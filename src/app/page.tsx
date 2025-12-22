@@ -21,13 +21,13 @@ export default function HomePage() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link
                     href="/app"
-                    className="rgb-btn bg-[var(--primary)] text-sm text-white"
+                    className="rgb-btn bg-[var(--primary)] text-white text-sm"
                   >
                     Start free — no account required
                   </Link>
                   <a
                     href="#how"
-                    className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    className="rgb-btn bg-[var(--surface)] text-[var(--text)] text-sm"
                   >
                     See how it works
                   </a>

@@ -12,7 +12,7 @@ function Card({ title, price, bullets, cta }: { title: string; price: string; bu
       </ul>
       <Link
         href="/app"
-        className="mt-7 inline-flex w-full items-center justify-center rounded-xl bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white hover:opacity-95"
+        className="rgb-btn bg-[var(--primary)] text-white text-sm w-full"
       >
         {cta}
       </Link>
