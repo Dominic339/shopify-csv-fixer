@@ -1,65 +1,75 @@
-import Image from "next/image";
+import Link from "next/link";
+import { GradientFrame } from "@/components/ui/GradientFrame";
+import { PricingCards } from "@/components/ui/PricingCards";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="px-6 py-14">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <GradientFrame>
+              <div className="rounded-3xl bg-[var(--surface)] p-8 shadow-sm">
+                <p className="text-sm font-medium text-[var(--muted)]">Shopify CSV Fixer</p>
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--text)]">
+                  Fix Shopify CSV import issues in seconds
+                </h1>
+                <p className="mt-4 text-base leading-relaxed text-[var(--muted)]">
+                  Upload your CSV, instantly see what’s wrong, auto-fix what’s safe, and export a clean file ready for Shopify.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    href="/app"
+                    className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-95"
+                  >
+                    Start free — no account required
+                  </Link>
+                  <a
+                    href="#how"
+                    className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface-2)]"
+                  >
+                    See how it works
+                  </a>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--muted)]">
+                  <span>Files processed locally</span>
+                  <span>No forced signup</span>
+                  <span>Cancel anytime</span>
+                </div>
+              </div>
+            </GradientFrame>
+          </div>
+
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+            <h2 className="text-xl font-semibold text-[var(--text)]">What it does</h2>
+            <ul className="mt-4 space-y-3 text-[var(--muted)]">
+              <li>• Fix common CSV issues that break Shopify imports</li>
+              <li>• Validate files and explain errors in plain English</li>
+              <li>• Build Shopify-ready product CSVs from scratch</li>
+            </ul>
+
+            <div id="how" className="mt-8 rounded-2xl bg-[var(--surface-2)] p-6">
+              <h3 className="text-sm font-semibold text-[var(--text)]">How it works</h3>
+              <ol className="mt-3 space-y-2 text-sm text-[var(--muted)]">
+                <li>1) Upload a CSV or start from scratch</li>
+                <li>2) Fix or validate</li>
+                <li>3) Preview results</li>
+                <li>4) Export a Shopify-ready CSV</li>
+              </ol>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="mt-14">
+          <PricingCards />
         </div>
-      </main>
+
+        <footer className="mt-16 border-t border-[var(--border)] pt-8 text-sm text-[var(--muted)]">
+          <p>Shopify is a trademark of Shopify Inc. This tool is not affiliated with or endorsed by Shopify.</p>
+        </footer>
+      </div>
     </div>
   );
 }
