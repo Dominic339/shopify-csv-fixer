@@ -21,7 +21,7 @@ export default function HomePage() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link
                     href="/app"
-                    className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-95"
+                    className="rgb-btn bg-[var(--primary)] text-sm text-white"
                   >
                     Start free — no account required
                   </Link>
