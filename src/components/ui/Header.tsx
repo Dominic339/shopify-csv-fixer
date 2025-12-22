@@ -19,14 +19,14 @@ export function Header() {
         <nav className="flex items-center gap-3">
           <Link
             href="/app"
-            className="rgb-btn bg-[var(--surface)] text-sm text-[var(--text)]"
+            className="rgb-btn bg-[var(--surface)] text-[var(--text)] text-sm"
           >
             Open app
           </Link>
 
           <button
             onClick={toggle}
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface-2)]"
+            className="rgb-btn bg-[var(--surface)] text-[var(--text)] text-sm"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? "Light" : "Dark"}

@@ -52,17 +52,28 @@ a {
 /* Peacock RGB outline button */
 .rgb-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
   border-radius: 14px;
   padding: 12px 18px;
   font-weight: 700;
+
+  cursor: pointer;
+  user-select: none;
+
+  /* this makes the press effect feel real */
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
   transform: translateZ(0);
-  transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
 }
 
 .rgb-btn::before {
   content: "";
   position: absolute;
-  inset: -2px;                 /* thickness of outline */
+  inset: -2px;
   border-radius: 16px;
   background: linear-gradient(
     90deg,
@@ -72,9 +83,8 @@ a {
     var(--accent-4),
     var(--accent-5)
   );
-  filter: blur(0px);
   opacity: 0.95;
-  z-index: -1;
+  z-index: -2;
 }
 
 .rgb-btn::after {
@@ -91,7 +101,8 @@ a {
 }
 
 .rgb-btn:active {
-  transform: translateY(2px) scale(0.99); /* sink */
+  transform: translateY(2px) scale(0.99);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.10);
 }
 
 .rgb-btn:focus-visible {
