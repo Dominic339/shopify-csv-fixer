@@ -50,9 +50,9 @@ export default function HomePage() {
               <li>• Build Shopify-ready product CSVs from scratch</li>
             </ul>
 
-            <div id="how" className="mt-8 rounded-2xl bg-[var(--surface-2)] p-6">
-              <h3 className="text-sm font-semibold text-[var(--text)]">How it works</h3>
-              <ol className="mt-3 space-y-2 text-sm text-[var(--muted)]">
+            <div id="how" className="mt-16 scroll-mt-24 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+              <h2 className="text-2xl font-semibold text-[var(--text)]">How it works</h2>
+              <ol className="mt-4 space-y-2 text-[var(--muted)]">
                 <li>1) Upload a CSV or start from scratch</li>
                 <li>2) Fix or validate</li>
                 <li>3) Preview results</li>
