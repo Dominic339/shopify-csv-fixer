@@ -11,7 +11,7 @@ function Card({ title, price, bullets, cta }: { title: string; price: string; bu
         ))}
       </ul>
       <Link
-        href="/app"
+        href="/"
         className="rgb-btn bg-[var(--primary)] text-white text-sm w-full"
       >
         {cta}

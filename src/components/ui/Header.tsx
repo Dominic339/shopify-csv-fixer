@@ -18,7 +18,7 @@ export function Header() {
 
         <nav className="flex items-center gap-3">
           <Link
-            href="/app"
+            href="/"
             className="rgb-btn bg-[var(--surface)] text-[var(--text)] text-sm"
           >
             Open app
