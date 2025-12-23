@@ -18,11 +18,12 @@ export function Header() {
 
         <nav className="flex items-center gap-3">
           <Link
-            href="/"
+            href="/app"
             className="rgb-btn bg-[var(--surface)] text-[var(--text)] text-sm"
-          >
-            Open app
-          </Link>
+            >
+                Open app
+            </Link>
+
 
           <button
             onClick={toggle}
