@@ -54,13 +54,19 @@ export default function AppPage() {
   }
 
   function updateRow(rowIndex: number, patch: Partial<CsvRow>) {
-    setEditableRows((prev) => {
-      const base = prev ? [...prev] : [...(parsed?.rows ?? [])];
-      if (!base[rowIndex]) return base;
-      base[rowIndex] = { ...base[rowIndex], ...patch };
-      return base;
-    });
-  }
+  // Remove any undefined values so CsvRow stays Record<string, string>
+  const cleaned: CsvRow = Object.fromEntries(
+    Object.entries(patch).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])
+  ) as CsvRow;
+
+  setEditableRows((prev) => {
+    const base = prev ? [...prev] : [...(parsed?.rows ?? [])];
+    if (!base[rowIndex]) return base;
+    base[rowIndex] = { ...base[rowIndex], ...cleaned };
+    return base;
+  });
+}
+
 
   function downloadFixed() {
     if (!fixed) return;
