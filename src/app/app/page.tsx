@@ -209,8 +209,19 @@ export default function AppPage() {
   );
 }
 
-function IssueList({ issues }: { issues: { severity: string; code: string; message: string; row?: number; column?: string; suggestion?: string }[] }) {
+function IssueList({
+  issues,
+}: {
+  issues: { severity: string; code: string; message: string; row?: number; column?: string; suggestion?: string }[];
+}) {
   const sorted = [...issues].sort((a, b) => sevRank(a.severity) - sevRank(b.severity));
+
+  const counts = {
+    error: sorted.filter((i) => i.severity === "error").length,
+    warning: sorted.filter((i) => i.severity === "warning").length,
+    info: sorted.filter((i) => i.severity === "info").length,
+  };
+
   if (!sorted.length) {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
@@ -221,33 +232,72 @@ function IssueList({ issues }: { issues: { severity: string; code: string; messa
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-      <p className="text-sm font-semibold">Issues ({sorted.length})</p>
-      <div className="mt-3 space-y-3">
-        {sorted.slice(0, 30).map((i, idx) => (
-          <div key={`${i.code}-${idx}`} className="rounded-xl bg-[var(--surface)] p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">
-                  <Badge severity={i.severity as any} />{" "}
-                  <span className="ml-2">{i.message}</span>
-                </p>
-                <p className="mt-1 text-xs text-[var(--muted)]">
-                  {i.row ? `Row ${i.row}` : "Header/General"}
-                  {i.column ? ` • Column: ${i.column}` : ""}
-                </p>
-                {i.suggestion ? <p className="mt-2 text-sm text-[var(--muted)]">{i.suggestion}</p> : null}
-              </div>
-            </div>
+    <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+      <summary className="cursor-pointer select-none list-none">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold">
+            Issues{" "}
+            <span className="text-[var(--muted)]">
+              ({sorted.length})
+            </span>
+          </p>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 font-semibold text-red-800">
+              Errors {counts.error}
+            </span>
+            <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">
+              Warnings {counts.warning}
+            </span>
+            <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 font-semibold text-sky-800">
+              Info {counts.info}
+            </span>
           </div>
+        </div>
+
+        <p className="mt-1 text-xs text-[var(--muted)]">
+          Click to expand. Fix errors before exporting.
+        </p>
+      </summary>
+
+      <div className="mt-4 space-y-3">
+        {sorted.slice(0, 50).map((i, idx) => (
+          <details key={`${i.code}-${idx}`} className="rounded-xl bg-[var(--surface)] p-3">
+            <summary className="cursor-pointer select-none list-none">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">
+                    <Badge severity={i.severity as any} />
+                    <span className="ml-2">{i.message}</span>
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    {i.row ? `Row ${i.row}` : "Header/General"}
+                    {i.column ? ` • Column: ${i.column}` : ""}
+                  </p>
+                </div>
+
+                <span className="text-xs text-[var(--muted)]">Details</span>
+              </div>
+            </summary>
+
+            {i.suggestion ? (
+              <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm text-[var(--muted)]">
+                {i.suggestion}
+              </div>
+            ) : (
+              <div className="mt-3 text-sm text-[var(--muted)]">No suggestion provided.</div>
+            )}
+          </details>
         ))}
-        {sorted.length > 30 ? (
-          <p className="text-xs text-[var(--muted)]">Showing first 30 issues.</p>
+
+        {sorted.length > 50 ? (
+          <p className="text-xs text-[var(--muted)]">Showing first 50 issues.</p>
         ) : null}
       </div>
-    </div>
+    </details>
   );
 }
+
 
 function sevRank(s: string) {
   if (s === "error") return 0;

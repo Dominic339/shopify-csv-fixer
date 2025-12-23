@@ -109,3 +109,7 @@ a {
   outline: 3px solid rgba(59, 130, 246, 0.35);
   outline-offset: 3px;
 }
+
+summary::-webkit-details-marker {
+  display: none;
+}
