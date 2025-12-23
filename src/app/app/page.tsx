@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { consumeExport, getQuota } from "@/lib/quota";
+import { useEffect, useMemo, useState } from "react";
+
 
 type Mode = "upload-fix";
 
@@ -23,7 +25,12 @@ export default function AppPage() {
     return validateAndFixShopifyBasic(parsed.headers, parsed.rows);
   }, [parsed]);
 
-  const quota = useMemo(() => (typeof window === "undefined" ? null : getQuota(3)), [rawText]);
+  const [quota, setQuota] = useState<ReturnType<typeof getQuota> | null>(null);
+
+  useEffect(() => {
+    setQuota(getQuota(3));
+}, []);
+
 
   const canExport = useMemo(() => {
     if (!quota) return false;
@@ -45,7 +52,10 @@ export default function AppPage() {
     if (!canExport) return;
 
     const afterQuota = consumeExport();
+    setQuota(afterQuota);
     const csv = toCsv(fixed.fixedHeaders, fixed.fixedRows);
+    {quota ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "Loading…"};
+
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
