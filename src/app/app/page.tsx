@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { consumeExport, getQuota } from "@/lib/quota";
-
+import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
 type Mode = "upload-fix";
 
@@ -19,17 +19,24 @@ export default function AppPage() {
     return parseCsv(rawText);
   }, [rawText]);
 
+  // Editable copy of parsed rows (lets user fix errors in-app)
+  const [editableRows, setEditableRows] = useState<CsvRow[] | null>(null);
+
+  useEffect(() => {
+    if (parsed?.rows) setEditableRows(parsed.rows);
+  }, [parsed?.rows]);
+
   const fixed = useMemo(() => {
     if (!parsed) return null;
-    return validateAndFixShopifyBasic(parsed.headers, parsed.rows);
-  }, [parsed]);
+    return validateAndFixShopifyBasic(parsed.headers, editableRows ?? parsed.rows);
+  }, [parsed, editableRows]);
 
+  // Hydration-safe quota: load after mount
   const [quota, setQuota] = useState<ReturnType<typeof getQuota> | null>(null);
 
   useEffect(() => {
     setQuota(getQuota(3));
-}, []);
-
+  }, []);
 
   const canExport = useMemo(() => {
     if (!quota) return false;
@@ -46,15 +53,23 @@ export default function AppPage() {
     reader.readAsText(file);
   }
 
+  function updateRow(rowIndex: number, patch: Partial<CsvRow>) {
+    setEditableRows((prev) => {
+      const base = prev ? [...prev] : [...(parsed?.rows ?? [])];
+      if (!base[rowIndex]) return base;
+      base[rowIndex] = { ...base[rowIndex], ...patch };
+      return base;
+    });
+  }
+
   function downloadFixed() {
     if (!fixed) return;
     if (!canExport) return;
 
     const afterQuota = consumeExport();
     setQuota(afterQuota);
-    const csv = toCsv(fixed.fixedHeaders, fixed.fixedRows);
-    {quota ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "Loading…"};
 
+    const csv = toCsv(fixed.fixedHeaders, fixed.fixedRows);
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -65,7 +80,6 @@ export default function AppPage() {
     a.click();
     URL.revokeObjectURL(url);
 
-    // update UI (simple)
     alert(`Exported! Remaining exports this month: ${afterQuota.remaining}/${afterQuota.limitPerMonth}`);
   }
 
@@ -74,13 +88,15 @@ export default function AppPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">CSV Fixer</h1>
-          <p className="text-sm text-[var(--muted)]">Upload → Diagnose → Auto-fix safe issues → Export Shopify-ready CSV.</p>
+          <p className="text-sm text-[var(--muted)]">
+            Upload → Diagnose → Auto-fix safe issues → Export Shopify-ready CSV.
+          </p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
           <span className="font-semibold">Free exports:</span>{" "}
           <span className="text-[var(--muted)]">
-            {quota ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "…"}
+            {quota ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "Loading…"}
           </span>
         </div>
       </div>
@@ -99,9 +115,13 @@ export default function AppPage() {
             />
             <button
               className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-50"
-              disabled={!fixed}
+              disabled={!fixed || !canExport}
               onClick={downloadFixed}
-              title={!canExport ? "Fix errors before exporting (and ensure you have free exports remaining)." : "Download fixed CSV"}
+              title={
+                !canExport
+                  ? "Fix errors before exporting (and ensure you have free exports remaining)."
+                  : "Download fixed CSV"
+              }
             >
               Export fixed CSV
             </button>
@@ -164,13 +184,23 @@ export default function AppPage() {
               Showing first 12 columns for readability. Export includes all columns.
             </p>
           </div>
+
+          {/* Editor for blocking error rows */}
+          {fixed ? (
+            <div className="mt-6">
+              <EditableIssuesTable
+                headers={fixed.fixedHeaders}
+                rows={fixed.fixedRows}
+                issues={fixed.issues}
+                onUpdateRow={updateRow}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold">Diagnostics</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Errors must be fixed before export. Warnings are usually safe.
-          </p>
+          <p className="mt-1 text-sm text-[var(--muted)]">Errors must be fixed before export. Warnings are usually safe.</p>
 
           <div className="mt-4 space-y-2">
             {!fixed ? (
@@ -214,6 +244,9 @@ export default function AppPage() {
       <div className="mt-10 text-xs text-[var(--muted)]">
         Current mode: <span className="font-semibold">Shopify Product CSV (Basic)</span> — we’ll add more formats next.
       </div>
+
+      {/* not used yet, but fine to keep for future */}
+      <div className="hidden">{mode}</div>
     </div>
   );
 }
@@ -245,10 +278,7 @@ function IssueList({
       <summary className="cursor-pointer select-none list-none">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-semibold">
-            Issues{" "}
-            <span className="text-[var(--muted)]">
-              ({sorted.length})
-            </span>
+            Issues <span className="text-[var(--muted)]">({sorted.length})</span>
           </p>
 
           <div className="flex items-center gap-2 text-xs">
@@ -264,9 +294,7 @@ function IssueList({
           </div>
         </div>
 
-        <p className="mt-1 text-xs text-[var(--muted)]">
-          Click to expand. Fix errors before exporting.
-        </p>
+        <p className="mt-1 text-xs text-[var(--muted)]">Click to expand. Fix errors before exporting.</p>
       </summary>
 
       <div className="mt-4 space-y-3">
@@ -299,14 +327,11 @@ function IssueList({
           </details>
         ))}
 
-        {sorted.length > 50 ? (
-          <p className="text-xs text-[var(--muted)]">Showing first 50 issues.</p>
-        ) : null}
+        {sorted.length > 50 ? <p className="text-xs text-[var(--muted)]">Showing first 50 issues.</p> : null}
       </div>
     </details>
   );
 }
-
 
 function sevRank(s: string) {
   if (s === "error") return 0;

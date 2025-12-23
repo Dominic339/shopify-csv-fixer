@@ -126,10 +126,10 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           .trim()
           .replace(/\s+/g, "-")
           .replace(/\-+/g, "-");
-        if (normalized !== handle) {
-          // Safe-ish: only auto-fix if it becomes non-empty and doesn’t look destructive
-          r["Handle"] = normalized;
-          fixesApplied.push(`Row ${rowNumber}: Normalized Handle to "${normalized}".`);
+        if (normalized !== handle && normalized.length > 0) {
+            // Safe normalization: lowercase + spaces to dashes + strip special chars
+            r["Handle"] = normalized;
+            fixesApplied.push(`Row ${rowNumber}: Normalized Handle to "${normalized}".`);
         }
       }
     }
