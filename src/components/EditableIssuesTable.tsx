@@ -105,9 +105,7 @@ export function EditableIssuesTable({
   // Highlight ONLY the specific cells that currently have errors
   function cellHasError(rowIndex: number, col: string) {
     const oneBased = rowIndex + 1;
-    return issues.some(
-      (i) => i.severity === "error" && i.row === oneBased && i.column === col
-    );
+    return issues.some((i) => i.severity === "error" && i.row === oneBased && i.column === col);
   }
 
   return (
@@ -131,20 +129,23 @@ export function EditableIssuesTable({
         <table className="min-w-full text-left text-xs">
           <thead className="bg-[var(--surface-2)]">
             <tr className="h-10">
-              <th className="sticky left-0 z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
+              <th className="sticky left-0 z-10 bg-[var(--surface-2)] px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible">
                 Row
               </th>
-              <th className="sticky left-[52px] z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
+              <th className="sticky left-[52px] z-10 bg-[var(--surface-2)] px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible">
                 Status
               </th>
 
               {editableCols.map((h) => (
-                <th key={h} className="whitespace-nowrap px-2 py-2 font-semibold">
+                <th
+                  key={h}
+                  className="px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible"
+                >
                   {h}
                 </th>
               ))}
 
-              <th className="px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none">
+              <th className="px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible">
                 Notes (live)
               </th>
             </tr>
@@ -189,8 +190,7 @@ export function EditableIssuesTable({
                       "w-[130px] min-w-[130px] rounded-lg px-2 py-1 text-xs focus:w-[240px] focus:min-w-[240px] transition-[width] duration-150";
 
                     const okStyle = "border border-[var(--border)] bg-[var(--surface-2)]";
-                    const errStyle =
-                      "border border-red-400 bg-red-50/10 ring-2 ring-red-500/30";
+                    const errStyle = "border border-red-400 bg-red-50/10 ring-2 ring-red-500/30";
 
                     return (
                       <td key={col} className="px-2 py-2">
@@ -270,6 +270,9 @@ export function EditableIssuesTable({
       <p className="mt-2 text-xs text-[var(--muted)]">
         Tip: Fix errors first. Warnings/info won’t block export (unless your export logic treats them as blocking).
       </p>
+
+      {/* headers is currently unused, but kept in props for future column-mapping UI */}
+      <div className="hidden">{headers.length}</div>
     </div>
   );
 }
