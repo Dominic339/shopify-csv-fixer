@@ -6,17 +6,15 @@ export default function HomePage() {
       {/* Hero */}
       <section className="grid gap-10 md:grid-cols-2 md:items-center">
         <div>
-          <p className="text-sm font-semibold text-[var(--muted)]">
-            Shopify CSV Fixer
-          </p>
+          <p className="text-sm font-semibold text-[var(--muted)]">Shopify CSV Fixer</p>
 
           <h1 className="mt-3 text-4xl font-bold tracking-tight">
             Fix Shopify CSV import issues in seconds
           </h1>
 
           <p className="mt-4 text-lg text-[var(--muted)]">
-            Upload your CSV, instantly see what’s wrong, auto-fix what’s safe,
-            and export a clean file ready for Shopify.
+            Upload your CSV, instantly see what’s wrong, auto-fix what’s safe, and export a clean
+            file ready for Shopify.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -27,10 +25,7 @@ export default function HomePage() {
               Start free — no account required
             </Link>
 
-            <Link
-              href="#how-it-works"
-              className="rgb-btn bg-[var(--surface)] px-6 py-3 text-sm"
-            >
+            <Link href="#how-it-works" className="rgb-btn bg-[var(--surface)] px-6 py-3 text-sm">
               See how it works
             </Link>
           </div>
@@ -79,8 +74,7 @@ export default function HomePage() {
       <section className="mt-24">
         <h2 className="text-2xl font-semibold">Pricing</h2>
         <p className="mt-2 text-[var(--muted)]">
-          Start free. Upgrade only when you need more exports or advanced
-          formats.
+          Start free. Upgrade only when you need more exports or advanced formats.
         </p>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
@@ -99,32 +93,23 @@ export default function HomePage() {
           <PricingCard
             title="Basic"
             price="$3 / month"
-            features={[
-              "Shopify product CSV exports",
-              "100 exports per month",
-              "Self-serve cancellation",
-            ]}
-            cta="Open app"
-            href="/app"
+            features={["Shopify product CSV exports", "100 exports per month", "Self-serve cancellation"]}
+            cta="Choose Basic"
+            href="/login?plan=basic"
           />
 
           <PricingCard
             title="Advanced"
             price="$10 / month"
-            features={[
-              "Advanced Shopify formats",
-              "Saved mappings + batch tools",
-              "Higher export limits",
-            ]}
-            cta="Open app"
-            href="/app"
+            features={["Advanced Shopify formats", "Saved mappings + batch tools", "Higher export limits"]}
+            cta="Choose Advanced"
+            href="/login?plan=advanced"
           />
         </div>
       </section>
 
       <footer className="mt-24 border-t border-[var(--border)] pt-6 text-xs text-[var(--muted)]">
-        Shopify is a trademark of Shopify Inc. This tool is not affiliated with
-        or endorsed by Shopify.
+        Shopify is a trademark of Shopify Inc. This tool is not affiliated with or endorsed by Shopify.
       </footer>
     </main>
   );
