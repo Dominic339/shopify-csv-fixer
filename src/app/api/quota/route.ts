@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getQuotaForDevice } from "@/lib/serverQuotaStore";
 
 // For now we stub this with a simple in-memory map.
 // (Works locally, but resets on Vercel redeploy — next step is adding a DB.)
@@ -14,25 +15,15 @@ function monthKey(d = new Date()) {
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const deviceId = String(body.deviceId ?? "");
-
   if (!deviceId) {
     return NextResponse.json({ ok: false, error: "missing_device_id" }, { status: 400 });
   }
 
-  const key = monthKey();
-  const state = mem.get(deviceId);
-
-  if (!state || state.monthKey !== key) {
-    mem.set(deviceId, { monthKey: key, used: 0 });
-  }
-
-  const cur = mem.get(deviceId)!;
-  const remaining = Math.max(0, LIMIT_PER_MONTH - cur.used);
-
+  const q = getQuotaForDevice(deviceId);
   return NextResponse.json({
     ok: true,
-    limitPerMonth: LIMIT_PER_MONTH,
-    used: cur.used,
-    remaining,
+    limitPerMonth: q.limitPerMonth,
+    used: q.used,
+    remaining: q.remaining,
   });
 }

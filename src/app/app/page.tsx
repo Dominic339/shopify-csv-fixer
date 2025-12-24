@@ -47,21 +47,25 @@ export default function AppPage() {
     }
   }
 
-  async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
-    try {
-      const deviceId = getDeviceId();
-      const res = await fetch("/api/quota/consume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId }),
-      });
+async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
+  try {
+    const deviceId = getDeviceId();
+    const res = await fetch("/api/quota/consume", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deviceId }),
+    });
 
-      const data = (await res.json()) as ServerQuota;
-      return { ok: res.ok, data };
-    } catch {
-      return { ok: false, data: { ok: false, error: "quota_consume_failed" } };
-    }
+    const data = (await res.json()) as ServerQuota;
+
+    // IMPORTANT: even on 403, server returns quota numbers
+    return { ok: res.ok, data };
+  } catch {
+    // true network failure only
+    return { ok: false, data: { ok: false, error: "quota_consume_failed" } };
   }
+}
+
 
   useEffect(() => {
     fetchQuota();
