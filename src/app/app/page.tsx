@@ -5,6 +5,8 @@ import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 import { getDeviceId } from "@/lib/deviceId";
+import { AuthPanel } from "@/components/AuthPanel";
+
 
 type Mode = "upload-fix";
 
@@ -164,6 +166,10 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
   }
 
   return (
+    <div className="mt-6">
+      <AuthPanel />
+    <div>
+      
     <div className="w-full max-w-none px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
