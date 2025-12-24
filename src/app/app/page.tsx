@@ -3,16 +3,70 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
-import { consumeExport, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
+import { getDeviceId } from "@/lib/deviceId";
 
 type Mode = "upload-fix";
+
+type ServerQuota = {
+  ok: boolean;
+  limitPerMonth?: number;
+  used?: number;
+  remaining?: number;
+  error?: string;
+};
 
 export default function AppPage() {
   const [mode] = useState<Mode>("upload-fix");
   const [fileName, setFileName] = useState<string>("");
   const [rawText, setRawText] = useState<string>("");
   const [rowsPreview, setRowsPreview] = useState<number>(20);
+
+  // --- server quota state ---
+  const [quota, setQuota] = useState<ServerQuota | null>(null);
+  const [quotaLoading, setQuotaLoading] = useState<boolean>(true);
+  const [exporting, setExporting] = useState<boolean>(false);
+
+  async function fetchQuota() {
+    try {
+      setQuotaLoading(true);
+      const deviceId = getDeviceId();
+
+      const res = await fetch("/api/quota", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+      });
+
+      const data = (await res.json()) as ServerQuota;
+      setQuota(data);
+    } catch {
+      setQuota({ ok: false, error: "quota_fetch_failed" });
+    } finally {
+      setQuotaLoading(false);
+    }
+  }
+
+  async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
+    try {
+      const deviceId = getDeviceId();
+      const res = await fetch("/api/quota/consume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+      });
+
+      const data = (await res.json()) as ServerQuota;
+      return { ok: res.ok, data };
+    } catch {
+      return { ok: false, data: { ok: false, error: "quota_consume_failed" } };
+    }
+  }
+
+  useEffect(() => {
+    fetchQuota();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const parsed = useMemo(() => {
     if (!rawText) return null;
@@ -31,23 +85,22 @@ export default function AppPage() {
     return validateAndFixShopifyBasic(parsed.headers, editableRows ?? parsed.rows);
   }, [parsed, editableRows]);
 
-  // Hydration-safe quota: load after mount
-  const [quota, setQuota] = useState<ReturnType<typeof getQuota> | null>(null);
-
-  useEffect(() => {
-    setQuota(getQuota(3));
-  }, []);
+  const hasFatalErrors = useMemo(() => {
+    if (!fixed) return true;
+    return fixed.issues.some((i) => i.severity === "error");
+  }, [fixed]);
 
   const canExport = useMemo(() => {
-    if (!quota) return false;
     if (!fixed) return false;
-    const hasFatal = fixed.issues.some((i) => i.severity === "error");
-    return quota.remaining > 0 && !hasFatal;
-  }, [quota, fixed]);
+    if (hasFatalErrors) return false;
+    if (!quota || !quota.ok) return false;
+    return (quota.remaining ?? 0) > 0;
+  }, [fixed, hasFatalErrors, quota]);
 
   function onPickFile(file: File | null) {
     if (!file) return;
     setFileName(file.name);
+
     const reader = new FileReader();
     reader.onload = () => setRawText(String(reader.result ?? ""));
     reader.readAsText(file);
@@ -71,13 +124,23 @@ export default function AppPage() {
     });
   }
 
-  function downloadFixed() {
+  async function downloadFixed() {
     if (!fixed) return;
     if (!canExport) return;
 
-    const afterQuota = consumeExport();
-    setQuota(afterQuota);
+    setExporting(true);
 
+    // 1) consume server quota first
+    const { ok, data } = await consumeQuota();
+    setQuota(data);
+
+    if (!ok || !data.ok) {
+      alert("Export locked (quota exceeded). Please upgrade to continue.");
+      setExporting(false);
+      return;
+    }
+
+    // 2) generate CSV locally (file never leaves browser)
     const csv = toCsv(fixed.fixedHeaders, fixed.fixedRows);
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -90,12 +153,15 @@ export default function AppPage() {
     URL.revokeObjectURL(url);
 
     alert(
-      `Exported! Remaining exports this month: ${afterQuota.remaining}/${afterQuota.limitPerMonth}`
+      `Exported! Remaining exports this month: ${data.remaining}/${data.limitPerMonth}`
     );
+
+    setExporting(false);
   }
 
   return (
-    <div className="w-full max-w-none px-6 py-10">      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full max-w-none px-6 py-10">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">CSV Fixer</h1>
           <p className="text-sm text-[var(--muted)]">
@@ -106,7 +172,11 @@ export default function AppPage() {
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
           <span className="font-semibold">Free exports:</span>{" "}
           <span className="text-[var(--muted)]">
-            {quota ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "Loading…"}
+            {quotaLoading
+              ? "Loading…"
+              : quota?.ok
+              ? `${quota.remaining}/${quota.limitPerMonth} remaining`
+              : "Unavailable"}
           </span>
         </div>
       </div>
@@ -127,15 +197,21 @@ export default function AppPage() {
             />
             <button
               className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-50"
-              disabled={!fixed || !canExport}
+              disabled={!fixed || !canExport || exporting}
               onClick={downloadFixed}
               title={
-                !canExport
-                  ? "Fix errors before exporting (and ensure you have free exports remaining)."
+                !fixed
+                  ? "Upload a CSV first."
+                  : hasFatalErrors
+                  ? "Fix errors before exporting."
+                  : !quota?.ok
+                  ? "Quota service unavailable."
+                  : (quota.remaining ?? 0) <= 0
+                  ? "You’ve used your free exports for this month."
                   : "Download fixed CSV"
               }
             >
-              Export fixed CSV
+              {exporting ? "Exporting…" : "Export fixed CSV"}
             </button>
           </div>
 
@@ -197,7 +273,6 @@ export default function AppPage() {
             </p>
           </div>
 
-          {/* Editor for blocking error rows */}
           {fixed ? (
             <div className="mt-6">
               <EditableIssuesTable
@@ -248,8 +323,10 @@ export default function AppPage() {
             <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               <p className="font-semibold">Export locked</p>
               <p className="mt-1">
-                {fixed.issues.some((i) => i.severity === "error")
+                {hasFatalErrors
                   ? "Fix the errors listed above, then export."
+                  : !quota?.ok
+                  ? "Quota service is temporarily unavailable."
                   : "You’ve used your free exports for this month on this device."}
               </p>
             </div>
@@ -261,7 +338,6 @@ export default function AppPage() {
         Current mode: <span className="font-semibold">Shopify Product CSV (Basic)</span> — we’ll add more formats next.
       </div>
 
-      {/* not used yet, but fine to keep for future */}
       <div className="hidden">{mode}</div>
     </div>
   );
