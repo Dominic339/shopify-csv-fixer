@@ -51,22 +51,25 @@ export default function AppPage() {
     const reader = new FileReader();
     reader.onload = () => setRawText(String(reader.result ?? ""));
     reader.readAsText(file);
+
+    // Reset editable rows immediately (they'll be set again once parsed updates)
+    setEditableRows(null);
   }
 
   function updateRow(rowIndex: number, patch: Partial<CsvRow>) {
-  // Remove any undefined values so CsvRow stays Record<string, string>
-  const cleaned: CsvRow = Object.fromEntries(
-    Object.entries(patch).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])
-  ) as CsvRow;
+    // Convert undefined -> "" so CsvRow stays Record<string, string>
+    const cleaned: CsvRow = {};
+    for (const [k, v] of Object.entries(patch)) {
+      cleaned[k] = v ?? "";
+    }
 
-  setEditableRows((prev) => {
-    const base = prev ? [...prev] : [...(parsed?.rows ?? [])];
-    if (!base[rowIndex]) return base;
-    base[rowIndex] = { ...base[rowIndex], ...cleaned };
-    return base;
-  });
-}
-
+    setEditableRows((prev) => {
+      const base = prev ? [...prev] : [...(parsed?.rows ?? [])];
+      if (!base[rowIndex]) return base;
+      base[rowIndex] = { ...base[rowIndex], ...cleaned };
+      return base;
+    });
+  }
 
   function downloadFixed() {
     if (!fixed) return;
@@ -86,7 +89,9 @@ export default function AppPage() {
     a.click();
     URL.revokeObjectURL(url);
 
-    alert(`Exported! Remaining exports this month: ${afterQuota.remaining}/${afterQuota.limitPerMonth}`);
+    alert(
+      `Exported! Remaining exports this month: ${afterQuota.remaining}/${afterQuota.limitPerMonth}`
+    );
   }
 
   return (
@@ -110,7 +115,9 @@ export default function AppPage() {
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold">1) Upload CSV</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">We process files locally in your browser.</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            We process files locally in your browser.
+          </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <input
@@ -206,7 +213,9 @@ export default function AppPage() {
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold">Diagnostics</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">Errors must be fixed before export. Warnings are usually safe.</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Errors must be fixed before export. Warnings are usually safe.
+          </p>
 
           <div className="mt-4 space-y-2">
             {!fixed ? (
@@ -224,7 +233,9 @@ export default function AppPage() {
                       ))}
                     </ul>
                     {fixed.fixesApplied.length > 8 ? (
-                      <p className="mt-2 text-emerald-900">…and {fixed.fixesApplied.length - 8} more.</p>
+                      <p className="mt-2 text-emerald-900">
+                        …and {fixed.fixesApplied.length - 8} more.
+                      </p>
                     ) : null}
                   </div>
                 ) : null}
