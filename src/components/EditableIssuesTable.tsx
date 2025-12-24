@@ -26,7 +26,7 @@ export function EditableIssuesTable({
 
   if (errorRows.length === 0) return null;
 
-  const editableCols = ["Handle", "Published", "Variant Price"];
+  const editableCols = ["Handle", "Published", "Variant Price", "Variant Inventory Qty"];
 
   return (
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
