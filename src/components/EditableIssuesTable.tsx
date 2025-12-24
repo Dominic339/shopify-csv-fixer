@@ -175,7 +175,7 @@ export function EditableIssuesTable({
                         Resolved
                       </span>
                     ) : (
-                      <span className="inline-flex rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-300">
+                      <span className="inline-flex rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-900">
                         Needs fixes
                       </span>
                     )}
