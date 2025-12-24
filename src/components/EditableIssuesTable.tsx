@@ -25,6 +25,9 @@ export function EditableIssuesTable({
   issues: Issue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
 }) {
+  // Space reserved for the sticky Row + Status columns so other columns don't get clipped underneath.
+  const STICKY_LEFT_WIDTH = 92; // px (tweak 84–110 if you want)
+
   const editableCols = [
     "Handle",
     "Title",
@@ -129,23 +132,37 @@ export function EditableIssuesTable({
         <table className="min-w-full text-left text-xs">
           <thead className="bg-[var(--surface-2)]">
             <tr className="h-10">
-              <th className="sticky left-0 z-10 bg-[var(--surface-2)] px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible">
+              {/* Sticky Row */}
+              <th
+                className="sticky left-0 z-20 bg-[var(--surface-2)] px-3 py-2 align-middle whitespace-nowrap font-semibold"
+                style={{ width: 40 }}
+              >
                 Row
               </th>
-              <th className="sticky left-[52px] z-10 bg-[var(--surface-2)] px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible">
+
+              {/* Sticky Status */}
+              <th
+                className="sticky z-20 bg-[var(--surface-2)] px-3 py-2 align-middle whitespace-nowrap font-semibold"
+                style={{ left: 40, width: STICKY_LEFT_WIDTH - 40 }}
+              >
                 Status
               </th>
 
+              {/* Non-sticky headers shifted right so they don't slide under sticky columns */}
               {editableCols.map((h) => (
                 <th
                   key={h}
-                  className="px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible"
+                  className="align-middle whitespace-nowrap px-2 py-2 font-semibold"
+                  style={{ paddingLeft: STICKY_LEFT_WIDTH }}
                 >
                   {h}
                 </th>
               ))}
 
-              <th className="px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none overflow-visible">
+              <th
+                className="align-middle whitespace-nowrap px-2 py-2 font-semibold"
+                style={{ paddingLeft: STICKY_LEFT_WIDTH }}
+              >
                 Notes (live)
               </th>
             </tr>
@@ -165,12 +182,18 @@ export function EditableIssuesTable({
               return (
                 <tr key={idx} className="border-t border-[var(--border)] align-top">
                   {/* Sticky Row number */}
-                  <td className="sticky left-0 z-10 whitespace-nowrap bg-[var(--surface)] px-2 py-2 text-[var(--muted)]">
+                  <td
+                    className="sticky left-0 z-20 whitespace-nowrap bg-[var(--surface)] px-3 py-2 text-[var(--muted)]"
+                    style={{ width: 40 }}
+                  >
                     {idx + 1}
                   </td>
 
                   {/* Sticky Status */}
-                  <td className="sticky left-[52px] z-10 whitespace-nowrap bg-[var(--surface)] px-2 py-2">
+                  <td
+                    className="sticky z-20 whitespace-nowrap bg-[var(--surface)] px-3 py-2"
+                    style={{ left: 40, width: STICKY_LEFT_WIDTH - 40 }}
+                  >
                     {resolved ? (
                       <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
                         Resolved
@@ -193,7 +216,12 @@ export function EditableIssuesTable({
                     const errStyle = "border border-red-400 bg-red-50/10 ring-2 ring-red-500/30";
 
                     return (
-                      <td key={col} className="px-2 py-2">
+                      <td
+                        key={col}
+                        className="px-2 py-2"
+                        // This is what prevents the header/cell text from being clipped under sticky Row/Status
+                        style={{ paddingLeft: STICKY_LEFT_WIDTH }}
+                      >
                         <input
                           className={`${baseInput} ${hasErr ? errStyle : okStyle}`}
                           value={(r[col] ?? "") as string}
@@ -220,7 +248,10 @@ export function EditableIssuesTable({
                   })}
 
                   {/* Sticky Notes */}
-                  <td className="sticky right-0 z-10 max-w-[420px] bg-[var(--surface)] px-2 py-2 text-xs text-[var(--muted)]">
+                  <td
+                    className="sticky right-0 z-10 max-w-[420px] bg-[var(--surface)] px-2 py-2 text-xs text-[var(--muted)]"
+                    style={{ paddingLeft: STICKY_LEFT_WIDTH }}
+                  >
                     {blocking.length === 0 && warnings.length === 0 && info.length === 0 ? (
                       <span className="text-emerald-200">No issues on this row.</span>
                     ) : (
@@ -270,9 +301,6 @@ export function EditableIssuesTable({
       <p className="mt-2 text-xs text-[var(--muted)]">
         Tip: Fix errors first. Warnings/info won’t block export (unless your export logic treats them as blocking).
       </p>
-
-      {/* headers is currently unused, but kept in props for future column-mapping UI */}
-      <div className="hidden">{headers.length}</div>
     </div>
   );
 }
