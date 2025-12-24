@@ -220,6 +220,29 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
   }
 
+    // 4) Duplicate handle check (allow the first one, flag the rest)
+  const firstSeen = new Map<string, number>(); // handle -> first rowIndex (0-based)
+
+  for (let idx = 0; idx < fixedRows.length; idx++) {
+    const handle = (fixedRows[idx]["Handle"] ?? "").trim();
+    if (!handle) continue;
+
+    if (!firstSeen.has(handle)) {
+      firstSeen.set(handle, idx);
+    } else {
+      const firstIdx = firstSeen.get(handle)!;
+      issues.push({
+        severity: "error",
+        code: "duplicate_handle",
+        message: `Row ${idx + 1}: "Handle" duplicates row ${firstIdx + 1} ("${handle}").`,
+        row: idx + 1,
+        column: "Handle",
+        suggestion: `Handle must be unique. Keep "${handle}" on one row and change the others (example: "${handle}-2").`,
+      });
+    }
+  }
+
+
   // 3b) Duplicate handle check (Shopify requires unique handle per product)
   if (fixedHeaders.includes("Handle")) {
     const seenHandles = new Map<string, number>(); // handle -> first row number

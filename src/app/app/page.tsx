@@ -95,8 +95,7 @@ export default function AppPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full max-w-none px-6 py-10">      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">CSV Fixer</h1>
           <p className="text-sm text-[var(--muted)]">
