@@ -29,11 +29,11 @@ function normHeader(h: string) {
 const HEADER_ALIASES: Record<string, string> = {
   "body html": "Body (HTML)",
   "body (html)": "Body (HTML)",
-  "body": "Body (HTML)",
+  body: "Body (HTML)",
   "inventory qty": "Variant Inventory Qty",
   "variant inventory quantity": "Variant Inventory Qty",
-  "price": "Variant Price",
-  "sku": "Variant SKU",
+  price: "Variant Price",
+  sku: "Variant SKU",
 };
 
 function headerToCanonical(h: string) {
@@ -126,10 +126,10 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           .trim()
           .replace(/\s+/g, "-")
           .replace(/\-+/g, "-");
+
         if (normalized !== handle && normalized.length > 0) {
-            // Safe normalization: lowercase + spaces to dashes + strip special chars
-            r["Handle"] = normalized;
-            fixesApplied.push(`Row ${rowNumber}: Normalized Handle to "${normalized}".`);
+          r["Handle"] = normalized;
+          fixesApplied.push(`Row ${rowNumber}: Normalized Handle to "${normalized}".`);
         }
       }
     }
@@ -173,18 +173,73 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Price numeric check (don’t auto-fix, just warn/error)
+    // Variant Price: safe normalization (remove $ and commas) + validate
     if (fixedHeaders.includes("Variant Price")) {
-      const p = (r["Variant Price"] ?? "").trim();
-      if (p && !/^\d+(\.\d{1,2})?$/.test(p)) {
+      const raw = (r["Variant Price"] ?? "").trim();
+      if (raw) {
+        const cleaned = raw.replace(/[$,]/g, "").trim(); // remove $ and commas
+        if (/^\d+(\.\d{1,2})?$/.test(cleaned)) {
+          if (cleaned !== raw) {
+            r["Variant Price"] = cleaned;
+            fixesApplied.push(`Row ${rowNumber}: Normalized Variant Price to "${cleaned}".`);
+          }
+        } else {
+          issues.push({
+            severity: "error",
+            code: "price_invalid",
+            message: `Row ${rowNumber}: "Variant Price" looks invalid ("${raw}").`,
+            row: rowNumber,
+            column: "Variant Price",
+            suggestion: `Use a number like 19.99 (no $ sign).`,
+          });
+        }
+      }
+    }
+
+    // Variant Inventory Qty: safe normalization (remove commas) + validate integer
+    if (fixedHeaders.includes("Variant Inventory Qty")) {
+      const raw = (r["Variant Inventory Qty"] ?? "").trim();
+      if (raw) {
+        const cleaned = raw.replace(/,/g, "").trim();
+        if (/^-?\d+$/.test(cleaned)) {
+          if (cleaned !== raw) {
+            r["Variant Inventory Qty"] = cleaned;
+            fixesApplied.push(`Row ${rowNumber}: Normalized Variant Inventory Qty to "${cleaned}".`);
+          }
+        } else {
+          issues.push({
+            severity: "error",
+            code: "inventory_qty_invalid",
+            message: `Row ${rowNumber}: "Variant Inventory Qty" looks invalid ("${raw}").`,
+            row: rowNumber,
+            column: "Variant Inventory Qty",
+            suggestion: `Use a whole number like 0, 5, 10 (no words).`,
+          });
+        }
+      }
+    }
+  }
+
+  // 3b) Duplicate handle check (Shopify requires unique handle per product)
+  if (fixedHeaders.includes("Handle")) {
+    const seenHandles = new Map<string, number>(); // handle -> first row number
+    for (let idx = 0; idx < fixedRows.length; idx++) {
+      const rowNumber = idx + 1;
+      const h = (fixedRows[idx]["Handle"] ?? "").trim();
+      if (!h) continue;
+
+      const first = seenHandles.get(h);
+      if (first) {
         issues.push({
           severity: "error",
-          code: "price_invalid",
-          message: `Row ${rowNumber}: "Variant Price" looks invalid ("${p}").`,
+          code: "duplicate_handle",
+          message: `Row ${rowNumber}: Duplicate "Handle" ("${h}") also appears on row ${first}.`,
           row: rowNumber,
-          column: "Variant Price",
-          suggestion: `Use a number like 19.99 (no $ sign).`,
+          column: "Handle",
+          suggestion: `Handles must be unique. Change one of the duplicates (rows ${first} and ${rowNumber}).`,
         });
+      } else {
+        seenHandles.set(h, rowNumber);
       }
     }
   }
