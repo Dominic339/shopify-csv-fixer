@@ -7,7 +7,6 @@ import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 import { getDeviceId } from "@/lib/deviceId";
 import { AuthPanel } from "@/components/AuthPanel";
 
-
 type Mode = "upload-fix";
 
 type ServerQuota = {
@@ -49,25 +48,24 @@ export default function AppPage() {
     }
   }
 
-async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
-  try {
-    const deviceId = getDeviceId();
-    const res = await fetch("/api/quota/consume", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId }),
-    });
+  async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
+    try {
+      const deviceId = getDeviceId();
+      const res = await fetch("/api/quota/consume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+      });
 
-    const data = (await res.json()) as ServerQuota;
+      const data = (await res.json()) as ServerQuota;
 
-    // IMPORTANT: even on 403, server returns quota numbers
-    return { ok: res.ok, data };
-  } catch {
-    // true network failure only
-    return { ok: false, data: { ok: false, error: "quota_consume_failed" } };
+      // IMPORTANT: even on 403, server returns quota numbers
+      return { ok: res.ok, data };
+    } catch {
+      // true network failure only
+      return { ok: false, data: { ok: false, error: "quota_consume_failed" } };
+    }
   }
-}
-
 
   useEffect(() => {
     fetchQuota();
@@ -158,19 +156,18 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
     a.click();
     URL.revokeObjectURL(url);
 
-    alert(
-      `Exported! Remaining exports this month: ${data.remaining}/${data.limitPerMonth}`
-    );
+    alert(`Exported! Remaining exports this month: ${data.remaining}/${data.limitPerMonth}`);
 
     setExporting(false);
   }
 
   return (
-    <div className="mt-6">
-      <AuthPanel />
-    <div>
-      
     <div className="w-full max-w-none px-6 py-10">
+      {/* Auth / account panel */}
+      <div className="mb-6">
+        <AuthPanel />
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">CSV Fixer</h1>
@@ -182,11 +179,7 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
           <span className="font-semibold">Free exports:</span>{" "}
           <span className="text-[var(--muted)]">
-            {quotaLoading
-              ? "Loading…"
-              : quota?.ok
-              ? `${quota.remaining}/${quota.limitPerMonth} remaining`
-              : "Unavailable"}
+            {quotaLoading ? "Loading…" : quota?.ok ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "Unavailable"}
           </span>
         </div>
       </div>
@@ -194,9 +187,7 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold">1) Upload CSV</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            We process files locally in your browser.
-          </p>
+          <p className="mt-1 text-sm text-[var(--muted)]">We process files locally in your browser.</p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <input
@@ -278,34 +269,23 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
               </table>
             </div>
 
-            <p className="mt-2 text-xs text-[var(--muted)]">
-              Showing first 12 columns for readability. Export includes all columns.
-            </p>
+            <p className="mt-2 text-xs text-[var(--muted)]">Showing first 12 columns for readability. Export includes all columns.</p>
           </div>
 
           {fixed ? (
             <div className="mt-6">
-              <EditableIssuesTable
-                headers={fixed.fixedHeaders}
-                rows={fixed.fixedRows}
-                issues={fixed.issues}
-                onUpdateRow={updateRow}
-              />
+              <EditableIssuesTable headers={fixed.fixedHeaders} rows={fixed.fixedRows} issues={fixed.issues} onUpdateRow={updateRow} />
             </div>
           ) : null}
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold">Diagnostics</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Errors must be fixed before export. Warnings are usually safe.
-          </p>
+          <p className="mt-1 text-sm text-[var(--muted)]">Errors must be fixed before export. Warnings are usually safe.</p>
 
           <div className="mt-4 space-y-2">
             {!fixed ? (
-              <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
-                Upload a CSV to see diagnostics.
-              </div>
+              <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">Upload a CSV to see diagnostics.</div>
             ) : (
               <>
                 {fixed.fixesApplied.length ? (
@@ -317,9 +297,7 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
                       ))}
                     </ul>
                     {fixed.fixesApplied.length > 8 ? (
-                      <p className="mt-2 text-emerald-900">
-                        …and {fixed.fixesApplied.length - 8} more.
-                      </p>
+                      <p className="mt-2 text-emerald-900">…and {fixed.fixesApplied.length - 8} more.</p>
                     ) : null}
                   </div>
                 ) : null}
@@ -344,10 +322,7 @@ async function consumeQuota(): Promise<{ ok: boolean; data: ServerQuota }> {
         </div>
       </div>
 
-      <div className="mt-10 text-xs text-[var(--muted)]">
-        Current mode: <span className="font-semibold">Shopify Product CSV (Basic)</span> — we’ll add more formats next.
-      </div>
-
+      {/* not used yet, but fine to keep for future */}
       <div className="hidden">{mode}</div>
     </div>
   );
@@ -384,15 +359,11 @@ function IssueList({
           </p>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 font-semibold text-red-800">
-              Errors {counts.error}
-            </span>
+            <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 font-semibold text-red-800">Errors {counts.error}</span>
             <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">
               Warnings {counts.warning}
             </span>
-            <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 font-semibold text-sky-800">
-              Info {counts.info}
-            </span>
+            <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 font-semibold text-sky-800">Info {counts.info}</span>
           </div>
         </div>
 
