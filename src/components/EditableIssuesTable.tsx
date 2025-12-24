@@ -14,6 +14,8 @@ type PinnedRow = {
   rowIndex: number; // 0-based
 };
 
+type SeverityFilter = "errors" | "errors+warnings" | "all";
+
 export function EditableIssuesTable({
   headers,
   rows,
@@ -41,41 +43,51 @@ export function EditableIssuesTable({
     "Variant Inventory Policy",
   ];
 
-  // Rows that currently have blocking errors
-  const errorRows = useMemo(() => {
+  // NEW: filter for which severities should surface rows in this table
+  const [filter, setFilter] = useState<SeverityFilter>("errors");
+
+  // Rows that currently have issues (based on filter)
+  const issueRows = useMemo(() => {
+    const allowed =
+      filter === "errors"
+        ? new Set(["error"])
+        : filter === "errors+warnings"
+        ? new Set(["error", "warning"])
+        : new Set(["error", "warning", "info"]);
+
     return Array.from(
       new Set(
         issues
-          .filter((i) => i.severity === "error" && typeof i.row === "number")
+          .filter((i) => allowed.has(i.severity) && typeof i.row === "number")
           .map((i) => (i.row as number) - 1)
       )
     ).filter((i) => i >= 0 && i < rows.length);
-  }, [issues, rows.length]);
+  }, [issues, rows.length, filter]);
 
   // --- Sticky / pinned rows ---
   const [pinnedRows, setPinnedRows] = useState<PinnedRow[]>([]);
 
-  // When new errors appear, automatically pin those rows (so they persist)
+  // When new issue rows appear, automatically pin those rows (so they persist)
   useEffect(() => {
-    if (errorRows.length === 0) return;
+    if (issueRows.length === 0) return;
     setPinnedRows((prev) => {
       const seen = new Set(prev.map((p) => p.rowIndex));
       const next = [...prev];
-      for (const ri of errorRows) {
+      for (const ri of issueRows) {
         if (!seen.has(ri)) next.push({ rowIndex: ri });
       }
       return next;
     });
-  }, [errorRows]);
+  }, [issueRows]);
 
   // The table should show:
-  // - any currently errored rows
+  // - any currently issue'd rows (based on filter)
   // - plus any pinned rows (even if resolved now)
   const rowsToShow = useMemo(() => {
     const seen = new Set<number>();
     const out: number[] = [];
 
-    for (const i of errorRows) {
+    for (const i of issueRows) {
       if (!seen.has(i)) {
         seen.add(i);
         out.push(i);
@@ -91,7 +103,7 @@ export function EditableIssuesTable({
 
     out.sort((a, b) => a - b);
     return out;
-  }, [errorRows, pinnedRows, rows.length]);
+  }, [issueRows, pinnedRows, rows.length]);
 
   if (rowsToShow.length === 0) return null;
 
@@ -121,9 +133,26 @@ export function EditableIssuesTable({
           </p>
         </div>
 
-        <div className="text-xs text-[var(--muted)]">
-          Showing <span className="font-semibold">{Math.min(rowsToShow.length, 25)}</span> rows
-          {rowsToShow.length > 25 ? " (first 25)" : ""}.
+        <div className="flex items-center gap-3">
+          {/* NEW: filter selector */}
+          <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+            <span>Show:</span>
+            <select
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as SeverityFilter)}
+              aria-label="Issue filter"
+            >
+              <option value="errors">Errors</option>
+              <option value="errors+warnings">Errors + warnings</option>
+              <option value="all">All issues</option>
+            </select>
+          </div>
+
+          <div className="text-xs text-[var(--muted)]">
+            Showing <span className="font-semibold">{Math.min(rowsToShow.length, 25)}</span> rows
+            {rowsToShow.length > 25 ? " (first 25)" : ""}.
+          </div>
         </div>
       </div>
 

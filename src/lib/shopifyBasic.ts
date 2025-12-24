@@ -206,6 +206,19 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
             r["Variant Inventory Qty"] = cleaned;
             fixesApplied.push(`Row ${rowNumber}: Normalized Variant Inventory Qty to "${cleaned}".`);
           }
+
+          // NEW: warn if negative (not always invalid, but suspicious)
+          const n = Number(cleaned);
+          if (Number.isFinite(n) && n < 0) {
+            issues.push({
+              severity: "warning",
+              code: "inventory_qty_negative",
+              message: `Row ${rowNumber}: "Variant Inventory Qty" is negative (${n}).`,
+              row: rowNumber,
+              column: "Variant Inventory Qty",
+              suggestion: `Double-check if you really want negative inventory. Usually this should be 0 or higher.`,
+            });
+          }
         } else {
           issues.push({
             severity: "error",
@@ -218,38 +231,92 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
         }
       }
     }
-  }
 
- // 4) Duplicate handle check (flag ALL duplicates so user can choose which one to keep)
-if (fixedHeaders.includes("Handle")) {
-  const byHandle = new Map<string, number[]>(); // handle -> rowIndexes (0-based)
+    // NEW: Variant Inventory Policy validation + safe normalization
+    if (fixedHeaders.includes("Variant Inventory Policy")) {
+      const raw = (r["Variant Inventory Policy"] ?? "").trim();
+      if (raw) {
+        const lower = raw.toLowerCase();
+        if (lower !== "deny" && lower !== "continue") {
+          issues.push({
+            severity: "error",
+            code: "inventory_policy_invalid",
+            message: `Row ${rowNumber}: "Variant Inventory Policy" must be "deny" or "continue" (got "${raw}").`,
+            row: rowNumber,
+            column: "Variant Inventory Policy",
+            suggestion: `Use "deny" (stop selling when out of stock) or "continue" (allow overselling).`,
+          });
+        } else if (raw !== lower) {
+          r["Variant Inventory Policy"] = lower;
+          fixesApplied.push(`Row ${rowNumber}: Normalized Variant Inventory Policy to "${lower}".`);
+        }
+      }
+    }
 
-  for (let idx = 0; idx < fixedRows.length; idx++) {
-    const handle = (fixedRows[idx]["Handle"] ?? "").trim();
-    if (!handle) continue;
+    // NEW: Tags safe normalization (trim spacing, remove empty tag entries)
+    if (fixedHeaders.includes("Tags")) {
+      const raw = (r["Tags"] ?? "");
+      if (raw) {
+        const normalized = raw
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0)
+          .join(", ");
 
-    const list = byHandle.get(handle) ?? [];
-    list.push(idx);
-    byHandle.set(handle, list);
-  }
+        if (normalized !== raw) {
+          r["Tags"] = normalized;
+          fixesApplied.push(`Row ${rowNumber}: Normalized Tags spacing.`);
+        }
+      }
+    }
 
-  for (const [handle, idxs] of byHandle.entries()) {
-    if (idxs.length <= 1) continue;
-
-    const rowsList = idxs.map((i) => i + 1).join(", ");
-    for (const idx of idxs) {
-      issues.push({
-        severity: "error",
-        code: "duplicate_handle",
-        message: `Row ${idx + 1}: "Handle" "${handle}" is duplicated (also on rows ${rowsList}).`,
-        row: idx + 1,
-        column: "Handle",
-        suggestion: `Handles must be unique. Keep "${handle}" on ONE row and change the others (example: "${handle}-2", "${handle}-3").`,
-      });
+    // NEW: Helpful info for blanks (not blocking)
+    for (const col of ["Title", "Vendor", "Type"] as const) {
+      if (fixedHeaders.includes(col)) {
+        const v = (r[col] ?? "").trim();
+        if (!v) {
+          issues.push({
+            severity: "info",
+            code: `${col.toLowerCase()}_blank`,
+            message: `Row ${rowNumber}: "${col}" is blank.`,
+            row: rowNumber,
+            column: col,
+            suggestion: `Not always required, but Shopify listings usually need a ${col}.`,
+          });
+        }
+      }
     }
   }
-}
 
+  // 4) Duplicate handle check (flag ALL duplicates so user can choose which one to keep)
+  if (fixedHeaders.includes("Handle")) {
+    const byHandle = new Map<string, number[]>(); // handle -> rowIndexes (0-based)
+
+    for (let idx = 0; idx < fixedRows.length; idx++) {
+      const handle = (fixedRows[idx]["Handle"] ?? "").trim();
+      if (!handle) continue;
+
+      const list = byHandle.get(handle) ?? [];
+      list.push(idx);
+      byHandle.set(handle, list);
+    }
+
+    for (const [handle, idxs] of byHandle.entries()) {
+      if (idxs.length <= 1) continue;
+
+      const rowsList = idxs.map((i) => i + 1).join(", ");
+      for (const idx of idxs) {
+        issues.push({
+          severity: "error",
+          code: "duplicate_handle",
+          message: `Row ${idx + 1}: "Handle" "${handle}" is duplicated (also on rows ${rowsList}).`,
+          row: idx + 1,
+          column: "Handle",
+          suggestion: `Handles must be unique. Keep "${handle}" on ONE row and change the others (example: "${handle}-2", "${handle}-3").`,
+        });
+      }
+    }
+  }
 
   // Ensure required headers are present for export even if missing
   const exportHeaders = [...fixedHeaders];
