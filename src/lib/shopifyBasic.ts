@@ -242,32 +242,6 @@ for (let idx = 0; idx < fixedRows.length; idx++) {
   }
 }
 
-
-
-  // 3b) Duplicate handle check (Shopify requires unique handle per product)
-  if (fixedHeaders.includes("Handle")) {
-    const seenHandles = new Map<string, number>(); // handle -> first row number
-    for (let idx = 0; idx < fixedRows.length; idx++) {
-      const rowNumber = idx + 1;
-      const h = (fixedRows[idx]["Handle"] ?? "").trim();
-      if (!h) continue;
-
-      const first = seenHandles.get(h);
-      if (first) {
-        issues.push({
-          severity: "error",
-          code: "duplicate_handle",
-          message: `Row ${rowNumber}: Duplicate "Handle" ("${h}") also appears on row ${first}.`,
-          row: rowNumber,
-          column: "Handle",
-          suggestion: `Handles must be unique. Change one of the duplicates (rows ${first} and ${rowNumber}).`,
-        });
-      } else {
-        seenHandles.set(h, rowNumber);
-      }
-    }
-  }
-
   // Ensure required headers are present for export even if missing
   const exportHeaders = [...fixedHeaders];
   for (const req of REQUIRED) {
