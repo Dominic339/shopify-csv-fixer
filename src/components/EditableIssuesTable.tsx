@@ -25,7 +25,7 @@ export function EditableIssuesTable({
   issues: Issue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
 }) {
-  const editableCols = ["Handle", "Published", "Variant Price", "Variant Inventory Qty"];
+  const editableCols = ["Handle", "Title", "Vendor", "Type", "Tags", "Published", "Variant SKU", "Variant Price", "Variant Inventory Qty", "Varient Inventory Policy", ""];
 
   // Rows that currently have blocking errors
   const errorRows = useMemo(() => {
