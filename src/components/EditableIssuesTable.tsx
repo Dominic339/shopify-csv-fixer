@@ -130,7 +130,7 @@ export function EditableIssuesTable({
         {/* Compact text to reduce width */}
         <table className="min-w-full text-left text-xs">
           <thead className="bg-[var(--surface-2)]">
-            <tr>
+            <tr className="h-10">
               <th className="sticky left-0 z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
                 Row
               </th>
@@ -144,7 +144,7 @@ export function EditableIssuesTable({
                 </th>
               ))}
 
-              <th className="sticky right-0 z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
+              <th className="px-2 py-2 align-middle whitespace-nowrap font-semibold leading-none">
                 Notes (live)
               </th>
             </tr>
