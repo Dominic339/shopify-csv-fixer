@@ -14,7 +14,7 @@ type PinnedRow = {
   rowIndex: number; // 0-based
 };
 
-type SeverityFilter = "errors" | "errors+warnings" | "all";
+type ShowMode = "errors" | "errors_warnings" | "all";
 
 export function EditableIssuesTable({
   headers,
@@ -43,69 +43,12 @@ export function EditableIssuesTable({
     "Variant Inventory Policy",
   ];
 
-  // NEW: filter for which severities should surface rows in this table
-  const [filter, setFilter] = useState<SeverityFilter>("errors");
+  // Filter control for what qualifies a row to appear automatically
+  const [showMode, setShowMode] = useState<ShowMode>("errors");
 
-  // Rows that currently have issues (based on filter)
-  const issueRows = useMemo(() => {
-    const allowed =
-      filter === "errors"
-        ? new Set(["error"])
-        : filter === "errors+warnings"
-        ? new Set(["error", "warning"])
-        : new Set(["error", "warning", "info"]);
-
-    return Array.from(
-      new Set(
-        issues
-          .filter((i) => allowed.has(i.severity) && typeof i.row === "number")
-          .map((i) => (i.row as number) - 1)
-      )
-    ).filter((i) => i >= 0 && i < rows.length);
-  }, [issues, rows.length, filter]);
-
-  // --- Sticky / pinned rows ---
-  const [pinnedRows, setPinnedRows] = useState<PinnedRow[]>([]);
-
-  // When new issue rows appear, automatically pin those rows (so they persist)
-  useEffect(() => {
-    if (issueRows.length === 0) return;
-    setPinnedRows((prev) => {
-      const seen = new Set(prev.map((p) => p.rowIndex));
-      const next = [...prev];
-      for (const ri of issueRows) {
-        if (!seen.has(ri)) next.push({ rowIndex: ri });
-      }
-      return next;
-    });
-  }, [issueRows]);
-
-  // The table should show:
-  // - any currently issue'd rows (based on filter)
-  // - plus any pinned rows (even if resolved now)
-  const rowsToShow = useMemo(() => {
-    const seen = new Set<number>();
-    const out: number[] = [];
-
-    for (const i of issueRows) {
-      if (!seen.has(i)) {
-        seen.add(i);
-        out.push(i);
-      }
-    }
-
-    for (const p of pinnedRows) {
-      if (p.rowIndex >= 0 && p.rowIndex < rows.length && !seen.has(p.rowIndex)) {
-        seen.add(p.rowIndex);
-        out.push(p.rowIndex);
-      }
-    }
-
-    out.sort((a, b) => a - b);
-    return out;
-  }, [issueRows, pinnedRows, rows.length]);
-
-  if (rowsToShow.length === 0) return null;
+  // --- Manual pinned rows ---
+  // These rows stay visible until export/new upload (because the user interacted with them).
+  const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
 
   // Notes for each row: show CURRENT errors/warnings/info on that row
   function issuesForRow(rowIndex: number) {
@@ -123,31 +66,92 @@ export function EditableIssuesTable({
     return issues.some((i) => i.severity === "error" && i.row === oneBased && i.column === col);
   }
 
+  function rowMatchesFilter(rowIndex: number) {
+    const rowIssues = issuesForRow(rowIndex);
+    if (rowIssues.length === 0) return false;
+
+    const hasErr = rowIssues.some((i) => i.severity === "error");
+    const hasWarn = rowIssues.some((i) => i.severity === "warning");
+    const hasInfo = rowIssues.some((i) => i.severity === "info");
+
+    if (showMode === "errors") return hasErr;
+    if (showMode === "errors_warnings") return hasErr || hasWarn;
+    return hasErr || hasWarn || hasInfo;
+  }
+
+  // Rows that match the CURRENT filter (these are NOT permanently pinned)
+  const autoRows = useMemo(() => {
+    const out: number[] = [];
+    for (let i = 0; i < rows.length; i++) {
+      if (rowMatchesFilter(i)) out.push(i);
+    }
+    return out;
+  }, [rows.length, issues, showMode]);
+
+  // Rows to actually show:
+  // - all rows matching the current filter
+  // - plus any MANUALLY pinned rows (until export/new upload)
+  const rowsToShow = useMemo(() => {
+    const seen = new Set<number>();
+    const out: number[] = [];
+
+    for (const i of autoRows) {
+      if (!seen.has(i)) {
+        seen.add(i);
+        out.push(i);
+      }
+    }
+
+    for (const p of manualPinnedRows) {
+      if (p.rowIndex >= 0 && p.rowIndex < rows.length && !seen.has(p.rowIndex)) {
+        seen.add(p.rowIndex);
+        out.push(p.rowIndex);
+      }
+    }
+
+    out.sort((a, b) => a - b);
+    return out;
+  }, [autoRows, manualPinnedRows, rows.length]);
+
+  if (rowsToShow.length === 0) return null;
+
+  // Pin a row manually (on focus/change)
+  function pinRow(rowIndex: number) {
+    setManualPinnedRows((prev) => {
+      if (prev.some((p) => p.rowIndex === rowIndex)) return prev;
+      return [...prev, { rowIndex }];
+    });
+  }
+
+  // Optional: if rows array changes (new upload), clear pins automatically
+  // (Usually you handle this by remounting or changing key, but this makes it resilient.)
+  useEffect(() => {
+    // If the file changes and row count shrinks, drop pins out of bounds
+    setManualPinnedRows((prev) => prev.filter((p) => p.rowIndex >= 0 && p.rowIndex < rows.length));
+  }, [rows.length]);
+
   return (
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Fix errors here</h2>
+          <h2 className="text-lg font-semibold">Fix issues here</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Rows stay visible while you work. “Resolved” rows will remain until you export or upload a new file.
+            Switch the filter to focus on errors only, or include warnings/info. Rows you interact with stay visible
+            until you export or upload a new file.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* NEW: filter selector */}
-          <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
-            <span>Show:</span>
-            <select
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as SeverityFilter)}
-              aria-label="Issue filter"
-            >
-              <option value="errors">Errors</option>
-              <option value="errors+warnings">Errors + warnings</option>
-              <option value="all">All issues</option>
-            </select>
-          </div>
+          <label className="text-xs text-[var(--muted)]">Show:</label>
+          <select
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs"
+            value={showMode}
+            onChange={(e) => setShowMode(e.target.value as ShowMode)}
+          >
+            <option value="errors">Errors</option>
+            <option value="errors_warnings">Errors + warnings</option>
+            <option value="all">All issues</option>
+          </select>
 
           <div className="text-xs text-[var(--muted)]">
             Showing <span className="font-semibold">{Math.min(rowsToShow.length, 25)}</span> rows
@@ -157,7 +161,6 @@ export function EditableIssuesTable({
       </div>
 
       <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)]">
-        {/* Compact text to reduce width */}
         <table className="min-w-full text-left text-xs">
           <thead className="bg-[var(--surface-2)]">
             <tr className="h-10">
@@ -177,7 +180,6 @@ export function EditableIssuesTable({
                 Status
               </th>
 
-              {/* Non-sticky headers shifted right so they don't slide under sticky columns */}
               {editableCols.map((h) => (
                 <th
                   key={h}
@@ -248,27 +250,15 @@ export function EditableIssuesTable({
                       <td
                         key={col}
                         className="px-2 py-2"
-                        // This is what prevents the header/cell text from being clipped under sticky Row/Status
                         style={{ paddingLeft: STICKY_LEFT_WIDTH }}
                       >
                         <input
                           className={`${baseInput} ${hasErr ? errStyle : okStyle}`}
                           value={(r[col] ?? "") as string}
                           placeholder={col}
-                          onFocus={() => {
-                            // Pin row as soon as user interacts with it
-                            setPinnedRows((prev) => {
-                              if (prev.some((p) => p.rowIndex === idx)) return prev;
-                              return [...prev, { rowIndex: idx }];
-                            });
-                          }}
+                          onFocus={() => pinRow(idx)}
                           onChange={(e) => {
-                            // also pin on change (extra safety)
-                            setPinnedRows((prev) => {
-                              if (prev.some((p) => p.rowIndex === idx)) return prev;
-                              return [...prev, { rowIndex: idx }];
-                            });
-
+                            pinRow(idx);
                             onUpdateRow(idx, { [col]: e.target.value });
                           }}
                         />
@@ -276,7 +266,7 @@ export function EditableIssuesTable({
                     );
                   })}
 
-                  {/* Sticky Notes */}
+                  {/* Notes */}
                   <td
                     className="sticky right-0 z-10 max-w-[420px] bg-[var(--surface)] px-2 py-2 text-xs text-[var(--muted)]"
                     style={{ paddingLeft: STICKY_LEFT_WIDTH }}
@@ -298,8 +288,9 @@ export function EditableIssuesTable({
 
                         {warnings.length > 0 ? (
                           <div>
-                            <p className="font-semibold text-amber-200">Warnings</p>
-                            <ul className="list-disc pl-5 text-amber-100">
+                            {/* FIX: better warning contrast for light + dark */}
+                            <p className="font-semibold text-amber-900 dark:text-amber-200">Warnings</p>
+                            <ul className="list-disc pl-5 text-amber-800 dark:text-amber-100">
                               {warnings.map((it, n) => (
                                 <li key={`w-${n}`}>{it.message}</li>
                               ))}
@@ -309,8 +300,8 @@ export function EditableIssuesTable({
 
                         {info.length > 0 ? (
                           <div>
-                            <p className="font-semibold text-sky-200">Info</p>
-                            <ul className="list-disc pl-5 text-sky-100">
+                            <p className="font-semibold text-sky-900 dark:text-sky-200">Info</p>
+                            <ul className="list-disc pl-5 text-sky-800 dark:text-sky-100">
                               {info.map((it, n) => (
                                 <li key={`i-${n}`}>{it.message}</li>
                               ))}
@@ -328,7 +319,7 @@ export function EditableIssuesTable({
       </div>
 
       <p className="mt-2 text-xs text-[var(--muted)]">
-        Tip: Fix errors first. Warnings/info won’t block export (unless your export logic treats them as blocking).
+        Tip: “Errors” block export. Warnings/info don’t (unless you decide to treat them as blocking later).
       </p>
     </div>
   );
