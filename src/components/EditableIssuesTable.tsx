@@ -5,7 +5,7 @@ import { CsvRow } from "@/lib/csv";
 
 type Issue = {
   severity: string; // "error" | "warning" | "info"
-  row?: number;     // 1-based
+  row?: number; // 1-based
   column?: string;
   message: string;
 };
@@ -25,7 +25,18 @@ export function EditableIssuesTable({
   issues: Issue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
 }) {
-  const editableCols = ["Handle", "Title", "Vendor", "Type", "Tags", "Published", "Variant SKU", "Variant Price", "Variant Inventory Qty", "Varient Inventory Policy", ""];
+  const editableCols = [
+    "Handle",
+    "Title",
+    "Vendor",
+    "Type",
+    "Tags",
+    "Published",
+    "Variant SKU",
+    "Variant Price",
+    "Variant Inventory Qty",
+    "Variant Inventory Policy",
+  ];
 
   // Rows that currently have blocking errors
   const errorRows = useMemo(() => {
@@ -39,7 +50,6 @@ export function EditableIssuesTable({
   }, [issues, rows.length]);
 
   // --- Sticky / pinned rows ---
-  // Any row that has EVER appeared in this table stays until export/new upload
   const [pinnedRows, setPinnedRows] = useState<PinnedRow[]>([]);
 
   // When new errors appear, automatically pin those rows (so they persist)
@@ -76,12 +86,10 @@ export function EditableIssuesTable({
       }
     }
 
-    // Keep stable ordering: lowest row first
     out.sort((a, b) => a - b);
     return out;
   }, [errorRows, pinnedRows, rows.length]);
 
-  // If nothing to show, hide the entire section
   if (rowsToShow.length === 0) return null;
 
   // Notes for each row: show CURRENT errors/warnings/info on that row
@@ -92,6 +100,14 @@ export function EditableIssuesTable({
 
   function hasBlockingError(rowIndex: number) {
     return issuesForRow(rowIndex).some((i) => i.severity === "error");
+  }
+
+  // Highlight ONLY the specific cells that currently have errors
+  function cellHasError(rowIndex: number, col: string) {
+    const oneBased = rowIndex + 1;
+    return issues.some(
+      (i) => i.severity === "error" && i.row === oneBased && i.column === col
+    );
   }
 
   return (
@@ -111,19 +127,26 @@ export function EditableIssuesTable({
       </div>
 
       <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)]">
-        <table className="min-w-full text-left text-sm">
+        {/* Compact text to reduce width */}
+        <table className="min-w-full text-left text-xs">
           <thead className="bg-[var(--surface-2)]">
             <tr>
-              <th className="px-3 py-2 font-semibold">Row</th>
-              <th className="px-3 py-2 font-semibold">Status</th>
+              <th className="sticky left-0 z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
+                Row
+              </th>
+              <th className="sticky left-[52px] z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
+                Status
+              </th>
 
               {editableCols.map((h) => (
-                <th key={h} className="px-3 py-2 font-semibold">
+                <th key={h} className="whitespace-nowrap px-2 py-2 font-semibold">
                   {h}
                 </th>
               ))}
 
-              <th className="px-3 py-2 font-semibold">Notes (live)</th>
+              <th className="sticky right-0 z-10 bg-[var(--surface-2)] px-2 py-2 font-semibold">
+                Notes (live)
+              </th>
             </tr>
           </thead>
 
@@ -140,56 +163,72 @@ export function EditableIssuesTable({
 
               return (
                 <tr key={idx} className="border-t border-[var(--border)] align-top">
-                  <td className="whitespace-nowrap px-3 py-2 text-[var(--muted)]">{idx + 1}</td>
+                  {/* Sticky Row number */}
+                  <td className="sticky left-0 z-10 whitespace-nowrap bg-[var(--surface)] px-2 py-2 text-[var(--muted)]">
+                    {idx + 1}
+                  </td>
 
-                  <td className="whitespace-nowrap px-3 py-2">
+                  {/* Sticky Status */}
+                  <td className="sticky left-[52px] z-10 whitespace-nowrap bg-[var(--surface)] px-2 py-2">
                     {resolved ? (
-                      <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-900">
+                      <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
                         Resolved
                       </span>
                     ) : (
-                      <span className="inline-flex rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-900">
+                      <span className="inline-flex rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-900">
                         Needs fixes
                       </span>
                     )}
                   </td>
 
-                  {editableCols.map((col) => (
-                    <td key={col} className="px-3 py-2">
-                      <input
-                        className="w-[220px] rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm"
-                        value={(r[col] ?? "") as string}
-                        placeholder={col}
-                        // -------- Change 3 goes HERE --------
-                        // onFocus ensures the row stays "sticky" the moment user starts interacting.
-                        onFocus={() => {
-                          setPinnedRows((prev) => {
-                            if (prev.some((p) => p.rowIndex === idx)) return prev;
-                            return [...prev, { rowIndex: idx }];
-                          });
-                        }}
-                        onChange={(e) => {
-                          // also pin on change (extra safety)
-                          setPinnedRows((prev) => {
-                            if (prev.some((p) => p.rowIndex === idx)) return prev;
-                            return [...prev, { rowIndex: idx }];
-                          });
+                  {/* Editable cells */}
+                  {editableCols.map((col) => {
+                    const hasErr = cellHasError(idx, col);
 
-                          onUpdateRow(idx, { [col]: e.target.value });
-                        }}
-                      />
-                    </td>
-                  ))}
+                    const baseInput =
+                      "w-[130px] min-w-[130px] rounded-lg px-2 py-1 text-xs focus:w-[240px] focus:min-w-[240px] transition-[width] duration-150";
 
-                  <td className="max-w-[520px] px-3 py-2 text-xs text-[var(--muted)]">
+                    const okStyle = "border border-[var(--border)] bg-[var(--surface-2)]";
+                    const errStyle =
+                      "border border-red-400 bg-red-50/10 ring-2 ring-red-500/30";
+
+                    return (
+                      <td key={col} className="px-2 py-2">
+                        <input
+                          className={`${baseInput} ${hasErr ? errStyle : okStyle}`}
+                          value={(r[col] ?? "") as string}
+                          placeholder={col}
+                          onFocus={() => {
+                            // Pin row as soon as user interacts with it
+                            setPinnedRows((prev) => {
+                              if (prev.some((p) => p.rowIndex === idx)) return prev;
+                              return [...prev, { rowIndex: idx }];
+                            });
+                          }}
+                          onChange={(e) => {
+                            // also pin on change (extra safety)
+                            setPinnedRows((prev) => {
+                              if (prev.some((p) => p.rowIndex === idx)) return prev;
+                              return [...prev, { rowIndex: idx }];
+                            });
+
+                            onUpdateRow(idx, { [col]: e.target.value });
+                          }}
+                        />
+                      </td>
+                    );
+                  })}
+
+                  {/* Sticky Notes */}
+                  <td className="sticky right-0 z-10 max-w-[420px] bg-[var(--surface)] px-2 py-2 text-xs text-[var(--muted)]">
                     {blocking.length === 0 && warnings.length === 0 && info.length === 0 ? (
-                      <span className="text-emerald-900">No issues on this row.</span>
+                      <span className="text-emerald-200">No issues on this row.</span>
                     ) : (
                       <div className="space-y-2">
                         {blocking.length > 0 ? (
                           <div>
-                            <p className="font-semibold text-red-900">Errors</p>
-                            <ul className="list-disc pl-5 text-red-900">
+                            <p className="font-semibold text-red-200">Errors</p>
+                            <ul className="list-disc pl-5 text-red-100">
                               {blocking.map((it, n) => (
                                 <li key={`e-${n}`}>{it.message}</li>
                               ))}
@@ -199,8 +238,8 @@ export function EditableIssuesTable({
 
                         {warnings.length > 0 ? (
                           <div>
-                            <p className="font-semibold text-amber-900">Warnings</p>
-                            <ul className="list-disc pl-5 text-amber-900">
+                            <p className="font-semibold text-amber-200">Warnings</p>
+                            <ul className="list-disc pl-5 text-amber-100">
                               {warnings.map((it, n) => (
                                 <li key={`w-${n}`}>{it.message}</li>
                               ))}
@@ -210,8 +249,8 @@ export function EditableIssuesTable({
 
                         {info.length > 0 ? (
                           <div>
-                            <p className="font-semibold text-sky-900">Info</p>
-                            <ul className="list-disc pl-5 text-sky-900">
+                            <p className="font-semibold text-sky-200">Info</p>
+                            <ul className="list-disc pl-5 text-sky-100">
                               {info.map((it, n) => (
                                 <li key={`i-${n}`}>{it.message}</li>
                               ))}
