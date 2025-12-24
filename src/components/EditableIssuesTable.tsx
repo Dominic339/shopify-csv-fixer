@@ -227,8 +227,8 @@ export function EditableIssuesTable({
                       <div className="space-y-2">
                         {blocking.length > 0 ? (
                           <div>
-                            <p className="font-semibold text-red-200">Errors</p>
-                            <ul className="list-disc pl-5 text-red-100">
+                            <p className="font-semibold text-red-900">Errors</p>
+                            <ul className="list-disc pl-5 text-red-900">
                               {blocking.map((it, n) => (
                                 <li key={`e-${n}`}>{it.message}</li>
                               ))}
