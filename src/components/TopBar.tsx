@@ -72,12 +72,8 @@ export function TopBar() {
 
       <div className="border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          {/* Brand / Home link */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 rounded-2xl px-2 py-1 hover:bg-[var(--surface-2)]"
-            aria-label="Go to home"
-          >
+          {/* Make brand click to Home */}
+          <Link href="/" className="flex items-center gap-3">
             <div className="grid h-9 w-9 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               🧾
             </div>
@@ -95,7 +91,6 @@ export function TopBar() {
               Open app
             </Link>
 
-            {/* Theme toggle (now actually works) */}
             <button
               className="rgb-btn rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm"
               type="button"
@@ -105,7 +100,6 @@ export function TopBar() {
               {theme === "dark" ? "Dark" : "Light"}
             </button>
 
-            {/* Profile dropdown */}
             <div className="relative" ref={menuRef}>
               <button
                 type="button"

@@ -4,7 +4,6 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
-      {/* Hero */}
       <section className="grid gap-10 md:grid-cols-2 md:items-center">
         <div>
           <p className="text-sm font-semibold text-[var(--muted)]">Shopify CSV Fixer</p>
@@ -38,7 +37,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Visual placeholder */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-sm text-[var(--muted)]">
           <p className="font-semibold text-[var(--text)]">What it does</p>
           <ul className="mt-3 list-disc space-y-2 pl-5">
@@ -49,7 +47,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it works */}
       <section id="how-it-works" className="mt-20">
         <h2 className="text-2xl font-semibold">How it works</h2>
 
@@ -71,7 +68,6 @@ export default function HomePage() {
         </ol>
       </section>
 
-      {/* Pricing preview */}
       <section className="mt-24">
         <h2 className="text-2xl font-semibold">Pricing</h2>
         <p className="mt-2 text-[var(--muted)]">
@@ -91,12 +87,13 @@ export default function HomePage() {
             href="/app"
           />
 
+          {/* NOW goes to Stripe checkout redirect page */}
           <PricingCard
             title="Basic"
             price="$3 / month"
             features={["Shopify product CSV exports", "100 exports per month", "Self-serve cancellation"]}
             cta="Choose Basic"
-            href="/app"
+            href="/checkout?plan=basic"
           />
 
           <PricingCard
@@ -104,7 +101,7 @@ export default function HomePage() {
             price="$10 / month"
             features={["Advanced Shopify formats", "Saved mappings + batch tools", "Higher export limits"]}
             cta="Choose Advanced"
-            href="/app"
+            href="/checkout?plan=advanced"
           />
         </div>
       </section>
