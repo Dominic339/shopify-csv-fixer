@@ -24,7 +24,7 @@ export default function LoginPage() {
   async function onEmailAuth() {
     setMsg(null);
     setBusy(true);
-    const supabase = createClient();
+    const supabase = await createSupabaseServerClient();
 
     try {
       if (mode === "signup") {
@@ -73,7 +73,7 @@ export default function LoginPage() {
   async function onGoogle() {
     setMsg(null);
     setBusy(true);
-    const supabase = createClient();
+    const supabase = await createSupabaseServerClient();
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
