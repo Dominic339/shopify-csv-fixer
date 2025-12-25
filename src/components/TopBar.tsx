@@ -1,8 +1,10 @@
+// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 type MeResponse =
   | { ok: true; user: { id: string; email: string | null } | null }
@@ -10,6 +12,7 @@ type MeResponse =
 
 export function TopBar() {
   const supabase = createSupabaseBrowserClient();
+  const { theme, toggle } = useTheme();
 
   const [me, setMe] = useState<MeResponse>({ ok: true, user: null });
   const [loading, setLoading] = useState(true);
@@ -59,8 +62,6 @@ export function TopBar() {
     await supabase.auth.signOut();
     setOpen(false);
     await refreshMe();
-    // optional: bounce to home
-    // window.location.href = "/";
   }
 
   const email = me.ok && me.user ? me.user.email : null;
@@ -91,13 +92,14 @@ export function TopBar() {
               Open app
             </Link>
 
-            {/* Keep your existing Light button where it already is if you want.
-                This is just a placeholder button that matches your UI. */}
+            {/* REAL theme toggle (uses your ThemeProvider + globals.css [data-theme="dark"]) */}
             <button
               className="rgb-btn rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm"
               type="button"
+              onClick={toggle}
+              title={`Theme: ${theme}`}
             >
-              Light
+              {theme === "dark" ? "Dark" : "Light"}
             </button>
 
             {/* Profile dropdown */}
