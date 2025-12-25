@@ -1,4 +1,3 @@
-// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
@@ -69,12 +68,16 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* subtle top border/gradient line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-sky-500 to-fuchsia-500" />
 
       <div className="border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
+          {/* Brand / Home link */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 rounded-2xl px-2 py-1 hover:bg-[var(--surface-2)]"
+            aria-label="Go to home"
+          >
             <div className="grid h-9 w-9 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               🧾
             </div>
@@ -82,7 +85,7 @@ export function TopBar() {
               <p className="text-sm font-semibold">Shopify CSV Fixer</p>
               <p className="text-xs text-[var(--muted)]">Fix imports fast</p>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-3">
             <Link
@@ -92,12 +95,12 @@ export function TopBar() {
               Open app
             </Link>
 
-            {/* REAL theme toggle (uses your ThemeProvider + globals.css [data-theme="dark"]) */}
+            {/* Theme toggle (now actually works) */}
             <button
               className="rgb-btn rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm"
               type="button"
               onClick={toggle}
-              title={`Theme: ${theme}`}
+              title="Toggle theme"
             >
               {theme === "dark" ? "Dark" : "Light"}
             </button>
@@ -144,7 +147,6 @@ export function TopBar() {
                       App
                     </Link>
 
-                    {/* Optional placeholder pages for later */}
                     <Link
                       href="/account"
                       className="block rounded-xl px-3 py-2 text-sm hover:bg-[var(--surface-2)]"
