@@ -440,5 +440,3 @@ function Badge({ severity }: { severity: "error" | "warning" | "info" }) {
     </span>
   );
 }
-
-::contentReference[oaicite:0]{index=0}
