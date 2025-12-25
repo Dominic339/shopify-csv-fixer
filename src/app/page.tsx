@@ -25,7 +25,7 @@ export default function HomePage() {
               Start free — no account required
             </Link>
 
-            <Link href="#how-it-works" className="rgb-btn bg-[var(--surface)] px-6 py-3 text-sm">
+            <Link href="/how-it-works" className="rgb-btn bg-[var(--surface)] px-6 py-3 text-sm">
               See how it works
             </Link>
           </div>
