@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/theme/ThemeProvider";
@@ -67,19 +68,30 @@ export function TopBar() {
   const initial = email ? email.slice(0, 1).toUpperCase() : "👤";
 
   return (
-    <header className="sticky top-0 z-40">
+    <header className="sticky top-0 z-40 w-full">
+      {/* subtle top border/gradient line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-sky-500 to-fuchsia-500" />
 
-      <div className="border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          {/* Make brand click to Home */}
-          <Link href="/" className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-              🧾
+      {/* FULL WIDTH background (this is what fixes the cut off) */}
+      <div className="w-full border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
+        {/* centered content */}
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+          {/* Brand (click to home) */}
+          <Link href="/" className="flex items-center gap-4">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+              <Image
+                src="/CSV Nest Logo.png"
+                alt="CSV Nest"
+                width={34}
+                height={34}
+                className="h-8 w-8"
+                priority
+              />
             </div>
+
             <div className="leading-tight">
-              <p className="text-sm font-semibold">Shopify CSV Fixer</p>
-              <p className="text-xs text-[var(--muted)]">Fix imports fast</p>
+              <p className="text-base font-semibold">CSV Nest</p>
+              <p className="text-sm text-[var(--muted)]">Fix imports fast</p>
             </div>
           </Link>
 
@@ -100,6 +112,7 @@ export function TopBar() {
               {theme === "dark" ? "Dark" : "Light"}
             </button>
 
+            {/* Profile dropdown */}
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
@@ -139,14 +152,6 @@ export function TopBar() {
                       onClick={() => setOpen(false)}
                     >
                       App
-                    </Link>
-
-                    <Link
-                      href="/account"
-                      className="block rounded-xl px-3 py-2 text-sm hover:bg-[var(--surface-2)]"
-                      onClick={() => setOpen(false)}
-                    >
-                      Account
                     </Link>
                   </div>
 
