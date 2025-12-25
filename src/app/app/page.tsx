@@ -1,3 +1,4 @@
+// src/app/app/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -5,7 +6,7 @@ import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 import { getDeviceId } from "@/lib/deviceId";
-import { AuthPanel } from "@/components/AuthPanel";
+import { TopBar } from "@/components/TopBar";
 
 type Mode = "upload-fix";
 
@@ -162,169 +163,183 @@ export default function AppPage() {
   }
 
   return (
-    <div className="w-full max-w-none px-6 py-10">
-      {/* Auth / account panel */}
-      <div className="mb-6">
-        <AuthPanel />
-      </div>
+    <>
+      <TopBar />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">CSV Fixer</h1>
-          <p className="text-sm text-[var(--muted)]">
-            Upload → Diagnose → Auto-fix safe issues → Export Shopify-ready CSV.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
-          <span className="font-semibold">Free exports:</span>{" "}
-          <span className="text-[var(--muted)]">
-            {quotaLoading ? "Loading…" : quota?.ok ? `${quota.remaining}/${quota.limitPerMonth} remaining` : "Unavailable"}
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold">1) Upload CSV</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">We process files locally in your browser.</p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
-              className="block w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm"
-            />
-            <button
-              className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-50"
-              disabled={!fixed || !canExport || exporting}
-              onClick={downloadFixed}
-              title={
-                !fixed
-                  ? "Upload a CSV first."
-                  : hasFatalErrors
-                  ? "Fix errors before exporting."
-                  : !quota?.ok
-                  ? "Quota service unavailable."
-                  : (quota.remaining ?? 0) <= 0
-                  ? "You’ve used your free exports for this month."
-                  : "Download fixed CSV"
-              }
-            >
-              {exporting ? "Exporting…" : "Export fixed CSV"}
-            </button>
+      <div className="w-full max-w-none px-6 py-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">CSV Fixer</h1>
+            <p className="text-sm text-[var(--muted)]">
+              Upload → Diagnose → Auto-fix safe issues → Export Shopify-ready CSV.
+            </p>
           </div>
 
-          {parsed?.parseErrors?.length ? (
-            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm">
-              <p className="font-semibold text-red-800">Parse issues</p>
-              <ul className="mt-2 list-disc pl-5 text-red-800">
-                {parsed.parseErrors.map((e) => (
-                  <li key={e}>{e}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
+            <span className="font-semibold">Free exports:</span>{" "}
+            <span className="text-[var(--muted)]">
+              {quotaLoading
+                ? "Loading…"
+                : quota?.ok
+                ? `${quota.remaining}/${quota.limitPerMonth} remaining`
+                : "Unavailable"}
+            </span>
+          </div>
+        </div>
 
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold">2) Preview</h2>
-            <div className="mt-3 flex items-center gap-3">
-              <label className="text-sm text-[var(--muted)]">Rows:</label>
-              <select
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm"
-                value={rowsPreview}
-                onChange={(e) => setRowsPreview(Number(e.target.value))}
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <h2 className="text-lg font-semibold">1) Upload CSV</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">We process files locally in your browser.</p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
+                className="block w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm"
+              />
+              <button
+                className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-50"
+                disabled={!fixed || !canExport || exporting}
+                onClick={downloadFixed}
+                title={
+                  !fixed
+                    ? "Upload a CSV first."
+                    : hasFatalErrors
+                    ? "Fix errors before exporting."
+                    : !quota?.ok
+                    ? "Quota service unavailable."
+                    : (quota.remaining ?? 0) <= 0
+                    ? "You’ve used your free exports for this month."
+                    : "Download fixed CSV"
+                }
               >
-                {[10, 20, 50, 100].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
+                {exporting ? "Exporting…" : "Export fixed CSV"}
+              </button>
             </div>
 
-            <div className="mt-3 overflow-auto rounded-2xl border border-[var(--border)]">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-[var(--surface-2)]">
-                  <tr>
-                    {(fixed?.fixedHeaders ?? parsed?.headers ?? []).slice(0, 12).map((h) => (
-                      <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(fixed?.fixedRows ?? parsed?.rows ?? []).slice(0, rowsPreview).map((r, idx) => (
-                    <tr key={idx} className="border-t border-[var(--border)]">
+            {parsed?.parseErrors?.length ? (
+              <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm">
+                <p className="font-semibold text-red-800">Parse issues</p>
+                <ul className="mt-2 list-disc pl-5 text-red-800">
+                  {parsed.parseErrors.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold">2) Preview</h2>
+              <div className="mt-3 flex items-center gap-3">
+                <label className="text-sm text-[var(--muted)]">Rows:</label>
+                <select
+                  className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm"
+                  value={rowsPreview}
+                  onChange={(e) => setRowsPreview(Number(e.target.value))}
+                >
+                  {[10, 20, 50, 100].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-3 overflow-auto rounded-2xl border border-[var(--border)]">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="bg-[var(--surface-2)]">
+                    <tr>
                       {(fixed?.fixedHeaders ?? parsed?.headers ?? []).slice(0, 12).map((h) => (
-                        <td key={h} className="max-w-[260px] truncate px-3 py-2 text-[var(--muted)]">
-                          {r[h] ?? ""}
-                        </td>
+                        <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold">
+                          {h}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {(fixed?.fixedRows ?? parsed?.rows ?? []).slice(0, rowsPreview).map((r, idx) => (
+                      <tr key={idx} className="border-t border-[var(--border)]">
+                        {(fixed?.fixedHeaders ?? parsed?.headers ?? []).slice(0, 12).map((h) => (
+                          <td key={h} className="max-w-[260px] truncate px-3 py-2 text-[var(--muted)]">
+                            {r[h] ?? ""}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            <p className="mt-2 text-xs text-[var(--muted)]">Showing first 12 columns for readability. Export includes all columns.</p>
-          </div>
-
-          {fixed ? (
-            <div className="mt-6">
-              <EditableIssuesTable headers={fixed.fixedHeaders} rows={fixed.fixedRows} issues={fixed.issues} onUpdateRow={updateRow} />
-            </div>
-          ) : null}
-        </div>
-
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold">Diagnostics</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">Errors must be fixed before export. Warnings are usually safe.</p>
-
-          <div className="mt-4 space-y-2">
-            {!fixed ? (
-              <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">Upload a CSV to see diagnostics.</div>
-            ) : (
-              <>
-                {fixed.fixesApplied.length ? (
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-                    <p className="font-semibold text-emerald-900">Auto-fixes applied</p>
-                    <ul className="mt-2 list-disc pl-5 text-emerald-900">
-                      {fixed.fixesApplied.slice(0, 8).map((f) => (
-                        <li key={f}>{f}</li>
-                      ))}
-                    </ul>
-                    {fixed.fixesApplied.length > 8 ? (
-                      <p className="mt-2 text-emerald-900">…and {fixed.fixesApplied.length - 8} more.</p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                <IssueList issues={fixed.issues} />
-              </>
-            )}
-          </div>
-
-          {!canExport && fixed ? (
-            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              <p className="font-semibold">Export locked</p>
-              <p className="mt-1">
-                {hasFatalErrors
-                  ? "Fix the errors listed above, then export."
-                  : !quota?.ok
-                  ? "Quota service is temporarily unavailable."
-                  : "You’ve used your free exports for this month on this device."}
+              <p className="mt-2 text-xs text-[var(--muted)]">
+                Showing first 12 columns for readability. Export includes all columns.
               </p>
             </div>
-          ) : null}
-        </div>
-      </div>
 
-      {/* not used yet, but fine to keep for future */}
-      <div className="hidden">{mode}</div>
-    </div>
+            {fixed ? (
+              <div className="mt-6">
+                <EditableIssuesTable
+                  headers={fixed.fixedHeaders}
+                  rows={fixed.fixedRows}
+                  issues={fixed.issues}
+                  onUpdateRow={updateRow}
+                />
+              </div>
+            ) : null}
+          </div>
+
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <h2 className="text-lg font-semibold">Diagnostics</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Errors must be fixed before export. Warnings are usually safe.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              {!fixed ? (
+                <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
+                  Upload a CSV to see diagnostics.
+                </div>
+              ) : (
+                <>
+                  {fixed.fixesApplied.length ? (
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+                      <p className="font-semibold text-emerald-900">Auto-fixes applied</p>
+                      <ul className="mt-2 list-disc pl-5 text-emerald-900">
+                        {fixed.fixesApplied.slice(0, 8).map((f) => (
+                          <li key={f}>{f}</li>
+                        ))}
+                      </ul>
+                      {fixed.fixesApplied.length > 8 ? (
+                        <p className="mt-2 text-emerald-900">…and {fixed.fixesApplied.length - 8} more.</p>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  <IssueList issues={fixed.issues} />
+                </>
+              )}
+            </div>
+
+            {!canExport && fixed ? (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p className="font-semibold">Export locked</p>
+                <p className="mt-1">
+                  {hasFatalErrors
+                    ? "Fix the errors listed above, then export."
+                    : !quota?.ok
+                    ? "Quota service is temporarily unavailable."
+                    : "You’ve used your free exports for this month on this device."}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* not used yet, but fine to keep for future */}
+        <div className="hidden">{mode}</div>
+      </div>
+    </>
   );
 }
 
@@ -359,11 +374,15 @@ function IssueList({
           </p>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 font-semibold text-red-800">Errors {counts.error}</span>
+            <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 font-semibold text-red-800">
+              Errors {counts.error}
+            </span>
             <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">
               Warnings {counts.warning}
             </span>
-            <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 font-semibold text-sky-800">Info {counts.info}</span>
+            <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 font-semibold text-sky-800">
+              Info {counts.info}
+            </span>
           </div>
         </div>
 
