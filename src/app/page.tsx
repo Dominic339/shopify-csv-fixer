@@ -1,10 +1,14 @@
 import Link from "next/link";
+import { UserBadge } from "@/components/UserBadge";
 
 export default function HomePage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
+      {/* Top right account status */}
+      <UserBadge />
+
       {/* Hero */}
-      <section className="grid gap-10 md:grid-cols-2 md:items-center">
+      <section className="mt-10 grid gap-10 md:grid-cols-2 md:items-center">
         <div>
           <p className="text-sm font-semibold text-[var(--muted)]">Shopify CSV Fixer</p>
 
@@ -13,8 +17,8 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-4 text-lg text-[var(--muted)]">
-            Upload your CSV, instantly see what’s wrong, auto-fix what’s safe, and export a clean
-            file ready for Shopify.
+            Upload your CSV, instantly see what’s wrong, auto-fix what’s safe,
+            and export a clean file ready for Shopify.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -25,7 +29,10 @@ export default function HomePage() {
               Start free — no account required
             </Link>
 
-            <Link href="#how-it-works" className="rgb-btn bg-[var(--surface)] px-6 py-3 text-sm">
+            <Link
+              href="#how-it-works"
+              className="rgb-btn bg-[var(--surface)] px-6 py-3 text-sm"
+            >
               See how it works
             </Link>
           </div>
@@ -90,20 +97,30 @@ export default function HomePage() {
             href="/app"
           />
 
+          {/* For now these still go to /app.
+              Next step (Stripe) will change these to checkout. */}
           <PricingCard
             title="Basic"
             price="$3 / month"
-            features={["Shopify product CSV exports", "100 exports per month", "Self-serve cancellation"]}
+            features={[
+              "Shopify product CSV exports",
+              "100 exports per month",
+              "Self-serve cancellation",
+            ]}
             cta="Choose Basic"
-            href="/login?plan=basic"
+            href="/app"
           />
 
           <PricingCard
             title="Advanced"
             price="$10 / month"
-            features={["Advanced Shopify formats", "Saved mappings + batch tools", "Higher export limits"]}
+            features={[
+              "Advanced Shopify formats",
+              "Saved mappings + batch tools",
+              "Higher export limits",
+            ]}
             cta="Choose Advanced"
-            href="/login?plan=advanced"
+            href="/app"
           />
         </div>
       </section>
