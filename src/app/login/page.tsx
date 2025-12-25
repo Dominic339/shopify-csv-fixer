@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signup");
@@ -24,7 +26,7 @@ export default function LoginPage() {
   async function onEmailAuth() {
     setMsg(null);
     setBusy(true);
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseBrowserClient();
 
     try {
       if (mode === "signup") {
@@ -73,7 +75,7 @@ export default function LoginPage() {
   async function onGoogle() {
     setMsg(null);
     setBusy(true);
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseBrowserClient();
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
