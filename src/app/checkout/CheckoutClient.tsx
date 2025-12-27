@@ -1,3 +1,4 @@
+// src/app/checkout/CheckoutClient.tsx
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -5,8 +6,8 @@ import Link from "next/link";
 
 export default function CheckoutClient() {
   const sp = useSearchParams();
-  const status = sp.get("status"); // success/canceled
-  const plan = sp.get("plan");     // basic/advanced
+  const status = sp.get("status"); // success | canceled (example)
+  const plan = sp.get("plan");     // basic | advanced (example)
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
