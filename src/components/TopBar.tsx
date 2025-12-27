@@ -68,23 +68,20 @@ export function TopBar() {
   const initial = email ? email.slice(0, 1).toUpperCase() : "👤";
 
   return (
-    <header className="sticky top-0 z-40 w-full">
-      {/* subtle top border/gradient line */}
+    <header className="sticky top-0 z-40">
       <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-sky-500 to-fuchsia-500" />
 
-      {/* FULL WIDTH background (this is what fixes the cut off) */}
-      <div className="w-full border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
-        {/* centered content */}
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          {/* Brand (click to home) */}
+      <div className="border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
+        {/* FULL WIDTH (this fixes the cutoff) */}
+        <div className="w-full flex items-center justify-between px-6 py-4">
+          {/* Brand */}
           <Link href="/" className="flex items-center gap-4">
-            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-[var(--border)] bg-white">
               <Image
                 src="/CSV Nest Logo.png"
                 alt="CSV Nest"
-                width={34}
-                height={34}
-                className="h-8 w-8"
+                fill
+                className="object-contain p-1"
                 priority
               />
             </div>
@@ -95,16 +92,17 @@ export function TopBar() {
             </div>
           </Link>
 
+          {/* Actions */}
           <div className="flex items-center gap-3">
             <Link
               href="/app"
-              className="rgb-btn rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
+              className="rgb-btn rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
             >
               Open app
             </Link>
 
             <button
-              className="rgb-btn rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm"
+              className="rgb-btn rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm"
               type="button"
               onClick={toggle}
               title="Toggle theme"
@@ -117,7 +115,7 @@ export function TopBar() {
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="grid h-10 w-10 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
+                className="grid h-11 w-11 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
                 aria-haspopup="menu"
                 aria-expanded={open}
                 title={email ?? "Account"}
