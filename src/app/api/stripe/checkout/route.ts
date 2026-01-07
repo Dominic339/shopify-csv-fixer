@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
@@ -11,17 +12,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const { plan } = (await req.json()) as { plan?: string };
 
-    if (error || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+    const user = data.user;
+    if (!user) {
+      return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     }
 
-    const { plan } = (await req.json()) as { plan: "basic" | "advanced" };
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      return NextResponse.json(
+        { error: "Missing NEXT_PUBLIC_SITE_URL" },
+        { status: 500 }
+      );
+    }
 
     const priceId =
       plan === "advanced"
@@ -29,14 +38,8 @@ export async function POST(req: Request) {
         : process.env.STRIPE_PRICE_BASIC;
 
     if (!priceId) {
-      return NextResponse.json({ error: "Missing price id" }, { status: 500 });
-    }
-
-    // IMPORTANT: use the deployed URL in production (set in Vercel env vars)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!siteUrl) {
       return NextResponse.json(
-        { error: "NEXT_PUBLIC_SITE_URL is not set" },
+        { error: "Missing Stripe price id for plan" },
         { status: 500 }
       );
     }
@@ -45,18 +48,19 @@ export async function POST(req: Request) {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
 
-      // This is how the webhook knows WHICH USER paid
+      // This is the key: tie Stripe session to your Supabase user
       client_reference_id: user.id,
       metadata: {
         user_id: user.id,
-        plan,
+        plan: plan === "advanced" ? "advanced" : "basic",
       },
 
-      // Helps Stripe associate the checkout with an identity
-      customer_email: user.email ?? undefined,
-
-      success_url: `${siteUrl}/checkout?status=success&plan=${plan}`,
-      cancel_url: `${siteUrl}/checkout?status=canceled&plan=${plan}`,
+      success_url: `${siteUrl}/checkout?status=success&plan=${encodeURIComponent(
+        plan ?? "basic"
+      )}`,
+      cancel_url: `${siteUrl}/checkout?status=canceled&plan=${encodeURIComponent(
+        plan ?? "basic"
+      )}`,
     });
 
     return NextResponse.json({ url: session.url });

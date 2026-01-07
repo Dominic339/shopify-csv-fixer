@@ -1,8 +1,10 @@
+// src/app/api/stripe/webhook/route.ts
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "../../../../lib/supabase/admin";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
@@ -10,7 +12,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
-  if (!sig) return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+  if (!sig) {
+    return NextResponse.json({ error: "Missing stripe-signature" }, { status: 400 });
+  }
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
@@ -18,11 +22,15 @@ export async function POST(req: Request) {
   }
 
   let event: Stripe.Event;
+
   try {
     const rawBody = await req.text();
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err: any) {
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+    return NextResponse.json(
+      { error: `Webhook signature verification failed: ${err?.message ?? "unknown"}` },
+      { status: 400 }
+    );
   }
 
   const admin = createSupabaseAdminClient();
@@ -32,31 +40,34 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
 
       const userId =
-        session.client_reference_id ||
+        (session.client_reference_id as string | null) ||
         (session.metadata?.user_id as string | undefined);
 
       const plan = (session.metadata?.plan as string | undefined) ?? "basic";
 
       if (!userId) {
-        return NextResponse.json(
-          { error: "No user id on session (client_reference_id/metadata)" },
-          { status: 400 }
-        );
+        // We can't attach it to a user; acknowledge so Stripe doesn't retry forever
+        return NextResponse.json({ ok: true, skipped: "missing_user_id" });
       }
 
-      // Pull subscription for accurate status/period end
+      const subscriptionId = session.subscription as string | null;
       let sub: Stripe.Subscription | null = null;
-      if (session.subscription) {
-        sub = await stripe.subscriptions.retrieve(session.subscription as string);
+
+      if (subscriptionId) {
+        sub = await stripe.subscriptions.retrieve(subscriptionId);
       }
 
       const status = sub?.status ?? "active";
+      const currentPeriodEnd =
+        typeof (sub as any)?.current_period_end === "number"
+          ? new Date(((sub as any).current_period_end as number) * 1000).toISOString()
+          : null;
 
-      // Stripe typings may not include current_period_end yet, so read it safely
-      const currentPeriodEndSec = (sub as any)?.current_period_end as number | undefined;
-      const currentPeriodEnd = currentPeriodEndSec
-        ? new Date(currentPeriodEndSec * 1000).toISOString()
-        : null;
+      const stripeCustomerId =
+        typeof session.customer === "string" ? session.customer : null;
+
+      const stripeSubscriptionId =
+        typeof session.subscription === "string" ? session.subscription : null;
 
       const { error: upsertErr } = await admin
         .from("user_subscriptions")
@@ -65,8 +76,8 @@ export async function POST(req: Request) {
             user_id: userId,
             plan,
             status,
-            stripe_customer_id: (session.customer as string) ?? null,
-            stripe_subscription_id: (session.subscription as string) ?? null,
+            stripe_customer_id: stripeCustomerId,
+            stripe_subscription_id: stripeSubscriptionId,
             current_period_end: currentPeriodEnd,
             updated_at: new Date().toISOString(),
           },
@@ -82,27 +93,33 @@ export async function POST(req: Request) {
     ) {
       const sub = event.data.object as Stripe.Subscription;
 
-      const currentPeriodEndSec = (sub as any)?.current_period_end as number | undefined;
-      const currentPeriodEnd = currentPeriodEndSec
-        ? new Date(currentPeriodEndSec * 1000).toISOString()
-        : null;
+      const stripeSubscriptionId = sub.id;
+      const status = sub.status;
 
-      const { error: updErr } = await admin
+      const currentPeriodEnd =
+        typeof (sub as any)?.current_period_end === "number"
+          ? new Date(((sub as any).current_period_end as number) * 1000).toISOString()
+          : null;
+
+      const { error: updateErr } = await admin
         .from("user_subscriptions")
         .update({
-          status: sub.status,
+          status,
           current_period_end: currentPeriodEnd,
           updated_at: new Date().toISOString(),
         })
-        .eq("stripe_subscription_id", sub.id);
+        .eq("stripe_subscription_id", stripeSubscriptionId);
 
-      if (updErr) throw updErr;
+      // If you haven’t stored stripe_subscription_id yet, this won't match anything.
+      // That's why the checkout.session.completed handler above is important.
+      if (updateErr) throw updateErr;
     }
 
-    return NextResponse.json({ received: true });
-  } catch (e: any) {
+    return NextResponse.json({ ok: true });
+  } catch (err: any) {
+    // Returning 500 makes Stripe retry, which is what you want for transient DB issues.
     return NextResponse.json(
-      { error: e?.message ?? "Webhook handler failed" },
+      { ok: false, error: err?.message ?? "unknown" },
       { status: 500 }
     );
   }
