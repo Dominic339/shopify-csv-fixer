@@ -3,23 +3,31 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
-import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 export default function TopBar() {
   const supabase = createClient();
+
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getUser().then(({ data }: { data: { user: { email?: string } | null } }) => {
-      if (!mounted) return;
-      setEmail(data.user?.email ?? null);
-    });
+    // Load initial user
+    supabase.auth
+      .getUser()
+      .then(({ data }: any) => {
+        if (!mounted) return;
+        setEmail(data?.user?.email ?? null);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setEmail(null);
+      });
 
+    // Subscribe to auth changes
     const { data: sub } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
+      (_event: any, session: any) => {
         setEmail(session?.user?.email ?? null);
       }
     );
@@ -28,7 +36,6 @@ export default function TopBar() {
       mounted = false;
       sub.subscription.unsubscribe();
     };
-    // supabase client instance is stable enough for this usage
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -56,14 +63,6 @@ export default function TopBar() {
             Open app
           </Link>
 
-          <button
-            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold"
-            onClick={() => document.documentElement.classList.toggle("dark")}
-            type="button"
-          >
-            Theme
-          </button>
-
           <div className="relative">
             <button
               className="rgb-btn flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
@@ -78,11 +77,13 @@ export default function TopBar() {
               <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg">
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-3">
                   <div className="text-xs text-[var(--muted)]">Signed in</div>
-                  <div className="mt-1 text-sm font-semibold">{email ?? "Guest"}</div>
+                  <div className="mt-1 text-sm font-semibold">
+                    {email ?? "Guest"}
+                  </div>
                 </div>
 
                 <div className="mt-3 grid gap-1 text-sm">
-                  {/* REQUIRED: Profile above Home */}
+                  {/* Profile above Home */}
                   <Link
                     className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
                     href="/account"
