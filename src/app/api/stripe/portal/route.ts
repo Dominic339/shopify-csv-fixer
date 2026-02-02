@@ -1,45 +1,61 @@
+// src/app/api/stripe/portal/route.ts
+import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createClient } from "@supabase/supabase-js";
+
+export const runtime = "nodejs";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-12-15.clover",
+});
+
+function siteUrl() {
+  const u = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!u) throw new Error("Missing NEXT_PUBLIC_SITE_URL");
+  return u.replace(/\/$/, "");
+}
 
 export async function POST() {
   try {
     const supabase = await createSupabaseServerClient();
-    const { data } = await supabase.auth.getUser();
-    const user = data.user;
 
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "not_logged_in" }, { status: 401 });
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
+
+    if (userErr || !user) {
+      return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     }
 
-    // Use service role to read your billing table
-    const admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const { data: billingRow } = await admin
-      .from("user_billing")
+    const { data: subRow, error: subErr } = await supabase
+      .from("user_subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const customerId = billingRow?.stripe_customer_id;
-
-    if (!customerId) {
-      return NextResponse.json({ ok: false, error: "no_customer" }, { status: 400 });
+    if (subErr) {
+      return NextResponse.json({ error: subErr.message }, { status: 500 });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const customerId = subRow?.stripe_customer_id;
+    if (!customerId) {
+      return NextResponse.json(
+        { error: "No Stripe customer on record for this user" },
+        { status: 400 }
+      );
+    }
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${siteUrl}/account`,
+      return_url: `${siteUrl()}/profile`,
     });
 
-    return NextResponse.json({ ok: true, url: session.url });
+    return NextResponse.json({ url: session.url });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? "unknown" }, { status: 500 });
+    return NextResponse.json(
+      { error: e?.message ?? "Unknown error" },
+      { status: 500 }
+    );
   }
 }

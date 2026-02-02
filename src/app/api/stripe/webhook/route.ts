@@ -4,11 +4,15 @@ import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
 });
+
+function getPlanFromSession(session: Stripe.Checkout.Session): "basic" | "advanced" {
+  const p = (session.metadata?.plan ?? "basic").toLowerCase();
+  return p === "advanced" ? "advanced" : "basic";
+}
 
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
@@ -16,21 +20,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing stripe-signature" }, { status: 400 });
   }
 
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!webhookSecret) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
     return NextResponse.json({ error: "Missing STRIPE_WEBHOOK_SECRET" }, { status: 500 });
   }
 
   let event: Stripe.Event;
-
   try {
     const rawBody = await req.text();
-    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: `Webhook signature verification failed: ${err?.message ?? "unknown"}` },
-      { status: 400 }
-    );
+    event = stripe.webhooks.constructEvent(rawBody, sig, secret);
+  } catch (e: any) {
+    return NextResponse.json({ error: `Webhook error: ${e?.message ?? "unknown"}` }, { status: 400 });
   }
 
   const admin = createSupabaseAdminClient();
@@ -40,34 +40,32 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
 
       const userId =
-        (session.client_reference_id as string | null) ||
+        session.client_reference_id ||
         (session.metadata?.user_id as string | undefined);
 
-      const plan = (session.metadata?.plan as string | undefined) ?? "basic";
-
       if (!userId) {
-        // We can't attach it to a user; acknowledge so Stripe doesn't retry forever
-        return NextResponse.json({ ok: true, skipped: "missing_user_id" });
+        return NextResponse.json(
+          { error: "No user id on session (client_reference_id/metadata.user_id)" },
+          { status: 200 }
+        );
       }
 
-      const subscriptionId = session.subscription as string | null;
+      const plan = getPlanFromSession(session);
+
+      // If we have a subscription, fetch it so we can store period end + status accurately
       let sub: Stripe.Subscription | null = null;
-
-      if (subscriptionId) {
-        sub = await stripe.subscriptions.retrieve(subscriptionId);
+      if (session.subscription) {
+        sub = await stripe.subscriptions.retrieve(session.subscription as string);
       }
 
-      const status = sub?.status ?? "active";
+      const status = (sub as any)?.status ?? "active";
       const currentPeriodEnd =
-        typeof (sub as any)?.current_period_end === "number"
+        (sub as any)?.current_period_end
           ? new Date(((sub as any).current_period_end as number) * 1000).toISOString()
           : null;
 
-      const stripeCustomerId =
-        typeof session.customer === "string" ? session.customer : null;
-
-      const stripeSubscriptionId =
-        typeof session.subscription === "string" ? session.subscription : null;
+      const stripeCustomerId = (session.customer as string) ?? null;
+      const stripeSubscriptionId = (session.subscription as string) ?? null;
 
       const { error: upsertErr } = await admin
         .from("user_subscriptions")
@@ -87,40 +85,55 @@ export async function POST(req: Request) {
       if (upsertErr) throw upsertErr;
     }
 
+    // Keep Supabase in sync if Stripe changes later
     if (
       event.type === "customer.subscription.updated" ||
       event.type === "customer.subscription.deleted"
     ) {
       const sub = event.data.object as Stripe.Subscription;
 
+      const stripeCustomerId = (sub.customer as string) ?? null;
       const stripeSubscriptionId = sub.id;
-      const status = sub.status;
 
-      const currentPeriodEnd =
-        typeof (sub as any)?.current_period_end === "number"
-          ? new Date(((sub as any).current_period_end as number) * 1000).toISOString()
-          : null;
-
-      const { error: updateErr } = await admin
+      // Find the user by stripe_subscription_id first, fallback by stripe_customer_id
+      const { data: bySub } = await admin
         .from("user_subscriptions")
-        .update({
-          status,
-          current_period_end: currentPeriodEnd,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("stripe_subscription_id", stripeSubscriptionId);
+        .select("user_id")
+        .eq("stripe_subscription_id", stripeSubscriptionId)
+        .maybeSingle();
 
-      // If you haven’t stored stripe_subscription_id yet, this won't match anything.
-      // That's why the checkout.session.completed handler above is important.
-      if (updateErr) throw updateErr;
+      let userId = bySub?.user_id as string | undefined;
+
+      if (!userId && stripeCustomerId) {
+        const { data: byCust } = await admin
+          .from("user_subscriptions")
+          .select("user_id")
+          .eq("stripe_customer_id", stripeCustomerId)
+          .maybeSingle();
+        userId = byCust?.user_id as string | undefined;
+      }
+
+      if (userId) {
+        const currentPeriodEnd =
+          (sub as any)?.current_period_end
+            ? new Date(((sub as any).current_period_end as number) * 1000).toISOString()
+            : null;
+
+        const { error: updErr } = await admin
+          .from("user_subscriptions")
+          .update({
+            status: (sub as any)?.status ?? "active",
+            current_period_end: currentPeriodEnd,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId);
+
+        if (updErr) throw updErr;
+      }
     }
 
-    return NextResponse.json({ ok: true });
-  } catch (err: any) {
-    // Returning 500 makes Stripe retry, which is what you want for transient DB issues.
-    return NextResponse.json(
-      { ok: false, error: err?.message ?? "unknown" },
-      { status: 500 }
-    );
+    return NextResponse.json({ received: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? "Webhook handler failed" }, { status: 500 });
   }
 }

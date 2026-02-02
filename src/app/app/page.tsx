@@ -6,6 +6,12 @@ import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 import { getDeviceId } from "@/lib/deviceId";
+import AppClient from "./AppClient";
+
+export default function AppPage() {
+  return <AppClient />;
+}
+
 
 type Mode = "upload-fix";
 

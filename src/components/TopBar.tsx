@@ -1,179 +1,114 @@
+// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { useTheme } from "@/components/theme/ThemeProvider";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/browser";
 
-type MeResponse =
-  | { ok: true; user: { id: string; email: string | null } | null }
-  | { ok: false; user: null };
-
-export function TopBar() {
-  const supabase = createSupabaseBrowserClient();
-  const { theme, toggle } = useTheme();
-
-  const [me, setMe] = useState<MeResponse>({ ok: true, user: null });
-  const [loading, setLoading] = useState(true);
-
+export default function TopBar() {
+  const supabase = createClient();
   const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  async function refreshMe() {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/me", { cache: "no-store" });
-      const data = (await res.json()) as MeResponse;
-      setMe(data);
-    } catch {
-      setMe({ ok: false, user: null });
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    refreshMe();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      refreshMe();
+    let mounted = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (!mounted) return;
+      setEmail(data.user?.email ?? null);
     });
-    return () => sub.subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    function onEsc(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onEsc);
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+    });
+
     return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onEsc);
+      mounted = false;
+      sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   async function signOut() {
     await supabase.auth.signOut();
     setOpen(false);
-    await refreshMe();
   }
 
-  const email = me.ok && me.user ? me.user.email : null;
-  const initial = email ? email.slice(0, 1).toUpperCase() : "👤";
-
   return (
-    <header className="sticky top-0 z-40">
-      <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 via-sky-500 to-fuchsia-500" />
+    <header className="border-b border-[var(--border)] bg-[var(--surface)]">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-3">
+          {/* If you have a logo, keep it. Otherwise this is fine. */}
+          <div className="h-9 w-9 rounded-xl border border-[var(--border)] bg-[var(--bg)]" />
+          <div className="leading-tight">
+            <div className="text-sm font-semibold">CSV Nest</div>
+            <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
+          </div>
+        </Link>
 
-      <div className="border-b border-[var(--border)] bg-[color:rgba(0,0,0,0.35)] backdrop-blur">
-        {/* FULL WIDTH (this fixes the cutoff) */}
-        <div className="w-full flex items-center justify-between px-6 py-4">
-          {/* Brand */}
-          <Link href="/" className="flex items-center gap-4">
-            <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-[var(--border)] bg-white">
-              <Image
-                src="/CSV Nest Logo.png"
-                alt="CSV Nest"
-                fill
-                className="object-contain p-1"
-                priority
-              />
-            </div>
-
-            <div className="leading-tight">
-              <p className="text-base font-semibold">CSV Nest</p>
-              <p className="text-sm text-[var(--muted)]">Fix imports fast</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/app"
+            className="rgb-btn bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
+          >
+            Open app
           </Link>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/app"
-              className="rgb-btn rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
-            >
-              Open app
-            </Link>
+          <button
+            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold"
+            onClick={() => document.documentElement.classList.toggle("dark")}
+          >
+            Light
+          </button>
 
+          <div className="relative">
             <button
-              className="rgb-btn rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm"
-              type="button"
-              onClick={toggle}
-              title="Toggle theme"
+              className="rgb-btn flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Account menu"
             >
-              {theme === "dark" ? "Dark" : "Light"}
+              {email ? email[0]?.toUpperCase() : "?"}
             </button>
 
-            {/* Profile dropdown */}
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-                className="grid h-11 w-11 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
-                aria-haspopup="menu"
-                aria-expanded={open}
-                title={email ?? "Account"}
-              >
-                {loading ? "…" : initial}
-              </button>
-
-              {open ? (
-                <div
-                  className="absolute right-0 mt-2 w-[280px] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg"
-                  role="menu"
-                >
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
-                    <p className="text-xs text-[var(--muted)]">Signed in</p>
-                    <p className="mt-1 truncate text-sm font-semibold">
-                      {email ?? (me.ok ? "Not signed in" : "Unavailable")}
-                    </p>
-                  </div>
-
-                  <div className="mt-3 space-y-1">
-                    <Link
-                      href="/"
-                      className="block rounded-xl px-3 py-2 text-sm hover:bg-[var(--surface-2)]"
-                      onClick={() => setOpen(false)}
-                    >
-                      Home
-                    </Link>
-
-                    <Link
-                      href="/app"
-                      className="block rounded-xl px-3 py-2 text-sm hover:bg-[var(--surface-2)]"
-                      onClick={() => setOpen(false)}
-                    >
-                      App
-                    </Link>
-                  </div>
-
-                  <div className="mt-3 border-t border-[var(--border)] pt-3">
-                    {email ? (
-                      <button
-                        onClick={signOut}
-                        className="w-full rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white"
-                      >
-                        Sign out
-                      </button>
-                    ) : (
-                      <Link
-                        href="/login"
-                        className="block w-full rounded-xl bg-[var(--primary)] px-4 py-2 text-center text-sm font-semibold text-white"
-                        onClick={() => setOpen(false)}
-                      >
-                        Sign in
-                      </Link>
-                    )}
-                  </div>
+            {open ? (
+              <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-3">
+                  <div className="text-xs text-[var(--muted)]">Signed in</div>
+                  <div className="mt-1 text-sm font-semibold">{email ?? "Guest"}</div>
                 </div>
-              ) : null}
-            </div>
+
+                <div className="mt-3 grid gap-1 text-sm">
+                  <Link
+                    className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
+                    href="/"
+                    onClick={() => setOpen(false)}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
+                    href="/app"
+                    onClick={() => setOpen(false)}
+                  >
+                    App
+                  </Link>
+                </div>
+
+                <button
+                  className="rgb-btn mt-3 w-full bg-red-600 px-4 py-2 text-sm font-semibold text-white"
+                  onClick={signOut}
+                  disabled={!email}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

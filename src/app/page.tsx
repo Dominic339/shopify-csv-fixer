@@ -1,5 +1,12 @@
 // src/app/page.tsx
 import Link from "next/link";
+import HomeClient from "./HomeClient";
+
+export default function HomePage() {
+  return <HomeClient />;
+}
+
+
 
 export default function HomePage() {
   return (

@@ -40,3 +40,15 @@ export function consumeExport() {
   window.localStorage.setItem(KEY, JSON.stringify(next));
   return getQuota();
 }
+
+export function getPlanLimits(plan: string) {
+  const p = (plan || "free").toLowerCase();
+
+  if (p === "advanced") {
+    return { exportsPerMonth: 1000 };
+  }
+  if (p === "basic") {
+    return { exportsPerMonth: 100 };
+  }
+  return { exportsPerMonth: 3 };
+}
