@@ -1,9 +1,9 @@
-// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 export default function TopBar() {
   const supabase = createClient();
@@ -13,20 +13,24 @@ export default function TopBar() {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }: { data: { user: { email?: string } | null } }) => {
       if (!mounted) return;
       setEmail(data.user?.email ?? null);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user?.email ?? null);
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setEmail(session?.user?.email ?? null);
+      }
+    );
 
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
     };
-  }, [supabase]);
+    // supabase client instance is stable enough for this usage
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -37,7 +41,6 @@ export default function TopBar() {
     <header className="border-b border-[var(--border)] bg-[var(--surface)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
-          {/* If you have a logo, keep it. Otherwise this is fine. */}
           <div className="h-9 w-9 rounded-xl border border-[var(--border)] bg-[var(--bg)]" />
           <div className="leading-tight">
             <div className="text-sm font-semibold">CSV Nest</div>
@@ -56,8 +59,9 @@ export default function TopBar() {
           <button
             className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold"
             onClick={() => document.documentElement.classList.toggle("dark")}
+            type="button"
           >
-            Light
+            Theme
           </button>
 
           <div className="relative">
@@ -65,6 +69,7 @@ export default function TopBar() {
               className="rgb-btn flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
               onClick={() => setOpen((v) => !v)}
               aria-label="Account menu"
+              type="button"
             >
               {email ? email[0]?.toUpperCase() : "?"}
             </button>
@@ -77,13 +82,15 @@ export default function TopBar() {
                 </div>
 
                 <div className="mt-3 grid gap-1 text-sm">
+                  {/* REQUIRED: Profile above Home */}
                   <Link
                     className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
-                    href="/profile"
+                    href="/account"
                     onClick={() => setOpen(false)}
                   >
                     Profile
                   </Link>
+
                   <Link
                     className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
                     href="/"
@@ -91,6 +98,7 @@ export default function TopBar() {
                   >
                     Home
                   </Link>
+
                   <Link
                     className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]"
                     href="/app"
@@ -101,9 +109,10 @@ export default function TopBar() {
                 </div>
 
                 <button
-                  className="rgb-btn mt-3 w-full bg-red-600 px-4 py-2 text-sm font-semibold text-white"
+                  className="rgb-btn mt-3 w-full bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                   onClick={signOut}
                   disabled={!email}
+                  type="button"
                 >
                   Sign out
                 </button>
