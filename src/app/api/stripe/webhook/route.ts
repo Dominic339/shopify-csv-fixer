@@ -1,4 +1,4 @@
-// src/app/api/stripe/webhook/route.ts
+// src/app/api/stripe/webhook/route.ts a
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
