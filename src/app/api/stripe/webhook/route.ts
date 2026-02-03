@@ -67,17 +67,31 @@ export async function POST(req: Request) {
         const customerId = (sub.customer as string) || null;
         if (!customerId) break;
 
-        // Stripe typings can vary; this is safe and keeps your logic.
         const currentPeriodEnd = toIsoFromUnixSeconds((sub as any).current_period_end);
 
-        await admin
-          .from("user_subscriptions")
-          .update({
+        const userId = (sub.metadata as any)?.user_id as string | undefined;
+        const plan = (sub.metadata as any)?.plan as "basic" | "advanced" | undefined;
+
+        if (userId) {
+          await admin.from("user_subscriptions").upsert({
+            user_id: userId,
+            plan: plan ?? "basic",
+            stripe_customer_id: customerId,
             status: sub.status,
             current_period_end: currentPeriodEnd,
             updated_at: new Date().toISOString(),
-          })
-          .eq("stripe_customer_id", customerId);
+          });
+        } else {
+          // fallback to your original behavior
+          await admin
+            .from("user_subscriptions")
+            .update({
+              status: sub.status,
+              current_period_end: currentPeriodEnd,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("stripe_customer_id", customerId);
+        }
 
         break;
       }
