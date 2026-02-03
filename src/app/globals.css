@@ -1,125 +1,142 @@
-/* src/app/globals.css */
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ===== Theme tokens ===== */
+:root {
+  --bg: #f6f7fb;
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-2: rgba(255, 255, 255, 0.72);
+  --border: rgba(10, 10, 20, 0.12);
+  --text: rgba(10, 10, 20, 0.92);
+  --muted: rgba(10, 10, 20, 0.62);
+  --primary: #2563eb;
 
-/* =========================
-   Global Reset / Base
-   ========================= */
+  /* RGB accents */
+  --accent-1: #22c55e;
+  --accent-2: #06b6d4;
+  --accent-3: #3b82f6;
+  --accent-4: #a855f7;
+  --accent-5: #f97316;
 
+  /* Popover/dropdown surface (solid so it is not see through) */
+  --popover: rgba(255, 255, 255, 0.96);
+  --popover-border: rgba(10, 10, 20, 0.14);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #07070a;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.10);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.68);
+  --primary: #60a5fa;
+
+  /* Popover/dropdown surface (solid in dark too) */
+  --popover: rgba(18, 22, 32, 0.96);
+  --popover-border: rgba(255, 255, 255, 0.14);
+
+  color-scheme: dark;
+}
+
+/* ===== Base page ===== */
 html,
 body {
   height: 100%;
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(34, 197, 94, 0.10), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(168, 85, 247, 0.10), transparent 55%),
+    var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* =========================
-   Theme Tokens
-   ========================= */
-
-:root {
-  /* Core surfaces */
-  --bg: #0b0c10;
-  --surface: rgba(255, 255, 255, 0.06);
-  --border: rgba(255, 255, 255, 0.14);
-
-  /* Text */
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.65);
-
-  /* Brand */
-  --primary: #2dd4bf;
-
-  /* Popovers / dropdowns */
-  --popover: rgba(18, 22, 26, 0.98);
-  --popover-border: rgba(255, 255, 255, 0.14);
-
-  color-scheme: dark;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-/* =========================
-   Light Mode
-   ========================= */
-
-.light {
-  --bg: #f6f7fb;
-  --surface: rgba(255, 255, 255, 0.95);
-  --border: rgba(10, 10, 20, 0.14);
-
-  --text: rgba(10, 10, 20, 0.92);
-  --muted: rgba(10, 10, 20, 0.6);
-
-  --primary: #2563eb;
-
-  --popover: rgba(255, 255, 255, 0.98);
-  --popover-border: rgba(10, 10, 20, 0.14);
-
-  color-scheme: light;
+::selection {
+  background: rgba(34, 197, 94, 0.22);
 }
 
-/* =========================
-   Universal UI Fixes
-   ========================= */
+/* ===== Utility helpers for your UI pieces ===== */
 
-/* Fix dropdowns / menus / popovers */
-[data-radix-popper-content],
-[data-state="open"],
-.dropdown,
-.popover {
+/* Use this on dropdown/popup containers if you want them to NOT be transparent */
+.popover-surface {
   background: var(--popover);
-  color: var(--text);
   border: 1px solid var(--popover-border);
-  backdrop-filter: blur(12px);
-}
-
-/* Fix transparent menus */
-.menu,
-.menu-content {
-  background: var(--popover);
   color: var(--text);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-/* Inputs */
-input,
-textarea,
-select {
+/* Peacock RGB outline button */
+.rgb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+
+  cursor: pointer;
+  user-select: none;
+
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+  transform: translateZ(0);
+}
+
+.rgb-btn::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-1),
+    var(--accent-2),
+    var(--accent-3),
+    var(--accent-4),
+    var(--accent-5)
+  );
+  opacity: 0.95;
+  z-index: -2;
+}
+
+.rgb-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
   background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
+  z-index: -1;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--muted);
+.rgb-btn:hover {
+  filter: brightness(1.02);
 }
 
-/* Buttons (fallback safety) */
-button {
-  color: var(--text);
+.rgb-btn:active {
+  transform: translateY(2px) scale(0.99);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.10);
 }
 
-/* Tables */
-table {
-  background: var(--surface);
-  color: var(--text);
+.rgb-btn:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.35);
+  outline-offset: 3px;
 }
 
-th {
-  color: var(--muted);
-}
-
-/* Scrollbars (nice-to-have, safe) */
-*::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+/* Hide the default marker on <summary> (if you use it for dropdowns) */
+summary::-webkit-details-marker {
+  display: none;
 }
