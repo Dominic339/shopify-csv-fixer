@@ -7,7 +7,7 @@ import Link from "next/link";
 import { parseCsv, toCsv, CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
-import { EditableIssuesTable } from "@/components/EditableIssuesTable";
+import EditableIssuesTable from "@/components/EditableIssuesTable";
 
 type SubStatus = {
   ok: boolean;
