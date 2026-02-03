@@ -1,5 +1,5 @@
 import Link from "next/link";
-import PricingCards from "@/components/ui/PricingCards";
+import { PricingCards } from "@/components/ui/PricingCards";
 
 export default function HomePage() {
   return (
