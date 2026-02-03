@@ -15,10 +15,14 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
   const { plan } = (await req.json()) as { plan?: "basic" | "advanced" };
-  if (!plan) return NextResponse.json({ error: "Missing plan" }, { status: 400 });
+  if (!plan) {
+    return NextResponse.json({ error: "Missing plan" }, { status: 400 });
+  }
 
   const priceId =
     plan === "basic"
@@ -27,32 +31,38 @@ export async function POST(req: Request) {
         ? process.env.STRIPE_PRICE_ADVANCED
         : null;
 
-  if (!priceId) return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
+  if (!priceId) {
+    return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   const session = await stripe.checkout.sessions.create({
-  mode: "subscription",
-  line_items: [{ price: priceId, quantity: 1 }],
-  success_url: `${siteUrl}/checkout?success=1`,
-  cancel_url: `${siteUrl}/?canceled=1`,
+    mode: "subscription",
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${siteUrl}/checkout?success=1`,
+    cancel_url: `${siteUrl}/?canceled=1`,
 
-  // Helps Stripe checkout prefill the right email (reduces user error)
-  customer_email: user.email ?? undefined,
+    // Prefill email to match the logged-in Supabase user (reduces mistakes)
+    customer_email: user.email ?? undefined,
 
-  // Extra safety (not required, but helpful)
-  client_reference_id: user.id,
+    // Redundant safety link
+    client_reference_id: user.id,
 
-  metadata: {
-    user_id: user.id,
-    plan,
-  },
-
-  // IMPORTANT: put metadata on the subscription too
-  subscription_data: {
+    // Used by your webhook to attach subscription to correct app user
     metadata: {
       user_id: user.id,
       plan,
     },
-  },
-});
+
+    // Also attach metadata to the subscription itself (helps subscription.* events)
+    subscription_data: {
+      metadata: {
+        user_id: user.id,
+        plan,
+      },
+    },
+  });
+
+  return NextResponse.json({ url: session.url });
+}
