@@ -1,13 +1,18 @@
 @import "tailwindcss";
 
 /* ===== Theme tokens ===== */
-:root {
+/* Default to LIGHT tokens (matches your “white mode”) */
+:root,
+[data-theme="light"] {
   --bg: #f6f7fb;
   --surface: rgba(255, 255, 255, 0.85);
   --surface-2: rgba(255, 255, 255, 0.72);
   --border: rgba(10, 10, 20, 0.12);
+
+  /* IMPORTANT: readable text in light mode */
   --text: rgba(10, 10, 20, 0.92);
   --muted: rgba(10, 10, 20, 0.62);
+
   --primary: #2563eb;
 
   /* RGB accents */
@@ -17,7 +22,7 @@
   --accent-4: #a855f7;
   --accent-5: #f97316;
 
-  /* Popover/dropdown surface (solid so it is not see through) */
+  /* Popover/dropdown surface (SOLID so it is not see-through) */
   --popover: rgba(255, 255, 255, 0.96);
   --popover-border: rgba(10, 10, 20, 0.14);
 
@@ -29,8 +34,10 @@
   --surface: rgba(255, 255, 255, 0.06);
   --surface-2: rgba(255, 255, 255, 0.10);
   --border: rgba(255, 255, 255, 0.12);
+
   --text: rgba(255, 255, 255, 0.92);
   --muted: rgba(255, 255, 255, 0.68);
+
   --primary: #60a5fa;
 
   /* Popover/dropdown surface (solid in dark too) */
@@ -94,6 +101,7 @@ a {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
   transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
   transform: translateZ(0);
+  color: var(--text); /* IMPORTANT: readable in light mode */
 }
 
 .rgb-btn::before {

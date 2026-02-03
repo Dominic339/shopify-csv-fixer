@@ -1,347 +1,273 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { CsvRow } from "@/lib/csv";
+import React, { useEffect, useMemo, useState } from "react";
 
-type Issue = {
-  severity: string; // "error" | "warning" | "info"
-  row?: number; // 1-based
-  column?: string;
+type Severity = "error" | "warning" | "info";
+
+export type CsvRow = Record<string, string>;
+
+export type CsvIssue = {
+  rowIndex: number; // 0-based
+  column: string;
+  severity: Severity;
   message: string;
 };
 
-type PinnedRow = {
-  rowIndex: number; // 0-based
-};
+function worstSeverity(a: Severity, b: Severity): Severity {
+  const rank: Record<Severity, number> = { error: 3, warning: 2, info: 1 };
+  return rank[a] >= rank[b] ? a : b;
+}
 
-type ShowMode = "errors" | "errors_warnings" | "all";
+function cellKey(rowIndex: number, column: string) {
+  return `${rowIndex}::${column}`;
+}
 
-type SeenLevel = 0 | 1 | 2; // 0 none, 1 warning, 2 error
+function badgeClasses(sev: Severity | "fixed") {
+  if (sev === "error") return "bg-red-500/15 text-red-700 dark:text-red-200 border-red-500/30";
+  if (sev === "warning") return "bg-yellow-500/15 text-yellow-800 dark:text-yellow-200 border-yellow-500/30";
+  if (sev === "info") return "bg-blue-500/15 text-blue-800 dark:text-blue-200 border-blue-500/30";
+  return "bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/30";
+}
 
-export function EditableIssuesTable({
-  headers,
-  rows,
-  issues,
-  onUpdateRow,
-}: {
-  headers: string[];
+function inputClasses(sev: Severity | "fixed" | null) {
+  // null = normal
+  if (sev === "error")
+    return "border-red-500/60 bg-red-500/10 focus:ring-red-500/30 focus:border-red-500/70";
+  if (sev === "warning")
+    return "border-yellow-500/60 bg-yellow-500/10 focus:ring-yellow-500/30 focus:border-yellow-500/70";
+  if (sev === "fixed")
+    return "border-emerald-500/60 bg-emerald-500/10 focus:ring-emerald-500/30 focus:border-emerald-500/70";
+  if (sev === "info")
+    return "border-blue-500/60 bg-blue-500/10 focus:ring-blue-500/30 focus:border-blue-500/70";
+  return "border-[var(--border)] bg-[var(--surface)] focus:ring-blue-500/20 focus:border-blue-500/40";
+}
+
+export default function EditableIssuesTable(props: {
   rows: CsvRow[];
-  issues: Issue[];
+  issues: CsvIssue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
 }) {
-  const STICKY_LEFT_WIDTH = 92;
+  const { rows, issues, onUpdateRow } = props;
 
-  const editableCols = [
-    "Handle",
-    "Title",
-    "Vendor",
-    "Type",
-    "Tags",
-    "Published",
-    "Variant SKU",
-    "Variant Price",
-    "Variant Inventory Qty",
-    "Variant Inventory Policy",
-  ];
+  // Track cells that ever had an issue so they stay listed even after fixed
+  const [seenCells, setSeenCells] = useState<Record<string, Severity>>({});
 
-  const [showMode, setShowMode] = useState<ShowMode>("errors");
-  const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
+  // Filter state
+  const [filter, setFilter] = useState<"errors" | "warnings" | "all">("errors");
 
-  // Track cells that have EVER had an error/warning so we can turn them green once fixed
-  const [seenCells, setSeenCells] = useState<Record<string, SeenLevel>>({});
-
-  function keyFor(rowIndex: number, col: string) {
-    return `${rowIndex}:${col}`;
-  }
-
-  function issuesForRow(rowIndex: number) {
-    const oneBased = rowIndex + 1;
-    return issues.filter((i) => i.row === oneBased);
-  }
-
-  function hasBlockingError(rowIndex: number) {
-    return issuesForRow(rowIndex).some((i) => i.severity === "error");
-  }
-
-  function cellCurrentLevel(rowIndex: number, col: string): SeenLevel {
-    const oneBased = rowIndex + 1;
-    let level: SeenLevel = 0;
-
-    for (const i of issues) {
-      if (i.row !== oneBased) continue;
-      if (i.column !== col) continue;
-
-      if (i.severity === "error") return 2;
-      if (i.severity === "warning") level = 1;
-    }
-
-    return level;
-  }
-
-  // Whenever issues change, mark any error/warning cells as "seen"
+  // Update "seenCells" whenever issues change
   useEffect(() => {
-    if (!issues || issues.length === 0) return;
+    if (!issues?.length) return;
 
     setSeenCells((prev) => {
       const next = { ...prev };
-
       for (const i of issues) {
-        if (!i.row || !i.column) continue;
-        if (i.severity !== "error" && i.severity !== "warning") continue;
-
-        const rowIndex = i.row - 1;
-        const col = i.column;
-
-        const k = keyFor(rowIndex, col);
-        const incoming: SeenLevel = i.severity === "error" ? 2 : 1;
-
-        // Keep the highest severity ever seen
-        const existing = next[k] ?? 0;
-        next[k] = (incoming > existing ? incoming : existing) as SeenLevel;
+        const k = cellKey(i.rowIndex, i.column);
+        if (!next[k]) next[k] = i.severity;
+        else next[k] = worstSeverity(next[k], i.severity);
       }
-
       return next;
     });
   }, [issues]);
 
-  function rowMatchesFilter(rowIndex: number) {
-    const rowIssues = issuesForRow(rowIndex);
-    if (rowIssues.length === 0) return false;
-
-    const hasErr = rowIssues.some((i) => i.severity === "error");
-    const hasWarn = rowIssues.some((i) => i.severity === "warning");
-    const hasInfo = rowIssues.some((i) => i.severity === "info");
-
-    if (showMode === "errors") return hasErr;
-    if (showMode === "errors_warnings") return hasErr || hasWarn;
-    return hasErr || hasWarn || hasInfo;
-  }
-
-  const autoRows = useMemo(() => {
-    const out: number[] = [];
-    for (let i = 0; i < rows.length; i++) {
-      if (rowMatchesFilter(i)) out.push(i);
-    }
-    return out;
-  }, [rows.length, issues, showMode]);
-
-  const rowsToShow = useMemo(() => {
-    const seen = new Set<number>();
-    const out: number[] = [];
-
-    for (const i of autoRows) {
-      if (!seen.has(i)) {
-        seen.add(i);
-        out.push(i);
+  const currentIssueByCell = useMemo(() => {
+    const map: Record<string, CsvIssue> = {};
+    for (const i of issues) {
+      const k = cellKey(i.rowIndex, i.column);
+      // If multiple issues hit same cell, keep worst severity
+      if (!map[k]) map[k] = i;
+      else {
+        const existing = map[k];
+        map[k] =
+          worstSeverity(existing.severity, i.severity) === existing.severity ? existing : i;
       }
     }
+    return map;
+  }, [issues]);
 
-    for (const p of manualPinnedRows) {
-      if (p.rowIndex >= 0 && p.rowIndex < rows.length && !seen.has(p.rowIndex)) {
-        seen.add(p.rowIndex);
-        out.push(p.rowIndex);
-      }
-    }
+  const tableRows = useMemo(() => {
+    // Build list of cells that ever had issues
+    const allCells = Object.keys(seenCells).map((k) => {
+      const [rowIndexStr, column] = k.split("::");
+      const rowIndex = Number(rowIndexStr);
+      const ever = seenCells[k];
+      const current = currentIssueByCell[k]; // undefined if fixed
+      const currentSev = current?.severity ?? null;
 
-    out.sort((a, b) => a - b);
-    return out;
-  }, [autoRows, manualPinnedRows, rows.length]);
+      // What should the input highlight show?
+      // error/warning/info if current issue exists
+      // green if no current issue but it had one before
+      const highlight: Severity | "fixed" | null =
+        currentSev ? currentSev : ever ? "fixed" : null;
 
-  if (rowsToShow.length === 0) return null;
-
-  function pinRow(rowIndex: number) {
-    setManualPinnedRows((prev) => {
-      if (prev.some((p) => p.rowIndex === rowIndex)) return prev;
-      return [...prev, { rowIndex }];
+      return {
+        key: k,
+        rowIndex,
+        column,
+        everSeverity: ever,
+        currentIssue: current ?? null,
+        highlight,
+      };
     });
-  }
 
-  useEffect(() => {
-    setManualPinnedRows((prev) => prev.filter((p) => p.rowIndex >= 0 && p.rowIndex < rows.length));
-  }, [rows.length]);
+    // Apply filters:
+    // - errors: show cells that currently have error OR previously had error
+    // - warnings: show cells that currently have warning OR previously had warning (and not error-only)
+    // - all: show all cells ever seen
+    const filtered = allCells.filter((c) => {
+      if (filter === "all") return true;
 
-  function inputClassForCell(rowIndex: number, col: string) {
-    const base =
-      "w-[130px] min-w-[130px] rounded-lg px-2 py-1 text-xs focus:w-[240px] focus:min-w-[240px] transition-[width] duration-150 outline-none";
+      const current = c.currentIssue?.severity ?? null;
+      const ever = c.everSeverity;
 
-    const current = cellCurrentLevel(rowIndex, col);
-    const seen = seenCells[keyFor(rowIndex, col)] ?? 0;
+      if (filter === "errors") {
+        return current === "error" || ever === "error";
+      }
 
-    // Current error -> red
-    if (current === 2) {
-      return `${base} border border-red-500 bg-red-500/10 ring-2 ring-red-500/25 text-[var(--text)]`;
-    }
+      if (filter === "warnings") {
+        // show warnings (current/ever), but include only if not ever-error
+        return (current === "warning" || ever === "warning") && ever !== "error";
+      }
 
-    // Current warning -> yellow
-    if (current === 1) {
-      return `${base} border border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/20 text-[var(--text)]`;
-    }
+      return true;
+    });
 
-    // Previously had error/warning but now clean -> green
-    if (seen > 0) {
-      return `${base} border border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/20 text-[var(--text)]`;
-    }
+    // Sort: current issues first, then by row, then column
+    filtered.sort((a, b) => {
+      const aHasCurrent = a.currentIssue ? 1 : 0;
+      const bHasCurrent = b.currentIssue ? 1 : 0;
+      if (aHasCurrent !== bHasCurrent) return bHasCurrent - aHasCurrent;
+      if (a.rowIndex !== b.rowIndex) return a.rowIndex - b.rowIndex;
+      return a.column.localeCompare(b.column);
+    });
 
-    // Normal
-    return `${base} border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]`;
+    return filtered;
+  }, [seenCells, currentIssueByCell, filter]);
+
+  if (!Object.keys(seenCells).length) {
+    return (
+      <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <div className="text-lg font-semibold">Manual fixes</div>
+        <div className="mt-2 text-sm text-[var(--muted)]">
+          Upload a CSV and any fields needing attention will appear here.
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Fix issues here</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Switch the filter to focus on errors only, or include warnings/info. Rows you interact with stay visible
-            until you export or upload a new file.
-          </p>
+          <div className="text-lg font-semibold">Manual fixes</div>
+          <div className="mt-1 text-sm text-[var(--muted)]">
+            Fields stay listed even after you fix them (so you can keep iterating).
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="text-xs text-[var(--muted)]">Show:</label>
-          <select
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)]"
-            value={showMode}
-            onChange={(e) => setShowMode(e.target.value as ShowMode)}
+        <div className="flex items-center gap-2">
+          <button
+            className={`rounded-xl border px-3 py-1.5 text-sm ${
+              filter === "errors"
+                ? "border-[var(--primary)] bg-[var(--surface-2)]"
+                : "border-[var(--border)] bg-transparent"
+            }`}
+            onClick={() => setFilter("errors")}
+            type="button"
           >
-            <option value="errors">Errors</option>
-            <option value="errors_warnings">Errors + warnings</option>
-            <option value="all">All issues</option>
-          </select>
-
-          <div className="text-xs text-[var(--muted)]">
-            Showing <span className="font-semibold">{Math.min(rowsToShow.length, 25)}</span> rows
-            {rowsToShow.length > 25 ? " (first 25)" : ""}.
-          </div>
+            Errors
+          </button>
+          <button
+            className={`rounded-xl border px-3 py-1.5 text-sm ${
+              filter === "warnings"
+                ? "border-[var(--primary)] bg-[var(--surface-2)]"
+                : "border-[var(--border)] bg-transparent"
+            }`}
+            onClick={() => setFilter("warnings")}
+            type="button"
+          >
+            Warnings
+          </button>
+          <button
+            className={`rounded-xl border px-3 py-1.5 text-sm ${
+              filter === "all"
+                ? "border-[var(--primary)] bg-[var(--surface-2)]"
+                : "border-[var(--border)] bg-transparent"
+            }`}
+            onClick={() => setFilter("all")}
+            type="button"
+          >
+            All
+          </button>
         </div>
       </div>
 
-      <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)]">
-        <table className="min-w-full text-left text-xs">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-[var(--border)]">
+        <table className="min-w-[900px] w-full text-sm">
           <thead className="bg-[var(--surface-2)]">
-            <tr className="h-10">
-              <th
-                className="sticky left-0 z-20 bg-[var(--surface-2)] px-3 py-2 align-middle whitespace-nowrap font-semibold"
-                style={{ width: 40 }}
-              >
-                Row
-              </th>
-
-              <th
-                className="sticky z-20 bg-[var(--surface-2)] px-3 py-2 align-middle whitespace-nowrap font-semibold"
-                style={{ left: 40, width: STICKY_LEFT_WIDTH - 40 }}
-              >
-                Status
-              </th>
-
-              {editableCols.map((h) => (
-                <th
-                  key={h}
-                  className="align-middle whitespace-nowrap px-2 py-2 font-semibold"
-                  style={{ paddingLeft: STICKY_LEFT_WIDTH }}
-                >
-                  {h}
-                </th>
-              ))}
-
-              <th className="align-middle whitespace-nowrap px-2 py-2 font-semibold" style={{ paddingLeft: STICKY_LEFT_WIDTH }}>
-                Notes (live)
-              </th>
+            <tr className="text-left">
+              <th className="px-4 py-3 font-semibold">Row</th>
+              <th className="px-4 py-3 font-semibold">Field</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
+              <th className="px-4 py-3 font-semibold">Edit value</th>
+              <th className="px-4 py-3 font-semibold">Message</th>
             </tr>
           </thead>
 
           <tbody>
-            {rowsToShow.slice(0, 25).map((idx) => {
-              const r = rows[idx];
-              const rowIssues = issuesForRow(idx);
+            {tableRows.map((c) => {
+              const row = rows[c.rowIndex] ?? {};
+              const value = row[c.column] ?? "";
 
-              const blocking = rowIssues.filter((i) => i.severity === "error");
-              const warnings = rowIssues.filter((i) => i.severity === "warning");
-              const info = rowIssues.filter((i) => i.severity === "info");
+              const currentSev = c.currentIssue?.severity ?? null;
+              const status: Severity | "fixed" =
+                currentSev ? currentSev : "fixed";
 
-              const resolved = !hasBlockingError(idx);
+              const message =
+                c.currentIssue?.message ??
+                "No current issue. This field stays listed because it previously had an issue.";
 
               return (
-                <tr key={idx} className="border-t border-[var(--border)] align-top">
-                  <td
-                    className="sticky left-0 z-20 whitespace-nowrap bg-[var(--surface)] px-3 py-2 text-[var(--muted)]"
-                    style={{ width: 40 }}
-                  >
-                    {idx + 1}
+                <tr
+                  key={c.key}
+                  className="border-t border-[var(--border)] align-top"
+                >
+                  <td className="px-4 py-3 font-medium">
+                    {c.rowIndex + 1}
                   </td>
 
-                  <td
-                    className="sticky z-20 whitespace-nowrap bg-[var(--surface)] px-3 py-2"
-                    style={{ left: 40, width: STICKY_LEFT_WIDTH - 40 }}
-                  >
-                    {resolved ? (
-                      <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--text)]">
-                        Resolved
-                      </span>
-                    ) : (
-                      <span className="inline-flex rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--text)]">
-                        Needs fixes
-                      </span>
-                    )}
+                  <td className="px-4 py-3">
+                    <div className="font-medium">{c.column}</div>
+                    <div className="text-xs text-[var(--muted)]">
+                      Ever: {c.everSeverity}
+                    </div>
                   </td>
 
-                  {editableCols.map((col) => (
-                    <td key={col} className="px-2 py-2" style={{ paddingLeft: STICKY_LEFT_WIDTH }}>
-                      <input
-                        className={inputClassForCell(idx, col)}
-                        value={(r[col] ?? "") as string}
-                        placeholder={col}
-                        onFocus={() => pinRow(idx)}
-                        onChange={(e) => {
-                          pinRow(idx);
-                          onUpdateRow(idx, { [col]: e.target.value });
-                        }}
-                      />
-                    </td>
-                  ))}
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${badgeClasses(
+                        status
+                      )}`}
+                    >
+                      {status === "fixed" ? "Fixed" : status.toUpperCase()}
+                    </span>
+                  </td>
 
-                  <td
-                    className="sticky right-0 z-10 max-w-[420px] bg-[var(--surface)] px-2 py-2 text-xs text-[var(--muted)]"
-                    style={{ paddingLeft: STICKY_LEFT_WIDTH }}
-                  >
-                    {blocking.length === 0 && warnings.length === 0 && info.length === 0 ? (
-                      <span className="text-emerald-400">No issues on this row.</span>
-                    ) : (
-                      <div className="space-y-2">
-                        {blocking.length > 0 ? (
-                          <div>
-                            <p className="font-semibold text-red-500">Errors</p>
-                            <ul className="list-disc pl-5 text-red-500/90">
-                              {blocking.map((it, n) => (
-                                <li key={`e-${n}`}>{it.message}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : null}
+                  <td className="px-4 py-3">
+                    <input
+                      className={`w-full rounded-xl border px-3 py-2 outline-none ring-0 transition focus:ring-2 ${inputClasses(
+                        c.highlight
+                      )} text-[var(--text)] placeholder:text-[var(--muted)]`}
+                      value={value}
+                      onChange={(e) => {
+                        const nextVal = e.target.value;
+                        onUpdateRow(c.rowIndex, { [c.column]: nextVal });
+                      }}
+                    />
+                  </td>
 
-                        {warnings.length > 0 ? (
-                          <div>
-                            <p className="font-semibold text-amber-500">Warnings</p>
-                            <ul className="list-disc pl-5 text-amber-500/90">
-                              {warnings.map((it, n) => (
-                                <li key={`w-${n}`}>{it.message}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : null}
-
-                        {info.length > 0 ? (
-                          <div>
-                            <p className="font-semibold text-sky-500">Info</p>
-                            <ul className="list-disc pl-5 text-sky-500/90">
-                              {info.map((it, n) => (
-                                <li key={`i-${n}`}>{it.message}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
+                  <td className="px-4 py-3 text-[var(--muted)]">
+                    {message}
                   </td>
                 </tr>
               );
@@ -350,9 +276,9 @@ export function EditableIssuesTable({
         </table>
       </div>
 
-      <p className="mt-2 text-xs text-[var(--muted)]">
-        Tip: Errors block export. Warnings/info don’t.
-      </p>
+      <div className="mt-4 text-xs text-[var(--muted)]">
+        Color rules: red = current error, yellow = current warning, green = fixed (previous issue).
+      </div>
     </div>
   );
 }
