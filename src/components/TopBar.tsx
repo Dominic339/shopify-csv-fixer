@@ -6,11 +6,47 @@ import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/browser";
 
+type ThemeMode = "light" | "dark";
+
+function getInitialTheme(): ThemeMode {
+  if (typeof window === "undefined") return "dark";
+  const stored = window.localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") return stored;
+
+  const prefersDark =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  return prefersDark ? "dark" : "light";
+}
+
+function applyTheme(mode: ThemeMode) {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  if (mode === "dark") root.classList.add("dark");
+  else root.classList.remove("dark");
+}
+
 export default function TopBar() {
   const supabase = createClient();
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
+  const [theme, setTheme] = useState<ThemeMode>("dark");
+
+  // Init theme
+  useEffect(() => {
+    const t = getInitialTheme();
+    setTheme(t);
+    applyTheme(t);
+  }, []);
+
+  function toggleTheme() {
+    const next: ThemeMode = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    applyTheme(next);
+    if (typeof window !== "undefined") window.localStorage.setItem("theme", next);
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -42,7 +78,6 @@ export default function TopBar() {
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
-      // Anything inside the dropdown or the trigger should not close
       const el = target.closest("[data-topbar-root='true']");
       if (el) return;
 
@@ -79,6 +114,15 @@ export default function TopBar() {
         </Link>
 
         <div className="flex items-center gap-3" data-topbar-root="true">
+          <button
+            type="button"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm font-semibold text-[var(--text)] hover:opacity-90"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? "Dark" : "Light"}
+          </button>
+
           <Link
             href="/app"
             className="rgb-btn bg-[var(--primary)] px-5 py-2 text-sm font-semibold text-white"

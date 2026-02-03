@@ -23,13 +23,6 @@ export default function HomePage() {
             >
               Start free — no account required
             </Link>
-
-            <Link
-              href="/#pricing"
-              className="rgb-btn bg-[var(--surface-2)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
-            >
-              View pricing
-            </Link>
           </div>
 
           <div className="mt-4 flex gap-6 text-sm text-[var(--muted)]">
