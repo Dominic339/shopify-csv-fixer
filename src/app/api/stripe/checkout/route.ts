@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-12-15.clover",
 });
 
 export async function POST(req: Request) {
@@ -21,7 +21,11 @@ export async function POST(req: Request) {
   if (!plan) return NextResponse.json({ error: "Missing plan" }, { status: 400 });
 
   const priceId =
-    plan === "basic" ? process.env.STRIPE_PRICE_BASIC : plan === "advanced" ? process.env.STRIPE_PRICE_ADVANCED : null;
+    plan === "basic"
+      ? process.env.STRIPE_PRICE_BASIC
+      : plan === "advanced"
+        ? process.env.STRIPE_PRICE_ADVANCED
+        : null;
 
   if (!priceId) return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
 
