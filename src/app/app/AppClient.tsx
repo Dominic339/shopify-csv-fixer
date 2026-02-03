@@ -45,11 +45,12 @@ function safeName(original: string | null | undefined) {
   return base;
 }
 
-function cleanPatch(patch: Partial<CsvRow>): Partial<CsvRow> {
-  // Remove any undefined values so the merge stays compatible with Record<string, string>
+// IMPORTANT: return type is Record<string, string> (no undefined)
+// so the merge stays compatible with CsvRow (Record<string, string>).
+function cleanPatch(patch: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(patch)) {
-    if (typeof v === "string") out[k] = v;
+    out[k] = typeof v === "string" ? v : "";
   }
   return out;
 }
@@ -69,10 +70,8 @@ export default function AppClient() {
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [statusMsg, setStatusMsg] = useState<string>("");
 
-  // Used to force-remount the table to clear pins on export/new upload.
   const [tableKey, setTableKey] = useState(0);
 
-  // Debounce validation after user edits
   const [dirtyTick, setDirtyTick] = useState(0);
   const validateTimer = useRef<number | null>(null);
 
@@ -162,13 +161,15 @@ export default function AppClient() {
     handleFile(f).catch((err) => setStatusMsg(err?.message ?? "Could not read file."));
   }
 
-  function onUpdateRow(rowIndex: number, patch: Partial<CsvRow>) {
+  // EditableIssuesTable calls with { [header]: string } only, never undefined.
+  function onUpdateRow(rowIndex: number, patch: Record<string, string>) {
     const cleaned = cleanPatch(patch);
 
     setRows((prev) => {
       const next = [...prev];
-      const existing = next[rowIndex] ?? ({} as CsvRow);
-      next[rowIndex] = { ...existing, ...cleaned };
+      const existing: CsvRow = next[rowIndex] ?? ({} as CsvRow);
+      const merged: CsvRow = { ...existing, ...cleaned };
+      next[rowIndex] = merged;
       return next;
     });
 
