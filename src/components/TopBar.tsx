@@ -1,29 +1,33 @@
-// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/browser";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 export default function TopBar() {
   const supabase = createClient();
 
+  const { theme, toggle } = useTheme();
+
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
-
-  const { theme, setTheme, resolvedTheme } = useTheme();
 
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (!mounted) return;
-      setEmail(data.user?.email ?? null);
-    });
+    supabase.auth
+      .getUser()
+      .then(({ data }: any) => {
+        if (!mounted) return;
+        setEmail(data?.user?.email ?? null);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setEmail(null);
+      });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setEmail(session?.user?.email ?? null);
     });
 
@@ -31,120 +35,82 @@ export default function TopBar() {
       mounted = false;
       sub.subscription.unsubscribe();
     };
-  }, [supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
     setOpen(false);
   }
 
-  const effectiveTheme = (resolvedTheme ?? theme ?? "dark") as "light" | "dark";
-  const nextTheme = effectiveTheme === "dark" ? "light" : "dark";
-
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
+    <header className="border-b border-[var(--border)] bg-[var(--surface)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-          <Image
-            src="/CSV Nest Logo.png"
-            alt="CSV Nest"
-            width={28}
-            height={28}
-            priority
-            className="rounded-md"
-          />
+        <Link href="/" className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl border border-[var(--border)] bg-[var(--bg)]" />
           <div className="leading-tight">
             <div className="text-sm font-semibold">CSV Nest</div>
             <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
           </div>
         </Link>
 
-        <div className="relative flex items-center gap-3">
-          {/* Theme toggle restored */}
+        <div className="flex items-center gap-3">
+          {/* Theme toggle (working with your ThemeProvider) */}
           <button
             type="button"
-            onClick={() => setTheme(nextTheme)}
-            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
+            onClick={toggle}
+            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm font-semibold text-[var(--text)] hover:opacity-90"
             aria-label="Toggle theme"
           >
-            {effectiveTheme === "dark" ? "Dark" : "Light"}
+            {theme === "dark" ? "Dark" : "Light"}
           </button>
 
-          <Link href="/app" className="rgb-btn">
-            <span className="px-5 py-2 text-sm font-semibold text-white">Open app</span>
+          <Link href="/app" className="rgb-btn bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white">
+            Open app
           </Link>
 
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="h-9 w-9 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
-            aria-label="Account menu"
-          >
-            {email ? email[0]?.toUpperCase() : "?"}
-          </button>
-
-          {open ? (
-            <div
-              className="absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border"
-              style={{
-                background: "var(--popover)",
-                borderColor: "var(--popover-border)",
-              }}
+          <div className="relative">
+            <button
+              className="rgb-btn flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Account menu"
+              type="button"
             >
-              <div className="px-4 py-3">
-                <div className="text-xs text-[var(--muted)]">{email ? "Signed in" : "Guest"}</div>
-                <div className="truncate text-sm font-semibold text-[var(--text)]">
-                  {email ?? "Not signed in"}
+              {email ? email[0]?.toUpperCase() : "?"}
+            </button>
+
+            {open ? (
+              <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-3">
+                  <div className="text-xs text-[var(--muted)]">Signed in</div>
+                  <div className="mt-1 text-sm font-semibold">{email ?? "Guest"}</div>
                 </div>
-              </div>
 
-              <div className="border-t" style={{ borderColor: "var(--popover-border)" }} />
-
-              <div className="p-2">
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/profile"
-                  onClick={() => setOpen(false)}
-                >
-                  Profile
-                </Link>
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/"
-                  onClick={() => setOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/app"
-                  onClick={() => setOpen(false)}
-                >
-                  App
-                </Link>
-
-                <div className="mt-2 border-t" style={{ borderColor: "var(--popover-border)" }} />
-
-                {email ? (
-                  <button
-                    className="mt-2 w-full rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                    onClick={signOut}
-                    type="button"
-                  >
-                    Sign out
-                  </button>
-                ) : (
-                  <Link
-                    className="mt-2 block w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-center text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
-                    href="/login"
-                    onClick={() => setOpen(false)}
-                  >
-                    Sign in
+                <div className="mt-3 grid gap-1 text-sm">
+                  <Link className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]" href="/account" onClick={() => setOpen(false)}>
+                    Profile
                   </Link>
-                )}
+
+                  <Link className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]" href="/" onClick={() => setOpen(false)}>
+                    Home
+                  </Link>
+
+                  <Link className="rounded-xl px-3 py-2 hover:bg-[var(--bg)]" href="/app" onClick={() => setOpen(false)}>
+                    App
+                  </Link>
+                </div>
+
+                <button
+                  className="rgb-btn mt-3 w-full bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  onClick={signOut}
+                  disabled={!email}
+                  type="button"
+                >
+                  Sign out
+                </button>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
     </header>

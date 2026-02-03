@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import Link from "next/link";
 import { PricingCards } from "@/components/ui/PricingCards";
 
@@ -14,8 +13,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-4 text-lg text-[var(--muted)]">
-            Upload your CSV, instantly see what&apos;s wrong, auto-fix what&apos;s safe, and export a clean
-            file ready for Shopify.
+            Upload your CSV, instantly see what&apos;s wrong, auto-fix what&apos;s safe, and export a clean file ready for Shopify.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -43,19 +41,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* PricingCards already includes the "Subscriptions are handled..." line */}
       <section className="mt-16">
-        <h2 className="text-2xl font-semibold">Pricing</h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Start free. Upgrade only when you need more exports or advanced formats.
-        </p>
-
-        <div className="mt-8">
-          <PricingCards />
-        </div>
-
-        <p className="mt-4 text-xs text-[var(--muted)]">
-          Subscriptions are handled securely by Stripe. Cancel anytime from your billing portal.
-        </p>
+        <PricingCards />
       </section>
     </main>
   );
