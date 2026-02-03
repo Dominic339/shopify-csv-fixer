@@ -45,6 +45,15 @@ function safeName(original: string | null | undefined) {
   return base;
 }
 
+function cleanPatch(patch: Partial<CsvRow>): Partial<CsvRow> {
+  // Remove any undefined values so the merge stays compatible with Record<string, string>
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(patch)) {
+    if (typeof v === "string") out[k] = v;
+  }
+  return out;
+}
+
 export default function AppClient() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -122,13 +131,11 @@ export default function AppClient() {
     setParseErrors(parsed.parseErrors);
 
     if (parsed.parseErrors.length > 0) {
-      // Still show whatever parsed, but surface parse errors prominently.
       setStatusMsg("Your file parsed with warnings. Review the errors before exporting.");
     }
 
     const result = validateAndFixShopifyBasic(parsed.headers, parsed.rows);
 
-    // Convert library issue types to UI issues
     const libIssues = result.issues.map((i) => ({
       severity: i.severity,
       code: i.code,
@@ -156,13 +163,15 @@ export default function AppClient() {
   }
 
   function onUpdateRow(rowIndex: number, patch: Partial<CsvRow>) {
+    const cleaned = cleanPatch(patch);
+
     setRows((prev) => {
       const next = [...prev];
-      next[rowIndex] = { ...next[rowIndex], ...patch };
+      const existing = next[rowIndex] ?? ({} as CsvRow);
+      next[rowIndex] = { ...existing, ...cleaned };
       return next;
     });
 
-    // mark dirty -> debounce validate
     setDirtyTick((t) => t + 1);
   }
 
@@ -196,7 +205,6 @@ export default function AppClient() {
   }, [dirtyTick]);
 
   async function consumeOneExport(): Promise<{ ok: boolean; error?: string }> {
-    // Signed-in users: use server quota
     if (sub?.signedIn) {
       const r = await fetch("/api/quota/consume", {
         method: "POST",
@@ -209,7 +217,6 @@ export default function AppClient() {
       return { ok: true };
     }
 
-    // Anonymous: use local quota
     const q = getQuota(3);
     if (q.remaining <= 0) return { ok: false, error: "Monthly free export limit reached for this device." };
     consumeExport();
@@ -232,7 +239,6 @@ export default function AppClient() {
       return;
     }
 
-    // If there are errors, warn but allow export (manual export requirement)
     if (issueCounts.error > 0) {
       const proceed = window.confirm(
         `There are still ${issueCounts.error} error(s). Export anyway?\n\nTip: Fix errors in the table first for best Shopify results.`
@@ -250,7 +256,6 @@ export default function AppClient() {
     const outName = safeName(fileName ? fileName.replace(/\.csv$/i, "") + "-fixed.csv" : "shopify-fixed.csv");
     downloadTextFile(outName, csv);
 
-    // Clear pins after export, but keep the file loaded.
     setTableKey((k) => k + 1);
     setStatusMsg("Exported successfully.");
   }
@@ -283,11 +288,10 @@ export default function AppClient() {
       ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Upload / actions */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Upload CSV</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            We’ll auto-fix safe issues (header normalization, trims, simple defaults). Anything risky stays in the table.
+            We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.
           </p>
 
           <input
@@ -378,11 +382,10 @@ export default function AppClient() {
           </p>
         </div>
 
-        {/* Preview */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm lg:col-span-2">
           <h2 className="text-lg font-semibold">Preview</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            This is a lightweight preview (first 10 rows). Your full diagnostics and manual fixes are below.
+            Lightweight preview (first 10 rows). Manual fixes table stays visible as you iterate.
           </p>
 
           <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)]">
@@ -416,7 +419,6 @@ export default function AppClient() {
             )}
           </div>
 
-          {/* Manual fixes table */}
           {rows.length > 0 ? (
             <div className="mt-6">
               <EditableIssuesTable
