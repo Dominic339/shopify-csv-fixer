@@ -1,29 +1,37 @@
-@import "tailwindcss";
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Theme tokens */
 :root {
-  --bg: #fafafa;
-  --surface: #ffffff;
-  --surface-2: #f4f4f5;
-  --text: #0a0a0a;
-  --muted: #52525b;
-  --border: #e4e4e7;
-  --primary: #2563eb;
+  --bg: #0b0c10;
+  --surface: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.68);
+  --primary: #2dd4bf;
 
-  --accent-1: #22c55e;
-  --accent-2: #06b6d4;
-  --accent-3: #3b82f6;
-  --accent-4: #a855f7;
-  --accent-5: #f97316;
+  /* New: solid-ish dropdown/popover surface */
+  --popover: rgba(18, 18, 22, 0.96);
+  --popover-border: rgba(255, 255, 255, 0.14);
+
+  color-scheme: dark;
 }
 
-[data-theme="dark"] {
-  --bg: #07070a;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.1);
-  --text: #f4f4f5;
-  --muted: #a1a1aa;
-  --border: rgba(255, 255, 255, 0.12);
-  --primary: #60a5fa;
+.light {
+  --bg: #f6f7fb;
+  --surface: rgba(255, 255, 255, 0.85);
+  --border: rgba(10, 10, 20, 0.12);
+  --text: rgba(10, 10, 20, 0.92);
+  --muted: rgba(10, 10, 20, 0.62);
+  --primary: #2563eb;
+
+  /* New: solid popover for light mode */
+  --popover: rgba(255, 255, 255, 0.98);
+  --popover-border: rgba(10, 10, 20, 0.14);
+
+  color-scheme: light;
 }
 
 html,
@@ -32,84 +40,26 @@ body {
 }
 
 body {
-  background: radial-gradient(1200px 600px at 10% 0%, rgba(34, 197, 94, 0.10), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(168, 85, 247, 0.10), transparent 55%),
+  background: radial-gradient(900px 500px at 10% 10%, rgba(45, 212, 191, 0.12), transparent 55%),
+    radial-gradient(700px 400px at 80% 20%, rgba(99, 102, 241, 0.12), transparent 55%),
     var(--bg);
   color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-::selection {
-  background: rgba(34, 197, 94, 0.22);
-}
-
-/* Peacock RGB outline button */
+/* Gradient button helper */
 .rgb-btn {
-  position: relative;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #22c55e, #60a5fa, #a855f7, #f97316);
+  padding: 2px;
+  display: inline-block;
+}
+
+.rgb-btn > * {
+  border-radius: 9999px;
+  width: 100%;
+  height: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-
-  border-radius: 14px;
-  padding: 12px 18px;
-  font-weight: 700;
-
-  cursor: pointer;
-  user-select: none;
-
-  /* this makes the press effect feel real */
-  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
-  transform: translateZ(0);
-}
-
-.rgb-btn::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 16px;
-  background: linear-gradient(
-    90deg,
-    var(--accent-1),
-    var(--accent-2),
-    var(--accent-3),
-    var(--accent-4),
-    var(--accent-5)
-  );
-  opacity: 0.95;
-  z-index: -2;
-}
-
-.rgb-btn::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: var(--surface);
-  z-index: -1;
-}
-
-.rgb-btn:hover {
-  filter: brightness(1.02);
-}
-
-.rgb-btn:active {
-  transform: translateY(2px) scale(0.99);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.10);
-}
-
-.rgb-btn:focus-visible {
-  outline: 3px solid rgba(59, 130, 246, 0.35);
-  outline-offset: 3px;
-}
-
-summary::-webkit-details-marker {
-  display: none;
+  background: rgba(0, 0, 0, 0.22);
 }

@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getPlanLimits } from "@/lib/quota";
 
 function monthKey(d = new Date()) {
   const y = d.getUTCFullYear();
@@ -9,10 +10,8 @@ function monthKey(d = new Date()) {
   return `${y}-${m}`;
 }
 
-function planLimit(plan: "free" | "basic" | "advanced") {
-  if (plan === "basic") return 100;
-  if (plan === "advanced") return 1000;
-  return 3;
+function monthPeriodStartUTC(d = new Date()) {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
 }
 
 export async function POST(req: Request) {
@@ -35,29 +34,38 @@ export async function POST(req: Request) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const activePlan: "free" | "basic" | "advanced" =
+  const activePlan =
     sub?.status === "active"
       ? (sub.plan === "advanced" ? "advanced" : "basic")
       : "free";
 
-  const limit = planLimit(activePlan);
-  const month = monthKey();
+  const limits = getPlanLimits(activePlan);
+  const limit = limits.exportsPerMonth;
 
   const admin = createSupabaseAdminClient();
 
+  const periodStart = monthPeriodStartUTC();
+  const periodStartIso = periodStart.toISOString();
+
   const { data: existing } = await admin
     .from("export_usage")
-    .select("used")
+    .select("exports_used")
     .eq("user_id", user.id)
-    .eq("month", month)
+    .eq("period_start", periodStartIso)
     .maybeSingle();
 
-  const used = Number(existing?.used ?? 0);
+  const used = Number(existing?.exports_used ?? 0);
   const nextUsed = used + count;
 
   if (nextUsed > limit) {
     return NextResponse.json(
-      { error: "Quota exceeded", limit, used, remaining: Math.max(0, limit - used) },
+      {
+        error: "Quota exceeded",
+        limit,
+        used,
+        remaining: Math.max(0, limit - used),
+        month: monthKey(),
+      },
       { status: 402 }
     );
   }
@@ -67,11 +75,11 @@ export async function POST(req: Request) {
     .upsert(
       {
         user_id: user.id,
-        month,
-        used: nextUsed,
+        period_start: periodStartIso,
+        exports_used: nextUsed,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id,month" }
+      { onConflict: "user_id,period_start" }
     );
 
   if (upsertErr) {
@@ -84,6 +92,6 @@ export async function POST(req: Request) {
     limit,
     used: nextUsed,
     remaining: Math.max(0, limit - nextUsed),
-    month,
+    month: monthKey(),
   });
 }

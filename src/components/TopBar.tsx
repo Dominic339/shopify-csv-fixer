@@ -1,52 +1,19 @@
+// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
+import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/browser";
-
-type ThemeMode = "light" | "dark";
-
-function getInitialTheme(): ThemeMode {
-  if (typeof window === "undefined") return "dark";
-  const stored = window.localStorage.getItem("theme");
-  if (stored === "light" || stored === "dark") return stored;
-
-  const prefersDark =
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  return prefersDark ? "dark" : "light";
-}
-
-function applyTheme(mode: ThemeMode) {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  if (mode === "dark") root.classList.add("dark");
-  else root.classList.remove("dark");
-}
 
 export default function TopBar() {
   const supabase = createClient();
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
-  const [theme, setTheme] = useState<ThemeMode>("dark");
 
-  // Init theme
-  useEffect(() => {
-    const t = getInitialTheme();
-    setTheme(t);
-    applyTheme(t);
-  }, []);
-
-  function toggleTheme() {
-    const next: ThemeMode = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    applyTheme(next);
-    if (typeof window !== "undefined") window.localStorage.setItem("theme", next);
-  }
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   useEffect(() => {
     let mounted = true;
@@ -71,131 +38,111 @@ export default function TopBar() {
     setOpen(false);
   }
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!open) return;
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-
-      const el = target.closest("[data-topbar-root='true']");
-      if (el) return;
-
-      setOpen(false);
-    }
-
-    document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
-  }, [open]);
+  const effectiveTheme = (resolvedTheme ?? theme ?? "dark") as "light" | "dark";
+  const nextTheme = effectiveTheme === "dark" ? "light" : "dark";
 
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--surface)]">
+    <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link
-          href="/"
-          className="flex items-center gap-3"
-          onClick={() => setOpen(false)}
-        >
-          <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)]">
-            <Image
-              src="/CSV Nest Logo.png"
-              alt="CSV Nest"
-              fill
-              sizes="40px"
-              className="object-contain p-1"
-              priority
-            />
-          </div>
-
+        <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+          <Image
+            src="/CSV Nest Logo.png"
+            alt="CSV Nest"
+            width={28}
+            height={28}
+            priority
+            className="rounded-md"
+          />
           <div className="leading-tight">
-            <div className="text-sm font-semibold text-[var(--text)]">CSV Nest</div>
+            <div className="text-sm font-semibold">CSV Nest</div>
             <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
           </div>
         </Link>
 
-        <div className="flex items-center gap-3" data-topbar-root="true">
+        <div className="relative flex items-center gap-3">
+          {/* Theme toggle restored */}
           <button
             type="button"
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm font-semibold text-[var(--text)] hover:opacity-90"
-            onClick={toggleTheme}
+            onClick={() => setTheme(nextTheme)}
+            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? "Dark" : "Light"}
+            {effectiveTheme === "dark" ? "Dark" : "Light"}
           </button>
 
-          <Link
-            href="/app"
-            className="rgb-btn bg-[var(--primary)] px-5 py-2 text-sm font-semibold text-white"
-            onClick={() => setOpen(false)}
-          >
-            Open app
+          <Link href="/app" className="rgb-btn">
+            <span className="px-5 py-2 text-sm font-semibold text-white">Open app</span>
           </Link>
 
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-semibold text-[var(--text)]"
             onClick={() => setOpen((v) => !v)}
+            className="h-9 w-9 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
             aria-label="Account menu"
           >
-            {email ? email.slice(0, 1).toUpperCase() : "?"}
+            {email ? email[0]?.toUpperCase() : "?"}
           </button>
 
           {open ? (
-            <div className="absolute right-6 top-[72px] z-50 w-72 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xl">
-              <div className="border-b border-[var(--border)] px-4 py-3">
-                <div className="text-xs text-[var(--muted)]">
-                  {email ? "Signed in" : "Guest"}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-[var(--text)]">
+            <div
+              className="absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border"
+              style={{
+                background: "var(--popover)",
+                borderColor: "var(--popover-border)",
+              }}
+            >
+              <div className="px-4 py-3">
+                <div className="text-xs text-[var(--muted)]">{email ? "Signed in" : "Guest"}</div>
+                <div className="truncate text-sm font-semibold text-[var(--text)]">
                   {email ?? "Not signed in"}
                 </div>
               </div>
 
-              <nav className="p-2">
+              <div className="border-t" style={{ borderColor: "var(--popover-border)" }} />
+
+              <div className="p-2">
                 <Link
+                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
                   href="/profile"
-                  className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                   onClick={() => setOpen(false)}
                 >
                   Profile
                 </Link>
-
                 <Link
+                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
                   href="/"
-                  className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                   onClick={() => setOpen(false)}
                 >
                   Home
                 </Link>
-
                 <Link
+                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
                   href="/app"
-                  className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                   onClick={() => setOpen(false)}
                 >
                   App
                 </Link>
 
-                <div className="my-2 border-t border-[var(--border)]" />
+                <div className="mt-2 border-t" style={{ borderColor: "var(--popover-border)" }} />
 
                 {email ? (
                   <button
-                    type="button"
-                    className="w-full rounded-xl bg-red-600 px-3 py-2 text-left text-sm font-semibold text-white hover:opacity-90"
+                    className="mt-2 w-full rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
                     onClick={signOut}
+                    type="button"
                   >
                     Sign out
                   </button>
                 ) : (
                   <Link
+                    className="mt-2 block w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-center text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
                     href="/login"
-                    className="block w-full rounded-xl bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
                     onClick={() => setOpen(false)}
                   >
                     Sign in
                   </Link>
                 )}
-              </nav>
+              </div>
             </div>
           ) : null}
         </div>

@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getPlanLimits } from "@/lib/quota";
 
 function monthKey(d = new Date()) {
   const y = d.getUTCFullYear();
@@ -9,10 +10,9 @@ function monthKey(d = new Date()) {
   return `${y}-${m}`;
 }
 
-function planLimit(plan: "free" | "basic" | "advanced") {
-  if (plan === "basic") return 100;
-  if (plan === "advanced") return 1000;
-  return 3;
+function monthPeriodStartUTC(d = new Date()) {
+  // First day of current month at 00:00:00 UTC
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
 }
 
 export async function GET() {
@@ -22,15 +22,16 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Not signed in => treat as free (local-only UX)
+  // Not signed in => free device experience (UX)
   if (!user) {
+    const limits = getPlanLimits("free");
     return NextResponse.json({
       signedIn: false,
       plan: "free",
       status: "none",
-      limit: planLimit("free"),
+      limit: limits.exportsPerMonth,
       used: 0,
-      remaining: planLimit("free"),
+      remaining: limits.exportsPerMonth,
       month: monthKey(),
     });
   }
@@ -41,25 +42,27 @@ export async function GET() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const activePlan: "free" | "basic" | "advanced" =
+  const activePlan =
     sub?.status === "active"
       ? (sub.plan === "advanced" ? "advanced" : "basic")
       : "free";
 
-  const limit = planLimit(activePlan);
+  const limits = getPlanLimits(activePlan);
+  const limit = limits.exportsPerMonth;
 
-  // use admin to avoid RLS headaches
   const admin = createSupabaseAdminClient();
-  const month = monthKey();
+
+  const periodStart = monthPeriodStartUTC();
+  const periodStartIso = periodStart.toISOString();
 
   const { data: usageRow } = await admin
     .from("export_usage")
-    .select("used")
+    .select("exports_used,period_start")
     .eq("user_id", user.id)
-    .eq("month", month)
+    .eq("period_start", periodStartIso)
     .maybeSingle();
 
-  const used = Number(usageRow?.used ?? 0);
+  const used = Number(usageRow?.exports_used ?? 0);
   const remaining = Math.max(0, limit - used);
 
   return NextResponse.json({
@@ -69,6 +72,6 @@ export async function GET() {
     limit,
     used,
     remaining,
-    month,
+    month: monthKey(),
   });
 }
