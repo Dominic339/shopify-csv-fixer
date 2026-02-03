@@ -45,12 +45,11 @@ function safeName(original: string | null | undefined) {
   return base;
 }
 
-// IMPORTANT: return type is Record<string, string> (no undefined)
-// so the merge stays compatible with CsvRow (Record<string, string>).
-function cleanPatch(patch: Record<string, string>): Record<string, string> {
+// Convert Partial<CsvRow> (string | undefined) into a safe Record<string, string>
+function sanitizePatch(patch: Partial<CsvRow>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(patch)) {
-    out[k] = typeof v === "string" ? v : "";
+    if (typeof v === "string") out[k] = v;
   }
   return out;
 }
@@ -161,9 +160,10 @@ export default function AppClient() {
     handleFile(f).catch((err) => setStatusMsg(err?.message ?? "Could not read file."));
   }
 
-  // EditableIssuesTable calls with { [header]: string } only, never undefined.
-  function onUpdateRow(rowIndex: number, patch: Record<string, string>) {
-    const cleaned = cleanPatch(patch);
+  // ✅ Match the prop type expected by EditableIssuesTable:
+  // (rowIndex: number, patch: Partial<CsvRow>) => void
+  function onUpdateRow(rowIndex: number, patch: Partial<CsvRow>) {
+    const cleaned = sanitizePatch(patch);
 
     setRows((prev) => {
       const next = [...prev];
