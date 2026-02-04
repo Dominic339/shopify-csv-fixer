@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
+import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
@@ -53,7 +54,6 @@ export default function AppClient() {
 
   async function refreshQuotaAndPlan() {
     try {
-      // FIX: getPlanLimits requires an argument now
       const [q, s, limits] = await Promise.all([
         getQuota(),
         fetch("/api/subscription/status").then((r) => r.json()),
@@ -63,7 +63,6 @@ export default function AppClient() {
       setSubStatus(s);
       setPlanLimits(limits);
     } catch (e: any) {
-      // keep UI alive even if quota fetch fails
       setErrorBanner(e?.message ?? "Failed to refresh quota/plan");
     }
   }
@@ -85,8 +84,7 @@ export default function AppClient() {
 
         const col = (it.column ?? it.field ?? "").toString();
 
-        const sev =
-          (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+        const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
 
         if (!col) return null;
 
@@ -106,7 +104,6 @@ export default function AppClient() {
       const existing = next[rowIndex] ?? {};
       const cleaned: Record<string, string> = {};
 
-      // prevent undefined values from creeping in
       for (const [k, v] of Object.entries(patch)) {
         if (typeof v === "string") cleaned[k] = v;
         else if (v == null) cleaned[k] = "";
@@ -125,14 +122,23 @@ export default function AppClient() {
 
     try {
       const text = await file.text();
-      const result = validateAndFixShopifyBasic(text);
 
-      setHeaders(result.headers ?? []);
-      setRows(result.rows ?? []);
-      setIssues(result.issues ?? []);
-      setAutoFixes(result.autoFixes ?? []);
+      // Parse CSV first (validateAndFixShopifyBasic expects headers + rows now)
+      const parsed = parseCsv(text);
+      const fixed = validateAndFixShopifyBasic(parsed.headers, parsed.rows);
 
-      // refresh quota display (optional)
+      // Show CSV parse errors as issues so the user still sees the file contents.
+      const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
+        message: m,
+        level: "error",
+        severity: "error",
+      }));
+
+      setHeaders(fixed.fixedHeaders ?? []);
+      setRows(fixed.fixedRows ?? []);
+      setIssues([...(fixed.issues ?? []), ...parseIssues]);
+      setAutoFixes(fixed.fixesApplied ?? []);
+
       await refreshQuotaAndPlan();
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Failed to process CSV");
@@ -145,23 +151,12 @@ export default function AppClient() {
     setBusy(true);
     setErrorBanner(null);
     try {
-      // consume quota (server-side)
       await consumeExport();
 
-      // export locally (client-side)
       const cols = headers.length ? headers : Object.keys(rows[0] ?? {});
-      const escape = (s: string) => {
-        const str = s ?? "";
-        if (/[,"\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
-        return str;
-      };
+      const csv = toCsv(cols, rows);
 
-      const lines = [
-        cols.map(escape).join(","),
-        ...rows.map((r) => cols.map((c) => escape(r[c] ?? "")).join(",")),
-      ];
-
-      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -225,103 +220,41 @@ export default function AppClient() {
                   const f = e.target.files?.[0];
                   if (f) void handleFile(f);
                 }}
-                disabled={busy}
               />
             </label>
 
             <button
               className="rg-btn"
-              onClick={() => {
-                setHeaders([]);
-                setRows([]);
-                setIssues([]);
-                setAutoFixes([]);
-                setFileName(null);
-              }}
-              disabled={busy}
-              type="button"
+              onClick={() => void exportFixedCsv()}
+              disabled={busy || rows.length === 0}
+              title={rows.length === 0 ? "Upload a CSV first" : "Export your fixed CSV"}
             >
-              Clear
+              {busy ? "Working..." : "Export fixed CSV"}
             </button>
-
-            <button className="rg-btn" onClick={exportFixedCsv} disabled={busy || rows.length === 0} type="button">
-              Export fixed CSV
-            </button>
-          </div>
-
-          <div className="mt-6 grid gap-2 text-sm text-[var(--text)]">
-            <div className="flex justify-between">
-              <span className="text-[color:rgba(var(--muted-rgb),1)]">File</span>
-              <span className="font-medium">{fileName ?? "None"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[color:rgba(var(--muted-rgb),1)]">Rows</span>
-              <span className="font-medium">{rows.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[color:rgba(var(--muted-rgb),1)]">Issues</span>
-              <span className="font-medium">
-                {issuesForTable.filter((i) => i.severity === "error").length} errors •{" "}
-                {issuesForTable.filter((i) => i.severity === "warning").length} warnings •{" "}
-                {issuesForTable.filter((i) => i.severity === "info").length} info
-              </span>
-            </div>
           </div>
 
           {autoFixes.length ? (
-            <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-              <div className="mb-2 text-sm font-semibold text-[var(--text)]">Auto fixes applied</div>
-              <ul className="list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                {autoFixes.map((x, idx) => (
-                  <li key={idx}>{x}</li>
+            <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+              <div className="text-sm font-medium text-[var(--text)]">Auto-fixes applied</div>
+              <ul className="mt-2 space-y-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                {autoFixes.slice(0, 8).map((x, i) => (
+                  <li key={i}>{x}</li>
                 ))}
+                {autoFixes.length > 8 ? <li>…and {autoFixes.length - 8} more</li> : null}
               </ul>
             </div>
           ) : null}
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--text)]">Preview</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Issues</h2>
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            Lightweight preview (first 10 rows). Manual fixes table stays visible as you iterate.
+            Click a cell in the table to fix it. Issues will update as you edit.
           </p>
 
-          <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)]">
-            {rows.length ? (
-              <table className="min-w-full text-sm">
-                <thead className="bg-[color:rgba(var(--bg-rgb),0.35)]">
-                  <tr>
-                    {headers.slice(0, 10).map((h) => (
-                      <th key={h} className="px-3 py-2 text-left font-semibold text-[var(--text)]">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.slice(0, 10).map((r, i) => (
-                    <tr key={i} className="border-t border-[var(--border)]">
-                      {headers.slice(0, 10).map((h) => (
-                        <td key={h} className="px-3 py-2 text-[var(--text)]">
-                          {r[h] ?? ""}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="p-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                Upload a CSV to preview it here.
-              </div>
-            )}
+          <div className="mt-4">
+            <EditableIssuesTable issues={issuesForTable} rows={rows} onUpdateRow={onUpdateRow} />
           </div>
-
-          {rows.length ? (
-            <div className="mt-6">
-              <EditableIssuesTable headers={headers} rows={rows} issues={issuesForTable} onUpdateRow={onUpdateRow} />
-            </div>
-          ) : null}
         </div>
       </div>
     </div>
