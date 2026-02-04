@@ -37,22 +37,25 @@ export default function HomeClient() {
       <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
         <div>
           <p className="text-sm text-[var(--muted)]">Shopify CSV Fixer</p>
+
           <h1 className="mt-2 text-4xl font-semibold leading-tight text-[var(--text)]">
             Fix Shopify CSV import issues in seconds
           </h1>
+
           <p className="mt-4 max-w-xl text-[var(--muted)]">
-            Upload your CSV, instantly see what&apos;s wrong, auto-fix what’s safe, and export a
-            clean file ready for Shopify.
+            Upload your CSV, instantly see what&apos;s wrong, auto-fix what’s safe, and export a clean
+            file ready for Shopify.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            {/* IMPORTANT: do NOT force text-white here; it breaks readability in light mode */}
+            {/* FIX: remove text-white so it’s black in light mode */}
             <Link
               href="/app"
               className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
             >
               Start free no account required
             </Link>
+
             <Link
               href="/how-it-works"
               className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
@@ -68,6 +71,7 @@ export default function HomeClient() {
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-base font-semibold text-[var(--text)]">What it does</h2>
+
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
             <li>Fix common CSV issues that break Shopify imports</li>
             <li>Validate files and explain errors in plain English</li>
@@ -86,7 +90,8 @@ export default function HomeClient() {
                 >
                   Manage subscription
                 </Link>
-                {/* IMPORTANT: do NOT force text-white here */}
+
+                {/* FIX: remove text-white here too so it’s readable in light mode */}
                 <Link
                   href="/app"
                   className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
@@ -113,6 +118,7 @@ export default function HomeClient() {
           <div className="text-sm text-[var(--muted)]">
             You’re subscribed to <span className="font-semibold text-[var(--text)]">{planLabel}</span>.
           </div>
+
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/profile"
@@ -120,7 +126,8 @@ export default function HomeClient() {
             >
               Upgrade / cancel
             </Link>
-            {/* IMPORTANT: do NOT force text-white here */}
+
+            {/* FIX: remove text-white here too */}
             <Link
               href="/app"
               className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
@@ -145,22 +152,14 @@ export default function HomeClient() {
           <PriceCard
             title="Basic"
             price="$3 / month"
-            bullets={[
-              "Shopify product CSV exports",
-              "100 exports per month",
-              "Self-serve cancellation",
-            ]}
+            bullets={["Shopify product CSV exports", "100 exports per month", "Self-serve cancellation"]}
             cta="Choose Basic"
             href="/checkout?plan=basic"
           />
           <PriceCard
             title="Advanced"
             price="$10 / month"
-            bullets={[
-              "Advanced Shopify formats",
-              "Saved mappings + batch tools",
-              "Higher export limits",
-            ]}
+            bullets={["Advanced Shopify formats", "Saved mappings + batch tools", "Higher export limits"]}
             cta="Choose Advanced"
             href="/checkout?plan=advanced"
           />
