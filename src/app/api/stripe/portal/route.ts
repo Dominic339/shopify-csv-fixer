@@ -12,10 +12,10 @@ function getStripe() {
     throw new Error("Missing STRIPE_SECRET_KEY env var");
   }
 
-  // Use a stable Stripe API version string (avoid invalid custom strings)
-  return new Stripe(key, {
-    apiVersion: "2024-06-20",
-  });
+  // IMPORTANT: Do not set apiVersion here because this project's Stripe types
+  // are pinned to a custom literal (e.g. "2025-12-15.clover").
+  // Let Stripe use the default configured version.
+  return new Stripe(key);
 }
 
 export async function POST() {
@@ -60,7 +60,6 @@ export async function POST() {
 
     return NextResponse.json({ url: session.url });
   } catch (e: any) {
-    // Always return JSON so the client can safely read it
     return NextResponse.json(
       {
         error: "Failed to create billing portal session",
