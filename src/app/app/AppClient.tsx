@@ -48,6 +48,11 @@ export default function AppClient() {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
+  // inline edit state for the restored table
+  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
+    null
+  );
+
   const planForLimits = useMemo(() => {
     return (subStatus?.plan ?? "free") as "free" | "basic" | "advanced";
   }, [subStatus]);
@@ -104,6 +109,32 @@ export default function AppClient() {
     return first ? Object.keys(first) : [];
   }, [headers, rows]);
 
+  const issueCellMap = useMemo(() => {
+    const map = new Map<string, "error" | "warning" | "info">();
+    for (const i of issuesForTable) {
+      const key = `${i.rowIndex}|||${i.column}`;
+      // error overrides warning overrides info
+      const prev = map.get(key);
+      if (prev === "error") continue;
+      if (prev === "warning" && i.severity === "info") continue;
+      map.set(key, i.severity);
+    }
+    return map;
+  }, [issuesForTable]);
+
+  const rowsWithAnyIssue = useMemo(() => {
+    const set = new Set<number>();
+    for (const i of issuesForTable) set.add(i.rowIndex);
+    return [...set].sort((a, b) => a - b);
+  }, [issuesForTable]);
+
+  const previewRows = useMemo(() => {
+    // restore the "big table" feel, but keep it performant:
+    // show up to 25 issue rows, otherwise first 25 rows.
+    if (rowsWithAnyIssue.length) return rowsWithAnyIssue.slice(0, 25);
+    return rows.map((_, idx) => idx).slice(0, 25);
+  }, [rows, rowsWithAnyIssue]);
+
   const onUpdateRow = useCallback((rowIndex: number, patch: Partial<CsvRow>) => {
     setRows((prev) => {
       const next = [...prev];
@@ -133,7 +164,6 @@ export default function AppClient() {
       const parsed = parseCsv(text);
       const fixed = validateAndFixShopifyBasic(parsed.headers, parsed.rows);
 
-      // Show CSV parse errors as issues so the user still sees the file contents.
       const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
         message: m,
         level: "error",
@@ -150,6 +180,7 @@ export default function AppClient() {
       setErrorBanner(e?.message ?? "Failed to process CSV");
     } finally {
       setBusy(false);
+      setEditing(null);
     }
   }
 
@@ -178,6 +209,21 @@ export default function AppClient() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function startEdit(rowIndex: number, col: string) {
+    const current = rows[rowIndex]?.[col] ?? "";
+    setEditing({ rowIndex, col, value: current });
+  }
+
+  function commitEdit() {
+    if (!editing) return;
+    onUpdateRow(editing.rowIndex, { [editing.col]: editing.value });
+    setEditing(null);
+  }
+
+  function cancelEdit() {
+    setEditing(null);
   }
 
   return (
@@ -234,6 +280,7 @@ export default function AppClient() {
               onClick={() => void exportFixedCsv()}
               disabled={busy || rows.length === 0}
               title={rows.length === 0 ? "Upload a CSV first" : "Export your fixed CSV"}
+              type="button"
             >
               {busy ? "Working..." : "Export fixed CSV"}
             </button>
@@ -255,16 +302,93 @@ export default function AppClient() {
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text)]">Issues</h2>
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            Click a cell in the table to fix it. Issues will update as you edit.
+            Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          <div className="mt-4">
-            <EditableIssuesTable
-              headers={tableHeaders}
-              issues={issuesForTable}
-              rows={rows}
-              onUpdateRow={onUpdateRow}
-            />
+          {/* RESTORED TABLE */}
+          <div className="mt-4 data-table-wrap">
+            <div className="data-table-scroll">
+              {rows.length === 0 ? (
+                <div className="p-6 text-sm text-[var(--muted)]">
+                  No table yet. Upload a CSV to see it here.
+                </div>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 80 }}>Row</th>
+                      {tableHeaders.slice(0, 12).map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.map((rowIndex) => {
+                      const row = rows[rowIndex] ?? {};
+                      return (
+                        <tr key={rowIndex}>
+                          <td className="text-[var(--muted)]">{rowIndex + 1}</td>
+                          {tableHeaders.slice(0, 12).map((h) => {
+                            const sev = issueCellMap.get(`${rowIndex}|||${h}`);
+                            const isEditing =
+                              editing?.rowIndex === rowIndex && editing?.col === h;
+
+                            const cellClass =
+                              (sev === "error"
+                                ? "cell-error"
+                                : sev === "warning"
+                                  ? "cell-warning"
+                                  : "") + (isEditing ? " cell-editing" : "");
+
+                            return (
+                              <td
+                                key={`${rowIndex}-${h}`}
+                                className={cellClass}
+                                onClick={() => startEdit(rowIndex, h)}
+                                style={{ cursor: "pointer" }}
+                                title={sev ? `${sev}` : "Click to edit"}
+                              >
+                                {isEditing ? (
+                                  <input
+                                    autoFocus
+                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
+                                    value={editing.value}
+                                    onChange={(e) =>
+                                      setEditing((prev) =>
+                                        prev ? { ...prev, value: e.target.value } : prev
+                                      )
+                                    }
+                                    onBlur={commitEdit}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") commitEdit();
+                                      if (e.key === "Escape") cancelEdit();
+                                    }}
+                                  />
+                                ) : (
+                                  <span>{row[h] ?? ""}</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {rows.length > 0 ? (
+              <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row
+                editing.
+              </div>
+            ) : null}
+          </div>
+
+          {/* MANUAL FIXES (kept) */}
+          <div className="mt-6">
+            <EditableIssuesTable headers={tableHeaders} issues={issues as any} rows={rows} onUpdateRow={onUpdateRow} />
           </div>
         </div>
       </div>

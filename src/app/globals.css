@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 /* ===== Theme tokens ===== */
-/* Default to LIGHT tokens */
 :root,
 [data-theme="light"] {
   --bg: #f6f7fb;
@@ -11,20 +10,16 @@
 
   --text: rgba(10, 10, 20, 0.92);
   --muted: rgba(10, 10, 20, 0.62);
-
-  /* for rgba(var(--muted-rgb), 1) usage */
   --muted-rgb: 10, 10, 20;
 
   --primary: #2563eb;
 
-  /* RGB accents */
   --accent-1: #22c55e;
   --accent-2: #06b6d4;
   --accent-3: #3b82f6;
   --accent-4: #a855f7;
   --accent-5: #f97316;
 
-  /* Popover/dropdown surface (SOLID) */
   --popover: rgba(255, 255, 255, 0.96);
   --popover-border: rgba(10, 10, 20, 0.14);
 
@@ -39,13 +34,10 @@
 
   --text: rgba(255, 255, 255, 0.92);
   --muted: rgba(255, 255, 255, 0.68);
-
-  /* for rgba(var(--muted-rgb), 1) usage */
   --muted-rgb: 255, 255, 255;
 
   --primary: #60a5fa;
 
-  /* Popover/dropdown surface (solid in dark too) */
   --popover: rgba(18, 22, 32, 0.96);
   --popover-border: rgba(255, 255, 255, 0.14);
 
@@ -78,7 +70,6 @@ a {
 }
 
 /* ===== Utility helpers ===== */
-
 .popover-surface {
   background: var(--popover);
   border: 1px solid var(--popover-border);
@@ -107,7 +98,6 @@ a {
   transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
   transform: translateZ(0);
 
-  /* keep readable in light mode */
   color: var(--text);
 }
 
@@ -162,7 +152,7 @@ a {
   cursor: not-allowed;
 }
 
-/* Colored filter pills (Errors / Warnings / All) */
+/* Colored filter pills */
 .pill-btn {
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -223,7 +213,65 @@ a {
   border-color: rgba(59, 130, 246, 0.22);
 }
 
-/* Hide the default marker on <summary> */
+/* ===== Data table (restored) ===== */
+.data-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.data-table-scroll {
+  max-height: 320px;
+  overflow: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+.data-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.data-table tr:hover td {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.cell-error {
+  background: rgba(239, 68, 68, 0.14);
+  border-bottom-color: rgba(239, 68, 68, 0.22);
+}
+
+.cell-warning {
+  background: rgba(234, 179, 8, 0.14);
+  border-bottom-color: rgba(234, 179, 8, 0.22);
+}
+
+.cell-editing {
+  outline: 2px solid rgba(59, 130, 246, 0.35);
+  outline-offset: -2px;
+}
+
 summary::-webkit-details-marker {
   display: none;
 }
