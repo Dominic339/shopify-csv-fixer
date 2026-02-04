@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ===== Theme tokens ===== */
-/* Default to LIGHT tokens (matches your “white mode”) */
+/* Default to LIGHT tokens */
 :root,
 [data-theme="light"] {
   --bg: #f6f7fb;
@@ -9,9 +9,11 @@
   --surface-2: rgba(255, 255, 255, 0.72);
   --border: rgba(10, 10, 20, 0.12);
 
-  /* IMPORTANT: readable text in light mode */
   --text: rgba(10, 10, 20, 0.92);
   --muted: rgba(10, 10, 20, 0.62);
+
+  /* for rgba(var(--muted-rgb), 1) usage */
+  --muted-rgb: 10, 10, 20;
 
   --primary: #2563eb;
 
@@ -22,7 +24,7 @@
   --accent-4: #a855f7;
   --accent-5: #f97316;
 
-  /* Popover/dropdown surface (SOLID so it is not see-through) */
+  /* Popover/dropdown surface (SOLID) */
   --popover: rgba(255, 255, 255, 0.96);
   --popover-border: rgba(10, 10, 20, 0.14);
 
@@ -37,6 +39,9 @@
 
   --text: rgba(255, 255, 255, 0.92);
   --muted: rgba(255, 255, 255, 0.68);
+
+  /* for rgba(var(--muted-rgb), 1) usage */
+  --muted-rgb: 255, 255, 255;
 
   --primary: #60a5fa;
 
@@ -72,9 +77,8 @@ a {
   background: rgba(34, 197, 94, 0.22);
 }
 
-/* ===== Utility helpers for your UI pieces ===== */
+/* ===== Utility helpers ===== */
 
-/* Use this on dropdown/popup containers if you want them to NOT be transparent */
 .popover-surface {
   background: var(--popover);
   border: 1px solid var(--popover-border);
@@ -83,8 +87,9 @@ a {
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* Peacock RGB outline button */
-.rgb-btn {
+/* Peacock RGB outline button (OLD LOOK) */
+.rgb-btn,
+.rg-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -101,10 +106,13 @@ a {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
   transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
   transform: translateZ(0);
-  color: var(--text); /* IMPORTANT: readable in light mode */
+
+  /* keep readable in light mode */
+  color: var(--text);
 }
 
-.rgb-btn::before {
+.rgb-btn::before,
+.rg-btn::before {
   content: "";
   position: absolute;
   inset: -2px;
@@ -121,7 +129,8 @@ a {
   z-index: -2;
 }
 
-.rgb-btn::after {
+.rgb-btn::after,
+.rg-btn::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -130,21 +139,91 @@ a {
   z-index: -1;
 }
 
-.rgb-btn:hover {
+.rgb-btn:hover,
+.rg-btn:hover {
   filter: brightness(1.02);
 }
 
-.rgb-btn:active {
+.rgb-btn:active,
+.rg-btn:active {
   transform: translateY(2px) scale(0.99);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.10);
 }
 
-.rgb-btn:focus-visible {
+.rgb-btn:focus-visible,
+.rg-btn:focus-visible {
   outline: 3px solid rgba(59, 130, 246, 0.35);
   outline-offset: 3px;
 }
 
-/* Hide the default marker on <summary> (if you use it for dropdowns) */
+.rgb-btn:disabled,
+.rg-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Colored filter pills (Errors / Warnings / All) */
+.pill-btn {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: transform 120ms ease, filter 120ms ease, background 120ms ease;
+  color: var(--text);
+  background: transparent;
+}
+
+.pill-btn:hover {
+  filter: brightness(1.02);
+}
+
+.pill-btn:active {
+  transform: translateY(1px);
+}
+
+.pill-btn.is-active {
+  background: var(--surface-2);
+}
+
+.pill-error.is-active {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.pill-warning.is-active {
+  background: rgba(234, 179, 8, 0.18);
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+.pill-all.is-active {
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(59, 130, 246, 0.30);
+}
+
+/* Red / Yellow highlighted issue boxes */
+.issue-box {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+}
+
+.issue-box.error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.issue-box.warning {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.28);
+}
+
+.issue-box.info {
+  background: rgba(59, 130, 246, 0.10);
+  border-color: rgba(59, 130, 246, 0.22);
+}
+
+/* Hide the default marker on <summary> */
 summary::-webkit-details-marker {
   display: none;
 }
