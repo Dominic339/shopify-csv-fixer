@@ -11,6 +11,16 @@ type SubStatus = {
   current_period_end: string | null;
 };
 
+async function safeReadJson(res: Response) {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 export default function ProfileClient() {
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,13 +39,26 @@ export default function ProfileClient() {
   async function openPortal() {
     setBusy(true);
     setMsg("");
+
     try {
       const r = await fetch("/api/stripe/portal", { method: "POST" });
-      const j = await r.json();
+
+      const j = await safeReadJson(r);
+
       if (!r.ok) {
-        setMsg(j?.error ?? "Failed to create portal session");
+        const errMsg =
+          j?.error ||
+          `Billing portal failed (${r.status}). Check STRIPE_SECRET_KEY + NEXT_PUBLIC_SITE_URL env vars.`;
+        const details = j?.details ? ` ${j.details}` : "";
+        setMsg(errMsg + details);
         return;
       }
+
+      if (!j?.url) {
+        setMsg("Billing portal response missing URL.");
+        return;
+      }
+
       window.location.href = j.url;
     } catch (e: any) {
       setMsg(e?.message ?? "Failed to open portal");
@@ -57,8 +80,7 @@ export default function ProfileClient() {
             <div className="text-sm text-[var(--muted)]">Subscription</div>
             <div className="mt-2 space-y-2 text-sm">
               <div>
-                Signed in:{" "}
-                <span className="font-semibold">{sub.signedIn ? "Yes" : "No"}</span>
+                Signed in: <span className="font-semibold">{sub.signedIn ? "Yes" : "No"}</span>
               </div>
               <div>
                 Plan: <span className="font-semibold">{sub.plan}</span>
@@ -67,10 +89,7 @@ export default function ProfileClient() {
                 Status: <span className="font-semibold">{sub.status}</span>
               </div>
               <div>
-                Period end:{" "}
-                <span className="font-semibold">
-                  {sub.current_period_end ?? "—"}
-                </span>
+                Period end: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>
               </div>
             </div>
 
