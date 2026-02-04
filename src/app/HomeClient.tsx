@@ -1,4 +1,3 @@
-// src/app/HomeClient.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -36,23 +35,18 @@ export default function HomeClient() {
     <main className="mx-auto max-w-6xl px-6 py-14">
       <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
         <div>
-          <p className="text-sm text-[var(--muted)]">Shopify CSV Fixer</p>
+          <p className="text-sm text-[var(--muted)]">CSNest CSV Fixer</p>
 
           <h1 className="mt-2 text-4xl font-semibold leading-tight text-[var(--text)]">
-            Fix Shopify CSV import issues in seconds
+            Fix messy CSVs in minutes
           </h1>
 
           <p className="mt-4 max-w-xl text-[var(--muted)]">
-            Upload your CSV, instantly see what&apos;s wrong, auto-fix what’s safe, and export a clean
-            file ready for Shopify.
+            Pick a format, upload a CSV, instantly see what’s wrong, auto-fix what’s safe, and export a clean file.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            {/* FIX: remove text-white so it’s black in light mode */}
-            <Link
-              href="/app"
-              className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
-            >
+            <Link href="/app" className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]">
               Start free no account required
             </Link>
 
@@ -73,9 +67,9 @@ export default function HomeClient() {
           <h2 className="text-base font-semibold text-[var(--text)]">What it does</h2>
 
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Fix common CSV issues that break Shopify imports</li>
-            <li>Validate files and explain errors in plain English</li>
-            <li>Build Shopify-ready product CSVs from scratch</li>
+            <li>Validates CSVs and highlights issues per field</li>
+            <li>Applies safe auto-fixes and lets you edit the rest</li>
+            <li>Exports a clean CSV that matches the selected format</li>
           </ul>
 
           <div className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
@@ -91,17 +85,13 @@ export default function HomeClient() {
                   Manage subscription
                 </Link>
 
-                {/* FIX: remove text-white here too so it’s readable in light mode */}
-                <Link
-                  href="/app"
-                  className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
-                >
+                <Link href="/app" className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]">
                   Open app
                 </Link>
               </div>
             ) : (
               <div className="mt-4 text-sm text-[var(--muted)]">
-                Subscribe below to raise your export limits.
+                Subscribe below to raise your export limits and unlock custom formats.
               </div>
             )}
           </div>
@@ -110,7 +100,7 @@ export default function HomeClient() {
 
       <h2 className="mt-14 text-xl font-semibold text-[var(--text)]">Pricing</h2>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Start free. Upgrade only when you need more exports or advanced formats.
+        Start free. Upgrade only when you need more exports or custom formats.
       </p>
 
       {isActive ? (
@@ -127,11 +117,7 @@ export default function HomeClient() {
               Upgrade / cancel
             </Link>
 
-            {/* FIX: remove text-white here too */}
-            <Link
-              href="/app"
-              className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
-            >
+            <Link href="/app" className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]">
               Open app
             </Link>
           </div>
@@ -142,7 +128,7 @@ export default function HomeClient() {
             title="Free"
             price="$0"
             bullets={[
-              "3 exports per month per account",
+              "3 exports per month per device",
               "Unlimited previews and diagnostics",
               "No account required",
             ]}
@@ -152,14 +138,22 @@ export default function HomeClient() {
           <PriceCard
             title="Basic"
             price="$3 / month"
-            bullets={["Shopify product CSV exports", "100 exports per month", "Self-serve cancellation"]}
+            bullets={[
+              "100 exports per month",
+              "Built-in formats included",
+              "Self-serve cancellation",
+            ]}
             cta="Choose Basic"
             href="/checkout?plan=basic"
           />
           <PriceCard
             title="Advanced"
             price="$10 / month"
-            bullets={["Advanced Shopify formats", "Saved mappings + batch tools", "Higher export limits"]}
+            bullets={[
+              "Unlimited exports",
+              "Custom formats (coming next)",
+              "Self-serve cancellation",
+            ]}
             cta="Choose Advanced"
             href="/checkout?plan=advanced"
           />
@@ -169,13 +163,7 @@ export default function HomeClient() {
   );
 }
 
-function PriceCard(props: {
-  title: string;
-  price: string;
-  bullets: string[];
-  cta: string;
-  href: string;
-}) {
+function PriceCard(props: { title: string; price: string; bullets: string[]; cta: string; href: string }) {
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
       <div className="text-sm font-semibold text-[var(--text)]">{props.title}</div>
