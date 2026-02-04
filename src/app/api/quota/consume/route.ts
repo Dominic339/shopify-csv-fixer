@@ -19,7 +19,9 @@ function monthKey(d: Date = new Date()): string {
  * - updated_at timestamptz
  */
 export async function POST(req: Request) {
-  const supabase = createSupabaseServerClient();
+  // ✅ IMPORTANT: await the server client (your helper returns a Promise)
+  const supabase = await createSupabaseServerClient();
+
   const {
     data: { user },
     error: authError,
