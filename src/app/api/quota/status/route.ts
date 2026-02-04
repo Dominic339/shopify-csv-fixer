@@ -9,48 +9,51 @@ export async function GET() {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
-  // Not signed in → free plan
-  if (!user) {
-    const limits = getPlanLimits("free");
+  if (authError || !user) {
+    // Treat signed-out users as free plan (UI can still render)
+    const plan = "free";
+    const limit = getPlanLimits(plan).exportsPerMonth;
     return NextResponse.json({
-      ok: true,
-      signedIn: false,
-      plan: "free",
-      exportsUsed: 0,
-      limit: limits.exportsPerMonth,
+      monthKey: getMonthKey(),
+      used: 0,
+      limit,
+      remaining: limit,
+      plan,
     });
   }
 
-  // Subscription
-  const { data: sub } = await supabase
+  const admin = createSupabaseAdminClient();
+  const monthKey = getMonthKey();
+
+  // Determine effective plan (active subscription -> plan else free)
+  const { data: subRow } = await admin
     .from("user_subscriptions")
     .select("plan,status")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const plan =
-    sub?.status === "active" ? (sub.plan as "basic" | "advanced") : "free";
+  const rawPlan = (subRow?.plan || "free").toString().toLowerCase();
+  const rawStatus = (subRow?.status || "none").toString().toLowerCase();
+  const plan = rawStatus === "active" ? rawPlan : "free";
+  const limit = getPlanLimits(plan).exportsPerMonth;
 
-  const limits = getPlanLimits(plan);
-  const monthKey = getMonthKey();
-
-  const admin = createSupabaseAdminClient();
-
-  const { data: usage } = await admin
+  const { data: usageRow } = await admin
     .from("export_usage")
     .select("exports_used")
     .eq("user_id", user.id)
     .eq("month_key", monthKey)
     .maybeSingle();
 
+  const used = Number(usageRow?.exports_used || 0);
+
   return NextResponse.json({
-    ok: true,
-    signedIn: true,
-    plan,
-    exportsUsed: usage?.exports_used ?? 0,
-    limit: limits.exportsPerMonth,
     monthKey,
+    used,
+    limit,
+    remaining: Math.max(0, limit - used),
+    plan,
   });
 }
