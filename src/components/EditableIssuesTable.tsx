@@ -26,7 +26,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
   const [showMode, setShowMode] = useState<"errors" | "warnings" | "all">("errors");
   const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
 
-  // Auto-pin any row that ever had an issue so it stays visible even after you fix it.
+  // Auto-pin rows that ever had an issue (keeps your old behavior)
   useEffect(() => {
     const rowsWithIssues = new Set<number>();
     for (const i of issues) {
@@ -45,6 +45,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
     });
   }, [issues, rows.length]);
 
+  // Map issues by row and also by (row,col) for per-field highlighting
   const issuesByRow = useMemo(() => {
     const map = new Map<number, Issue[]>();
     for (const i of issues) {
@@ -52,6 +53,24 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
       const idx = i.row - 1;
       if (!map.has(idx)) map.set(idx, []);
       map.get(idx)!.push(i);
+    }
+    return map;
+  }, [issues]);
+
+  const issueByCellSeverity = useMemo(() => {
+    const map = new Map<string, "error" | "warning" | "info">();
+    for (const i of issues) {
+      if (typeof i.row !== "number") continue;
+      if (!i.column) continue;
+      const rowIndex = i.row - 1;
+      const key = `${rowIndex}|||${i.column}`;
+
+      const prev = map.get(key);
+      // error overrides warning overrides info
+      if (prev === "error") continue;
+      if (prev === "warning" && i.severity === "info") continue;
+
+      map.set(key, i.severity);
     }
     return map;
   }, [issues]);
@@ -103,28 +122,17 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
     );
   };
 
-  function rowToneBorder(rowIssues: Issue[]) {
-    const anyError = rowIssues.some((x) => x.severity === "error");
-    const anyWarning = rowIssues.some((x) => x.severity === "warning");
-
-    if (anyError) return "border-red-500/35";
-    if (anyWarning) return "border-yellow-500/35";
-    return "border-[var(--border)]";
-  }
-
-  function rowHeaderToneBg(rowIssues: Issue[]) {
-    const anyError = rowIssues.some((x) => x.severity === "error");
-    const anyWarning = rowIssues.some((x) => x.severity === "warning");
-
-    if (anyError) return "bg-red-500/10";
-    if (anyWarning) return "bg-yellow-500/10";
-    return "bg-[var(--surface-2)]";
-  }
-
   function issueBoxClass(sev: Issue["severity"]) {
     if (sev === "error") return "issue-box error";
     if (sev === "warning") return "issue-box warning";
     return "issue-box info";
+  }
+
+  function inputToneClass(rowIndex: number, col: string) {
+    const sev = issueByCellSeverity.get(`${rowIndex}|||${col}`);
+    if (sev === "error") return "input-error";
+    if (sev === "warning") return "input-warning";
+    return "";
   }
 
   return (
@@ -133,7 +141,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
         <div>
           <h3 className="text-lg font-semibold">Manual fixes</h3>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Edit values directly. Rows that ever had an issue stay visible so you can keep iterating.
+            Edit values directly. Only the specific fields with issues are highlighted.
           </p>
         </div>
 
@@ -174,15 +182,8 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
             const pinned = manualPinnedRows.some((p) => p.rowIndex === rowIndex);
 
             return (
-              <div
-                key={rowIndex}
-                className={`rounded-2xl border overflow-hidden ${rowToneBorder(rowIssues)}`}
-              >
-                <div
-                  className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 ${rowHeaderToneBg(
-                    rowIssues
-                  )}`}
-                >
+              <div key={rowIndex} className="rounded-2xl border border-[var(--border)] overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--surface-2)]">
                   <div className="flex items-center gap-3">
                     <div className="text-sm font-semibold">{rowLabel(rowIndex)}</div>
                     {pinned ? (
@@ -192,15 +193,13 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
                     ) : null}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold"
-                      type="button"
-                      onClick={() => togglePin(rowIndex)}
-                    >
-                      {pinned ? "Unpin" : "Pin"}
-                    </button>
-                  </div>
+                  <button
+                    className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold"
+                    type="button"
+                    onClick={() => togglePin(rowIndex)}
+                  >
+                    {pinned ? "Unpin" : "Pin"}
+                  </button>
                 </div>
 
                 {rowIssues.length > 0 ? (
@@ -235,7 +234,10 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
                       <label key={h} className="block">
                         <div className="mb-1 text-[10px] font-semibold text-[var(--muted)]">{h}</div>
                         <input
-                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs outline-none"
+                          className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs outline-none ${inputToneClass(
+                            rowIndex,
+                            h
+                          )}`}
                           value={cell(row?.[h])}
                           onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
                         />

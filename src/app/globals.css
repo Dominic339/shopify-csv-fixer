@@ -213,6 +213,17 @@ a {
   border-color: rgba(59, 130, 246, 0.22);
 }
 
+/* NEW: Per-field highlights (what you asked for) */
+.input-error {
+  border-color: rgba(239, 68, 68, 0.38) !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+.input-warning {
+  border-color: rgba(234, 179, 8, 0.38) !important;
+  background: rgba(234, 179, 8, 0.12) !important;
+}
+
 /* ===== Data table (restored) ===== */
 .data-table-wrap {
   border: 1px solid var(--border);
@@ -247,7 +258,6 @@ a {
 
 .data-table td {
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   border-bottom: 1px solid var(--border);
   vertical-align: top;
   white-space: nowrap;

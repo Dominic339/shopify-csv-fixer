@@ -1,11 +1,10 @@
-// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/browser";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 export default function TopBar() {
   const supabase = createClient();
@@ -13,7 +12,8 @@ export default function TopBar() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
 
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  // IMPORTANT: use our custom ThemeProvider (NOT next-themes)
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     let mounted = true;
@@ -38,14 +38,10 @@ export default function TopBar() {
     setOpen(false);
   }
 
-  const effectiveTheme = (resolvedTheme ?? theme ?? "dark") as "light" | "dark";
-  const nextTheme = effectiveTheme === "dark" ? "light" : "dark";
-
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-          {/* Use URL-encoded path so the logo reliably loads on Vercel/Linux */}
           <Image
             src="/CSV%20Nest%20Logo.png"
             alt="CSV Nest"
@@ -63,11 +59,11 @@ export default function TopBar() {
         <div className="relative flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setTheme(nextTheme)}
+            onClick={toggle}
             className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
             aria-label="Toggle theme"
           >
-            {effectiveTheme === "dark" ? "Dark" : "Light"}
+            {theme === "dark" ? "Dark" : "Light"}
           </button>
 
           <Link href="/app" className="rgb-btn">
