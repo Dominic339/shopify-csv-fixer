@@ -37,24 +37,25 @@ export default function HomeClient() {
       <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
         <div>
           <p className="text-sm text-[var(--muted)]">Shopify CSV Fixer</p>
-          <h1 className="mt-2 text-4xl font-semibold leading-tight">
+          <h1 className="mt-2 text-4xl font-semibold leading-tight text-[var(--text)]">
             Fix Shopify CSV import issues in seconds
           </h1>
           <p className="mt-4 max-w-xl text-[var(--muted)]">
-            Upload your CSV, instantly see what's wrong, auto-fix what’s safe,
-            and export a clean file ready for Shopify.
+            Upload your CSV, instantly see what&apos;s wrong, auto-fix what’s safe, and export a
+            clean file ready for Shopify.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
+            {/* IMPORTANT: do NOT force text-white here; it breaks readability in light mode */}
             <Link
               href="/app"
-              className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
+              className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
             >
-              Start free — no account required
+              Start free no account required
             </Link>
             <Link
               href="/how-it-works"
-              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
             >
               See how it works
             </Link>
@@ -66,7 +67,7 @@ export default function HomeClient() {
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-base font-semibold">What it does</h2>
+          <h2 className="text-base font-semibold text-[var(--text)]">What it does</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
             <li>Fix common CSV issues that break Shopify imports</li>
             <li>Validate files and explain errors in plain English</li>
@@ -74,22 +75,21 @@ export default function HomeClient() {
           </ul>
 
           <div className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
-            <div className="text-sm font-semibold">Your plan</div>
-            <div className="mt-1 text-sm text-[var(--muted)]">
-              {sub ? planLabel : "Loading…"}
-            </div>
+            <div className="text-sm font-semibold text-[var(--text)]">Your plan</div>
+            <div className="mt-1 text-sm text-[var(--muted)]">{sub ? planLabel : "Loading…"}</div>
 
             {isActive ? (
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link
                   href="/profile"
-                  className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
+                  className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
                 >
                   Manage subscription
                 </Link>
+                {/* IMPORTANT: do NOT force text-white here */}
                 <Link
                   href="/app"
-                  className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
+                  className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
                 >
                   Open app
                 </Link>
@@ -103,7 +103,7 @@ export default function HomeClient() {
         </div>
       </div>
 
-      <h2 className="mt-14 text-xl font-semibold">Pricing</h2>
+      <h2 className="mt-14 text-xl font-semibold text-[var(--text)]">Pricing</h2>
       <p className="mt-2 text-sm text-[var(--muted)]">
         Start free. Upgrade only when you need more exports or advanced formats.
       </p>
@@ -111,18 +111,19 @@ export default function HomeClient() {
       {isActive ? (
         <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <div className="text-sm text-[var(--muted)]">
-            You’re subscribed to <span className="font-semibold">{planLabel}</span>.
+            You’re subscribed to <span className="font-semibold text-[var(--text)]">{planLabel}</span>.
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/profile"
-              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
             >
               Upgrade / cancel
             </Link>
+            {/* IMPORTANT: do NOT force text-white here */}
             <Link
               href="/app"
-              className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
+              className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
             >
               Open app
             </Link>
@@ -178,8 +179,8 @@ function PriceCard(props: {
 }) {
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-      <div className="text-sm font-semibold">{props.title}</div>
-      <div className="mt-2 text-3xl font-semibold">{props.price}</div>
+      <div className="text-sm font-semibold text-[var(--text)]">{props.title}</div>
+      <div className="mt-2 text-3xl font-semibold text-[var(--text)]">{props.price}</div>
 
       <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
         {props.bullets.map((b) => (
@@ -190,7 +191,7 @@ function PriceCard(props: {
       <div className="mt-6">
         <Link
           href={props.href}
-          className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
+          className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
         >
           {props.cta}
         </Link>

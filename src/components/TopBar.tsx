@@ -12,7 +12,6 @@ export default function TopBar() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
 
-  // IMPORTANT: use our custom ThemeProvider (NOT next-themes)
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
@@ -51,7 +50,7 @@ export default function TopBar() {
             className="rounded-md"
           />
           <div className="leading-tight">
-            <div className="text-sm font-semibold">CSV Nest</div>
+            <div className="text-sm font-semibold text-[var(--text)]">CSV Nest</div>
             <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
           </div>
         </Link>
@@ -66,8 +65,9 @@ export default function TopBar() {
             {theme === "dark" ? "Dark" : "Light"}
           </button>
 
+          {/* IMPORTANT: don’t force white text; keep it readable in light mode */}
           <Link href="/app" className="rgb-btn">
-            <span className="px-5 py-2 text-sm font-semibold text-white">Open app</span>
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open app</span>
           </Link>
 
           <button
