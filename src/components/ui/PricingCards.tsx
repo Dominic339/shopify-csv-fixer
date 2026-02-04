@@ -133,8 +133,8 @@ export function PricingCards() {
           <div className="text-sm text-[var(--muted)]">Free</div>
           <div className="mt-2 text-3xl font-semibold">$0</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
+            <li>Fix and export CSVs</li>
             <li>3 exports per month per device</li>
-            <li>Unlimited previews and diagnostics</li>
             <li>No account required</li>
           </ul>
 
@@ -151,9 +151,9 @@ export function PricingCards() {
           <div className="text-sm text-[var(--muted)]">Basic</div>
           <div className="mt-2 text-3xl font-semibold">$3 / month</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Shopify product CSV exports</li>
             <li>100 exports per month</li>
-            <li>Self-serve cancellation</li>
+            <li>Account required</li>
+            <li>Manage billing in Profile</li>
           </ul>
 
           <button
@@ -170,9 +170,9 @@ export function PricingCards() {
           <div className="text-sm text-[var(--muted)]">Advanced</div>
           <div className="mt-2 text-3xl font-semibold">$10 / month</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Advanced Shopify formats</li>
-            <li>Saved mappings + batch tools</li>
-            <li>Higher export limits</li>
+            <li>Unlimited exports</li>
+            <li>Account required</li>
+            <li>Custom formats (coming soon)</li>
           </ul>
 
           <button
