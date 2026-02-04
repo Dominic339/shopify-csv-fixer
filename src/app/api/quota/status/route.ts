@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getPlanLimits } from "@/lib/quota";
+
+function monthPeriodStartUTC(d = new Date()) {
+  // First day of current month at 00:00:00 UTC
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
+}
+
+function isPaidStatus(status?: string | null) {
+  // Treat trialing like paid so new subscriptions still get paid limits
+  return status === "active" || status === "trialing";
+}
 
 export async function GET() {
   const supabase = await createSupabaseServerClient();
@@ -28,22 +39,23 @@ export async function GET() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const plan = subRow?.status === "active" ? (subRow.plan as string) : "free";
+  const plan = isPaidStatus(subRow?.status) ? (subRow?.plan as string) : "free";
   const limits = getPlanLimits(plan);
 
-  const { data: usageRow } = await supabase
+  // IMPORTANT: always read the usage row for the CURRENT month.
+  // Using maybeSingle() without filtering can silently return an older row,
+  // which makes exports look like they aren't being counted.
+  const admin = createSupabaseAdminClient();
+  const periodStartIso = monthPeriodStartUTC().toISOString();
+
+  const { data: usageRow } = await admin
     .from("export_usage")
-    .select("exports_used,period_start")
+    .select("exports_used")
     .eq("user_id", user.id)
+    .eq("period_start", periodStartIso)
     .maybeSingle();
 
-  const now = new Date();
-  const periodStart = usageRow?.period_start ? new Date(usageRow.period_start) : now;
-  const isSameMonth =
-    periodStart.getUTCFullYear() === now.getUTCFullYear() &&
-    periodStart.getUTCMonth() === now.getUTCMonth();
-
-  const exportsUsed = isSameMonth ? usageRow?.exports_used ?? 0 : 0;
+  const exportsUsed = Number(usageRow?.exports_used ?? 0);
 
   return NextResponse.json({
     ok: true,
