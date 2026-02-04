@@ -1,3 +1,4 @@
+// src/app/api/quota/status/route.ts
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -6,11 +7,6 @@ import { getPlanLimits } from "@/lib/quota";
 function monthPeriodStartUTC(d = new Date()) {
   // First day of current month at 00:00:00 UTC
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
-}
-
-function isPaidStatus(status?: string | null) {
-  // Treat trialing like paid so new subscriptions still get paid limits
-  return status === "active" || status === "trialing";
 }
 
 export async function GET() {
@@ -33,18 +29,19 @@ export async function GET() {
     });
   }
 
+  // Subscription status (from your table)
   const { data: subRow } = await supabase
     .from("user_subscriptions")
     .select("plan,status,current_period_end")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const plan = isPaidStatus(subRow?.status) ? (subRow?.plan as string) : "free";
+  const plan = subRow?.status === "active" ? (subRow.plan as "basic" | "advanced") : "free";
   const limits = getPlanLimits(plan);
 
-  // IMPORTANT: always read the usage row for the CURRENT month.
-  // Using maybeSingle() without filtering can silently return an older row,
-  // which makes exports look like they aren't being counted.
+  // IMPORTANT:
+  // Always read usage for *this month only*.
+  // This avoids "maybeSingle" problems if there are multiple months of rows.
   const admin = createSupabaseAdminClient();
   const periodStartIso = monthPeriodStartUTC().toISOString();
 
