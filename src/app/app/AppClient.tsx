@@ -113,7 +113,6 @@ export default function AppClient() {
     const map = new Map<string, "error" | "warning" | "info">();
     for (const i of issuesForTable) {
       const key = `${i.rowIndex}|||${i.column}`;
-      // error overrides warning overrides info
       const prev = map.get(key);
       if (prev === "error") continue;
       if (prev === "warning" && i.severity === "info") continue;
@@ -129,8 +128,6 @@ export default function AppClient() {
   }, [issuesForTable]);
 
   const previewRows = useMemo(() => {
-    // restore the "big table" feel, but keep it performant:
-    // show up to 25 issue rows, otherwise first 25 rows.
     if (rowsWithAnyIssue.length) return rowsWithAnyIssue.slice(0, 25);
     return rows.map((_, idx) => idx).slice(0, 25);
   }, [rows, rowsWithAnyIssue]);
@@ -160,7 +157,6 @@ export default function AppClient() {
     try {
       const text = await file.text();
 
-      // Parse CSV first (validateAndFixShopifyBasic expects headers + rows now)
       const parsed = parseCsv(text);
       const fixed = validateAndFixShopifyBasic(parsed.headers, parsed.rows);
 
@@ -226,6 +222,11 @@ export default function AppClient() {
     setEditing(null);
   }
 
+  const autoFixPreviewCount = 8;
+  const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
+  const autoFixRest = autoFixes.slice(autoFixPreviewCount);
+  const autoFixRestCount = Math.max(0, autoFixRest.length);
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
@@ -289,12 +290,25 @@ export default function AppClient() {
           {autoFixes.length ? (
             <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
               <div className="text-sm font-medium text-[var(--text)]">Auto-fixes applied</div>
+
               <ul className="mt-2 space-y-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                {autoFixes.slice(0, 8).map((x, i) => (
+                {autoFixPreview.map((x, i) => (
                   <li key={i}>{x}</li>
                 ))}
-                {autoFixes.length > 8 ? <li>…and {autoFixes.length - 8} more</li> : null}
               </ul>
+
+              {autoFixRestCount > 0 ? (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-[color:rgba(var(--muted-rgb),1)]">
+                    …and {autoFixRestCount} more
+                  </summary>
+                  <ul className="mt-2 space-y-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                    {autoFixRest.map((x, i) => (
+                      <li key={i + autoFixPreviewCount}>{x}</li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -305,7 +319,6 @@ export default function AppClient() {
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          {/* RESTORED TABLE */}
           <div className="mt-4 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
@@ -386,9 +399,13 @@ export default function AppClient() {
             ) : null}
           </div>
 
-          {/* MANUAL FIXES (kept) */}
           <div className="mt-6">
-            <EditableIssuesTable headers={tableHeaders} issues={issues as any} rows={rows} onUpdateRow={onUpdateRow} />
+            <EditableIssuesTable
+              headers={tableHeaders}
+              issues={issues as any}
+              rows={rows}
+              onUpdateRow={onUpdateRow}
+            />
           </div>
         </div>
       </div>
