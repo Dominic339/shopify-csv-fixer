@@ -15,14 +15,10 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const { plan } = (await req.json()) as { plan?: "basic" | "advanced" };
-  if (!plan) {
-    return NextResponse.json({ error: "Missing plan" }, { status: 400 });
-  }
+  if (!plan) return NextResponse.json({ error: "Missing plan" }, { status: 400 });
 
   const priceId =
     plan === "basic"
@@ -31,11 +27,9 @@ export async function POST(req: Request) {
         ? process.env.STRIPE_PRICE_ADVANCED
         : null;
 
-  if (!priceId) {
-    return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
-  }
+  if (!priceId) return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
@@ -43,19 +37,15 @@ export async function POST(req: Request) {
     success_url: `${siteUrl}/checkout?success=1`,
     cancel_url: `${siteUrl}/?canceled=1`,
 
-    // Prefill email to match the logged-in Supabase user (reduces mistakes)
-    customer_email: user.email ?? undefined,
-
-    // Redundant safety link
-    client_reference_id: user.id,
-
-    // Used by your webhook to attach subscription to correct app user
+    // Keep this (used by checkout.session.completed)
     metadata: {
       user_id: user.id,
       plan,
     },
 
-    // Also attach metadata to the subscription itself (helps subscription.* events)
+    // NEW: Put metadata onto the SUBSCRIPTION too.
+    // This makes customer.subscription.created/updated contain user_id/plan,
+    // so your webhook can always sync Supabase even if checkout.session.completed is missing.
     subscription_data: {
       metadata: {
         user_id: user.id,
