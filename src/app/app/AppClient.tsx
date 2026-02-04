@@ -98,6 +98,12 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
+  const tableHeaders = useMemo(() => {
+    if (headers.length) return headers;
+    const first = rows[0];
+    return first ? Object.keys(first) : [];
+  }, [headers, rows]);
+
   const onUpdateRow = useCallback((rowIndex: number, patch: Partial<CsvRow>) => {
     setRows((prev) => {
       const next = [...prev];
@@ -153,7 +159,7 @@ export default function AppClient() {
     try {
       await consumeExport();
 
-      const cols = headers.length ? headers : Object.keys(rows[0] ?? {});
+      const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
       const csv = toCsv(cols, rows);
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -253,7 +259,12 @@ export default function AppClient() {
           </p>
 
           <div className="mt-4">
-            <EditableIssuesTable issues={issuesForTable} rows={rows} onUpdateRow={onUpdateRow} />
+            <EditableIssuesTable
+              headers={tableHeaders}
+              issues={issuesForTable}
+              rows={rows}
+              onUpdateRow={onUpdateRow}
+            />
           </div>
         </div>
       </div>
