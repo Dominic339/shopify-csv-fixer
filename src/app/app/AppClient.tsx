@@ -7,7 +7,7 @@ import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
 import { getAllBuiltinFormats, getFormatById } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
-import type { CsvFixResult, CsvIssue, CsvRow } from "@/lib/formats/types";
+import type { CsvFixResult, CsvRow } from "@/lib/formats/types";
 
 type SubStatus = {
   ok: boolean;
@@ -20,7 +20,7 @@ type PlanLimits = {
 };
 
 type UiIssue = {
-  row?: number; // 1-based
+  row?: number; // 1-based (what EditableIssuesTable expects)
   column?: string;
   field?: string;
   message: string;
@@ -74,25 +74,6 @@ export default function AppClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planForLimits]);
 
-  const issuesForTable: CsvIssue[] = useMemo(() => {
-    return (issues ?? [])
-      .map((it: any) => {
-        const rowIndex =
-          typeof it.rowIndex === "number"
-            ? it.rowIndex
-            : typeof it.row === "number"
-              ? Math.max(0, it.row - 1)
-              : 0;
-
-        const col = (it.column ?? it.field ?? "").toString();
-        const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
-        if (!col) return null;
-
-        return { rowIndex, column: col, message: it.message, severity: sev };
-      })
-      .filter(Boolean) as CsvIssue[];
-  }, [issues]);
-
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
     const first = rows[0];
@@ -118,6 +99,7 @@ export default function AppClient() {
 
   function toUiIssues(result: CsvFixResult): UiIssue[] {
     return (result.issues ?? []).map((i) => ({
+      // IMPORTANT: convert rowIndex (0-based) -> row (1-based)
       row: i.rowIndex + 1,
       column: i.column,
       message: i.message,
@@ -130,8 +112,10 @@ export default function AppClient() {
     const parsed = parseCsv(text);
     const fmt = getFormatById(formatId);
 
+    // engine signature: (headers, rows, format)
     const result = applyFormatToParsedCsv(parsed.headers, parsed.rows, fmt);
 
+    // parse errors don't have a row; keep them as banner-ish issues (won't show in manual table)
     const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
       message: m,
       level: "error",
@@ -140,7 +124,7 @@ export default function AppClient() {
 
     setHeaders(result.fixedHeaders ?? []);
     setRows(result.fixedRows ?? []);
-    setIssues([...toUiIssues(result), ...parseIssues]);
+    setIssues([...(toUiIssues(result) ?? []), ...parseIssues]);
     setAutoFixes(result.fixesApplied ?? []);
   }
 
@@ -205,6 +189,34 @@ export default function AppClient() {
       setBusy(false);
     }
   }
+
+  // THIS is the key fix:
+  // EditableIssuesTable expects issues shaped like:
+  // { row: number (1-based), column?: string, message: string, severity: ... }
+  const issuesForManualTable = useMemo(() => {
+    return (issues ?? [])
+      .map((it: any) => {
+        const row =
+          typeof it.row === "number"
+            ? it.row
+            : typeof it.rowIndex === "number"
+              ? it.rowIndex + 1
+              : undefined;
+
+        const column = (it.column ?? it.field ?? "").toString() || undefined;
+        const severity = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+
+        return {
+          row,
+          column,
+          message: String(it.message ?? ""),
+          severity,
+          suggestion: it.suggestion,
+        };
+      })
+      // rows without a row number can't be shown as “manual fix” rows
+      .filter((x: any) => typeof x.row === "number" && x.row >= 1);
+  }, [issues]);
 
   const autoFixPreviewCount = 8;
   const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
@@ -342,7 +354,7 @@ export default function AppClient() {
           <div className="mt-4">
             <EditableIssuesTable
               headers={tableHeaders}
-              issues={issuesForTable}
+              issues={issuesForManualTable as any}
               rows={rows}
               onUpdateRow={onUpdateRow}
             />
