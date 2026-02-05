@@ -1,11 +1,9 @@
 import type { CsvFormat } from "./types";
 import { generalCsvFormat } from "./builtins/general";
 import { shopifyProductsFormat } from "./builtins/shopifyProducts";
+import { builtinPackFormats } from "./builtins/packs";
 
-export { applyFormatToParsedCsv, normalizeRowsSafe } from "./engine";
-export type { CsvFormat, CsvRow, CsvIssue, CsvFixResult } from "./types";
-
-const BUILTINS: CsvFormat[] = [generalCsvFormat, shopifyProductsFormat];
+const BUILTINS: CsvFormat[] = [generalCsvFormat, shopifyProductsFormat, ...builtinPackFormats];
 
 export function getAllBuiltinFormats() {
   return BUILTINS;
