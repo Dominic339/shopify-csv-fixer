@@ -1,6 +1,6 @@
-// src/app/page.tsx
-import HomeClient from "@/app/HomeClient";
+// src/app/formats/page.tsx
+import FormatsClient from "@/app/formats/FormatsClient";
 
-export default function HomePage() {
-  return <HomeClient />;
+export default function FormatsPage() {
+  return <FormatsClient />;
 }
