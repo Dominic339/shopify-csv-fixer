@@ -18,8 +18,8 @@ export type RuleType =
 
 export type UserFormatColumn = {
   id: string; // stable internal id for rules
-  key?: string; // optional mapping hint (can be empty)
-  title?: string; // display/export header (can be empty)
+  key?: string; // optional mapping hint
+  title?: string; // export header (optional)
   required?: boolean;
   defaultValue?: string;
 };
@@ -85,8 +85,9 @@ function applyRuleToValue(value: string, rule: UserFormatRule): { value: string;
       break;
 
     case "no_special_chars": {
-      const allowed = safeString(rule.value?.allowed ?? "");
-      const re = new RegExp(`[^a-zA-Z0-9${allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}]`, "g");
+      const allowed = safeString(rule.value?.allowed ?? rule.value ?? "");
+      const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+      const re = new RegExp(`[^a-zA-Z0-9${esc}]`, "g");
       value = value.replace(re, "");
       break;
     }
@@ -107,18 +108,11 @@ function applyRuleToValue(value: string, rule: UserFormatRule): { value: string;
       break;
     }
 
-    case "allowed_values": {
-      // validation only, no transform
-      break;
-    }
-
+    // validation-only
+    case "allowed_values":
     case "required":
-      // validation only, no transform
-      break;
-
     case "regex_allow":
     case "regex_block":
-      // validation only, no transform
       break;
 
     default:
@@ -135,8 +129,13 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
 
     case "allowed_values": {
       const raw = rule.value;
-      const list =
-        Array.isArray(raw) ? raw.map(safeString) : safeString(raw).split(",").map((x) => x.trim()).filter(Boolean);
+      const list = Array.isArray(raw)
+        ? raw.map(safeString)
+        : safeString(raw)
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean);
+
       if (!list.length) return null;
       return list.includes(value) ? null : `Value must be one of: ${list.join(", ")}`;
     }
@@ -173,9 +172,9 @@ export function loadUserFormatsFromStorage(): UserFormatV1[] {
   try {
     const raw = window.localStorage.getItem(USER_FORMATS_STORAGE_KEY);
     if (!raw) return [];
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return [];
-    return arr.filter(Boolean) as UserFormatV1[];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(Boolean) as UserFormatV1[];
   } catch {
     return [];
   }
@@ -194,12 +193,10 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
 
       const expectedHeaders = (uf.columns ?? []).map((c, idx) => columnDisplayTitle(c, idx));
 
-      // Build input row header map (case-insensitive)
       const normalizedInputHeaders = headers.map((h) => normalizeHeaderKey(h));
       const inputIndexByNorm = new Map<string, number>();
       normalizedInputHeaders.forEach((h, idx) => inputIndexByNorm.set(h, idx));
 
-      // For each expected column, find matching input column name (best effort)
       const matchInputHeaderForCol = (col: UserFormatColumn, colIdx: number): string | null => {
         const candidates = columnMatchKeys(col, colIdx);
         for (const c of candidates) {
@@ -209,10 +206,12 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
         return null;
       };
 
-      const colInputHeader: (string | null)[] = (uf.columns ?? []).map((c, idx) => matchInputHeaderForCol(c, idx));
+      const colInputHeader: (string | null)[] = (uf.columns ?? []).map((c, idx) =>
+        matchInputHeaderForCol(c, idx)
+      );
 
-      // Prepare rule lists
       const globalRules = (uf.globalRules ?? []).filter((r) => r?.scope === "global");
+
       const perColRules = new Map<string, UserFormatRule[]>();
       for (const r of uf.rules ?? []) {
         if (r?.scope !== "column" || !r.columnId) continue;
@@ -233,7 +232,6 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
           if (inputHeader && inRow && Object.prototype.hasOwnProperty.call(inRow, inputHeader)) {
             v = safeString((inRow as any)[inputHeader]);
           } else {
-            // fallback: try exact expected header from input if present
             const fallback = expectedHeaders[ci];
             if (inRow && Object.prototype.hasOwnProperty.call(inRow, fallback)) {
               v = safeString((inRow as any)[fallback]);
@@ -250,9 +248,7 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
           // global transforms first
           for (const gr of globalRules) {
             const res = applyRuleToValue(v, gr);
-            if (res.changed) {
-              v = res.value;
-            }
+            if (res.changed) v = res.value;
           }
 
           // column transforms + validations
@@ -262,39 +258,19 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
             if (res.changed) v = res.value;
           }
 
-          // required and validations: column flag + rules
+          // required flag and rule validation
           if (col.required && !v) {
-            issues.push({
-              rowIndex,
-              column: outHeader,
-              severity: "error",
-              message: "Required value is missing",
-            });
+            issues.push({ rowIndex, column: outHeader, severity: "error", message: "Required value is missing" });
           }
 
           for (const r of rules) {
             const msg = validateValue(v, r);
-            if (msg) {
-              issues.push({
-                rowIndex,
-                column: outHeader,
-                severity: r.type === "allowed_values" ? "error" : "error",
-                message: msg,
-              });
-            }
+            if (msg) issues.push({ rowIndex, column: outHeader, severity: "error", message: msg });
           }
 
-          // global validations too (if you ever add them)
           for (const gr of globalRules) {
             const msg = validateValue(v, gr);
-            if (msg) {
-              issues.push({
-                rowIndex,
-                column: outHeader,
-                severity: "error",
-                message: msg,
-              });
-            }
+            if (msg) issues.push({ rowIndex, column: outHeader, severity: "error", message: msg });
           }
 
           out[outHeader] = v;
@@ -302,10 +278,6 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
 
         return out;
       });
-
-      if (globalRules.some((r) => r.type === "trim")) fixesApplied.push("Applied global trim rule");
-      if (globalRules.some((r) => r.type === "uppercase")) fixesApplied.push("Applied global uppercase rule");
-      if (globalRules.some((r) => r.type === "no_spaces")) fixesApplied.push("Applied global no spaces rule");
 
       return {
         fixedHeaders: expectedHeaders,

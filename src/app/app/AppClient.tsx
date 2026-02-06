@@ -32,10 +32,7 @@ type UiIssue = {
 
 export default function AppClient() {
   const builtinFormats = useMemo(() => getAllBuiltinFormats(), []);
-
   const [userFormats, setUserFormats] = useState<CsvFormat[]>([]);
-
-  // default to General CSV
   const [formatId, setFormatId] = useState<string>("general_csv");
 
   const [headers, setHeaders] = useState<string[]>([]);
@@ -43,8 +40,6 @@ export default function AppClient() {
   const [issues, setIssues] = useState<UiIssue[]>([]);
   const [autoFixes, setAutoFixes] = useState<string[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
-
-  // store original uploaded text so switching formats can re-run processing
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
   const [quota, setQuota] = useState<any>(null);
@@ -78,14 +73,12 @@ export default function AppClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planForLimits]);
 
-  // Load custom formats from local storage and convert them into CsvFormat
   useEffect(() => {
     const refresh = () => {
       const raw = loadUserFormatsFromStorage();
       const converted = raw.map(userFormatToCsvFormat);
       setUserFormats(converted);
 
-      // if currently selected format no longer exists, fall back to general_csv
       const exists = [...builtinFormats, ...converted].some((f) => f.id === formatId);
       if (!exists) setFormatId("general_csv");
     };
@@ -160,18 +153,16 @@ export default function AppClient() {
   }
 
   function getSelectedFormat(): CsvFormat {
-    const found =
+    return (
       allFormats.builtins.find((f) => f.id === formatId) ??
       allFormats.users.find((f) => f.id === formatId) ??
-      allFormats.builtins[0];
-
-    return found ?? allFormats.builtins[0];
+      allFormats.builtins[0]
+    );
   }
 
   async function processCsvText(text: string) {
     const parsed = parseCsv(text);
     const fmt = getSelectedFormat();
-
     const result = applyFormatToParsedCsv(parsed.headers, parsed.rows, fmt);
 
     const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
@@ -194,7 +185,6 @@ export default function AppClient() {
     try {
       const text = await file.text();
       setLastUploadedText(text);
-
       await processCsvText(text);
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -204,7 +194,6 @@ export default function AppClient() {
     }
   }
 
-  // If user switches formats after uploading, re-run processing on the same file
   useEffect(() => {
     if (!lastUploadedText) return;
     (async () => {
@@ -253,8 +242,6 @@ export default function AppClient() {
   const autoFixRest = autoFixes.slice(autoFixPreviewCount);
   const autoFixRestCount = Math.max(0, autoFixRest.length);
 
-  const isUnlimited = (subStatus?.plan ?? "free") === "advanced";
-
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
@@ -270,26 +257,8 @@ export default function AppClient() {
             Pick a format → upload → auto-fix safe issues → export.
           </p>
         </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
-          <div className="font-medium">Monthly exports</div>
-          <div>
-            {isUnlimited ? (
-              <>Unlimited</>
-            ) : (
-              <>
-                {quota?.used ?? 0}/{planLimits?.exportsPerMonth ?? 3} used •{" "}
-                {(planLimits?.exportsPerMonth ?? 3) - (quota?.used ?? 0)} left
-              </>
-            )}
-          </div>
-          <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-            Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
-          </div>
-        </div>
       </div>
 
-      {/* FORMAT PICKER */}
       <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4">
         <div className="text-sm font-semibold text-[var(--text)]">Format</div>
 
@@ -314,7 +283,9 @@ export default function AppClient() {
           })}
 
           {allFormats.users.length ? (
-            <div className="mx-2 flex items-center text-xs text-[color:rgba(var(--muted-rgb),1)]">Your formats</div>
+            <div className="mx-2 flex items-center text-xs text-[color:rgba(var(--muted-rgb),1)]">
+              Your formats
+            </div>
           ) : null}
 
           {allFormats.users.map((f) => {
@@ -345,9 +316,6 @@ export default function AppClient() {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text)]">Upload CSV</h2>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.
-          </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
@@ -367,7 +335,6 @@ export default function AppClient() {
               className="rg-btn"
               onClick={() => void exportFixedCsv()}
               disabled={busy || rows.length === 0}
-              title={rows.length === 0 ? "Upload a CSV first" : "Export your fixed CSV"}
               type="button"
             >
               {busy ? "Working..." : "Export fixed CSV"}
@@ -402,10 +369,6 @@ export default function AppClient() {
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text)]">Manual fixes</h2>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
-          </p>
-
           <div className="mt-6">
             <EditableIssuesTable headers={tableHeaders} issues={issues as any} rows={rows} onUpdateRow={onUpdateRow} />
           </div>

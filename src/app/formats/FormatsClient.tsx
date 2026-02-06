@@ -4,6 +4,13 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
+import {
+  USER_FORMATS_STORAGE_KEY,
+  type RuleType,
+  type UserFormatColumn,
+  type UserFormatRule,
+  type UserFormatV1,
+} from "@/lib/formats/customUser";
 
 type SubStatus = {
   signedIn: boolean;
@@ -11,39 +18,21 @@ type SubStatus = {
   status: string;
 };
 
-type CustomColumn = {
-  key: string;
-  title: string;
-  required?: boolean;
-  defaultValue?: string;
-};
-
-type CustomFormat = {
-  version: 1;
-  id: string;
-  name: string;
-  source: "user";
-  columns: CustomColumn[];
-  rules: any[];
-  globalRules: any[];
-  createdAt: number;
-  updatedAt: number;
-};
-
-const STORAGE_KEY = "csnest_user_formats_v1";
-
-function safeIdPart(s: string) {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 40);
+function uid() {
+  return Math.random().toString(36).slice(2) + "_" + Date.now().toString(36);
 }
 
-function loadFormats(): CustomFormat[] {
+function newFormatId() {
+  return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function colLabel(i: number) {
+  return `Column ${i + 1}`;
+}
+
+function loadFormats(): UserFormatV1[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(USER_FORMATS_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -53,8 +42,9 @@ function loadFormats(): CustomFormat[] {
   }
 }
 
-function saveFormats(formats: CustomFormat[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formats));
+function saveFormats(formats: UserFormatV1[]) {
+  localStorage.setItem(USER_FORMATS_STORAGE_KEY, JSON.stringify(formats));
+  window.dispatchEvent(new Event("csnest-formats-changed"));
 }
 
 function downloadJson(filename: string, obj: unknown) {
@@ -69,11 +59,34 @@ function downloadJson(filename: string, obj: unknown) {
   URL.revokeObjectURL(url);
 }
 
+function safeNamePart(s: string) {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
+}
+
+const RULES: { type: RuleType; label: string; needsValue?: boolean; valueLabel?: string }[] = [
+  { type: "trim", label: "Trim" },
+  { type: "uppercase", label: "Uppercase" },
+  { type: "no_spaces", label: "No spaces" },
+  { type: "no_special_chars", label: "No special characters", needsValue: true, valueLabel: "Allowed characters (optional)" },
+  { type: "numeric_only", label: "Numeric only" },
+  { type: "max_length", label: "Max length", needsValue: true, valueLabel: "Max" },
+  { type: "required", label: "Required" },
+  { type: "default_value", label: "Default value", needsValue: true, valueLabel: "Default" },
+  { type: "allowed_values", label: "Allowed values", needsValue: true, valueLabel: "Comma list" },
+  { type: "regex_allow", label: "Regex allow", needsValue: true, valueLabel: "Pattern" },
+  { type: "regex_block", label: "Regex block", needsValue: true, valueLabel: "Pattern" },
+];
+
 export default function FormatsClient() {
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
-  const [formats, setFormats] = useState<CustomFormat[]>([]);
+  const [formats, setFormats] = useState<UserFormatV1[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
 
@@ -113,61 +126,65 @@ export default function FormatsClient() {
     return () => window.clearTimeout(t);
   }, [toast]);
 
-  const selected = useMemo(() => {
-    return formats.find((f) => f.id === selectedId) ?? null;
-  }, [formats, selectedId]);
+  const selected = useMemo(
+    () => formats.find((f) => f.id === selectedId) ?? null,
+    [formats, selectedId]
+  );
 
-  function updateSelected(patch: Partial<CustomFormat>) {
-    if (!selected) return;
-    const next = formats.map((f) =>
-      f.id === selected.id ? { ...f, ...patch, updatedAt: Date.now() } : f
-    );
+  function setAndPersist(next: UserFormatV1[]) {
     setFormats(next);
     saveFormats(next);
   }
 
+  function updateSelected(patch: Partial<UserFormatV1>) {
+    if (!selected) return;
+    const next = formats.map((f) =>
+      f.id === selected.id ? { ...f, ...patch, updatedAt: Date.now() } : f
+    );
+    setAndPersist(next);
+  }
+
   function createNewFormat() {
     const now = Date.now();
-    const id = `custom_${now}`;
-    const f: CustomFormat = {
+    const f: UserFormatV1 = {
       version: 1,
-      id,
+      id: newFormatId(),
       name: "New format",
       source: "user",
-      columns: [
-        { key: "email", title: "Email", required: true, defaultValue: "" },
-        { key: "sku", title: "SKU", required: true, defaultValue: "" },
-      ],
+      columns: [], // IMPORTANT: start empty (no email/sku)
       rules: [],
       globalRules: [],
       createdAt: now,
       updatedAt: now,
     };
-
     const next = [f, ...formats];
-    setFormats(next);
+    setAndPersist(next);
     setSelectedId(f.id);
-    saveFormats(next);
     setToast("Created new format");
   }
 
   function deleteSelected() {
     if (!selected) return;
     const next = formats.filter((f) => f.id !== selected.id);
-    setFormats(next);
+    setAndPersist(next);
     setSelectedId(next[0]?.id ?? null);
-    saveFormats(next);
     setToast("Deleted format");
   }
 
   function addColumn() {
     if (!selected) return;
-    const nextCol: CustomColumn = { key: `col_${selected.columns.length + 1}`, title: "New Column", required: false, defaultValue: "" };
-    updateSelected({ columns: [...selected.columns, nextCol] });
+    const col: UserFormatColumn = {
+      id: uid(),
+      key: "", // IMPORTANT: blank
+      title: "", // IMPORTANT: blank
+      required: false,
+      defaultValue: "",
+    };
+    updateSelected({ columns: [...selected.columns, col] });
     setToast("Added column");
   }
 
-  function updateColumn(idx: number, patch: Partial<CustomColumn>) {
+  function updateColumn(idx: number, patch: Partial<UserFormatColumn>) {
     if (!selected) return;
     const cols = [...selected.columns];
     cols[idx] = { ...cols[idx], ...patch };
@@ -176,14 +193,73 @@ export default function FormatsClient() {
 
   function removeColumn(idx: number) {
     if (!selected) return;
+    const removedId = selected.columns[idx]?.id;
     const cols = selected.columns.filter((_, i) => i !== idx);
-    updateSelected({ columns: cols });
+    const rules = (selected.rules ?? []).filter((r) => r.columnId !== removedId);
+    updateSelected({ columns: cols, rules });
     setToast("Removed column");
+  }
+
+  function getGlobalRule(type: RuleType) {
+    return (selected?.globalRules ?? []).find((r) => r.type === type) ?? null;
+  }
+
+  function getColumnRule(columnId: string, type: RuleType) {
+    return (
+      (selected?.rules ?? []).find(
+        (r) => r.scope === "column" && r.columnId === columnId && r.type === type
+      ) ?? null
+    );
+  }
+
+  function toggleGlobalRule(type: RuleType, enabled: boolean) {
+    if (!selected) return;
+    const exists = (selected.globalRules ?? []).some((r) => r.type === type);
+    if (enabled && exists) return;
+    if (!enabled && !exists) return;
+
+    const nextRules = enabled
+      ? [...(selected.globalRules ?? []), { scope: "global", type } as UserFormatRule]
+      : (selected.globalRules ?? []).filter((r) => r.type !== type);
+
+    updateSelected({ globalRules: nextRules });
+  }
+
+  function setGlobalRuleValue(type: RuleType, value: any) {
+    if (!selected) return;
+    const nextRules = (selected.globalRules ?? []).map((r) =>
+      r.type === type ? { ...r, value } : r
+    );
+    updateSelected({ globalRules: nextRules });
+  }
+
+  function toggleColumnRule(columnId: string, type: RuleType, enabled: boolean) {
+    if (!selected) return;
+    const all = selected.rules ?? [];
+    const exists = all.some((r) => r.scope === "column" && r.columnId === columnId && r.type === type);
+    if (enabled && exists) return;
+    if (!enabled && !exists) return;
+
+    const next = enabled
+      ? [...all, { scope: "column", columnId, type } as UserFormatRule]
+      : all.filter((r) => !(r.scope === "column" && r.columnId === columnId && r.type === type));
+
+    updateSelected({ rules: next });
+  }
+
+  function setColumnRuleValue(columnId: string, type: RuleType, value: any) {
+    if (!selected) return;
+    const next = (selected.rules ?? []).map((r) => {
+      if (r.scope === "column" && r.columnId === columnId && r.type === type) return { ...r, value };
+      return r;
+    });
+    updateSelected({ rules: next });
   }
 
   function exportSelected() {
     if (!selected) return;
-    downloadJson(`${selected.name ? safeIdPart(selected.name) : selected.id}.csnest-format.json`, selected);
+    const base = selected.name ? safeNamePart(selected.name) : selected.id;
+    downloadJson(`${base}.csnest-format.json`, selected);
     setToast("Exported format file");
   }
 
@@ -196,10 +272,15 @@ export default function FormatsClient() {
       if (obj.version !== 1) throw new Error("Unsupported format version");
 
       const now = Date.now();
-      const imported: CustomFormat = {
+      let importedId = typeof obj.id === "string" ? obj.id : newFormatId();
+
+      // If id collides, generate a new one so formats don't overwrite each other
+      if (formats.some((f) => f.id === importedId)) importedId = newFormatId();
+
+      const imported: UserFormatV1 = {
         version: 1,
-        id: obj.id && typeof obj.id === "string" ? obj.id : `custom_${now}`,
-        name: obj.name && typeof obj.name === "string" ? obj.name : "Imported format",
+        id: importedId,
+        name: typeof obj.name === "string" ? obj.name : "Imported format",
         source: "user",
         columns: Array.isArray(obj.columns) ? obj.columns : [],
         rules: Array.isArray(obj.rules) ? obj.rules : [],
@@ -209,21 +290,76 @@ export default function FormatsClient() {
       };
 
       const next = [imported, ...formats];
-      setFormats(next);
+      setAndPersist(next);
       setSelectedId(imported.id);
-      saveFormats(next);
       setToast("Imported format");
     } catch (e: any) {
       setToast(e?.message ?? "Import failed");
     }
   }
 
+  const previewHeaders = useMemo(() => {
+    if (!selected) return [];
+    return selected.columns.map((c, i) => (c.title?.trim() ? c.title.trim() : colLabel(i)));
+  }, [selected]);
+
+  const previewRows = useMemo(() => {
+    if (!selected) return [];
+    const cols = selected.columns;
+
+    const sampleRaw = cols.map((_, i) => (i === 0 ? "  Example value  " : i === 1 ? "ab c-12" : "Test123"));
+    const global = selected.globalRules ?? [];
+
+    const applyOne = (value: string, rules: UserFormatRule[]) => {
+      let v = value;
+
+      if (rules.some((r) => r.type === "trim")) v = v.trim();
+      if (rules.some((r) => r.type === "uppercase")) v = v.toUpperCase();
+      if (rules.some((r) => r.type === "no_spaces")) v = v.replace(/\s+/g, "");
+
+      const ns = rules.find((r) => r.type === "no_special_chars");
+      if (ns) {
+        const allowed = String(ns.value ?? ns.value?.allowed ?? "").trim();
+        const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+        const re = new RegExp(`[^a-zA-Z0-9${esc}]`, "g");
+        v = v.replace(re, "");
+      }
+
+      if (rules.some((r) => r.type === "numeric_only")) v = v.replace(/[^\d]/g, "");
+
+      const ml = rules.find((r) => r.type === "max_length");
+      if (ml) {
+        const n = Number(ml.value ?? 0);
+        if (Number.isFinite(n) && n > 0 && v.length > n) v = v.slice(0, n);
+      }
+
+      const dv = rules.find((r) => r.type === "default_value");
+      if (dv && !v) v = String(dv.value ?? "");
+
+      return v;
+    };
+
+    const rowRaw: Record<string, string> = {};
+    const rowOut: Record<string, string> = {};
+
+    cols.forEach((c, i) => {
+      const header = previewHeaders[i];
+      const colRules = (selected.rules ?? []).filter((r) => r.scope === "column" && r.columnId === c.id);
+      const allRules = [...global, ...colRules];
+
+      rowRaw[header] = sampleRaw[i] ?? "";
+      rowOut[header] = applyOne(sampleRaw[i] ?? "", allRules);
+    });
+
+    return [rowRaw, rowOut];
+  }, [selected, previewHeaders]);
+
   if (!canAccessCustomFormats) {
     return (
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="text-3xl font-semibold text-[var(--text)]">Custom Formats</h1>
         <p className="mt-3 max-w-2xl text-sm text-[var(--muted)]">
-          Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats for any workflow.
+          Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
@@ -231,10 +367,7 @@ export default function FormatsClient() {
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Upgrade to Advanced</span>
           </button>
 
-          <Link
-            href="/"
-            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
-          >
+          <Link href="/" className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]">
             Back to Home
           </Link>
         </div>
@@ -340,7 +473,7 @@ export default function FormatsClient() {
             <div>
               <div className="text-sm font-semibold text-[var(--text)]">Format Builder</div>
               <p className="mt-2 text-sm text-[var(--muted)]">
-                Edit the format name and columns now. Rules and sample CSV preview come next.
+                Add columns, configure rules, and preview the final CSV layout.
               </p>
             </div>
 
@@ -392,26 +525,119 @@ export default function FormatsClient() {
               </div>
 
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+                <div className="text-sm font-semibold text-[var(--text)]">Format rules (apply to all columns)</div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {RULES.filter((r) =>
+                    ["trim", "uppercase", "no_spaces", "no_special_chars", "numeric_only", "max_length"].includes(r.type)
+                  ).map((r) => {
+                    const existing = getGlobalRule(r.type);
+                    const enabled = !!existing;
+
+                    return (
+                      <div key={r.type} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                        <label className="flex items-center gap-2 text-sm text-[var(--text)]">
+                          <input
+                            type="checkbox"
+                            checked={enabled}
+                            onChange={(e) => toggleGlobalRule(r.type, e.target.checked)}
+                          />
+                          {r.label}
+                        </label>
+
+                        {r.needsValue && enabled ? (
+                          <div className="mt-3">
+                            <div className="text-xs text-[var(--muted)]">{r.valueLabel}</div>
+                            <input
+                              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
+                              value={String(existing?.value ?? "")}
+                              onChange={(e) => setGlobalRuleValue(r.type, e.target.value)}
+                              placeholder={r.type === "max_length" ? "10" : ""}
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+                <div className="text-sm font-semibold text-[var(--text)]">Preview</div>
+                <div className="mt-2 text-xs text-[var(--muted)]">
+                  Row 1 is sample input. Row 2 shows output after applying your current rules.
+                </div>
+
+                <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+                  <table className="min-w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[var(--border)]">
+                        {previewHeaders.map((h, i) => (
+                          <th key={i} className="px-3 py-2 font-semibold text-[var(--text)] whitespace-nowrap">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {previewRows.map((r, idx) => (
+                        <tr key={idx} className={idx === 0 ? "border-b border-[var(--border)]" : ""}>
+                          {previewHeaders.map((h, i) => (
+                            <td key={i} className="px-3 py-2 text-[var(--text)] whitespace-nowrap">
+                              {(r as any)[h] ?? ""}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
                 <div className="text-sm font-semibold text-[var(--text)]">Columns</div>
+                <div className="mt-2 text-xs text-[var(--muted)]">
+                  Keys and titles can be blank. They will display as Column 1, Column 2, and so on.
+                </div>
 
                 <div className="mt-4 space-y-3">
+                  {selected.columns.length === 0 ? (
+                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
+                      No columns yet. Click Add column to begin.
+                    </div>
+                  ) : null}
+
                   {selected.columns.map((c, idx) => (
-                    <div key={idx} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                      <div className="grid gap-3 md:grid-cols-2">
+                    <div key={c.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                      <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-xs text-[var(--muted)]">Key</div>
+                          <div className="text-sm font-semibold text-[var(--text)]">{colLabel(idx)}</div>
+                          <div className="mt-1 text-xs text-[var(--muted)]">Internal ID: {c.id}</div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--text)]"
+                          onClick={() => removeColumn(idx)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 md:grid-cols-2">
+                        <div>
+                          <div className="text-xs text-[var(--muted)]">Key (optional)</div>
                           <input
                             className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                            value={c.key}
+                            value={c.key ?? ""}
                             onChange={(e) => updateColumn(idx, { key: e.target.value })}
                           />
                         </div>
 
                         <div>
-                          <div className="text-xs text-[var(--muted)]">Title</div>
+                          <div className="text-xs text-[var(--muted)]">Title (optional)</div>
                           <input
                             className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                            value={c.title}
+                            value={c.title ?? ""}
                             onChange={(e) => updateColumn(idx, { title: e.target.value })}
                           />
                         </div>
@@ -435,21 +661,42 @@ export default function FormatsClient() {
                         </div>
                       </div>
 
-                      <div className="mt-3">
-                        <button
-                          type="button"
-                          className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--text)]"
-                          onClick={() => removeColumn(idx)}
-                        >
-                          Remove column
-                        </button>
+                      <div className="mt-5">
+                        <div className="text-sm font-semibold text-[var(--text)]">Column rules</div>
+                        <div className="mt-3 grid gap-3 md:grid-cols-2">
+                          {RULES.map((r) => {
+                            const existing = getColumnRule(c.id, r.type);
+                            const enabled = !!existing;
+
+                            return (
+                              <div key={r.type} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                                <label className="flex items-center gap-2 text-sm text-[var(--text)]">
+                                  <input
+                                    type="checkbox"
+                                    checked={enabled}
+                                    onChange={(e) => toggleColumnRule(c.id, r.type, e.target.checked)}
+                                  />
+                                  {r.label}
+                                </label>
+
+                                {r.needsValue && enabled ? (
+                                  <div className="mt-3">
+                                    <div className="text-xs text-[var(--muted)]">{r.valueLabel}</div>
+                                    <input
+                                      className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
+                                      value={String(existing?.value ?? "")}
+                                      onChange={(e) => setColumnRuleValue(c.id, r.type, e.target.value)}
+                                      placeholder={r.type === "max_length" ? "10" : ""}
+                                    />
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   ))}
-                </div>
-
-                <div className="mt-4 text-xs text-[var(--muted)]">
-                  Rules and sample CSV preview will be added next. This step gets saving and format files working now.
                 </div>
               </div>
             </div>
