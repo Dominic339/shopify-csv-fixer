@@ -1,50 +1,23 @@
+// src/app/formats/FormatsClient.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { UpgradeModal } from "@/components/UpgradeModal";
-import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
+import { parseCsv } from "@/lib/csv";
 import {
-  USER_FORMATS_STORAGE_KEY,
+  columnTemplateTitle,
+  generateUserFormatId,
+  importUserFormatsIntoStorage,
+  loadUserFormatsFromStorage,
+  saveUserFormatsToStorage,
   type RuleType,
   type UserFormatColumn,
   type UserFormatRule,
   type UserFormatV1,
 } from "@/lib/formats/customUser";
 
-type SubStatus = {
-  signedIn: boolean;
-  plan: "free" | "basic" | "advanced";
-  status: string;
-};
-
 function uid() {
   return Math.random().toString(36).slice(2) + "_" + Date.now().toString(36);
-}
-
-function newFormatId() {
-  return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-}
-
-function colLabel(i: number) {
-  return `Column ${i + 1}`;
-}
-
-function loadFormats(): UserFormatV1[] {
-  try {
-    const raw = localStorage.getItem(USER_FORMATS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(Boolean);
-  } catch {
-    return [];
-  }
-}
-
-function saveFormats(formats: UserFormatV1[]) {
-  localStorage.setItem(USER_FORMATS_STORAGE_KEY, JSON.stringify(formats));
-  window.dispatchEvent(new Event("csnest-formats-changed"));
 }
 
 function downloadJson(filename: string, obj: unknown) {
@@ -68,54 +41,77 @@ function safeNamePart(s: string) {
     .slice(0, 40);
 }
 
-const RULES: { type: RuleType; label: string; needsValue?: boolean; valueLabel?: string }[] = [
-  { type: "trim", label: "Trim" },
-  { type: "uppercase", label: "Uppercase" },
-  { type: "no_spaces", label: "No spaces" },
-  { type: "no_special_chars", label: "No special characters", needsValue: true, valueLabel: "Allowed characters (optional)" },
-  { type: "numeric_only", label: "Numeric only" },
-  { type: "max_length", label: "Max length", needsValue: true, valueLabel: "Max" },
-  { type: "required", label: "Required" },
-  { type: "default_value", label: "Default value", needsValue: true, valueLabel: "Default" },
-  { type: "allowed_values", label: "Allowed values", needsValue: true, valueLabel: "Comma list" },
-  { type: "regex_allow", label: "Regex allow", needsValue: true, valueLabel: "Pattern" },
-  { type: "regex_block", label: "Regex block", needsValue: true, valueLabel: "Pattern" },
-];
+const GLOBAL_RULES: { type: RuleType; label: string; needsValue?: boolean; valueLabel?: string }[] =
+  [
+    { type: "trim", label: "Trim" },
+    { type: "uppercase", label: "Uppercase" },
+    { type: "no_spaces", label: "No spaces" },
+    {
+      type: "no_special_chars",
+      label: "No special characters",
+      needsValue: true,
+      valueLabel: "Allowed characters (optional)",
+    },
+    { type: "numeric_only", label: "Numeric only" },
+    { type: "max_length", label: "Max length", needsValue: true, valueLabel: "Max" },
+  ];
+
+const COLUMN_RULES: { type: RuleType; label: string; needsValue?: boolean; valueLabel?: string }[] =
+  [
+    ...GLOBAL_RULES,
+    { type: "required", label: "Required" },
+    { type: "default_value", label: "Default value", needsValue: true, valueLabel: "Default" },
+    { type: "allowed_values", label: "Allowed values", needsValue: true, valueLabel: "Comma list" },
+    { type: "regex_allow", label: "Regex allow", needsValue: true, valueLabel: "Pattern" },
+    { type: "regex_block", label: "Regex block", needsValue: true, valueLabel: "Pattern" },
+  ];
+
+function suggestRulesForHeader(header: string): {
+  global: UserFormatRule[];
+  perColumn: UserFormatRule[];
+} {
+  const h = header.trim().toLowerCase();
+
+  // conservative suggestions only
+  const per: UserFormatRule[] = [];
+
+  if (h.includes("email")) {
+    per.push({ scope: "column", type: "trim" });
+    per.push({ scope: "column", type: "no_spaces" });
+  }
+
+  if (h.includes("sku") || h.includes("handle")) {
+    per.push({ scope: "column", type: "trim" });
+    per.push({ scope: "column", type: "uppercase" });
+    per.push({ scope: "column", type: "no_spaces" });
+    per.push({
+      scope: "column",
+      type: "no_special_chars",
+      value: { allowed: "-_" },
+    });
+  }
+
+  if (h.includes("phone") || h.includes("zip") || h.endsWith("_id") || h === "id") {
+    per.push({ scope: "column", type: "trim" });
+    per.push({ scope: "column", type: "numeric_only" });
+  }
+
+  return {
+    global: [],
+    perColumn: per,
+  };
+}
 
 export default function FormatsClient() {
-  const [sub, setSub] = useState<SubStatus | null>(null);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
-
   const [formats, setFormats] = useState<UserFormatV1[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
 
-  const importInputRef = useRef<HTMLInputElement | null>(null);
+  const importJsonRef = useRef<HTMLInputElement | null>(null);
+  const importCsvRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetch("/api/subscription/status", { cache: "no-store" });
-        const j = (await r.json()) as SubStatus;
-        if (!cancelled) setSub(j);
-      } catch {
-        if (!cancelled) setSub(null);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const isAdvanced = useMemo(() => {
-    return !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
-  }, [sub]);
-
-  const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvanced;
-
-  useEffect(() => {
-    const initial = loadFormats();
+    const initial = loadUserFormatsFromStorage();
     setFormats(initial);
     setSelectedId(initial[0]?.id ?? null);
   }, []);
@@ -133,7 +129,7 @@ export default function FormatsClient() {
 
   function setAndPersist(next: UserFormatV1[]) {
     setFormats(next);
-    saveFormats(next);
+    saveUserFormatsToStorage(next);
   }
 
   function updateSelected(patch: Partial<UserFormatV1>) {
@@ -144,23 +140,40 @@ export default function FormatsClient() {
     setAndPersist(next);
   }
 
-  function createNewFormat() {
+  function createNewFormatWithBlankColumns(count: number) {
     const now = Date.now();
+    const existingIds = new Set(formats.map((f) => f.id));
+    const id = generateUserFormatId(existingIds);
+
+    const cols: UserFormatColumn[] = Array.from({ length: count }).map((_, i) => ({
+      id: uid(),
+      key: "",
+      title: columnTemplateTitle(i), // IMPORTANT: start with template title in input
+      required: false,
+      defaultValue: "",
+    }));
+
     const f: UserFormatV1 = {
       version: 1,
-      id: newFormatId(),
+      id,
       name: "New format",
       source: "user",
-      columns: [], // IMPORTANT: start empty (no email/sku)
+      columns: cols,
       rules: [],
       globalRules: [],
       createdAt: now,
       updatedAt: now,
     };
+
     const next = [f, ...formats];
     setAndPersist(next);
     setSelectedId(f.id);
     setToast("Created new format");
+  }
+
+  function createNewFormat() {
+    // start with 1 column so UI looks alive
+    createNewFormatWithBlankColumns(1);
   }
 
   function deleteSelected() {
@@ -173,13 +186,16 @@ export default function FormatsClient() {
 
   function addColumn() {
     if (!selected) return;
+
+    const nextIndex = selected.columns.length;
     const col: UserFormatColumn = {
       id: uid(),
-      key: "", // IMPORTANT: blank
-      title: "", // IMPORTANT: blank
+      key: "",
+      title: columnTemplateTitle(nextIndex), // IMPORTANT
       required: false,
       defaultValue: "",
     };
+
     updateSelected({ columns: [...selected.columns, col] });
     setToast("Added column");
   }
@@ -236,7 +252,9 @@ export default function FormatsClient() {
   function toggleColumnRule(columnId: string, type: RuleType, enabled: boolean) {
     if (!selected) return;
     const all = selected.rules ?? [];
-    const exists = all.some((r) => r.scope === "column" && r.columnId === columnId && r.type === type);
+    const exists = all.some(
+      (r) => r.scope === "column" && r.columnId === columnId && r.type === type
+    );
     if (enabled && exists) return;
     if (!enabled && !exists) return;
 
@@ -263,79 +281,123 @@ export default function FormatsClient() {
     setToast("Exported format file");
   }
 
-  async function onImportFile(file: File) {
+  function exportAllFormats() {
+    downloadJson("csnest-format-pack.json", loadUserFormatsFromStorage());
+    setToast("Exported format pack");
+  }
+
+  async function onImportJson(file: File) {
     try {
       const text = await file.text();
-      const obj = JSON.parse(text);
+      const payload = JSON.parse(text);
 
-      if (!obj || typeof obj !== "object") throw new Error("Invalid format file");
-      if (obj.version !== 1) throw new Error("Unsupported format version");
+      const result = importUserFormatsIntoStorage(payload);
 
-      const now = Date.now();
-      let importedId = typeof obj.id === "string" ? obj.id : newFormatId();
+      const refreshed = loadUserFormatsFromStorage();
+      setFormats(refreshed);
+      setSelectedId(refreshed[0]?.id ?? null);
 
-      // If id collides, generate a new one so formats don't overwrite each other
-      if (formats.some((f) => f.id === importedId)) importedId = newFormatId();
-
-      const imported: UserFormatV1 = {
-        version: 1,
-        id: importedId,
-        name: typeof obj.name === "string" ? obj.name : "Imported format",
-        source: "user",
-        columns: Array.isArray(obj.columns) ? obj.columns : [],
-        rules: Array.isArray(obj.rules) ? obj.rules : [],
-        globalRules: Array.isArray(obj.globalRules) ? obj.globalRules : [],
-        createdAt: typeof obj.createdAt === "number" ? obj.createdAt : now,
-        updatedAt: now,
-      };
-
-      const next = [imported, ...formats];
-      setAndPersist(next);
-      setSelectedId(imported.id);
-      setToast("Imported format");
+      setToast(`Imported ${result.imported} format${result.imported === 1 ? "" : "s"}`);
     } catch (e: any) {
       setToast(e?.message ?? "Import failed");
     }
   }
 
+  async function onImportCsv(file: File) {
+    try {
+      const text = await file.text();
+      const parsed = parseCsv(text);
+
+      const headers = (parsed.headers ?? []).filter((h) => h.trim().length > 0);
+      if (!headers.length) {
+        setToast("CSV has no headers");
+        return;
+      }
+
+      const now = Date.now();
+      const existingIds = new Set(formats.map((f) => f.id));
+      const id = generateUserFormatId(existingIds);
+
+      // Build columns from CSV headers
+      const cols: UserFormatColumn[] = headers.map((h, i) => ({
+        id: uid(),
+        key: h, // key is the real header so Fixer can match
+        title: h || columnTemplateTitle(i), // title starts as header name
+        required: false,
+        defaultValue: "",
+      }));
+
+      // Suggest rules
+      const globalRules: UserFormatRule[] = [{ scope: "global", type: "trim" }];
+
+      const rules: UserFormatRule[] = [];
+      cols.forEach((c, i) => {
+        const hdr = headers[i] ?? "";
+        const sugg = suggestRulesForHeader(hdr);
+        for (const r of sugg.perColumn) rules.push({ ...r, columnId: c.id });
+      });
+
+      const f: UserFormatV1 = {
+        version: 1,
+        id,
+        name: `From CSV: ${file.name.replace(/\.csv$/i, "")}`,
+        source: "user",
+        columns: cols,
+        rules,
+        globalRules,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const next = [f, ...formats];
+      setAndPersist(next);
+      setSelectedId(f.id);
+
+      setToast("Created format from CSV");
+    } catch (e: any) {
+      setToast(e?.message ?? "CSV import failed");
+    }
+  }
+
   const previewHeaders = useMemo(() => {
     if (!selected) return [];
-    return selected.columns.map((c, i) => (c.title?.trim() ? c.title.trim() : colLabel(i)));
+    return selected.columns.map((c, i) => (c.title?.trim() ? c.title.trim() : columnTemplateTitle(i)));
   }, [selected]);
 
   const previewRows = useMemo(() => {
     if (!selected) return [];
     const cols = selected.columns;
 
-    const sampleRaw = cols.map((_, i) => (i === 0 ? "  Example value  " : i === 1 ? "ab c-12" : "Test123"));
+    const sampleRaw = cols.map((_, i) =>
+      i === 0 ? "  Example value  " : i === 1 ? "ab c-12" : "Test123"
+    );
+
     const global = selected.globalRules ?? [];
 
-    const applyOne = (value: string, rules: UserFormatRule[]) => {
+    const applyRules = (value: string, rules: UserFormatRule[]) => {
       let v = value;
-
-      if (rules.some((r) => r.type === "trim")) v = v.trim();
-      if (rules.some((r) => r.type === "uppercase")) v = v.toUpperCase();
-      if (rules.some((r) => r.type === "no_spaces")) v = v.replace(/\s+/g, "");
-
-      const ns = rules.find((r) => r.type === "no_special_chars");
-      if (ns) {
-        const allowed = String(ns.value ?? ns.value?.allowed ?? "").trim();
-        const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
-        const re = new RegExp(`[^a-zA-Z0-9${esc}]`, "g");
-        v = v.replace(re, "");
+      for (const r of rules) {
+        if (r.scope !== "global" && r.scope !== "column") continue;
+        // apply only transform rules for preview
+        if (r.type === "trim") v = v.trim();
+        if (r.type === "uppercase") v = v.toUpperCase();
+        if (r.type === "no_spaces") v = v.replace(/\s+/g, "");
+        if (r.type === "no_special_chars") {
+          const allowed = String(r.value?.allowed ?? r.value ?? "").trim();
+          const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+          const re = new RegExp(`[^a-zA-Z0-9${esc}]`, "g");
+          v = v.replace(re, "");
+        }
+        if (r.type === "numeric_only") v = v.replace(/[^\d]/g, "");
+        if (r.type === "max_length") {
+          const n = Number(r.value ?? 0);
+          if (Number.isFinite(n) && n > 0 && v.length > n) v = v.slice(0, n);
+        }
+        if (r.type === "default_value") {
+          const dv = String(r.value ?? "");
+          if (!v) v = dv;
+        }
       }
-
-      if (rules.some((r) => r.type === "numeric_only")) v = v.replace(/[^\d]/g, "");
-
-      const ml = rules.find((r) => r.type === "max_length");
-      if (ml) {
-        const n = Number(ml.value ?? 0);
-        if (Number.isFinite(n) && n > 0 && v.length > n) v = v.slice(0, n);
-      }
-
-      const dv = rules.find((r) => r.type === "default_value");
-      if (dv && !v) v = String(dv.value ?? "");
-
       return v;
     };
 
@@ -344,43 +406,17 @@ export default function FormatsClient() {
 
     cols.forEach((c, i) => {
       const header = previewHeaders[i];
-      const colRules = (selected.rules ?? []).filter((r) => r.scope === "column" && r.columnId === c.id);
+      const colRules = (selected.rules ?? []).filter(
+        (r) => r.scope === "column" && r.columnId === c.id
+      );
       const allRules = [...global, ...colRules];
 
       rowRaw[header] = sampleRaw[i] ?? "";
-      rowOut[header] = applyOne(sampleRaw[i] ?? "", allRules);
+      rowOut[header] = applyRules(sampleRaw[i] ?? "", allRules);
     });
 
     return [rowRaw, rowOut];
   }, [selected, previewHeaders]);
-
-  if (!canAccessCustomFormats) {
-    return (
-      <main className="mx-auto max-w-6xl px-6 py-16">
-        <h1 className="text-3xl font-semibold text-[var(--text)]">Custom Formats</h1>
-        <p className="mt-3 max-w-2xl text-sm text-[var(--muted)]">
-          Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <button type="button" className="rgb-btn" onClick={() => setUpgradeOpen(true)}>
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Upgrade to Advanced</span>
-          </button>
-
-          <Link href="/" className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]">
-            Back to Home
-          </Link>
-        </div>
-
-        <UpgradeModal
-          open={upgradeOpen}
-          title="Advanced only"
-          message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
-          onClose={() => setUpgradeOpen(false)}
-        />
-      </main>
-    );
-  }
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -392,14 +428,12 @@ export default function FormatsClient() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/app"
-            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
-          >
-            CSV Fixer
-          </Link>
-        </div>
+        <Link
+          href="/app"
+          className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
+        >
+          CSV Fixer
+        </Link>
       </div>
 
       {toast ? (
@@ -409,13 +443,25 @@ export default function FormatsClient() {
       ) : null}
 
       <input
-        ref={importInputRef}
+        ref={importJsonRef}
         type="file"
         accept="application/json,.json"
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) void onImportFile(f);
+          if (f) void onImportJson(f);
+          if (e.target) e.target.value = "";
+        }}
+      />
+
+      <input
+        ref={importCsvRef}
+        type="file"
+        accept=".csv,text/csv"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void onImportCsv(f);
           if (e.target) e.target.value = "";
         }}
       />
@@ -458,13 +504,21 @@ export default function FormatsClient() {
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">New format</span>
             </button>
 
-            <button type="button" className="rgb-btn" onClick={() => importInputRef.current?.click()}>
+            <button type="button" className="rgb-btn" onClick={() => importJsonRef.current?.click()}>
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Import format file</span>
+            </button>
+
+            <button type="button" className="rgb-btn" onClick={() => importCsvRef.current?.click()}>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Import sample CSV</span>
+            </button>
+
+            <button type="button" className="rgb-btn" onClick={exportAllFormats}>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Export all formats</span>
             </button>
           </div>
 
           <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--muted)]">
-            Formats are saved locally on your device. Export a format file to back up or share it.
+            Formats are saved locally on your device. Export a format file or pack to back up or share it.
           </div>
         </div>
 
@@ -473,7 +527,7 @@ export default function FormatsClient() {
             <div>
               <div className="text-sm font-semibold text-[var(--text)]">Format Builder</div>
               <p className="mt-2 text-sm text-[var(--muted)]">
-                Add columns, configure rules, and preview the final CSV layout.
+                Columns start with template names like Column 1. Edit Title to rename.
               </p>
             </div>
 
@@ -527,10 +581,8 @@ export default function FormatsClient() {
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
                 <div className="text-sm font-semibold text-[var(--text)]">Format rules (apply to all columns)</div>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {RULES.filter((r) =>
-                    ["trim", "uppercase", "no_spaces", "no_special_chars", "numeric_only", "max_length"].includes(r.type)
-                  ).map((r) => {
-                    const existing = getGlobalRule(r.type);
+                  {GLOBAL_RULES.map((r) => {
+                    const existing = (selected.globalRules ?? []).find((x) => x.type === r.type) ?? null;
                     const enabled = !!existing;
 
                     return (
@@ -551,7 +603,6 @@ export default function FormatsClient() {
                               className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
                               value={String(existing?.value ?? "")}
                               onChange={(e) => setGlobalRuleValue(r.type, e.target.value)}
-                              placeholder={r.type === "max_length" ? "10" : ""}
                             />
                           </div>
                         ) : null}
@@ -595,22 +646,13 @@ export default function FormatsClient() {
 
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
                 <div className="text-sm font-semibold text-[var(--text)]">Columns</div>
-                <div className="mt-2 text-xs text-[var(--muted)]">
-                  Keys and titles can be blank. They will display as Column 1, Column 2, and so on.
-                </div>
 
                 <div className="mt-4 space-y-3">
-                  {selected.columns.length === 0 ? (
-                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
-                      No columns yet. Click Add column to begin.
-                    </div>
-                  ) : null}
-
                   {selected.columns.map((c, idx) => (
                     <div key={c.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-[var(--text)]">{colLabel(idx)}</div>
+                          <div className="text-sm font-semibold text-[var(--text)]">{columnTemplateTitle(idx)}</div>
                           <div className="mt-1 text-xs text-[var(--muted)]">Internal ID: {c.id}</div>
                         </div>
 
@@ -634,10 +676,10 @@ export default function FormatsClient() {
                         </div>
 
                         <div>
-                          <div className="text-xs text-[var(--muted)]">Title (optional)</div>
+                          <div className="text-xs text-[var(--muted)]">Title</div>
                           <input
                             className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                            value={c.title ?? ""}
+                            value={c.title ?? columnTemplateTitle(idx)}
                             onChange={(e) => updateColumn(idx, { title: e.target.value })}
                           />
                         </div>
@@ -664,7 +706,7 @@ export default function FormatsClient() {
                       <div className="mt-5">
                         <div className="text-sm font-semibold text-[var(--text)]">Column rules</div>
                         <div className="mt-3 grid gap-3 md:grid-cols-2">
-                          {RULES.map((r) => {
+                          {COLUMN_RULES.map((r) => {
                             const existing = getColumnRule(c.id, r.type);
                             const enabled = !!existing;
 
@@ -686,7 +728,6 @@ export default function FormatsClient() {
                                       className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
                                       value={String(existing?.value ?? "")}
                                       onChange={(e) => setColumnRuleValue(c.id, r.type, e.target.value)}
-                                      placeholder={r.type === "max_length" ? "10" : ""}
                                     />
                                   </div>
                                 ) : null}
@@ -697,19 +738,18 @@ export default function FormatsClient() {
                       </div>
                     </div>
                   ))}
+
+                  {selected.columns.length === 0 ? (
+                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
+                      No columns yet. Click Add column to begin.
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
-
-      <UpgradeModal
-        open={upgradeOpen}
-        title="Advanced only"
-        message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
-        onClose={() => setUpgradeOpen(false)}
-      />
     </main>
   );
 }

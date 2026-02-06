@@ -1,3 +1,4 @@
+// src/app/app/AppClient.tsx
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -32,14 +33,27 @@ type UiIssue = {
 
 export default function AppClient() {
   const builtinFormats = useMemo(() => getAllBuiltinFormats(), []);
+
   const [userFormats, setUserFormats] = useState<CsvFormat[]>([]);
+
+  // default to General CSV
   const [formatId, setFormatId] = useState<string>("general_csv");
+
+  const allFormats = useMemo(() => {
+    return [...builtinFormats, ...userFormats];
+  }, [builtinFormats, userFormats]);
+
+  const activeFormat = useMemo(() => {
+    return allFormats.find((f) => f.id === formatId) ?? allFormats[0];
+  }, [allFormats, formatId]);
 
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
   const [autoFixes, setAutoFixes] = useState<string[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
+
+  // store original uploaded text so switching formats can re-run processing
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
   const [quota, setQuota] = useState<any>(null);
@@ -49,8 +63,17 @@ export default function AppClient() {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
+  // inline edit state for the restored table
+  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
+    null
+  );
+
   const planForLimits = useMemo(() => {
     return (subStatus?.plan ?? "free") as "free" | "basic" | "advanced";
+  }, [subStatus]);
+
+  const isUnlimited = useMemo(() => {
+    return subStatus?.plan === "advanced" && subStatus?.status === "active";
   }, [subStatus]);
 
   async function refreshQuotaAndPlan() {
@@ -68,53 +91,56 @@ export default function AppClient() {
     }
   }
 
+  // load user formats initially + whenever formats change
+  useEffect(() => {
+    const load = () => {
+      const raw = loadUserFormatsFromStorage();
+      const converted = raw.map(userFormatToCsvFormat);
+      setUserFormats(converted);
+    };
+
+    load();
+
+    const onChanged = () => load();
+    window.addEventListener("csnest-formats-changed", onChanged);
+
+    return () => window.removeEventListener("csnest-formats-changed", onChanged);
+  }, []);
+
   useEffect(() => {
     refreshQuotaAndPlan();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planForLimits]);
 
+  // If currently selected format was deleted, fall back to first
   useEffect(() => {
-    const refresh = () => {
-      const raw = loadUserFormatsFromStorage();
-      const converted = raw.map(userFormatToCsvFormat);
-      setUserFormats(converted);
-
-      const exists = [...builtinFormats, ...converted].some((f) => f.id === formatId);
-      if (!exists) setFormatId("general_csv");
-    };
-
-    refresh();
-
-    const onChanged = () => refresh();
-    window.addEventListener("csnest-formats-changed", onChanged);
-    window.addEventListener("storage", onChanged);
-
-    return () => {
-      window.removeEventListener("csnest-formats-changed", onChanged);
-      window.removeEventListener("storage", onChanged);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [builtinFormats]);
-
-  const allFormats = useMemo(() => {
-    return { builtins: builtinFormats, users: userFormats };
-  }, [builtinFormats, userFormats]);
+    if (!allFormats.length) return;
+    const exists = allFormats.some((f) => f.id === formatId);
+    if (!exists) setFormatId(allFormats[0].id);
+  }, [allFormats, formatId]);
 
   const issuesForTable: CsvIssue[] = useMemo(() => {
     return (issues ?? [])
-      .map((it: any) => {
+      .map((it) => {
         const rowIndex =
-          typeof it.rowIndex === "number"
-            ? it.rowIndex
+          typeof (it as any).rowIndex === "number"
+            ? (it as any).rowIndex
             : typeof it.row === "number"
               ? Math.max(0, it.row - 1)
               : 0;
 
         const col = (it.column ?? it.field ?? "").toString();
+
         const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+
         if (!col) return null;
 
-        return { rowIndex, column: col, message: it.message, severity: sev };
+        return {
+          rowIndex,
+          column: col,
+          message: it.message,
+          severity: sev,
+        };
       })
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
@@ -124,6 +150,29 @@ export default function AppClient() {
     const first = rows[0];
     return first ? Object.keys(first) : [];
   }, [headers, rows]);
+
+  const issueCellMap = useMemo(() => {
+    const map = new Map<string, "error" | "warning" | "info">();
+    for (const i of issuesForTable) {
+      const key = `${i.rowIndex}|||${i.column}`;
+      const prev = map.get(key);
+      if (prev === "error") continue;
+      if (prev === "warning" && i.severity === "info") continue;
+      map.set(key, i.severity);
+    }
+    return map;
+  }, [issuesForTable]);
+
+  const rowsWithAnyIssue = useMemo(() => {
+    const set = new Set<number>();
+    for (const i of issuesForTable) set.add(i.rowIndex);
+    return [...set].sort((a, b) => a - b);
+  }, [issuesForTable]);
+
+  const previewRows = useMemo(() => {
+    if (rowsWithAnyIssue.length) return rowsWithAnyIssue.slice(0, 25);
+    return rows.map((_, idx) => idx).slice(0, 25);
+  }, [rows, rowsWithAnyIssue]);
 
   const onUpdateRow = useCallback((rowIndex: number, patch: Partial<CsvRow>) => {
     setRows((prev) => {
@@ -142,71 +191,59 @@ export default function AppClient() {
     });
   }, []);
 
-  function toUiIssues(result: CsvFixResult): UiIssue[] {
-    return (result.issues ?? []).map((i) => ({
-      row: i.rowIndex + 1,
-      column: i.column,
-      message: i.message,
-      severity: i.severity,
-      level: i.severity,
-    }));
+  function startEdit(rowIndex: number, col: string) {
+    const current = rows[rowIndex]?.[col] ?? "";
+    setEditing({ rowIndex, col, value: current });
   }
 
-  function getSelectedFormat(): CsvFormat {
-    return (
-      allFormats.builtins.find((f) => f.id === formatId) ??
-      allFormats.users.find((f) => f.id === formatId) ??
-      allFormats.builtins[0]
-    );
+  function commitEdit() {
+    if (!editing) return;
+    onUpdateRow(editing.rowIndex, { [editing.col]: editing.value });
+    setEditing(null);
   }
 
-  async function processCsvText(text: string) {
-    const parsed = parseCsv(text);
-    const fmt = getSelectedFormat();
-    const result = applyFormatToParsedCsv(parsed.headers, parsed.rows, fmt);
-
-    const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
-      message: m,
-      level: "error",
-      severity: "error",
-    }));
-
-    setHeaders(result.fixedHeaders ?? []);
-    setRows(result.fixedRows ?? []);
-    setIssues([...toUiIssues(result), ...parseIssues]);
-    setAutoFixes(result.fixesApplied ?? []);
+  function cancelEdit() {
+    setEditing(null);
   }
 
-  async function handleFile(file: File) {
+  async function runFormatOnText(format: CsvFormat, text: string, nameForExport?: string) {
     setBusy(true);
     setErrorBanner(null);
-    setFileName(file.name);
+    if (nameForExport) setFileName(nameForExport);
 
     try {
-      const text = await file.text();
-      setLastUploadedText(text);
-      await processCsvText(text);
-      await refreshQuotaAndPlan();
+      const parsed = parseCsv(text);
+      const result: CsvFixResult = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
+
+      const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
+        message: m,
+        level: "error",
+        severity: "error",
+      }));
+
+      setHeaders(result.fixedHeaders ?? []);
+      setRows(result.fixedRows ?? []);
+      setIssues([...(result.issues ?? []), ...parseIssues]);
+      setAutoFixes(result.fixesApplied ?? []);
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Failed to process CSV");
     } finally {
       setBusy(false);
+      setEditing(null);
     }
   }
 
+  async function handleFile(file: File) {
+    const text = await file.text();
+    setLastUploadedText(text);
+    await runFormatOnText(activeFormat, text, file.name);
+    await refreshQuotaAndPlan();
+  }
+
+  // Re-run when switching formats (if a file was already uploaded)
   useEffect(() => {
     if (!lastUploadedText) return;
-    (async () => {
-      try {
-        setBusy(true);
-        setErrorBanner(null);
-        await processCsvText(lastUploadedText);
-      } catch (e: any) {
-        setErrorBanner(e?.message ?? "Failed to reprocess CSV for selected format");
-      } finally {
-        setBusy(false);
-      }
-    })();
+    void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatId]);
 
@@ -214,7 +251,9 @@ export default function AppClient() {
     setBusy(true);
     setErrorBanner(null);
     try {
-      await consumeExport();
+      if (!isUnlimited) {
+        await consumeExport();
+      }
 
       const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
       const csv = toCsv(cols, rows);
@@ -242,6 +281,8 @@ export default function AppClient() {
   const autoFixRest = autoFixes.slice(autoFixPreviewCount);
   const autoFixRestCount = Math.max(0, autoFixRest.length);
 
+  const customFormatsCount = userFormats.length;
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
@@ -257,13 +298,30 @@ export default function AppClient() {
             Pick a format → upload → auto-fix safe issues → export.
           </p>
         </div>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
+          <div className="font-medium">Monthly exports</div>
+          <div>
+            {isUnlimited ? (
+              <>Unlimited</>
+            ) : (
+              <>
+                {quota?.used ?? 0}/{planLimits?.exportsPerMonth ?? 3} used •{" "}
+                {(planLimits?.exportsPerMonth ?? 3) - (quota?.used ?? 0)} left
+              </>
+            )}
+          </div>
+          <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+            Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
+          </div>
+        </div>
       </div>
 
-      <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4">
+      <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <div className="text-sm font-semibold text-[var(--text)]">Format</div>
 
         <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-          {allFormats.builtins.map((f) => {
+          {builtinFormats.map((f) => {
             const active = f.id === formatId;
             return (
               <button
@@ -282,13 +340,11 @@ export default function AppClient() {
             );
           })}
 
-          {allFormats.users.length ? (
-            <div className="mx-2 flex items-center text-xs text-[color:rgba(var(--muted-rgb),1)]">
-              Your formats
-            </div>
+          {customFormatsCount > 0 ? (
+            <div className="mx-2 h-9 w-px shrink-0 bg-[var(--border)]" />
           ) : null}
 
-          {allFormats.users.map((f) => {
+          {userFormats.map((f) => {
             const active = f.id === formatId;
             return (
               <button
@@ -301,6 +357,7 @@ export default function AppClient() {
                     ? "border-transparent bg-[var(--primary)] text-white"
                     : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]")
                 }
+                title="Custom format"
               >
                 {f.name}
               </button>
@@ -309,13 +366,17 @@ export default function AppClient() {
         </div>
 
         <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-          Built-in formats are available to everyone. Custom formats are created in Custom Formats.
+          Built-in formats are available to everyone. Custom formats appear here when you save or
+          import them.
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text)]">Upload CSV</h2>
+          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+            We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.
+          </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
@@ -335,6 +396,7 @@ export default function AppClient() {
               className="rg-btn"
               onClick={() => void exportFixedCsv()}
               disabled={busy || rows.length === 0}
+              title={rows.length === 0 ? "Upload a CSV first" : "Export your fixed CSV"}
               type="button"
             >
               {busy ? "Working..." : "Export fixed CSV"}
@@ -368,7 +430,89 @@ export default function AppClient() {
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--text)]">Manual fixes</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Issues</h2>
+          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+            Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
+          </p>
+
+          <div className="mt-4 data-table-wrap">
+            <div className="data-table-scroll">
+              {rows.length === 0 ? (
+                <div className="p-6 text-sm text-[var(--muted)]">
+                  No table yet. Upload a CSV to see it here.
+                </div>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 80 }}>Row</th>
+                      {tableHeaders.slice(0, 12).map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.map((rowIndex) => {
+                      const row = rows[rowIndex] ?? {};
+                      return (
+                        <tr key={rowIndex}>
+                          <td className="text-[var(--muted)]">{rowIndex + 1}</td>
+                          {tableHeaders.slice(0, 12).map((h) => {
+                            const sev = issueCellMap.get(`${rowIndex}|||${h}`);
+                            const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
+
+                            const cellClass =
+                              (sev === "error"
+                                ? "cell-error"
+                                : sev === "warning"
+                                  ? "cell-warning"
+                                  : "") + (isEditing ? " cell-editing" : "");
+
+                            return (
+                              <td
+                                key={`${rowIndex}-${h}`}
+                                className={cellClass}
+                                onClick={() => startEdit(rowIndex, h)}
+                                style={{ cursor: "pointer" }}
+                                title={sev ? `${sev}` : "Click to edit"}
+                              >
+                                {isEditing ? (
+                                  <input
+                                    autoFocus
+                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
+                                    value={editing.value}
+                                    onChange={(e) =>
+                                      setEditing((prev) =>
+                                        prev ? { ...prev, value: e.target.value } : prev
+                                      )
+                                    }
+                                    onBlur={commitEdit}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") commitEdit();
+                                      if (e.key === "Escape") cancelEdit();
+                                    }}
+                                  />
+                                ) : (
+                                  <span>{row[h] ?? ""}</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {rows.length > 0 ? (
+              <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row editing.
+              </div>
+            ) : null}
+          </div>
+
           <div className="mt-6">
             <EditableIssuesTable headers={tableHeaders} issues={issues as any} rows={rows} onUpdateRow={onUpdateRow} />
           </div>
