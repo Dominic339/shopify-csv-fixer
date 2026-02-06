@@ -5,9 +5,11 @@ import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
-import { getAllBuiltinFormats, getFormatById } from "@/lib/formats";
+import { getAllBuiltinFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
-import type { CsvFixResult, CsvRow } from "@/lib/formats/types";
+import type { CsvFixResult, CsvIssue, CsvRow, CsvFormat } from "@/lib/formats/types";
+
+import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats/customUser";
 
 type SubStatus = {
   ok: boolean;
@@ -20,7 +22,7 @@ type PlanLimits = {
 };
 
 type UiIssue = {
-  row?: number; // 1-based (what EditableIssuesTable expects)
+  row?: number; // 1-based
   column?: string;
   field?: string;
   message: string;
@@ -30,6 +32,8 @@ type UiIssue = {
 
 export default function AppClient() {
   const builtinFormats = useMemo(() => getAllBuiltinFormats(), []);
+
+  const [userFormats, setUserFormats] = useState<CsvFormat[]>([]);
 
   // default to General CSV
   const [formatId, setFormatId] = useState<string>("general_csv");
@@ -74,6 +78,54 @@ export default function AppClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planForLimits]);
 
+  // Load custom formats from local storage and convert them into CsvFormat
+  useEffect(() => {
+    const refresh = () => {
+      const raw = loadUserFormatsFromStorage();
+      const converted = raw.map(userFormatToCsvFormat);
+      setUserFormats(converted);
+
+      // if currently selected format no longer exists, fall back to general_csv
+      const exists = [...builtinFormats, ...converted].some((f) => f.id === formatId);
+      if (!exists) setFormatId("general_csv");
+    };
+
+    refresh();
+
+    const onChanged = () => refresh();
+    window.addEventListener("csnest-formats-changed", onChanged);
+    window.addEventListener("storage", onChanged);
+
+    return () => {
+      window.removeEventListener("csnest-formats-changed", onChanged);
+      window.removeEventListener("storage", onChanged);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [builtinFormats]);
+
+  const allFormats = useMemo(() => {
+    return { builtins: builtinFormats, users: userFormats };
+  }, [builtinFormats, userFormats]);
+
+  const issuesForTable: CsvIssue[] = useMemo(() => {
+    return (issues ?? [])
+      .map((it: any) => {
+        const rowIndex =
+          typeof it.rowIndex === "number"
+            ? it.rowIndex
+            : typeof it.row === "number"
+              ? Math.max(0, it.row - 1)
+              : 0;
+
+        const col = (it.column ?? it.field ?? "").toString();
+        const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+        if (!col) return null;
+
+        return { rowIndex, column: col, message: it.message, severity: sev };
+      })
+      .filter(Boolean) as CsvIssue[];
+  }, [issues]);
+
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
     const first = rows[0];
@@ -99,7 +151,6 @@ export default function AppClient() {
 
   function toUiIssues(result: CsvFixResult): UiIssue[] {
     return (result.issues ?? []).map((i) => ({
-      // IMPORTANT: convert rowIndex (0-based) -> row (1-based)
       row: i.rowIndex + 1,
       column: i.column,
       message: i.message,
@@ -108,14 +159,21 @@ export default function AppClient() {
     }));
   }
 
+  function getSelectedFormat(): CsvFormat {
+    const found =
+      allFormats.builtins.find((f) => f.id === formatId) ??
+      allFormats.users.find((f) => f.id === formatId) ??
+      allFormats.builtins[0];
+
+    return found ?? allFormats.builtins[0];
+  }
+
   async function processCsvText(text: string) {
     const parsed = parseCsv(text);
-    const fmt = getFormatById(formatId);
+    const fmt = getSelectedFormat();
 
-    // engine signature: (headers, rows, format)
     const result = applyFormatToParsedCsv(parsed.headers, parsed.rows, fmt);
 
-    // parse errors don't have a row; keep them as banner-ish issues (won't show in manual table)
     const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
       message: m,
       level: "error",
@@ -124,7 +182,7 @@ export default function AppClient() {
 
     setHeaders(result.fixedHeaders ?? []);
     setRows(result.fixedRows ?? []);
-    setIssues([...(toUiIssues(result) ?? []), ...parseIssues]);
+    setIssues([...toUiIssues(result), ...parseIssues]);
     setAutoFixes(result.fixesApplied ?? []);
   }
 
@@ -190,34 +248,6 @@ export default function AppClient() {
     }
   }
 
-  // THIS is the key fix:
-  // EditableIssuesTable expects issues shaped like:
-  // { row: number (1-based), column?: string, message: string, severity: ... }
-  const issuesForManualTable = useMemo(() => {
-    return (issues ?? [])
-      .map((it: any) => {
-        const row =
-          typeof it.row === "number"
-            ? it.row
-            : typeof it.rowIndex === "number"
-              ? it.rowIndex + 1
-              : undefined;
-
-        const column = (it.column ?? it.field ?? "").toString() || undefined;
-        const severity = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
-
-        return {
-          row,
-          column,
-          message: String(it.message ?? ""),
-          severity,
-          suggestion: it.suggestion,
-        };
-      })
-      // rows without a row number can't be shown as “manual fix” rows
-      .filter((x: any) => typeof x.row === "number" && x.row >= 1);
-  }, [issues]);
-
   const autoFixPreviewCount = 8;
   const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
   const autoFixRest = autoFixes.slice(autoFixPreviewCount);
@@ -262,8 +292,32 @@ export default function AppClient() {
       {/* FORMAT PICKER */}
       <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4">
         <div className="text-sm font-semibold text-[var(--text)]">Format</div>
+
         <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-          {builtinFormats.map((f) => {
+          {allFormats.builtins.map((f) => {
+            const active = f.id === formatId;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFormatId(f.id)}
+                className={
+                  "whitespace-nowrap rounded-full border px-4 py-2 text-sm " +
+                  (active
+                    ? "border-transparent bg-[var(--primary)] text-white"
+                    : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]")
+                }
+              >
+                {f.name}
+              </button>
+            );
+          })}
+
+          {allFormats.users.length ? (
+            <div className="mx-2 flex items-center text-xs text-[color:rgba(var(--muted-rgb),1)]">Your formats</div>
+          ) : null}
+
+          {allFormats.users.map((f) => {
             const active = f.id === formatId;
             return (
               <button
@@ -282,8 +336,9 @@ export default function AppClient() {
             );
           })}
         </div>
+
         <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-          Built-in formats are available to everyone. Custom formats (Advanced) come next.
+          Built-in formats are available to everyone. Custom formats are created in Custom Formats.
         </div>
       </div>
 
@@ -346,18 +401,13 @@ export default function AppClient() {
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--text)]">Issues</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Manual fixes</h2>
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          <div className="mt-4">
-            <EditableIssuesTable
-              headers={tableHeaders}
-              issues={issuesForManualTable as any}
-              rows={rows}
-              onUpdateRow={onUpdateRow}
-            />
+          <div className="mt-6">
+            <EditableIssuesTable headers={tableHeaders} issues={issues as any} rows={rows} onUpdateRow={onUpdateRow} />
           </div>
         </div>
       </div>
