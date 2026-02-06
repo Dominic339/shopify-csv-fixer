@@ -2,13 +2,32 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type Issue = {
-  severity: "error" | "warning" | "info";
-  code?: string;
-  message: string;
-  row?: number; // 1-based
+type RawIssue = {
+  // New shape (engine)
+  rowIndex?: number; // 0-based
   column?: string;
+
+  // Old shape (legacy)
+  row?: number; // 1-based
+  field?: string;
+
+  // Common
+  message: string;
   suggestion?: string;
+
+  // Some code paths used level instead of severity
+  severity?: "error" | "warning" | "info";
+  level?: "error" | "warning" | "info";
+
+  code?: string;
+};
+
+type NormalizedIssue = {
+  rowIndex: number; // 0-based
+  column?: string;
+  message: string;
+  suggestion?: string;
+  severity: "error" | "warning" | "info";
 };
 
 type CsvRow = Record<string, string>;
@@ -16,7 +35,7 @@ type CsvRow = Record<string, string>;
 type Props = {
   headers: string[];
   rows: CsvRow[];
-  issues: Issue[];
+  issues: RawIssue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
 };
 
@@ -26,12 +45,39 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
   const [showMode, setShowMode] = useState<"errors" | "warnings" | "all">("errors");
   const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
 
-  // Auto-pin rows that ever had an issue (keeps your old behavior)
+  // Normalize issues so both old + new formats work
+  const normalizedIssues: NormalizedIssue[] = useMemo(() => {
+    return (issues ?? [])
+      .map((it) => {
+        const rowIndex =
+          typeof it.rowIndex === "number"
+            ? it.rowIndex
+            : typeof it.row === "number"
+              ? Math.max(0, it.row - 1)
+              : null;
+
+        if (rowIndex == null) return null;
+
+        const column = (it.column ?? it.field ?? "").toString() || undefined;
+
+        const severity = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+
+        return {
+          rowIndex,
+          column,
+          message: it.message,
+          suggestion: it.suggestion,
+          severity,
+        };
+      })
+      .filter(Boolean) as NormalizedIssue[];
+  }, [issues]);
+
+  // Auto-pin rows that ever had an issue
   useEffect(() => {
     const rowsWithIssues = new Set<number>();
-    for (const i of issues) {
-      if (typeof i.row === "number") rowsWithIssues.add(i.row - 1);
-    }
+    for (const i of normalizedIssues) rowsWithIssues.add(i.rowIndex);
+
     if (rowsWithIssues.size === 0) return;
 
     setManualPinnedRows((prev) => {
@@ -43,37 +89,33 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
       }
       return next;
     });
-  }, [issues, rows.length]);
+  }, [normalizedIssues, rows.length]);
 
-  // Map issues by row and also by (row,col) for per-field highlighting
+  // Map issues by row
   const issuesByRow = useMemo(() => {
-    const map = new Map<number, Issue[]>();
-    for (const i of issues) {
-      if (typeof i.row !== "number") continue;
-      const idx = i.row - 1;
-      if (!map.has(idx)) map.set(idx, []);
-      map.get(idx)!.push(i);
+    const map = new Map<number, NormalizedIssue[]>();
+    for (const i of normalizedIssues) {
+      if (!map.has(i.rowIndex)) map.set(i.rowIndex, []);
+      map.get(i.rowIndex)!.push(i);
     }
     return map;
-  }, [issues]);
+  }, [normalizedIssues]);
 
+  // Per-cell highlighting
   const issueByCellSeverity = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
-    for (const i of issues) {
-      if (typeof i.row !== "number") continue;
+    for (const i of normalizedIssues) {
       if (!i.column) continue;
-      const rowIndex = i.row - 1;
-      const key = `${rowIndex}|||${i.column}`;
+      const key = `${i.rowIndex}|||${i.column}`;
 
       const prev = map.get(key);
-      // error overrides warning overrides info
       if (prev === "error") continue;
       if (prev === "warning" && i.severity === "info") continue;
 
       map.set(key, i.severity);
     }
     return map;
-  }, [issues]);
+  }, [normalizedIssues]);
 
   const rowsToShow = useMemo(() => {
     const set = new Set<number>();
@@ -107,7 +149,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
     return value ?? "";
   }
 
-  const severityChip = (s: Issue["severity"]) => {
+  const severityChip = (s: NormalizedIssue["severity"]) => {
     const cls =
       s === "error"
         ? "bg-red-500/15 text-red-300 border-red-500/30"
@@ -122,7 +164,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
     );
   };
 
-  function issueBoxClass(sev: Issue["severity"]) {
+  function issueBoxClass(sev: NormalizedIssue["severity"]) {
     if (sev === "error") return "issue-box error";
     if (sev === "warning") return "issue-box warning";
     return "issue-box info";
@@ -182,12 +224,12 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
             const pinned = manualPinnedRows.some((p) => p.rowIndex === rowIndex);
 
             return (
-              <div key={rowIndex} className="rounded-2xl border border-[var(--border)] overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--surface-2)]">
+              <div key={rowIndex} className="overflow-hidden rounded-2xl border border-[var(--border)]">
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--surface-2)] px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="text-sm font-semibold">{rowLabel(rowIndex)}</div>
                     {pinned ? (
-                      <span className="text-[10px] rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-[var(--muted)]">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-[10px] text-[var(--muted)]">
                         Pinned
                       </span>
                     ) : null}
@@ -213,9 +255,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
                             <div className="flex-1 text-[var(--text)]">
                               <span className="font-semibold">{i.column ? `${i.column}: ` : ""}</span>
                               {i.message}
-                              {i.suggestion ? (
-                                <div className="mt-1 text-[var(--muted)]">{i.suggestion}</div>
-                              ) : null}
+                              {i.suggestion ? <div className="mt-1 text-[var(--muted)]">{i.suggestion}</div> : null}
                             </div>
                           </div>
                         </div>
