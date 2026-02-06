@@ -49,8 +49,8 @@ export default function HomeClient() {
           </h1>
 
           <p className="mt-4 text-lg text-[var(--muted)]">
-            Fix broken CSVs fast for any platform. Auto-fix what is safe, flag what is risky, and export a
-            clean file you can trust.
+            Fix broken CSVs fast for any platform. Auto-fix what is safe, flag what is risky, and export a clean file you
+            can trust.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -60,15 +60,11 @@ export default function HomeClient() {
 
             {canAccessCustomFormats ? (
               <Link href="/formats" className="rgb-btn">
-                <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                  Open Custom Formats
-                </span>
+                <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Custom Formats</span>
               </Link>
             ) : (
               <button type="button" className="rgb-btn opacity-60" onClick={() => setUpgradeOpen(true)}>
-                <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                  Custom Formats (Advanced)
-                </span>
+                <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats (Advanced)</span>
               </button>
             )}
           </div>
@@ -95,12 +91,10 @@ export default function HomeClient() {
           <div className="grid gap-10 md:grid-cols-2 md:items-start">
             <div>
               <div className="text-sm font-semibold text-[var(--text)]">CSV Fixer</div>
-              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">
-                Fix broken CSV files in seconds
-              </div>
+              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">Fix broken CSV files in seconds</div>
               <p className="mt-3 text-sm text-[var(--muted)]">
-                Upload any CSV and CSNest will automatically clean up formatting issues, flag errors and warnings,
-                and let you manually fix only what matters before exporting a clean file.
+                Upload any CSV and CSNest will automatically clean up formatting issues, flag errors and warnings, and let
+                you manually fix only what matters before exporting a clean file.
               </p>
               <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
                 <li>Auto-fix safe issues such as spacing, casing, and formatting</li>
@@ -118,9 +112,7 @@ export default function HomeClient() {
 
             <div>
               <div className="text-sm font-semibold text-[var(--text)]">Custom Formats</div>
-              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">
-                Build reusable CSV formats for any workflow
-              </div>
+              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">Build reusable CSV formats for any workflow</div>
               <p className="mt-3 text-sm text-[var(--muted)]">
                 Custom Formats let you define how a CSV should look before you ever upload it. Create reusable rules for
                 columns, validation, and cleanup so every file imports cleanly the first time.
@@ -136,15 +128,11 @@ export default function HomeClient() {
               <div className="mt-6">
                 {canAccessCustomFormats ? (
                   <Link href="/formats" className="rgb-btn">
-                    <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                      Open Custom Formats
-                    </span>
+                    <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Custom Formats</span>
                   </Link>
                 ) : (
                   <button type="button" className="rgb-btn opacity-60" onClick={() => setUpgradeOpen(true)}>
-                    <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                      Custom Formats (Advanced)
-                    </span>
+                    <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats (Advanced)</span>
                   </button>
                 )}
               </div>

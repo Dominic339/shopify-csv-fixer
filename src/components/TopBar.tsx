@@ -14,6 +14,16 @@ type SubStatus = {
   status: string;
 };
 
+// Minimal local types to avoid depending on supabase-js exported types.
+// These are enough for what TopBar uses.
+type SupabaseUser = {
+  email?: string | null;
+};
+
+type SupabaseSession = {
+  user?: SupabaseUser | null;
+} | null;
+
 export default function TopBar() {
   const supabase = createClient();
 
@@ -28,14 +38,28 @@ export default function TopBar() {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (!mounted) return;
-      setEmail(data.user?.email ?? null);
-    });
+    (async () => {
+      try {
+        const res = await supabase.auth.getUser();
+        // res shape varies by supabase-js version, so read safely
+        const userEmail =
+          (res as any)?.data?.user?.email ??
+          (res as any)?.user?.email ??
+          null;
 
-    const { data: authSub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user?.email ?? null);
-    });
+        if (!mounted) return;
+        setEmail(userEmail);
+      } catch {
+        if (!mounted) return;
+        setEmail(null);
+      }
+    })();
+
+    const { data: authSub } = supabase.auth.onAuthStateChange(
+      (_event: string, session: SupabaseSession) => {
+        setEmail(session?.user?.email ?? null);
+      }
+    );
 
     return () => {
       mounted = false;
@@ -45,6 +69,7 @@ export default function TopBar() {
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       try {
         const r = await fetch("/api/subscription/status", { cache: "no-store" });
@@ -54,6 +79,7 @@ export default function TopBar() {
         if (!cancelled) setSub(null);
       }
     })();
+
     return () => {
       cancelled = true;
     };
