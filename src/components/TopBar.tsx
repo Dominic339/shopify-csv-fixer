@@ -2,15 +2,26 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
+
+type SubStatus = {
+  signedIn: boolean;
+  plan: "free" | "basic" | "advanced";
+  status: string;
+};
 
 export default function TopBar() {
   const supabase = createClient();
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
+  const [sub, setSub] = useState<SubStatus | null>(null);
+
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const { theme, toggle } = useTheme();
 
@@ -22,15 +33,37 @@ export default function TopBar() {
       setEmail(data.user?.email ?? null);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authSub } = supabase.auth.onAuthStateChange((_event, session) => {
       setEmail(session?.user?.email ?? null);
     });
 
     return () => {
       mounted = false;
-      sub.subscription.unsubscribe();
+      authSub.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/subscription/status", { cache: "no-store" });
+        const j = (await r.json()) as SubStatus;
+        if (!cancelled) setSub(j);
+      } catch {
+        if (!cancelled) setSub(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [email]);
+
+  const isAdvanced = useMemo(() => {
+    return !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
+  }, [sub]);
+
+  const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvanced;
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -43,14 +76,14 @@ export default function TopBar() {
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           <Image
             src="/CSV%20Nest%20Logo.png"
-            alt="CSV Nest"
+            alt="CSNest"
             width={28}
             height={28}
             priority
             className="rounded-md"
           />
           <div className="leading-tight">
-            <div className="text-sm font-semibold text-[var(--text)]">CSV Nest</div>
+            <div className="text-sm font-semibold text-[var(--text)]">CSNest</div>
             <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
           </div>
         </Link>
@@ -65,10 +98,28 @@ export default function TopBar() {
             {theme === "dark" ? "Dark" : "Light"}
           </button>
 
-          {/* IMPORTANT: don’t force white text; keep it readable in light mode */}
           <Link href="/app" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open app</span>
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
           </Link>
+
+          {canAccessCustomFormats ? (
+            <Link href="/formats" className="rgb-btn">
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
+                Custom Formats
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="rgb-btn opacity-60"
+              onClick={() => setUpgradeOpen(true)}
+              aria-label="Custom Formats (Advanced)"
+            >
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
+                Custom Formats
+              </span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -97,26 +148,22 @@ export default function TopBar() {
               <div className="border-t" style={{ borderColor: "var(--popover-border)" }} />
 
               <div className="p-2">
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/profile"
-                  onClick={() => setOpen(false)}
-                >
-                  Profile
-                </Link>
+                {email ? (
+                  <Link
+                    className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                ) : null}
+
                 <Link
                   className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
                   href="/"
                   onClick={() => setOpen(false)}
                 >
                   Home
-                </Link>
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/app"
-                  onClick={() => setOpen(false)}
-                >
-                  App
                 </Link>
 
                 <div className="mt-2 border-t" style={{ borderColor: "var(--popover-border)" }} />
@@ -143,6 +190,13 @@ export default function TopBar() {
           ) : null}
         </div>
       </div>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        title="Advanced only"
+        message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+        onClose={() => setUpgradeOpen(false)}
+      />
     </header>
   );
 }
