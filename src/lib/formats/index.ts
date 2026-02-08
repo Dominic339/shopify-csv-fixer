@@ -5,7 +5,13 @@ import { builtinPackFormats } from "./builtins/packs";
 
 const BUILTINS: CsvFormat[] = [generalCsvFormat, shopifyProductsFormat, ...builtinPackFormats];
 
-export function getAllBuiltinFormats() {
+// Backward-compatible name (AppClient.tsx expects this)
+export function getAllFormats(): CsvFormat[] {
+  return BUILTINS;
+}
+
+// Preferred explicit name
+export function getAllBuiltinFormats(): CsvFormat[] {
   return BUILTINS;
 }
 
