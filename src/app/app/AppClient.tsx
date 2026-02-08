@@ -4,10 +4,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
+
 import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
 import type { CsvFormat } from "@/lib/formats/types";
-import { loadSavedCustomFormats } from "@/lib/formats/customStore";
+import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats/customUser";
 
 type SubStatus = {
   ok: boolean;
@@ -22,7 +23,8 @@ type PlanLimits = {
 type CsvRow = Record<string, string>;
 
 type UiIssue = {
-  row?: number; // 1-based
+  row?: number; // 1-based (legacy)
+  rowIndex?: number; // 0-based (new)
   column?: string;
   field?: string;
   message: string;
@@ -51,21 +53,51 @@ export default function AppClient() {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
-  // inline edit state for the restored table
-  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
+  // inline edit state for the preview table
+  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
+    null
+  );
 
-  // keep last uploaded text so switching formats re-runs automatically
+  // store last uploaded CSV text so switching formats can re-run on same file
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
   // Selected format
   const [formatId, setFormatId] = useState<string>("general_csv");
 
-  // Load builtin + saved custom formats
-  const allFormats: CsvFormat[] = useMemo(() => {
-    const builtins = getAllFormats();
-    const custom = loadSavedCustomFormats();
-    return [...builtins, ...custom];
+  // Built-in formats are stable
+  const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
+
+  // Custom formats can change during the session (import/save/delete)
+  const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
+
+  function refreshCustomFormats() {
+    const user = loadUserFormatsFromStorage();
+    const next = user.map(userFormatToCsvFormat);
+    setCustomFormats(next);
+  }
+
+  useEffect(() => {
+    refreshCustomFormats();
+
+    // Listen for storage updates triggered by saveUserFormatsToStorage()
+    const onChanged = () => refreshCustomFormats();
+    window.addEventListener("csnest-formats-changed", onChanged);
+
+    return () => {
+      window.removeEventListener("csnest-formats-changed", onChanged);
+    };
   }, []);
+
+  const allFormats = useMemo<CsvFormat[]>(() => {
+    return [...builtinFormats, ...customFormats];
+  }, [builtinFormats, customFormats]);
+
+  // Keep selected format valid (if a custom format is deleted, fall back)
+  useEffect(() => {
+    if (allFormats.some((f) => f.id === formatId)) return;
+    setFormatId(allFormats[0]?.id ?? "general_csv");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFormats.length]);
 
   const activeFormat = useMemo(() => {
     return allFormats.find((f) => f.id === formatId) ?? allFormats[0];
@@ -103,13 +135,12 @@ export default function AppClient() {
             ? (it as any).rowIndex
             : typeof it.row === "number"
               ? Math.max(0, it.row - 1)
-              : 0;
+              : null;
 
         const col = (it.column ?? it.field ?? "").toString();
-
         const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
 
-        if (!col) return null;
+        if (rowIndex == null || !col) return null;
 
         return {
           rowIndex,
@@ -187,7 +218,7 @@ export default function AppClient() {
       setRows(res.fixedRows ?? []);
       setIssues([...(res.issues ?? []), ...parseIssues]);
       setAutoFixes(res.fixesApplied ?? []);
-      setFileName(name ?? null);
+      if (typeof name === "string") setFileName(name);
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -207,12 +238,14 @@ export default function AppClient() {
       const text = await file.text();
       setLastUploadedText(text);
 
-      // Clear prior state for a clean run
+      // Clear previous run immediately for a clean swap-in
       setIssues([]);
       setAutoFixes([]);
       setEditing(null);
 
-      await runFormatOnText(activeFormat, text, file.name);
+      if (activeFormat) {
+        await runFormatOnText(activeFormat, text, file.name);
+      }
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Failed to process CSV");
     } finally {
@@ -221,14 +254,13 @@ export default function AppClient() {
     }
   }
 
-  // Re-run validation when switching formats (same file, new rules)
+  // When switching formats, clear pins + clear issues/autofixes, then re-run if a file is loaded
   useEffect(() => {
-    if (!lastUploadedText) return;
-
-    // When switching formats, clear prior format-specific UI state so it doesn't get in the way
     setIssues([]);
     setAutoFixes([]);
     setEditing(null);
+
+    if (!lastUploadedText || !activeFormat) return;
 
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -399,7 +431,9 @@ export default function AppClient() {
           <div className="mt-4 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
-                <div className="p-6 text-sm text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
+                <div className="p-6 text-sm text-[var(--muted)]">
+                  No table yet. Upload a CSV to see it here.
+                </div>
               ) : (
                 <table className="data-table">
                   <thead>
@@ -441,7 +475,9 @@ export default function AppClient() {
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
                                     value={editing.value}
                                     onChange={(e) =>
-                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
+                                      setEditing((prev) =>
+                                        prev ? { ...prev, value: e.target.value } : prev
+                                      )
                                     }
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
@@ -465,7 +501,8 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row editing.
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row
+                editing.
               </div>
             ) : null}
           </div>
