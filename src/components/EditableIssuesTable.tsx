@@ -37,13 +37,23 @@ type Props = {
   rows: CsvRow[];
   issues: RawIssue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
+
+  // Changing this value clears pinned rows (useful when switching formats)
+  resetKey?: string;
 };
 
 type PinnedRow = { rowIndex: number };
 
-export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Props) {
+export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetKey }: Props) {
   const [showMode, setShowMode] = useState<"errors" | "warnings" | "all">("errors");
   const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
+
+  // Clear pins when switching formats (or any parent-driven reset)
+  useEffect(() => {
+    if (!resetKey) return;
+    setManualPinnedRows([]);
+    setShowMode("errors");
+  }, [resetKey]);
 
   // Normalize issues so both old + new formats work
   const normalizedIssues: NormalizedIssue[] = useMemo(() => {
@@ -213,93 +223,84 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
       </div>
 
       {rowsToShow.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-6 text-sm text-[var(--muted)]">
+        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
           No rows to show yet. Upload a CSV to see issues here.
         </div>
       ) : (
-        <div className="mt-6 space-y-6">
-          {rowsToShow.slice(0, 50).map((rowIndex) => {
-            const row = rows[rowIndex];
+        <div className="mt-6 space-y-4">
+          {rowsToShow.map((rowIndex) => {
             const rowIssues = issuesByRow.get(rowIndex) ?? [];
-            const pinned = manualPinnedRows.some((p) => p.rowIndex === rowIndex);
+            const row = rows[rowIndex] ?? {};
+
+            const anyError = rowIssues.some((x) => x.severity === "error");
+            const anyWarning = rowIssues.some((x) => x.severity === "warning");
+
+            if (showMode === "errors" && !anyError && !manualPinnedRows.some((p) => p.rowIndex === rowIndex)) return null;
+            if (showMode === "warnings" && !anyWarning && !manualPinnedRows.some((p) => p.rowIndex === rowIndex)) return null;
 
             return (
-              <div key={rowIndex} className="overflow-hidden rounded-2xl border border-[var(--border)]">
-                <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--surface-2)] px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-semibold">{rowLabel(rowIndex)}</div>
-                    {pinned ? (
-                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-[10px] text-[var(--muted)]">
-                        Pinned
-                      </span>
-                    ) : null}
+              <div key={rowIndex} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-semibold text-[var(--text)]">{rowLabel(rowIndex)}</div>
+                    {rowIssues.length ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {rowIssues.slice(0, 3).map((x, i) => (
+                          <span key={i}>{severityChip(x.severity)}</span>
+                        ))}
+                        {rowIssues.length > 3 ? (
+                          <span className="text-[10px] text-[var(--muted)]">+{rowIssues.length - 3} more</span>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-[var(--muted)]">Pinned</div>
+                    )}
                   </div>
 
                   <button
-                    className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold"
-                    type="button"
+                    className="pill-btn"
                     onClick={() => togglePin(rowIndex)}
+                    type="button"
+                    title="Pin or unpin this row"
                   >
-                    {pinned ? "Unpin" : "Pin"}
+                    {manualPinnedRows.some((p) => p.rowIndex === rowIndex) ? "Unpin" : "Pin"}
                   </button>
                 </div>
 
-                {rowIssues.length > 0 ? (
-                  <div className="border-t border-[var(--border)] p-4">
-                    <div className="mb-2 text-xs font-semibold text-[var(--muted)]">Issues</div>
-                    <div className="space-y-2">
-                      {rowIssues.slice(0, 8).map((i, idx) => (
-                        <div key={idx} className={issueBoxClass(i.severity)}>
-                          <div className="flex flex-wrap items-start gap-3 text-xs">
-                            {severityChip(i.severity)}
-                            <div className="flex-1 text-[var(--text)]">
-                              <span className="font-semibold">{i.column ? `${i.column}: ` : ""}</span>
-                              {i.message}
-                              {i.suggestion ? <div className="mt-1 text-[var(--muted)]">{i.suggestion}</div> : null}
-                            </div>
+                {rowIssues.length ? (
+                  <div className="mt-3 space-y-2">
+                    {rowIssues.map((iss, i) => (
+                      <div key={i} className={issueBoxClass(iss.severity)}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs font-semibold text-[var(--text)]">
+                            {iss.column ? iss.column : "Row issue"}
                           </div>
+                          {severityChip(iss.severity)}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-t border-[var(--border)] p-4 text-xs text-[var(--muted)]">
-                    No current issues on this row. It stays visible because it previously had an issue.
-                  </div>
-                )}
-
-                <div className="border-t border-[var(--border)] p-4">
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {headers.slice(0, 12).map((h) => (
-                      <label key={h} className="block">
-                        <div className="mb-1 text-[10px] font-semibold text-[var(--muted)]">{h}</div>
-                        <input
-                          className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs outline-none ${inputToneClass(
-                            rowIndex,
-                            h
-                          )}`}
-                          value={cell(row?.[h])}
-                          onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
-                        />
-                      </label>
-                    ))}
-
-                    {headers.length > 12 ? (
-                      <div className="text-xs text-[var(--muted)]">
-                        Showing the first 12 columns. Expand this later if you want every column editable here.
+                        <div className="mt-1 text-sm text-[var(--text)]">{iss.message}</div>
+                        {iss.suggestion ? (
+                          <div className="mt-1 text-xs text-[var(--muted)]">{iss.suggestion}</div>
+                        ) : null}
                       </div>
-                    ) : null}
+                    ))}
                   </div>
+                ) : null}
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {headers.map((h) => (
+                    <div key={h}>
+                      <div className="mb-1 text-xs font-semibold text-[var(--muted)]">{h}</div>
+                      <input
+                        className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(rowIndex, h)}`}
+                        value={cell(row[h])}
+                        onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             );
           })}
-
-          {rowsToShow.length > 50 ? (
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--muted)]">
-              Showing the first 50 rows in the manual fix table to keep the UI fast.
-            </div>
-          ) : null}
         </div>
       )}
     </div>

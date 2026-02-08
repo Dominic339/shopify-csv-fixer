@@ -1,5 +1,4 @@
 import type { CsvFormat, CsvFixResult, CsvIssue, CsvRow } from "../types";
-import { normalizeRowsSafe } from "../engine";
 
 type FormatSpec = {
   id: string;
@@ -25,286 +24,290 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
     category: spec.category,
     source: "builtin",
     apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
-      // First do safe normalization (trim, ensure strings)
-      const base = normalizeRowsSafe(headers, rows);
+      // NOTE: Universal cleanup runs in the engine for ALL formats.
+      // Here we only do mapping to expected headers + lightweight validation.
 
-      const inHeaders = base.fixedHeaders ?? headers;
-      const inRows = base.fixedRows ?? rows;
+      const inHeaders = headers;
+      const inRows = rows;
 
       // Map expected headers to actual headers (case-insensitive match)
       const actualByNorm = new Map<string, string>();
       for (const h of inHeaders) actualByNorm.set(normHeader(h), h);
 
-      const expected = spec.expectedHeaders;
-      const requiredSet = new Set(spec.requiredHeaders.map(normHeader));
+      const mappedHeaders = [...spec.expectedHeaders];
 
-      // Preserve any extra columns after the expected ones
-      const expectedNormSet = new Set(expected.map(normHeader));
-      const extras = inHeaders.filter((h) => !expectedNormSet.has(normHeader(h)));
-
-      const outHeaders = [...expected, ...extras];
-
-      const issues: CsvIssue[] = [];
-      const fixesApplied: string[] = [...(base.fixesApplied ?? [])];
-
-      const missingExpected: string[] = [];
-      for (const eh of expected) {
-        if (!actualByNorm.has(normHeader(eh))) missingExpected.push(eh);
-      }
-      if (missingExpected.length) {
-        fixesApplied.push(`Added missing columns: ${missingExpected.join(", ")}`);
-      }
-      fixesApplied.push("Reordered columns to match selected format");
-
-      const emailHeaders = new Set((spec.emailHeaders ?? []).map(normHeader));
-      const numericHeaders = new Set((spec.numericHeaders ?? []).map(normHeader));
-
-      const outRows: CsvRow[] = inRows.map((r, rowIndex) => {
+      // Build a mapped row set with exactly the expected headers
+      const fixedRows: CsvRow[] = inRows.map((r) => {
         const out: CsvRow = {};
-
-        // Build expected columns
-        for (const eh of expected) {
-          const src = actualByNorm.get(normHeader(eh));
-          const v = src ? r?.[src] : "";
-          const value = typeof v === "string" ? v.trim() : v == null ? "" : String(v).trim();
-          out[eh] = value;
-
-          // Required checks (row-level issues so they show in manual fixes)
-          if (requiredSet.has(normHeader(eh)) && value === "") {
-            issues.push({
-              rowIndex,
-              column: eh,
-              message: "Required field is missing",
-              severity: "error",
-            });
-          }
-
-          // Light email validation
-          if (emailHeaders.has(normHeader(eh)) && value) {
-            if (!value.includes("@") || !value.includes(".")) {
-              issues.push({
-                rowIndex,
-                column: eh,
-                message: "Email looks invalid",
-                severity: "warning",
-              });
-            }
-          }
-
-          // Light numeric validation (only digits and optional punctuation)
-          if (numericHeaders.has(normHeader(eh)) && value) {
-            const cleaned = value.replace(/[0-9.\-]/g, "");
-            if (cleaned.length > 0) {
-              issues.push({
-                rowIndex,
-                column: eh,
-                message: "Value should be numeric",
-                severity: "warning",
-              });
-            }
-          }
+        for (const expected of spec.expectedHeaders) {
+          const actual = actualByNorm.get(normHeader(expected));
+          out[expected] = actual ? (r?.[actual] ?? "") : "";
         }
-
-        // Append extras unchanged (trimmed already by normalizeRowsSafe)
-        for (const ex of extras) {
-          const v = r?.[ex];
-          out[ex] = typeof v === "string" ? v : v == null ? "" : String(v);
-        }
-
         return out;
       });
 
+      const issues: CsvIssue[] = [];
+
+      // Required header checks (if missing, flag as error on first row)
+      for (const required of spec.requiredHeaders) {
+        const actual = actualByNorm.get(normHeader(required));
+        if (!actual) {
+          issues.push({
+            rowIndex: 0,
+            column: required,
+            severity: "error",
+            message: `Missing required column: ${required}`,
+          });
+        }
+      }
+
+      // Optional validations
+      const emailCols = spec.emailHeaders ?? [];
+      const numericCols = spec.numericHeaders ?? [];
+
+      // Email validation (very light)
+      if (emailCols.length) {
+        const emailSet = new Set(emailCols.map(normHeader));
+        for (let i = 0; i < fixedRows.length; i++) {
+          const row = fixedRows[i];
+          for (const h of spec.expectedHeaders) {
+            if (!emailSet.has(normHeader(h))) continue;
+            const v = (row[h] ?? "").trim();
+            if (!v) continue;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+              issues.push({
+                rowIndex: i,
+                column: h,
+                severity: "warning",
+                message: "Email looks invalid",
+              });
+            }
+          }
+        }
+      }
+
+      // Numeric validation (very light)
+      if (numericCols.length) {
+        const numSet = new Set(numericCols.map(normHeader));
+        for (let i = 0; i < fixedRows.length; i++) {
+          const row = fixedRows[i];
+          for (const h of spec.expectedHeaders) {
+            if (!numSet.has(normHeader(h))) continue;
+            const v = (row[h] ?? "").trim();
+            if (!v) continue;
+            const cleaned = v.replace(/[,\\s\\$£€¥]/g, "");
+            if (!/^[-+]?\\d*(\\.\\d+)?$/.test(cleaned)) {
+              issues.push({
+                rowIndex: i,
+                column: h,
+                severity: "warning",
+                message: "Value should be numeric",
+              });
+            }
+          }
+        }
+      }
+
       return {
-        fixedHeaders: outHeaders,
-        fixedRows: outRows,
+        fixedHeaders: mappedHeaders,
+        fixedRows,
         issues,
-        fixesApplied,
+        fixesApplied: [],
       };
     },
   };
 }
 
-const SPECS: FormatSpec[] = [
-  // Ecommerce / marketplaces
-  {
+// Ecommerce / marketplaces
+export const formatPackEcommerce: CsvFormat[] = [
+  buildSimpleFormat({
     id: "woocommerce_products",
     name: "WooCommerce Products",
-    description: "Basic WooCommerce product import layout with safe cleanup.",
+    description: "Maps products into a WooCommerce-friendly template and flags common issues.",
     category: "Ecommerce",
-    expectedHeaders: ["ID", "Type", "SKU", "Name", "Published", "Regular price", "Sale price", "Description", "Images"],
-    requiredHeaders: ["Name"],
-  },
-  {
+    expectedHeaders: ["ID", "Type", "SKU", "Name", "Published", "Regular price", "Sale price", "Stock", "Categories", "Tags", "Images"],
+    requiredHeaders: ["SKU", "Name"],
+    numericHeaders: ["Regular price", "Sale price", "Stock"],
+  }),
+  buildSimpleFormat({
     id: "bigcommerce_products",
     name: "BigCommerce Products",
-    description: "Basic BigCommerce product import layout with safe cleanup.",
+    description: "Maps product columns for BigCommerce imports and flags missing required fields.",
     category: "Ecommerce",
-    expectedHeaders: ["Product Name", "Product Type", "SKU", "Description", "Price", "Weight", "Visible", "Categories"],
-    requiredHeaders: ["Product Name"],
-  },
-  {
+    expectedHeaders: ["Product Name", "Product SKU", "Price", "Weight", "Category", "Description", "Product Image URL"],
+    requiredHeaders: ["Product Name", "Product SKU"],
+    numericHeaders: ["Price", "Weight"],
+  }),
+  buildSimpleFormat({
     id: "etsy_listings",
     name: "Etsy Listings",
-    description: "Simplified Etsy listings layout with safe cleanup.",
+    description: "Prepares a listings template and highlights missing or suspicious values.",
     category: "Ecommerce",
-    expectedHeaders: ["Title", "Description", "Price", "Quantity", "SKU", "Tags", "Who made it", "When made", "Materials"],
+    expectedHeaders: ["Title", "Description", "Price", "Quantity", "SKU", "Tags", "Who made it", "When was it made", "What is it"],
     requiredHeaders: ["Title", "Price", "Quantity"],
     numericHeaders: ["Price", "Quantity"],
-  },
-  {
+  }),
+  buildSimpleFormat({
     id: "ebay_listings",
     name: "eBay Listings",
-    description: "Simplified eBay listings layout with safe cleanup.",
+    description: "Maps to a simplified eBay listing template and flags common problems.",
     category: "Ecommerce",
-    expectedHeaders: ["Title", "Description", "StartPrice", "Quantity", "SKU", "ConditionID", "Category", "PictureURL"],
-    requiredHeaders: ["Title", "StartPrice", "Quantity"],
-    numericHeaders: ["StartPrice", "Quantity"],
-  },
-  {
+    expectedHeaders: ["Title", "SKU", "Quantity", "Price", "ConditionID", "CategoryID", "PictureURL"],
+    requiredHeaders: ["Title", "Quantity", "Price"],
+    numericHeaders: ["Quantity", "Price"],
+  }),
+  buildSimpleFormat({
     id: "amazon_inventory_loader",
-    name: "Amazon Inventory Loader (Simplified)",
-    description: "Simplified Amazon inventory loader style columns.",
+    name: "Amazon Inventory Loader",
+    description: "Builds a simplified Amazon inventory template and flags missing essentials.",
     category: "Ecommerce",
-    expectedHeaders: ["sku", "product-id", "product-id-type", "price", "quantity", "condition-type", "item-name", "item-description"],
-    requiredHeaders: ["sku", "price", "quantity"],
-    numericHeaders: ["price", "quantity", "product-id-type"],
-  },
+    expectedHeaders: ["sku", "product-id", "product-id-type", "price", "quantity", "item-name", "brand-name"],
+    requiredHeaders: ["sku", "item-name"],
+    numericHeaders: ["price", "quantity"],
+  }),
+];
 
-  // Marketing / ads
-  {
+// Marketing / ads
+export const formatPackMarketing: CsvFormat[] = [
+  buildSimpleFormat({
     id: "mailchimp_contacts",
     name: "Mailchimp Contacts",
-    description: "Mailchimp contacts import basics (email + name).",
+    description: "Maps contact fields for Mailchimp imports and flags invalid emails.",
     category: "Marketing",
     expectedHeaders: ["Email Address", "First Name", "Last Name", "Phone Number"],
     requiredHeaders: ["Email Address"],
     emailHeaders: ["Email Address"],
-  },
-  {
+  }),
+  buildSimpleFormat({
     id: "klaviyo_profiles",
     name: "Klaviyo Profiles",
-    description: "Klaviyo profiles import basics (email + name).",
+    description: "Prepares a Klaviyo profile import template and flags invalid emails.",
     category: "Marketing",
     expectedHeaders: ["email", "first_name", "last_name", "phone_number"],
     requiredHeaders: ["email"],
     emailHeaders: ["email"],
-  },
-  {
+  }),
+  buildSimpleFormat({
     id: "meta_custom_audience",
-    name: "Meta Custom Audience (Email/Phone)",
-    description: "Meta custom audience basic identifiers.",
+    name: "Meta Custom Audience",
+    description: "Builds a simple Meta Customer List template for email and phone matching.",
     category: "Marketing",
-    expectedHeaders: ["email", "phone", "fn", "ln", "ct", "st", "zip", "country"],
+    expectedHeaders: ["email", "phone", "first_name", "last_name", "country", "zip"],
     requiredHeaders: ["email"],
     emailHeaders: ["email"],
-  },
-  {
+  }),
+  buildSimpleFormat({
     id: "google_ads_customer_match",
     name: "Google Ads Customer Match",
-    description: "Google Ads customer match basic identifiers.",
+    description: "Creates a basic Google Ads customer match template and flags invalid emails.",
     category: "Marketing",
     expectedHeaders: ["Email", "Phone", "First Name", "Last Name", "Country", "Zip"],
     requiredHeaders: ["Email"],
     emailHeaders: ["Email"],
-  },
+  }),
+];
 
-  // CRM
-  {
+// CRM
+export const formatPackCrm: CsvFormat[] = [
+  buildSimpleFormat({
     id: "hubspot_contacts",
     name: "HubSpot Contacts",
-    description: "HubSpot contacts import basics.",
+    description: "Maps fields for HubSpot contact imports and flags invalid emails.",
     category: "CRM",
-    expectedHeaders: ["Email", "First Name", "Last Name", "Phone Number", "Company Name"],
+    expectedHeaders: ["Email", "First Name", "Last Name", "Phone", "Company"],
     requiredHeaders: ["Email"],
     emailHeaders: ["Email"],
-  },
-  {
+  }),
+  buildSimpleFormat({
     id: "salesforce_leads",
     name: "Salesforce Leads",
-    description: "Salesforce leads import basics.",
+    description: "Creates a simple Salesforce lead import template and flags invalid emails.",
     category: "CRM",
-    expectedHeaders: ["First Name", "Last Name", "Company", "Email", "Phone", "Status"],
-    requiredHeaders: ["Last Name", "Company"],
+    expectedHeaders: ["Company", "Last Name", "First Name", "Email", "Phone", "Lead Source"],
+    requiredHeaders: ["Company", "Last Name"],
     emailHeaders: ["Email"],
-  },
-  {
+  }),
+  buildSimpleFormat({
     id: "zoho_contacts",
     name: "Zoho Contacts",
-    description: "Zoho contacts import basics.",
+    description: "Maps contacts for Zoho imports and flags invalid emails.",
     category: "CRM",
     expectedHeaders: ["First Name", "Last Name", "Email", "Phone", "Account Name"],
     requiredHeaders: ["Last Name"],
     emailHeaders: ["Email"],
-  },
-
-  // Accounting / finance
-  {
-    id: "quickbooks_transactions_basic",
-    name: "QuickBooks Transactions Import (Basic)",
-    description: "Basic transaction import layout with safe cleanup.",
-    category: "Accounting",
-    expectedHeaders: ["Date", "Description", "Amount", "Type", "Account"],
-    requiredHeaders: ["Date", "Amount"],
-    numericHeaders: ["Amount"],
-  },
-  {
-    id: "xero_bank_statement_basic",
-    name: "Xero Bank Statement Import",
-    description: "Basic bank statement import layout with safe cleanup.",
-    category: "Accounting",
-    expectedHeaders: ["Date", "Amount", "Payee", "Description", "Reference"],
-    requiredHeaders: ["Date", "Amount"],
-    numericHeaders: ["Amount"],
-  },
-
-  // Shipping
-  {
-    id: "shipstation_orders",
-    name: "ShipStation Orders Import",
-    description: "Basic order import layout for ShipStation.",
-    category: "Shipping",
-    expectedHeaders: ["Order Number", "Order Date", "Ship Name", "Ship Address 1", "Ship City", "Ship State", "Ship Postal Code", "Ship Country", "SKU", "Quantity"],
-    requiredHeaders: ["Order Number", "Ship Name", "Ship Address 1", "Ship City", "Ship Postal Code", "Ship Country"],
-    numericHeaders: ["Quantity"],
-  },
-  {
-    id: "pirate_ship_addresses",
-    name: "Pirate Ship Address Import",
-    description: "Basic address import layout for Pirate Ship.",
-    category: "Shipping",
-    expectedHeaders: ["Name", "Company", "Address1", "Address2", "City", "State", "Zip", "Country", "Phone", "Email"],
-    requiredHeaders: ["Name", "Address1", "City", "Zip", "Country"],
-    emailHeaders: ["Email"],
-  },
-  {
-    id: "ups_addresses_basic",
-    name: "UPS Address Import (Basic)",
-    description: "Basic UPS address import layout with safe cleanup.",
-    category: "Shipping",
-    expectedHeaders: ["Company or Name", "Address Line 1", "Address Line 2", "City", "State/Province", "Postal Code", "Country", "Phone", "Email"],
-    requiredHeaders: ["Company or Name", "Address Line 1", "City", "Postal Code", "Country"],
-    emailHeaders: ["Email"],
-  },
-
-  // Support / reviews
-  {
-    id: "zendesk_users",
-    name: "Zendesk Users Import",
-    description: "Zendesk users import basics.",
-    category: "Support",
-    expectedHeaders: ["name", "email", "role", "phone", "organization"],
-    requiredHeaders: ["name", "email"],
-    emailHeaders: ["email"],
-  },
-  {
-    id: "gorgias_contacts",
-    name: "Gorgias Contacts Import",
-    description: "Gorgias contacts import basics.",
-    category: "Support",
-    expectedHeaders: ["email", "first_name", "last_name", "phone", "external_id"],
-    requiredHeaders: ["email"],
-    emailHeaders: ["email"],
-  },
+  }),
 ];
 
-export const builtinPackFormats: CsvFormat[] = SPECS.map(buildSimpleFormat);
+// Accounting / finance
+export const formatPackAccounting: CsvFormat[] = [
+  buildSimpleFormat({
+    id: "quickbooks_transactions",
+    name: "QuickBooks Transactions",
+    description: "Builds a basic transaction import template and flags non-numeric amounts.",
+    category: "Accounting",
+    expectedHeaders: ["Date", "Description", "Amount", "Category"],
+    requiredHeaders: ["Date", "Amount"],
+    numericHeaders: ["Amount"],
+  }),
+  buildSimpleFormat({
+    id: "xero_bank_statement",
+    name: "Xero Bank Statement",
+    description: "Creates a simple bank statement import template and flags invalid amounts.",
+    category: "Accounting",
+    expectedHeaders: ["Date", "Payee", "Description", "Amount"],
+    requiredHeaders: ["Date", "Amount"],
+    numericHeaders: ["Amount"],
+  }),
+];
+
+// Shipping
+export const formatPackShipping: CsvFormat[] = [
+  buildSimpleFormat({
+    id: "shipstation_orders",
+    name: "ShipStation Orders",
+    description: "Maps order fields for ShipStation and flags missing required address fields.",
+    category: "Shipping",
+    expectedHeaders: ["Order Number", "Order Date", "Recipient Name", "Address 1", "City", "State", "Postal Code", "Country", "SKU", "Quantity"],
+    requiredHeaders: ["Order Number", "Recipient Name", "Address 1", "City", "Postal Code"],
+    numericHeaders: ["Quantity"],
+  }),
+  buildSimpleFormat({
+    id: "pirate_ship_addresses",
+    name: "Pirate Ship Addresses",
+    description: "Builds an address import template for Pirate Ship and flags missing essentials.",
+    category: "Shipping",
+    expectedHeaders: ["Name", "Company", "Address 1", "Address 2", "City", "State", "Zip", "Country", "Phone", "Email"],
+    requiredHeaders: ["Name", "Address 1", "City", "Zip", "Country"],
+    emailHeaders: ["Email"],
+  }),
+  buildSimpleFormat({
+    id: "ups_addresses",
+    name: "UPS Address Import",
+    description: "Creates a basic UPS address import template and flags missing required fields.",
+    category: "Shipping",
+    expectedHeaders: ["Name", "Address Line 1", "City", "State/Province", "Postal Code", "Country"],
+    requiredHeaders: ["Name", "Address Line 1", "City", "Postal Code", "Country"],
+  }),
+];
+
+// Support / reviews
+export const formatPackSupport: CsvFormat[] = [
+  buildSimpleFormat({
+    id: "zendesk_users",
+    name: "Zendesk Users",
+    description: "Builds a Zendesk user import template and flags invalid emails.",
+    category: "Support",
+    expectedHeaders: ["name", "email", "phone", "organization"],
+    requiredHeaders: ["name", "email"],
+    emailHeaders: ["email"],
+  }),
+  buildSimpleFormat({
+    id: "gorgias_contacts",
+    name: "Gorgias Contacts",
+    description: "Creates a contact template for Gorgias imports and flags invalid emails.",
+    category: "Support",
+    expectedHeaders: ["email", "first_name", "last_name", "phone"],
+    requiredHeaders: ["email"],
+    emailHeaders: ["email"],
+  }),
+];

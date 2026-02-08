@@ -1,5 +1,4 @@
 import type { CsvFormat } from "../types";
-import { normalizeRowsSafe } from "../engine";
 
 export const generalCsvFormat: CsvFormat = {
   id: "general_csv",
@@ -8,7 +7,8 @@ export const generalCsvFormat: CsvFormat = {
   category: "General",
   source: "builtin",
   apply: (headers, rows) => {
-    // Keep exactly what was uploaded, just normalize and trim safely
-    return normalizeRowsSafe(headers, rows);
+    // Universal cleanup is applied in the engine for ALL formats.
+    // General CSV simply passes through without platform-specific rules.
+    return { fixedHeaders: headers, fixedRows: rows, issues: [], fixesApplied: [] };
   },
 };
