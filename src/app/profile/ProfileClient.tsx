@@ -1,8 +1,9 @@
 // src/app/profile/ProfileClient.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type SubStatus = {
   signedIn: boolean;
@@ -22,9 +23,17 @@ async function safeReadJson(res: Response) {
 }
 
 export default function ProfileClient() {
+  const sp = useSearchParams();
+  const router = useRouter();
+
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+
+  const upgradeIntent = useMemo(() => {
+    const u = (sp.get("upgrade") ?? "").toLowerCase();
+    return u === "basic" || u === "advanced" ? (u as "basic" | "advanced") : null;
+  }, [sp]);
 
   async function load() {
     const r = await fetch("/api/subscription/status", { cache: "no-store" });
@@ -67,12 +76,50 @@ export default function ProfileClient() {
     }
   }
 
+  async function startCheckout(plan: "basic" | "advanced") {
+    setBusy(true);
+    setMsg("");
+
+    try {
+      if (!sub?.signedIn) {
+        router.push(
+          `/login?redirect=${encodeURIComponent(`/profile?upgrade=${plan}`)}&msg=${encodeURIComponent(
+            "Sign in to upgrade your plan."
+          )}`
+        );
+        return;
+      }
+
+      const r = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+
+      const j = await safeReadJson(r);
+
+      if (!r.ok) {
+        setMsg(j?.error ?? "Could not start checkout.");
+        return;
+      }
+
+      if (!j?.url) {
+        setMsg("Checkout response missing URL.");
+        return;
+      }
+
+      window.location.href = j.url;
+    } catch (e: any) {
+      setMsg(e?.message ?? "Could not start checkout.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-semibold">Profile</h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">
-        Verify your subscription and manage billing.
-      </p>
+      <p className="mt-2 text-sm text-[var(--muted)]">Verify your subscription and manage billing.</p>
 
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         {sub ? (
@@ -94,13 +141,64 @@ export default function ProfileClient() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                onClick={openPortal}
-                disabled={busy || !sub.signedIn}
-              >
-                {busy ? "Opening…" : "Manage in Stripe (upgrade/cancel)"}
-              </button>
+              {sub.signedIn && sub.status === "active" ? (
+                <button
+                  className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  onClick={openPortal}
+                  disabled={busy}
+                  type="button"
+                >
+                  {busy ? "Opening…" : "Manage in Stripe (upgrade/cancel)"}
+                </button>
+              ) : null}
+
+              {sub.signedIn && sub.status !== "active" ? (
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
+                    onClick={() => startCheckout("basic")}
+                    disabled={busy}
+                    type="button"
+                  >
+                    Upgrade to Basic
+                  </button>
+
+                  <button
+                    className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
+                    onClick={() => startCheckout("advanced")}
+                    disabled={busy}
+                    type="button"
+                  >
+                    Upgrade to Advanced
+                  </button>
+                </div>
+              ) : null}
+
+              {sub.signedIn && sub.status === "active" && sub.plan === "basic" ? (
+                <button
+                  className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
+                  onClick={() => startCheckout("advanced")}
+                  disabled={busy}
+                  type="button"
+                >
+                  Upgrade to Advanced
+                </button>
+              ) : null}
+
+              {!sub.signedIn ? (
+                <Link
+                  href={
+                    upgradeIntent
+                      ? `/login?redirect=${encodeURIComponent(
+                          `/profile?upgrade=${upgradeIntent}`
+                        )}&msg=${encodeURIComponent("Sign in to upgrade your plan.")}`
+                      : "/login?redirect=%2Fprofile"
+                  }
+                  className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
+                >
+                  Sign in
+                </Link>
+              ) : null}
 
               <Link
                 href="/app"
@@ -109,6 +207,12 @@ export default function ProfileClient() {
                 Back to app
               </Link>
             </div>
+
+            {upgradeIntent ? (
+              <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm">
+                You’re signed in. Choose a plan above to upgrade.
+              </div>
+            ) : null}
 
             {msg ? <div className="mt-3 text-sm text-[var(--muted)]">{msg}</div> : null}
           </>

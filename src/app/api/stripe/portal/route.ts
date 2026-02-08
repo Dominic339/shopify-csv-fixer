@@ -6,16 +6,14 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error("Missing STRIPE_SECRET_KEY env var");
-  }
+function requireEnv(name: string) {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing ${name} env var`);
+  return v;
+}
 
-  // IMPORTANT: Do not set apiVersion here because this project's Stripe types
-  // are pinned to a custom literal (e.g. "2025-12-15.clover").
-  // Let Stripe use the default configured version.
-  return new Stripe(key);
+function getStripe() {
+  return new Stripe(requireEnv("STRIPE_SECRET_KEY"));
 }
 
 export async function POST() {

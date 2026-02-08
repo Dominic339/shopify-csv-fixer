@@ -1,34 +1,18 @@
-// src/app/api/quota/consume/route.ts
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getPlanLimits } from "@/lib/quota";
 
-function monthKey(d: Date = new Date()): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
-}
-
-/**
- * Increments the user's export counter for the current month.
- * Table schema (public.export_usage):
- * - user_id uuid
- * - month_key text (YYYY-MM)
- * - exports_used int4
- * - updated_at timestamptz
- */
 export async function POST(req: Request) {
-  // ✅ IMPORTANT: await the server client (your helper returns a Promise)
   const supabase = await createSupabaseServerClient();
-
   const {
     data: { user },
-    error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    return NextResponse.json({ ok: false, message: "Not signed in" }, { status: 401 });
+  if (!user) {
+    return NextResponse.json(
+      { ok: false, message: "Not signed in" },
+      { status: 401 }
+    );
   }
 
   let body: any = {};
@@ -38,83 +22,67 @@ export async function POST(req: Request) {
     body = {};
   }
 
-  const amount = Math.max(1, Math.min(10, Number(body.amount || 1)));
+  const amount = Math.max(1, Math.min(10, Number(body.amount ?? 1)));
 
-  // Determine the plan from user_subscriptions (kept in sync by Stripe webhooks)
   const admin = createSupabaseAdminClient();
-  const { data: subRow } = await admin
-    .from("user_subscriptions")
-    .select("plan,status")
-    .eq("user_id", user.id)
-    .maybeSingle();
 
-  const plan = (subRow?.plan || "free").toString().toLowerCase();
-  const status = (subRow?.status || "none").toString().toLowerCase();
-  const effectivePlan = status === "active" ? plan : "free";
-  const limit = getPlanLimits(effectivePlan).exportsPerMonth;
+  const { data, error } = await admin.rpc("consume_export_quota", {
+    p_user_id: user.id,
+    p_amount: amount,
+  });
 
-  const mk = monthKey();
-
-  // Read current usage
-  const { data: usageRow, error: usageReadError } = await admin
-    .from("export_usage")
-    .select("exports_used")
-    .eq("user_id", user.id)
-    .eq("month_key", mk)
-    .maybeSingle();
-
-  if (usageReadError) {
-    return NextResponse.json({ ok: false, message: usageReadError.message }, { status: 500 });
+  if (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          "Quota consume failed. Make sure consume_export_quota exists.",
+        details: error.message,
+      },
+      { status: 500 }
+    );
   }
 
-  const current = Number(usageRow?.exports_used || 0);
-  const nextUsed = current + amount;
+  const row = Array.isArray(data) ? data[0] : data;
 
-  if (nextUsed > limit) {
+  if (!row) {
+    return NextResponse.json(
+      { ok: false, message: "Quota consume returned no data" },
+      { status: 500 }
+    );
+  }
+
+  // Advanced: unlimited, no counters
+  if (row.unlimited) {
+    return NextResponse.json({
+      ok: true,
+      plan: row.plan,
+      unlimited: true,
+    });
+  }
+
+  // Over limit
+  if (!row.ok) {
     return NextResponse.json(
       {
         ok: false,
         message: "Monthly export limit reached.",
-        monthKey: mk,
-        used: current,
-        limit,
-        remaining: Math.max(0, limit - current),
-        plan: effectivePlan,
+        monthKey: row.month_key,
+        used: row.used,
+        limit: row.quota_limit,
+        remaining: row.remaining,
       },
       { status: 403 }
     );
   }
 
-  // Write new usage
-  if (usageRow) {
-    const { error: updErr } = await admin
-      .from("export_usage")
-      .update({ exports_used: nextUsed, updated_at: new Date().toISOString() })
-      .eq("user_id", user.id)
-      .eq("month_key", mk);
-
-    if (updErr) {
-      return NextResponse.json({ ok: false, message: updErr.message }, { status: 500 });
-    }
-  } else {
-    const { error: insErr } = await admin.from("export_usage").insert({
-      user_id: user.id,
-      month_key: mk,
-      exports_used: nextUsed,
-      updated_at: new Date().toISOString(),
-    });
-
-    if (insErr) {
-      return NextResponse.json({ ok: false, message: insErr.message }, { status: 500 });
-    }
-  }
-
+  // Normal success
   return NextResponse.json({
     ok: true,
-    monthKey: mk,
-    used: nextUsed,
-    limit,
-    remaining: Math.max(0, limit - nextUsed),
-    plan: effectivePlan,
+    plan: row.plan,
+    monthKey: row.month_key,
+    used: row.used,
+    limit: row.quota_limit,
+    remaining: row.remaining,
   });
 }

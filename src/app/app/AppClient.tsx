@@ -1,25 +1,32 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
+
+import { getAllFormats } from "@/lib/formats";
+import { applyFormatToParsedCsv } from "@/lib/formats/engine";
+import type { CsvFormat } from "@/lib/formats/types";
+import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats/customUser";
 
 type SubStatus = {
   ok: boolean;
   plan?: "free" | "basic" | "advanced";
   status?: string;
+  signedIn?: boolean;
 };
 
 type PlanLimits = {
   exportsPerMonth: number;
+  unlimited?: boolean;
 };
 
 type CsvRow = Record<string, string>;
 
 type UiIssue = {
-  row?: number; // 1-based
+  row?: number; // 1-based (legacy)
+  rowIndex?: number; // 0-based (new)
   column?: string;
   field?: string;
   message: string;
@@ -48,22 +55,66 @@ export default function AppClient() {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
-  // inline edit state for the restored table
+  // inline edit state for the preview table
   const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
     null
   );
 
-  const planForLimits = useMemo(() => {
-    return (subStatus?.plan ?? "free") as "free" | "basic" | "advanced";
-  }, [subStatus]);
+  // store last uploaded CSV text so switching formats can re-run on same file
+  const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
+
+  // Selected format
+  const [formatId, setFormatId] = useState<string>("general_csv");
+
+  // Built-in formats are stable
+  const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
+
+  // Custom formats can change during the session (import/save/delete)
+  const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
+
+  function refreshCustomFormats() {
+    const user = loadUserFormatsFromStorage();
+    const next = user.map(userFormatToCsvFormat);
+    setCustomFormats(next);
+  }
+
+  useEffect(() => {
+    refreshCustomFormats();
+
+    // Listen for storage updates triggered by saveUserFormatsToStorage()
+    const onChanged = () => refreshCustomFormats();
+    window.addEventListener("csnest-formats-changed", onChanged);
+
+    return () => {
+      window.removeEventListener("csnest-formats-changed", onChanged);
+    };
+  }, []);
+
+  const allFormats = useMemo<CsvFormat[]>(() => {
+    return [...builtinFormats, ...customFormats];
+  }, [builtinFormats, customFormats]);
+
+  // Keep selected format valid (if a custom format is deleted, fall back)
+  useEffect(() => {
+    if (allFormats.some((f) => f.id === formatId)) return;
+    setFormatId(allFormats[0]?.id ?? "general_csv");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFormats.length]);
+
+  const activeFormat = useMemo(() => {
+    return allFormats.find((f) => f.id === formatId) ?? allFormats[0];
+  }, [allFormats, formatId]);
 
   async function refreshQuotaAndPlan() {
     try {
-      const [q, s, limits] = await Promise.all([
+      const [q, s] = await Promise.all([
         getQuota(),
-        fetch("/api/subscription/status").then((r) => r.json()),
-        getPlanLimits(planForLimits),
+        fetch("/api/subscription/status", { cache: "no-store" }).then((r) => r.json()),
       ]);
+
+      const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
+      const limits = getPlanLimits(plan) as PlanLimits;
+
       setQuota(q);
       setSubStatus(s);
       setPlanLimits(limits);
@@ -73,9 +124,17 @@ export default function AppClient() {
   }
 
   useEffect(() => {
-    refreshQuotaAndPlan();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [planForLimits]);
+    void refreshQuotaAndPlan();
+  }, []);
+
+  const isUnlimited = useMemo(() => {
+    const status = (subStatus?.status ?? "").toLowerCase();
+    const plan = subStatus?.plan ?? "free";
+    if (plan === "advanced" && status === "active") return true;
+    if (quota?.unlimited) return true;
+    if (planLimits?.unlimited) return true;
+    return false;
+  }, [subStatus, quota, planLimits]);
 
   const issuesForTable: CsvIssue[] = useMemo(() => {
     return (issues ?? [])
@@ -85,13 +144,12 @@ export default function AppClient() {
             ? (it as any).rowIndex
             : typeof it.row === "number"
               ? Math.max(0, it.row - 1)
-              : 0;
+              : null;
 
         const col = (it.column ?? it.field ?? "").toString();
-
         const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
 
-        if (!col) return null;
+        if (rowIndex == null || !col) return null;
 
         return {
           rowIndex,
@@ -149,16 +207,15 @@ export default function AppClient() {
     });
   }, []);
 
-  async function handleFile(file: File) {
+  async function runFormatOnText(format: CsvFormat, csvText: string, name?: string) {
     setBusy(true);
     setErrorBanner(null);
-    setFileName(file.name);
 
     try {
-      const text = await file.text();
+      const parsed = parseCsv(csvText);
 
-      const parsed = parseCsv(text);
-      const fixed = validateAndFixShopifyBasic(parsed.headers, parsed.rows);
+      // Apply selected format (engine includes universal cleanup now)
+      const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
 
       const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
         message: m,
@@ -166,10 +223,11 @@ export default function AppClient() {
         severity: "error",
       }));
 
-      setHeaders(fixed.fixedHeaders ?? []);
-      setRows(fixed.fixedRows ?? []);
-      setIssues([...(fixed.issues ?? []), ...parseIssues]);
-      setAutoFixes(fixed.fixesApplied ?? []);
+      setHeaders(res.fixedHeaders ?? []);
+      setRows(res.fixedRows ?? []);
+      setIssues([...(res.issues ?? []), ...parseIssues]);
+      setAutoFixes(res.fixesApplied ?? []);
+      if (typeof name === "string") setFileName(name);
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -179,6 +237,43 @@ export default function AppClient() {
       setEditing(null);
     }
   }
+
+  async function handleFile(file: File) {
+    setBusy(true);
+    setErrorBanner(null);
+    setFileName(file.name);
+
+    try {
+      const text = await file.text();
+      setLastUploadedText(text);
+
+      // Clear previous run immediately for a clean swap-in
+      setIssues([]);
+      setAutoFixes([]);
+      setEditing(null);
+
+      if (activeFormat) {
+        await runFormatOnText(activeFormat, text, file.name);
+      }
+    } catch (e: any) {
+      setErrorBanner(e?.message ?? "Failed to process CSV");
+    } finally {
+      setBusy(false);
+      setEditing(null);
+    }
+  }
+
+  // When switching formats, clear pins + clear issues/autofixes, then re-run if a file is loaded
+  useEffect(() => {
+    setIssues([]);
+    setAutoFixes([]);
+    setEditing(null);
+
+    if (!lastUploadedText || !activeFormat) return;
+
+    void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formatId]);
 
   async function exportFixedCsv() {
     setBusy(true);
@@ -227,6 +322,10 @@ export default function AppClient() {
   const autoFixRest = autoFixes.slice(autoFixPreviewCount);
   const autoFixRestCount = Math.max(0, autoFixRest.length);
 
+  const used = Number(quota?.used ?? 0);
+  const limit = Number(planLimits?.exportsPerMonth ?? 3);
+  const left = isUnlimited ? null : Math.max(0, limit - used);
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
@@ -239,23 +338,50 @@ export default function AppClient() {
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">CSV Fixer</h1>
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            Upload → auto-normalize what’s safe → fix remaining issues → export.
+            Pick a format → upload → auto-fix safe issues → export.
           </p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
           <div className="font-medium">Monthly exports</div>
-          <div>
-            {quota?.used ?? 0}/{planLimits?.exportsPerMonth ?? 3} used •{" "}
-            {(planLimits?.exportsPerMonth ?? 3) - (quota?.used ?? 0)} left
-          </div>
+          {isUnlimited ? (
+            <div>Unlimited</div>
+          ) : (
+            <div>
+              {used}/{limit} used • {left} left
+            </div>
+          )}
           <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <div className="text-sm font-semibold text-[var(--text)]">Format</div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {allFormats.map((f) => {
+            const active = f.id === formatId;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                className={`pill-btn ${active ? "is-active" : ""}`}
+                onClick={() => setFormatId(f.id)}
+              >
+                {f.name}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 text-xs text-[var(--muted)]">
+          Built-in formats are available to everyone. Custom formats appear here when you save or
+          import them.
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text)]">Upload CSV</h2>
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
@@ -343,8 +469,7 @@ export default function AppClient() {
                           <td className="text-[var(--muted)]">{rowIndex + 1}</td>
                           {tableHeaders.slice(0, 12).map((h) => {
                             const sev = issueCellMap.get(`${rowIndex}|||${h}`);
-                            const isEditing =
-                              editing?.rowIndex === rowIndex && editing?.col === h;
+                            const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
 
                             const cellClass =
                               (sev === "error"
@@ -393,8 +518,8 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row
-                editing.
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full
+                row editing.
               </div>
             ) : null}
           </div>
@@ -405,6 +530,7 @@ export default function AppClient() {
               issues={issues as any}
               rows={rows}
               onUpdateRow={onUpdateRow}
+              resetKey={formatId}
             />
           </div>
         </div>

@@ -5,15 +5,19 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
+function requireEnv(name: string) {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing ${name} env var`);
+  return v;
+}
+
 function toIsoFromUnixSeconds(sec: number | null | undefined) {
   if (!sec || typeof sec !== "number") return null;
   return new Date(sec * 1000).toISOString();
 }
 
 function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("Missing STRIPE_SECRET_KEY");
-  return new Stripe(key, { apiVersion: "2025-12-15.clover" });
+  return new Stripe(requireEnv("STRIPE_SECRET_KEY"));
 }
 
 async function upsertSubscriptionRow(args: {
@@ -21,6 +25,7 @@ async function upsertSubscriptionRow(args: {
   plan: "basic" | "advanced" | "free";
   status: string;
   stripe_customer_id: string | null;
+  stripe_subscription_id?: string | null;
   current_period_end?: string | null;
 }) {
   const admin = createSupabaseAdminClient();
@@ -33,15 +38,17 @@ async function upsertSubscriptionRow(args: {
     updated_at: new Date().toISOString(),
   };
 
+  if (typeof args.stripe_subscription_id !== "undefined") {
+    payload.stripe_subscription_id = args.stripe_subscription_id;
+  }
+
   if (typeof args.current_period_end !== "undefined") {
     payload.current_period_end = args.current_period_end;
   }
 
   const { error } = await admin.from("user_subscriptions").upsert(payload);
 
-  if (error) {
-    throw new Error(`Supabase upsert failed: ${error.message}`);
-  }
+  if (error) throw new Error(`Supabase upsert failed: ${error.message}`);
 }
 
 export async function POST(req: Request) {
@@ -77,6 +84,8 @@ export async function POST(req: Request) {
         const plan = session.metadata?.plan as "basic" | "advanced" | undefined;
 
         const customerId = typeof session.customer === "string" ? session.customer : null;
+        const subscriptionId =
+          typeof session.subscription === "string" ? session.subscription : null;
 
         if (!userId || !plan) break;
 
@@ -85,6 +94,7 @@ export async function POST(req: Request) {
           plan,
           status: "active",
           stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId,
         });
 
         break;
@@ -95,10 +105,9 @@ export async function POST(req: Request) {
         const sub = event.data.object as Stripe.Subscription;
 
         const customerId = (sub.customer as string) || null;
+        const subscriptionId = sub.id || null;
         const currentPeriodEnd = toIsoFromUnixSeconds((sub as any).current_period_end);
 
-        // NEW: Use subscription metadata as a fallback path to create the row.
-        // This fixes the “Stripe shows subscription but Supabase empty” problem.
         const userId = (sub.metadata as any)?.user_id as string | undefined;
         const plan = (sub.metadata as any)?.plan as "basic" | "advanced" | undefined;
 
@@ -108,23 +117,23 @@ export async function POST(req: Request) {
             plan,
             status: sub.status,
             stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
             current_period_end: currentPeriodEnd,
           });
         } else {
-          // If the row already exists (matched by stripe_customer_id), still update status/period end.
+          // Row exists already (matched by stripe_customer_id). Still update status/period end/sub id.
           const admin = createSupabaseAdminClient();
           const { error } = await admin
             .from("user_subscriptions")
             .update({
               status: sub.status,
               current_period_end: currentPeriodEnd,
+              stripe_subscription_id: subscriptionId,
               updated_at: new Date().toISOString(),
             })
             .eq("stripe_customer_id", customerId);
 
-          if (error) {
-            throw new Error(`Supabase update failed: ${error.message}`);
-          }
+          if (error) throw new Error(`Supabase update failed: ${error.message}`);
         }
 
         break;
@@ -133,6 +142,7 @@ export async function POST(req: Request) {
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         const customerId = (sub.customer as string) || null;
+        const subscriptionId = sub.id || null;
         if (!customerId) break;
 
         const admin = createSupabaseAdminClient();
@@ -140,27 +150,23 @@ export async function POST(req: Request) {
           .from("user_subscriptions")
           .update({
             status: "canceled",
+            stripe_subscription_id: subscriptionId,
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_customer_id", customerId);
 
-        if (error) {
-          throw new Error(`Supabase update failed: ${error.message}`);
-        }
+        if (error) throw new Error(`Supabase update failed: ${error.message}`);
 
         break;
       }
 
       default:
-        console.log("Unhandled Stripe event:", event.type);
+        // ignore
         break;
     }
   } catch (e: any) {
     console.error("Stripe webhook handler error:", e);
-    return NextResponse.json(
-      { error: e?.message ?? "Webhook handler failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: e?.message ?? "Webhook handler failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

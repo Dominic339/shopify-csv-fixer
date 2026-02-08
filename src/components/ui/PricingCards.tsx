@@ -84,36 +84,39 @@ export function PricingCards() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="text-sm text-[var(--muted)]">Your membership</div>
-            <div className="mt-1 text-2xl font-semibold">{planLabel}</div>
+            <div className="mt-1 text-2xl font-semibold text-[var(--text)]">{planLabel}</div>
             <div className="mt-2 text-sm text-[var(--muted)]">
-              You’re subscribed. You can manage billing, cancel, or upgrade any time.
+              You are subscribed. You can manage billing, cancel, or upgrade any time.
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
             {canUpgrade ? (
               <button
-                className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
                 onClick={() => startCheckout("advanced")}
                 disabled={busy !== null}
+                type="button"
               >
                 {busy === "advanced" ? "Starting..." : "Upgrade to Advanced"}
               </button>
             ) : null}
 
             <button
-              className="rgb-btn bg-[var(--surface-2)] px-5 py-3 text-sm disabled:opacity-50"
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
               onClick={openPortal}
               disabled={busy !== null}
+              type="button"
             >
-              {busy === "portal" ? "Opening..." : "Manage billing / cancel"}
+              {busy === "portal" ? "Opening..." : "Manage billing in Profile"}
             </button>
 
             <button
-              className="rgb-btn bg-[var(--surface-2)] px-5 py-3 text-sm"
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
               onClick={() => router.push("/app")}
+              type="button"
             >
-              Open app
+              Open CSV Fixer
             </button>
           </div>
         </div>
@@ -131,16 +134,18 @@ export function PricingCards() {
         {/* Free */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
           <div className="text-sm text-[var(--muted)]">Free</div>
-          <div className="mt-2 text-3xl font-semibold">$0</div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$0</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Fix and export CSVs</li>
+            <li>Fix and export CSV files</li>
             <li>3 exports per month per device</li>
+            <li>Access to all built-in formats</li>
             <li>No account required</li>
           </ul>
 
           <button
-            className="rgb-btn mt-6 w-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
+            className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)]"
             onClick={() => router.push("/app")}
+            type="button"
           >
             Start free
           </button>
@@ -149,17 +154,19 @@ export function PricingCards() {
         {/* Basic */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
           <div className="text-sm text-[var(--muted)]">Basic</div>
-          <div className="mt-2 text-3xl font-semibold">$3 / month</div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$3 / month</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
             <li>100 exports per month</li>
+            <li>Access to all built-in formats</li>
             <li>Account required</li>
             <li>Manage billing in Profile</li>
           </ul>
 
           <button
-            className="rgb-btn mt-6 w-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
             onClick={() => startCheckout("basic")}
             disabled={busy !== null}
+            type="button"
           >
             {busy === "basic" ? "Starting..." : sub?.signedIn ? "Subscribe" : "Sign in to subscribe"}
           </button>
@@ -168,17 +175,19 @@ export function PricingCards() {
         {/* Advanced */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
           <div className="text-sm text-[var(--muted)]">Advanced</div>
-          <div className="mt-2 text-3xl font-semibold">$10 / month</div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$10 / month</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
             <li>Unlimited exports</li>
-            <li>Account required</li>
-            <li>Custom formats (coming soon)</li>
+            <li>Access to all built-in formats</li>
+            <li>Custom Format Builder</li>
+            <li>Save, reuse, import, and export formats</li>
           </ul>
 
           <button
-            className="rgb-btn mt-6 w-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
             onClick={() => startCheckout("advanced")}
             disabled={busy !== null}
+            type="button"
           >
             {busy === "advanced" ? "Starting..." : sub?.signedIn ? "Subscribe" : "Sign in to subscribe"}
           </button>

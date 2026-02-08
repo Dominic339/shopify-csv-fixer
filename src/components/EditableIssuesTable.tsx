@@ -2,13 +2,32 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type Issue = {
-  severity: "error" | "warning" | "info";
-  code?: string;
-  message: string;
-  row?: number; // 1-based
+type RawIssue = {
+  // New shape (engine)
+  rowIndex?: number; // 0-based
   column?: string;
+
+  // Old shape (legacy)
+  row?: number; // 1-based
+  field?: string;
+
+  // Common
+  message: string;
   suggestion?: string;
+
+  // Some code paths used level instead of severity
+  severity?: "error" | "warning" | "info";
+  level?: "error" | "warning" | "info";
+
+  code?: string;
+};
+
+type NormalizedIssue = {
+  rowIndex: number; // 0-based (rowIndex < 0 means file-level issue)
+  column?: string;
+  message: string;
+  suggestion?: string;
+  severity: "error" | "warning" | "info";
 };
 
 type CsvRow = Record<string, string>;
@@ -16,22 +35,69 @@ type CsvRow = Record<string, string>;
 type Props = {
   headers: string[];
   rows: CsvRow[];
-  issues: Issue[];
+  issues: RawIssue[];
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
+
+  // Changing this value clears pinned rows (useful when switching formats)
+  resetKey?: string;
 };
 
 type PinnedRow = { rowIndex: number };
 
-export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Props) {
+export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetKey }: Props) {
   const [showMode, setShowMode] = useState<"errors" | "warnings" | "all">("errors");
   const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
 
-  // Auto-pin rows that ever had an issue (keeps your old behavior)
+  // Clear pins when switching formats (or any parent-driven reset)
+  useEffect(() => {
+    if (!resetKey) return;
+    setManualPinnedRows([]);
+    setShowMode("errors");
+  }, [resetKey]);
+
+  // Normalize issues so both old + new formats work
+  const normalizedIssues: NormalizedIssue[] = useMemo(() => {
+    return (issues ?? [])
+      .map((it) => {
+        const rowIndex =
+          typeof it.rowIndex === "number"
+            ? it.rowIndex
+            : typeof it.row === "number"
+              ? Math.max(0, it.row - 1)
+              : null;
+
+        if (rowIndex == null) return null;
+
+        const column = (it.column ?? it.field ?? "").toString() || undefined;
+
+        const severity = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+
+        return {
+          rowIndex,
+          column,
+          message: it.message,
+          suggestion: it.suggestion,
+          severity,
+        };
+      })
+      .filter(Boolean) as NormalizedIssue[];
+  }, [issues]);
+
+  // File-level issues (ex: missing required columns) use rowIndex < 0
+  const fileIssues = useMemo(() => {
+    return normalizedIssues.filter((i) => i.rowIndex < 0);
+  }, [normalizedIssues]);
+
+  // Only row-scoped issues participate in pinning, cell highlights, and row editing
+  const rowIssuesOnly = useMemo(() => {
+    return normalizedIssues.filter((i) => i.rowIndex >= 0 && i.rowIndex < rows.length);
+  }, [normalizedIssues, rows.length]);
+
+  // Auto-pin rows that ever had an issue
   useEffect(() => {
     const rowsWithIssues = new Set<number>();
-    for (const i of issues) {
-      if (typeof i.row === "number") rowsWithIssues.add(i.row - 1);
-    }
+    for (const i of rowIssuesOnly) rowsWithIssues.add(i.rowIndex);
+
     if (rowsWithIssues.size === 0) return;
 
     setManualPinnedRows((prev) => {
@@ -43,37 +109,33 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
       }
       return next;
     });
-  }, [issues, rows.length]);
+  }, [rowIssuesOnly, rows.length]);
 
-  // Map issues by row and also by (row,col) for per-field highlighting
+  // Map issues by row
   const issuesByRow = useMemo(() => {
-    const map = new Map<number, Issue[]>();
-    for (const i of issues) {
-      if (typeof i.row !== "number") continue;
-      const idx = i.row - 1;
-      if (!map.has(idx)) map.set(idx, []);
-      map.get(idx)!.push(i);
+    const map = new Map<number, NormalizedIssue[]>();
+    for (const i of rowIssuesOnly) {
+      if (!map.has(i.rowIndex)) map.set(i.rowIndex, []);
+      map.get(i.rowIndex)!.push(i);
     }
     return map;
-  }, [issues]);
+  }, [rowIssuesOnly]);
 
+  // Per-cell highlighting
   const issueByCellSeverity = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
-    for (const i of issues) {
-      if (typeof i.row !== "number") continue;
+    for (const i of rowIssuesOnly) {
       if (!i.column) continue;
-      const rowIndex = i.row - 1;
-      const key = `${rowIndex}|||${i.column}`;
+      const key = `${i.rowIndex}|||${i.column}`;
 
       const prev = map.get(key);
-      // error overrides warning overrides info
       if (prev === "error") continue;
       if (prev === "warning" && i.severity === "info") continue;
 
       map.set(key, i.severity);
     }
     return map;
-  }, [issues]);
+  }, [rowIssuesOnly]);
 
   const rowsToShow = useMemo(() => {
     const set = new Set<number>();
@@ -94,7 +156,8 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
 
   function togglePin(rowIndex: number) {
     setManualPinnedRows((prev) => {
-      if (prev.some((p) => p.rowIndex === rowIndex)) return prev.filter((p) => p.rowIndex !== rowIndex);
+      if (prev.some((p) => p.rowIndex === rowIndex))
+        return prev.filter((p) => p.rowIndex !== rowIndex);
       return [...prev, { rowIndex }];
     });
   }
@@ -107,7 +170,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
     return value ?? "";
   }
 
-  const severityChip = (s: Issue["severity"]) => {
+  const severityChip = (s: NormalizedIssue["severity"]) => {
     const cls =
       s === "error"
         ? "bg-red-500/15 text-red-300 border-red-500/30"
@@ -122,7 +185,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
     );
   };
 
-  function issueBoxClass(sev: Issue["severity"]) {
+  function issueBoxClass(sev: NormalizedIssue["severity"]) {
     if (sev === "error") return "issue-box error";
     if (sev === "warning") return "issue-box warning";
     return "issue-box info";
@@ -170,96 +233,137 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow }: Prop
         </div>
       </div>
 
-      {rowsToShow.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-6 text-sm text-[var(--muted)]">
+      {fileIssues.length ? (
+        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+          <div className="text-sm font-semibold text-[var(--text)]">File issues</div>
+          <div className="mt-2 space-y-2">
+            {fileIssues
+              .filter((x) =>
+                showMode === "errors"
+                  ? x.severity === "error"
+                  : showMode === "warnings"
+                    ? x.severity === "warning"
+                    : true
+              )
+              .slice(0, 12)
+              .map((x, i) => (
+                <div key={i} className={issueBoxClass(x.severity)}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="text-sm text-[var(--text)]">
+                      {x.column ? <span className="font-semibold">{x.column}: </span> : null}
+                      {x.message}
+                    </div>
+                    {severityChip(x.severity)}
+                  </div>
+                </div>
+              ))}
+
+            {fileIssues.length > 12 ? (
+              <div className="text-xs text-[var(--muted)]">+{fileIssues.length - 12} more</div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {rowsToShow.length === 0 && fileIssues.length === 0 ? (
+        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
           No rows to show yet. Upload a CSV to see issues here.
         </div>
       ) : (
-        <div className="mt-6 space-y-6">
-          {rowsToShow.slice(0, 50).map((rowIndex) => {
-            const row = rows[rowIndex];
+        <div className="mt-6 space-y-4">
+          {rowsToShow.map((rowIndex) => {
             const rowIssues = issuesByRow.get(rowIndex) ?? [];
-            const pinned = manualPinnedRows.some((p) => p.rowIndex === rowIndex);
+            const row = rows[rowIndex] ?? {};
+
+            const anyError = rowIssues.some((x) => x.severity === "error");
+            const anyWarning = rowIssues.some((x) => x.severity === "warning");
+
+            if (
+              showMode === "errors" &&
+              !anyError &&
+              !manualPinnedRows.some((p) => p.rowIndex === rowIndex)
+            )
+              return null;
+            if (
+              showMode === "warnings" &&
+              !anyWarning &&
+              !manualPinnedRows.some((p) => p.rowIndex === rowIndex)
+            )
+              return null;
 
             return (
-              <div key={rowIndex} className="rounded-2xl border border-[var(--border)] overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--surface-2)]">
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-semibold">{rowLabel(rowIndex)}</div>
-                    {pinned ? (
-                      <span className="text-[10px] rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-[var(--muted)]">
-                        Pinned
-                      </span>
-                    ) : null}
+              <div
+                key={rowIndex}
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-semibold text-[var(--text)]">
+                      {rowLabel(rowIndex)}
+                    </div>
+                    {rowIssues.length ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {rowIssues.slice(0, 3).map((x, i) => (
+                          <span key={i}>{severityChip(x.severity)}</span>
+                        ))}
+                        {rowIssues.length > 3 ? (
+                          <span className="text-[10px] text-[var(--muted)]">
+                            +{rowIssues.length - 3} more
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-[var(--muted)]">Pinned</div>
+                    )}
                   </div>
 
                   <button
-                    className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold"
-                    type="button"
+                    className="pill-btn"
                     onClick={() => togglePin(rowIndex)}
+                    type="button"
+                    title="Pin or unpin this row"
                   >
-                    {pinned ? "Unpin" : "Pin"}
+                    {manualPinnedRows.some((p) => p.rowIndex === rowIndex) ? "Unpin" : "Pin"}
                   </button>
                 </div>
 
-                {rowIssues.length > 0 ? (
-                  <div className="border-t border-[var(--border)] p-4">
-                    <div className="mb-2 text-xs font-semibold text-[var(--muted)]">Issues</div>
-                    <div className="space-y-2">
-                      {rowIssues.slice(0, 8).map((i, idx) => (
-                        <div key={idx} className={issueBoxClass(i.severity)}>
-                          <div className="flex flex-wrap items-start gap-3 text-xs">
-                            {severityChip(i.severity)}
-                            <div className="flex-1 text-[var(--text)]">
-                              <span className="font-semibold">{i.column ? `${i.column}: ` : ""}</span>
-                              {i.message}
-                              {i.suggestion ? (
-                                <div className="mt-1 text-[var(--muted)]">{i.suggestion}</div>
-                              ) : null}
-                            </div>
+                {rowIssues.length ? (
+                  <div className="mt-3 space-y-2">
+                    {rowIssues.map((iss, i) => (
+                      <div key={i} className={issueBoxClass(iss.severity)}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs font-semibold text-[var(--text)]">
+                            {iss.column ? iss.column : "Row issue"}
                           </div>
+                          {severityChip(iss.severity)}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-t border-[var(--border)] p-4 text-xs text-[var(--muted)]">
-                    No current issues on this row. It stays visible because it previously had an issue.
-                  </div>
-                )}
-
-                <div className="border-t border-[var(--border)] p-4">
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {headers.slice(0, 12).map((h) => (
-                      <label key={h} className="block">
-                        <div className="mb-1 text-[10px] font-semibold text-[var(--muted)]">{h}</div>
-                        <input
-                          className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs outline-none ${inputToneClass(
-                            rowIndex,
-                            h
-                          )}`}
-                          value={cell(row?.[h])}
-                          onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
-                        />
-                      </label>
-                    ))}
-
-                    {headers.length > 12 ? (
-                      <div className="text-xs text-[var(--muted)]">
-                        Showing the first 12 columns. Expand this later if you want every column editable here.
+                        <div className="mt-1 text-sm text-[var(--text)]">{iss.message}</div>
+                        {iss.suggestion ? (
+                          <div className="mt-1 text-xs text-[var(--muted)]">{iss.suggestion}</div>
+                        ) : null}
                       </div>
-                    ) : null}
+                    ))}
                   </div>
+                ) : null}
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {headers.map((h) => (
+                    <div key={h}>
+                      <div className="mb-1 text-xs font-semibold text-[var(--muted)]">{h}</div>
+                      <input
+                        className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(
+                          rowIndex,
+                          h
+                        )}`}
+                        value={cell(row[h])}
+                        onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             );
           })}
-
-          {rowsToShow.length > 50 ? (
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--muted)]">
-              Showing the first 50 rows in the manual fix table to keep the UI fast.
-            </div>
-          ) : null}
         </div>
       )}
     </div>
