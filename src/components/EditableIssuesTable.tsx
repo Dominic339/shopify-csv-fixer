@@ -23,7 +23,7 @@ type RawIssue = {
 };
 
 type NormalizedIssue = {
-  rowIndex: number; // 0-based
+  rowIndex: number; // 0-based (rowIndex < 0 means file-level issue)
   column?: string;
   message: string;
   suggestion?: string;
@@ -83,10 +83,20 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
       .filter(Boolean) as NormalizedIssue[];
   }, [issues]);
 
+  // File-level issues (ex: missing required columns) use rowIndex < 0
+  const fileIssues = useMemo(() => {
+    return normalizedIssues.filter((i) => i.rowIndex < 0);
+  }, [normalizedIssues]);
+
+  // Only row-scoped issues participate in pinning, cell highlights, and row editing
+  const rowIssuesOnly = useMemo(() => {
+    return normalizedIssues.filter((i) => i.rowIndex >= 0 && i.rowIndex < rows.length);
+  }, [normalizedIssues, rows.length]);
+
   // Auto-pin rows that ever had an issue
   useEffect(() => {
     const rowsWithIssues = new Set<number>();
-    for (const i of normalizedIssues) rowsWithIssues.add(i.rowIndex);
+    for (const i of rowIssuesOnly) rowsWithIssues.add(i.rowIndex);
 
     if (rowsWithIssues.size === 0) return;
 
@@ -99,22 +109,22 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
       }
       return next;
     });
-  }, [normalizedIssues, rows.length]);
+  }, [rowIssuesOnly, rows.length]);
 
   // Map issues by row
   const issuesByRow = useMemo(() => {
     const map = new Map<number, NormalizedIssue[]>();
-    for (const i of normalizedIssues) {
+    for (const i of rowIssuesOnly) {
       if (!map.has(i.rowIndex)) map.set(i.rowIndex, []);
       map.get(i.rowIndex)!.push(i);
     }
     return map;
-  }, [normalizedIssues]);
+  }, [rowIssuesOnly]);
 
   // Per-cell highlighting
   const issueByCellSeverity = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
-    for (const i of normalizedIssues) {
+    for (const i of rowIssuesOnly) {
       if (!i.column) continue;
       const key = `${i.rowIndex}|||${i.column}`;
 
@@ -125,7 +135,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
       map.set(key, i.severity);
     }
     return map;
-  }, [normalizedIssues]);
+  }, [rowIssuesOnly]);
 
   const rowsToShow = useMemo(() => {
     const set = new Set<number>();
@@ -146,7 +156,8 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
 
   function togglePin(rowIndex: number) {
     setManualPinnedRows((prev) => {
-      if (prev.some((p) => p.rowIndex === rowIndex)) return prev.filter((p) => p.rowIndex !== rowIndex);
+      if (prev.some((p) => p.rowIndex === rowIndex))
+        return prev.filter((p) => p.rowIndex !== rowIndex);
       return [...prev, { rowIndex }];
     });
   }
@@ -222,7 +233,39 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
         </div>
       </div>
 
-      {rowsToShow.length === 0 ? (
+      {fileIssues.length ? (
+        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+          <div className="text-sm font-semibold text-[var(--text)]">File issues</div>
+          <div className="mt-2 space-y-2">
+            {fileIssues
+              .filter((x) =>
+                showMode === "errors"
+                  ? x.severity === "error"
+                  : showMode === "warnings"
+                    ? x.severity === "warning"
+                    : true
+              )
+              .slice(0, 12)
+              .map((x, i) => (
+                <div key={i} className={issueBoxClass(x.severity)}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="text-sm text-[var(--text)]">
+                      {x.column ? <span className="font-semibold">{x.column}: </span> : null}
+                      {x.message}
+                    </div>
+                    {severityChip(x.severity)}
+                  </div>
+                </div>
+              ))}
+
+            {fileIssues.length > 12 ? (
+              <div className="text-xs text-[var(--muted)]">+{fileIssues.length - 12} more</div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {rowsToShow.length === 0 && fileIssues.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
           No rows to show yet. Upload a CSV to see issues here.
         </div>
@@ -235,21 +278,38 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
             const anyError = rowIssues.some((x) => x.severity === "error");
             const anyWarning = rowIssues.some((x) => x.severity === "warning");
 
-            if (showMode === "errors" && !anyError && !manualPinnedRows.some((p) => p.rowIndex === rowIndex)) return null;
-            if (showMode === "warnings" && !anyWarning && !manualPinnedRows.some((p) => p.rowIndex === rowIndex)) return null;
+            if (
+              showMode === "errors" &&
+              !anyError &&
+              !manualPinnedRows.some((p) => p.rowIndex === rowIndex)
+            )
+              return null;
+            if (
+              showMode === "warnings" &&
+              !anyWarning &&
+              !manualPinnedRows.some((p) => p.rowIndex === rowIndex)
+            )
+              return null;
 
             return (
-              <div key={rowIndex} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+              <div
+                key={rowIndex}
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="text-sm font-semibold text-[var(--text)]">{rowLabel(rowIndex)}</div>
+                    <div className="text-sm font-semibold text-[var(--text)]">
+                      {rowLabel(rowIndex)}
+                    </div>
                     {rowIssues.length ? (
                       <div className="flex flex-wrap items-center gap-2">
                         {rowIssues.slice(0, 3).map((x, i) => (
                           <span key={i}>{severityChip(x.severity)}</span>
                         ))}
                         {rowIssues.length > 3 ? (
-                          <span className="text-[10px] text-[var(--muted)]">+{rowIssues.length - 3} more</span>
+                          <span className="text-[10px] text-[var(--muted)]">
+                            +{rowIssues.length - 3} more
+                          </span>
                         ) : null}
                       </div>
                     ) : (
@@ -291,7 +351,10 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
                     <div key={h}>
                       <div className="mb-1 text-xs font-semibold text-[var(--muted)]">{h}</div>
                       <input
-                        className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(rowIndex, h)}`}
+                        className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(
+                          rowIndex,
+                          h
+                        )}`}
                         value={cell(row[h])}
                         onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
                       />

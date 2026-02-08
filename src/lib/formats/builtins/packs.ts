@@ -48,12 +48,12 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
 
       const issues: CsvIssue[] = [];
 
-      // Required header checks (if missing, flag as error on first row)
+      // Required header checks (file-level issues, not tied to a specific row)
       for (const required of spec.requiredHeaders) {
         const actual = actualByNorm.get(normHeader(required));
         if (!actual) {
           issues.push({
-            rowIndex: 0,
+            rowIndex: -1,
             column: required,
             severity: "error",
             message: `Missing required column: ${required}`,
@@ -125,7 +125,19 @@ export const formatPackEcommerce: CsvFormat[] = [
     name: "WooCommerce Products",
     description: "Maps products into a WooCommerce-friendly template and flags common issues.",
     category: "Ecommerce",
-    expectedHeaders: ["ID", "Type", "SKU", "Name", "Published", "Regular price", "Sale price", "Stock", "Categories", "Tags", "Images"],
+    expectedHeaders: [
+      "ID",
+      "Type",
+      "SKU",
+      "Name",
+      "Published",
+      "Regular price",
+      "Sale price",
+      "Stock",
+      "Categories",
+      "Tags",
+      "Images",
+    ],
     requiredHeaders: ["SKU", "Name"],
     numericHeaders: ["Regular price", "Sale price", "Stock"],
   }),
@@ -134,7 +146,15 @@ export const formatPackEcommerce: CsvFormat[] = [
     name: "BigCommerce Products",
     description: "Maps product columns for BigCommerce imports and flags missing required fields.",
     category: "Ecommerce",
-    expectedHeaders: ["Product Name", "Product SKU", "Price", "Weight", "Category", "Description", "Product Image URL"],
+    expectedHeaders: [
+      "Product Name",
+      "Product SKU",
+      "Price",
+      "Weight",
+      "Category",
+      "Description",
+      "Product Image URL",
+    ],
     requiredHeaders: ["Product Name", "Product SKU"],
     numericHeaders: ["Price", "Weight"],
   }),
@@ -143,7 +163,17 @@ export const formatPackEcommerce: CsvFormat[] = [
     name: "Etsy Listings",
     description: "Prepares a listings template and highlights missing or suspicious values.",
     category: "Ecommerce",
-    expectedHeaders: ["Title", "Description", "Price", "Quantity", "SKU", "Tags", "Who made it", "When was it made", "What is it"],
+    expectedHeaders: [
+      "Title",
+      "Description",
+      "Price",
+      "Quantity",
+      "SKU",
+      "Tags",
+      "Who made it",
+      "When was it made",
+      "What is it",
+    ],
     requiredHeaders: ["Title", "Price", "Quantity"],
     numericHeaders: ["Price", "Quantity"],
   }),
@@ -267,7 +297,18 @@ export const formatPackShipping: CsvFormat[] = [
     name: "ShipStation Orders",
     description: "Maps order fields for ShipStation and flags missing required address fields.",
     category: "Shipping",
-    expectedHeaders: ["Order Number", "Order Date", "Recipient Name", "Address 1", "City", "State", "Postal Code", "Country", "SKU", "Quantity"],
+    expectedHeaders: [
+      "Order Number",
+      "Order Date",
+      "Recipient Name",
+      "Address 1",
+      "City",
+      "State",
+      "Postal Code",
+      "Country",
+      "SKU",
+      "Quantity",
+    ],
     requiredHeaders: ["Order Number", "Recipient Name", "Address 1", "City", "Postal Code"],
     numericHeaders: ["Quantity"],
   }),
