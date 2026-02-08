@@ -8,6 +8,16 @@ function hasEnv(name: string) {
   return Boolean(process.env[name] && String(process.env[name]).length > 0);
 }
 
+type AuthState = {
+  signedIn: boolean;
+  userId: string | null;
+};
+
+type SubscriptionRead = {
+  ok: boolean;
+  error: string | null;
+};
+
 export async function GET() {
   const checks = {
     NEXT_PUBLIC_SITE_URL: hasEnv("NEXT_PUBLIC_SITE_URL"),
@@ -20,8 +30,8 @@ export async function GET() {
     STRIPE_PRICE_ADVANCED: hasEnv("STRIPE_PRICE_ADVANCED"),
   };
 
-  let auth = { signedIn: false as const, userId: null as string | null };
-  let subscriptionRead = { ok: false as const, error: null as string | null };
+  let auth: AuthState = { signedIn: false, userId: null };
+  let subscriptionRead: SubscriptionRead = { ok: true, error: null };
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -30,7 +40,7 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (user) {
-      auth = { signedIn: true as const, userId: user.id };
+      auth = { signedIn: true, userId: user.id };
 
       const admin = createSupabaseAdminClient();
       const { error } = await admin
@@ -39,12 +49,16 @@ export async function GET() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      subscriptionRead = { ok: !error, error: error?.message ?? null };
-    } else {
-      subscriptionRead = { ok: true as const, error: null };
+      subscriptionRead = {
+        ok: !error,
+        error: error?.message ?? null,
+      };
     }
   } catch (e: any) {
-    subscriptionRead = { ok: false as const, error: e?.message ?? "health check failed" };
+    subscriptionRead = {
+      ok: false,
+      error: e?.message ?? "health check failed",
+    };
   }
 
   const ok =
