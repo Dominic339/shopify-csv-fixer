@@ -10,12 +10,16 @@ type LocalQuotaState = {
 export type Plan = "free" | "basic" | "advanced";
 
 export type PlanLimits = {
-  exportsPerMonth: number; // for Advanced we still return a large number for UI fallback
+  // When unlimited is true, exportsPerMonth is only a UI fallback.
+  // (We keep it numeric so existing math doesn't crash.)
+  exportsPerMonth: number;
+  unlimited?: boolean;
 };
 
 export function getPlanLimits(plan: string): PlanLimits {
   const p = (plan || "free").toLowerCase();
-  if (p === "advanced") return { exportsPerMonth: 1000000 };
+  // Advanced is truly unlimited.
+  if (p === "advanced") return { exportsPerMonth: 0, unlimited: true };
   if (p === "basic") return { exportsPerMonth: 100 };
   return { exportsPerMonth: 3 };
 }
@@ -66,7 +70,8 @@ function consumeLocalExport(limitPerMonth = 3) {
 export async function getQuota() {
   if (typeof window === "undefined") {
     const r = await fetch("/api/quota/status", { cache: "no-store" }).catch(() => null);
-    if (!r || !r.ok) return { used: 0, limit: 3, remaining: 3, signedIn: false, plan: "free", monthKey: getMonthKey() };
+    if (!r || !r.ok)
+      return { used: 0, limit: 3, remaining: 3, signedIn: false, plan: "free", monthKey: getMonthKey() };
     const j = await r.json();
     return {
       signedIn: Boolean(j?.signedIn),
@@ -75,6 +80,7 @@ export async function getQuota() {
       used: Number(j?.used ?? 0),
       limit: Number(j?.limit ?? 3),
       remaining: Number(j?.remaining ?? 3),
+      unlimited: Boolean(j?.unlimited ?? false),
     };
   }
 
@@ -93,6 +99,7 @@ export async function getQuota() {
       used: Number(j?.used ?? 0),
       limit: Number(j?.limit ?? getPlanLimits(j?.plan ?? "free").exportsPerMonth),
       remaining: Number(j?.remaining ?? 0),
+      unlimited: Boolean(j?.unlimited ?? false),
     };
   } catch {
     return getLocalQuota(3);
@@ -105,7 +112,11 @@ export async function consumeExport(): Promise<void> {
   if (q?.signedIn && q?.plan === "advanced") return;
 
   try {
-    const r = await fetch("/api/quota/consume", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ amount: 1 }) });
+    const r = await fetch("/api/quota/consume", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount: 1 }),
+    });
 
     if (r.status === 401) {
       const local = consumeLocalExport(3);

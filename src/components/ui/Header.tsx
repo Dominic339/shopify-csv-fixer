@@ -97,6 +97,8 @@ export function Header() {
         open={upgradeOpen}
         title="Advanced only"
         message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+        signedIn={Boolean(sub?.signedIn)}
+        upgradePlan="advanced"
         onClose={() => setUpgradeOpen(false)}
       />
     </header>

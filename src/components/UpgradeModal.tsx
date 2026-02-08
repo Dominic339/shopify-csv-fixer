@@ -6,9 +6,13 @@ export function UpgradeModal(props: {
   open: boolean;
   title?: string;
   message: string;
+  // If falsey, the modal will prompt the user to sign in before upgrading.
+  signedIn?: boolean;
+  // Which plan the CTA should focus on.
+  upgradePlan?: "basic" | "advanced";
   onClose: () => void;
 }) {
-  const { open, onClose, title, message } = props;
+  const { open, onClose, title, message, signedIn, upgradePlan } = props;
 
   useEffect(() => {
     if (!open) return;
@@ -22,6 +26,12 @@ export function UpgradeModal(props: {
   }, [open, onClose]);
 
   if (!open) return null;
+
+  const plan = upgradePlan ?? "advanced";
+  const redirect = `/profile?upgrade=${encodeURIComponent(plan)}`;
+  const loginHref = `/login?redirect=${encodeURIComponent(redirect)}&msg=${encodeURIComponent(
+    "Sign in to upgrade your plan."
+  )}`;
 
   return (
     <div
@@ -69,10 +79,10 @@ export function UpgradeModal(props: {
           </a>
 
           <a
-            href="/checkout?plan=advanced"
+            href={signedIn ? redirect : loginHref}
             className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
           >
-            Upgrade to Advanced
+            {signedIn ? "Go to account to upgrade" : "Sign in to upgrade"}
           </a>
         </div>
       </div>

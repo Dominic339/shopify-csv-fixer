@@ -14,10 +14,12 @@ type SubStatus = {
   ok: boolean;
   plan?: "free" | "basic" | "advanced";
   status?: string;
+  signedIn?: boolean;
 };
 
 type PlanLimits = {
   exportsPerMonth: number;
+  unlimited?: boolean;
 };
 
 type CsvRow = Record<string, string>;
@@ -105,16 +107,13 @@ export default function AppClient() {
 
   async function refreshQuotaAndPlan() {
     try {
-      // Fetch quota + subscription first, then compute limits from the freshest plan value.
       const [q, s] = await Promise.all([
         getQuota(),
         fetch("/api/subscription/status", { cache: "no-store" }).then((r) => r.json()),
       ]);
 
-      const plan =
-        ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
-
-      const limits = getPlanLimits(plan);
+      const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
+      const limits = getPlanLimits(plan) as PlanLimits;
 
       setQuota(q);
       setSubStatus(s);
@@ -124,11 +123,18 @@ export default function AppClient() {
     }
   }
 
-  // Only refresh once on mount.
-  // You already refresh after: runFormatOnText() and exportFixedCsv()
   useEffect(() => {
     void refreshQuotaAndPlan();
   }, []);
+
+  const isUnlimited = useMemo(() => {
+    const status = (subStatus?.status ?? "").toLowerCase();
+    const plan = subStatus?.plan ?? "free";
+    if (plan === "advanced" && status === "active") return true;
+    if (quota?.unlimited) return true;
+    if (planLimits?.unlimited) return true;
+    return false;
+  }, [subStatus, quota, planLimits]);
 
   const issuesForTable: CsvIssue[] = useMemo(() => {
     return (issues ?? [])
@@ -318,7 +324,7 @@ export default function AppClient() {
 
   const used = Number(quota?.used ?? 0);
   const limit = Number(planLimits?.exportsPerMonth ?? 3);
-  const left = Math.max(0, limit - used);
+  const left = isUnlimited ? null : Math.max(0, limit - used);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -338,9 +344,13 @@ export default function AppClient() {
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
           <div className="font-medium">Monthly exports</div>
-          <div>
-            {used}/{limit} used • {left} left
-          </div>
+          {isUnlimited ? (
+            <div>Unlimited</div>
+          ) : (
+            <div>
+              {used}/{limit} used • {left} left
+            </div>
+          )}
           <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
@@ -366,7 +376,8 @@ export default function AppClient() {
         </div>
 
         <div className="mt-3 text-xs text-[var(--muted)]">
-          Built-in formats are available to everyone. Custom formats appear here when you save or import them.
+          Built-in formats are available to everyone. Custom formats appear here when you save or
+          import them.
         </div>
       </div>
 
@@ -507,8 +518,8 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row
-                editing.
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full
+                row editing.
               </div>
             ) : null}
           </div>

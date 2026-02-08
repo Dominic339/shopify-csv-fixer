@@ -42,10 +42,7 @@ export default function TopBar() {
       try {
         const res = await supabase.auth.getUser();
         // res shape varies by supabase-js version, so read safely
-        const userEmail =
-          (res as any)?.data?.user?.email ??
-          (res as any)?.user?.email ??
-          null;
+        const userEmail = (res as any)?.data?.user?.email ?? (res as any)?.user?.email ?? null;
 
         if (!mounted) return;
         setEmail(userEmail);
@@ -221,6 +218,8 @@ export default function TopBar() {
         open={upgradeOpen}
         title="Advanced only"
         message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+        signedIn={Boolean(sub?.signedIn)}
+        upgradePlan="advanced"
         onClose={() => setUpgradeOpen(false)}
       />
     </header>
