@@ -1,9 +1,11 @@
 // src/app/formats/FormatsClient.tsx
+// (your file, updated to gate create/import/edit/export to Advanced without introducing new storage files)
 "use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parseCsv } from "@/lib/csv";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import {
   columnTemplateTitle,
   generateUserFormatId,
@@ -15,6 +17,12 @@ import {
   type UserFormatRule,
   type UserFormatV1,
 } from "@/lib/formats/customUser";
+
+type SubStatus = {
+  signedIn: boolean;
+  plan: "free" | "basic" | "advanced";
+  status: string;
+};
 
 function uid() {
   return Math.random().toString(36).slice(2) + "_" + Date.now().toString(36);
@@ -71,8 +79,6 @@ function suggestRulesForHeader(header: string): {
   perColumn: UserFormatRule[];
 } {
   const h = header.trim().toLowerCase();
-
-  // conservative suggestions only
   const per: UserFormatRule[] = [];
 
   if (h.includes("email")) {
@@ -96,10 +102,7 @@ function suggestRulesForHeader(header: string): {
     per.push({ scope: "column", type: "numeric_only" });
   }
 
-  return {
-    global: [],
-    perColumn: per,
-  };
+  return { global: [], perColumn: per };
 }
 
 export default function FormatsClient() {
@@ -110,11 +113,36 @@ export default function FormatsClient() {
   const importJsonRef = useRef<HTMLInputElement | null>(null);
   const importCsvRef = useRef<HTMLInputElement | null>(null);
 
+  const [sub, setSub] = useState<SubStatus | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
   useEffect(() => {
     const initial = loadUserFormatsFromStorage();
     setFormats(initial);
     setSelectedId(initial[0]?.id ?? null);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/subscription/status", { cache: "no-store" });
+        const j = (await r.json()) as SubStatus;
+        if (!cancelled) setSub(j);
+      } catch {
+        if (!cancelled) setSub(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const isAdvanced = useMemo(() => {
+    return !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
+  }, [sub]);
+
+  const canEdit = isAdvanced;
 
   useEffect(() => {
     if (!toast) return;
@@ -132,8 +160,16 @@ export default function FormatsClient() {
     saveUserFormatsToStorage(next);
   }
 
+  function requireAdvanced() {
+    if (canEdit) return true;
+    setUpgradeOpen(true);
+    return false;
+  }
+
   function updateSelected(patch: Partial<UserFormatV1>) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const next = formats.map((f) =>
       f.id === selected.id ? { ...f, ...patch, updatedAt: Date.now() } : f
     );
@@ -141,6 +177,8 @@ export default function FormatsClient() {
   }
 
   function createNewFormatWithBlankColumns(count: number) {
+    if (!requireAdvanced()) return;
+
     const now = Date.now();
     const existingIds = new Set(formats.map((f) => f.id));
     const id = generateUserFormatId(existingIds);
@@ -148,7 +186,7 @@ export default function FormatsClient() {
     const cols: UserFormatColumn[] = Array.from({ length: count }).map((_, i) => ({
       id: uid(),
       key: "",
-      title: columnTemplateTitle(i), // IMPORTANT: start with template title in input
+      title: columnTemplateTitle(i),
       required: false,
       defaultValue: "",
     }));
@@ -172,12 +210,13 @@ export default function FormatsClient() {
   }
 
   function createNewFormat() {
-    // start with 1 column so UI looks alive
     createNewFormatWithBlankColumns(1);
   }
 
   function deleteSelected() {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const next = formats.filter((f) => f.id !== selected.id);
     setAndPersist(next);
     setSelectedId(next[0]?.id ?? null);
@@ -186,12 +225,13 @@ export default function FormatsClient() {
 
   function addColumn() {
     if (!selected) return;
+    if (!requireAdvanced()) return;
 
     const nextIndex = selected.columns.length;
     const col: UserFormatColumn = {
       id: uid(),
       key: "",
-      title: columnTemplateTitle(nextIndex), // IMPORTANT
+      title: columnTemplateTitle(nextIndex),
       required: false,
       defaultValue: "",
     };
@@ -202,6 +242,8 @@ export default function FormatsClient() {
 
   function updateColumn(idx: number, patch: Partial<UserFormatColumn>) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const cols = [...selected.columns];
     cols[idx] = { ...cols[idx], ...patch };
     updateSelected({ columns: cols });
@@ -209,15 +251,13 @@ export default function FormatsClient() {
 
   function removeColumn(idx: number) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const removedId = selected.columns[idx]?.id;
     const cols = selected.columns.filter((_, i) => i !== idx);
     const rules = (selected.rules ?? []).filter((r) => r.columnId !== removedId);
     updateSelected({ columns: cols, rules });
     setToast("Removed column");
-  }
-
-  function getGlobalRule(type: RuleType) {
-    return (selected?.globalRules ?? []).find((r) => r.type === type) ?? null;
   }
 
   function getColumnRule(columnId: string, type: RuleType) {
@@ -230,6 +270,8 @@ export default function FormatsClient() {
 
   function toggleGlobalRule(type: RuleType, enabled: boolean) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const exists = (selected.globalRules ?? []).some((r) => r.type === type);
     if (enabled && exists) return;
     if (!enabled && !exists) return;
@@ -243,6 +285,8 @@ export default function FormatsClient() {
 
   function setGlobalRuleValue(type: RuleType, value: any) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const nextRules = (selected.globalRules ?? []).map((r) =>
       r.type === type ? { ...r, value } : r
     );
@@ -251,6 +295,8 @@ export default function FormatsClient() {
 
   function toggleColumnRule(columnId: string, type: RuleType, enabled: boolean) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const all = selected.rules ?? [];
     const exists = all.some(
       (r) => r.scope === "column" && r.columnId === columnId && r.type === type
@@ -267,6 +313,8 @@ export default function FormatsClient() {
 
   function setColumnRuleValue(columnId: string, type: RuleType, value: any) {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const next = (selected.rules ?? []).map((r) => {
       if (r.scope === "column" && r.columnId === columnId && r.type === type) return { ...r, value };
       return r;
@@ -276,17 +324,23 @@ export default function FormatsClient() {
 
   function exportSelected() {
     if (!selected) return;
+    if (!requireAdvanced()) return;
+
     const base = selected.name ? safeNamePart(selected.name) : selected.id;
     downloadJson(`${base}.csnest-format.json`, selected);
     setToast("Exported format file");
   }
 
   function exportAllFormats() {
+    if (!requireAdvanced()) return;
+
     downloadJson("csnest-format-pack.json", loadUserFormatsFromStorage());
     setToast("Exported format pack");
   }
 
   async function onImportJson(file: File) {
+    if (!requireAdvanced()) return;
+
     try {
       const text = await file.text();
       const payload = JSON.parse(text);
@@ -304,6 +358,8 @@ export default function FormatsClient() {
   }
 
   async function onImportCsv(file: File) {
+    if (!requireAdvanced()) return;
+
     try {
       const text = await file.text();
       const parsed = parseCsv(text);
@@ -318,16 +374,14 @@ export default function FormatsClient() {
       const existingIds = new Set(formats.map((f) => f.id));
       const id = generateUserFormatId(existingIds);
 
-      // Build columns from CSV headers
       const cols: UserFormatColumn[] = headers.map((h, i) => ({
         id: uid(),
-        key: h, // key is the real header so Fixer can match
-        title: h || columnTemplateTitle(i), // title starts as header name
+        key: h,
+        title: h || columnTemplateTitle(i),
         required: false,
         defaultValue: "",
       }));
 
-      // Suggest rules
       const globalRules: UserFormatRule[] = [{ scope: "global", type: "trim" }];
 
       const rules: UserFormatRule[] = [];
@@ -378,23 +432,23 @@ export default function FormatsClient() {
       let v = value;
       for (const r of rules) {
         if (r.scope !== "global" && r.scope !== "column") continue;
-        // apply only transform rules for preview
+
         if (r.type === "trim") v = v.trim();
         if (r.type === "uppercase") v = v.toUpperCase();
         if (r.type === "no_spaces") v = v.replace(/\s+/g, "");
         if (r.type === "no_special_chars") {
-          const allowed = String(r.value?.allowed ?? r.value ?? "").trim();
+          const allowed = String((r as any).value?.allowed ?? (r as any).value ?? "").trim();
           const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
           const re = new RegExp(`[^a-zA-Z0-9${esc}]`, "g");
           v = v.replace(re, "");
         }
         if (r.type === "numeric_only") v = v.replace(/[^\d]/g, "");
         if (r.type === "max_length") {
-          const n = Number(r.value ?? 0);
+          const n = Number((r as any).value ?? 0);
           if (Number.isFinite(n) && n > 0 && v.length > n) v = v.slice(0, n);
         }
         if (r.type === "default_value") {
-          const dv = String(r.value ?? "");
+          const dv = String((r as any).value ?? "");
           if (!v) v = dv;
         }
       }
@@ -426,6 +480,11 @@ export default function FormatsClient() {
           <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
             Define expected columns, apply cleanup rules, validate data, and reuse the same format across files.
           </p>
+          {!canEdit ? (
+            <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
+              Advanced plan required to create, import, edit, or export formats.
+            </p>
+          ) : null}
         </div>
 
         <Link
@@ -500,19 +559,27 @@ export default function FormatsClient() {
           </div>
 
           <div className="mt-6 flex flex-col gap-2">
-            <button type="button" className="rgb-btn" onClick={createNewFormat}>
+            <button type="button" className={"rgb-btn" + (canEdit ? "" : " opacity-60")} onClick={createNewFormat}>
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">New format</span>
             </button>
 
-            <button type="button" className="rgb-btn" onClick={() => importJsonRef.current?.click()}>
+            <button
+              type="button"
+              className={"rgb-btn" + (canEdit ? "" : " opacity-60")}
+              onClick={() => (canEdit ? importJsonRef.current?.click() : setUpgradeOpen(true))}
+            >
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Import format file</span>
             </button>
 
-            <button type="button" className="rgb-btn" onClick={() => importCsvRef.current?.click()}>
+            <button
+              type="button"
+              className={"rgb-btn" + (canEdit ? "" : " opacity-60")}
+              onClick={() => (canEdit ? importCsvRef.current?.click() : setUpgradeOpen(true))}
+            >
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Import sample CSV</span>
             </button>
 
-            <button type="button" className="rgb-btn" onClick={exportAllFormats}>
+            <button type="button" className={"rgb-btn" + (canEdit ? "" : " opacity-60")} onClick={exportAllFormats}>
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Export all formats</span>
             </button>
           </div>
@@ -534,7 +601,7 @@ export default function FormatsClient() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
+                className={"rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]" + (canEdit ? "" : " opacity-60")}
                 onClick={addColumn}
                 disabled={!selected}
               >
@@ -543,7 +610,7 @@ export default function FormatsClient() {
 
               <button
                 type="button"
-                className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
+                className={"rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]" + (canEdit ? "" : " opacity-60")}
                 onClick={exportSelected}
                 disabled={!selected}
               >
@@ -552,7 +619,7 @@ export default function FormatsClient() {
 
               <button
                 type="button"
-                className="rgb-btn border border-red-500/60 bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-red-300 disabled:opacity-50"
+                className={"rgb-btn border border-red-500/60 bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-red-300 disabled:opacity-50" + (canEdit ? "" : " opacity-60")}
                 onClick={deleteSelected}
                 disabled={!selected}
               >
@@ -566,7 +633,7 @@ export default function FormatsClient() {
               Select a format or create a new one to begin editing.
             </div>
           ) : (
-            <div className="mt-6 space-y-6">
+            <div className={"mt-6 space-y-6" + (canEdit ? "" : " opacity-75")}>
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
                 <div className="text-sm font-semibold text-[var(--text)]">Format name</div>
                 <input
@@ -574,6 +641,7 @@ export default function FormatsClient() {
                   value={selected.name}
                   onChange={(e) => updateSelected({ name: e.target.value })}
                   placeholder="Format name"
+                  readOnly={!canEdit}
                 />
                 <div className="mt-2 text-xs text-[var(--muted)]">ID: {selected.id}</div>
               </div>
@@ -591,6 +659,7 @@ export default function FormatsClient() {
                           <input
                             type="checkbox"
                             checked={enabled}
+                            disabled={!canEdit}
                             onChange={(e) => toggleGlobalRule(r.type, e.target.checked)}
                           />
                           {r.label}
@@ -601,7 +670,8 @@ export default function FormatsClient() {
                             <div className="text-xs text-[var(--muted)]">{r.valueLabel}</div>
                             <input
                               className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                              value={String(existing?.value ?? "")}
+                              value={String((existing as any)?.value ?? "")}
+                              disabled={!canEdit}
                               onChange={(e) => setGlobalRuleValue(r.type, e.target.value)}
                             />
                           </div>
@@ -658,7 +728,7 @@ export default function FormatsClient() {
 
                         <button
                           type="button"
-                          className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--text)]"
+                          className={"rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--text)]" + (canEdit ? "" : " opacity-60")}
                           onClick={() => removeColumn(idx)}
                         >
                           Remove
@@ -671,6 +741,7 @@ export default function FormatsClient() {
                           <input
                             className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
                             value={c.key ?? ""}
+                            disabled={!canEdit}
                             onChange={(e) => updateColumn(idx, { key: e.target.value })}
                           />
                         </div>
@@ -680,6 +751,7 @@ export default function FormatsClient() {
                           <input
                             className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
                             value={c.title ?? columnTemplateTitle(idx)}
+                            disabled={!canEdit}
                             onChange={(e) => updateColumn(idx, { title: e.target.value })}
                           />
                         </div>
@@ -688,6 +760,7 @@ export default function FormatsClient() {
                           <input
                             type="checkbox"
                             checked={!!c.required}
+                            disabled={!canEdit}
                             onChange={(e) => updateColumn(idx, { required: e.target.checked })}
                           />
                           Required
@@ -698,6 +771,7 @@ export default function FormatsClient() {
                           <input
                             className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
                             value={c.defaultValue ?? ""}
+                            disabled={!canEdit}
                             onChange={(e) => updateColumn(idx, { defaultValue: e.target.value })}
                           />
                         </div>
@@ -716,6 +790,7 @@ export default function FormatsClient() {
                                   <input
                                     type="checkbox"
                                     checked={enabled}
+                                    disabled={!canEdit}
                                     onChange={(e) => toggleColumnRule(c.id, r.type, e.target.checked)}
                                   />
                                   {r.label}
@@ -726,7 +801,8 @@ export default function FormatsClient() {
                                     <div className="text-xs text-[var(--muted)]">{r.valueLabel}</div>
                                     <input
                                       className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                                      value={String(existing?.value ?? "")}
+                                      value={String((existing as any)?.value ?? "")}
+                                      disabled={!canEdit}
                                       onChange={(e) => setColumnRuleValue(c.id, r.type, e.target.value)}
                                     />
                                   </div>
@@ -750,6 +826,13 @@ export default function FormatsClient() {
           )}
         </div>
       </div>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        title="Advanced only"
+        message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+        onClose={() => setUpgradeOpen(false)}
+      />
     </main>
   );
 }
