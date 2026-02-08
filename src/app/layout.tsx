@@ -2,6 +2,7 @@
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import TopBar from "@/components/TopBar";
+import { Analytics } from "@vercel/analytics/next";
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TopBar />
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
