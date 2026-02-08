@@ -5,8 +5,13 @@ type FormatSpec = {
   name: string;
   description: string;
   category: string;
+
   expectedHeaders: string[];
+
+  // These are “required fields” for the format. If a column is missing in the upload,
+  // we still include it in the output template and generate row issues so the user can fill it in.
   requiredHeaders: string[];
+
   // Optional light validation
   emailHeaders?: string[];
   numericHeaders?: string[];
@@ -14,6 +19,10 @@ type FormatSpec = {
 
 function normHeader(s: string) {
   return s.trim().toLowerCase();
+}
+
+function isBlank(v: unknown) {
+  return v == null || String(v).trim() === "";
 }
 
 function buildSimpleFormat(spec: FormatSpec): CsvFormat {
@@ -24,19 +33,19 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
     category: spec.category,
     source: "builtin",
     apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
-      // NOTE: Universal cleanup runs in the engine for ALL formats.
-      // Here we only do mapping to expected headers + lightweight validation.
+      // Universal cleanup runs in the engine for ALL formats.
+      // Here we only do mapping to expected headers + validation issues.
 
-      const inHeaders = headers;
-      const inRows = rows;
+      const inHeaders = headers ?? [];
+      const inRows = rows ?? [];
 
       // Map expected headers to actual headers (case-insensitive match)
       const actualByNorm = new Map<string, string>();
       for (const h of inHeaders) actualByNorm.set(normHeader(h), h);
 
-      const mappedHeaders = [...spec.expectedHeaders];
+      const fixedHeaders = [...spec.expectedHeaders];
 
-      // Build a mapped row set with exactly the expected headers
+      // Build rows with exactly the expected headers
       const fixedRows: CsvRow[] = inRows.map((r) => {
         const out: CsvRow = {};
         for (const expected of spec.expectedHeaders) {
@@ -48,7 +57,7 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
 
       const issues: CsvIssue[] = [];
 
-      // Required header checks (file-level issues, not tied to a specific row)
+      // Header-level checks (still useful), but we ALSO create row-level issues so the manual editor works like Shopify.
       for (const required of spec.requiredHeaders) {
         const actual = actualByNorm.get(normHeader(required));
         if (!actual) {
@@ -56,24 +65,50 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
             rowIndex: -1,
             column: required,
             severity: "error",
-            message: `Missing required column: ${required}`,
+            message: `Missing required column: ${required}. The output includes this column so you can fill it in.`,
           });
         }
       }
 
-      // Optional validations
+      // Row-level required value checks (this is the key change)
+      // Cap issues so huge files don’t explode the UI.
+      const MAX_ROW_ISSUES = 800;
+
+      for (let i = 0; i < fixedRows.length; i++) {
+        if (issues.length >= MAX_ROW_ISSUES) break;
+
+        const row = fixedRows[i];
+
+        for (const required of spec.requiredHeaders) {
+          const v = row?.[required];
+          if (isBlank(v)) {
+            issues.push({
+              rowIndex: i,
+              column: required,
+              severity: "error",
+              message: `Missing required value: ${required}`,
+            });
+            if (issues.length >= MAX_ROW_ISSUES) break;
+          }
+        }
+      }
+
+      // Optional validations (also row-level so manual fixes can target exact cells)
       const emailCols = spec.emailHeaders ?? [];
       const numericCols = spec.numericHeaders ?? [];
 
-      // Email validation (very light)
       if (emailCols.length) {
         const emailSet = new Set(emailCols.map(normHeader));
         for (let i = 0; i < fixedRows.length; i++) {
+          if (issues.length >= MAX_ROW_ISSUES) break;
+
           const row = fixedRows[i];
           for (const h of spec.expectedHeaders) {
             if (!emailSet.has(normHeader(h))) continue;
+
             const v = (row[h] ?? "").trim();
-            if (!v) continue;
+            if (!v) continue; // required check handles blanks if the field is required
+
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
               issues.push({
                 rowIndex: i,
@@ -81,20 +116,24 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
                 severity: "warning",
                 message: "Email looks invalid",
               });
+              if (issues.length >= MAX_ROW_ISSUES) break;
             }
           }
         }
       }
 
-      // Numeric validation (very light)
       if (numericCols.length) {
         const numSet = new Set(numericCols.map(normHeader));
         for (let i = 0; i < fixedRows.length; i++) {
+          if (issues.length >= MAX_ROW_ISSUES) break;
+
           const row = fixedRows[i];
           for (const h of spec.expectedHeaders) {
             if (!numSet.has(normHeader(h))) continue;
+
             const v = (row[h] ?? "").trim();
-            if (!v) continue;
+            if (!v) continue; // required check handles blanks if the field is required
+
             const cleaned = v.replace(/[,\\s\\$£€¥]/g, "");
             if (!/^[-+]?\\d*(\\.\\d+)?$/.test(cleaned)) {
               issues.push({
@@ -103,13 +142,14 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
                 severity: "warning",
                 message: "Value should be numeric",
               });
+              if (issues.length >= MAX_ROW_ISSUES) break;
             }
           }
         }
       }
 
       return {
-        fixedHeaders: mappedHeaders,
+        fixedHeaders,
         fixedRows,
         issues,
         fixesApplied: [],
@@ -155,7 +195,7 @@ export const formatPackEcommerce: CsvFormat[] = [
       "Description",
       "Product Image URL",
     ],
-    requiredHeaders: ["Product Name", "Product SKU"],
+    requiredHeaders: ["Product Name", "Product SKU", "Price"],
     numericHeaders: ["Price", "Weight"],
   }),
   buildSimpleFormat({
@@ -192,7 +232,7 @@ export const formatPackEcommerce: CsvFormat[] = [
     description: "Builds a simplified Amazon inventory template and flags missing essentials.",
     category: "Ecommerce",
     expectedHeaders: ["sku", "product-id", "product-id-type", "price", "quantity", "item-name", "brand-name"],
-    requiredHeaders: ["sku", "item-name"],
+    requiredHeaders: ["sku", "item-name", "price", "quantity"],
     numericHeaders: ["price", "quantity"],
   }),
 ];
@@ -309,7 +349,7 @@ export const formatPackShipping: CsvFormat[] = [
       "SKU",
       "Quantity",
     ],
-    requiredHeaders: ["Order Number", "Recipient Name", "Address 1", "City", "Postal Code"],
+    requiredHeaders: ["Order Number", "Recipient Name", "Address 1", "City", "Postal Code", "Country"],
     numericHeaders: ["Quantity"],
   }),
   buildSimpleFormat({
@@ -331,7 +371,7 @@ export const formatPackShipping: CsvFormat[] = [
   }),
 ];
 
-// Support / reviews
+// Support
 export const formatPackSupport: CsvFormat[] = [
   buildSimpleFormat({
     id: "zendesk_users",
