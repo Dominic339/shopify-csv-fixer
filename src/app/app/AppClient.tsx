@@ -297,6 +297,12 @@ export default function AppClient() {
       await refreshQuotaAndPlan();
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Export failed");
+      // If the export failed due to quota, refresh so the UI matches the real usage.
+      try {
+        await refreshQuotaAndPlan();
+      } catch {
+        // ignore
+      }
     } finally {
       setBusy(false);
     }
