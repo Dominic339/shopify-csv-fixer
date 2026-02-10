@@ -1,18 +1,16 @@
 // src/app/profile/page.tsx
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import ProfileClient from "./ProfileClient";
 
+export const metadata: Metadata = {
+  title: "Profile",
+  robots: { index: false, follow: false },
+};
+
 export default function ProfilePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="mx-auto max-w-3xl px-6 py-12">
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm text-[var(--muted)]">
-            Loading profile…
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={null}>
       <ProfileClient />
     </Suspense>
   );

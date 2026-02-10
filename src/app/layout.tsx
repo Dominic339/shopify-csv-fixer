@@ -1,8 +1,44 @@
-// src/app/layout.tsx
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import TopBar from "@/components/TopBar";
+import Footer from "@/components/Footer";
+import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
+export const metadata: Metadata = {
+  metadataBase: new URL("https://csnest.vercel.app"),
+  title: {
+    default: "CSNest | CSV Fixer for Shopify",
+    template: "%s | CSNest",
+  },
+  description:
+    "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
+  applicationName: "CSNest",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://csnest.vercel.app",
+    title: "CSNest | CSV Fixer for Shopify",
+    description:
+      "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
+    siteName: "CSNest",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "CSNest" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CSNest | CSV Fixer for Shopify",
+    description:
+      "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +47,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <TopBar />
           {children}
+          <Footer />
         </ThemeProvider>
+
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
