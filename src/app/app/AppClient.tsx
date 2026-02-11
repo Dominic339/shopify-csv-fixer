@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
@@ -68,6 +69,30 @@ export default function AppClient() {
 
   // Built-in formats are stable
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
+
+  // Support selecting a preset via /app?preset=<formatId>
+  const searchParams = useSearchParams();
+  const appliedPresetRef = useRef(false);
+
+  useEffect(() => {
+    if (appliedPresetRef.current) return;
+
+    const preset = searchParams.get("preset");
+    if (!preset) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
+    // Only allow presets that exist in built-in formats (safe + predictable)
+    const exists = builtinFormats.some((f) => f.id === preset);
+    if (!exists) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
+    setFormatId(preset);
+    appliedPresetRef.current = true;
+  }, [searchParams, builtinFormats]);
 
   // Custom formats can change during the session (import/save/delete)
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -323,18 +348,18 @@ export default function AppClient() {
     setEditing(null);
   }
 
-    const autoFixPreviewCount = 8;
-    const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
-    const autoFixRest = autoFixes.slice(autoFixPreviewCount);
-    const autoFixRestCount = Math.max(0, autoFixRest.length);
+  const autoFixPreviewCount = 8;
+  const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
+  const autoFixRest = autoFixes.slice(autoFixPreviewCount);
+  const autoFixRestCount = Math.max(0, autoFixRest.length);
 
-    const used = Number(quota?.used ?? 0);
-    const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
-    // Prefer server-provided remaining when available (and clamp at 0)
-    const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
+  const used = Number(quota?.used ?? 0);
+  const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
+  // Prefer server-provided remaining when available (and clamp at 0)
+  const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
-    return (
-      <div className="mx-auto max-w-6xl px-6 py-10">
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
         <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--text)]">
           {errorBanner}
