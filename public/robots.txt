@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /profile
+Disallow: /login
+Disallow: /checkout
+Disallow: /api
+
+Sitemap: https://csnest.vercel.app/sitemap.xml
