@@ -1,57 +1,53 @@
+// src/app/layout.tsx
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import TopBar from "@/components/TopBar";
-import Footer from "@/components/Footer";
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import Analytics from "@/components/Analytics";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://csnest.vercel.app"),
+  metadataBase: new URL("https://csv-nest.vercel.app"), // keep vercel URL for now
   title: {
-    default: "CSNest | CSV Fixer for Shopify",
-    template: "%s | CSNest",
+    default: "CSV Nest – Fix Broken CSV Files Online",
+    template: "%s | CSV Nest",
   },
   description:
-    "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
-  applicationName: "CSNest",
-  alternates: {
-    canonical: "/",
-  },
+    "Fix broken CSV files instantly. Clean, validate, normalize, merge, and export CSV files directly in your browser. Includes Shopify and eCommerce presets.",
+  keywords: [
+    "fix csv file",
+    "clean csv online",
+    "csv validator",
+    "merge csv files",
+    "shopify csv fixer",
+    "bulk csv parser",
+    "csv formatting tool",
+  ],
   openGraph: {
-    type: "website",
-    url: "https://csnest.vercel.app",
-    title: "CSNest | CSV Fixer for Shopify",
+    title: "CSV Nest – Fix Broken CSV Files Online",
     description:
-      "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
-    siteName: "CSNest",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "CSNest" }],
+      "Clean and repair CSV files instantly. Merge, normalize, and export clean data in seconds.",
+    url: "https://csv-nest.vercel.app",
+    siteName: "CSV Nest",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CSNest | CSV Fixer for Shopify",
-    description:
-      "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
-    images: ["/opengraph-image"],
+    title: "CSV Nest – Fix Broken CSV Files",
+    description: "Fix broken CSV files online. Merge and clean data instantly.",
   },
-  robots: {
-    index: true,
-    follow: true,
+  alternates: {
+    canonical: "https://csv-nest.vercel.app",
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>
-          <TopBar />
-          {children}
-          <Footer />
-        </ThemeProvider>
-
         <Analytics />
-        <SpeedInsights />
+        {children}
       </body>
     </html>
   );

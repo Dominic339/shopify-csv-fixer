@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PricingCards } from "@/components/ui/PricingCards";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
+import SEOJsonLd from "@/components/SEOJsonLd";
 
 type SubStatus = {
   signedIn: boolean;
@@ -40,6 +41,8 @@ export default function HomeClient() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
+      <SEOJsonLd />
+
       <section className="grid gap-10 md:grid-cols-2">
         <div>
           <p className="text-sm text-[var(--muted)]">CSNest</p>
@@ -63,7 +66,6 @@ export default function HomeClient() {
                 <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Custom Formats</span>
               </Link>
             ) : (
-              // CHANGED: removed opacity-60 so it is not transparent
               <button type="button" className="rgb-btn" onClick={() => setUpgradeOpen(true)}>
                 <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats (Advanced)</span>
               </button>
