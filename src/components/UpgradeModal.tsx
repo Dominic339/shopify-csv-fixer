@@ -1,89 +1,116 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export function UpgradeModal(props: {
-  open: boolean;
-  title?: string;
-  message: string;
-  // If falsey, the modal will prompt the user to sign in before upgrading.
-  signedIn?: boolean;
-  // Which plan the CTA should focus on.
-  upgradePlan?: "basic" | "advanced";
+export function UpgradeModal({
+  onClose,
+  signedIn,
+  plan,
+  status,
+}: {
   onClose: () => void;
+  signedIn: boolean | null;
+  plan: "free" | "basic" | "advanced";
+  status: string;
 }) {
-  const { open, onClose, title, message, signedIn, upgradePlan } = props;
+  const router = useRouter();
 
   useEffect(() => {
-    if (!open) return;
-
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
-
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [onClose]);
 
-  if (!open) return null;
+  const isActive = (status ?? "").toLowerCase() === "active";
+  const isAdvanced = plan === "advanced" && isActive;
 
-  const plan = upgradePlan ?? "advanced";
-  const redirect = `/profile?upgrade=${encodeURIComponent(plan)}`;
-  const loginHref = `/login?redirect=${encodeURIComponent(redirect)}&msg=${encodeURIComponent(
-    "Sign in to upgrade your plan."
-  )}`;
+  let title = "Custom Formats";
+  let body =
+    "Custom formats let you save your own rules and reuse them anytime. They’re included with the Advanced plan.";
+  let ctaText = "Upgrade";
+  let ctaAction: (() => void) | null = () => {
+    router.push("/#pricing");
+    onClose();
+  };
+
+  if (signedIn === null) {
+    title = "Checking your account…";
+    body = "One second—loading your plan details.";
+    ctaText = "Checking…";
+    ctaAction = null;
+  } else if (!signedIn) {
+    title = "Sign in required";
+    body = "Sign in to upgrade and unlock Custom Formats.";
+    ctaText = "Sign in";
+    ctaAction = () => {
+      router.push("/login");
+      onClose();
+    };
+  } else if (isAdvanced) {
+    title = "You already have Custom Formats";
+    body = "Your Advanced plan is active. You can use Custom Formats now.";
+    ctaText = "Go to Custom Formats";
+    ctaAction = () => {
+      router.push("/formats");
+      onClose();
+    };
+  } else {
+    title = "Upgrade to Advanced";
+    body =
+      plan === "basic"
+        ? "You’re on Basic. Upgrade to Advanced to unlock Custom Formats (and unlimited exports)."
+        : "Upgrade to Advanced to unlock Custom Formats (and unlimited exports).";
+    ctaText = "View plans";
+    ctaAction = () => {
+      router.push("/#pricing");
+      onClose();
+    };
+  }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-6"
-      role="dialog"
-      aria-modal="true"
-      onMouseDown={(e) => {
-        // click outside
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="absolute inset-0 bg-black/50" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+      {/* darker overlay + blur so the modal is readable on dark theme */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-md rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
+      <div className="relative w-full max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-lg font-semibold text-[var(--text)]">
-              {title ?? "Upgrade required"}
-            </div>
-            <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">{message}</div>
+            <h2 className="text-xl font-semibold text-[var(--text)]">{title}</h2>
+            <p className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">{body}</p>
           </div>
 
           <button
             type="button"
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-sm font-semibold text-[var(--text)]"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-sm text-[var(--text)]"
             onClick={onClose}
             aria-label="Close"
+            title="Close"
           >
-            Close
+            ✕
           </button>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <a
-            href="#pricing"
-            onClick={(e) => {
-              e.preventDefault();
-              onClose();
-              const el = document.getElementById("pricing");
-              el?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
+        <div className="mt-6 flex flex-wrap justify-end gap-3">
+          <button
+            type="button"
+            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 text-sm text-[var(--text)]"
+            onClick={onClose}
           >
-            View pricing
-          </a>
+            Not now
+          </button>
 
-          <a
-            href={signedIn ? redirect : loginHref}
-            className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
+          <button
+            type="button"
+            className="rg-btn"
+            disabled={!ctaAction}
+            onClick={() => ctaAction?.()}
+            title={!ctaAction ? "Loading…" : undefined}
           >
-            {signedIn ? "Go to account to upgrade" : "Sign in to upgrade"}
-          </a>
+            {ctaText}
+          </button>
         </div>
       </div>
     </div>
