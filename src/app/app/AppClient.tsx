@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
@@ -70,30 +69,6 @@ export default function AppClient() {
   // Built-in formats are stable
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
 
-  // Support selecting a preset via /app?preset=<formatId>
-  const searchParams = useSearchParams();
-  const appliedPresetRef = useRef(false);
-
-  useEffect(() => {
-    if (appliedPresetRef.current) return;
-
-    const preset = searchParams.get("preset");
-    if (!preset) {
-      appliedPresetRef.current = true;
-      return;
-    }
-
-    // Only allow presets that exist in built-in formats (safe + predictable)
-    const exists = builtinFormats.some((f) => f.id === preset);
-    if (!exists) {
-      appliedPresetRef.current = true;
-      return;
-    }
-
-    setFormatId(preset);
-    appliedPresetRef.current = true;
-  }, [searchParams, builtinFormats]);
-
   // Custom formats can change during the session (import/save/delete)
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
 
@@ -118,6 +93,30 @@ export default function AppClient() {
   const allFormats = useMemo<CsvFormat[]>(() => {
     return [...builtinFormats, ...customFormats];
   }, [builtinFormats, customFormats]);
+
+  // Support selecting a preset via /app?preset=<formatId>
+  const appliedPresetRef = useRef(false);
+
+  useEffect(() => {
+    if (appliedPresetRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const preset = new URLSearchParams(window.location.search).get("preset");
+    if (!preset) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
+    // Only allow presets that exist in built-in formats (safe + predictable)
+    const exists = builtinFormats.some((f) => f.id === preset);
+    if (!exists) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
+    setFormatId(preset);
+    appliedPresetRef.current = true;
+  }, [builtinFormats]);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
   useEffect(() => {

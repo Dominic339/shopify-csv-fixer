@@ -1,15 +1,11 @@
 // src/app/app/page.tsx
-import type { Metadata } from "next";
+import { Suspense } from "react";
 import AppClient from "./AppClient";
 
-export const metadata: Metadata = {
-  title: "CSV Fixer",
-  alternates: {
-    canonical: "/app",
-  },
-  robots: { index: true, follow: true },
-};
-
-export default function AppPage() {
-  return <AppClient />;
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-6xl px-6 py-10">Loading…</div>}>
+      <AppClient />
+    </Suspense>
+  );
 }
