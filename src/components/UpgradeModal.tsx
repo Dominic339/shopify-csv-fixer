@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 
 /**
  * UpgradeModal supports two calling styles:
  *
- * 1) Controlled text modal (used by HomeClient / FormatsClient)
- *    <UpgradeModal open title message onClose />
+ * 1) Controlled text modal (used by HomeClient / TopBar / FormatsClient)
+ *    <UpgradeModal open title message signedIn upgradePlan onClose />
  *
  * 2) Status-driven modal (legacy)
  *    <UpgradeModal signedIn plan status onClose />
@@ -17,6 +17,10 @@ type ControlledProps = {
   title: string;
   message: string;
   onClose: () => void;
+
+  // Optional extras some callers pass (ex: TopBar)
+  signedIn?: boolean;
+  upgradePlan?: "basic" | "advanced" | string;
 };
 
 type StatusDrivenProps = {
@@ -57,13 +61,32 @@ export function UpgradeModal(props: Props) {
 
   if (!open) return null;
 
-  // If the caller provided title/message, always use them (prevents “Sign in…” when already signed in).
+  // Prefer caller-provided title/message when in controlled mode
   let title = isControlled(props) ? props.title : "Upgrade required";
-  let message = isControlled(props)
-    ? props.message
-    : "This feature requires a higher plan.";
+  let message = isControlled(props) ? props.message : "This feature requires a higher plan.";
 
-  // Legacy behavior (only when using the status-driven props signature)
+  // Derive CTA behavior
+  const { ctaHref, ctaLabel } = useMemo(() => {
+    const controlled = isControlled(props);
+
+    // Signed-in signal:
+    // - controlled: optional boolean (TopBar passes a real boolean)
+    // - legacy: boolean|null
+    const signedIn = controlled ? Boolean(props.signedIn) : Boolean(props.signedIn);
+
+    if (!signedIn) {
+      return { ctaHref: "/login", ctaLabel: "Sign in" };
+    }
+
+    // If signed in, go to checkout. Some callers tell us which plan they want.
+    const upgradePlan = controlled ? props.upgradePlan : "advanced";
+    const planParam =
+      typeof upgradePlan === "string" && upgradePlan.length ? `?plan=${encodeURIComponent(upgradePlan)}` : "";
+
+    return { ctaHref: `/checkout${planParam}`, ctaLabel: "Upgrade" };
+  }, [props]);
+
+  // Legacy message logic only when not controlled
   if (!isControlled(props)) {
     const signedIn = props.signedIn;
     const plan = props.plan;
@@ -81,6 +104,13 @@ export function UpgradeModal(props: Props) {
     }
   }
 
+  // If legacy mode says already advanced+active, don’t show CTA
+  const hideCta =
+    !isControlled(props) &&
+    Boolean(props.signedIn) &&
+    props.plan === "advanced" &&
+    (props.status || "").toLowerCase() === "active";
+
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center px-4"
@@ -89,37 +119,22 @@ export function UpgradeModal(props: Props) {
       aria-label={title}
     >
       {/* Darker overlay (less transparent than before) */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
-        onClick={props.onClose}
-      />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" onClick={props.onClose} />
 
       {/* Modal */}
       <div className="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl">
-        <div className="text-lg font-semibold text-[var(--text)]">
-          {title}
-        </div>
+        <div className="text-lg font-semibold text-[var(--text)]">{title}</div>
 
-        <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-          {message}
-        </div>
+        <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">{message}</div>
 
         <div className="mt-6 flex flex-wrap justify-end gap-3">
-          <button
-            type="button"
-            className="rg-btn"
-            onClick={props.onClose}
-          >
+          <button type="button" className="rg-btn" onClick={props.onClose}>
             Close
           </button>
 
-          {/* If the user is already on Advanced Active (legacy signature), no need to show Upgrade */}
-          {!isControlled(props) &&
-          props.signedIn &&
-          props.plan === "advanced" &&
-          (props.status || "").toLowerCase() === "active" ? null : (
-            <a className="rg-btn" href="/checkout">
-              Upgrade
+          {hideCta ? null : (
+            <a className="rg-btn" href={ctaHref}>
+              {ctaLabel}
             </a>
           )}
         </div>
