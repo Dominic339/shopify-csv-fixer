@@ -1,118 +1,131 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 
-export function UpgradeModal({
-  onClose,
-  signedIn,
-  plan,
-  status,
-}: {
+/**
+ * UpgradeModal supports two calling styles:
+ *
+ * 1) Controlled text modal (used by HomeClient / FormatsClient)
+ *    <UpgradeModal open title message onClose />
+ *
+ * 2) Status-driven modal (legacy)
+ *    <UpgradeModal signedIn plan status onClose />
+ */
+
+type ControlledProps = {
+  open: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+};
+
+type StatusDrivenProps = {
   onClose: () => void;
   signedIn: boolean | null;
   plan: "free" | "basic" | "advanced";
   status: string;
-}) {
-  const router = useRouter();
+  // no `open` here in the legacy signature
+};
 
+type Props = ControlledProps | StatusDrivenProps;
+
+function isControlled(p: Props): p is ControlledProps {
+  return typeof (p as any).open === "boolean";
+}
+
+export function UpgradeModal(props: Props) {
+  const open = isControlled(props) ? props.open : true;
+
+  // Close on Escape + prevent background scroll when open
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") props.onClose();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, props]);
+
+  if (!open) return null;
+
+  // If the caller provided title/message, always use them (prevents “Sign in…” when already signed in).
+  let title = isControlled(props) ? props.title : "Upgrade required";
+  let message = isControlled(props)
+    ? props.message
+    : "This feature requires a higher plan.";
+
+  // Legacy behavior (only when using the status-driven props signature)
+  if (!isControlled(props)) {
+    const signedIn = props.signedIn;
+    const plan = props.plan;
+    const status = (props.status || "").toLowerCase();
+
+    if (!signedIn) {
+      title = "Sign in required";
+      message = "Please sign in to manage your plan and upgrade.";
+    } else if (plan === "advanced" && status === "active") {
+      title = "You're on Advanced";
+      message = "You already have access to this feature.";
+    } else {
+      title = "Upgrade required";
+      message = "This feature requires the Advanced plan. Upgrade to unlock it.";
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  const isActive = (status ?? "").toLowerCase() === "active";
-  const isAdvanced = plan === "advanced" && isActive;
-
-  let title = "Custom Formats";
-  let body =
-    "Custom formats let you save your own rules and reuse them anytime. They’re included with the Advanced plan.";
-  let ctaText = "Upgrade";
-  let ctaAction: (() => void) | null = () => {
-    router.push("/#pricing");
-    onClose();
-  };
-
-  if (signedIn === null) {
-    title = "Checking your account…";
-    body = "One second—loading your plan details.";
-    ctaText = "Checking…";
-    ctaAction = null;
-  } else if (!signedIn) {
-    title = "Sign in required";
-    body = "Sign in to upgrade and unlock Custom Formats.";
-    ctaText = "Sign in";
-    ctaAction = () => {
-      router.push("/login");
-      onClose();
-    };
-  } else if (isAdvanced) {
-    title = "You already have Custom Formats";
-    body = "Your Advanced plan is active. You can use Custom Formats now.";
-    ctaText = "Go to Custom Formats";
-    ctaAction = () => {
-      router.push("/formats");
-      onClose();
-    };
-  } else {
-    title = "Upgrade to Advanced";
-    body =
-      plan === "basic"
-        ? "You’re on Basic. Upgrade to Advanced to unlock Custom Formats (and unlimited exports)."
-        : "Upgrade to Advanced to unlock Custom Formats (and unlimited exports).";
-    ctaText = "View plans";
-    ctaAction = () => {
-      router.push("/#pricing");
-      onClose();
-    };
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-      {/* darker overlay + blur so the modal is readable on dark theme */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      {/* Darker overlay (less transparent than before) */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
+        onClick={props.onClose}
+      />
 
-      <div className="relative w-full max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold text-[var(--text)]">{title}</h2>
-            <p className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">{body}</p>
-          </div>
+      {/* Modal */}
+      <div className="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl">
+        <div className="text-lg font-semibold text-[var(--text)]">
+          {title}
+        </div>
 
-          <button
-            type="button"
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-sm text-[var(--text)]"
-            onClick={onClose}
-            aria-label="Close"
-            title="Close"
-          >
-            ✕
-          </button>
+        <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+          {message}
         </div>
 
         <div className="mt-6 flex flex-wrap justify-end gap-3">
           <button
             type="button"
-            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 text-sm text-[var(--text)]"
-            onClick={onClose}
+            className="rg-btn"
+            onClick={props.onClose}
           >
-            Not now
+            Close
           </button>
 
-          <button
-            type="button"
-            className="rg-btn"
-            disabled={!ctaAction}
-            onClick={() => ctaAction?.()}
-            title={!ctaAction ? "Loading…" : undefined}
-          >
-            {ctaText}
-          </button>
+          {/* If the user is already on Advanced Active (legacy signature), no need to show Upgrade */}
+          {!isControlled(props) &&
+          props.signedIn &&
+          props.plan === "advanced" &&
+          (props.status || "").toLowerCase() === "active" ? null : (
+            <a className="rg-btn" href="/checkout">
+              Upgrade
+            </a>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+export default UpgradeModal;
