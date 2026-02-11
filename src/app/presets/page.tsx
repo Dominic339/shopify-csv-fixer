@@ -1,3 +1,4 @@
+// src/app/presets/page.tsx
 import Link from "next/link";
 import { getPresetFormats, groupPresetsByCategory } from "@/lib/presets";
 import JsonLd from "@/components/JsonLd";
@@ -44,10 +45,11 @@ export default function PresetsPage() {
           return (
             <section key={cat}>
               <h2 className="text-lg font-semibold text-[var(--text)]">{cat}</h2>
+
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((p) => {
                   const detailHref = `/presets/${encodeURIComponent(p.id)}`;
-                  const openHref = `/app?preset=${encodeURIComponent(p.id)}`;
+                  const openHref = `/app?preset=${encodeURIComponent(p.formatId)}`;
 
                   return (
                     <div
@@ -65,8 +67,6 @@ export default function PresetsPage() {
                           Open in fixer
                         </Link>
                       </div>
-
-                      <div className="mt-4 text-xs text-[var(--muted)]">Preset ID: {p.id}</div>
                     </div>
                   );
                 })}
@@ -74,14 +74,6 @@ export default function PresetsPage() {
             </section>
           );
         })}
-      </div>
-
-      <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <h3 className="text-lg font-semibold text-[var(--text)]">How these pages help SEO</h3>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Each preset has its own page with a clear topic and matching “Open in fixer” link. That lets
-          you target search intent like “Shopify CSV fixer” and convert those visits directly into tool usage.
-        </p>
       </div>
     </main>
   );

@@ -1,9 +1,9 @@
+// src/app/presets/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPresetById, getPresetFormats } from "@/lib/presets";
 import JsonLd from "@/components/JsonLd";
 
-// Important for static export reliability
 export const dynamic = "force-static";
 export const dynamicParams = false;
 
@@ -15,7 +15,6 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { id: string } }) {
   const preset = getPresetById(params.id);
   if (!preset) return {};
-
   return {
     title: `${preset.name} CSV Fixer`,
     description: preset.description,
@@ -27,7 +26,7 @@ function guessUseCases(category: string) {
 
   if (cat.includes("ecommerce")) {
     return [
-      "Fix missing required columns (like handles or IDs)",
+      "Fix missing required columns before import",
       "Normalize price, inventory, and option formatting",
       "Catch invalid values that break imports",
     ];
@@ -35,7 +34,7 @@ function guessUseCases(category: string) {
 
   if (cat.includes("marketing")) {
     return [
-      "Clean emails and required audience fields",
+      "Clean emails and identifiers used for matching",
       "Normalize names, tags, and segmentation columns",
       "Catch blanks and malformed values early",
     ];
@@ -84,8 +83,8 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
   const preset = getPresetById(params.id);
   if (!preset) return notFound();
 
-  const openUrl = `/app?preset=${encodeURIComponent(preset.id)}`;
-  const useCases = guessUseCases(preset.category ?? "");
+  const openUrl = `/app?preset=${encodeURIComponent(preset.formatId)}`;
+  const useCases = guessUseCases(preset.category);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -124,9 +123,7 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
           </Link>
         </div>
 
-        <div className="mt-4 text-xs text-[var(--muted)]">
-          Category: {preset.category ?? "Other"} • Preset ID: {preset.id}
-        </div>
+        <div className="mt-4 text-xs text-[var(--muted)]">Category: {preset.category}</div>
       </div>
 
       <section className="mt-10 grid gap-6 md:grid-cols-2">
@@ -153,39 +150,6 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
               Open now
             </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <h2 className="text-lg font-semibold text-[var(--text)]">FAQ</h2>
-
-        <div className="mt-5 grid gap-4">
-          <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-              Does this upload my CSV anywhere?
-            </summary>
-            <p className="mt-3 text-sm text-[var(--muted)]">
-              The core parsing and edits run in your browser. Your export is generated locally.
-            </p>
-          </details>
-
-          <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-              What if my CSV is missing required columns?
-            </summary>
-            <p className="mt-3 text-sm text-[var(--muted)]">
-              Presets include required columns in the output template and flag rows so you can fill in missing values.
-            </p>
-          </details>
-
-          <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-              Can I still use custom formats?
-            </summary>
-            <p className="mt-3 text-sm text-[var(--muted)]">
-              Yes. Custom formats continue to appear in the app format pills when you save or import them.
-            </p>
-          </details>
         </div>
       </section>
     </main>
