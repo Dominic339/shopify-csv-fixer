@@ -12,17 +12,34 @@ type ThemeCtx = {
 
 const ThemeContext = React.createContext<ThemeCtx | null>(null);
 
+function getPreferredTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  const stored = localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") return stored;
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+  return prefersDark ? "dark" : "light";
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>("dark");
 
+  // Initialize from storage/system on mount (avoids SSR touching window)
   React.useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("theme") : null;
-    if (stored === "light" || stored === "dark") setTheme(stored);
+    setTheme(getPreferredTheme());
   }, []);
 
+  // Apply theme tokens + tailwind dark class
   React.useEffect(() => {
     if (typeof document === "undefined") return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
+
+    const root = document.documentElement;
+
+    // CSS variables in globals.css key off data-theme
+    root.setAttribute("data-theme", theme);
+
+    // Tailwind "dark:" utilities key off the .dark class
+    root.classList.toggle("dark", theme === "dark");
+
     if (typeof window !== "undefined") localStorage.setItem("theme", theme);
   }, [theme]);
 

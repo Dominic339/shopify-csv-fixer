@@ -139,8 +139,9 @@ export default function TopBar() {
             onClick={toggle}
             className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
             aria-label="Toggle theme"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {theme === "dark" ? "Dark" : "Light"}
+            {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
 
           <Link href="/app" className="rgb-btn">

@@ -136,6 +136,54 @@ export default function HomeClient() {
         </div>
       </section>
 
+      <section className="mt-16" id="faq">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+          <div className="text-sm font-semibold text-[var(--text)]">FAQ</div>
+          <div className="mt-2 text-2xl font-semibold text-[var(--text)]">Quick answers</div>
+
+          <div className="mt-6 grid gap-4">
+            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
+                Do you upload my CSV to a server?
+              </summary>
+              <p className="mt-3 text-sm text-[var(--muted)]">
+                The fixer runs in your browser for the core parsing and edits. When you export, your cleaned CSV is
+                generated locally.
+              </p>
+            </details>
+
+            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
+                What kinds of problems can it fix automatically?
+              </summary>
+              <p className="mt-3 text-sm text-[var(--muted)]">
+                Safe fixes include trimming extra spaces, normalizing empty cells, and applying consistent formatting.
+                Anything that could change meaning is flagged so you can review it before export.
+              </p>
+            </details>
+
+            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
+                What are Custom Formats?
+              </summary>
+              <p className="mt-3 text-sm text-[var(--muted)]">
+                Custom Formats let you save reusable column templates and cleanup rules so repeat jobs take seconds.
+                Advanced plan is required for creating and managing formats.
+              </p>
+            </details>
+
+            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
+                Can I cancel or change plans later?
+              </summary>
+              <p className="mt-3 text-sm text-[var(--muted)]">
+                Yes. You can upgrade, downgrade, or cancel from your Profile at any time.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
       <UpgradeModal
         open={upgradeOpen}
         title="Advanced only"
