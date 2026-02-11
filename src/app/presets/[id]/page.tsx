@@ -47,31 +47,73 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+function sampleValueForColumn(colName: string) {
+  const c = colName.trim().toLowerCase();
+
+  // Common patterns first
+  if (c === "handle") return "example-item";
+  if (c === "title" || c.includes("name")) return "Example Item";
+  if (c.includes("body") || c.includes("description") || c.includes("html"))
+    return "Example description text";
+  if (c.includes("vendor") || c.includes("brand")) return "Example Brand";
+  if (c.includes("category")) return "Example Category";
+  if (c === "type") return "Example Type";
+  if (c.includes("tag")) return "tag1, tag2";
+  if (c.includes("published") || c.includes("active") || c.includes("enabled")) return "TRUE";
+  if (c.includes("status")) return "active";
+
+  // Money + quantities
+  if (c.includes("price") || c.includes("cost") || c.includes("amount")) return "19.99";
+  if (c.includes("qty") || c.includes("quantity") || c.includes("inventory") || c.includes("stock"))
+    return "10";
+
+  // IDs / SKUs
+  if (c === "sku" || c.includes("sku")) return "SKU-EXAMPLE-001";
+  if (c.includes("id")) return "12345";
+
+  // Options / variants
+  if (c.includes("option") && c.includes("name")) return "Size";
+  if (c.includes("option") && c.includes("value")) return "M";
+  if (c.includes("variant") && c.includes("price")) return "19.99";
+  if (c.includes("variant") && c.includes("sku")) return "SKU-VAR-001";
+  if (c.includes("variant") && (c.includes("qty") || c.includes("quantity") || c.includes("inventory")))
+    return "10";
+
+  // URLs / images
+  if (c.includes("image") && c.includes("alt")) return "Example image alt text";
+  if (c.includes("image") || c.includes("url") || c.includes("link"))
+    return "https://example.com/item";
+
+  // Contact-ish fields
+  if (c.includes("email")) return "customer@example.com";
+  if (c.includes("phone")) return "555-0100";
+
+  // Address-ish fields
+  if (c.includes("address")) return "123 Main St";
+  if (c.includes("city")) return "Boston";
+  if (c.includes("state") || c.includes("province")) return "MA";
+  if (c.includes("zip") || c.includes("postal")) return "02101";
+  if (c.includes("country")) return "US";
+
+  // Dates
+  if (c.includes("date")) return "2026-01-01";
+
+  // Fallback: something non-empty that still reads like a placeholder
+  return "Example";
+}
+
 function buildSampleRows(columns: string[]) {
-  // Keep sample values minimal and generic so it still “looks like a CSV”
-  // You can later swap this for per-preset sample data if you want.
+  // Row 1: fill EVERY column with something
   const row1: Record<string, string> = {};
+  for (const c of columns) row1[c] = sampleValueForColumn(c);
+
+  // Row 2/3: keep blank so it still looks like a template
   const row2: Record<string, string> = {};
   const row3: Record<string, string> = {};
-
   for (const c of columns) {
-    row1[c] = "";
     row2[c] = "";
     row3[c] = "";
   }
-
-  // Put a couple obvious examples when common fields exist (optional but nice)
-  const setIfExists = (row: Record<string, string>, key: string, val: string) => {
-    if (key in row) row[key] = val;
-  };
-
-  setIfExists(row1, "Title", "Example Item");
-  setIfExists(row1, "Price", "19.99");
-  setIfExists(row1, "Quantity", "10");
-  setIfExists(row1, "Description", "Short description here");
-  setIfExists(row1, "ImageURL", "https://example.com/image.jpg");
-  setIfExists(row1, "Handle", "example-item");
-  setIfExists(row1, "Email", "customer@example.com");
 
   return [row1, row2, row3];
 }
@@ -147,7 +189,10 @@ export default async function PresetDetailPage({ params }: PageProps) {
                     Row
                   </th>
                   {columns.map((c) => (
-                    <th key={c} className="px-4 py-3 font-semibold text-[var(--text)] whitespace-nowrap">
+                    <th
+                      key={c}
+                      className="px-4 py-3 font-semibold text-[var(--text)] whitespace-nowrap"
+                    >
                       {c}
                     </th>
                   ))}
