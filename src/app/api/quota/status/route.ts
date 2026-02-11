@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import { getMonthKey } from "@/lib/month";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-function monthKey(d: Date = new Date()): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
+type Plan = "free" | "basic" | "advanced";
+
+function getPlanLimit(plan: Plan) {
+  if (plan === "advanced") return { unlimited: true as const, limit: 0 };
+  if (plan === "basic") return { unlimited: false as const, limit: 100 };
+  return { unlimited: false as const, limit: 3 };
 }
 
 export async function GET() {
@@ -14,14 +17,12 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const mk = monthKey();
-
   if (!user) {
-    // Anonymous users are tracked client-side (localStorage)
     return NextResponse.json({
       signedIn: false,
       plan: "free",
-      monthKey: mk,
+      unlimited: false,
+      monthKey: getMonthKey(),
       used: 0,
       limit: 3,
       remaining: 3,
@@ -29,47 +30,51 @@ export async function GET() {
   }
 
   const admin = createSupabaseAdminClient();
+  const monthKey = getMonthKey();
 
-  const { data: sub } = await admin
+  const { data: subRow } = await admin
     .from("user_subscriptions")
     .select("plan,status")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const status = (sub?.status ?? "none").toString().toLowerCase();
-  const planRaw = (sub?.plan ?? "free").toString().toLowerCase();
-  const plan = status === "active" ? (planRaw === "advanced" ? "advanced" : "basic") : "free";
+  const status = String(subRow?.status ?? "").toLowerCase();
+  const rawPlan = String(subRow?.plan ?? "free").toLowerCase();
+  const plan: Plan = rawPlan === "advanced" ? "advanced" : rawPlan === "basic" ? "basic" : "free";
 
-  // Advanced = unlimited
-  if (plan === "advanced") {
+  // Only treat as paid if status is active
+  const effectivePlan: Plan = status === "active" ? plan : "free";
+  const { unlimited, limit } = getPlanLimit(effectivePlan);
+
+  if (unlimited) {
     return NextResponse.json({
       signedIn: true,
-      plan,
-      monthKey: mk,
+      plan: effectivePlan,
+      unlimited: true,
+      monthKey,
       used: 0,
       limit: 0,
       remaining: 0,
-      unlimited: true,
     });
   }
-
-  const limit = plan === "basic" ? 100 : 3;
 
   const { data: usageRow } = await admin
     .from("export_usage")
     .select("exports_used")
     .eq("user_id", user.id)
-    .eq("month_key", mk)
+    .eq("month_key", monthKey)
     .maybeSingle();
 
   const used = Number(usageRow?.exports_used ?? 0);
+  const remaining = Math.max(0, limit - used);
 
   return NextResponse.json({
     signedIn: true,
-    plan,
-    monthKey: mk,
+    plan: effectivePlan,
+    unlimited: false,
+    monthKey,
     used,
     limit,
-    remaining: Math.max(0, limit - used),
+    remaining,
   });
 }

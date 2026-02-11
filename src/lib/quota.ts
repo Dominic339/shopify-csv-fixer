@@ -10,39 +10,15 @@ type LocalQuotaState = {
 export type Plan = "free" | "basic" | "advanced";
 
 export type PlanLimits = {
-  // When unlimited is true, exportsPerMonth is only a UI fallback.
-  // (We keep it numeric so existing math doesn't crash.)
   exportsPerMonth: number;
   unlimited?: boolean;
 };
 
 export function getPlanLimits(plan: string): PlanLimits {
   const p = (plan || "free").toLowerCase();
-  // Advanced is truly unlimited.
   if (p === "advanced") return { exportsPerMonth: 0, unlimited: true };
   if (p === "basic") return { exportsPerMonth: 100 };
   return { exportsPerMonth: 3 };
-}
-
-type AuthStatus = {
-  signedIn: boolean;
-  plan: Plan;
-  status?: string;
-};
-
-async function fetchAuthStatus(): Promise<AuthStatus> {
-  try {
-    const r = await fetch("/api/subscription/status", { cache: "no-store" });
-    if (!r.ok) return { signedIn: false, plan: "free" };
-    const j = await r.json().catch(() => ({}));
-    return {
-      signedIn: Boolean(j?.signedIn),
-      plan: (j?.plan ?? "free") as Plan,
-      status: typeof j?.status === "string" ? j.status : undefined,
-    };
-  } catch {
-    return { signedIn: false, plan: "free" };
-  }
 }
 
 function getLocalQuota(limitPerMonth = 3) {
@@ -73,6 +49,7 @@ function getLocalQuota(limitPerMonth = 3) {
     used: state.used,
     limit: limitPerMonth,
     remaining,
+    unlimited: false as const,
   };
 }
 
@@ -89,22 +66,43 @@ function consumeLocalExport(limitPerMonth = 3) {
 }
 
 export async function getQuota() {
-  // Server side always relies on API (no localStorage)
+  // server render: try API, but never rely on localStorage
   if (typeof window === "undefined") {
     const r = await fetch("/api/quota/status", { cache: "no-store" }).catch(() => null);
-    if (!r || !r.ok)
+    if (!r || !r.ok) {
       return {
         used: 0,
         limit: 3,
         remaining: 3,
         signedIn: false,
-        plan: "free",
+        plan: "free" as Plan,
         monthKey: getMonthKey(),
+        unlimited: false,
       };
-
+    }
     const j = await r.json();
     return {
       signedIn: Boolean(j?.signedIn),
+      plan: (j?.plan ?? "free") as Plan,
+      monthKey: String(j?.monthKey ?? getMonthKey()),
+      used: Number(j?.used ?? 0),
+      limit: Number(j?.limit ?? 3),
+      remaining: Number(j?.remaining ?? 3),
+      unlimited: Boolean(j?.unlimited ?? false),
+    };
+  }
+
+  // browser: prefer API, fallback to local ONLY if not signed in / error
+  try {
+    const r = await fetch("/api/quota/status", { cache: "no-store" });
+    if (!r.ok) return getLocalQuota(3);
+
+    const j = await r.json();
+
+    if (!j?.signedIn) return getLocalQuota(3);
+
+    return {
+      signedIn: true as const,
       plan: (j?.plan ?? "free") as Plan,
       monthKey: String(j?.monthKey ?? getMonthKey()),
       used: Number(j?.used ?? 0),
@@ -112,101 +110,37 @@ export async function getQuota() {
       remaining: Number(j?.remaining ?? 0),
       unlimited: Boolean(j?.unlimited ?? false),
     };
-  }
-
-  // Client side: decide local vs server based on "are we signed in?"
-  const auth = await fetchAuthStatus();
-
-  // If not signed in, use local device quota (free only)
-  if (!auth.signedIn) return getLocalQuota(3);
-
-  // Signed in: do NOT use local quota at all
-  // Advanced: treat as unlimited even if quota endpoint lags behind
-  if (auth.plan === "advanced") {
-    return {
-      signedIn: true as const,
-      plan: "advanced" as const,
-      monthKey: getMonthKey(),
-      used: 0,
-      limit: 0,
-      remaining: 0,
-      unlimited: true as const,
-    };
-  }
-
-  try {
-    const r = await fetch("/api/quota/status", { cache: "no-store" });
-    if (!r.ok) {
-      const limits = getPlanLimits(auth.plan);
-      return {
-        signedIn: true as const,
-        plan: auth.plan,
-        monthKey: getMonthKey(),
-        used: 0,
-        limit: limits.exportsPerMonth,
-        remaining: limits.exportsPerMonth,
-        unlimited: Boolean(limits.unlimited ?? false),
-      };
-    }
-
-    const j = await r.json().catch(() => ({}));
-    const plan = (j?.plan ?? auth.plan ?? "free") as Plan;
-    const limits = getPlanLimits(plan);
-
-    // If the quota endpoint ever claims "not signed in" but auth says signed in,
-    // trust auth and keep signedIn true so we never fall back to local for signed users.
-    const signedIn = true as const;
-
-    return {
-      signedIn,
-      plan,
-      monthKey: String(j?.monthKey ?? getMonthKey()),
-      used: Number(j?.used ?? 0),
-      limit: Number(j?.limit ?? limits.exportsPerMonth),
-      remaining: Number(j?.remaining ?? Math.max(0, limits.exportsPerMonth - Number(j?.used ?? 0))),
-      unlimited: Boolean(j?.unlimited ?? limits.unlimited ?? false),
-    };
   } catch {
-    const limits = getPlanLimits(auth.plan);
-    return {
-      signedIn: true as const,
-      plan: auth.plan,
-      monthKey: getMonthKey(),
-      used: 0,
-      limit: limits.exportsPerMonth,
-      remaining: limits.exportsPerMonth,
-      unlimited: Boolean(limits.unlimited ?? false),
-    };
+    return getLocalQuota(3);
   }
 }
 
 export async function consumeExport(): Promise<void> {
-  // Decide behavior from subscription status first so "advanced" never gets blocked
-  const auth = await fetchAuthStatus();
+  const q = await getQuota();
 
-  // Not signed in: local free quota only
-  if (!auth.signedIn) {
+  // signed in + advanced => unlimited
+  if (q?.signedIn && q?.plan === "advanced") return;
+
+  try {
+    const r = await fetch("/api/quota/consume", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount: 1 }),
+    });
+
+    // If not signed in, use local free quota
+    if (r.status === 401) {
+      const local = consumeLocalExport(3);
+      if (!local.ok) throw new Error("Free tier limit reached (3 exports this month for this device).");
+      return;
+    }
+
+    const j = await r.json().catch(() => ({}));
+
+    if (!r.ok) throw new Error(j?.message ?? "Monthly export limit reached.");
+    return;
+  } catch {
     const local = consumeLocalExport(3);
     if (!local.ok) throw new Error("Free tier limit reached (3 exports this month for this device).");
-    return;
   }
-
-  // Signed in: advanced is unlimited
-  if (auth.plan === "advanced") return;
-
-  // Signed in: basic or free is enforced by server
-  const r = await fetch("/api/quota/consume", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ amount: 1 }),
-  });
-
-  // If the server says 401 but auth says signed in, don't fall back to local.
-  // That would incorrectly show the free device limit for paid users.
-  if (r.status === 401) {
-    throw new Error("Session not recognized by the server. Please sign out and sign back in.");
-  }
-
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j?.message ?? "Monthly export limit reached.");
 }
