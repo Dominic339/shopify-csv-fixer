@@ -18,13 +18,6 @@ export default function HomePage() {
     },
   };
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <HomeClient jsonLd={jsonLd} />
-    </>
-  );
+  // HomeClient expects jsonLd as a required prop
+  return <HomeClient jsonLd={jsonLd} />;
 }

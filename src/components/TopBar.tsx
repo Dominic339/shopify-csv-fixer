@@ -1,8 +1,10 @@
+// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -26,6 +28,8 @@ type SupabaseSession = {
 
 export default function TopBar() {
   const supabase = createClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
@@ -93,6 +97,24 @@ export default function TopBar() {
     setOpen(false);
   }
 
+  function goToPricing() {
+    setOpen(false);
+
+    // If already on home, scroll to #pricing
+    if (pathname === "/") {
+      const el = document.getElementById("pricing");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.location.hash = "pricing";
+      }
+      return;
+    }
+
+    // Otherwise navigate to home + hash
+    router.push("/#pricing");
+  }
+
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -124,6 +146,10 @@ export default function TopBar() {
           <Link href="/app" className="rgb-btn">
             <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
           </Link>
+
+          <button type="button" onClick={goToPricing} className="rgb-btn" aria-label="View pricing">
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">View pricing</span>
+          </button>
 
           {canAccessCustomFormats ? (
             <Link href="/formats" className="rgb-btn">
@@ -188,6 +214,14 @@ export default function TopBar() {
                 >
                   Home
                 </Link>
+
+                <button
+                  type="button"
+                  className="mt-1 block w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
+                  onClick={goToPricing}
+                >
+                  View pricing
+                </button>
 
                 <div className="mt-2 border-t" style={{ borderColor: "var(--popover-border)" }} />
 
