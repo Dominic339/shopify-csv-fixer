@@ -1,50 +1,39 @@
 // src/app/presets/[id]/sample.csv/route.ts
-
+import { NextRequest } from "next/server";
 import { getPresetById } from "@/lib/presets";
 
-function csvEscape(value: string) {
-  const s = value ?? "";
-  if (/[",\n\r]/.test(s)) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
+function escapeCsvCell(value: string) {
+  // Minimal CSV escaping: wrap if contains comma, quote, or newline
+  const needsQuotes = /[",\n\r]/.test(value);
+  const escaped = value.replace(/"/g, '""');
+  return needsQuotes ? `"${escaped}"` : escaped;
 }
 
 function toCsv(headers: string[], rows: Record<string, string>[]) {
   const lines: string[] = [];
-  lines.push(headers.map(csvEscape).join(","));
-
+  lines.push(headers.map(escapeCsvCell).join(","));
   for (const r of rows) {
-    const line = headers.map((h) => csvEscape((r?.[h] ?? "").toString()));
-    lines.push(line.join(","));
+    lines.push(headers.map((h) => escapeCsvCell(r?.[h] ?? "")).join(","));
   }
-
   return lines.join("\n") + "\n";
 }
 
-export async function GET(
-  _req: Request,
-  ctx: { params: { id: string } }
-) {
-  const preset = getPresetById(ctx.params.id);
+export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
+  const preset = getPresetById(id);
   if (!preset) {
-    return new Response("Preset not found", { status: 404 });
+    return new Response("Not found", { status: 404 });
   }
 
-  const headers = preset.columns ?? [];
-  const rows = (preset.sampleRows && preset.sampleRows.length ? preset.sampleRows : [{}]) as Record<
-    string,
-    string
-  >[];
-
-  const csv = toCsv(headers, rows);
+  const csv = toCsv(preset.columns, preset.sampleRows);
 
   return new Response(csv, {
     status: 200,
     headers: {
-      "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="${preset.id}_sample.csv"`,
-      "cache-control": "public, max-age=3600",
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${preset.id}_sample.csv"`,
+      "Cache-Control": "public, max-age=3600",
     },
   });
 }
