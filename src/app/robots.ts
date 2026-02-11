@@ -5,10 +5,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/app", "/formats"],
+        allow: "/",
+        // Keep sensitive or non public routes blocked
         disallow: ["/account", "/profile", "/login", "/checkout", "/api"],
       },
     ],
     sitemap: "https://csnest.vercel.app/sitemap.xml",
   };
 }
+
