@@ -45,26 +45,31 @@ export default function PresetsPage() {
             <section key={cat}>
               <h2 className="text-lg font-semibold text-[var(--text)]">{cat}</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((p) => (
-                  <div
-                    key={p.id}
-                    className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6"
-                  >
-                    <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
-                    <p className="mt-2 text-sm text-[var(--muted)]">{p.description}</p>
+                {items.map((p) => {
+                  const detailHref = `/presets/${encodeURIComponent(p.id)}`;
+                  const openHref = `/app?preset=${encodeURIComponent(p.id)}`;
 
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <Link href={`/presets/${p.id}`} className="rg-btn">
-                        View details
-                      </Link>
-                      <Link href={`/app?preset=${encodeURIComponent(p.id)}`} className="rg-btn">
-                        Open in fixer
-                      </Link>
+                  return (
+                    <div
+                      key={p.id}
+                      className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6"
+                    >
+                      <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
+                      <p className="mt-2 text-sm text-[var(--muted)]">{p.description}</p>
+
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        <Link href={detailHref} className="rg-btn">
+                          View details
+                        </Link>
+                        <Link href={openHref} className="rg-btn">
+                          Open in fixer
+                        </Link>
+                      </div>
+
+                      <div className="mt-4 text-xs text-[var(--muted)]">Preset ID: {p.id}</div>
                     </div>
-
-                    <div className="mt-4 text-xs text-[var(--muted)]">Preset ID: {p.id}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           );

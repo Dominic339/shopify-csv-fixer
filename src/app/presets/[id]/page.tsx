@@ -3,12 +3,16 @@ import { notFound } from "next/navigation";
 import { getPresetById, getPresetFormats } from "@/lib/presets";
 import JsonLd from "@/components/JsonLd";
 
-export async function generateStaticParams() {
+// Important for static export reliability
+export const dynamic = "force-static";
+export const dynamicParams = false;
+
+export function generateStaticParams() {
   const presets = getPresetFormats();
   return presets.map((p) => ({ id: p.id }));
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export function generateMetadata({ params }: { params: { id: string } }) {
   const preset = getPresetById(params.id);
   if (!preset) return {};
 
@@ -81,6 +85,7 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
   if (!preset) return notFound();
 
   const openUrl = `/app?preset=${encodeURIComponent(preset.id)}`;
+  const useCases = guessUseCases(preset.category ?? "");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -97,8 +102,6 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
       target: openUrl,
     },
   };
-
-  const useCases = guessUseCases(preset.category ?? "");
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
