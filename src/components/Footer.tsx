@@ -11,6 +11,9 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-wrap gap-4 text-sm">
+          <Link className="text-white/70 hover:text-white" href="/presets">
+            Preset Formats
+          </Link>
           <Link className="text-white/70 hover:text-white" href="/about">
             About
           </Link>
