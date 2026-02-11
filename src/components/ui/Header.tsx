@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 
 type SubStatus = {
@@ -14,89 +15,92 @@ type SubStatus = {
 export function Header() {
   const { theme, toggle } = useTheme();
   const [sub, setSub] = useState<SubStatus | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/subscription/status", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((j) => {
-        if (cancelled) return;
-        const plan = (j?.plan ?? "free") as SubStatus["plan"];
-        const status = String(j?.status ?? "unknown");
-        const signedIn = Boolean(j?.signedIn);
-        setSub({ plan, status, signedIn });
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setSub({ plan: "free", status: "unknown", signedIn: false });
-      });
+    (async () => {
+      try {
+        const r = await fetch("/api/subscription/status", { cache: "no-store" });
+        const j = (await r.json()) as SubStatus;
+        if (!cancelled) setSub(j);
+      } catch {
+        if (!cancelled) setSub(null);
+      }
+    })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const canAccessCustomFormats = useMemo(() => {
-    if (ALLOW_CUSTOM_FORMATS_FOR_ALL) return true;
-    return sub?.plan === "advanced" && sub?.status === "active";
+  const isAdvanced = useMemo(() => {
+    return !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
   }, [sub]);
 
-  const customFormatsHref = useMemo(() => {
-    if (canAccessCustomFormats) return "/formats";
-    return sub?.signedIn ? "/profile" : "/login";
-  }, [canAccessCustomFormats, sub?.signedIn]);
+  const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvanced;
 
   return (
-    <header className="flex items-center justify-between px-6 py-4">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-xl bg-[var(--surface-2)]" />
-          <div>
-            <div className="text-sm font-semibold text-[var(--text)]">
-              CSNest
-            </div>
-            <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
-          </div>
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface)] shadow-sm">
+            🧾
+          </span>
+          <span className="text-sm font-semibold text-[var(--text)]">CSNest</span>
         </Link>
+
+        <nav className="flex items-center gap-3">
+          <Link
+            href="/app"
+            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
+          >
+            CSV Fixer
+          </Link>
+
+          {canAccessCustomFormats ? (
+            <Link
+              href="/formats"
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
+            >
+              Custom Formats
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)] opacity-60"
+              onClick={() => setUpgradeOpen(true)}
+            >
+              Custom Formats
+            </button>
+          )}
+
+          <button
+            onClick={toggle}
+            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
+            aria-label="Toggle theme"
+            type="button"
+          >
+            {theme === "dark" ? "Dark" : "Light"}
+          </button>
+        </nav>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          className="pill-btn"
-          onClick={toggle}
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? "Dark" : "Light"}
-        </button>
+      <div
+        className="h-[2px]"
+        style={{
+          background:
+            "linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-4), var(--accent-5))",
+        }}
+      />
 
-        <Link href="/app" className="nav-pill is-active">
-          CSV Fixer
-        </Link>
-
-        <Link
-          href={customFormatsHref}
-          className={`nav-pill ${!canAccessCustomFormats ? "opacity-60" : ""}`}
-          title={
-            canAccessCustomFormats
-              ? "Open Custom Formats"
-              : sub?.signedIn
-              ? "Manage your plan in Profile"
-              : "Sign in to manage your plan"
-          }
-        >
-          Custom Formats
-        </Link>
-
-        <Link
-          href={sub?.signedIn ? "/profile" : "/login"}
-          className="avatar"
-          aria-label="Account"
-        >
-          <span className="avatar-initial">D</span>
-        </Link>
-      </div>
+      <UpgradeModal
+        open={upgradeOpen}
+        title="Advanced only"
+        message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+        signedIn={Boolean(sub?.signedIn)}
+        upgradePlan="advanced"
+        onClose={() => setUpgradeOpen(false)}
+      />
     </header>
   );
 }
-
-export default Header;
