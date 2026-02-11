@@ -4,7 +4,10 @@ import FormatsClient from "./FormatsClient";
 
 export const metadata: Metadata = {
   title: "Custom Formats",
-  robots: { index: false, follow: false },
+  alternates: {
+    canonical: "/formats",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function FormatsPage() {

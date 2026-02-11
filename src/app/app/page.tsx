@@ -4,7 +4,10 @@ import AppClient from "./AppClient";
 
 export const metadata: Metadata = {
   title: "CSV Fixer",
-  robots: { index: false, follow: false },
+  alternates: {
+    canonical: "/app",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function AppPage() {
