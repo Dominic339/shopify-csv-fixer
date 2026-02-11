@@ -1,4 +1,5 @@
 // src/app/presets/page.tsx
+
 import Link from "next/link";
 import { getPresetFormats, groupPresetsByCategory } from "@/lib/presets";
 import JsonLd from "@/components/JsonLd";
@@ -34,7 +35,9 @@ export default function PresetsPage() {
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/app" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
+              Open CSV Fixer
+            </span>
           </Link>
         </div>
       </div>

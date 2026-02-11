@@ -9,195 +9,500 @@ export type PresetCategory =
   | "Support";
 
 export type PresetFormat = {
-  // This is the URL id used for /presets/[id]
+  // Used for /presets/[id]
   id: string;
 
-  // If you ever rename ids later, keep backwards compatibility here
-  aliases?: string[];
-
+  // Display
   name: string;
   description: string;
   category: PresetCategory;
 
-  // This must match the CsvFormat id used in your app format engine
-  // (the same ids you show in your AppClient pills)
+  // Must match the CsvFormat id used in your app formats list
   formatId: string;
+
+  // Used for “example table” and “download sample csv”
+  columns: string[];
+  sampleRows: Record<string, string>[];
 };
 
-// 20 Presets (excluding general_csv)
+function row(columns: string[], values: Record<string, string>) {
+  const out: Record<string, string> = {};
+  for (const c of columns) out[c] = values[c] ?? "";
+  return out;
+}
+
+// NOTE: Keep these ids aligned with your format ids from getAllFormats()
 export const PRESET_FORMATS: PresetFormat[] = [
   // Ecommerce
-  {
-    id: "shopify_products",
-    aliases: ["shopify", "shopify-product-csv", "shopify_products_csv"],
-    name: "Shopify Products",
-    description: "Fix common Shopify product import problems (handles, options, pricing, inventory).",
-    category: "Ecommerce",
-    formatId: "shopify_products",
-  },
-  {
-    id: "woocommerce_products",
-    aliases: ["woocommerce", "woo_products"],
-    name: "WooCommerce Products",
-    description: "Normalize WooCommerce product imports and flag missing required fields.",
-    category: "Ecommerce",
-    formatId: "woocommerce_products",
-  },
-  {
-    id: "bigcommerce_products",
-    aliases: ["bigcommerce"],
-    name: "BigCommerce Products",
-    description: "Map and clean product columns for BigCommerce imports and catch required-field issues.",
-    category: "Ecommerce",
-    formatId: "bigcommerce_products",
-  },
-  {
-    id: "etsy_listings",
-    aliases: ["etsy"],
-    name: "Etsy Listings",
-    description: "Normalize Etsy listing exports and flag common formatting issues.",
-    category: "Ecommerce",
-    formatId: "etsy_listings",
-  },
-  {
-    id: "ebay_listings",
-    aliases: ["ebay"],
-    name: "eBay Listings",
-    description: "Clean a simplified eBay listing template and flag common problems before import.",
-    category: "Ecommerce",
-    formatId: "ebay_listings",
-  },
-  {
-    id: "amazon_inventory_loader",
-    aliases: ["amazon", "amazon_inventory"],
-    name: "Amazon Inventory Loader",
-    description: "Build a simplified Amazon inventory template and flag missing essentials.",
-    category: "Ecommerce",
-    formatId: "amazon_inventory_loader",
-  },
+  (() => {
+    const columns = [
+      "Handle",
+      "Title",
+      "Body (HTML)",
+      "Vendor",
+      "Product Category",
+      "Type",
+      "Tags",
+      "Published",
+      "Option1 Name",
+      "Option1 Value",
+      "Variant SKU",
+      "Variant Price",
+      "Variant Inventory Qty",
+      "Image Src",
+    ];
+    return {
+      id: "shopify_products",
+      name: "Shopify Products",
+      description: "Fix common Shopify product import issues (handles, variants, pricing, inventory).",
+      category: "Ecommerce",
+      formatId: "shopify_products",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Handle: "vibrant-mug",
+          Title: "Vibrant Mug",
+          "Body (HTML)": "<p>Colorful ceramic mug.</p>",
+          Vendor: "CSNest",
+          "Product Category": "Home & Garden > Kitchen & Dining > Drinkware",
+          Type: "Mug",
+          Tags: "mug,ceramic",
+          Published: "TRUE",
+          "Option1 Name": "Size",
+          "Option1 Value": "12oz",
+          "Variant SKU": "MUG-12",
+          "Variant Price": "12.99",
+          "Variant Inventory Qty": "100",
+          "Image Src": "https://example.com/mug.jpg",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Name", "Type", "SKU", "Regular price", "Sale price", "Description", "Categories", "Images"];
+    return {
+      id: "woocommerce_products",
+      name: "WooCommerce Products",
+      description: "Normalize WooCommerce product imports and flag missing required fields.",
+      category: "Ecommerce",
+      formatId: "woocommerce_products",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Name: "Vibrant Mug",
+          Type: "simple",
+          SKU: "MUG-12",
+          "Regular price": "12.99",
+          "Sale price": "",
+          Description: "Colorful ceramic mug.",
+          Categories: "Mugs",
+          Images: "https://example.com/mug.jpg",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Product Name", "Product SKU", "Price", "Inventory Level", "Category", "Description", "Image URL"];
+    return {
+      id: "bigcommerce_products",
+      name: "BigCommerce Products",
+      description: "Maps product columns for BigCommerce imports and flags missing required fields.",
+      category: "Ecommerce",
+      formatId: "bigcommerce_products",
+      columns,
+      sampleRows: [
+        row(columns, {
+          "Product Name": "Vibrant Mug",
+          "Product SKU": "MUG-12",
+          Price: "12.99",
+          "Inventory Level": "100",
+          Category: "Mugs",
+          Description: "Colorful ceramic mug.",
+          "Image URL": "https://example.com/mug.jpg",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["TITLE", "DESCRIPTION", "PRICE", "QUANTITY", "TAGS", "IMAGE1"];
+    return {
+      id: "etsy_listings",
+      name: "Etsy Listings",
+      description: "Normalize Etsy listing exports and flag common formatting issues.",
+      category: "Ecommerce",
+      formatId: "etsy_listings",
+      columns,
+      sampleRows: [
+        row(columns, {
+          TITLE: "Vibrant Mug",
+          DESCRIPTION: "Colorful ceramic mug.",
+          PRICE: "12.99",
+          QUANTITY: "100",
+          TAGS: "mug,ceramic",
+          IMAGE1: "https://example.com/mug.jpg",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Title", "Price", "Quantity", "Condition", "Description", "ImageURL"];
+    return {
+      id: "ebay_listings",
+      name: "eBay Listings",
+      description: "Clean a simplified eBay listing template and flag common problems before import.",
+      category: "Ecommerce",
+      formatId: "ebay_listings",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Title: "Vibrant Mug",
+          Price: "12.99",
+          Quantity: "100",
+          Condition: "New",
+          Description: "Colorful ceramic mug.",
+          ImageURL: "https://example.com/mug.jpg",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["sku", "product-name", "price", "quantity", "condition", "image-url"];
+    return {
+      id: "amazon_inventory_loader",
+      name: "Amazon Inventory Loader",
+      description: "Build a simplified Amazon inventory template and flag missing essentials.",
+      category: "Ecommerce",
+      formatId: "amazon_inventory_loader",
+      columns,
+      sampleRows: [
+        row(columns, {
+          sku: "MUG-12",
+          "product-name": "Vibrant Mug",
+          price: "12.99",
+          quantity: "100",
+          condition: "new",
+          "image-url": "https://example.com/mug.jpg",
+        }),
+      ],
+    };
+  })(),
 
   // Marketing
-  {
-    id: "mailchimp_contacts",
-    aliases: ["mailchimp"],
-    name: "Mailchimp Contacts",
-    description: "Clean contact imports and flag invalid emails and required fields.",
-    category: "Marketing",
-    formatId: "mailchimp_contacts",
-  },
-  {
-    id: "klaviyo_profiles",
-    aliases: ["klaviyo"],
-    name: "Klaviyo Profiles",
-    description: "Normalize profile exports and reduce import errors caused by formatting and blanks.",
-    category: "Marketing",
-    formatId: "klaviyo_profiles",
-  },
-  {
-    id: "meta_custom_audience",
-    aliases: ["meta_audience", "facebook_custom_audience", "facebook_audience"],
-    name: "Meta Custom Audience",
-    description: "Prepare customer match style audiences and flag invalid identifiers.",
-    category: "Marketing",
-    formatId: "meta_custom_audience",
-  },
-  {
-    id: "google_ads_customer_match",
-    aliases: ["google_ads", "customer_match", "google_customer_match"],
-    name: "Google Ads Customer Match",
-    description: "Normalize customer match uploads and flag invalid / missing identifiers.",
-    category: "Marketing",
-    formatId: "google_ads_customer_match",
-  },
+  (() => {
+    const columns = ["Email Address", "First Name", "Last Name", "Phone Number", "Tags"];
+    return {
+      id: "mailchimp_contacts",
+      name: "Mailchimp Contacts",
+      description: "Clean contact imports and flag invalid emails and required fields.",
+      category: "Marketing",
+      formatId: "mailchimp_contacts",
+      columns,
+      sampleRows: [
+        row(columns, {
+          "Email Address": "alex@example.com",
+          "First Name": "Alex",
+          "Last Name": "Smith",
+          "Phone Number": "+15551234567",
+          Tags: "newsletter",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["email", "first_name", "last_name", "phone_number", "accepts_marketing"];
+    return {
+      id: "klaviyo_profiles",
+      name: "Klaviyo Profiles",
+      description: "Normalize profile exports and reduce import errors caused by formatting and blanks.",
+      category: "Marketing",
+      formatId: "klaviyo_profiles",
+      columns,
+      sampleRows: [
+        row(columns, {
+          email: "alex@example.com",
+          first_name: "Alex",
+          last_name: "Smith",
+          phone_number: "+15551234567",
+          accepts_marketing: "true",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["email", "phone", "first_name", "last_name", "country", "zip"];
+    return {
+      id: "meta_custom_audience",
+      name: "Meta Custom Audience",
+      description: "Prepare customer-match style audiences and flag invalid identifiers.",
+      category: "Marketing",
+      formatId: "meta_custom_audience",
+      columns,
+      sampleRows: [
+        row(columns, {
+          email: "alex@example.com",
+          phone: "+15551234567",
+          first_name: "Alex",
+          last_name: "Smith",
+          country: "US",
+          zip: "02139",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Email", "Phone", "First Name", "Last Name", "Country", "Zip"];
+    return {
+      id: "google_ads_customer_match",
+      name: "Google Ads Customer Match",
+      description: "Normalize customer match uploads and flag invalid or missing identifiers.",
+      category: "Marketing",
+      formatId: "google_ads_customer_match",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Email: "alex@example.com",
+          Phone: "+15551234567",
+          "First Name": "Alex",
+          "Last Name": "Smith",
+          Country: "US",
+          Zip: "02139",
+        }),
+      ],
+    };
+  })(),
 
   // CRM
-  {
-    id: "hubspot_contacts",
-    aliases: ["hubspot"],
-    name: "HubSpot Contacts",
-    description: "Map fields for HubSpot contact imports and flag invalid emails.",
-    category: "CRM",
-    formatId: "hubspot_contacts",
-  },
-  {
-    id: "salesforce_leads",
-    aliases: ["salesforce"],
-    name: "Salesforce Leads",
-    description: "Create a simple Salesforce lead import template and flag invalid emails.",
-    category: "CRM",
-    formatId: "salesforce_leads",
-  },
-  {
-    id: "zoho_contacts",
-    aliases: ["zoho"],
-    name: "Zoho Contacts",
-    description: "Maps contacts for Zoho imports and flags invalid emails.",
-    category: "CRM",
-    formatId: "zoho_contacts",
-  },
+  (() => {
+    const columns = ["Email", "First Name", "Last Name", "Phone Number", "Company", "Lifecycle Stage"];
+    return {
+      id: "hubspot_contacts",
+      name: "HubSpot Contacts",
+      description: "Maps fields for HubSpot contact imports and flags invalid emails.",
+      category: "CRM",
+      formatId: "hubspot_contacts",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Email: "alex@example.com",
+          "First Name": "Alex",
+          "Last Name": "Smith",
+          "Phone Number": "+15551234567",
+          Company: "CSNest",
+          "Lifecycle Stage": "lead",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Email", "First Name", "Last Name", "Company", "Title", "Status"];
+    return {
+      id: "salesforce_leads",
+      name: "Salesforce Leads",
+      description: "Create a simple Salesforce lead import template and flag invalid emails.",
+      category: "CRM",
+      formatId: "salesforce_leads",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Email: "alex@example.com",
+          "First Name": "Alex",
+          "Last Name": "Smith",
+          Company: "CSNest",
+          Title: "Owner",
+          Status: "Open - Not Contacted",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Email", "First Name", "Last Name", "Phone", "Account Name"];
+    return {
+      id: "zoho_contacts",
+      name: "Zoho Contacts",
+      description: "Maps contacts for Zoho imports and flags invalid emails.",
+      category: "CRM",
+      formatId: "zoho_contacts",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Email: "alex@example.com",
+          "First Name": "Alex",
+          "Last Name": "Smith",
+          Phone: "+15551234567",
+          "Account Name": "CSNest",
+        }),
+      ],
+    };
+  })(),
 
   // Accounting
-  {
-    id: "quickbooks_transactions",
-    aliases: ["quickbooks", "qb_transactions"],
-    name: "QuickBooks Transactions",
-    description: "Build a basic transaction import template and flag non-numeric amounts.",
-    category: "Accounting",
-    formatId: "quickbooks_transactions",
-  },
-  {
-    id: "xero_bank_statement",
-    aliases: ["xero", "xero_statement"],
-    name: "Xero Bank Statement",
-    description: "Creates a simple bank statement import template and flags invalid amounts.",
-    category: "Accounting",
-    formatId: "xero_bank_statement",
-  },
+  (() => {
+    const columns = ["Date", "Description", "Amount", "Category", "Account"];
+    return {
+      id: "quickbooks_transactions",
+      name: "QuickBooks Transactions",
+      description: "Build a transaction import template and flag non-numeric amounts.",
+      category: "Accounting",
+      formatId: "quickbooks_transactions",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Date: "2026-02-11",
+          Description: "Office supplies",
+          Amount: "19.99",
+          Category: "Supplies",
+          Account: "Checking",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Date", "Payee", "Reference", "Amount", "Currency"];
+    return {
+      id: "xero_bank_statement",
+      name: "Xero Bank Statement",
+      description: "Creates a simple bank statement import template and flags invalid amounts.",
+      category: "Accounting",
+      formatId: "xero_bank_statement",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Date: "2026-02-11",
+          Payee: "Office Depot",
+          Reference: "INV-1001",
+          Amount: "-19.99",
+          Currency: "USD",
+        }),
+      ],
+    };
+  })(),
 
   // Shipping
-  {
-    id: "shipstation_orders",
-    aliases: ["shipstation"],
-    name: "ShipStation Orders",
-    description: "Clean ShipStation order imports and normalize common fields.",
-    category: "Shipping",
-    formatId: "shipstation_orders",
-  },
-  {
-    id: "pirate_ship_addresses",
-    aliases: ["pirateship", "pirate_ship", "pirate-ship-addresses"],
-    name: "Pirate Ship Addresses",
-    description: "Normalize address imports and flag missing pieces that break label creation.",
-    category: "Shipping",
-    formatId: "pirate_ship_addresses",
-  },
-  {
-    id: "ups_address_import",
-    // This directly fixes your screenshot case:
-    aliases: ["ups_addresses", "ups-addresses", "ups_address", "ups"],
-    name: "UPS Address Import",
-    description: "Standardize address fields and flag missing required columns for UPS imports.",
-    category: "Shipping",
-    formatId: "ups_address_import",
-  },
+  (() => {
+    const columns = ["Order Number", "Recipient Name", "Address 1", "City", "State", "Postal Code", "Country", "Phone"];
+    return {
+      id: "shipstation_orders",
+      name: "ShipStation Orders",
+      description: "Clean ShipStation order imports and normalize common fields.",
+      category: "Shipping",
+      formatId: "shipstation_orders",
+      columns,
+      sampleRows: [
+        row(columns, {
+          "Order Number": "1001",
+          "Recipient Name": "Alex Smith",
+          "Address 1": "1 Main St",
+          City: "Boston",
+          State: "MA",
+          "Postal Code": "02139",
+          Country: "US",
+          Phone: "+15551234567",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Name", "Address1", "Address2", "City", "State", "Zip", "Country", "Email"];
+    return {
+      id: "pirate_ship_addresses",
+      name: "Pirate Ship Addresses",
+      description: "Normalize address imports and flag missing pieces that break label creation.",
+      category: "Shipping",
+      formatId: "pirate_ship_addresses",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Name: "Alex Smith",
+          Address1: "1 Main St",
+          Address2: "Apt 2",
+          City: "Boston",
+          State: "MA",
+          Zip: "02139",
+          Country: "US",
+          Email: "alex@example.com",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["Name", "Address 1", "Address 2", "City", "State", "Postal Code", "Country", "Phone"];
+    return {
+      id: "ups_address_import",
+      name: "UPS Address Import",
+      description: "Standardize address fields and flag missing required columns for UPS imports.",
+      category: "Shipping",
+      formatId: "ups_address_import",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Name: "Alex Smith",
+          "Address 1": "1 Main St",
+          "Address 2": "Apt 2",
+          City: "Boston",
+          State: "MA",
+          "Postal Code": "02139",
+          Country: "US",
+          Phone: "+15551234567",
+        }),
+      ],
+    };
+  })(),
 
   // Support
-  {
-    id: "zendesk_users",
-    aliases: ["zendesk"],
-    name: "Zendesk Users",
-    description: "Normalize support user imports and flag missing or invalid values.",
-    category: "Support",
-    formatId: "zendesk_users",
-  },
-  {
-    id: "gorgias_contacts",
-    aliases: ["gorgias"],
-    name: "Gorgias Contacts",
-    description: "Clean Gorgias contact exports and reduce import failures caused by formatting.",
-    category: "Support",
-    formatId: "gorgias_contacts",
-  },
+  (() => {
+    const columns = ["Email", "Name", "Role", "Organization", "External ID"];
+    return {
+      id: "zendesk_users",
+      name: "Zendesk Users",
+      description: "Normalize support user imports and flag missing or invalid values.",
+      category: "Support",
+      formatId: "zendesk_users",
+      columns,
+      sampleRows: [
+        row(columns, {
+          Email: "alex@example.com",
+          Name: "Alex Smith",
+          Role: "end-user",
+          Organization: "CSNest",
+          "External ID": "user_1001",
+        }),
+      ],
+    };
+  })(),
+
+  (() => {
+    const columns = ["email", "first_name", "last_name", "phone", "tags"];
+    return {
+      id: "gorgias_contacts",
+      name: "Gorgias Contacts",
+      description: "Clean Gorgias contact exports and reduce import failures caused by formatting.",
+      category: "Support",
+      formatId: "gorgias_contacts",
+      columns,
+      sampleRows: [
+        row(columns, {
+          email: "alex@example.com",
+          first_name: "Alex",
+          last_name: "Smith",
+          phone: "+15551234567",
+          tags: "vip",
+        }),
+      ],
+    };
+  })(),
 ];
 
 export function getPresetFormats(): PresetFormat[] {
@@ -206,55 +511,32 @@ export function getPresetFormats(): PresetFormat[] {
 
 export function getPresetById(id: string): PresetFormat | undefined {
   const needle = (id ?? "").trim().toLowerCase();
-
-  // Direct id match
-  const direct = PRESET_FORMATS.find((p) => p.id.toLowerCase() === needle);
-  if (direct) return direct;
-
-  // Alias match
-  const aliasMatch = PRESET_FORMATS.find((p) =>
-    (p.aliases ?? []).some((a) => a.toLowerCase() === needle)
-  );
-  if (aliasMatch) return aliasMatch;
-
-  // Fuzzy: treat - and _ as the same for safety
-  const normalized = needle.replace(/-/g, "_");
-  const fuzzy = PRESET_FORMATS.find((p) => {
-    const pid = p.id.toLowerCase().replace(/-/g, "_");
-    if (pid === normalized) return true;
-
-    return (p.aliases ?? []).some((a) => a.toLowerCase().replace(/-/g, "_") === normalized);
-  });
-
-  return fuzzy;
+  return PRESET_FORMATS.find((p) => p.id.toLowerCase() === needle);
 }
 
-export function groupPresetsByCategory(presets: PresetFormat[]) {
-  const map = new Map<string, PresetFormat[]>();
+// This is what your /presets page is importing.
+// It MUST be exported, and it MUST return typed values (not any).
+export function groupPresetsByCategory(presets: PresetFormat[]): {
+  categories: PresetCategory[];
+  map: Map<PresetCategory, PresetFormat[]>;
+} {
+  const map = new Map<PresetCategory, PresetFormat[]>();
 
   for (const p of presets) {
-    const key = p.category ?? "Other";
-    const arr = map.get(key) ?? [];
-    arr.push(p);
-    map.set(key, arr);
+    const list = map.get(p.category) ?? [];
+    list.push(p);
+    map.set(p.category, list);
   }
 
-  const categories = Array.from(map.keys());
+  // Keep your category order consistent (not random Map order)
+  const categoryOrder: PresetCategory[] = ["Accounting", "CRM", "Ecommerce", "Marketing", "Shipping", "Support"];
+  const categories = categoryOrder.filter((c) => map.has(c));
 
-  // A stable category order
-  const order: PresetCategory[] = ["Ecommerce", "CRM", "Marketing", "Accounting", "Shipping", "Support"];
-  categories.sort((a, b) => {
-    const ai = order.indexOf(a as PresetCategory);
-    const bi = order.indexOf(b as PresetCategory);
-    if (ai === -1 && bi === -1) return a.localeCompare(b);
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
-    return ai - bi;
-  });
-
-  for (const [k, arr] of map) {
-    arr.sort((a, b) => a.name.localeCompare(b.name));
-    map.set(k, arr);
+  // Sort presets within each category by name
+  for (const c of categories) {
+    const list = map.get(c) ?? [];
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    map.set(c, list);
   }
 
   return { categories, map };

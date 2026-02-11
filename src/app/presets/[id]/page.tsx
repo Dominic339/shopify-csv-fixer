@@ -1,43 +1,34 @@
 // src/app/presets/[id]/page.tsx
 
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getPresetById, getPresetFormats } from "@/lib/presets";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
+export const dynamicParams = false;
 
-function titleFromId(id: string) {
-  // bigcommerce_products -> Bigcommerce Products
-  const clean = (id ?? "")
-    .trim()
-    .replace(/[-]+/g, "_")
-    .replace(/_+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!clean) return "Preset CSV Format";
-
-  return clean
-    .split(" ")
-    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
-    .join(" ");
+export function generateStaticParams() {
+  return getPresetFormats().map((p) => ({ id: p.id }));
 }
 
 export function generateMetadata({ params }: { params: { id: string } }) {
-  const name = titleFromId(params.id);
+  const preset = getPresetById(params.id);
+  if (!preset) return {};
   return {
-    title: `${name} CSV Fixer`,
-    description:
-      `Open the CSV Fixer preconfigured for ${name}. Upload your CSV, review issues, then export a cleaned file.`,
+    title: `${preset.name} CSV Fixer`,
+    description: preset.description,
   };
 }
 
 export default function PresetDetailPage({ params }: { params: { id: string } }) {
-  const id = (params?.id ?? "").toString();
-  const name = titleFromId(id);
+  const preset = getPresetById(params.id);
+  if (!preset) return notFound();
 
-  // IMPORTANT:
-  // We intentionally do NOT look this up in any registry.
-  // That prevents 404s if an id is missing/mismatched.
-  const openHref = `/app?preset=${encodeURIComponent(id)}`;
+  const openHref = `/app?preset=${encodeURIComponent(preset.formatId)}`;
+  const sampleHref = `/presets/${encodeURIComponent(preset.id)}/sample.csv`;
+
+  const columns = preset.columns ?? [];
+  const sample = preset.sampleRows?.[0] ?? {};
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
@@ -45,13 +36,10 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
         <p className="text-sm text-[var(--muted)]">Preset format</p>
 
         <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">
-          {name} CSV Fixer
+          {preset.name} CSV Fixer
         </h1>
 
-        <p className="mt-3 text-sm text-[var(--muted)]">
-          Open the fixer with this preset selected. Upload your CSV, let safe fixes run, then review
-          anything flagged before exporting.
-        </p>
+        <p className="mt-3 text-sm text-[var(--muted)]">{preset.description}</p>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href={openHref} className="rgb-btn">
@@ -60,34 +48,63 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
             </span>
           </Link>
 
+          <a href={sampleHref} className="rg-btn">
+            Download sample CSV
+          </a>
+
           <Link href="/presets" className="rg-btn">
             Back to all presets
           </Link>
         </div>
+
+        <div className="mt-4 text-xs text-[var(--muted)]">Category: {preset.category}</div>
       </div>
 
-      <section className="mt-10 grid gap-6 md:grid-cols-2">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h2 className="text-lg font-semibold text-[var(--text)]">What to do</h2>
-          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Click “Open fixer with this preset”</li>
-            <li>Upload your CSV</li>
-            <li>Review highlighted issues and apply manual fixes if needed</li>
-            <li>Export the cleaned CSV</li>
-          </ol>
+      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text)]">Example columns</h2>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              These are the columns this preset expects. Download the sample CSV to start from a clean template.
+            </p>
+          </div>
+
+          <a href={sampleHref} className="rg-btn">
+            Download sample CSV
+          </a>
         </div>
 
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h2 className="text-lg font-semibold text-[var(--text)]">Why this won’t 404 anymore</h2>
-          <p className="mt-4 text-sm text-[var(--muted)]">
-            This page no longer depends on a preset registry lookup. It renders for any id and
-            passes that id into the fixer via the query string.
-          </p>
-
-          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-            <div className="text-xs text-[var(--muted)]">Preset id</div>
-            <div className="mt-1 text-sm font-semibold text-[var(--text)] break-all">{id}</div>
+        <div className="mt-6 data-table-wrap">
+          <div className="data-table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  {columns.map((c) => (
+                    <th key={c}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  {columns.map((c) => (
+                    <td key={c} className="text-[color:rgba(var(--muted-rgb),1)]">
+                      {sample[c] ?? ""}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
           </div>
+
+          {columns.length ? (
+            <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
+              Showing 1 example row. Download the sample CSV for a ready-to-use template.
+            </div>
+          ) : (
+            <div className="p-4 text-sm text-[var(--muted)]">
+              No columns configured for this preset yet.
+            </div>
+          )}
         </div>
       </section>
     </main>
