@@ -1,118 +1,60 @@
 // src/app/presets/[id]/page.tsx
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getPresetById, getPresetFormats } from "@/lib/presets";
-import JsonLd from "@/components/JsonLd";
 
-export const dynamic = "force-static";
-export const dynamicParams = false;
+export const dynamic = "force-dynamic";
 
-export function generateStaticParams() {
-  const presets = getPresetFormats();
-  return presets.map((p) => ({ id: p.id }));
+function titleFromId(id: string) {
+  // bigcommerce_products -> Bigcommerce Products
+  const clean = (id ?? "")
+    .trim()
+    .replace(/[-]+/g, "_")
+    .replace(/_+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return "Preset CSV Format";
+
+  return clean
+    .split(" ")
+    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
 }
 
 export function generateMetadata({ params }: { params: { id: string } }) {
-  const preset = getPresetById(params.id);
-  if (!preset) return {};
+  const name = titleFromId(params.id);
   return {
-    title: `${preset.name} CSV Fixer`,
-    description: preset.description,
+    title: `${name} CSV Fixer`,
+    description:
+      `Open the CSV Fixer preconfigured for ${name}. Upload your CSV, review issues, then export a cleaned file.`,
   };
-}
-
-function guessUseCases(category: string) {
-  const cat = (category || "").toLowerCase();
-
-  if (cat.includes("ecommerce")) {
-    return [
-      "Fix missing required columns before import",
-      "Normalize price, inventory, and option formatting",
-      "Catch invalid values that break imports",
-    ];
-  }
-
-  if (cat.includes("marketing")) {
-    return [
-      "Clean emails and identifiers used for matching",
-      "Normalize names, tags, and segmentation columns",
-      "Catch blanks and malformed values early",
-    ];
-  }
-
-  if (cat.includes("crm")) {
-    return [
-      "Clean contact rows and normalize required fields",
-      "Reduce import rejects caused by missing columns",
-      "Standardize formatting across exports",
-    ];
-  }
-
-  if (cat.includes("accounting")) {
-    return [
-      "Normalize number-like fields and blanks",
-      "Ensure required columns exist in the output",
-      "Flag rows that need attention before import",
-    ];
-  }
-
-  if (cat.includes("shipping")) {
-    return [
-      "Standardize address fields and required columns",
-      "Flag missing address pieces before label creation",
-      "Reduce downstream errors during bulk imports",
-    ];
-  }
-
-  if (cat.includes("support")) {
-    return [
-      "Normalize user/contact fields for support imports",
-      "Catch blanks and invalid values that cause rejects",
-      "Clean common formatting issues quickly",
-    ];
-  }
-
-  return [
-    "Normalize blanks and whitespace",
-    "Ensure required columns exist in the output",
-    "Flag risky rows so you can fix them before export",
-  ];
 }
 
 export default function PresetDetailPage({ params }: { params: { id: string } }) {
-  const preset = getPresetById(params.id);
-  if (!preset) return notFound();
+  const id = (params?.id ?? "").toString();
+  const name = titleFromId(id);
 
-  const openUrl = `/app?preset=${encodeURIComponent(preset.formatId)}`;
-  const useCases = guessUseCases(preset.category);
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: `${preset.name} CSV Fixer`,
-    description: preset.description,
-    isPartOf: {
-      "@type": "WebSite",
-      name: "CSNest",
-    },
-    potentialAction: {
-      "@type": "UseAction",
-      name: "Open in CSV Fixer",
-      target: openUrl,
-    },
-  };
+  // IMPORTANT:
+  // We intentionally do NOT look this up in any registry.
+  // That prevents 404s if an id is missing/mismatched.
+  const openHref = `/app?preset=${encodeURIComponent(id)}`;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
-      <JsonLd data={jsonLd} />
-
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <p className="text-sm text-[var(--muted)]">Preset format</p>
-        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">{preset.name} CSV Fixer</h1>
-        <p className="mt-3 text-sm text-[var(--muted)]">{preset.description}</p>
+
+        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">
+          {name} CSV Fixer
+        </h1>
+
+        <p className="mt-3 text-sm text-[var(--muted)]">
+          Open the fixer with this preset selected. Upload your CSV, let safe fixes run, then review
+          anything flagged before exporting.
+        </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href={openUrl} className="rgb-btn">
+          <Link href={openHref} className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
               Open fixer with this preset
             </span>
@@ -122,33 +64,29 @@ export default function PresetDetailPage({ params }: { params: { id: string } })
             Back to all presets
           </Link>
         </div>
-
-        <div className="mt-4 text-xs text-[var(--muted)]">Category: {preset.category}</div>
       </div>
 
       <section className="mt-10 grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h2 className="text-lg font-semibold text-[var(--text)]">What this preset helps with</h2>
-          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            {useCases.map((x) => (
-              <li key={x}>{x}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h2 className="text-lg font-semibold text-[var(--text)]">How to use</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">What to do</h2>
           <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Open the fixer using the button above</li>
+            <li>Click “Open fixer with this preset”</li>
             <li>Upload your CSV</li>
             <li>Review highlighted issues and apply manual fixes if needed</li>
             <li>Export the cleaned CSV</li>
           </ol>
+        </div>
 
-          <div className="mt-6">
-            <Link href={openUrl} className="rg-btn">
-              Open now
-            </Link>
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+          <h2 className="text-lg font-semibold text-[var(--text)]">Why this won’t 404 anymore</h2>
+          <p className="mt-4 text-sm text-[var(--muted)]">
+            This page no longer depends on a preset registry lookup. It renders for any id and
+            passes that id into the fixer via the query string.
+          </p>
+
+          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+            <div className="text-xs text-[var(--muted)]">Preset id</div>
+            <div className="mt-1 text-sm font-semibold text-[var(--text)] break-all">{id}</div>
           </div>
         </div>
       </section>
