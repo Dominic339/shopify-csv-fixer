@@ -1,4 +1,5 @@
 // src/lib/quota.ts
+
 export type Plan = "free" | "basic" | "advanced";
 
 export type QuotaStatus = {
@@ -8,157 +9,114 @@ export type QuotaStatus = {
   used: number;
   limit: number;
   remaining: number;
+  unlimited?: boolean;
 };
 
-function getMonthKey() {
-  // Use UTC month key to keep consistent with server-side month logic
-  const d = new Date();
+export function getPlanLimits(plan: Plan) {
+  if (plan === "advanced") return { exportsPerMonth: 999999, unlimited: true };
+  if (plan === "basic") return { exportsPerMonth: 50, unlimited: false };
+  return { exportsPerMonth: 3, unlimited: false };
+}
+
+function storageKeyForMonth(monthKey: string) {
+  return `csnest_quota_${monthKey}`;
+}
+
+function getMonthKeyUtc(d = new Date()) {
   const y = d.getUTCFullYear();
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");
   return `${y}-${m}`;
 }
 
-const LOCAL_KEY = "csnest_quota_v1";
-
-function readLocal() {
+function readLocalUsed(monthKey: string) {
   try {
-    const raw = localStorage.getItem(LOCAL_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as { monthKey: string; used: number };
+    const raw = localStorage.getItem(storageKeyForMonth(monthKey));
+    const n = Number(raw ?? "0");
+    return Number.isFinite(n) ? Math.max(0, n) : 0;
   } catch {
-    return null;
+    return 0;
   }
 }
 
-function writeLocal(v: { monthKey: string; used: number }) {
+function writeLocalUsed(monthKey: string, used: number) {
   try {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(v));
+    localStorage.setItem(storageKeyForMonth(monthKey), String(Math.max(0, used)));
   } catch {
     // ignore
   }
 }
 
-export function getLocalQuota(limit: number): QuotaStatus {
-  const monthKey = getMonthKey();
-  const existing = readLocal();
-
-  let used = 0;
-  if (existing && existing.monthKey === monthKey) used = Number(existing.used ?? 0);
-
-  used = Math.max(0, Math.floor(used));
+function localStatus(plan: Plan): QuotaStatus {
+  const monthKey = getMonthKeyUtc();
+  const limits = getPlanLimits(plan);
+  const used = readLocalUsed(monthKey);
+  const limit = limits.exportsPerMonth;
   const remaining = Math.max(0, limit - used);
-
   return {
     signedIn: false,
-    plan: "free",
+    plan,
     monthKey,
     used,
     limit,
     remaining,
+    unlimited: limits.unlimited,
   };
-}
-
-export function consumeLocalExport(limit: number) {
-  const monthKey = getMonthKey();
-  const existing = readLocal();
-
-  let used = 0;
-  if (existing && existing.monthKey === monthKey) used = Number(existing.used ?? 0);
-
-  used = Math.max(0, Math.floor(used)) + 1;
-  writeLocal({ monthKey, used });
-
-  const remaining = Math.max(0, limit - used);
-  return { monthKey, used, remaining, limit };
-}
-
-export function resetLocalQuota() {
-  try {
-    localStorage.removeItem(LOCAL_KEY);
-  } catch {
-    // ignore
-  }
 }
 
 export async function getQuota(): Promise<QuotaStatus> {
   try {
     const r = await fetch("/api/quota/status", { cache: "no-store" });
-    const j = await r.json();
-
-    // Signed out -> pure device quota
-    if (!j?.signedIn) return getLocalQuota(3);
-
-    const plan = (j?.plan ?? "free") as Plan;
-
-    const serverUsed = Number(j?.used ?? 0);
-    const serverLimit = Number(j?.limit ?? 3);
-
-    // IMPORTANT:
-    // Free plan stays device-limited even if signed in, otherwise users can dodge the device limit
-    // by signing in/out (and it also causes UI mismatch).
-    if (plan === "free") {
-      const local = getLocalQuota(3);
-
-      const used = Math.max(serverUsed, local.used);
-      const limit = 3;
-      const remaining = Math.max(0, limit - used);
-
-      return {
-        signedIn: true,
-        plan: "free",
-        monthKey: local.monthKey,
-        used,
-        limit,
-        remaining,
-      };
-    }
-
-    // Basic/Advanced -> server quota
-    const remaining = Number(j?.remaining ?? Math.max(0, serverLimit - serverUsed));
-
-    return {
-      signedIn: true,
-      plan,
-      monthKey: String(j?.monthKey ?? getMonthKey()),
-      used: serverUsed,
-      limit: serverLimit,
-      remaining: Math.max(0, remaining),
-    };
+    if (!r.ok) return localStatus("free");
+    const data = (await r.json()) as QuotaStatus;
+    // If server says not signed in, we still want the local device limit.
+    if (!data?.signedIn) return localStatus("free");
+    return data;
   } catch {
-    // If API fails, fallback to device quota (safe default)
-    return getLocalQuota(3);
+    return localStatus("free");
   }
 }
 
-export async function consumeExport() {
-  // We always call getQuota first so we know if this export should use local vs server logic.
-  const q = await getQuota();
+export async function consumeExport(amount = 1): Promise<QuotaStatus> {
+  // Attempt server first (signed-in users)
+  try {
+    const r = await fetch("/api/quota/consume", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount }),
+    });
 
-  // Advanced should be unlimited and not consume anything
-  if (q.plan === "advanced") return;
-
-  // Free plan is device-limited even when signed in
-  if (q.plan === "free") {
-    const local = getLocalQuota(3);
-    if (local.remaining <= 0) {
-      throw new Error("Free tier limit reached (3 exports this month for this device).");
+    if (r.ok) {
+      return (await r.json()) as QuotaStatus;
     }
-  }
 
-  // Signed-in non-advanced: consume server quota (basic uses server)
-  if (q.signedIn && q.plan !== "free") {
-    const r = await fetch("/api/quota/consume", { method: "POST" });
-    const j = await r.json();
-    if (!r.ok || !j?.ok) {
-      throw new Error(j?.error || "Export quota exceeded");
+    // If not signed in (401), fall back to local device tracking.
+    if (r.status === 401) {
+      const monthKey = getMonthKeyUtc();
+      const plan: Plan = "free";
+      const limits = getPlanLimits(plan);
+      const used = readLocalUsed(monthKey);
+      const nextUsed = used + Math.max(1, Math.min(10, Number(amount || 1)));
+      if (!limits.unlimited && nextUsed > limits.exportsPerMonth) {
+        throw new Error(`Free tier limit reached (${limits.exportsPerMonth} exports this month for this device).`);
+      }
+      writeLocalUsed(monthKey, nextUsed);
+      return localStatus(plan);
     }
-    return;
-  }
 
-  // Signed-in free OR signed-out: use local quota
-  // Signed-in free: also consume local so UI and enforcement always match the banner
-  const localConsume = consumeLocalExport(3);
-  if (localConsume.remaining < 0) {
-    throw new Error("Export quota exceeded");
+    // 403 from server means real quota exceeded
+    const err = await r.json().catch(() => null);
+    throw new Error(err?.message ?? "Monthly export limit reached.");
+  } catch (e) {
+    // If network/server fails, be conservative and use local device tracking.
+    const monthKey = getMonthKeyUtc();
+    const plan: Plan = "free";
+    const limits = getPlanLimits(plan);
+    const used = readLocalUsed(monthKey);
+    const nextUsed = used + Math.max(1, Math.min(10, Number(amount || 1)));
+    if (!limits.unlimited && nextUsed > limits.exportsPerMonth) {
+      throw new Error(`Free tier limit reached (${limits.exportsPerMonth} exports this month for this device).`);
+    }
+    writeLocalUsed(monthKey, nextUsed);
+    return localStatus(plan);
   }
 }
