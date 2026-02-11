@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/app", "/formats", "/account", "/profile", "/login", "/checkout", "/api"],
+        disallow: ["/api", "/account", "/auth", "/checkout", "/login", "/profile"],
       },
     ],
     sitemap: "https://csnest.vercel.app/sitemap.xml",
