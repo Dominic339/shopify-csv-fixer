@@ -323,17 +323,18 @@ export default function AppClient() {
     setEditing(null);
   }
 
-  const autoFixPreviewCount = 8;
-  const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
-  const autoFixRest = autoFixes.slice(autoFixPreviewCount);
-  const autoFixRestCount = Math.max(0, autoFixRest.length);
+    const autoFixPreviewCount = 8;
+    const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
+    const autoFixRest = autoFixes.slice(autoFixPreviewCount);
+    const autoFixRestCount = Math.max(0, autoFixRest.length);
 
-  const used = Number(quota?.used ?? 0);
-  const limit = Number(planLimits?.exportsPerMonth ?? 3);
-  const left = isUnlimited ? null : Math.max(0, limit - used);
+    const used = Number(quota?.used ?? 0);
+    const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
+    // Prefer server-provided remaining when available (and clamp at 0)
+    const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
-  return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
         <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--text)]">
           {errorBanner}
