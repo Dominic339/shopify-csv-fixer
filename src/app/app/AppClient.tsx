@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
@@ -54,6 +55,10 @@ export default function AppClient() {
 
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+
+  // NEW: optional export base name (from query param exportName)
+  // Example: /app?exportName=shopify-products -> shopify-products_fixed.csv
+  const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
   // inline edit state for the preview table
   const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
@@ -118,6 +123,29 @@ export default function AppClient() {
     appliedPresetRef.current = true;
   }, [builtinFormats]);
 
+  // NEW: support exportName via /app?exportName=<base>
+  const appliedExportNameRef = useRef(false);
+  useEffect(() => {
+    if (appliedExportNameRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const qp = new URLSearchParams(window.location.search);
+    const exportName = qp.get("exportName");
+    if (exportName) {
+      setExportBaseName(exportName);
+      appliedExportNameRef.current = true;
+      return;
+    }
+
+    // If not provided, but preset is provided, we can default export name to preset
+    const preset = qp.get("preset");
+    if (preset) {
+      setExportBaseName(preset);
+    }
+
+    appliedExportNameRef.current = true;
+  }, []);
+
   // Keep selected format valid (if a custom format is deleted, fall back)
   useEffect(() => {
     if (allFormats.some((f) => f.id === formatId)) return;
@@ -136,6 +164,7 @@ export default function AppClient() {
         fetch("/api/subscription/status", { cache: "no-store" }).then((r) => r.json()),
       ]);
 
+      // Your quota helper expects a plan argument for getPlanLimits(plan)
       const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
       const limits = getPlanLimits(plan) as PlanLimits;
 
@@ -184,6 +213,25 @@ export default function AppClient() {
       })
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
+
+  // NEW: Validation score + ready badge
+  const validation = useMemo(() => {
+    let error = 0;
+    let warning = 0;
+    let info = 0;
+
+    for (const it of issuesForTable) {
+      if (it.severity === "error") error++;
+      else if (it.severity === "warning") warning++;
+      else info++;
+    }
+
+    // simple scoring model
+    const score = Math.max(0, Math.min(100, 100 - error * 15 - warning * 5 - info * 1));
+    const ready = rows.length > 0 && error === 0;
+
+    return { error, warning, info, score, ready };
+  }, [issuesForTable, rows.length]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -312,7 +360,15 @@ export default function AppClient() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName ? fileName.replace(/\.csv$/i, "") + "_fixed.csv" : "fixed.csv";
+
+      // NEW: named export base overrides fileName
+      const base =
+        (exportBaseName ?? fileName ?? "fixed")
+          .replace(/\.csv$/i, "")
+          .trim() || "fixed";
+
+      a.download = `${base}_fixed.csv`;
+
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -371,6 +427,30 @@ export default function AppClient() {
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
             Pick a format → upload → auto-fix safe issues → export.
           </p>
+
+          {/* NEW: score + badge (only show when rows exist) */}
+          {rows.length > 0 ? (
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
+                Validation score: <span className="font-semibold">{validation.score}</span>/100
+              </span>
+
+              <span
+                className={
+                  "rounded-full border px-3 py-1 font-semibold " +
+                  (validation.ready
+                    ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
+                    : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                }
+              >
+                {validation.ready ? "Ready to import" : "Not ready yet"}
+              </span>
+
+              <span className="text-[color:rgba(var(--muted-rgb),1)]">
+                {validation.error} errors, {validation.warning} warnings
+              </span>
+            </div>
+          ) : null}
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
@@ -476,6 +556,30 @@ export default function AppClient() {
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
+          {/* NEW: show the badge here too when rows exist */}
+          {rows.length > 0 ? (
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
+                Validation score: <span className="font-semibold">{validation.score}</span>/100
+              </span>
+
+              <span
+                className={
+                  "rounded-full border px-3 py-1 font-semibold " +
+                  (validation.ready
+                    ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
+                    : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                }
+              >
+                {validation.ready ? "Ready to import" : "Not ready yet"}
+              </span>
+
+              <span className="text-[color:rgba(var(--muted-rgb),1)]">
+                {validation.error} errors, {validation.warning} warnings, {validation.info} tips
+              </span>
+            </div>
+          ) : null}
+
           <div className="mt-4 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
@@ -565,6 +669,16 @@ export default function AppClient() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Small footer links (keeps internal linking clean) */}
+      <div className="mt-10 flex flex-wrap gap-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+        <Link href="/formats/presets" className="hover:underline">
+          Preset Formats
+        </Link>
+        <Link href="/pricing" className="hover:underline">
+          Pricing
+        </Link>
       </div>
     </div>
   );
