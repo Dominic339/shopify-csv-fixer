@@ -1,10 +1,13 @@
-export type CsvRow = Record<string, string>;
-
 export type CsvIssue = {
   rowIndex: number; // 0-based
   column: string;
   message: string;
   severity: "error" | "warning" | "info";
+
+  // Optional structured metadata for richer UX (tooltips, scoring, fix-all)
+  // Backwards compatible: existing code can ignore these.
+  code?: string;
+  suggestion?: string;
 };
 
 export type CsvFixResult = {
@@ -18,7 +21,7 @@ export type CsvFormat = {
   id: string;
   name: string;
   description: string;
-  category: string;
-  source: "builtin" | "user";
   apply: (headers: string[], rows: CsvRow[]) => CsvFixResult;
 };
+
+export type CsvRow = Record<string, string>;

@@ -1,62 +1,65 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
-type RawIssue = {
-  // New shape (engine)
-  rowIndex?: number; // 0-based
-  column?: string;
+type Severity = "error" | "warning" | "info";
 
-  // Old shape (legacy)
-  row?: number; // 1-based
-  field?: string;
-
-  // Common
-  message: string;
-  suggestion?: string;
-
-  // Some code paths used level instead of severity
-  severity?: "error" | "warning" | "info";
-  level?: "error" | "warning" | "info";
-
-  code?: string;
-};
+type CsvRow = Record<string, string>;
 
 type NormalizedIssue = {
   rowIndex: number; // 0-based (rowIndex < 0 means file-level issue)
   column?: string;
   message: string;
   suggestion?: string;
-  severity: "error" | "warning" | "info";
+  severity: Severity;
+  code?: string;
 };
-
-type CsvRow = Record<string, string>;
 
 type Props = {
   headers: string[];
   rows: CsvRow[];
-  issues: RawIssue[];
+  issues: Array<{
+    rowIndex?: number;
+    row?: number; // legacy 1-based
+    column?: string;
+    field?: string;
+    message: string;
+    severity?: Severity;
+    level?: Severity;
+    suggestion?: string;
+    code?: string;
+  }>;
   onUpdateRow: (rowIndex: number, patch: Partial<CsvRow>) => void;
-
-  // Changing this value clears pinned rows (useful when switching formats)
   resetKey?: string;
+
+  /** Needed for preset-specific tooltip metadata (Shopify, WooCommerce, etc.) */
+  formatId?: string;
 };
 
-type PinnedRow = { rowIndex: number };
+function severityChip(sev: Severity) {
+  const base = "rounded-full px-2 py-0.5 text-xs font-semibold border";
+  if (sev === "error")
+    return (
+      <span className={`${base} border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.10)] text-[var(--text)]`}>
+        Error
+      </span>
+    );
+  if (sev === "warning")
+    return (
+      <span className={`${base} border-[color:rgba(255,200,80,0.35)] bg-[color:rgba(255,200,80,0.12)] text-[var(--text)]`}>
+        Warning
+      </span>
+    );
+  return (
+    <span className={`${base} border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]`}>
+      Info
+    </span>
+  );
+}
 
-export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetKey }: Props) {
-  const [showMode, setShowMode] = useState<"errors" | "warnings" | "all">("errors");
-  const [manualPinnedRows, setManualPinnedRows] = useState<PinnedRow[]>([]);
-
-  // Clear pins when switching formats (or any parent-driven reset)
-  useEffect(() => {
-    if (!resetKey) return;
-    setManualPinnedRows([]);
-    setShowMode("errors");
-  }, [resetKey]);
-
-  // Normalize issues so both old + new formats work
-  const normalizedIssues: NormalizedIssue[] = useMemo(() => {
+export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetKey, formatId }: Props) {
+  const normalized = useMemo<NormalizedIssue[]>(() => {
     return (issues ?? [])
       .map((it) => {
         const rowIndex =
@@ -64,308 +67,183 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
             ? it.rowIndex
             : typeof it.row === "number"
               ? Math.max(0, it.row - 1)
-              : null;
+              : -1;
 
-        if (rowIndex == null) return null;
-
-        const column = (it.column ?? it.field ?? "").toString() || undefined;
-
-        const severity = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+        const column = (it.column ?? it.field ?? "").toString();
+        const severity = (it.severity ?? it.level ?? "error") as Severity;
 
         return {
           rowIndex,
-          column,
+          column: column || undefined,
           message: it.message,
-          suggestion: it.suggestion,
           severity,
+          suggestion: it.suggestion,
+          code: it.code,
         };
       })
-      .filter(Boolean) as NormalizedIssue[];
+      .filter(Boolean);
   }, [issues]);
 
-  // File-level issues (ex: missing required columns) use rowIndex < 0
-  const fileIssues = useMemo(() => {
-    return normalizedIssues.filter((i) => i.rowIndex < 0);
-  }, [normalizedIssues]);
+  const fileIssues = useMemo(() => normalized.filter((x) => x.rowIndex < 0), [normalized]);
+  const rowIssues = useMemo(() => normalized.filter((x) => x.rowIndex >= 0), [normalized]);
 
-  // Only row-scoped issues participate in pinning, cell highlights, and row editing
-  const rowIssuesOnly = useMemo(() => {
-    return normalizedIssues.filter((i) => i.rowIndex >= 0 && i.rowIndex < rows.length);
-  }, [normalizedIssues, rows.length]);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
-  // Auto-pin rows that ever had an issue
   useEffect(() => {
-    const rowsWithIssues = new Set<number>();
-    for (const i of rowIssuesOnly) rowsWithIssues.add(i.rowIndex);
+    setExpandedRow(null);
+  }, [resetKey]);
 
-    if (rowsWithIssues.size === 0) return;
-
-    setManualPinnedRows((prev) => {
-      const next = [...prev];
-      for (const rowIndex of rowsWithIssues) {
-        if (rowIndex < 0 || rowIndex >= rows.length) continue;
-        if (next.some((p) => p.rowIndex === rowIndex)) continue;
-        next.push({ rowIndex });
-      }
-      return next;
-    });
-  }, [rowIssuesOnly, rows.length]);
-
-  // Map issues by row
-  const issuesByRow = useMemo(() => {
-    const map = new Map<number, NormalizedIssue[]>();
-    for (const i of rowIssuesOnly) {
-      if (!map.has(i.rowIndex)) map.set(i.rowIndex, []);
-      map.get(i.rowIndex)!.push(i);
-    }
-    return map;
-  }, [rowIssuesOnly]);
-
-  // Per-cell highlighting
-  const issueByCellSeverity = useMemo(() => {
-    const map = new Map<string, "error" | "warning" | "info">();
-    for (const i of rowIssuesOnly) {
-      if (!i.column) continue;
-      const key = `${i.rowIndex}|||${i.column}`;
-
-      const prev = map.get(key);
-      if (prev === "error") continue;
-      if (prev === "warning" && i.severity === "info") continue;
-
-      map.set(key, i.severity);
-    }
-    return map;
-  }, [rowIssuesOnly]);
-
-  const rowsToShow = useMemo(() => {
-    const set = new Set<number>();
-
-    for (const [rowIndex, rowIssues] of issuesByRow.entries()) {
-      const anyError = rowIssues.some((x) => x.severity === "error");
-      const anyWarning = rowIssues.some((x) => x.severity === "warning");
-
-      if (showMode === "errors" && anyError) set.add(rowIndex);
-      else if (showMode === "warnings" && anyWarning) set.add(rowIndex);
-      else if (showMode === "all") set.add(rowIndex);
-    }
-
-    for (const p of manualPinnedRows) set.add(p.rowIndex);
-
-    return [...set].sort((a, b) => a - b);
-  }, [issuesByRow, manualPinnedRows, showMode]);
-
-  function togglePin(rowIndex: number) {
-    setManualPinnedRows((prev) => {
-      if (prev.some((p) => p.rowIndex === rowIndex))
-        return prev.filter((p) => p.rowIndex !== rowIndex);
-      return [...prev, { rowIndex }];
-    });
-  }
-
-  function rowLabel(rowIndex: number) {
-    return `Row ${rowIndex + 1}`;
-  }
-
-  function cell(value: string | undefined) {
-    return value ?? "";
-  }
-
-  const severityChip = (s: NormalizedIssue["severity"]) => {
-    const cls =
-      s === "error"
-        ? "bg-red-500/15 text-red-300 border-red-500/30"
-        : s === "warning"
-          ? "bg-yellow-500/15 text-yellow-200 border-yellow-500/30"
-          : "bg-blue-500/15 text-blue-200 border-blue-500/30";
-
-    return (
-      <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] ${cls}`}>
-        {s}
-      </span>
-    );
-  };
-
-  function issueBoxClass(sev: NormalizedIssue["severity"]) {
-    if (sev === "error") return "issue-box error";
-    if (sev === "warning") return "issue-box warning";
-    return "issue-box info";
+  function issueBoxClass(sev: Severity) {
+    if (sev === "error") return "border-[color:rgba(255,80,80,0.25)] bg-[color:rgba(255,80,80,0.06)]";
+    if (sev === "warning") return "border-[color:rgba(255,200,80,0.25)] bg-[color:rgba(255,200,80,0.08)]";
+    return "border-[var(--border)] bg-[var(--surface-2)]";
   }
 
   function inputToneClass(rowIndex: number, col: string) {
-    const sev = issueByCellSeverity.get(`${rowIndex}|||${col}`);
-    if (sev === "error") return "input-error";
-    if (sev === "warning") return "input-warning";
-    return "";
+    // highlight cells with issues
+    const sev = rowIssues.find((x) => x.rowIndex === rowIndex && x.column === col)?.severity;
+    if (sev === "error") return "border-[color:rgba(255,80,80,0.35)]";
+    if (sev === "warning") return "border-[color:rgba(255,200,80,0.35)]";
+    return "border-[var(--border)]";
+  }
+
+  function issueTooltip(issue: NormalizedIssue) {
+    const meta = getIssueMeta(formatId, issue.code);
+    if (!meta) return null;
+
+    return (
+      <span className="group relative inline-flex">
+        <span
+          className="ml-2 inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-[11px] text-[var(--muted)]"
+          aria-label="Help"
+        >
+          ?
+        </span>
+
+        <span className="pointer-events-none absolute left-1/2 top-full z-50 hidden w-[320px] -translate-x-1/2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)] shadow-lg group-hover:block">
+          <div className="text-sm font-semibold">{meta.title}</div>
+          <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{meta.explanation}</div>
+
+          <div className="mt-2 font-semibold">Why Shopify rejects it</div>
+          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{meta.whyPlatformCares}</div>
+
+          <div className="mt-2 font-semibold">How to fix</div>
+          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{meta.howToFix}</div>
+
+          {meta.autoFixable ? (
+            <div className="mt-2 rounded-xl border border-[color:rgba(var(--accent-rgb),0.25)] bg-[color:rgba(var(--accent-rgb),0.10)] px-2 py-1 text-[11px]">
+              Auto-fixable (safe)
+            </div>
+          ) : null}
+        </span>
+      </span>
+    );
+  }
+
+  if (!normalized.length) {
+    return (
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
+        No issues detected.
+      </div>
+    );
   }
 
   return (
-    <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-semibold">Manual fixes</h3>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Edit values directly. Only the specific fields with issues are highlighted.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            className={`pill-btn pill-error ${showMode === "errors" ? "is-active" : ""}`}
-            onClick={() => setShowMode("errors")}
-            type="button"
-          >
-            Errors
-          </button>
-          <button
-            className={`pill-btn pill-warning ${showMode === "warnings" ? "is-active" : ""}`}
-            onClick={() => setShowMode("warnings")}
-            type="button"
-          >
-            Warnings
-          </button>
-          <button
-            className={`pill-btn pill-all ${showMode === "all" ? "is-active" : ""}`}
-            onClick={() => setShowMode("all")}
-            type="button"
-          >
-            All
-          </button>
+    <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold text-[var(--text)]">Manual fixes</div>
+        <div className="text-xs text-[var(--muted)]">
+          Click a row to expand and edit fields inline.
         </div>
       </div>
 
       {fileIssues.length ? (
-        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-          <div className="text-sm font-semibold text-[var(--text)]">File issues</div>
+        <div className="mt-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+          <div className="text-sm font-semibold text-[var(--text)]">File-level issues</div>
           <div className="mt-2 space-y-2">
-            {fileIssues
-              .filter((x) =>
-                showMode === "errors"
-                  ? x.severity === "error"
-                  : showMode === "warnings"
-                    ? x.severity === "warning"
-                    : true
-              )
-              .slice(0, 12)
-              .map((x, i) => (
-                <div key={i} className={issueBoxClass(x.severity)}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="text-sm text-[var(--text)]">
-                      {x.column ? <span className="font-semibold">{x.column}: </span> : null}
-                      {x.message}
-                    </div>
-                    {severityChip(x.severity)}
+            {fileIssues.map((x, idx) => (
+              <div
+                key={`file-${idx}`}
+                className={`rounded-2xl border p-3 ${issueBoxClass(x.severity)}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-[var(--text)]">
+                    {x.column ?? "(file)"} {issueTooltip(x)}
                   </div>
+                  {severityChip(x.severity)}
                 </div>
-              ))}
 
-            {fileIssues.length > 12 ? (
-              <div className="text-xs text-[var(--muted)]">+{fileIssues.length - 12} more</div>
-            ) : null}
+                <div className="mt-1 text-sm text-[var(--text)]">
+                  {x.message} {issueTooltip(x)}
+                </div>
+
+                {x.suggestion ? (
+                  <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                    Suggestion: {x.suggestion}
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </div>
         </div>
       ) : null}
 
-      {rowsToShow.length === 0 && fileIssues.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
-          No rows to show yet. Upload a CSV to see issues here.
-        </div>
-      ) : (
-        <div className="mt-6 space-y-4">
-          {rowsToShow.map((rowIndex) => {
-            const rowIssues = issuesByRow.get(rowIndex) ?? [];
-            const row = rows[rowIndex] ?? {};
+      <div className="mt-3 space-y-2">
+        {rowIssues.map((iss, idx) => {
+          const key = `${iss.rowIndex}-${iss.column}-${idx}`;
+          const isOpen = expandedRow === iss.rowIndex;
 
-            const anyError = rowIssues.some((x) => x.severity === "error");
-            const anyWarning = rowIssues.some((x) => x.severity === "warning");
-
-            if (
-              showMode === "errors" &&
-              !anyError &&
-              !manualPinnedRows.some((p) => p.rowIndex === rowIndex)
-            )
-              return null;
-            if (
-              showMode === "warnings" &&
-              !anyWarning &&
-              !manualPinnedRows.some((p) => p.rowIndex === rowIndex)
-            )
-              return null;
-
-            return (
-              <div
-                key={rowIndex}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4"
+          return (
+            <div key={key} className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}>
+              <button
+                type="button"
+                className="w-full text-left"
+                onClick={() => setExpandedRow(isOpen ? null : iss.rowIndex)}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm font-semibold text-[var(--text)]">
-                      {rowLabel(rowIndex)}
-                    </div>
-                    {rowIssues.length ? (
-                      <div className="flex flex-wrap items-center gap-2">
-                        {rowIssues.slice(0, 3).map((x, i) => (
-                          <span key={i}>{severityChip(x.severity)}</span>
-                        ))}
-                        {rowIssues.length > 3 ? (
-                          <span className="text-[10px] text-[var(--muted)]">
-                            +{rowIssues.length - 3} more
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-[var(--muted)]">Pinned</div>
-                    )}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-[var(--text)]">
+                    Row {iss.rowIndex + 1}
+                    {iss.column ? ` · ${iss.column}` : ""} {issueTooltip(iss)}
                   </div>
-
-                  <button
-                    className="pill-btn"
-                    onClick={() => togglePin(rowIndex)}
-                    type="button"
-                    title="Pin or unpin this row"
-                  >
-                    {manualPinnedRows.some((p) => p.rowIndex === rowIndex) ? "Unpin" : "Pin"}
-                  </button>
+                  {severityChip(iss.severity)}
                 </div>
-
-                {rowIssues.length ? (
-                  <div className="mt-3 space-y-2">
-                    {rowIssues.map((iss, i) => (
-                      <div key={i} className={issueBoxClass(iss.severity)}>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="text-xs font-semibold text-[var(--text)]">
-                            {iss.column ? iss.column : "Row issue"}
-                          </div>
-                          {severityChip(iss.severity)}
-                        </div>
-                        <div className="mt-1 text-sm text-[var(--text)]">{iss.message}</div>
-                        {iss.suggestion ? (
-                          <div className="mt-1 text-xs text-[var(--muted)]">{iss.suggestion}</div>
-                        ) : null}
-                      </div>
-                    ))}
+                <div className="mt-1 text-sm text-[var(--text)]">
+                  {iss.message}
+                  {issueTooltip(iss)}
+                </div>
+                {iss.suggestion ? (
+                  <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                    Suggestion: {iss.suggestion}
                   </div>
                 ) : null}
+              </button>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {headers.map((h) => (
-                    <div key={h}>
-                      <div className="mb-1 text-xs font-semibold text-[var(--muted)]">{h}</div>
-                      <input
-                        className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(
-                          rowIndex,
-                          h
-                        )}`}
-                        value={cell(row[h])}
-                        onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
-                      />
-                    </div>
-                  ))}
+              {isOpen ? (
+                <div className="mt-3 grid gap-2 md:grid-cols-2">
+                  {headers.map((h) => {
+                    const v = rows[iss.rowIndex]?.[h] ?? "";
+                    return (
+                      <label key={`${iss.rowIndex}-${h}`} className="block">
+                        <div className="mb-1 text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">
+                          {h}
+                        </div>
+                        <input
+                          className={`w-full rounded-xl border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(
+                            iss.rowIndex,
+                            h
+                          )}`}
+                          value={v}
+                          onChange={(e) => onUpdateRow(iss.rowIndex, { [h]: e.target.value })}
+                        />
+                      </label>
+                    );
+                  })}
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

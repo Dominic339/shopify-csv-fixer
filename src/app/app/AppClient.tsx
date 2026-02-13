@@ -8,8 +8,10 @@ import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
 import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
-import type { CsvFormat } from "@/lib/formats/types";
+import type { CsvFormat, CsvIssue } from "@/lib/formats/types";
 import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats/customUser";
+import { computeValidationBreakdown } from "@/lib/validation/scoring";
+import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 
 type SubStatus = {
   ok: boolean;
@@ -33,14 +35,13 @@ type UiIssue = {
   message: string;
   level?: "error" | "warning" | "info";
   severity?: "error" | "warning" | "info";
+
+  // Structured metadata (optional)
+  code?: string;
+  suggestion?: string;
 };
 
-type CsvIssue = {
-  rowIndex: number; // 0-based
-  column: string;
-  message: string;
-  severity: "error" | "warning" | "info";
-};
+// CsvIssue type now comes from src/lib/formats/types.ts
 
 export default function AppClient() {
   const [headers, setHeaders] = useState<string[]>([]);
@@ -197,41 +198,29 @@ export default function AppClient() {
             ? (it as any).rowIndex
             : typeof it.row === "number"
               ? Math.max(0, it.row - 1)
-              : null;
+              : -1;
 
         const col = (it.column ?? it.field ?? "").toString();
         const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
 
-        if (rowIndex == null || !col) return null;
+        if (rowIndex == null) return null;
 
         return {
           rowIndex,
-          column: col,
+          column: col || "(file)",
           message: it.message,
           severity: sev,
+          code: (it as any).code,
+          suggestion: (it as any).suggestion,
         };
       })
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
-  // NEW: Validation score + ready badge
+  // NEW: Weighted validation scoring + category breakdown
   const validation = useMemo(() => {
-    let error = 0;
-    let warning = 0;
-    let info = 0;
-
-    for (const it of issuesForTable) {
-      if (it.severity === "error") error++;
-      else if (it.severity === "warning") warning++;
-      else info++;
-    }
-
-    // simple scoring model
-    const score = Math.max(0, Math.min(100, 100 - error * 15 - warning * 5 - info * 1));
-    const ready = rows.length > 0 && error === 0;
-
-    return { error, warning, info, score, ready };
-  }, [issuesForTable, rows.length]);
+    return computeValidationBreakdown(issuesForTable, { formatId });
+  }, [issuesForTable, formatId]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -253,7 +242,9 @@ export default function AppClient() {
 
   const rowsWithAnyIssue = useMemo(() => {
     const set = new Set<number>();
-    for (const i of issuesForTable) set.add(i.rowIndex);
+    for (const i of issuesForTable) {
+      if (i.rowIndex >= 0) set.add(i.rowIndex);
+    }
     return [...set].sort((a, b) => a - b);
   }, [issuesForTable]);
 
@@ -278,6 +269,22 @@ export default function AppClient() {
       return next;
     });
   }, []);
+
+  function runFormatOnCurrentData(nextHeaders: string[], nextRows: CsvRow[], additionalFixes: string[] = []) {
+    const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
+    setHeaders(res.fixedHeaders ?? nextHeaders);
+    setRows(res.fixedRows ?? nextRows);
+    setIssues((res.issues as any) ?? []);
+    setAutoFixes([...(additionalFixes ?? []), ...(res.fixesApplied ?? [])]);
+  }
+
+  function handleFixAllBlocking() {
+    // Currently Shopify-only, but the plumbing is reusable for other presets.
+    if (formatId !== "shopify_products") return;
+    const fixed = fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
+    if (!fixed.fixesApplied.length) return;
+    runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
+  }
 
   async function runFormatOnText(format: CsvFormat, csvText: string, name?: string) {
     setBusy(true);
@@ -430,25 +437,57 @@ export default function AppClient() {
 
           {/* NEW: score + badge (only show when rows exist) */}
           {rows.length > 0 ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
-                Validation score: <span className="font-semibold">{validation.score}</span>/100
-              </span>
+            <div className="mt-3 space-y-2 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
+                  Validation score: <span className="font-semibold">{validation.score}</span>/100
+                </span>
 
-              <span
-                className={
-                  "rounded-full border px-3 py-1 font-semibold " +
-                  (validation.ready
-                    ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
-                }
-              >
-                {validation.ready ? "Ready to import" : "Not ready yet"}
-              </span>
+                <span
+                  className={
+                    "rounded-full border px-3 py-1 font-semibold " +
+                    (validation.readyForShopifyImport
+                      ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
+                      : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                  }
+                >
+                  {validation.label}
+                </span>
 
-              <span className="text-[color:rgba(var(--muted-rgb),1)]">
-                {validation.error} errors, {validation.warning} warnings
-              </span>
+                <span className="text-[color:rgba(var(--muted-rgb),1)]">
+                  {validation.counts.errors} errors, {validation.counts.warnings} warnings
+                  {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
+                </span>
+
+                {formatId === "shopify_products" && validation.counts.blockingErrors > 0 ? (
+                  <button
+                    type="button"
+                    className="pill-btn"
+                    onClick={handleFixAllBlocking}
+                    title="Applies safe, deterministic fixes to blocking Shopify issues only."
+                  >
+                    Fix all blocking issues
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
+                  Structure {validation.categories.structure}
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
+                  Variants {validation.categories.variant}
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
+                  Pricing {validation.categories.pricing}
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
+                  Inventory {validation.categories.inventory}
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
+                  SEO {validation.categories.seo}
+                </span>
+              </div>
             </div>
           ) : null}
         </div>
@@ -566,16 +605,16 @@ export default function AppClient() {
               <span
                 className={
                   "rounded-full border px-3 py-1 font-semibold " +
-                  (validation.ready
+                  (validation.readyForShopifyImport
                     ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
                 }
               >
-                {validation.ready ? "Ready to import" : "Not ready yet"}
+                {validation.label}
               </span>
 
               <span className="text-[color:rgba(var(--muted-rgb),1)]">
-                {validation.error} errors, {validation.warning} warnings, {validation.info} tips
+                {validation.counts.errors} errors, {validation.counts.warnings} warnings, {validation.counts.infos} tips
               </span>
             </div>
           ) : null}
@@ -666,6 +705,7 @@ export default function AppClient() {
               rows={rows}
               onUpdateRow={onUpdateRow}
               resetKey={formatId}
+              formatId={formatId}
             />
           </div>
         </div>
