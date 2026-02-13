@@ -1,27 +1,17 @@
-export type CsvIssue = {
-  rowIndex: number; // 0-based
-  column: string;
-  message: string;
-  severity: "error" | "warning" | "info";
+import type { CsvFormat } from "../types";
 
-  // Optional structured metadata for richer UX (tooltips, scoring, fix-all)
-  // Backwards compatible: existing code can ignore these.
-  code?: string;
-  suggestion?: string;
+export const generalFormat: CsvFormat = {
+  id: "general_csv",
+  name: "General CSV",
+  description: "Light cleanup and a clean export. No platform-specific rules.",
+  apply: (headers, rows) => {
+    // Universal cleanup is applied in the engine for ALL formats.
+    // This format intentionally does not add extra rules.
+    return {
+      fixedHeaders: headers,
+      fixedRows: rows,
+      issues: [],
+      fixesApplied: [],
+    };
+  },
 };
-
-export type CsvFixResult = {
-  fixedHeaders: string[];
-  fixedRows: CsvRow[];
-  issues: CsvIssue[];
-  fixesApplied: string[];
-};
-
-export type CsvFormat = {
-  id: string;
-  name: string;
-  description: string;
-  apply: (headers: string[], rows: CsvRow[]) => CsvFixResult;
-};
-
-export type CsvRow = Record<string, string>;
