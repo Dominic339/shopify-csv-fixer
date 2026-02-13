@@ -6,8 +6,6 @@ export type CsvIssue = {
   message: string;
   severity: "error" | "warning" | "info";
 
-  // Optional structured metadata used by the Shopify optimizer + tooltips/scoring.
-  // Safe: existing UI/logic can ignore these.
   code?: string;
   suggestion?: string;
 };
@@ -19,7 +17,6 @@ export type CsvFixResult = {
   fixesApplied: string[];
 };
 
-// Categories are useful for preset directory grouping + SEO clusters.
 export type CsvFormatCategory =
   | "General"
   | "Ecommerce"
@@ -29,14 +26,13 @@ export type CsvFormatCategory =
   | "Shipping"
   | "Support";
 
-// Keep compatibility with your older "user" label.
-// (Some parts of the app may still call this "user" rather than "custom".)
 export type CsvFormatSource = "builtin" | "user";
 
 export type CsvFormat = {
   id: string;
   name: string;
   description: string;
+
   category: CsvFormatCategory;
   source: CsvFormatSource;
 
