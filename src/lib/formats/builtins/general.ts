@@ -1,14 +1,12 @@
-import type { CsvFormat } from "../types";
+import type { CsvFormat, CsvRow } from "../types";
 
-export const generalFormat: CsvFormat = {
+export const generalCsvFormat: CsvFormat = {
   id: "general_csv",
   name: "General CSV",
   description: "Light cleanup and a clean export. No platform-specific rules.",
   category: "General",
   source: "builtin",
-  apply: (headers, rows) => {
-    // Universal cleanup is applied in the engine for ALL formats.
-    // This format intentionally does not add extra rules.
+  apply: (headers: string[], rows: CsvRow[]) => {
     return {
       fixedHeaders: headers,
       fixedRows: rows,

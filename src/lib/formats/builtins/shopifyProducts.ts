@@ -1,13 +1,14 @@
-import type { CsvFormat } from "../types";
+import type { CsvFormat, CsvRow } from "../types";
 import { validateAndFixShopifyOptimizer } from "@/lib/shopifyOptimizer";
 
 export const shopifyProductsFormat: CsvFormat = {
   id: "shopify_products",
   name: "Shopify Import Optimizer",
-  description:
-    "Strict Shopify schema validation + safe auto-fixes for products, variants, images, pricing, inventory, and SEO.",
+  description: "Strict Shopify schema validation + safe auto-fixes for products, variants, images, pricing, inventory, and SEO.",
+  category: "Ecommerce",
+  source: "builtin",
 
-  apply(headers, rows) {
+  apply: (headers: string[], rows: CsvRow[]) => {
     const res = validateAndFixShopifyOptimizer(headers, rows);
 
     const issues = (res.issues ?? []).map((i: any) => ({

@@ -1,17 +1,44 @@
-import type { CsvFormat } from "../types";
+export type CsvRow = Record<string, string>;
 
-export const generalFormat: CsvFormat = {
-  id: "general_csv",
-  name: "General CSV",
-  description: "Light cleanup and a clean export. No platform-specific rules.",
-  apply: (headers, rows) => {
-    // Universal cleanup is applied in the engine for ALL formats.
-    // This format intentionally does not add extra rules.
-    return {
-      fixedHeaders: headers,
-      fixedRows: rows,
-      issues: [],
-      fixesApplied: [],
-    };
-  },
+export type CsvIssue = {
+  rowIndex: number; // 0-based, use -1 for file-level issues
+  column: string;
+  message: string;
+  severity: "error" | "warning" | "info";
+
+  // Optional structured metadata used by the Shopify optimizer + tooltips/scoring.
+  // Safe: existing UI/logic can ignore these.
+  code?: string;
+  suggestion?: string;
+};
+
+export type CsvFixResult = {
+  fixedHeaders: string[];
+  fixedRows: CsvRow[];
+  issues: CsvIssue[];
+  fixesApplied: string[];
+};
+
+// Categories are useful for preset directory grouping + SEO clusters.
+export type CsvFormatCategory =
+  | "General"
+  | "Ecommerce"
+  | "Marketing"
+  | "CRM"
+  | "Accounting"
+  | "Shipping"
+  | "Support";
+
+// Keep compatibility with your older "user" label.
+// (Some parts of the app may still call this "user" rather than "custom".)
+export type CsvFormatSource = "builtin" | "user";
+
+export type CsvFormat = {
+  id: string;
+  name: string;
+  description: string;
+  category: CsvFormatCategory;
+  source: CsvFormatSource;
+
+  apply: (headers: string[], rows: CsvRow[]) => CsvFixResult;
 };
