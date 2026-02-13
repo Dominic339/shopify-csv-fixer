@@ -6,6 +6,8 @@ export type CsvIssue = {
   message: string;
   severity: "error" | "warning" | "info";
 
+  // Optional structured metadata used by optimizer/scoring/tooltips/fix-all.
+  // Backwards compatible: existing UI/logic can ignore these.
   code?: string;
   suggestion?: string;
 };
@@ -17,6 +19,15 @@ export type CsvFixResult = {
   fixesApplied: string[];
 };
 
+/**
+ * Categories are used for:
+ * - Preset directory grouping
+ * - SEO cluster pages (Ecommerce/CRM/etc.)
+ * - Future pricing gates by category
+ *
+ * "Custom" is for user-defined formats and should be excluded
+ * from SEO preset landing generation.
+ */
 export type CsvFormatCategory =
   | "General"
   | "Ecommerce"
@@ -24,7 +35,8 @@ export type CsvFormatCategory =
   | "CRM"
   | "Accounting"
   | "Shipping"
-  | "Support";
+  | "Support"
+  | "Custom";
 
 export type CsvFormatSource = "builtin" | "user";
 
