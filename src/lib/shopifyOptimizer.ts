@@ -22,24 +22,38 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   // Also: BaseIssue may not include code/suggestion, so we push as any.
   const issues: BaseIssue[] = [...(base.issues ?? [])];
 
-  // Helper columns (exact Shopify headers)
+    // Helper columns (supports both legacy + new Shopify template)
   const col = (name: string) => fixedHeaders.find((h) => h.toLowerCase() === name.toLowerCase());
+  const colAny = (...names: string[]) => names.map(col).find(Boolean);
 
-  const cHandle = col("Handle");
+  const cHandle = colAny("Handle", "URL handle");
   const cTitle = col("Title");
   const cVendor = col("Vendor");
   const cStatus = col("Status");
-  const cPublished = col("Published");
-  const cPrice = col("Variant Price");
-  const cCompareAt = col("Variant Compare At Price");
+  const cPublished = colAny("Published", "Published on online store");
+  const cPrice = colAny("Variant Price", "Price");
+  const cCompareAt = colAny("Variant Compare At Price", "Compare-at price");
   const cInvPolicy = col("Variant Inventory Policy");
-  const cImageSrc = col("Image Src");
-  const cSeoTitle = col("SEO Title");
-  const cSeoDesc = col("SEO Description");
-  const cBody = col("Body (HTML)");
+  const cContinueSelling = col("Continue selling when out of stock");
+  const cInventoryQty = colAny("Variant Inventory Qty", "Inventory quantity");
+  const cImageSrc = colAny("Image Src", "Product image URL");
+  const cImagePos = colAny("Image Position", "Image position");
+  const cSeoTitle = colAny("SEO Title", "SEO title");
+  const cSeoDesc = colAny("SEO Description", "SEO description");
+  const cBody = colAny("Body (HTML)", "Description");
 
-  const optNameCols = [col("Option1 Name"), col("Option2 Name"), col("Option3 Name")].filter(Boolean) as string[];
-  const optValCols = [col("Option1 Value"), col("Option2 Value"), col("Option3 Value")].filter(Boolean) as string[];
+  const optNameCols = [
+    colAny("Option1 Name", "Option1 name"),
+    colAny("Option2 Name", "Option2 name"),
+    colAny("Option3 Name", "Option3 name"),
+  ].filter(Boolean) as string[];
+
+  const optValCols = [
+    colAny("Option1 Value", "Option1 value"),
+    colAny("Option2 Value", "Option2 value"),
+    colAny("Option3 Value", "Option3 value"),
+  ].filter(Boolean) as string[];
+
 
   function add(issue: {
     row: number;
@@ -204,7 +218,7 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
         add({
           row: i + 1,
           column: cPrice,
-          message: `Variant Price is not a valid number ("${priceRaw}").`,
+          message: `Price is not a valid number ("${priceRaw}").`,
           severity: "error",
           code: "shopify/invalid_numeric_price",
           suggestion: "Use plain numbers like 19.99 (no currency symbols).",
@@ -215,7 +229,7 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
         add({
           row: i + 1,
           column: cCompareAt,
-          message: `Variant Compare At Price is not a valid number ("${compareRaw}").`,
+          message: `Compare-at price is not a valid number ("${compareRaw}").`,
           severity: "error",
           code: "shopify/invalid_numeric_price",
           suggestion: "Use plain numbers like 29.99 (no currency symbols).",
