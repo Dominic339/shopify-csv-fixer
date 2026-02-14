@@ -1,10 +1,20 @@
 import type { CsvIssue, CsvRow } from "@/lib/formats/types";
 import { SHOPIFY_ISSUE_META } from "./issueMetaShopify";
 
+export type FixAllSummary = {
+  /** Number of blocking issues that were eligible for Fix All (autoFixable + blocking). */
+  autoFixableBlockingFound: number;
+  /** Number of successful fix operations applied (best-effort). */
+  fixesAppliedCount: number;
+  /** Count of fixes grouped by issue code. */
+  fixedByCode: Record<string, number>;
+};
+
 export type FixAllResult = {
   fixedHeaders: string[];
   fixedRows: CsvRow[];
   fixesApplied: string[];
+  summary: FixAllSummary;
 };
 
 function getStr(r: CsvRow, col: string) {
@@ -27,12 +37,23 @@ function setStr(r: CsvRow, col: string, value: string) {
  */
 export function fixAllShopifyBlocking(headers: string[], rows: CsvRow[], issues: CsvIssue[]): FixAllResult {
   const fixesApplied: string[] = [];
+  const fixedByCode: Record<string, number> = {};
 
-  const fixedHeaders = [...headers];
-  const fixedRows: CsvRow[] = rows.map((r) => ({ ...r }));
+  const fixedHeaders = [...(headers ?? [])];
+  const fixedRows: CsvRow[] = (rows ?? []).map((r) => ({ ...r }));
+
+  // Count how many blockers are eligible
+  const autoFixableBlockingFound = issues.filter((i) => {
+    if (i.severity !== "error") return false;
+    const meta = SHOPIFY_ISSUE_META[i.code ?? ""];
+    return Boolean(meta?.blocking && meta?.autoFixable);
+  }).length;
+
+  function bump(code: string) {
+    fixedByCode[code] = (fixedByCode[code] ?? 0) + 1;
+  }
 
   // 1) Add missing required headers safely (blank values)
-  // We detect these via issues with code shopify/missing_required_header
   const missingHeaderIssues = issues.filter((i) => i.code === "shopify/missing_required_header");
   for (const i of missingHeaderIssues) {
     const missing = (i.column ?? "").trim();
@@ -44,6 +65,7 @@ export function fixAllShopifyBlocking(headers: string[], rows: CsvRow[], issues:
         if (r[missing] == null) r[missing] = "";
       }
       fixesApplied.push(`Added missing required column header: ${missing}`);
+      bump(i.code ?? "shopify/missing_required_header");
     }
   }
 
@@ -69,11 +91,16 @@ export function fixAllShopifyBlocking(headers: string[], rows: CsvRow[], issues:
     if (code === "shopify/invalid_boolean_published" && colPublished) {
       const raw = getStr(row, colPublished).trim().toLowerCase();
       const next =
-        raw === "true" || raw === "1" || raw === "yes" || raw === "y" ? "TRUE" : raw === "false" || raw === "0" || raw === "no" || raw === "n" ? "FALSE" : null;
+        raw === "true" || raw === "1" || raw === "yes" || raw === "y"
+          ? "TRUE"
+          : raw === "false" || raw === "0" || raw === "no" || raw === "n"
+            ? "FALSE"
+            : null;
 
       if (next) {
         setStr(row, colPublished, next);
         fixesApplied.push(`Row ${issue.rowIndex + 1}: Normalized Published → ${next}`);
+        bump(code);
       }
       continue;
     }
@@ -84,16 +111,18 @@ export function fixAllShopifyBlocking(headers: string[], rows: CsvRow[], issues:
       const next = raw.includes("deny") ? "deny" : raw.includes("continue") ? "continue" : "deny";
       setStr(row, colInvPolicy, next);
       fixesApplied.push(`Row ${issue.rowIndex + 1}: Normalized Variant Inventory Policy → ${next}`);
+      bump(code);
       continue;
     }
 
-    // Status normalization (lowercase if it becomes valid)
+    // Status normalization
     if (code === "shopify/invalid_status" && colStatus) {
       const raw = getStr(row, colStatus).trim().toLowerCase();
       const allowed = new Set(["active", "draft", "archived"]);
       if (allowed.has(raw)) {
         setStr(row, colStatus, raw);
         fixesApplied.push(`Row ${issue.rowIndex + 1}: Normalized Status → ${raw}`);
+        bump(code);
       }
       continue;
     }
@@ -105,17 +134,26 @@ export function fixAllShopifyBlocking(headers: string[], rows: CsvRow[], issues:
 
       const raw = getStr(row, col);
       const cleaned = raw.replace(/[$,]/g, "").trim();
-
-      // only apply if parseable as a number after cleanup
       const num = Number(cleaned);
+
       if (Number.isFinite(num)) {
         const normalized = String(num);
         setStr(row, col, normalized);
         fixesApplied.push(`Row ${issue.rowIndex + 1}: Normalized ${col} → ${normalized}`);
+        bump(code);
       }
       continue;
     }
   }
 
-  return { fixedHeaders, fixedRows, fixesApplied };
+  return {
+    fixedHeaders,
+    fixedRows,
+    fixesApplied,
+    summary: {
+      autoFixableBlockingFound,
+      fixesAppliedCount: fixesApplied.length,
+      fixedByCode,
+    },
+  };
 }

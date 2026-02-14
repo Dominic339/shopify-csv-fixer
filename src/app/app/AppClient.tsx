@@ -13,6 +13,10 @@ import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats
 import { computeValidationBreakdown } from "@/lib/validation/scoring";
 import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 
+// NEW Phase 1 helpers
+import { computeReadinessSummary } from "@/lib/validation/readiness";
+import { buildScoreNotes } from "@/lib/validation/scoreNotes";
+
 type SubStatus = {
   ok: boolean;
   plan?: "free" | "basic" | "advanced";
@@ -77,6 +81,12 @@ export default function AppClient() {
 
   // Custom formats can change during the session (import/save/delete)
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
+
+  // Phase 1: “Jump to issues”
+  const issuesPanelRef = useRef<HTMLDivElement | null>(null);
+
+  // Phase 1: show last “Fix All” audit snippet
+  const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
@@ -217,10 +227,19 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
-  // NEW: Weighted validation scoring + category breakdown
+  // Weighted validation scoring + category breakdown
   const validation = useMemo(() => {
     return computeValidationBreakdown(issuesForTable, { formatId });
   }, [issuesForTable, formatId]);
+
+  // Phase 1: readiness and score notes (Shopify UI polish)
+  const readiness = useMemo(() => {
+    return computeReadinessSummary(issuesForTable, formatId);
+  }, [issuesForTable, formatId]);
+
+  const scoreNotes = useMemo(() => {
+    return buildScoreNotes(validation as any, issuesForTable, formatId);
+  }, [validation, issuesForTable, formatId]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -281,8 +300,12 @@ export default function AppClient() {
   function handleFixAllBlocking() {
     // Currently Shopify-only, but the plumbing is reusable for other presets.
     if (formatId !== "shopify_products") return;
+
     const fixed = fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
     if (!fixed.fixesApplied.length) return;
+
+    setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
+
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
 
@@ -308,6 +331,8 @@ export default function AppClient() {
       setAutoFixes(res.fixesApplied ?? []);
       if (typeof name === "string") setFileName(name);
 
+      setLastFixAll(null);
+
       await refreshQuotaAndPlan();
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Failed to process CSV");
@@ -330,6 +355,7 @@ export default function AppClient() {
       setIssues([]);
       setAutoFixes([]);
       setEditing(null);
+      setLastFixAll(null);
 
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
@@ -347,6 +373,7 @@ export default function AppClient() {
     setIssues([]);
     setAutoFixes([]);
     setEditing(null);
+    setLastFixAll(null);
 
     if (!lastUploadedText || !activeFormat) return;
 
@@ -420,6 +447,15 @@ export default function AppClient() {
   // Prefer server-provided remaining when available (and clamp at 0)
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
+  // Phase 1: smart Fix All label + disable when no safe blockers
+  const fixAllLabel =
+    readiness.autoFixableBlockingErrors > 0
+      ? `Fix ${readiness.autoFixableBlockingErrors} auto-fixable blockers`
+      : "Fix all blocking issues";
+
+  const fixAllDisabled =
+    formatId !== "shopify_products" || readiness.autoFixableBlockingErrors === 0 || busy || rows.length === 0;
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
@@ -435,7 +471,7 @@ export default function AppClient() {
             Pick a format → upload → auto-fix safe issues → export.
           </p>
 
-          {/* NEW: score + badge (only show when rows exist) */}
+          {/* score + badge (only show when rows exist) */}
           {rows.length > 0 ? (
             <div className="mt-3 space-y-2 text-sm">
               <div className="flex flex-wrap items-center gap-2">
@@ -464,12 +500,100 @@ export default function AppClient() {
                     type="button"
                     className="pill-btn"
                     onClick={handleFixAllBlocking}
-                    title="Applies safe, deterministic fixes to blocking Shopify issues only."
+                    disabled={fixAllDisabled}
+                    title={
+                      fixAllDisabled
+                        ? "No blocking issues are safely auto-fixable. Review the manual blockers in the Issues list."
+                        : "Applies safe, deterministic fixes to blocking Shopify issues only."
+                    }
+                    style={fixAllDisabled ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
                   >
-                    Fix all blocking issues
+                    {fixAllLabel}
                   </button>
                 ) : null}
               </div>
+
+              {/* Phase 1: Shopify readiness summary */}
+              {formatId === "shopify_products" ? (
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-[260px]">
+                      <div className="text-sm font-semibold text-[var(--text)]">
+                        {validation.readyForShopifyImport ? "🟢 Ready for Shopify Import" : "Not ready for Shopify Import"}
+                      </div>
+                      <div className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                        {validation.readyForShopifyImport
+                          ? "No blocking issues detected. Exporting should import cleanly."
+                          : "Blocking issues are preventing a clean import. Fix blockers to safely import."}
+                      </div>
+
+                      {!validation.readyForShopifyImport ? (
+                        <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                          <div className="font-semibold text-[var(--text)]">Top blockers</div>
+                          <ul className="mt-1 list-disc pl-5">
+                            {readiness.blockingGroups.slice(0, 3).map((g) => (
+                              <li key={g.code}>
+                                <span className="font-semibold text-[var(--text)]">{g.title}</span>{" "}
+                                <span className="text-[color:rgba(var(--muted-rgb),1)]">({g.count})</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              className="rg-btn"
+                              onClick={() =>
+                                issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                              }
+                            >
+                              Jump to issues
+                            </button>
+
+                            <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                              Fixable blockers:{" "}
+                              <span className="font-semibold text-[var(--text)]">{readiness.autoFixableBlockingErrors}</span>
+                            </span>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {lastFixAll ? (
+                        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+                          <div className="text-sm font-semibold text-[var(--text)]">Last Fix All</div>
+                          <ul className="mt-2 list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                            {lastFixAll.applied.slice(0, 5).map((t, idx) => (
+                              <li key={idx}>{t}</li>
+                            ))}
+                            {lastFixAll.applied.length > 5 ? (
+                              <li>…and {lastFixAll.applied.length - 5} more</li>
+                            ) : null}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="min-w-[240px] rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                      <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                        {scoreNotes.map((n) => (
+                          <div
+                            key={n.key}
+                            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2"
+                            title={n.note}
+                          >
+                            <div className="font-semibold text-[var(--text)]">
+                              {n.label}{" "}
+                              <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
+                            </div>
+                            <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
               <div className="flex flex-wrap items-center gap-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
                 <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
@@ -589,13 +713,13 @@ export default function AppClient() {
           ) : null}
         </div>
 
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text)]">Issues</h2>
           <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          {/* NEW: show the badge here too when rows exist */}
+          {/* show the badge here too when rows exist */}
           {rows.length > 0 ? (
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
               <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
