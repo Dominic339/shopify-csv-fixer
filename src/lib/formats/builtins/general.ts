@@ -1,3 +1,4 @@
+// src/lib/formats/builtins/general.ts
 import type { CsvFormat, CsvRow } from "../types";
 
 export const generalCsvFormat: CsvFormat = {
@@ -8,8 +9,8 @@ export const generalCsvFormat: CsvFormat = {
   source: "builtin",
   apply: (headers: string[], rows: CsvRow[]) => {
     return {
-      fixedHeaders: headers,
-      fixedRows: rows,
+      fixedHeaders: headers ?? [],
+      fixedRows: rows ?? [],
       issues: [],
       fixesApplied: [],
     };

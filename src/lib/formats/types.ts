@@ -1,3 +1,5 @@
+// src/lib/formats/types.ts
+
 export type CsvRow = Record<string, string>;
 
 export type CsvIssue = {
@@ -6,8 +8,11 @@ export type CsvIssue = {
   message: string;
   severity: "error" | "warning" | "info";
 
-  // Optional structured metadata used by optimizer/scoring/tooltips/fix-all.
-  // Backwards compatible: existing UI/logic can ignore these.
+  // Optional structured metadata used by:
+  // - tooltips (plain English explanations)
+  // - scoring category mapping
+  // - fix-all eligibility
+  // Safe: older code can ignore these.
   code?: string;
   suggestion?: string;
 };
@@ -21,12 +26,11 @@ export type CsvFixResult = {
 
 /**
  * Categories are used for:
- * - Preset directory grouping
+ * - Grouping presets in UI
  * - SEO cluster pages (Ecommerce/CRM/etc.)
  * - Future pricing gates by category
  *
- * "Custom" is for user-defined formats and should be excluded
- * from SEO preset landing generation.
+ * "Custom" is for user-defined formats and should be excluded from SEO preset landing generation.
  */
 export type CsvFormatCategory =
   | "General"

@@ -1,3 +1,4 @@
+// src/lib/formats/builtins/packs.ts
 import type { CsvFixResult, CsvFormat, CsvFormatCategory, CsvRow, CsvIssue } from "../types";
 
 type FormatSpec = {
@@ -7,9 +8,6 @@ type FormatSpec = {
   category: CsvFormatCategory;
 
   expectedHeaders: string[];
-
-  // These are “required fields” for the format. If a column is missing in the upload,
-  // we still include it in the output template and generate row issues so the user can fill it in.
   requiredHeaders: string[];
 
   emailHeaders?: string[];
@@ -33,22 +31,17 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
     source: "builtin",
 
     apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
-      // Universal cleanup runs in the engine for ALL formats:
-      // Here we only do mapping to expected headers + validation issues.
-
       const inHeaders = headers ?? [];
       const inRows = rows ?? [];
 
       const issues: CsvIssue[] = [];
       const fixesApplied: string[] = [];
 
-      // Map expected headers to actual headers (case-insensitive match)
       const actualByNorm = new Map<string, string>();
       for (const h of inHeaders) actualByNorm.set(normHeader(h), h);
 
       const fixedHeaders = [...spec.expectedHeaders];
 
-      // Build rows with exactly the expected headers
       const fixedRows: CsvRow[] = inRows.map((r) => {
         const out: CsvRow = {};
         for (const expected of spec.expectedHeaders) {
@@ -73,13 +66,12 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
         }
       }
 
-      // Row-level: required field blank (cap to avoid huge issue lists)
+      // Row-level required blanks (cap)
       const MAX_ROW_ISSUES = 800;
       let rowIssueCount = 0;
 
       for (let i = 0; i < fixedRows.length && rowIssueCount < MAX_ROW_ISSUES; i++) {
         const row = fixedRows[i];
-
         for (const required of spec.requiredHeaders) {
           const v = row?.[required];
           if (isBlank(v)) {
@@ -97,10 +89,9 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
         }
       }
 
-      // Validators: email columns
+      // Email validators
       if (spec.emailHeaders?.length) {
         const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
-
         for (let i = 0; i < fixedRows.length; i++) {
           for (const col of spec.emailHeaders) {
             const v = String(fixedRows[i]?.[col] ?? "").trim();
@@ -112,23 +103,21 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
                 severity: "warning",
                 message: `Invalid email format: "${v}".`,
                 code: `${spec.id}/invalid_email`,
-                suggestion: "Fix the email formatting (example: name@domain.com).",
+                suggestion: `Fix the email formatting (example: name@domain.com).`,
               });
             }
           }
         }
       }
 
-      // Validators: numeric columns
+      // Numeric validators
       if (spec.numericHeaders?.length) {
         for (let i = 0; i < fixedRows.length; i++) {
           for (const col of spec.numericHeaders) {
             const raw = String(fixedRows[i]?.[col] ?? "").trim();
             if (!raw) continue;
-
             const cleaned = raw.replace(/[$,]/g, "").trim();
             const n = Number(cleaned);
-
             if (!Number.isFinite(n)) {
               issues.push({
                 rowIndex: i,
@@ -136,24 +125,19 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
                 severity: "warning",
                 message: `Not a valid number: "${raw}".`,
                 code: `${spec.id}/invalid_number`,
-                suggestion: "Use a plain numeric value (no currency symbols).",
+                suggestion: `Use a plain numeric value (no currency symbols).`,
               });
             }
           }
         }
       }
 
-      return {
-        fixedHeaders,
-        fixedRows,
-        issues,
-        fixesApplied,
-      };
+      return { fixedHeaders, fixedRows, issues, fixesApplied };
     },
   };
 }
 
-// Ecommerce / marketplaces
+// Ecommerce
 export const formatPackEcommerce: CsvFormat[] = [
   buildSimpleFormat({
     id: "woocommerce_products",
@@ -202,7 +186,7 @@ export const formatPackEcommerce: CsvFormat[] = [
   }),
 ];
 
-// Marketing / ads
+// Marketing
 export const formatPackMarketing: CsvFormat[] = [
   buildSimpleFormat({
     id: "mailchimp_contacts",
@@ -273,7 +257,7 @@ export const formatPackCrm: CsvFormat[] = [
   }),
 ];
 
-// Accounting / finance
+// Accounting
 export const formatPackAccounting: CsvFormat[] = [
   buildSimpleFormat({
     id: "quickbooks_transactions",
