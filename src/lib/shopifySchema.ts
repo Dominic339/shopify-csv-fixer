@@ -216,6 +216,27 @@ export function isValidShopifyBool(input: string): boolean {
   return s === "true" || s === "false";
 }
 
+// Shopify "Continue selling when out of stock" is an inventory policy: deny | continue
+export function normalizeShopifyInventoryPolicy(input: string): string {
+  const s = String(input ?? "").trim().toLowerCase();
+  if (!s) return "";
+
+  // Accept canonical values
+  if (s === "deny" || s === "continue") return s;
+
+  // Common boolean-ish inputs: map to Shopify policy
+  if (s === "true" || s === "t" || s === "yes" || s === "y" || s === "1") return "continue";
+  if (s === "false" || s === "f" || s === "no" || s === "n" || s === "0") return "deny";
+
+  // Keep original if ambiguous (validator will flag)
+  return String(input ?? "").trim();
+}
+
+export function isValidShopifyInventoryPolicy(input: string): boolean {
+  const s = String(input ?? "").trim().toLowerCase();
+  return s === "deny" || s === "continue";
+}
+
 export function parseShopifyMoney(input: string): number | null {
   const raw = String(input ?? "").trim();
   if (!raw) return null;

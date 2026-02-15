@@ -5,6 +5,8 @@ import {
   slugifyShopifyHandle,
   normalizeShopifyBool,
   isValidShopifyBool,
+  normalizeShopifyInventoryPolicy,
+  isValidShopifyInventoryPolicy,
   parseShopifyMoney,
   formatShopifyMoney,
   isHttpUrl,
@@ -188,28 +190,22 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
+    // Shopify expects an inventory policy here: deny | continue
     const cs = get(r, cContinue).trim();
     if (cs) {
-      const lower = cs.toLowerCase();
-      if (lower === "continue" || lower === "deny") {
-        const mapped = lower === "continue" ? "true" : "false";
-        set(r, cContinue, mapped);
-        fixesApplied.push(`Mapped legacy inventory policy "${cs}" to Continue selling = "${mapped}" on row ${row}`);
-      } else {
-        const norm = normalizeShopifyBool(cs);
-        if (norm !== cs) {
-          set(r, cContinue, norm);
-          fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
-        }
+      const norm = normalizeShopifyInventoryPolicy(cs);
+      if (norm !== cs) {
+        set(r, cContinue, norm);
+        fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
       }
-      if (!isValidShopifyBool(get(r, cContinue))) {
+      if (!isValidShopifyInventoryPolicy(get(r, cContinue))) {
         issues.push({
           severity: "error",
-          code: "shopify/invalid_boolean_continue_selling",
+          code: "shopify/invalid_inventory_policy",
           row,
           column: cContinue,
-          message: `Row ${row}: Continue selling when out of stock must be true or false (got "${cs}").`,
-          suggestion: `Change to "true" or "false".`,
+          message: `Row ${row}: Continue selling when out of stock must be "deny" or "continue" (got "${cs}").`,
+          suggestion: `Use "deny" (stop selling) or "continue" (allow oversell).`,
         });
       }
     }
@@ -261,7 +257,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     if (p != null && c != null && c > 0 && p > 0 && c < p) {
       issues.push({
         severity: "warning",
-        code: "shopify/compare_at_less_than_price",
+        code: "shopify/compare_at_lt_price",
         row,
         column: cCompare,
         message: `Row ${row}: Compare-at price (${get(r, cCompare)}) is less than Price (${get(r, cPrice)}).`,
@@ -284,7 +280,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       } else if (n < 0) {
         issues.push({
           severity: "warning",
-          code: "shopify/negative_inventory_qty",
+          code: "shopify/negative_inventory",
           row,
           column: cInvQty,
           message: `Row ${row}: Inventory quantity is negative (${invRaw}).`,
@@ -387,8 +383,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       byHandle.set(h, list);
     }
   }
-
-  // 4) Variant grouping + duplicate handle sanity (FIXED)
+    // 4) Variant grouping + duplicate handle sanity (FIXED)
   for (const [handle, idxs] of byHandle.entries()) {
     if (idxs.length <= 1) continue;
 
