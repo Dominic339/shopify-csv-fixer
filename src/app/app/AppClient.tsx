@@ -61,6 +61,7 @@ export default function AppClient() {
 
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
+  // inline edit state for the preview table
   const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
@@ -70,11 +71,13 @@ export default function AppClient() {
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
 
+  // “Jump to issues”
   const issuesPanelRef = useRef<HTMLDivElement | null>(null);
 
+  // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
-  // ✅ Pinned rows = Manual fixes worklist
+  // ✅ Pinned rows = the "Manual fixes" worklist
   const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
 
   function refreshCustomFormats() {
@@ -92,6 +95,7 @@ export default function AppClient() {
 
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
+  // Support selecting a preset via /app?preset=<formatId>
   const appliedPresetRef = useRef(false);
   useEffect(() => {
     if (appliedPresetRef.current) return;
@@ -113,6 +117,7 @@ export default function AppClient() {
     appliedPresetRef.current = true;
   }, [builtinFormats]);
 
+  // support exportName via /app?exportName=<base>
   const appliedExportNameRef = useRef(false);
   useEffect(() => {
     if (appliedExportNameRef.current) return;
@@ -128,10 +133,10 @@ export default function AppClient() {
 
     const preset = qp.get("preset");
     if (preset) setExportBaseName(preset);
-
     appliedExportNameRef.current = true;
   }, []);
 
+  // Keep selected format valid (if a custom format is deleted, fall back)
   useEffect(() => {
     if (allFormats.some((f) => f.id === formatId)) return;
     setFormatId(allFormats[0]?.id ?? "general_csv");
@@ -208,25 +213,18 @@ export default function AppClient() {
     return first ? Object.keys(first) : [];
   }, [headers, rows]);
 
-  // ✅ CELL-LEVEL severity map for highlighting (used by preview + Manual fixes inputs)
-  const cellSeverityMap = useMemo(() => {
+  // Build cell highlight map from CURRENT issues
+  const issueCellMap = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
-
     for (const i of issuesForTable) {
-      if (i.rowIndex == null || i.rowIndex < 0) continue;
-      const col = (i.column ?? "").toString().trim();
-      if (!col || col === "(file)") continue;
+      if (!i.column || i.column === "(file)") continue; // ✅ ignore file-level issues for cell highlighting
 
-      const key = `${i.rowIndex}|||${col}`;
+      const key = `${i.rowIndex}|||${i.column}`;
       const prev = map.get(key);
-
-      // keep highest severity
       if (prev === "error") continue;
       if (prev === "warning" && i.severity === "info") continue;
-
       map.set(key, i.severity);
     }
-
     return map;
   }, [issuesForTable]);
 
@@ -238,7 +236,7 @@ export default function AppClient() {
     return [...set].sort((a, b) => a - b);
   }, [issuesForTable]);
 
-  // ✅ Auto-pin rows with issues (Manual fixes worklist)
+  // ✅ Auto-pin any row that has issues (so it appears in Manual fixes by default)
   useEffect(() => {
     if (!rowsWithAnyIssue.length) return;
     setPinnedRows((prev) => {
@@ -252,7 +250,7 @@ export default function AppClient() {
     return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
   }, [pinnedRows, rows.length]);
 
-  // Preview table ordering: pinned rows first, then issue rows, then rest
+  // Preview table: pinned rows first, then issue rows, then rest up to 25
   const previewRows = useMemo(() => {
     const out: number[] = [];
     const seen = new Set<number>();
@@ -279,6 +277,7 @@ export default function AppClient() {
   }, [pinnedSorted, rowsWithAnyIssue, rows.length]);
 
   const rowSeverity = useMemo(() => {
+    // highest severity per row
     const m = new Map<number, "error" | "warning" | "info">();
     for (const i of issuesForTable) {
       if (i.rowIndex < 0) continue;
@@ -314,7 +313,16 @@ export default function AppClient() {
     });
   }
 
-  // ✅ Revalidate issues only (no auto-fix during typing)
+  function togglePin(rowIndex: number) {
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowIndex)) next.delete(rowIndex);
+      else next.add(rowIndex);
+      return next;
+    });
+  }
+
+  // ✅ Revalidate issues WITHOUT applying fixes (so typing doesn't get "corrected")
   const revalidateTimerRef = useRef<number | null>(null);
   function revalidateIssuesOnly(nextHeaders: string[], nextRows: CsvRow[]) {
     if (!activeFormat) return;
@@ -421,13 +429,14 @@ export default function AppClient() {
 
       setHeaders(res.fixedHeaders ?? []);
       setRows(res.fixedRows ?? []);
+
       setIssues([...(res.issues ?? []), ...nextParseIssues] as any);
 
       setAutoFixes(res.fixesApplied ?? []);
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      setPinnedRows(new Set());
+      setPinnedRows(new Set()); // will auto-pin issue rows via effect
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -568,6 +577,7 @@ export default function AppClient() {
   function startEdit(rowIndex: number, col: string) {
     const current = rows[rowIndex]?.[col] ?? "";
     setEditing({ rowIndex, col, value: current });
+    // ✅ clicking a cell means user is working that row => pin it into Manual fixes
     pinRow(rowIndex);
   }
 
@@ -600,6 +610,167 @@ export default function AppClient() {
           {errorBanner}
         </div>
       ) : null}
+
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--text)]">CSV Fixer</h1>
+          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+            Pick a format → upload → auto-fix safe issues → export.
+          </p>
+
+          {rows.length > 0 ? (
+            <div className="mt-3 space-y-2 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
+                  Validation score: <span className="font-semibold">{validation.score}</span>/100
+                </span>
+
+                <span
+                  className={
+                    "rounded-full border px-3 py-1 font-semibold " +
+                    (validation.readyForShopifyImport
+                      ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
+                      : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                  }
+                >
+                  {validation.label}
+                </span>
+
+                <span className="text-[color:rgba(var(--muted-rgb),1)]">
+                  {validation.counts.errors} errors, {validation.counts.warnings} warnings
+                  {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
+                </span>
+
+                {fixAllVisible ? (
+                  <button
+                    type="button"
+                    className="pill-btn"
+                    onClick={handleFixAllBlocking}
+                    disabled={busy}
+                    title="Applies safe, deterministic fixes to Shopify blocking issues only."
+                    style={busy ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
+                  >
+                    {fixAllLabel}
+                  </button>
+                ) : null}
+              </div>
+
+              {formatId === "shopify_products" ? (
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-[260px]">
+                      <div className="text-sm font-semibold text-[var(--text)]">
+                        {validation.readyForShopifyImport ? "🟢 Ready for Shopify Import" : "Not ready for Shopify Import"}
+                      </div>
+                      <div className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                        {validation.readyForShopifyImport
+                          ? "No blocking issues detected. Exporting should import cleanly."
+                          : "Blocking issues are preventing a clean import. Fix blockers to safely import."}
+                      </div>
+
+                      {!validation.readyForShopifyImport ? (
+                        <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                          <div className="font-semibold text-[var(--text)]">Top blockers</div>
+                          <ul className="mt-1 list-disc pl-5">
+                            {readiness.blockingGroups.slice(0, 3).map((g) => (
+                              <li key={g.code}>
+                                <span className="font-semibold text-[var(--text)]">{g.title}</span>{" "}
+                                <span className="text-[color:rgba(var(--muted-rgb),1)]">({g.count})</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              className="rg-btn"
+                              onClick={() => issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                            >
+                              Jump to issues
+                            </button>
+
+                            <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                              Auto-fixable blockers:{" "}
+                              <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
+                            </span>
+                          </div>
+
+                          {realFixableBlockingCount === 0 ? (
+                            <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                              No safe auto-fixable blockers found. Use Manual fixes to resolve items like missing Title or non-numeric Price.
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      {lastFixAll ? (
+                        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+                          <div className="text-sm font-semibold text-[var(--text)]">Last Fix All</div>
+                          <ul className="mt-2 list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                            {lastFixAll.applied.slice(0, 5).map((t, idx) => (
+                              <li key={idx}>{t}</li>
+                            ))}
+                            {lastFixAll.applied.length > 5 ? <li>…and {lastFixAll.applied.length - 5} more</li> : null}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="min-w-[240px] rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                      <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                        {scoreNotes.map((n) => (
+                          <div
+                            key={n.key}
+                            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2"
+                            title={n.note}
+                          >
+                            <div className="font-semibold text-[var(--text)]">
+                              {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
+                            </div>
+                            <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
+          <div className="font-medium">Monthly exports</div>
+          {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
+          <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+            Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <div className="text-sm font-semibold text-[var(--text)]">Format</div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {allFormats.map((f) => {
+            const active = f.id === formatId;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                className={`pill-btn ${active ? "is-active" : ""}`}
+                onClick={() => setFormatId(f.id)}
+              >
+                {f.name}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 text-xs text-[var(--muted)]">
+          Built-in formats are available to everyone. Custom formats appear here when you save or import them.
+        </div>
+      </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
@@ -695,6 +866,106 @@ export default function AppClient() {
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
+          <div className="mt-4 data-table-wrap">
+            <div className="data-table-scroll">
+              {rows.length === 0 ? (
+                <div className="p-6 text-sm text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 70 }}>Row</th>
+                      <th style={{ width: 96 }}></th>
+                      {tableHeaders.slice(0, 10).map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.map((rowIndex) => {
+                      const row = rows[rowIndex] ?? {};
+                      const isPinned = pinnedRows.has(rowIndex);
+                      const sev = rowSeverity.get(rowIndex);
+                      const hasEW = rowHasErrorOrWarning(rowIndex);
+
+                      const actionCell = hasEW ? (
+                        <span
+                          className={
+                            "rounded-full border px-2 py-1 text-xs font-semibold " +
+                            (sev === "error"
+                              ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.10)] text-[var(--text)]"
+                              : "border-[color:rgba(255,200,0,0.35)] bg-[color:rgba(255,200,0,0.10)] text-[var(--text)]")
+                          }
+                          title="This row still has an active issue"
+                        >
+                          {sev === "error" ? "Error" : "Warning"}
+                        </span>
+                      ) : isPinned ? (
+                        <button type="button" className="pill-btn" onClick={() => unpinRow(rowIndex)} title="Remove from Manual fixes">
+                          Unpin
+                        </button>
+                      ) : (
+                        <button type="button" className="pill-btn" onClick={() => pinRow(rowIndex)} title="Add to Manual fixes">
+                          Pin
+                        </button>
+                      );
+
+                      return (
+                        <tr key={rowIndex}>
+                          <td className="text-[var(--muted)]">{rowIndex + 1}</td>
+                          <td>{actionCell}</td>
+
+                          {tableHeaders.slice(0, 10).map((h) => {
+                            const cellSev = issueCellMap.get(`${rowIndex}|||${h}`);
+                            const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
+
+                            const cellClass =
+                              (cellSev === "error" ? "cell-error" : cellSev === "warning" ? "cell-warning" : "") +
+                              (isEditing ? " cell-editing" : "");
+
+                            return (
+                              <td
+                                key={`${rowIndex}-${h}`}
+                                className={cellClass}
+                                onClick={() => startEdit(rowIndex, h)}
+                                style={{ cursor: "pointer" }}
+                                title={cellSev ? `${cellSev}` : "Click to edit"}
+                              >
+                                {isEditing ? (
+                                  <input
+                                    autoFocus
+                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
+                                    value={editing.value}
+                                    onChange={(e) =>
+                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
+                                    }
+                                    onBlur={commitEdit}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") commitEdit();
+                                      if (e.key === "Escape") cancelEdit();
+                                    }}
+                                  />
+                                ) : (
+                                  <span>{row[h] ?? ""}</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {rows.length > 0 ? (
+              <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
+                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until unpinned.
+              </div>
+            ) : null}
+          </div>
+
           <div className="mt-6">
             <EditableIssuesTable
               headers={tableHeaders}
@@ -705,26 +976,20 @@ export default function AppClient() {
               formatId={formatId}
               pinnedRows={pinnedSorted}
               onUnpinRow={unpinRow}
-              cellSeverityMap={cellSeverityMap}
+              cellSeverityMap={issueCellMap}  // ✅ NEW: drives cell-level highlight in Manual fixes
             />
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            <Link href="/formats/presets" className="hover:underline">
-              Preset Formats
-            </Link>
-            <Link href="/pricing" className="hover:underline">
-              Pricing
-            </Link>
           </div>
         </div>
       </div>
 
-      {/* NOTE: the rest of your component above this section is unchanged in your app.
-          If you pasted a different AppClient version earlier, keep that and only merge:
-          - cellSeverityMap
-          - passing cellSeverityMap into EditableIssuesTable
-      */}
+      <div className="mt-10 flex flex-wrap gap-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+        <Link href="/formats/presets" className="hover:underline">
+          Preset Formats
+        </Link>
+        <Link href="/pricing" className="hover:underline">
+          Pricing
+        </Link>
+      </div>
     </div>
   );
 }

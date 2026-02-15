@@ -35,16 +35,19 @@ export function EditableIssuesTable(props: {
   resetKey: string;
   formatId: string;
 
+  // ✅ Manual fixes is now a pinned worklist
   pinnedRows: number[];
   onUnpinRow: (rowIndex: number) => void;
 
-  // ✅ NEW: cell-level highlight map from AppClient (key = `${rowIndex}|||${columnName}`)
+  // ✅ NEW: cell-level highlight map (key = `${rowIndex}|||${header}`)
   cellSeverityMap: Map<string, "error" | "warning" | "info">;
 }) {
   const { headers, issues, rows, onUpdateRow, resetKey, pinnedRows, onUnpinRow, cellSeverityMap } = props;
 
+  // Expand state for pinned rows
   const [open, setOpen] = useState<Set<number>>(() => new Set());
 
+  // When switching formats/files, collapse
   useEffect(() => {
     setOpen(new Set());
   }, [resetKey]);
@@ -88,35 +91,35 @@ export function EditableIssuesTable(props: {
     });
   }
 
-  const visibleHeaders = useMemo(() => headers.slice(0, 40), [headers]);
+  const visibleHeaders = useMemo(() => {
+    // keep UI sane; still “full row editing”
+    // if you want literally every header shown always, remove slice(0, 40)
+    return headers.slice(0, 40);
+  }, [headers]);
 
   function cellSev(rowIndex: number, header: string): "error" | "warning" | "info" | undefined {
     return cellSeverityMap.get(`${rowIndex}|||${header}`);
   }
 
   function inputClassFor(sev?: "error" | "warning" | "info") {
-    // Base input style matches your existing UI
     const base =
-      "w-full rounded-xl border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none";
+      "w-full rounded-xl border px-3 py-2 text-sm text-[var(--text)] outline-none";
 
     if (sev === "error") {
-      // stronger red highlight
       return (
         base +
-        " border-[color:rgba(255,80,80,0.55)] bg-[color:rgba(255,80,80,0.10)] ring-1 ring-[color:rgba(255,80,80,0.25)]"
+        " border-[color:rgba(255,80,80,0.55)] bg-[color:rgba(255,80,80,0.12)] ring-1 ring-[color:rgba(255,80,80,0.25)]"
       );
     }
 
     if (sev === "warning") {
-      // stronger yellow highlight
       return (
         base +
-        " border-[color:rgba(255,200,0,0.55)] bg-[color:rgba(255,200,0,0.10)] ring-1 ring-[color:rgba(255,200,0,0.22)]"
+        " border-[color:rgba(255,200,0,0.55)] bg-[color:rgba(255,200,0,0.12)] ring-1 ring-[color:rgba(255,200,0,0.22)]"
       );
     }
 
-    // info/tip doesn’t highlight the cell by default (you can add if you want)
-    return base + " border-[var(--border)]";
+    return base + " border-[var(--border)] bg-[var(--surface)]";
   }
 
   return (
@@ -197,7 +200,9 @@ export function EditableIssuesTable(props: {
                   <div className="border-t border-[var(--border)] px-4 py-4">
                     {list.length ? (
                       <div className="mb-4 space-y-2">
-                        <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">Issues in this row</div>
+                        <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">
+                          Issues in this row
+                        </div>
 
                         {list.slice(0, 6).map((it, idx) => {
                           const sev = normalizeSeverity(it);
@@ -226,7 +231,10 @@ export function EditableIssuesTable(props: {
                               {suggestion ? (
                                 <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
                                   Suggestion:{" "}
-                                  <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>
+                                  <span
+                                    className="font-semibold"
+                                    style={{ color: "rgba(255,255,255,0.92)" }} // ✅ brighter white
+                                  >
                                     {suggestion}
                                   </span>
                                 </div>
@@ -245,7 +253,7 @@ export function EditableIssuesTable(props: {
                       </div>
                     )}
 
-                    {/* ✅ Cell-level highlighting happens here */}
+                    {/* ✅ FIELD-LEVEL highlighting happens here */}
                     <div className="grid gap-3 md:grid-cols-2">
                       {visibleHeaders.map((h) => {
                         const sev = cellSev(rowIndex, h);
