@@ -64,7 +64,9 @@ export default function AppClient() {
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
   // inline edit state for the preview table
-  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
+  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
+    null
+  );
 
   // store last uploaded CSV text so switching formats can re-run on same file
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
@@ -83,6 +85,9 @@ export default function AppClient() {
 
   // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
+
+  // ✅ NEW: pinned rows (stay visible even after issues are fixed)
+  const [pinnedRows, setPinnedRows] = useState<Set<number>>(new Set());
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
@@ -255,27 +260,126 @@ export default function AppClient() {
     return [...set].sort((a, b) => a - b);
   }, [issuesForTable]);
 
+  // ✅ NEW: preview rows = (pinned ∪ issue rows) first, then other rows (up to 25)
   const previewRows = useMemo(() => {
-    if (rowsWithAnyIssue.length) return rowsWithAnyIssue.slice(0, 25);
-    return rows.map((_, idx) => idx).slice(0, 25);
-  }, [rows, rowsWithAnyIssue]);
+    const out: number[] = [];
+    const seen = new Set<number>();
 
-  const onUpdateRow = useCallback((rowIndex: number, patch: Partial<CsvRow>) => {
-    setRows((prev) => {
-      const next = [...prev];
-      const existing = next[rowIndex] ?? {};
-      const cleaned: Record<string, string> = {};
-
-      for (const [k, v] of Object.entries(patch)) {
-        if (typeof v === "string") cleaned[k] = v;
-        else if (v == null) cleaned[k] = "";
-        else cleaned[k] = String(v);
+    // pinned first (keep stable order)
+    for (const idx of Array.from(pinnedRows).sort((a, b) => a - b)) {
+      if (idx >= 0 && idx < rows.length && !seen.has(idx)) {
+        out.push(idx);
+        seen.add(idx);
       }
+    }
 
-      next[rowIndex] = { ...existing, ...cleaned };
+    // then rows with issues
+    for (const idx of rowsWithAnyIssue) {
+      if (idx >= 0 && idx < rows.length && !seen.has(idx)) {
+        out.push(idx);
+        seen.add(idx);
+      }
+    }
+
+    // then fill remaining
+    for (let i = 0; i < rows.length && out.length < 25; i++) {
+      if (!seen.has(i)) {
+        out.push(i);
+        seen.add(i);
+      }
+    }
+
+    return out.slice(0, 25);
+  }, [pinnedRows, rowsWithAnyIssue, rows.length]);
+
+  function togglePinRow(rowIndex: number) {
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowIndex)) next.delete(rowIndex);
+      else next.add(rowIndex);
       return next;
     });
-  }, []);
+  }
+
+  function pinRow(rowIndex: number) {
+    setPinnedRows((prev) => {
+      if (prev.has(rowIndex)) return prev;
+      const next = new Set(prev);
+      next.add(rowIndex);
+      return next;
+    });
+  }
+
+  function clearPins() {
+    setPinnedRows(new Set());
+  }
+
+  // ✅ NEW: revalidate after manual edits so red/yellow highlights disappear when fixed
+  const revalidateTimerRef = useRef<number | null>(null);
+  const revalidateInFlightRef = useRef(false);
+
+  const scheduleRevalidate = useCallback(
+    (opts?: { pinRowIndex?: number }) => {
+      if (!activeFormat) return;
+      if (!rows.length) return;
+
+      if (typeof opts?.pinRowIndex === "number") {
+        pinRow(opts.pinRowIndex);
+      }
+
+      if (revalidateTimerRef.current) {
+        window.clearTimeout(revalidateTimerRef.current);
+      }
+
+      revalidateTimerRef.current = window.setTimeout(() => {
+        if (revalidateInFlightRef.current) return;
+        revalidateInFlightRef.current = true;
+
+        try {
+          // We re-run the engine so the issue list matches the CURRENT edited data.
+          // IMPORTANT: we do NOT append fixesApplied here (to avoid bloating the log on every keystroke).
+          const res = applyFormatToParsedCsv(tableHeaders, rows, activeFormat);
+
+          // Keep tables in sync with the engine’s "safe normalization"
+          setHeaders(res.fixedHeaders ?? tableHeaders);
+          setRows(res.fixedRows ?? rows);
+
+          // Replace issues so highlights reflect what's still wrong
+          setIssues((res.issues as any) ?? []);
+        } catch (e: any) {
+          // Don't hard-fail the UX on background revalidation
+          console.warn("Revalidate failed", e);
+        } finally {
+          revalidateInFlightRef.current = false;
+        }
+      }, 180);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeFormat, rows, tableHeaders.join("||")]
+  );
+
+  const onUpdateRow = useCallback(
+    (rowIndex: number, patch: Partial<CsvRow>) => {
+      setRows((prev) => {
+        const next = [...prev];
+        const existing = next[rowIndex] ?? {};
+        const cleaned: Record<string, string> = {};
+
+        for (const [k, v] of Object.entries(patch)) {
+          if (typeof v === "string") cleaned[k] = v;
+          else if (v == null) cleaned[k] = "";
+          else cleaned[k] = String(v);
+        }
+
+        next[rowIndex] = { ...existing, ...cleaned };
+        return next;
+      });
+
+      // keep row visible even after issues resolve
+      scheduleRevalidate({ pinRowIndex: rowIndex });
+    },
+    [scheduleRevalidate]
+  );
 
   function runFormatOnCurrentData(nextHeaders: string[], nextRows: CsvRow[], additionalFixes: string[] = []) {
     const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
@@ -295,14 +399,6 @@ export default function AppClient() {
 
   const realFixableBlockingCount = fixAllDryRun?.fixesApplied?.length ?? 0;
 
-  // ✅ consolidated fix list (used by UI + log)
-  const fixList = useMemo(() => {
-    const uniq = new Set<string>();
-    for (const f of autoFixes ?? []) uniq.add(f);
-    for (const f of lastFixAll?.applied ?? []) uniq.add(f);
-    return Array.from(uniq);
-  }, [autoFixes, lastFixAll]);
-
   function handleFixAllBlocking() {
     if (formatId !== "shopify_products") return;
 
@@ -310,13 +406,29 @@ export default function AppClient() {
 
     if (!fixed.fixesApplied.length) {
       setErrorBanner(
-        `Fix All ran, but 0 fixes were safely applied. Remaining blockers require manual edits (e.g., Missing Title, Published like "maybe", Price like "free").`
+        `No safe auto-fixable blockers found. Use Manual fixes below to resolve items like missing Title or non-numeric Price.`
       );
       return;
     }
 
     setErrorBanner(null);
     setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
+
+    // When we apply fixes, those rows should remain visible (pinned) so user can review.
+    const affected = new Set<number>();
+    for (const fx of fixed.fixedRows ?? []) {
+      // no-op; we can’t map from row objects to indices safely here
+    }
+    // safest: pin all rows that currently have blocking issues (before applying)
+    for (const i of issuesForTable) {
+      if (i.severity === "error" && i.rowIndex >= 0) affected.add(i.rowIndex);
+    }
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      for (const idx of affected) next.add(idx);
+      return next;
+    });
+
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
 
@@ -342,6 +454,9 @@ export default function AppClient() {
 
       setLastFixAll(null);
 
+      // New file: clear pins (fresh session)
+      setPinnedRows(new Set());
+
       await refreshQuotaAndPlan();
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Failed to process CSV");
@@ -365,6 +480,9 @@ export default function AppClient() {
       setEditing(null);
       setLastFixAll(null);
 
+      // New file: clear pins
+      setPinnedRows(new Set());
+
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
       }
@@ -382,6 +500,7 @@ export default function AppClient() {
     setEditing(null);
     setLastFixAll(null);
 
+    // format switch: keep pins (user intent), but re-run to refresh issues
     if (!lastUploadedText || !activeFormat) return;
 
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
@@ -402,7 +521,11 @@ export default function AppClient() {
       const a = document.createElement("a");
       a.href = url;
 
-      const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
+      const base =
+        (exportBaseName ?? fileName ?? "fixed")
+          .replace(/\.csv$/i, "")
+          .trim() || "fixed";
+
       a.download = `${base}_fixed.csv`;
 
       document.body.appendChild(a);
@@ -424,11 +547,15 @@ export default function AppClient() {
   }
 
   function downloadAutoFixLog() {
+    const fixList = Array.from(new Set([...(autoFixes ?? []), ...(lastFixAll?.applied ?? [])]));
     if (!fixList.length) return;
 
     const now = new Date();
     const iso = now.toISOString();
-    const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
+    const base =
+      (exportBaseName ?? fileName ?? "fixed")
+        .replace(/\.csv$/i, "")
+        .trim() || "fixed";
 
     const lines: string[] = [];
     lines.push("StriveFormats – Auto-fix Change Log");
@@ -443,7 +570,7 @@ export default function AppClient() {
       tips: issuesForTable.filter((i) => i.severity === "info").length,
     };
     lines.push(`Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`);
-    lines.push(`Total fixes recorded: ${fixList.length}`);
+    lines.push(`Total auto-fixes applied: ${fixList.length}`);
     lines.push("");
 
     lines.push("Fixes:");
@@ -471,6 +598,9 @@ export default function AppClient() {
   function startEdit(rowIndex: number, col: string) {
     const current = rows[rowIndex]?.[col] ?? "";
     setEditing({ rowIndex, col, value: current });
+
+    // keep this row visible while user works
+    pinRow(rowIndex);
   }
 
   function commitEdit() {
@@ -484,19 +614,17 @@ export default function AppClient() {
   }
 
   const autoFixPreviewCount = 8;
-  const autoFixPreview = fixList.slice(0, autoFixPreviewCount);
-  const autoFixRest = fixList.slice(autoFixPreviewCount);
+  const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
+  const autoFixRest = autoFixes.slice(autoFixPreviewCount);
   const autoFixRestCount = Math.max(0, autoFixRest.length);
 
   const used = Number(quota?.used ?? 0);
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
-  const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? Number(limit ?? 0) - used));
+  const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
-  // ✅ show button ONLY if fixer can truly apply at least 1 safe fix
+  // show button ONLY if fixer can truly apply at least 1 safe fix
   const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
   const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
-
-  const logDisabled = busy || rows.length === 0 || fixList.length === 0;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -509,7 +637,9 @@ export default function AppClient() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
+          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+            Pick a format → upload → auto-fix safe issues → export.
+          </p>
 
           {rows.length > 0 ? (
             <div className="mt-3 space-y-2 text-sm">
@@ -546,6 +676,16 @@ export default function AppClient() {
                     {fixAllLabel}
                   </button>
                 ) : null}
+
+                {/* ✅ NEW: pin controls */}
+                {pinnedRows.size > 0 ? (
+                  <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                    Pinned: <span className="font-semibold text-[var(--text)]">{pinnedRows.size}</span>{" "}
+                    <button type="button" className="pill-btn" onClick={clearPins} style={{ padding: "4px 10px" }}>
+                      Clear pins
+                    </button>
+                  </span>
+                ) : null}
               </div>
 
               {formatId === "shopify_products" ? (
@@ -577,7 +717,9 @@ export default function AppClient() {
                             <button
                               type="button"
                               className="rg-btn"
-                              onClick={() => issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                              onClick={() =>
+                                issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                              }
                             >
                               Jump to issues
                             </button>
@@ -590,7 +732,8 @@ export default function AppClient() {
 
                           {realFixableBlockingCount === 0 ? (
                             <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              No safe auto-fixable blockers found. Use Manual fixes below to resolve items like missing Title or non-numeric Price.
+                              No safe auto-fixable blockers found. Use Manual fixes below to resolve items like missing
+                              Title or non-numeric Price.
                             </div>
                           ) : null}
                         </div>
@@ -603,7 +746,9 @@ export default function AppClient() {
                             {lastFixAll.applied.slice(0, 5).map((t, idx) => (
                               <li key={idx}>{t}</li>
                             ))}
-                            {lastFixAll.applied.length > 5 ? <li>…and {lastFixAll.applied.length - 5} more</li> : null}
+                            {lastFixAll.applied.length > 5 ? (
+                              <li>…and {lastFixAll.applied.length - 5} more</li>
+                            ) : null}
                           </ul>
                         </div>
                       ) : null}
@@ -619,7 +764,8 @@ export default function AppClient() {
                             title={n.note}
                           >
                             <div className="font-semibold text-[var(--text)]">
-                              {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
+                              {n.label}{" "}
+                              <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>
                             <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
                           </div>
@@ -653,7 +799,13 @@ export default function AppClient() {
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
           <div className="font-medium">Monthly exports</div>
-          {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
+          {isUnlimited ? (
+            <div>Unlimited</div>
+          ) : (
+            <div>
+              {used}/{limit} used • {left} left
+            </div>
+          )}
           <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
@@ -718,21 +870,25 @@ export default function AppClient() {
               type="button"
               className="pill-btn"
               onClick={downloadAutoFixLog}
-              disabled={logDisabled}
+              disabled={busy || rows.length === 0 || (!autoFixes.length && !lastFixAll?.applied?.length)}
               title={
                 rows.length === 0
                   ? "Upload a CSV first"
-                  : fixList.length === 0
+                  : !autoFixes.length && !lastFixAll?.applied?.length
                     ? "No auto-fixes have been applied yet"
                     : "Download a text log of the fixes that were applied"
               }
-              style={logDisabled ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
+              style={
+                busy || rows.length === 0 || (!autoFixes.length && !lastFixAll?.applied?.length)
+                  ? { opacity: 0.6, cursor: "not-allowed" }
+                  : undefined
+              }
             >
               Download fix log
             </button>
           </div>
 
-          {(fixList.length > 0) ? (
+          {autoFixes.length ? (
             <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
               <div className="text-sm font-medium text-[var(--text)]">Auto-fixes applied</div>
 
@@ -804,7 +960,7 @@ export default function AppClient() {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: 80 }}>Row</th>
+                      <th style={{ width: 110 }}>Row</th>
                       {tableHeaders.slice(0, 12).map((h) => (
                         <th key={h}>{h}</th>
                       ))}
@@ -813,16 +969,35 @@ export default function AppClient() {
                   <tbody>
                     {previewRows.map((rowIndex) => {
                       const row = rows[rowIndex] ?? {};
+                      const isPinned = pinnedRows.has(rowIndex);
+
                       return (
                         <tr key={rowIndex}>
-                          <td className="text-[var(--muted)]">{rowIndex + 1}</td>
+                          <td className="text-[var(--muted)]">
+                            <div className="flex items-center gap-2">
+                              <span>{rowIndex + 1}</span>
+                              <button
+                                type="button"
+                                className="pill-btn"
+                                onClick={() => togglePinRow(rowIndex)}
+                                title={isPinned ? "Unpin row" : "Pin row"}
+                                style={{ padding: "2px 10px", fontSize: 12 }}
+                              >
+                                {isPinned ? "Unpin" : "Pin"}
+                              </button>
+                            </div>
+                          </td>
+
                           {tableHeaders.slice(0, 12).map((h) => {
                             const sev = issueCellMap.get(`${rowIndex}|||${h}`);
                             const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
 
                             const cellClass =
-                              (sev === "error" ? "cell-error" : sev === "warning" ? "cell-warning" : "") +
-                              (isEditing ? " cell-editing" : "");
+                              (sev === "error"
+                                ? "cell-error"
+                                : sev === "warning"
+                                  ? "cell-warning"
+                                  : "") + (isEditing ? " cell-editing" : "");
 
                             return (
                               <td
@@ -862,7 +1037,8 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row editing.
+                Showing first 12 columns and up to 25 rows for speed. Pinned rows stay visible even after fixes. Use
+                “Manual fixes” for full row editing.
               </div>
             ) : null}
           </div>
