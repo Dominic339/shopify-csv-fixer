@@ -70,7 +70,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
   const optNames = ["Option1 name", "Option2 name", "Option3 name"];
   const optVals = ["Option1 value", "Option2 value", "Option3 value"];
 
-  // 2) File-level checks (match Shopify docs reality: Title always required; URL handle required if variants are present)
+  // 2) File-level checks
   const anyVariantSignals = fixedRows.some((r) => {
     return (
       get(r, cSku).trim() ||
@@ -84,8 +84,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     );
   });
 
-  // Title is required for creating/importing products. Shopify: Title is required; URL handle required for variants.
-  // We treat missing Title column as blocking.
   if (!fixedHeaders.includes(cTitle)) {
     issues.push({
       severity: "error",
@@ -96,7 +94,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     });
   }
 
-  // URL handle column should always exist in our canonical export, but still verify
   if (!fixedHeaders.includes(cHandle)) {
     issues.push({
       severity: "error",
@@ -108,14 +105,12 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
   }
 
   // 3) Per-row validation + deterministic fixes
-  // We also do variant grouping sanity checks by handle.
   const byHandle = new Map<string, number[]>();
 
   for (let i = 0; i < fixedRows.length; i++) {
     const r = fixedRows[i];
     const row = i + 1;
 
-    // Title required (row-level)
     const title = get(r, cTitle).trim();
     if (!title) {
       issues.push({
@@ -128,7 +123,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       });
     }
 
-    // URL handle: if blank, try deterministic autofill from Title
     const rawHandle = get(r, cHandle).trim();
     if (!rawHandle) {
       if (title) {
@@ -159,7 +153,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     } else {
       const slug = slugifyShopifyHandle(rawHandle);
       if (slug && slug !== rawHandle) {
-        // Only normalize if it results in a non-empty safe slug
         set(r, cHandle, slug);
         fixesApplied.push(`Normalized URL handle on row ${row}`);
       }
@@ -176,7 +169,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Published on online store: normalize to true/false (lowercase)
     const pub = get(r, cPublished).trim();
     if (pub) {
       const norm = normalizeShopifyBool(pub);
@@ -196,8 +188,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Continue selling when out of stock:
-    // - If it looks like legacy inventory policy (continue/deny), map deterministically
     const cs = get(r, cContinue).trim();
     if (cs) {
       const lower = cs.toLowerCase();
@@ -224,7 +214,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Price + compare-at normalization
     const priceRaw = get(r, cPrice).trim();
     if (priceRaw) {
       const n = parseShopifyMoney(priceRaw);
@@ -267,7 +256,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Compare-at sanity: compare-at < price is suspicious (warn)
     const p = priceRaw ? parseShopifyMoney(get(r, cPrice)) : null;
     const c = compareRaw ? parseShopifyMoney(get(r, cCompare)) : null;
     if (p != null && c != null && c > 0 && p > 0 && c < p) {
@@ -281,7 +269,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       });
     }
 
-    // Inventory quantity: integer; negative warning
     const invRaw = get(r, cInvQty).trim();
     if (invRaw) {
       const n = Number(invRaw);
@@ -306,7 +293,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Images: URL format + position integer if present
     const img = get(r, cImgUrl).trim();
     if (img) {
       if (!isHttpUrl(img)) {
@@ -335,7 +321,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Options dependency rules (matches Shopify dependency concept)
     const n1 = get(r, optNames[0]).trim();
     const n2 = get(r, optNames[1]).trim();
     const n3 = get(r, optNames[2]).trim();
@@ -395,7 +380,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       });
     }
 
-    // Group rows by handle for duplicate/variant logic
     const h = get(r, cHandle).trim();
     if (h) {
       const list = byHandle.get(h) ?? [];
@@ -404,12 +388,10 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
   }
 
-  // 4) Variant grouping + duplicate handle sanity
+  // 4) Variant grouping + duplicate handle sanity (FIXED)
   for (const [handle, idxs] of byHandle.entries()) {
     if (idxs.length <= 1) continue;
 
-    // Shopify expects multiple rows with the same handle to represent variants/images.
-    // We'll warn only when it looks like duplicates that aren't variants (same SKU + same option values, etc.)
     const sigs = new Map<string, number[]>();
 
     for (const idx of idxs) {
@@ -419,36 +401,47 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       const ov2 = get(r, "Option2 value").trim();
       const ov3 = get(r, "Option3 value").trim();
       const img = get(r, "Product image URL").trim();
-      // Signature: if all are empty except image, treat as image row, not a duplicate
-      const sig = [sku, ov1, ov2, ov3, img ? "IMG" : ""].join("|");
+
+      // IMPORTANT: include the image URL itself so extra-image rows don't look like duplicates.
+      const imgKey = img ? img.trim().toLowerCase().slice(0, 180) : "";
+
+      const sig = [sku, ov1, ov2, ov3, imgKey].join("|");
       const list = sigs.get(sig) ?? [];
       list.push(idx);
       sigs.set(sig, list);
     }
 
     for (const [sig, list] of sigs.entries()) {
-      // More than 1 row with identical variant signature AND no image differentiation -> suspicious duplicates
-      const onlyImageRows = sig.endsWith("|IMG") && sig.startsWith("|||");
-      if (onlyImageRows) continue;
+      if (list.length <= 1) continue;
 
-      if (list.length > 1) {
-        const rowsList = list.map((i) => i + 1).join(", ");
-        for (const idx of list) {
-          issues.push({
-            severity: "warning",
-            code: "shopify/duplicate_handle_not_variants",
-            row: idx + 1,
-            column: "URL handle",
-            message: `Row ${idx + 1}: Handle "${handle}" appears multiple times with identical variant details (rows ${rowsList}).`,
-            suggestion:
-              "If these are meant to be variants, make sure option values differ per row (or SKUs differ). If they are extra images, keep only URL handle + image fields on the extra rows.",
-          });
-        }
+      // If these are image-only rows (no sku/options, only an image URL), don't warn.
+      // We detect this by checking one representative row for the signature.
+      const sampleRow = fixedRows[list[0]];
+      const sku = get(sampleRow, cSku).trim();
+      const ov1 = get(sampleRow, "Option1 value").trim();
+      const ov2 = get(sampleRow, "Option2 value").trim();
+      const ov3 = get(sampleRow, "Option3 value").trim();
+      const img = get(sampleRow, "Product image URL").trim();
+
+      const imageOnly = !sku && !ov1 && !ov2 && !ov3 && !!img;
+      if (imageOnly) continue;
+
+      const rowsList = list.map((i) => i + 1).join(", ");
+      for (const idx of list) {
+        issues.push({
+          severity: "warning",
+          code: "shopify/duplicate_handle_not_variants",
+          row: idx + 1,
+          column: "URL handle",
+          message: `Row ${idx + 1}: Handle "${handle}" appears multiple times with identical variant details (rows ${rowsList}).`,
+          suggestion:
+            "If these are meant to be variants, make sure option values differ per row (or SKUs differ). If they are extra images, keep only URL handle + image fields on the extra rows.",
+        });
       }
     }
   }
 
-  // 5) Lightweight SEO guidance (non-blocking; doesn’t “scare” template uploads)
+  // 5) Lightweight SEO guidance
   for (let i = 0; i < fixedRows.length; i++) {
     const r = fixedRows[i];
     const row = i + 1;
@@ -477,7 +470,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       });
     }
 
-    // Optional: encourage SEO fields if description exists
     const desc = get(r, cDesc).trim();
     if (desc && !st) {
       issues.push({
