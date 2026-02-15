@@ -44,6 +44,23 @@ type UiIssue = {
   suggestion?: string;
 };
 
+function downloadText(filename: string, text: string) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function safeBaseName(name: string | null) {
+  const base = (name ?? "csv").replace(/\.csv$/i, "").trim() || "csv";
+  return base.replace(/[^\w\d._-]+/g, "_");
+}
+
 export default function AppClient() {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -533,6 +550,8 @@ export default function AppClient() {
   const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
   const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
 
+  const fixLogBase = safeBaseName(exportBaseName ?? fileName ?? "csv");
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       {errorBanner ? (
@@ -658,6 +677,43 @@ export default function AppClient() {
                       </div>
                     </div>
                   </div>
+
+                  {/* NEW: Auto-fix log (collapsible) */}
+                  {autoFixes.length > 0 ? (
+                    <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="text-sm font-semibold text-[var(--text)]">
+                          Auto fixes applied <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length})</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="pill-btn"
+                          onClick={() => {
+                            const header = `Auto fix log\nFile: ${fileName ?? "unknown"}\nFormat: ${formatId}\nApplied: ${autoFixes.length}\n\n`;
+                            const body = autoFixes.map((x, idx) => `${idx + 1}. ${x}`).join("\n");
+                            downloadText(`${fixLogBase}_fix_log.txt`, header + body + "\n");
+                          }}
+                        >
+                          Download fix log
+                        </button>
+                      </div>
+
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                          View auto fixes
+                        </summary>
+                        <ul className="mt-2 list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                          {autoFixes.slice(0, 50).map((t, idx) => (
+                            <li key={idx}>{t}</li>
+                          ))}
+                          {autoFixes.length > 50 ? (
+                            <li>…and {autoFixes.length - 50} more (download the log for the full list)</li>
+                          ) : null}
+                        </ul>
+                      </details>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -712,63 +768,7 @@ export default function AppClient() {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) void (async () => {
-                    setBusy(true);
-                    setErrorBanner(null);
-                    setFileName(f.name);
-
-                    try {
-                      const text = await f.text();
-                      setLastUploadedText(text);
-
-                      setIssues([]);
-                      setParseIssues([]);
-                      setAutoFixes([]);
-                      setEditing(null);
-                      setLastFixAll(null);
-                      setPinnedRows(new Set());
-
-                      if (activeFormat) {
-                        await (async () => {
-                          setBusy(true);
-                          setErrorBanner(null);
-
-                          try {
-                            const parsed = parseCsv(text);
-                            const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, activeFormat);
-
-                            const nextParseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
-                              message: m,
-                              level: "error",
-                              severity: "error",
-                            }));
-
-                            setParseIssues(nextParseIssues);
-
-                            setHeaders(res.fixedHeaders ?? []);
-                            setRows(res.fixedRows ?? []);
-
-                            setIssues([...(res.issues ?? []), ...nextParseIssues] as any);
-
-                            setAutoFixes(res.fixesApplied ?? []);
-                            setPinnedRows(new Set());
-
-                            await refreshQuotaAndPlan();
-                          } catch (e2: any) {
-                            setErrorBanner(e2?.message ?? "Failed to process CSV");
-                          } finally {
-                            setBusy(false);
-                            setEditing(null);
-                          }
-                        })();
-                      }
-                    } catch (e3: any) {
-                      setErrorBanner(e3?.message ?? "Failed to process CSV");
-                    } finally {
-                      setBusy(false);
-                      setEditing(null);
-                    }
-                  })();
+                  if (f) void handleFile(f);
                 }}
               />
             </label>
@@ -782,7 +782,29 @@ export default function AppClient() {
             >
               {busy ? "Working..." : "Export fixed CSV"}
             </button>
+
+            {/* NEW: quick download fix log (only when fixes exist) */}
+            {autoFixes.length > 0 ? (
+              <button
+                className="pill-btn"
+                type="button"
+                onClick={() => {
+                  const header = `Auto fix log\nFile: ${fileName ?? "unknown"}\nFormat: ${formatId}\nApplied: ${autoFixes.length}\n\n`;
+                  const body = autoFixes.map((x, idx) => `${idx + 1}. ${x}`).join("\n");
+                  downloadText(`${fixLogBase}_fix_log.txt`, header + body + "\n");
+                }}
+              >
+                Download fix log
+              </button>
+            ) : null}
           </div>
+
+          {/* NEW: small inline hint if there are no fixes */}
+          {rows.length > 0 && autoFixes.length === 0 ? (
+            <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+              No auto fixes were applied for this upload.
+            </div>
+          ) : null}
         </div>
 
         <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
@@ -900,7 +922,7 @@ export default function AppClient() {
               formatId={formatId}
               pinnedRows={pinnedSorted}
               onUnpinRow={unpinRow}
-              cellSeverityMap={issueCellMap}  // ✅ drives cell highlight in Manual fixes
+              cellSeverityMap={issueCellMap}
             />
           </div>
         </div>
