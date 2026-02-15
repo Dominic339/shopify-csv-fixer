@@ -302,9 +302,23 @@ export default function AppClient() {
     if (formatId !== "shopify_products") return;
 
     const fixed = fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
-    if (!fixed.fixesApplied.length) return;
+
+    // If no fixes were safely applied, show a helpful banner so it doesn't feel "broken".
+    // Common case: Price/Compare-at values aren't convertible to numbers (e.g. "free", "N/A", "$--").
+    if (!fixed.fixesApplied.length) {
+      const found = fixed.summary?.autoFixableBlockingFound ?? 0;
+      setErrorBanner(
+        found > 0
+          ? `Fix All ran, but 0 fixes were safely applied. This usually happens when values like Price/Compare-at aren't convertible to numbers (e.g., "free", "N/A", "$--"). Check the Issues list for the exact cells.`
+          : "Fix All ran, but no eligible blocking issues were found to auto-fix."
+      );
+      return;
+    }
 
     setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
+
+    // Clear any prior banner now that we actually changed data.
+    setErrorBanner(null);
 
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
@@ -422,9 +436,10 @@ export default function AppClient() {
     }
   }
 
-  // NEW: downloadable log of applied fixes (plain text)
   function downloadAutoFixLog() {
-    if (!autoFixes.length) return;
+    // Include both engine auto-fixes and Fix All batch fixes.
+    const fixList = Array.from(new Set([...(autoFixes ?? []), ...(lastFixAll?.applied ?? [])]));
+    if (!fixList.length) return;
 
     const now = new Date();
     const iso = now.toISOString();
@@ -441,23 +456,20 @@ export default function AppClient() {
     if (activeFormat?.name) lines.push(`Format: ${activeFormat.name}`);
     lines.push("");
 
-    // Quick summary (post-fix)
     const counts = {
       errors: issuesForTable.filter((i) => i.severity === "error").length,
       warnings: issuesForTable.filter((i) => i.severity === "warning").length,
       tips: issuesForTable.filter((i) => i.severity === "info").length,
     };
     lines.push(`Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`);
-    lines.push(`Total auto-fixes applied: ${autoFixes.length}`);
+    lines.push(`Total auto-fixes applied: ${fixList.length}`);
     lines.push("");
 
-    // Fix list
     lines.push("Fixes:");
-    for (let i = 0; i < autoFixes.length; i++) {
-      lines.push(`${i + 1}. ${autoFixes[i]}`);
+    for (let i = 0; i < fixList.length; i++) {
+      lines.push(`${i + 1}. ${fixList[i]}`);
     }
 
-    // If Fix All was used, include a tiny callout (autoFixes already includes them; this is just context)
     if (lastFixAll?.applied?.length) {
       lines.push("");
       lines.push(`Note: "Fix all blocking issues" was used (${lastFixAll.applied.length} fixes in that batch).`);
@@ -596,7 +608,9 @@ export default function AppClient() {
                             <button
                               type="button"
                               className="rg-btn"
-                              onClick={() => issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                              onClick={() =>
+                                issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                              }
                             >
                               Jump to issues
                             </button>
@@ -616,7 +630,9 @@ export default function AppClient() {
                             {lastFixAll.applied.slice(0, 5).map((t, idx) => (
                               <li key={idx}>{t}</li>
                             ))}
-                            {lastFixAll.applied.length > 5 ? <li>…and {lastFixAll.applied.length - 5} more</li> : null}
+                            {lastFixAll.applied.length > 5 ? (
+                              <li>…and {lastFixAll.applied.length - 5} more</li>
+                            ) : null}
                           </ul>
                         </div>
                       ) : null}
@@ -632,7 +648,8 @@ export default function AppClient() {
                             title={n.note}
                           >
                             <div className="font-semibold text-[var(--text)]">
-                              {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
+                              {n.label}{" "}
+                              <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>
                             <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
                           </div>
@@ -698,7 +715,8 @@ export default function AppClient() {
         </div>
 
         <div className="mt-3 text-xs text-[var(--muted)]">
-          Built-in formats are available to everyone. Custom formats appear here when you save or import them.
+          Built-in formats are available to everyone. Custom formats appear here when you save or
+          import them.
         </div>
       </div>
 
@@ -732,24 +750,32 @@ export default function AppClient() {
             >
               {busy ? "Working..." : "Export fixed CSV"}
             </button>
+
+            <button
+              type="button"
+              className="pill-btn"
+              onClick={downloadAutoFixLog}
+              disabled={busy || rows.length === 0 || (!autoFixes.length && !lastFixAll?.applied?.length)}
+              title={
+                rows.length === 0
+                  ? "Upload a CSV first"
+                  : !autoFixes.length && !lastFixAll?.applied?.length
+                    ? "No auto-fixes have been applied yet"
+                    : "Download a text log of the fixes that were applied"
+              }
+              style={
+                busy || rows.length === 0 || (!autoFixes.length && !lastFixAll?.applied?.length)
+                  ? { opacity: 0.6, cursor: "not-allowed" }
+                  : undefined
+              }
+            >
+              Download fix log
+            </button>
           </div>
 
           {autoFixes.length ? (
             <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-              {/* ✅ NEW: keep the existing header text, just wrap it + add Download log button */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-[var(--text)]">Auto-fixes applied</div>
-
-                <button
-                  type="button"
-                  className="pill-btn"
-                  onClick={downloadAutoFixLog}
-                  disabled={!autoFixes.length}
-                  title="Download a text log of the auto-fixes that were applied"
-                >
-                  Download log
-                </button>
-              </div>
+              <div className="text-sm font-medium text-[var(--text)]">Auto-fixes applied</div>
 
               <ul className="mt-2 space-y-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
                 {autoFixPreview.map((x, i) => (
@@ -769,6 +795,15 @@ export default function AppClient() {
                   </ul>
                 </details>
               ) : null}
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button type="button" className="pill-btn" onClick={downloadAutoFixLog}>
+                  Download fix log
+                </button>
+                <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                  Includes both auto-fixes and any “Fix all blocking issues” changes.
+                </span>
+              </div>
             </div>
           ) : null}
         </div>
@@ -806,7 +841,9 @@ export default function AppClient() {
           <div className="mt-4 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
-                <div className="p-6 text-sm text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
+                <div className="p-6 text-sm text-[var(--muted)]">
+                  No table yet. Upload a CSV to see it here.
+                </div>
               ) : (
                 <table className="data-table">
                   <thead>
@@ -848,7 +885,9 @@ export default function AppClient() {
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
                                     value={editing.value}
                                     onChange={(e) =>
-                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
+                                      setEditing((prev) =>
+                                        prev ? { ...prev, value: e.target.value } : prev
+                                      )
                                     }
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
@@ -872,7 +911,8 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row editing.
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full
+                row editing.
               </div>
             ) : null}
           </div>
