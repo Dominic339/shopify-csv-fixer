@@ -40,8 +40,6 @@ type UiIssue = {
   message: string;
   level?: "error" | "warning" | "info";
   severity?: "error" | "warning" | "info";
-
-  // Structured metadata (optional)
   code?: string;
   suggestion?: string;
 };
@@ -61,22 +59,16 @@ export default function AppClient() {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
-  // optional export base name (from query param exportName)
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
   // inline edit state for the preview table
   const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
 
-  // store last uploaded CSV text so switching formats can re-run on same file
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
-  // Selected format
   const [formatId, setFormatId] = useState<string>("general_csv");
 
-  // Built-in formats are stable
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
-
-  // Custom formats can change during the session (import/save/delete)
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
 
   // “Jump to issues”
@@ -85,17 +77,8 @@ export default function AppClient() {
   // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
-  // ✅ NEW: pinned rows (stay visible even after issues are resolved)
+  // ✅ Pinned rows = the "Manual fixes" worklist
   const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
-
-  function resetForNewRun() {
-    setIssues([]);
-    setParseIssues([]);
-    setAutoFixes([]);
-    setEditing(null);
-    setLastFixAll(null);
-    setPinnedRows(new Set());
-  }
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
@@ -105,22 +88,15 @@ export default function AppClient() {
 
   useEffect(() => {
     refreshCustomFormats();
-
     const onChanged = () => refreshCustomFormats();
     window.addEventListener("csnest-formats-changed", onChanged);
-
-    return () => {
-      window.removeEventListener("csnest-formats-changed", onChanged);
-    };
+    return () => window.removeEventListener("csnest-formats-changed", onChanged);
   }, []);
 
-  const allFormats = useMemo<CsvFormat[]>(() => {
-    return [...builtinFormats, ...customFormats];
-  }, [builtinFormats, customFormats]);
+  const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
   const appliedPresetRef = useRef(false);
-
   useEffect(() => {
     if (appliedPresetRef.current) return;
     if (typeof window === "undefined") return;
@@ -157,7 +133,6 @@ export default function AppClient() {
 
     const preset = qp.get("preset");
     if (preset) setExportBaseName(preset);
-
     appliedExportNameRef.current = true;
   }, []);
 
@@ -168,9 +143,7 @@ export default function AppClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allFormats.length]);
 
-  const activeFormat = useMemo(() => {
-    return allFormats.find((f) => f.id === formatId) ?? allFormats[0];
-  }, [allFormats, formatId]);
+  const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
 
   async function refreshQuotaAndPlan() {
     try {
@@ -230,17 +203,9 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
-  const validation = useMemo(() => {
-    return computeValidationBreakdown(issuesForTable, { formatId });
-  }, [issuesForTable, formatId]);
-
-  const readiness = useMemo(() => {
-    return computeReadinessSummary(issuesForTable, formatId);
-  }, [issuesForTable, formatId]);
-
-  const scoreNotes = useMemo(() => {
-    return buildScoreNotes(validation as any, issuesForTable, formatId);
-  }, [validation, issuesForTable, formatId]);
+  const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
+  const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
+  const scoreNotes = useMemo(() => buildScoreNotes(validation as any, issuesForTable, formatId), [validation, issuesForTable, formatId]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -248,59 +213,7 @@ export default function AppClient() {
     return first ? Object.keys(first) : [];
   }, [headers, rows]);
 
-  // ✅ IMPORTANT: Highlights should reflect *current* issues after edits.
-  // We revalidate issues (without modifying rows) on a short debounce.
-  const revalidateTimerRef = useRef<number | null>(null);
-  const lastRevalidateSigRef = useRef<string>("");
-
-  function computeSig(h: string[], r: CsvRow[]) {
-    // lightweight signature; enough to prevent duplicate revalidations
-    const head = h.join("|");
-    // sample a few rows to keep it cheap
-    const sampleCount = Math.min(5, r.length);
-    const parts: string[] = [head, String(r.length)];
-    for (let i = 0; i < sampleCount; i++) {
-      const row = r[i] ?? {};
-      // include only a few keys
-      const keys = Object.keys(row).slice(0, 6);
-      parts.push(keys.map((k) => `${k}=${row[k] ?? ""}`).join("&"));
-    }
-    return parts.join("::");
-  }
-
-  function revalidateIssuesOnly(nextHeaders: string[], nextRows: CsvRow[]) {
-    if (!activeFormat) return;
-
-    // Don’t let this thrash while typing—debounce
-    const sig = computeSig(nextHeaders, nextRows);
-    if (sig === lastRevalidateSigRef.current) return;
-    lastRevalidateSigRef.current = sig;
-
-    if (revalidateTimerRef.current) {
-      window.clearTimeout(revalidateTimerRef.current);
-      revalidateTimerRef.current = null;
-    }
-
-    revalidateTimerRef.current = window.setTimeout(() => {
-      try {
-        const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
-
-        // ✅ Critical: DO NOT apply res.fixedRows / fixesApplied here.
-        // Only update the issue list so highlights clear immediately when fixed.
-        const mergedIssues = [ ...((res.issues as any) ?? []), ...(parseIssues ?? []) ];
-        setIssues(mergedIssues as any);
-      } catch {
-        // If validation fails for any reason, don't brick typing.
-      }
-    }, 220);
-  }
-
-  useEffect(() => {
-    return () => {
-      if (revalidateTimerRef.current) window.clearTimeout(revalidateTimerRef.current);
-    };
-  }, []);
-
+  // Build cell highlight map from CURRENT issues
   const issueCellMap = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
     for (const i of issuesForTable) {
@@ -321,12 +234,22 @@ export default function AppClient() {
     return [...set].sort((a, b) => a - b);
   }, [issuesForTable]);
 
+  // ✅ Auto-pin any row that has issues (so it appears in Manual fixes by default)
+  useEffect(() => {
+    if (!rowsWithAnyIssue.length) return;
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      for (const idx of rowsWithAnyIssue) next.add(idx);
+      return next;
+    });
+  }, [rowsWithAnyIssue.join("|")]);
+
   const pinnedSorted = useMemo(() => {
     return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
   }, [pinnedRows, rows.length]);
 
+  // Preview table: pinned rows first, then issue rows, then rest up to 25
   const previewRows = useMemo(() => {
-    // ✅ Order: pinned rows first, then issue rows, then remaining rows (up to 25)
     const out: number[] = [];
     const seen = new Set<number>();
 
@@ -336,23 +259,57 @@ export default function AppClient() {
         seen.add(idx);
       }
     }
-
     for (const idx of rowsWithAnyIssue) {
       if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
       }
     }
-
     for (let idx = 0; idx < rows.length && out.length < 25; idx++) {
       if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
       }
     }
-
     return out.slice(0, 25);
   }, [pinnedSorted, rowsWithAnyIssue, rows.length]);
+
+  const rowSeverity = useMemo(() => {
+    // highest severity per row
+    const m = new Map<number, "error" | "warning" | "info">();
+    for (const i of issuesForTable) {
+      if (i.rowIndex < 0) continue;
+      const prev = m.get(i.rowIndex);
+      if (prev === "error") continue;
+      if (prev === "warning" && i.severity === "info") continue;
+      m.set(i.rowIndex, i.severity);
+    }
+    return m;
+  }, [issuesForTable]);
+
+  const rowHasErrorOrWarning = useCallback(
+    (rowIndex: number) => {
+      const s = rowSeverity.get(rowIndex);
+      return s === "error" || s === "warning";
+    },
+    [rowSeverity]
+  );
+
+  function pinRow(rowIndex: number) {
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      next.add(rowIndex);
+      return next;
+    });
+  }
+
+  function unpinRow(rowIndex: number) {
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      next.delete(rowIndex);
+      return next;
+    });
+  }
 
   function togglePin(rowIndex: number) {
     setPinnedRows((prev) => {
@@ -362,6 +319,33 @@ export default function AppClient() {
       return next;
     });
   }
+
+  // ✅ Revalidate issues WITHOUT applying fixes (so typing doesn't get "corrected")
+  const revalidateTimerRef = useRef<number | null>(null);
+  function revalidateIssuesOnly(nextHeaders: string[], nextRows: CsvRow[]) {
+    if (!activeFormat) return;
+
+    if (revalidateTimerRef.current) {
+      window.clearTimeout(revalidateTimerRef.current);
+      revalidateTimerRef.current = null;
+    }
+
+    revalidateTimerRef.current = window.setTimeout(() => {
+      try {
+        const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
+        const mergedIssues = [...((res.issues as any) ?? []), ...(parseIssues ?? [])];
+        setIssues(mergedIssues as any);
+      } catch {
+        // ignore
+      }
+    }, 220);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (revalidateTimerRef.current) window.clearTimeout(revalidateTimerRef.current);
+    };
+  }, []);
 
   const onUpdateRow = useCallback(
     (rowIndex: number, patch: Partial<CsvRow>) => {
@@ -378,8 +362,6 @@ export default function AppClient() {
 
         next[rowIndex] = { ...existing, ...cleaned };
 
-        // ✅ Revalidate issues without mutating the user's typed values.
-        // (We call with the updated next array.)
         const hdrs = tableHeaders.length ? tableHeaders : Object.keys(next[0] ?? {});
         revalidateIssuesOnly(hdrs, next);
 
@@ -395,13 +377,12 @@ export default function AppClient() {
     setHeaders(res.fixedHeaders ?? nextHeaders);
     setRows(res.fixedRows ?? nextRows);
 
-    const mergedIssues = [ ...((res.issues as any) ?? []), ...(parseIssues ?? []) ];
+    const mergedIssues = [...((res.issues as any) ?? []), ...(parseIssues ?? [])];
     setIssues(mergedIssues as any);
 
     setAutoFixes([...(additionalFixes ?? []), ...(res.fixesApplied ?? [])]);
   }
 
-  // true “can this button actually fix anything?” dry-run
   const fixAllDryRun = useMemo(() => {
     if (formatId !== "shopify_products") return null;
     if (!rows.length) return null;
@@ -425,8 +406,6 @@ export default function AppClient() {
 
     setErrorBanner(null);
     setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
-
-    // Applying fix-all is an intentional mutation (ok to use fixed rows here)
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
 
@@ -449,14 +428,13 @@ export default function AppClient() {
       setHeaders(res.fixedHeaders ?? []);
       setRows(res.fixedRows ?? []);
 
-      // ✅ Merge format issues + parse issues
       setIssues([...(res.issues ?? []), ...nextParseIssues] as any);
 
       setAutoFixes(res.fixesApplied ?? []);
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      setPinnedRows(new Set());
+      setPinnedRows(new Set()); // will auto-pin issue rows via effect
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -476,7 +454,12 @@ export default function AppClient() {
       const text = await file.text();
       setLastUploadedText(text);
 
-      resetForNewRun();
+      setIssues([]);
+      setParseIssues([]);
+      setAutoFixes([]);
+      setEditing(null);
+      setLastFixAll(null);
+      setPinnedRows(new Set());
 
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
@@ -490,7 +473,6 @@ export default function AppClient() {
   }
 
   useEffect(() => {
-    // switching formats should keep pins? usually no—safer to clear
     setIssues([]);
     setParseIssues([]);
     setAutoFixes([]);
@@ -571,9 +553,7 @@ export default function AppClient() {
     lines.push("");
 
     lines.push("Fixes:");
-    for (let i = 0; i < fixList.length; i++) {
-      lines.push(`${i + 1}. ${fixList[i]}`);
-    }
+    for (let i = 0; i < fixList.length; i++) lines.push(`${i + 1}. ${fixList[i]}`);
 
     if (lastFixAll?.applied?.length) {
       lines.push("");
@@ -595,12 +575,8 @@ export default function AppClient() {
   function startEdit(rowIndex: number, col: string) {
     const current = rows[rowIndex]?.[col] ?? "";
     setEditing({ rowIndex, col, value: current });
-    // convenience: pin the row when user starts editing from the preview table
-    setPinnedRows((prev) => {
-      const next = new Set(prev);
-      next.add(rowIndex);
-      return next;
-    });
+    // ✅ clicking a cell means user is working that row => pin it into Manual fixes
+    pinRow(rowIndex);
   }
 
   function commitEdit() {
@@ -622,7 +598,6 @@ export default function AppClient() {
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
-  // show button ONLY if fixer can truly apply at least 1 safe fix
   const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
   const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
 
@@ -759,24 +734,6 @@ export default function AppClient() {
                   </div>
                 </div>
               ) : null}
-
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
-                  Structure {validation.categories.structure}
-                </span>
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
-                  Variants {validation.categories.variant}
-                </span>
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
-                  Pricing {validation.categories.pricing}
-                </span>
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
-                  Inventory {validation.categories.inventory}
-                </span>
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5">
-                  SEO {validation.categories.seo}
-                </span>
-              </div>
             </div>
           ) : null}
         </div>
@@ -907,29 +864,6 @@ export default function AppClient() {
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          {rows.length > 0 ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
-                Validation score: <span className="font-semibold">{validation.score}</span>/100
-              </span>
-
-              <span
-                className={
-                  "rounded-full border px-3 py-1 font-semibold " +
-                  (validation.readyForShopifyImport
-                    ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
-                }
-              >
-                {validation.label}
-              </span>
-
-              <span className="text-[color:rgba(var(--muted-rgb),1)]">
-                {validation.counts.errors} errors, {validation.counts.warnings} warnings, {validation.counts.infos} tips
-              </span>
-            </div>
-          ) : null}
-
           <div className="mt-4 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
@@ -939,7 +873,7 @@ export default function AppClient() {
                   <thead>
                     <tr>
                       <th style={{ width: 70 }}>Row</th>
-                      <th style={{ width: 84 }}>Pin</th>
+                      <th style={{ width: 96 }}></th>
                       {tableHeaders.slice(0, 10).map((h) => (
                         <th key={h}>{h}</th>
                       ))}
@@ -949,29 +883,45 @@ export default function AppClient() {
                     {previewRows.map((rowIndex) => {
                       const row = rows[rowIndex] ?? {};
                       const isPinned = pinnedRows.has(rowIndex);
+                      const sev = rowSeverity.get(rowIndex);
+                      const hasEW = rowHasErrorOrWarning(rowIndex);
+
+                      // ✅ Per your request:
+                      // - While errors/warnings exist: show the badge (no unpin button here)
+                      // - Once clear: show Unpin button (replaces the badge)
+                      const actionCell = hasEW ? (
+                        <span
+                          className={
+                            "rounded-full border px-2 py-1 text-xs font-semibold " +
+                            (sev === "error"
+                              ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.10)] text-[var(--text)]"
+                              : "border-[color:rgba(255,200,0,0.35)] bg-[color:rgba(255,200,0,0.10)] text-[var(--text)]")
+                          }
+                          title="This row still has an active issue"
+                        >
+                          {sev === "error" ? "Error" : "Warning"}
+                        </span>
+                      ) : isPinned ? (
+                        <button type="button" className="pill-btn" onClick={() => unpinRow(rowIndex)} title="Remove from Manual fixes">
+                          Unpin
+                        </button>
+                      ) : (
+                        <button type="button" className="pill-btn" onClick={() => pinRow(rowIndex)} title="Add to Manual fixes">
+                          Pin
+                        </button>
+                      );
 
                       return (
                         <tr key={rowIndex}>
                           <td className="text-[var(--muted)]">{rowIndex + 1}</td>
-
-                          <td>
-                            <button
-                              type="button"
-                              className="pill-btn"
-                              onClick={() => togglePin(rowIndex)}
-                              title={isPinned ? "Unpin this row" : "Pin this row to keep it visible"}
-                              style={{ padding: "6px 10px" }}
-                            >
-                              {isPinned ? "Unpin" : "Pin"}
-                            </button>
-                          </td>
+                          <td>{actionCell}</td>
 
                           {tableHeaders.slice(0, 10).map((h) => {
-                            const sev = issueCellMap.get(`${rowIndex}|||${h}`);
+                            const cellSev = issueCellMap.get(`${rowIndex}|||${h}`);
                             const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
 
                             const cellClass =
-                              (sev === "error" ? "cell-error" : sev === "warning" ? "cell-warning" : "") +
+                              (cellSev === "error" ? "cell-error" : cellSev === "warning" ? "cell-warning" : "") +
                               (isEditing ? " cell-editing" : "");
 
                             return (
@@ -980,7 +930,7 @@ export default function AppClient() {
                                 className={cellClass}
                                 onClick={() => startEdit(rowIndex, h)}
                                 style={{ cursor: "pointer" }}
-                                title={sev ? `${sev}` : "Click to edit"}
+                                title={cellSev ? `${cellSev}` : "Click to edit"}
                               >
                                 {isEditing ? (
                                   <input
@@ -1012,8 +962,7 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 10 columns and up to 25 rows for speed. Pinned rows stay visible even after fixes.
-                Use “Manual fixes” for full row editing.
+                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until unpinned.
               </div>
             ) : null}
           </div>
@@ -1026,6 +975,8 @@ export default function AppClient() {
               onUpdateRow={onUpdateRow}
               resetKey={formatId}
               formatId={formatId}
+              pinnedRows={pinnedSorted}
+              onUnpinRow={unpinRow}
             />
           </div>
         </div>
