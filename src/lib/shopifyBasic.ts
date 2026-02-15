@@ -5,8 +5,6 @@ import {
   slugifyShopifyHandle,
   normalizeShopifyBool,
   isValidShopifyBool,
-  normalizeShopifyInventoryPolicy,
-  isValidShopifyInventoryPolicy,
   parseShopifyMoney,
   formatShopifyMoney,
   isHttpUrl,
@@ -42,6 +40,44 @@ function set(r: CsvRow, k: string, v: string) {
   r[k] = v;
 }
 
+function normalizeTags(raw: string) {
+  // Split by commas, trim each tag, drop empties, dedupe (case-insensitive), rejoin with ", "
+  const parts = raw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of parts) {
+    const key = t.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(t);
+  }
+  return out.join(", ");
+}
+
+function normalizeStatus(raw: string): { value: string | null; mappedFrom?: string } {
+  const s = (raw ?? "").toString().trim().toLowerCase();
+  if (!s) return { value: null };
+
+  // Shopify accepted values
+  if (s === "active" || s === "draft" || s === "archived") return { value: s };
+
+  // Common legacy / user-entered values we can safely map
+  const map: Record<string, string> = {
+    enabled: "active",
+    disabled: "draft",
+    published: "active",
+    unpublished: "draft",
+  };
+
+  if (map[s]) return { value: map[s], mappedFrom: s };
+
+  return { value: "__invalid__" };
+}
+
 export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): FixResult {
   const issues: Issue[] = [];
   const fixesApplied: string[] = [];
@@ -55,7 +91,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
   const cTitle = "Title";
   const cHandle = "URL handle";
   const cDesc = "Description";
-  const cVendor = "Vendor";
   const cTags = "Tags";
   const cPublished = "Published on online store";
   const cStatus = "Status";
@@ -112,6 +147,16 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
   for (let i = 0; i < fixedRows.length; i++) {
     const r = fixedRows[i];
     const row = i + 1;
+
+    // --- Tags normalization (safe)
+    const tagsRaw = get(r, cTags);
+    if (tagsRaw && tagsRaw.includes(",")) {
+      const normalized = normalizeTags(tagsRaw);
+      if (normalized !== tagsRaw) {
+        set(r, cTags, normalized);
+        fixesApplied.push(`Normalized Tags formatting on row ${row}`);
+      }
+    }
 
     const title = get(r, cTitle).trim();
     if (!title) {
@@ -171,6 +216,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
+    // --- Published normalization/validation (already present)
     const pub = get(r, cPublished).trim();
     if (pub) {
       const norm = normalizeShopifyBool(pub);
@@ -190,26 +236,72 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // Shopify expects an inventory policy here: deny | continue
+    // --- Status normalization/fix (NEW)
+    const statusRaw = get(r, cStatus);
+    if (fixedHeaders.includes(cStatus)) {
+      const st = normalizeStatus(statusRaw);
+      const pubNorm = get(r, cPublished).trim().toLowerCase();
+
+      if (st.value === null) {
+        // Status column exists but value is blank => derive safely
+        // If Published is valid, map published true->active, false->draft; else default to draft (safer).
+        let derived = "draft";
+        if (isValidShopifyBool(pubNorm)) {
+          derived = pubNorm === "true" ? "active" : "draft";
+        }
+        set(r, cStatus, derived);
+        fixesApplied.push(`Filled blank Status with "${derived}" on row ${row}`);
+      } else if (st.value === "__invalid__") {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_status",
+          row,
+          column: cStatus,
+          message: `Row ${row}: Status must be active, draft, or archived (got "${statusRaw}").`,
+          suggestion: `Use "active", "draft", or "archived".`,
+        });
+      } else {
+        // Valid (or mapped) value; normalize casing + map legacy
+        const target = st.value;
+        if (target !== statusRaw.trim()) {
+          set(r, cStatus, target);
+          fixesApplied.push(
+            st.mappedFrom
+              ? `Mapped Status "${st.mappedFrom}" to "${target}" on row ${row}`
+              : `Normalized Status to "${target}" on row ${row}`
+          );
+        }
+      }
+    }
+
+    // --- Continue selling normalization (already present, but align code with meta)
     const cs = get(r, cContinue).trim();
     if (cs) {
-      const norm = normalizeShopifyInventoryPolicy(cs);
-      if (norm !== cs) {
-        set(r, cContinue, norm);
-        fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
+      const lower = cs.toLowerCase();
+      if (lower === "continue" || lower === "deny") {
+        const mapped = lower === "continue" ? "true" : "false";
+        set(r, cContinue, mapped);
+        fixesApplied.push(`Mapped legacy inventory policy "${cs}" to Continue selling = "${mapped}" on row ${row}`);
+      } else {
+        const norm = normalizeShopifyBool(cs);
+        if (norm !== cs) {
+          set(r, cContinue, norm);
+          fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
+        }
       }
-      if (!isValidShopifyInventoryPolicy(get(r, cContinue))) {
+      if (!isValidShopifyBool(get(r, cContinue))) {
         issues.push({
           severity: "error",
           code: "shopify/invalid_inventory_policy",
           row,
           column: cContinue,
-          message: `Row ${row}: Continue selling when out of stock must be "deny" or "continue" (got "${cs}").`,
-          suggestion: `Use "deny" (stop selling) or "continue" (allow oversell).`,
+          message: `Row ${row}: Continue selling when out of stock must be true or false (got "${cs}").`,
+          suggestion: `Change to "true" or "false".`,
         });
       }
     }
 
+    // --- Price normalization/validation (already present)
     const priceRaw = get(r, cPrice).trim();
     if (priceRaw) {
       const n = parseShopifyMoney(priceRaw);
@@ -324,6 +416,24 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     const v2 = get(r, optVals[1]).trim();
     const v3 = get(r, optVals[2]).trim();
 
+    // --- Default Title normalization (NEW, safe)
+    // Shopify docs: if a product has only one option, it should be Default Title.
+    // If Option1 value is Default Title and Option2/3 are blank, normalize Option1 name to Default Title.
+    if (v1.toLowerCase() === "default title" && !v2 && !v3) {
+      const n1Lower = n1.toLowerCase();
+      if (!n1 || n1Lower === "title" || n1Lower === "default title") {
+        if (n1 !== "Default Title") {
+          set(r, optNames[0], "Default Title");
+          fixesApplied.push(`Normalized Option1 name to "Default Title" on row ${row}`);
+        }
+      }
+      // Also ensure the value is properly cased
+      if (v1 !== "Default Title") {
+        set(r, optVals[0], "Default Title");
+        fixesApplied.push(`Normalized Option1 value to "Default Title" on row ${row}`);
+      }
+    }
+
     if ((n2 || v2) && !(n1 || v1)) {
       issues.push({
         severity: "error",
@@ -383,7 +493,8 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       byHandle.set(h, list);
     }
   }
-    // 4) Variant grouping + duplicate handle sanity (FIXED)
+
+  // 4) Variant grouping + duplicate handle sanity (FIXED)
   for (const [handle, idxs] of byHandle.entries()) {
     if (idxs.length <= 1) continue;
 
@@ -410,7 +521,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       if (list.length <= 1) continue;
 
       // If these are image-only rows (no sku/options, only an image URL), don't warn.
-      // We detect this by checking one representative row for the signature.
       const sampleRow = fixedRows[list[0]];
       const sku = get(sampleRow, cSku).trim();
       const ov1 = get(sampleRow, "Option1 value").trim();
