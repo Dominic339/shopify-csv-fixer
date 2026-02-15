@@ -1,4 +1,3 @@
-// src/components/EditableIssuesTable.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -35,12 +34,6 @@ type Props = {
 
   /** Needed for preset-specific tooltip metadata (Shopify, WooCommerce, etc.) */
   formatId?: string;
-
-  /** Pinned rows remain visible even after issues resolve; user must manually unpin. */
-  pinnedRows?: number[];
-
-  /** Called when user clicks Unpin. */
-  onUnpinRow?: (rowIndex: number) => void;
 };
 
 function sevRank(sev: Severity) {
@@ -74,27 +67,7 @@ function severityChip(sev: Severity) {
   );
 }
 
-function resolvedChip() {
-  const base = "rounded-full px-2 py-0.5 text-xs font-semibold border";
-  return (
-    <span
-      className={`${base} border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]`}
-    >
-      Resolved
-    </span>
-  );
-}
-
-export function EditableIssuesTable({
-  headers,
-  rows,
-  issues,
-  onUpdateRow,
-  resetKey,
-  formatId,
-  pinnedRows,
-  onUnpinRow,
-}: Props) {
+export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetKey, formatId }: Props) {
   const normalized = useMemo<NormalizedIssue[]>(() => {
     return (issues ?? [])
       .map((it) => {
@@ -149,13 +122,10 @@ export function EditableIssuesTable({
     return map;
   }, [rowIssues]);
 
-  // Stable row order: union of rows with issues + pinned rows
+  // Stable row order (ascending)
   const problemRows = useMemo(() => {
-    const set = new Set<number>();
-    for (const k of issuesByRow.keys()) set.add(k);
-    for (const k of pinnedRows ?? []) set.add(k);
-    return Array.from(set).sort((a, b) => a - b);
-  }, [issuesByRow, pinnedRows]);
+    return Array.from(issuesByRow.keys()).sort((a, b) => a - b);
+  }, [issuesByRow]);
 
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -197,17 +167,17 @@ export function EditableIssuesTable({
           className="pointer-events-none absolute left-1/2 top-full z-50 hidden w-[340px] -translate-x-1/2 rounded-2xl border border-[var(--border)] p-3 text-xs text-[var(--text)] shadow-2xl group-hover:block"
           style={{ backgroundColor: "rgba(10,10,10,0.96)" }}
         >
-          <div className="text-sm font-semibold">{(meta as any).title}</div>
+          <div className="text-sm font-semibold">{meta.title}</div>
 
-          <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).explanation}</div>
+          <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{meta.explanation}</div>
 
           <div className="mt-3 font-semibold text-[var(--text)]">Why the platform cares</div>
-          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).whyPlatformCares}</div>
+          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{meta.whyPlatformCares}</div>
 
           <div className="mt-3 font-semibold text-[var(--text)]">How to fix</div>
-          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).howToFix}</div>
+          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{meta.howToFix}</div>
 
-          {(meta as any).autoFixable ? (
+          {meta.autoFixable ? (
             <div className="mt-3 rounded-xl border border-[color:rgba(var(--accent-rgb),0.25)] bg-[color:rgba(var(--accent-rgb),0.10)] px-2 py-1 text-[11px]">
               Auto-fixable (safe)
             </div>
@@ -217,7 +187,7 @@ export function EditableIssuesTable({
     );
   }
 
-  if (!normalized.length && !(pinnedRows?.length ?? 0)) {
+  if (!normalized.length) {
     return (
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
         No issues detected.
@@ -273,17 +243,13 @@ export function EditableIssuesTable({
             else infos++;
           }
 
-          const hasActiveIssues = rowArr.length > 0;
-
           // Use the "worst" severity for the row box tone
-          const rowTone: Severity = hasActiveIssues
-            ? rowArr.reduce<Severity>((acc, cur) => {
-                if (acc === "error") return acc;
-                if (acc === "warning" && cur.severity === "error") return "error";
-                if (acc === "info" && (cur.severity === "error" || cur.severity === "warning")) return cur.severity;
-                return acc;
-              }, "info")
-            : "info";
+          const rowTone: Severity = rowArr.reduce<Severity>((acc, cur) => {
+            if (acc === "error") return acc;
+            if (acc === "warning" && cur.severity === "error") return "error";
+            if (acc === "info" && (cur.severity === "error" || cur.severity === "warning")) return cur.severity;
+            return acc;
+          }, "info");
 
           return (
             <div key={`row-${rowIndex}`} className={`rounded-2xl border p-3 ${issueBoxClass(rowTone)}`}>
@@ -295,46 +261,17 @@ export function EditableIssuesTable({
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-[var(--text)]">
                     Row {rowIndex + 1}
-                    {hasActiveIssues ? (
-                      <span className="ml-2 text-xs font-normal text-[color:rgba(var(--muted-rgb),1)]">
-                        {errors ? `${errors} errors` : ""}
-                        {warnings ? (errors ? `, ${warnings} warnings` : `${warnings} warnings`) : ""}
-                        {infos ? ((errors || warnings) ? `, ${infos} tips` : `${infos} tips`) : ""}
-                      </span>
-                    ) : (
-                      <span className="ml-2 text-xs font-normal text-[color:rgba(var(--muted-rgb),1)]">0 issues</span>
-                    )}
+                    <span className="ml-2 text-xs font-normal text-[color:rgba(var(--muted-rgb),1)]">
+                      {errors ? `${errors} errors` : ""}
+                      {warnings ? (errors ? `, ${warnings} warnings` : `${warnings} warnings`) : ""}
+                      {infos ? ((errors || warnings) ? `, ${infos} tips` : `${infos} tips`) : ""}
+                    </span>
                   </div>
-
-                  {hasActiveIssues ? (
-                    severityChip(rowTone)
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      {resolvedChip()}
-                      {onUnpinRow ? (
-                        <button
-                          type="button"
-                          className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)]"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onUnpinRow(rowIndex);
-                          }}
-                          title="Remove this resolved row from the Issues list"
-                        >
-                          Unpin
-                        </button>
-                      ) : null}
-                    </div>
-                  )}
+                  {severityChip(rowTone)}
                 </div>
 
                 <div className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                  {isOpen
-                    ? "Click to collapse"
-                    : hasActiveIssues
-                      ? "Click to expand and fix"
-                      : "Resolved (unpin when you’re ready)"}
+                  {isOpen ? "Click to collapse" : "Click to expand and fix"}
                 </div>
               </button>
 
@@ -345,35 +282,26 @@ export function EditableIssuesTable({
                   <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
                     <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">Issues in this row</div>
                     <div className="mt-2 space-y-2">
-                      {hasActiveIssues ? (
-                        rowArr.map((iss, idx) => (
-                          <div
-                            key={`${rowIndex}-iss-${idx}`}
-                            className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="text-sm font-semibold text-[var(--text)]">
-                                {iss.column ? iss.column : "(row)"} {issueTooltip(iss)}
-                              </div>
-                              {severityChip(iss.severity)}
+                      {rowArr.map((iss, idx) => (
+                        <div key={`${rowIndex}-iss-${idx}`} className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="text-sm font-semibold text-[var(--text)]">
+                              {iss.column ? iss.column : "(row)"} {issueTooltip(iss)}
                             </div>
-
-                            <div className="mt-1 text-sm text-[var(--text)]">
-                              {iss.message} {issueTooltip(iss)}
-                            </div>
-
-                            {iss.suggestion ? (
-                              <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                                Suggestion: {iss.suggestion}
-                              </div>
-                            ) : null}
+                            {severityChip(iss.severity)}
                           </div>
-                        ))
-                      ) : (
-                        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                          No current issues remain on this row. You can unpin it when you’re ready.
+
+                          <div className="mt-1 text-sm text-[var(--text)]">
+                            {iss.message} {issueTooltip(iss)}
+                          </div>
+
+                          {iss.suggestion ? (
+                            <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                              Suggestion: {iss.suggestion}
+                            </div>
+                          ) : null}
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
 
@@ -383,7 +311,9 @@ export function EditableIssuesTable({
                       const v = rows[rowIndex]?.[h] ?? "";
                       return (
                         <label key={`${rowIndex}-${h}`} className="block">
-                          <div className="mb-1 text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">{h}</div>
+                          <div className="mb-1 text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">
+                            {h}
+                          </div>
                           <input
                             className={`w-full rounded-xl border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(
                               rowIndex,
