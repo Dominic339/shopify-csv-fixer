@@ -64,9 +64,7 @@ export default function AppClient() {
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
   // inline edit state for the preview table
-  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
-    null
-  );
+  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
 
   // store last uploaded CSV text so switching formats can re-run on same file
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
@@ -279,11 +277,7 @@ export default function AppClient() {
     });
   }, []);
 
-  function runFormatOnCurrentData(
-    nextHeaders: string[],
-    nextRows: CsvRow[],
-    additionalFixes: string[] = []
-  ) {
+  function runFormatOnCurrentData(nextHeaders: string[], nextRows: CsvRow[], additionalFixes: string[] = []) {
     const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
     setHeaders(res.fixedHeaders ?? nextHeaders);
     setRows(res.fixedRows ?? nextRows);
@@ -291,26 +285,32 @@ export default function AppClient() {
     setAutoFixes([...(additionalFixes ?? []), ...(res.fixesApplied ?? [])]);
   }
 
-  // ✅ NEW: true “can this button actually fix anything?” dry-run
+  // ✅ true “can this button actually fix anything?” dry-run
   const fixAllDryRun = useMemo(() => {
     if (formatId !== "shopify_products") return null;
     if (!rows.length) return null;
-    // Run the same fixer but do NOT apply unless user clicks
     return fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatId, tableHeaders.join("||"), rows, issuesForTable]);
 
   const realFixableBlockingCount = fixAllDryRun?.fixesApplied?.length ?? 0;
 
+  // ✅ consolidated fix list (used by UI + log)
+  const fixList = useMemo(() => {
+    const uniq = new Set<string>();
+    for (const f of autoFixes ?? []) uniq.add(f);
+    for (const f of lastFixAll?.applied ?? []) uniq.add(f);
+    return Array.from(uniq);
+  }, [autoFixes, lastFixAll]);
+
   function handleFixAllBlocking() {
     if (formatId !== "shopify_products") return;
 
-    // Use the dry-run result if we have it (same inputs)
     const fixed = fixAllDryRun ?? fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
 
     if (!fixed.fixesApplied.length) {
       setErrorBanner(
-        `No safe auto-fixable blockers found. Remaining blockers need manual edits (for example: Missing Title, Published like "maybe", Price like "free").`
+        `Fix All ran, but 0 fixes were safely applied. Remaining blockers require manual edits (e.g., Missing Title, Published like "maybe", Price like "free").`
       );
       return;
     }
@@ -424,7 +424,6 @@ export default function AppClient() {
   }
 
   function downloadAutoFixLog() {
-    const fixList = Array.from(new Set([...(autoFixes ?? []), ...(lastFixAll?.applied ?? [])]));
     if (!fixList.length) return;
 
     const now = new Date();
@@ -443,10 +442,8 @@ export default function AppClient() {
       warnings: issuesForTable.filter((i) => i.severity === "warning").length,
       tips: issuesForTable.filter((i) => i.severity === "info").length,
     };
-    lines.push(
-      `Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`
-    );
-    lines.push(`Total auto-fixes applied: ${fixList.length}`);
+    lines.push(`Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`);
+    lines.push(`Total fixes recorded: ${fixList.length}`);
     lines.push("");
 
     lines.push("Fixes:");
@@ -487,24 +484,19 @@ export default function AppClient() {
   }
 
   const autoFixPreviewCount = 8;
-  const autoFixPreview = autoFixes.slice(0, autoFixPreviewCount);
-  const autoFixRest = autoFixes.slice(autoFixPreviewCount);
+  const autoFixPreview = fixList.slice(0, autoFixPreviewCount);
+  const autoFixRest = fixList.slice(autoFixPreviewCount);
   const autoFixRestCount = Math.max(0, autoFixRest.length);
 
   const used = Number(quota?.used ?? 0);
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? Number(limit ?? 0) - used));
 
-  // ✅ FIX: show button ONLY if fixer can truly apply at least 1 safe fix
+  // ✅ show button ONLY if fixer can truly apply at least 1 safe fix
   const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
   const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
 
-  // ✅ UX: if there are blockers but none are safely fixable, show a friendly hint
-  const showNoFixableHint =
-    formatId === "shopify_products" &&
-    rows.length > 0 &&
-    validation.counts.blockingErrors > 0 &&
-    realFixableBlockingCount === 0;
+  const logDisabled = busy || rows.length === 0 || fixList.length === 0;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -517,9 +509,7 @@ export default function AppClient() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            Pick a format → upload → auto-fix safe issues → export.
-          </p>
+          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
 
           {rows.length > 0 ? (
             <div className="mt-3 space-y-2 text-sm">
@@ -544,7 +534,6 @@ export default function AppClient() {
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
                 </span>
 
-                {/* ✅ FIX: button only shows when it will actually apply changes */}
                 {fixAllVisible ? (
                   <button
                     type="button"
@@ -559,7 +548,6 @@ export default function AppClient() {
                 ) : null}
               </div>
 
-              {/* Phase 1: Shopify readiness summary */}
               {formatId === "shopify_products" ? (
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -595,16 +583,14 @@ export default function AppClient() {
                             </button>
 
                             <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              Fixable blockers:{" "}
+                              Auto-fixable blockers:{" "}
                               <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
                             </span>
                           </div>
 
-                          {/* ✅ UX hint when nothing safe is fixable */}
-                          {showNoFixableHint ? (
+                          {realFixableBlockingCount === 0 ? (
                             <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              No safe auto-fixable blockers found. Use <span className="font-semibold text-[var(--text)]">Manual fixes</span> below to resolve items like
-                              missing Title or non-numeric Price.
+                              No safe auto-fixable blockers found. Use Manual fixes below to resolve items like missing Title or non-numeric Price.
                             </div>
                           ) : null}
                         </div>
@@ -667,13 +653,7 @@ export default function AppClient() {
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
           <div className="font-medium">Monthly exports</div>
-          {isUnlimited ? (
-            <div>Unlimited</div>
-          ) : (
-            <div>
-              {used}/{limit} used • {left} left
-            </div>
-          )}
+          {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
           <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
@@ -738,25 +718,21 @@ export default function AppClient() {
               type="button"
               className="pill-btn"
               onClick={downloadAutoFixLog}
-              disabled={busy || rows.length === 0 || (!autoFixes.length && !lastFixAll?.applied?.length)}
+              disabled={logDisabled}
               title={
                 rows.length === 0
                   ? "Upload a CSV first"
-                  : !autoFixes.length && !lastFixAll?.applied?.length
+                  : fixList.length === 0
                     ? "No auto-fixes have been applied yet"
                     : "Download a text log of the fixes that were applied"
               }
-              style={
-                busy || rows.length === 0 || (!autoFixes.length && !lastFixAll?.applied?.length)
-                  ? { opacity: 0.6, cursor: "not-allowed" }
-                  : undefined
-              }
+              style={logDisabled ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
             >
               Download fix log
             </button>
           </div>
 
-          {autoFixes.length ? (
+          {(fixList.length > 0) ? (
             <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
               <div className="text-sm font-medium text-[var(--text)]">Auto-fixes applied</div>
 
