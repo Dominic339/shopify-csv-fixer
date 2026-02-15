@@ -2,29 +2,42 @@
 import type { CsvIssue } from "@/lib/formats/types";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
+export type ScoreNoteKey = "structure" | "variant" | "pricing" | "inventory" | "seo" | "images";
+
 export type ScoreNote = {
-  key: "structure" | "variant" | "pricing" | "inventory" | "seo";
+  key: ScoreNoteKey;
   label: string;
   score: number;
   note: string;
 };
 
-export function buildScoreNotes(
-  validation: any,
-  issues: CsvIssue[],
-  formatId?: string
-): ScoreNote[] {
-  const counts: Record<ScoreNote["key"], { blocking: number; errors: number; warnings: number }> = {
+const LABELS: Record<ScoreNoteKey, string> = {
+  structure: "Structure",
+  variant: "Variants",
+  pricing: "Pricing",
+  inventory: "Inventory",
+  seo: "SEO",
+  images: "Images",
+};
+
+const KEYS: ScoreNoteKey[] = ["structure", "variant", "pricing", "inventory", "seo", "images"];
+
+export function buildScoreNotes(validation: any, issues: CsvIssue[], formatId?: string): ScoreNote[] {
+  const counts: Record<ScoreNoteKey, { blocking: number; errors: number; warnings: number }> = {
     structure: { blocking: 0, errors: 0, warnings: 0 },
     variant: { blocking: 0, errors: 0, warnings: 0 },
     pricing: { blocking: 0, errors: 0, warnings: 0 },
     inventory: { blocking: 0, errors: 0, warnings: 0 },
     seo: { blocking: 0, errors: 0, warnings: 0 },
+    images: { blocking: 0, errors: 0, warnings: 0 },
   };
 
   for (const issue of issues) {
     const meta = getIssueMeta(formatId, issue.code);
-    const cat = (meta?.category ?? "structure") as ScoreNote["key"];
+
+    // meta.category can be something new later; never crash.
+    const rawCat = String(meta?.category ?? "structure") as ScoreNoteKey;
+    const cat: ScoreNoteKey = rawCat in counts ? rawCat : "structure";
 
     if (issue.severity === "error") {
       counts[cat].errors += 1;
@@ -34,17 +47,7 @@ export function buildScoreNotes(
     }
   }
 
-  const labels: Record<ScoreNote["key"], string> = {
-    structure: "Structure",
-    variant: "Variants",
-    pricing: "Pricing",
-    inventory: "Inventory",
-    seo: "SEO",
-  };
-
-  const keys: ScoreNote["key"][] = ["structure", "variant", "pricing", "inventory", "seo"];
-
-  return keys.map((k) => {
+  return KEYS.map((k) => {
     const s = Number(validation?.categories?.[k] ?? 0);
     const c = counts[k];
     const parts: string[] = [];
@@ -52,6 +55,6 @@ export function buildScoreNotes(
     if (c.errors && !c.blocking) parts.push(`${c.errors} errors`);
     if (c.warnings) parts.push(`${c.warnings} warnings`);
     const note = parts.length ? parts.join(", ") : "No issues detected";
-    return { key: k, label: labels[k], score: s, note };
+    return { key: k, label: LABELS[k], score: s, note };
   });
 }
