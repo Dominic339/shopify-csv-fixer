@@ -50,6 +50,7 @@ export default function AppClient() {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
+  const [parseIssues, setParseIssues] = useState<UiIssue[]>([]);
   const [autoFixes, setAutoFixes] = useState<string[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
 
@@ -64,9 +65,7 @@ export default function AppClient() {
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
   // inline edit state for the preview table
-  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(
-    null
-  );
+  const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
 
   // store last uploaded CSV text so switching formats can re-run on same file
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
@@ -86,8 +85,17 @@ export default function AppClient() {
   // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
-  // ✅ NEW: pinned rows (stay visible even after issues are fixed)
-  const [pinnedRows, setPinnedRows] = useState<Set<number>>(new Set());
+  // ✅ NEW: pinned rows (stay visible even after issues are resolved)
+  const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
+
+  function resetForNewRun() {
+    setIssues([]);
+    setParseIssues([]);
+    setAutoFixes([]);
+    setEditing(null);
+    setLastFixAll(null);
+    setPinnedRows(new Set());
+  }
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
@@ -240,6 +248,59 @@ export default function AppClient() {
     return first ? Object.keys(first) : [];
   }, [headers, rows]);
 
+  // ✅ IMPORTANT: Highlights should reflect *current* issues after edits.
+  // We revalidate issues (without modifying rows) on a short debounce.
+  const revalidateTimerRef = useRef<number | null>(null);
+  const lastRevalidateSigRef = useRef<string>("");
+
+  function computeSig(h: string[], r: CsvRow[]) {
+    // lightweight signature; enough to prevent duplicate revalidations
+    const head = h.join("|");
+    // sample a few rows to keep it cheap
+    const sampleCount = Math.min(5, r.length);
+    const parts: string[] = [head, String(r.length)];
+    for (let i = 0; i < sampleCount; i++) {
+      const row = r[i] ?? {};
+      // include only a few keys
+      const keys = Object.keys(row).slice(0, 6);
+      parts.push(keys.map((k) => `${k}=${row[k] ?? ""}`).join("&"));
+    }
+    return parts.join("::");
+  }
+
+  function revalidateIssuesOnly(nextHeaders: string[], nextRows: CsvRow[]) {
+    if (!activeFormat) return;
+
+    // Don’t let this thrash while typing—debounce
+    const sig = computeSig(nextHeaders, nextRows);
+    if (sig === lastRevalidateSigRef.current) return;
+    lastRevalidateSigRef.current = sig;
+
+    if (revalidateTimerRef.current) {
+      window.clearTimeout(revalidateTimerRef.current);
+      revalidateTimerRef.current = null;
+    }
+
+    revalidateTimerRef.current = window.setTimeout(() => {
+      try {
+        const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
+
+        // ✅ Critical: DO NOT apply res.fixedRows / fixesApplied here.
+        // Only update the issue list so highlights clear immediately when fixed.
+        const mergedIssues = [ ...((res.issues as any) ?? []), ...(parseIssues ?? []) ];
+        setIssues(mergedIssues as any);
+      } catch {
+        // If validation fails for any reason, don't brick typing.
+      }
+    }, 220);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (revalidateTimerRef.current) window.clearTimeout(revalidateTimerRef.current);
+    };
+  }, []);
+
   const issueCellMap = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
     for (const i of issuesForTable) {
@@ -260,39 +321,40 @@ export default function AppClient() {
     return [...set].sort((a, b) => a - b);
   }, [issuesForTable]);
 
-  // ✅ NEW: preview rows = (pinned ∪ issue rows) first, then other rows (up to 25)
+  const pinnedSorted = useMemo(() => {
+    return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
+  }, [pinnedRows, rows.length]);
+
   const previewRows = useMemo(() => {
+    // ✅ Order: pinned rows first, then issue rows, then remaining rows (up to 25)
     const out: number[] = [];
     const seen = new Set<number>();
 
-    // pinned first (keep stable order)
-    for (const idx of Array.from(pinnedRows).sort((a, b) => a - b)) {
-      if (idx >= 0 && idx < rows.length && !seen.has(idx)) {
+    for (const idx of pinnedSorted) {
+      if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
       }
     }
 
-    // then rows with issues
     for (const idx of rowsWithAnyIssue) {
-      if (idx >= 0 && idx < rows.length && !seen.has(idx)) {
+      if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
       }
     }
 
-    // then fill remaining
-    for (let i = 0; i < rows.length && out.length < 25; i++) {
-      if (!seen.has(i)) {
-        out.push(i);
-        seen.add(i);
+    for (let idx = 0; idx < rows.length && out.length < 25; idx++) {
+      if (!seen.has(idx)) {
+        out.push(idx);
+        seen.add(idx);
       }
     }
 
     return out.slice(0, 25);
-  }, [pinnedRows, rowsWithAnyIssue, rows.length]);
+  }, [pinnedSorted, rowsWithAnyIssue, rows.length]);
 
-  function togglePinRow(rowIndex: number) {
+  function togglePin(rowIndex: number) {
     setPinnedRows((prev) => {
       const next = new Set(prev);
       if (next.has(rowIndex)) next.delete(rowIndex);
@@ -300,63 +362,6 @@ export default function AppClient() {
       return next;
     });
   }
-
-  function pinRow(rowIndex: number) {
-    setPinnedRows((prev) => {
-      if (prev.has(rowIndex)) return prev;
-      const next = new Set(prev);
-      next.add(rowIndex);
-      return next;
-    });
-  }
-
-  function clearPins() {
-    setPinnedRows(new Set());
-  }
-
-  // ✅ NEW: revalidate after manual edits so red/yellow highlights disappear when fixed
-  const revalidateTimerRef = useRef<number | null>(null);
-  const revalidateInFlightRef = useRef(false);
-
-  const scheduleRevalidate = useCallback(
-    (opts?: { pinRowIndex?: number }) => {
-      if (!activeFormat) return;
-      if (!rows.length) return;
-
-      if (typeof opts?.pinRowIndex === "number") {
-        pinRow(opts.pinRowIndex);
-      }
-
-      if (revalidateTimerRef.current) {
-        window.clearTimeout(revalidateTimerRef.current);
-      }
-
-      revalidateTimerRef.current = window.setTimeout(() => {
-        if (revalidateInFlightRef.current) return;
-        revalidateInFlightRef.current = true;
-
-        try {
-          // We re-run the engine so the issue list matches the CURRENT edited data.
-          // IMPORTANT: we do NOT append fixesApplied here (to avoid bloating the log on every keystroke).
-          const res = applyFormatToParsedCsv(tableHeaders, rows, activeFormat);
-
-          // Keep tables in sync with the engine’s "safe normalization"
-          setHeaders(res.fixedHeaders ?? tableHeaders);
-          setRows(res.fixedRows ?? rows);
-
-          // Replace issues so highlights reflect what's still wrong
-          setIssues((res.issues as any) ?? []);
-        } catch (e: any) {
-          // Don't hard-fail the UX on background revalidation
-          console.warn("Revalidate failed", e);
-        } finally {
-          revalidateInFlightRef.current = false;
-        }
-      }, 180);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeFormat, rows, tableHeaders.join("||")]
-  );
 
   const onUpdateRow = useCallback(
     (rowIndex: number, patch: Partial<CsvRow>) => {
@@ -372,24 +377,31 @@ export default function AppClient() {
         }
 
         next[rowIndex] = { ...existing, ...cleaned };
+
+        // ✅ Revalidate issues without mutating the user's typed values.
+        // (We call with the updated next array.)
+        const hdrs = tableHeaders.length ? tableHeaders : Object.keys(next[0] ?? {});
+        revalidateIssuesOnly(hdrs, next);
+
         return next;
       });
-
-      // keep row visible even after issues resolve
-      scheduleRevalidate({ pinRowIndex: rowIndex });
     },
-    [scheduleRevalidate]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tableHeaders, activeFormat, parseIssues]
   );
 
   function runFormatOnCurrentData(nextHeaders: string[], nextRows: CsvRow[], additionalFixes: string[] = []) {
     const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
     setHeaders(res.fixedHeaders ?? nextHeaders);
     setRows(res.fixedRows ?? nextRows);
-    setIssues((res.issues as any) ?? []);
+
+    const mergedIssues = [ ...((res.issues as any) ?? []), ...(parseIssues ?? []) ];
+    setIssues(mergedIssues as any);
+
     setAutoFixes([...(additionalFixes ?? []), ...(res.fixesApplied ?? [])]);
   }
 
-  // ✅ true “can this button actually fix anything?” dry-run
+  // true “can this button actually fix anything?” dry-run
   const fixAllDryRun = useMemo(() => {
     if (formatId !== "shopify_products") return null;
     if (!rows.length) return null;
@@ -406,7 +418,7 @@ export default function AppClient() {
 
     if (!fixed.fixesApplied.length) {
       setErrorBanner(
-        `No safe auto-fixable blockers found. Use Manual fixes below to resolve items like missing Title or non-numeric Price.`
+        `Fix All ran, but 0 fixes were safely applied. Remaining blockers require manual edits (e.g., Missing Title, Published like "maybe", Price like "free").`
       );
       return;
     }
@@ -414,21 +426,7 @@ export default function AppClient() {
     setErrorBanner(null);
     setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
 
-    // When we apply fixes, those rows should remain visible (pinned) so user can review.
-    const affected = new Set<number>();
-    for (const fx of fixed.fixedRows ?? []) {
-      // no-op; we can’t map from row objects to indices safely here
-    }
-    // safest: pin all rows that currently have blocking issues (before applying)
-    for (const i of issuesForTable) {
-      if (i.severity === "error" && i.rowIndex >= 0) affected.add(i.rowIndex);
-    }
-    setPinnedRows((prev) => {
-      const next = new Set(prev);
-      for (const idx of affected) next.add(idx);
-      return next;
-    });
-
+    // Applying fix-all is an intentional mutation (ok to use fixed rows here)
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
 
@@ -440,21 +438,24 @@ export default function AppClient() {
       const parsed = parseCsv(csvText);
       const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
 
-      const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
+      const nextParseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
         message: m,
         level: "error",
         severity: "error",
       }));
 
+      setParseIssues(nextParseIssues);
+
       setHeaders(res.fixedHeaders ?? []);
       setRows(res.fixedRows ?? []);
-      setIssues([...(res.issues ?? []), ...parseIssues]);
+
+      // ✅ Merge format issues + parse issues
+      setIssues([...(res.issues ?? []), ...nextParseIssues] as any);
+
       setAutoFixes(res.fixesApplied ?? []);
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-
-      // New file: clear pins (fresh session)
       setPinnedRows(new Set());
 
       await refreshQuotaAndPlan();
@@ -475,13 +476,7 @@ export default function AppClient() {
       const text = await file.text();
       setLastUploadedText(text);
 
-      setIssues([]);
-      setAutoFixes([]);
-      setEditing(null);
-      setLastFixAll(null);
-
-      // New file: clear pins
-      setPinnedRows(new Set());
+      resetForNewRun();
 
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
@@ -495,12 +490,14 @@ export default function AppClient() {
   }
 
   useEffect(() => {
+    // switching formats should keep pins? usually no—safer to clear
     setIssues([]);
+    setParseIssues([]);
     setAutoFixes([]);
     setEditing(null);
     setLastFixAll(null);
+    setPinnedRows(new Set());
 
-    // format switch: keep pins (user intent), but re-run to refresh issues
     if (!lastUploadedText || !activeFormat) return;
 
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
@@ -598,9 +595,12 @@ export default function AppClient() {
   function startEdit(rowIndex: number, col: string) {
     const current = rows[rowIndex]?.[col] ?? "";
     setEditing({ rowIndex, col, value: current });
-
-    // keep this row visible while user works
-    pinRow(rowIndex);
+    // convenience: pin the row when user starts editing from the preview table
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      next.add(rowIndex);
+      return next;
+    });
   }
 
   function commitEdit() {
@@ -676,16 +676,6 @@ export default function AppClient() {
                     {fixAllLabel}
                   </button>
                 ) : null}
-
-                {/* ✅ NEW: pin controls */}
-                {pinnedRows.size > 0 ? (
-                  <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                    Pinned: <span className="font-semibold text-[var(--text)]">{pinnedRows.size}</span>{" "}
-                    <button type="button" className="pill-btn" onClick={clearPins} style={{ padding: "4px 10px" }}>
-                      Clear pins
-                    </button>
-                  </span>
-                ) : null}
               </div>
 
               {formatId === "shopify_products" ? (
@@ -717,9 +707,7 @@ export default function AppClient() {
                             <button
                               type="button"
                               className="rg-btn"
-                              onClick={() =>
-                                issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-                              }
+                              onClick={() => issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
                             >
                               Jump to issues
                             </button>
@@ -732,8 +720,7 @@ export default function AppClient() {
 
                           {realFixableBlockingCount === 0 ? (
                             <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              No safe auto-fixable blockers found. Use Manual fixes below to resolve items like missing
-                              Title or non-numeric Price.
+                              No safe auto-fixable blockers found. Use Manual fixes to resolve items like missing Title or non-numeric Price.
                             </div>
                           ) : null}
                         </div>
@@ -746,9 +733,7 @@ export default function AppClient() {
                             {lastFixAll.applied.slice(0, 5).map((t, idx) => (
                               <li key={idx}>{t}</li>
                             ))}
-                            {lastFixAll.applied.length > 5 ? (
-                              <li>…and {lastFixAll.applied.length - 5} more</li>
-                            ) : null}
+                            {lastFixAll.applied.length > 5 ? <li>…and {lastFixAll.applied.length - 5} more</li> : null}
                           </ul>
                         </div>
                       ) : null}
@@ -764,8 +749,7 @@ export default function AppClient() {
                             title={n.note}
                           >
                             <div className="font-semibold text-[var(--text)]">
-                              {n.label}{" "}
-                              <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
+                              {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>
                             <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
                           </div>
@@ -799,13 +783,7 @@ export default function AppClient() {
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
           <div className="font-medium">Monthly exports</div>
-          {isUnlimited ? (
-            <div>Unlimited</div>
-          ) : (
-            <div>
-              {used}/{limit} used • {left} left
-            </div>
-          )}
+          {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
           <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
@@ -960,8 +938,9 @@ export default function AppClient() {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{ width: 110 }}>Row</th>
-                      {tableHeaders.slice(0, 12).map((h) => (
+                      <th style={{ width: 70 }}>Row</th>
+                      <th style={{ width: 84 }}>Pin</th>
+                      {tableHeaders.slice(0, 10).map((h) => (
                         <th key={h}>{h}</th>
                       ))}
                     </tr>
@@ -973,31 +952,27 @@ export default function AppClient() {
 
                       return (
                         <tr key={rowIndex}>
-                          <td className="text-[var(--muted)]">
-                            <div className="flex items-center gap-2">
-                              <span>{rowIndex + 1}</span>
-                              <button
-                                type="button"
-                                className="pill-btn"
-                                onClick={() => togglePinRow(rowIndex)}
-                                title={isPinned ? "Unpin row" : "Pin row"}
-                                style={{ padding: "2px 10px", fontSize: 12 }}
-                              >
-                                {isPinned ? "Unpin" : "Pin"}
-                              </button>
-                            </div>
+                          <td className="text-[var(--muted)]">{rowIndex + 1}</td>
+
+                          <td>
+                            <button
+                              type="button"
+                              className="pill-btn"
+                              onClick={() => togglePin(rowIndex)}
+                              title={isPinned ? "Unpin this row" : "Pin this row to keep it visible"}
+                              style={{ padding: "6px 10px" }}
+                            >
+                              {isPinned ? "Unpin" : "Pin"}
+                            </button>
                           </td>
 
-                          {tableHeaders.slice(0, 12).map((h) => {
+                          {tableHeaders.slice(0, 10).map((h) => {
                             const sev = issueCellMap.get(`${rowIndex}|||${h}`);
                             const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
 
                             const cellClass =
-                              (sev === "error"
-                                ? "cell-error"
-                                : sev === "warning"
-                                  ? "cell-warning"
-                                  : "") + (isEditing ? " cell-editing" : "");
+                              (sev === "error" ? "cell-error" : sev === "warning" ? "cell-warning" : "") +
+                              (isEditing ? " cell-editing" : "");
 
                             return (
                               <td
@@ -1037,8 +1012,8 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Pinned rows stay visible even after fixes. Use
-                “Manual fixes” for full row editing.
+                Showing first 10 columns and up to 25 rows for speed. Pinned rows stay visible even after fixes.
+                Use “Manual fixes” for full row editing.
               </div>
             ) : null}
           </div>
