@@ -36,13 +36,10 @@ type Props = {
   /** Needed for preset-specific tooltip metadata (Shopify, WooCommerce, etc.) */
   formatId?: string;
 
-  /**
-   * Rows pinned in the Issues list. Rows can remain pinned even after their issues are resolved.
-   * They only leave the pinned list when the user clicks Unpin.
-   */
+  /** Pinned rows remain visible even after issues resolve; user must manually unpin. */
   pinnedRows?: number[];
 
-  /** Called when a pinned row is manually unpinned. */
+  /** Called when user clicks Unpin. */
   onUnpinRow?: (rowIndex: number) => void;
 };
 
@@ -152,7 +149,7 @@ export function EditableIssuesTable({
     return map;
   }, [rowIssues]);
 
-  // Stable row order: union of current-problem rows + pinned rows
+  // Stable row order: union of rows with issues + pinned rows
   const problemRows = useMemo(() => {
     const set = new Set<number>();
     for (const k of issuesByRow.keys()) set.add(k);
@@ -200,25 +197,15 @@ export function EditableIssuesTable({
           className="pointer-events-none absolute left-1/2 top-full z-50 hidden w-[340px] -translate-x-1/2 rounded-2xl border border-[var(--border)] p-3 text-xs text-[var(--text)] shadow-2xl group-hover:block"
           style={{ backgroundColor: "rgba(10,10,10,0.96)" }}
         >
-          <div className="text-sm font-semibold">{(meta as any).title ?? "Issue"}</div>
+          <div className="text-sm font-semibold">{(meta as any).title}</div>
 
-          {(meta as any).explanation ? (
-            <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).explanation}</div>
-          ) : null}
+          <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).explanation}</div>
 
-          {(meta as any).whyPlatformCares ? (
-            <>
-              <div className="mt-3 font-semibold text-[var(--text)]">Why the platform cares</div>
-              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).whyPlatformCares}</div>
-            </>
-          ) : null}
+          <div className="mt-3 font-semibold text-[var(--text)]">Why the platform cares</div>
+          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).whyPlatformCares}</div>
 
-          {(meta as any).howToFix ? (
-            <>
-              <div className="mt-3 font-semibold text-[var(--text)]">How to fix</div>
-              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).howToFix}</div>
-            </>
-          ) : null}
+          <div className="mt-3 font-semibold text-[var(--text)]">How to fix</div>
+          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).howToFix}</div>
 
           {(meta as any).autoFixable ? (
             <div className="mt-3 rounded-xl border border-[color:rgba(var(--accent-rgb),0.25)] bg-[color:rgba(var(--accent-rgb),0.10)] px-2 py-1 text-[11px]">
@@ -343,10 +330,15 @@ export function EditableIssuesTable({
                 </div>
 
                 <div className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                  {isOpen ? "Click to collapse" : hasActiveIssues ? "Click to expand and fix" : "Resolved (unpin when you’re ready)"}
+                  {isOpen
+                    ? "Click to collapse"
+                    : hasActiveIssues
+                      ? "Click to expand and fix"
+                      : "Resolved (unpin when you’re ready)"}
                 </div>
               </button>
 
+              {/* Expanded: show issues list + inline editor grid */}
               {isOpen ? (
                 <div className="mt-3 space-y-3">
                   {/* Issues for this row */}
@@ -355,7 +347,10 @@ export function EditableIssuesTable({
                     <div className="mt-2 space-y-2">
                       {hasActiveIssues ? (
                         rowArr.map((iss, idx) => (
-                          <div key={`${rowIndex}-iss-${idx}`} className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}>
+                          <div
+                            key={`${rowIndex}-iss-${idx}`}
+                            className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}
+                          >
                             <div className="flex items-center justify-between gap-3">
                               <div className="text-sm font-semibold text-[var(--text)]">
                                 {iss.column ? iss.column : "(row)"} {issueTooltip(iss)}
@@ -382,7 +377,7 @@ export function EditableIssuesTable({
                     </div>
                   </div>
 
-                  {/* Inline editor grid */}
+                  {/* Inline editor grid (your existing “sub-table”) */}
                   <div className="grid gap-2 md:grid-cols-2">
                     {headers.map((h) => {
                       const v = rows[rowIndex]?.[h] ?? "";

@@ -3,6 +3,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
@@ -46,8 +47,6 @@ function computeValidationSummary(headers: string[], rows: CsvRow[], issues: Csv
   let warningCount = 0;
   let tipCount = 0;
 
-  // For now: treat all errors as "blocking". If your engine already tags blocking in the issue object,
-  // you can tighten this later without changing UI.
   let blockingCount = 0;
   let autoFixableBlockingErrors = 0;
 
@@ -75,11 +74,7 @@ function computeValidationSummary(headers: string[], rows: CsvRow[], issues: Csv
     }
   }
 
-  // Simple score that is stable and understandable.
-  // Shopify can be stricter later; this keeps the UI consistent now.
-  const base = 100;
-  const score = clamp(base - errorCount * 10 - warningCount * 4 - tipCount * 1, 0, 100);
-
+  const score = clamp(100 - errorCount * 10 - warningCount * 4 - tipCount * 1, 0, 100);
   const readyForShopifyImport = blockingCount === 0;
 
   const topBlockers = Array.from(blockerCounts.entries())
@@ -107,7 +102,18 @@ function computeValidationSummary(headers: string[], rows: CsvRow[], issues: Csv
 }
 
 export default function AppClient() {
+  const searchParams = useSearchParams();
+
   const [formatId, setFormatId] = useState<string>("general_csv");
+
+  // Respect preset chosen from preset menu (e.g. /app?preset=shopify_products)
+  useEffect(() => {
+    const preset = searchParams.get("preset");
+    if (preset && preset !== formatId) {
+      setFormatId(preset);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // When switching formats, clear pins so old errors don’t clog the next format’s workflow.
   useEffect(() => {
@@ -247,10 +253,7 @@ export default function AppClient() {
       {
         title: "Data",
         score: clamp(validation.score - validation.warningCount * 2, 0, 100),
-        note:
-          validation.warningCount === 0
-            ? "No warnings detected"
-            : `${validation.warningCount} warnings to review`,
+        note: validation.warningCount === 0 ? "No warnings detected" : `${validation.warningCount} warnings to review`,
       },
       {
         title: "Import",
@@ -344,11 +347,7 @@ export default function AppClient() {
 
     const fixed = fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
 
-    if (fixed.fixesApplied.length) {
-      setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
-    } else {
-      setLastFixAll({ at: Date.now(), applied: [] });
-    }
+    setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied ?? [] });
 
     // Always re-run validation so resolved highlights disappear
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
@@ -530,7 +529,7 @@ export default function AppClient() {
                         <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
                           <div className="font-semibold text-[var(--text)]">Top blockers</div>
                           <ul className="mt-1 list-disc pl-5">
-                            {validation.topBlockers.map((x, i) => (
+                            {validation.topBlockers.map((x: any, i: number) => (
                               <li key={i}>
                                 {x.label} ({x.count})
                               </li>
@@ -705,30 +704,38 @@ export default function AppClient() {
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-            <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
-              Validation score: <span className="font-semibold">{validation.score}</span>/100
-            </span>
-            <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 font-semibold text-[var(--text)]">
-              {validation.readyForShopifyImport ? "Ready for Shopify import" : "Not ready yet"}
-            </span>
-            <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[color:rgba(var(--muted-rgb),1)]">
-              {validation.errorCount} errors, {validation.warningCount} warnings, {validation.tipCount} tips
-            </span>
-          </div>
+          {rows.length === 0 ? (
+            <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+              Upload a CSV to see issues.
+            </div>
+          ) : (
+            <>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
+                  Validation score: <span className="font-semibold">{validation.score}</span>/100
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 font-semibold text-[var(--text)]">
+                  {validation.readyForShopifyImport ? "Ready for Shopify import" : "Not ready yet"}
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[color:rgba(var(--muted-rgb),1)]">
+                  {validation.errorCount} errors, {validation.warningCount} warnings, {validation.tipCount} tips
+                </span>
+              </div>
 
-          <div className="mt-4">
-            <EditableIssuesTable
-              headers={tableHeaders}
-              issues={issues as any}
-              rows={rows}
-              onUpdateRow={onUpdateRow}
-              resetKey={formatId}
-              formatId={formatId}
-              pinnedRows={pinnedRows}
-              onUnpinRow={(rowIndex) => setPinnedRows((prev) => prev.filter((x) => x !== rowIndex))}
-            />
-          </div>
+              <div className="mt-4">
+                <EditableIssuesTable
+                  headers={tableHeaders}
+                  issues={issues as any}
+                  rows={rows}
+                  onUpdateRow={onUpdateRow}
+                  resetKey={formatId}
+                  formatId={formatId}
+                  pinnedRows={pinnedRows}
+                  onUnpinRow={(rowIndex) => setPinnedRows((prev) => prev.filter((x) => x !== rowIndex))}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
