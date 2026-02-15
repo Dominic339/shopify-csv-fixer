@@ -1,3 +1,4 @@
+// src/app/app/AppClient.tsx
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -45,8 +46,6 @@ type UiIssue = {
   suggestion?: string;
 };
 
-// CsvIssue type now comes from src/lib/formats/types.ts
-
 export default function AppClient() {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -61,8 +60,7 @@ export default function AppClient() {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
-  // NEW: optional export base name (from query param exportName)
-  // Example: /app?exportName=shopify-products -> shopify-products_fixed.csv
+  // optional export base name (from query param exportName)
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
   // inline edit state for the preview table
@@ -82,10 +80,10 @@ export default function AppClient() {
   // Custom formats can change during the session (import/save/delete)
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
 
-  // Phase 1: “Jump to issues”
+  // “Jump to issues”
   const issuesPanelRef = useRef<HTMLDivElement | null>(null);
 
-  // Phase 1: show last “Fix All” audit snippet
+  // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
   function refreshCustomFormats() {
@@ -97,7 +95,6 @@ export default function AppClient() {
   useEffect(() => {
     refreshCustomFormats();
 
-    // Listen for storage updates triggered by saveUserFormatsToStorage()
     const onChanged = () => refreshCustomFormats();
     window.addEventListener("csnest-formats-changed", onChanged);
 
@@ -123,7 +120,6 @@ export default function AppClient() {
       return;
     }
 
-    // Only allow presets that exist in built-in formats (safe + predictable)
     const exists = builtinFormats.some((f) => f.id === preset);
     if (!exists) {
       appliedPresetRef.current = true;
@@ -134,7 +130,7 @@ export default function AppClient() {
     appliedPresetRef.current = true;
   }, [builtinFormats]);
 
-  // NEW: support exportName via /app?exportName=<base>
+  // support exportName via /app?exportName=<base>
   const appliedExportNameRef = useRef(false);
   useEffect(() => {
     if (appliedExportNameRef.current) return;
@@ -148,11 +144,8 @@ export default function AppClient() {
       return;
     }
 
-    // If not provided, but preset is provided, we can default export name to preset
     const preset = qp.get("preset");
-    if (preset) {
-      setExportBaseName(preset);
-    }
+    if (preset) setExportBaseName(preset);
 
     appliedExportNameRef.current = true;
   }, []);
@@ -175,7 +168,6 @@ export default function AppClient() {
         fetch("/api/subscription/status", { cache: "no-store" }).then((r) => r.json()),
       ]);
 
-      // Your quota helper expects a plan argument for getPlanLimits(plan)
       const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
       const limits = getPlanLimits(plan) as PlanLimits;
 
@@ -232,7 +224,7 @@ export default function AppClient() {
     return computeValidationBreakdown(issuesForTable, { formatId });
   }, [issuesForTable, formatId]);
 
-  // Phase 1: readiness and score notes (Shopify UI polish)
+  // readiness and score notes (Shopify UI polish)
   const readiness = useMemo(() => {
     return computeReadinessSummary(issuesForTable, formatId);
   }, [issuesForTable, formatId]);
@@ -298,13 +290,11 @@ export default function AppClient() {
   }
 
   function handleFixAllBlocking() {
-    // Currently Shopify-only, but the plumbing is reusable for other presets.
     if (formatId !== "shopify_products") return;
 
     const fixed = fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
 
-    // If no fixes were safely applied, show a helpful banner so it doesn't feel "broken".
-    // Common case: Price/Compare-at values aren't convertible to numbers (e.g. "free", "N/A", "$--").
+    // If no fixes were safely applied, explain why (avoid "button does nothing")
     if (!fixed.fixesApplied.length) {
       const found = fixed.summary?.autoFixableBlockingFound ?? 0;
       setErrorBanner(
@@ -315,10 +305,8 @@ export default function AppClient() {
       return;
     }
 
-    setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
-
-    // Clear any prior banner now that we actually changed data.
     setErrorBanner(null);
+    setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
 
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
@@ -330,7 +318,6 @@ export default function AppClient() {
     try {
       const parsed = parseCsv(csvText);
 
-      // Apply selected format (engine includes universal cleanup now)
       const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
 
       const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
@@ -365,7 +352,6 @@ export default function AppClient() {
       const text = await file.text();
       setLastUploadedText(text);
 
-      // Clear previous run immediately for a clean swap-in
       setIssues([]);
       setAutoFixes([]);
       setEditing(null);
@@ -382,7 +368,7 @@ export default function AppClient() {
     }
   }
 
-  // When switching formats, clear pins + clear issues/autofixes, then re-run if a file is loaded
+  // When switching formats, clear issues/autofixes then re-run if a file is loaded
   useEffect(() => {
     setIssues([]);
     setAutoFixes([]);
@@ -409,7 +395,6 @@ export default function AppClient() {
       const a = document.createElement("a");
       a.href = url;
 
-      // NEW: named export base overrides fileName
       const base =
         (exportBaseName ?? fileName ?? "fixed")
           .replace(/\.csv$/i, "")
@@ -425,7 +410,6 @@ export default function AppClient() {
       await refreshQuotaAndPlan();
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Export failed");
-      // If the export failed due to quota, refresh so the UI matches the real usage.
       try {
         await refreshQuotaAndPlan();
       } catch {
@@ -437,7 +421,6 @@ export default function AppClient() {
   }
 
   function downloadAutoFixLog() {
-    // Include both engine auto-fixes and Fix All batch fixes.
     const fixList = Array.from(new Set([...(autoFixes ?? []), ...(lastFixAll?.applied ?? [])]));
     if (!fixList.length) return;
 
@@ -448,7 +431,6 @@ export default function AppClient() {
         .replace(/\.csv$/i, "")
         .trim() || "fixed";
 
-    // Plain-text log (easy to read + share)
     const lines: string[] = [];
     lines.push("StriveFormats – Auto-fix Change Log");
     lines.push(`Generated: ${iso}`);
@@ -461,7 +443,9 @@ export default function AppClient() {
       warnings: issuesForTable.filter((i) => i.severity === "warning").length,
       tips: issuesForTable.filter((i) => i.severity === "info").length,
     };
-    lines.push(`Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`);
+    lines.push(
+      `Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`
+    );
     lines.push(`Total auto-fixes applied: ${fixList.length}`);
     lines.push("");
 
@@ -509,17 +493,15 @@ export default function AppClient() {
 
   const used = Number(quota?.used ?? 0);
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
-  // Prefer server-provided remaining when available (and clamp at 0)
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
-  // Phase 1: smart Fix All label + disable when no safe blockers
-  const fixAllLabel =
-    readiness.autoFixableBlockingErrors > 0
-      ? `Fix ${readiness.autoFixableBlockingErrors} auto-fixable blockers`
-      : "Fix all blocking issues";
+  // ✅ FIX: Only show the Fix All button when there are real auto-fixable blockers
+  const fixAllVisible =
+    formatId === "shopify_products" &&
+    rows.length > 0 &&
+    readiness.autoFixableBlockingErrors > 0;
 
-  const fixAllDisabled =
-    formatId !== "shopify_products" || readiness.autoFixableBlockingErrors === 0 || busy || rows.length === 0;
+  const fixAllLabel = `Fix ${readiness.autoFixableBlockingErrors} auto-fixable blockers`;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -536,7 +518,6 @@ export default function AppClient() {
             Pick a format → upload → auto-fix safe issues → export.
           </p>
 
-          {/* score + badge (only show when rows exist) */}
           {rows.length > 0 ? (
             <div className="mt-3 space-y-2 text-sm">
               <div className="flex flex-wrap items-center gap-2">
@@ -560,25 +541,21 @@ export default function AppClient() {
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
                 </span>
 
-                {formatId === "shopify_products" && validation.counts.blockingErrors > 0 ? (
+                {/* ✅ FIX: only show when there are truly auto-fixable blockers */}
+                {fixAllVisible ? (
                   <button
                     type="button"
                     className="pill-btn"
                     onClick={handleFixAllBlocking}
-                    disabled={fixAllDisabled}
-                    title={
-                      fixAllDisabled
-                        ? "No blocking issues are safely auto-fixable. Review the manual blockers in the Issues list."
-                        : "Applies safe, deterministic fixes to blocking Shopify issues only."
-                    }
-                    style={fixAllDisabled ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
+                    disabled={busy}
+                    title="Applies safe, deterministic fixes to Shopify blocking issues only."
+                    style={busy ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
                   >
                     {fixAllLabel}
                   </button>
                 ) : null}
               </div>
 
-              {/* Phase 1: Shopify readiness summary */}
               {formatId === "shopify_products" ? (
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -814,7 +791,6 @@ export default function AppClient() {
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          {/* show the badge here too when rows exist */}
           {rows.length > 0 ? (
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
               <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
@@ -930,7 +906,6 @@ export default function AppClient() {
         </div>
       </div>
 
-      {/* Small footer links (keeps internal linking clean) */}
       <div className="mt-10 flex flex-wrap gap-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/formats/presets" className="hover:underline">
           Preset Formats
