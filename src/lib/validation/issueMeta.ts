@@ -3,8 +3,8 @@ export type ValidationCategory =
   | "variant"
   | "pricing"
   | "inventory"
-  | "seo"
-  | "images";
+  | "images"
+  | "seo";
 
 export type IssueMeta = {
   /** Stable id used by scoring + tooltip system (ex: "shopify/missing_handle"). */
@@ -19,16 +19,22 @@ export type IssueMeta = {
   /** Why the platform rejects it / why it matters. */
   whyPlatformCares: string;
 
-  /** How a user can fix it manually, if needed. */
+  /** Clear next step instruction. */
   howToFix: string;
 
-  /** Category used by the weighted scoring system. */
+  /** Category used by scoring + UI grouping. */
   category: ValidationCategory;
 
-  /** Whether this is blocking for "Ready for Shopify import" */
+  /**
+   * If true, issue blocks “ready for import”.
+   * (In UI this shows as a blocker.)
+   */
   blocking: boolean;
 
-  /** Whether this issue is safe + deterministic to auto-fix in "Fix All Blocking Issues" */
+  /**
+   * If true, our “Fix all blockers” button is allowed to automatically fix it.
+   * IMPORTANT: Only use for deterministic, non-guessy fixes.
+   */
   autoFixable?: boolean;
 };
 

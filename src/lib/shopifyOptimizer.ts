@@ -1,13 +1,13 @@
-// src/lib/shopifyOptimizer.ts
 import type { CsvRow } from "./csv";
 import { validateAndFixShopifyBasic, type FixResult, type Issue as BaseIssue } from "./shopifyBasic";
-import { isValidShopifyBool, normalizeShopifyBool, parseShopifyMoney } from "./shopifySchema";
 
 /**
- * Shopify Import Optimizer (strict layer)
+ * Shopify Import Optimizer
  *
- * - Runs canonicalization + safe fixes (shopifyBasic)
- * - Adds stricter "import readiness" rules (still deterministic)
+ * Design goals:
+ * - DO NOT break existing Shopify basic validator.
+ * - Wrap the base engine, then append stricter checks (and safe normalizations).
+ * - Return shape remains compatible: { fixedHeaders, fixedRows, issues, fixesApplied }.
  */
 export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]): FixResult {
   const base = validateAndFixShopifyBasic(headers, rows);
@@ -15,127 +15,113 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   const fixedHeaders = base.fixedHeaders;
   const fixedRows = base.fixedRows;
   const fixesApplied = [...(base.fixesApplied ?? [])];
-  const issues: BaseIssue[] = [...(base.issues ?? [])];
 
-  const cStatus = "Status";
-  const cPublished = "Published on online store";
-  const cPrice = "Price";
-  const cCompare = "Compare-at price";
+  // We dedupe issues aggressively because:
+  // - The base validator may emit both a "summary" and a "row-specific" version.
+  // - The optimizer adds its own checks.
+  const issues: BaseIssue[] = [];
+  const seen = new Set<string>();
 
-  function add(issue: {
-    row: number;
-    column: string;
-    message: string;
-    severity: "error" | "warning" | "info";
-    code: string;
-    suggestion?: string;
-  }) {
-    issues.push(issue as any);
+  function normalizeCode(code: string | undefined | null): string {
+    const c = (code ?? "").trim();
+    if (!c) return "";
+
+    // If you already use the canonical Shopify codes, keep them.
+    if (c.startsWith("shopify/")) return c;
+
+    // Legacy / base-validator codes -> canonical Shopify issue codes used by issueMetaShopify.ts
+    const map: Record<string, string> = {
+      missing_required_header: "shopify/missing_required_header",
+      blank_title: "shopify/blank_title",
+      blank_handle: "shopify/blank_handle",
+      invalid_handle: "shopify/invalid_handle",
+      invalid_boolean_published: "shopify/invalid_boolean_published",
+      invalid_boolean_continue_selling: "shopify/invalid_boolean_continue_selling",
+      invalid_numeric_price: "shopify/invalid_numeric_price",
+      invalid_numeric_compare_at: "shopify/invalid_numeric_compare_at",
+      compare_at_lt_price: "shopify/compare_at_lt_price",
+      invalid_integer_inventory_qty: "shopify/invalid_integer_inventory_qty",
+      negative_inventory: "shopify/negative_inventory",
+      invalid_image_url: "shopify/invalid_image_url",
+      invalid_image_position: "shopify/invalid_image_position",
+      option_order_invalid: "shopify/option_order_invalid",
+      duplicate_handle_not_variants: "shopify/duplicate_handle_not_variants",
+      seo_title_too_long: "shopify/seo_title_too_long",
+      seo_description_too_long: "shopify/seo_description_too_long",
+      seo_title_missing: "shopify/seo_title_missing",
+      seo_description_missing: "shopify/seo_description_missing",
+    };
+
+    return map[c] ?? c;
   }
 
-  function get(r: CsvRow, k: string) {
-    const v = (r as any)?.[k];
-    return typeof v === "string" ? v : v == null ? "" : String(v);
+  function add(issue: BaseIssue) {
+    const code = normalizeCode((issue as any).code);
+    (issue as any).code = code;
+
+    // Prefer 1-based row if present; base issue type may use "row" or "rowIndex".
+    const row =
+      (issue as any).row ?? (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
+    const col = (issue as any).column ?? "(file)";
+    const sev = (issue as any).severity ?? "error";
+
+    // Dedupe key: severity + code + row + column (message can vary slightly but should be treated as the same issue)
+    const key = `${sev}|${code}|${row ?? -1}|${col}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    issues.push(issue);
   }
 
-  // Status normalization + strict validation (Shopify valid values: active, draft, archived)
-  if (fixedHeaders.includes(cStatus)) {
-    const allowed = new Set(["active", "draft", "archived"]);
+  // 0) Pull base issues in, but normalize codes + dedupe.
+  for (const issue of base.issues ?? []) add(issue);
+
+  // Helper columns (supports both legacy + new Shopify template)
+  const col = (name: string) => fixedHeaders.find((h) => h.toLowerCase() === name.toLowerCase());
+  const colAny = (...names: string[]) => names.map(col).find(Boolean);
+
+  const cHandle = colAny("Handle", "URL handle");
+  const cTitle = col("Title");
+
+  // If there are variants, handle is required (Shopify reality)
+  const anyVariantSignals = fixedRows.some((r) => {
+    return (
+      String((r as any)["Option1 Value"] ?? "").trim() ||
+      String((r as any)["Option2 Value"] ?? "").trim() ||
+      String((r as any)["Option3 Value"] ?? "").trim() ||
+      String((r as any)["Variant SKU"] ?? "").trim() ||
+      String((r as any)["Variant Price"] ?? "").trim()
+    );
+  });
+
+  if (anyVariantSignals && cHandle) {
     for (let i = 0; i < fixedRows.length; i++) {
-      const r = fixedRows[i];
-      const raw = get(r, cStatus).trim();
-      if (!raw) continue;
-
-      const lower = raw.toLowerCase();
-      if (allowed.has(lower) && raw !== lower) {
-        (r as any)[cStatus] = lower;
-        fixesApplied.push(`Normalized Status to "${lower}" on row ${i + 1}`);
-      } else if (!allowed.has(lower)) {
+      const row = i + 1;
+      const v = String((fixedRows[i] as any)[cHandle] ?? "").trim();
+      if (!v) {
         add({
-          row: i + 1,
-          column: cStatus,
-          message: `Invalid Status "${raw}". Use active, draft, or archived.`,
           severity: "error",
-          code: "shopify/invalid_status",
-          suggestion: `Set Status to active, draft, or archived.`,
-        });
+          code: "shopify/blank_handle",
+          row,
+          column: cHandle,
+          message: `Row ${row}: URL handle is blank (required for variants/updates).`,
+          suggestion: cTitle
+            ? `Fill URL handle. If you have a Title, you can slugify it (e.g., "My Product" → "my-product").`
+            : "Fill URL handle (letters, numbers, dashes; no spaces).",
+        } as any);
       }
     }
   }
 
-  // Published strict safety net (true/false)
-  if (fixedHeaders.includes(cPublished)) {
-    for (let i = 0; i < fixedRows.length; i++) {
-      const r = fixedRows[i];
-      const raw = get(r, cPublished).trim();
-      if (!raw) continue;
-      const norm = normalizeShopifyBool(raw);
-      if (norm !== raw) {
-        (r as any)[cPublished] = norm;
-        fixesApplied.push(`Normalized Published on online store to "${norm}" on row ${i + 1}`);
-      }
-      if (!isValidShopifyBool(get(r, cPublished))) {
-        add({
-          row: i + 1,
-          column: cPublished,
-          message: `Published on online store must be true or false (got "${raw}").`,
-          severity: "error",
-          code: "shopify/invalid_boolean_published",
-          suggestion: `Change to "true" or "false".`,
-        });
-      }
-    }
-  }
-
-  // Compare-at strict numeric + sanity (extra safety)
-  if (fixedHeaders.includes(cPrice) || fixedHeaders.includes(cCompare)) {
-    for (let i = 0; i < fixedRows.length; i++) {
-      const r = fixedRows[i];
-      const priceRaw = get(r, cPrice).trim();
-      const compareRaw = get(r, cCompare).trim();
-
-      const price = priceRaw ? parseShopifyMoney(priceRaw) : null;
-      const compare = compareRaw ? parseShopifyMoney(compareRaw) : null;
-
-      if (priceRaw && price == null) {
-        add({
-          row: i + 1,
-          column: cPrice,
-          message: `Price is not a valid number ("${priceRaw}").`,
-          severity: "error",
-          code: "shopify/invalid_numeric_price",
-          suggestion: "Use numbers like 19.99 (no currency symbols).",
-        });
-      }
-
-      if (compareRaw && compare == null) {
-        add({
-          row: i + 1,
-          column: cCompare,
-          message: `Compare-at price is not a valid number ("${compareRaw}").`,
-          severity: "error",
-          code: "shopify/invalid_numeric_compare_at",
-          suggestion: "Use numbers like 29.99 (no currency symbols).",
-        });
-      }
-
-      if (price != null && compare != null && compare > 0 && price > 0 && compare < price) {
-        add({
-          row: i + 1,
-          column: cCompare,
-          message: `Compare-at price (${compareRaw}) is less than Price (${priceRaw}).`,
-          severity: "warning",
-          code: "shopify/compare_at_less_than_price",
-          suggestion: "Compare-at price is usually higher than price when on sale.",
-        });
-      }
-    }
-  }
+  // NOTE:
+  // The optimizer intentionally does not auto-generate handles here.
+  // That belongs in the base fixer (deterministic from Title), or a dedicated “safe autofix”.
+  // This file focuses on *detecting* additional Shopify constraints.
 
   return {
     fixedHeaders,
     fixedRows,
-    issues: issues as any,
-    fixesApplied,
+    issues,
+    fixesApplied: Array.from(new Set(fixesApplied)),
   };
 }
