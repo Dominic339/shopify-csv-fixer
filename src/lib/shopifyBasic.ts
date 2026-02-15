@@ -182,6 +182,9 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
   // 3) Per-row validation + deterministic fixes
   const byHandle = new Map<string, number[]>();
 
+  // NEW: file-wide SKU duplicate tracking (variant rows only; image-only excluded)
+  const bySku = new Map<string, number[]>();
+
   for (let i = 0; i < fixedRows.length; i++) {
     const r = fixedRows[i];
     const row = i + 1;
@@ -456,6 +459,28 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     const v2 = get(r, optVals[1]).trim();
     const v3 = get(r, optVals[2]).trim();
 
+    // NEW (Enforcement 1): Variant data exists but Option1 missing (BLOCKING)
+    // Only applies to non-image-only rows.
+    if (!imageOnly) {
+      const hasVariantFields =
+        !!get(r, cSku).trim() ||
+        !!get(r, cPrice).trim() ||
+        !!get(r, cCompare).trim() ||
+        !!get(r, cInvQty).trim() ||
+        !!get(r, cContinue).trim();
+
+      if (hasVariantFields && !(n1 || v1)) {
+        issues.push({
+          severity: "error",
+          code: "shopify/missing_option1_for_variant_data",
+          row,
+          column: optNames[0],
+          message: "Variant data exists on a row but Option1 name/value are missing.",
+          suggestion: "Include Option1 name and Option1 value on variant rows.",
+        });
+      }
+    }
+
     // --- Default Title normalization (NEW, safe)
     if (v1.toLowerCase() === "default title" && !v2 && !v3) {
       const n1Lower = n1.toLowerCase();
@@ -529,6 +554,16 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       list.push(i);
       byHandle.set(h, list);
     }
+
+    // NEW (Enforcement 3): Track SKU duplicates (warning). Only for variant rows (non-image-only).
+    if (!imageOnly) {
+      const sku = get(r, cSku).trim();
+      if (sku) {
+        const list = bySku.get(sku) ?? [];
+        list.push(i);
+        bySku.set(sku, list);
+      }
+    }
   }
 
   // 4) Variant grouping + duplicate handle sanity (FIXED + EXTENDED)
@@ -540,6 +575,40 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       const r = fixedRows[idx];
       return !isImageOnlyRow(r, cTitle, cHandle, cImgUrl, cSku, cPrice, cInvQty, optNames, optVals);
     });
+
+    // NEW (Enforcement 2): Option value combos must be unique per handle (BLOCKING)
+    // Ignore image-only rows; evaluate only variant rows.
+    if (variantIdxs.length >= 2) {
+      const comboMap = new Map<string, number[]>();
+
+      for (const idx of variantIdxs) {
+        const r = fixedRows[idx];
+        const ov1 = get(r, optVals[0]).trim().toLowerCase();
+        const ov2 = get(r, optVals[1]).trim().toLowerCase();
+        const ov3 = get(r, optVals[2]).trim().toLowerCase();
+
+        const key = [ov1, ov2, ov3].join("|");
+        const list = comboMap.get(key) ?? [];
+        list.push(idx);
+        comboMap.set(key, list);
+      }
+
+      for (const [key, list] of comboMap.entries()) {
+        if (list.length <= 1) continue;
+
+        const rowsList = list.map((i) => i + 1).join(", ");
+        for (const idx of list) {
+          issues.push({
+            severity: "error",
+            code: "shopify/options_not_unique",
+            row: idx + 1,
+            column: optVals[0],
+            message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${rowsList}).`,
+            suggestion: "Make each variant option combination unique (Option1/2/3 values).",
+          });
+        }
+      }
+    }
 
     // 4a) Option name consistency per handle (warn)
     if (variantIdxs.length >= 2) {
@@ -730,6 +799,22 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
             "If these are meant to be variants, make sure option values differ per row (or SKUs differ). If these are extra images, keep only URL handle + image fields on additional rows.",
         });
       }
+    }
+  }
+
+  // NEW (Enforcement 3): Emit duplicate SKU warnings (file-wide)
+  for (const [sku, idxs] of bySku.entries()) {
+    if (idxs.length <= 1) continue;
+    const rowsList = idxs.map((i) => i + 1).join(", ");
+    for (const idx of idxs) {
+      issues.push({
+        severity: "warning",
+        code: "shopify/duplicate_sku",
+        row: idx + 1,
+        column: cSku,
+        message: `Row ${idx + 1}: The same SKU "${sku}" appears on multiple rows (rows ${rowsList}).`,
+        suggestion: "Make SKUs unique per variant (or leave blank if you don’t use SKUs).",
+      });
     }
   }
 
