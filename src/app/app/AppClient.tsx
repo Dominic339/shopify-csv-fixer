@@ -14,7 +14,7 @@ import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats
 import { computeValidationBreakdown } from "@/lib/validation/scoring";
 import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 
-// NEW Phase 1 helpers
+// Phase helpers
 import { computeReadinessSummary } from "@/lib/validation/readiness";
 import { buildScoreNotes } from "@/lib/validation/scoreNotes";
 
@@ -219,12 +219,10 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
-  // Weighted validation scoring + category breakdown
   const validation = useMemo(() => {
     return computeValidationBreakdown(issuesForTable, { formatId });
   }, [issuesForTable, formatId]);
 
-  // readiness and score notes (Shopify UI polish)
   const readiness = useMemo(() => {
     return computeReadinessSummary(issuesForTable, formatId);
   }, [issuesForTable, formatId]);
@@ -289,25 +287,32 @@ export default function AppClient() {
     setAutoFixes([...(additionalFixes ?? []), ...(res.fixesApplied ?? [])]);
   }
 
+  // ✅ NEW: true “can this button actually fix anything?” dry-run
+  const fixAllDryRun = useMemo(() => {
+    if (formatId !== "shopify_products") return null;
+    if (!rows.length) return null;
+    // Run the same fixer but do NOT apply unless user clicks
+    return fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formatId, tableHeaders.join("||"), rows, issuesForTable]);
+
+  const realFixableBlockingCount = fixAllDryRun?.fixesApplied?.length ?? 0;
+
   function handleFixAllBlocking() {
     if (formatId !== "shopify_products") return;
 
-    const fixed = fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
+    // Use the dry-run result if we have it (same inputs)
+    const fixed = fixAllDryRun ?? fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
 
-    // If no fixes were safely applied, explain why (avoid "button does nothing")
     if (!fixed.fixesApplied.length) {
-      const found = fixed.summary?.autoFixableBlockingFound ?? 0;
       setErrorBanner(
-        found > 0
-          ? `Fix All ran, but 0 fixes were safely applied. This usually happens when values like Price/Compare-at aren't convertible to numbers (e.g., "free", "N/A", "$--"). Check the Issues list for the exact cells.`
-          : "Fix All ran, but no eligible blocking issues were found to auto-fix."
+        `Fix All ran, but 0 fixes were safely applied. Remaining blockers require manual edits (e.g., Missing Title, Published like "maybe", Price like "free").`
       );
       return;
     }
 
     setErrorBanner(null);
     setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
-
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
 
@@ -317,7 +322,6 @@ export default function AppClient() {
 
     try {
       const parsed = parseCsv(csvText);
-
       const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
 
       const parseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
@@ -368,7 +372,6 @@ export default function AppClient() {
     }
   }
 
-  // When switching formats, clear issues/autofixes then re-run if a file is loaded
   useEffect(() => {
     setIssues([]);
     setAutoFixes([]);
@@ -443,9 +446,7 @@ export default function AppClient() {
       warnings: issuesForTable.filter((i) => i.severity === "warning").length,
       tips: issuesForTable.filter((i) => i.severity === "info").length,
     };
-    lines.push(
-      `Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`
-    );
+    lines.push(`Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`);
     lines.push(`Total auto-fixes applied: ${fixList.length}`);
     lines.push("");
 
@@ -495,13 +496,13 @@ export default function AppClient() {
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
-  // ✅ FIX: Only show the Fix All button when there are real auto-fixable blockers
+  // ✅ FIX: show button ONLY if fixer can truly apply at least 1 safe fix
   const fixAllVisible =
     formatId === "shopify_products" &&
     rows.length > 0 &&
-    readiness.autoFixableBlockingErrors > 0;
+    realFixableBlockingCount > 0;
 
-  const fixAllLabel = `Fix ${readiness.autoFixableBlockingErrors} auto-fixable blockers`;
+  const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -541,7 +542,7 @@ export default function AppClient() {
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
                 </span>
 
-                {/* ✅ FIX: only show when there are truly auto-fixable blockers */}
+                {/* ✅ FIX: button only shows when it will actually apply changes */}
                 {fixAllVisible ? (
                   <button
                     type="button"
@@ -556,6 +557,7 @@ export default function AppClient() {
                 ) : null}
               </div>
 
+              {/* Phase 1: Shopify readiness summary */}
               {formatId === "shopify_products" ? (
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -594,7 +596,7 @@ export default function AppClient() {
 
                             <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
                               Fixable blockers:{" "}
-                              <span className="font-semibold text-[var(--text)]">{readiness.autoFixableBlockingErrors}</span>
+                              <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
                             </span>
                           </div>
                         </div>
@@ -817,9 +819,7 @@ export default function AppClient() {
           <div className="mt-4 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
-                <div className="p-6 text-sm text-[var(--muted)]">
-                  No table yet. Upload a CSV to see it here.
-                </div>
+                <div className="p-6 text-sm text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
               ) : (
                 <table className="data-table">
                   <thead>
@@ -841,11 +841,8 @@ export default function AppClient() {
                             const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
 
                             const cellClass =
-                              (sev === "error"
-                                ? "cell-error"
-                                : sev === "warning"
-                                  ? "cell-warning"
-                                  : "") + (isEditing ? " cell-editing" : "");
+                              (sev === "error" ? "cell-error" : sev === "warning" ? "cell-warning" : "") +
+                              (isEditing ? " cell-editing" : "");
 
                             return (
                               <td
@@ -861,9 +858,7 @@ export default function AppClient() {
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
                                     value={editing.value}
                                     onChange={(e) =>
-                                      setEditing((prev) =>
-                                        prev ? { ...prev, value: e.target.value } : prev
-                                      )
+                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
                                     }
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
@@ -887,8 +882,7 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full
-                row editing.
+                Showing first 12 columns and up to 25 rows for speed. Use “Manual fixes” for full row editing.
               </div>
             ) : null}
           </div>
