@@ -279,7 +279,11 @@ export default function AppClient() {
     });
   }, []);
 
-  function runFormatOnCurrentData(nextHeaders: string[], nextRows: CsvRow[], additionalFixes: string[] = []) {
+  function runFormatOnCurrentData(
+    nextHeaders: string[],
+    nextRows: CsvRow[],
+    additionalFixes: string[] = []
+  ) {
     const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
     setHeaders(res.fixedHeaders ?? nextHeaders);
     setRows(res.fixedRows ?? nextRows);
@@ -306,7 +310,7 @@ export default function AppClient() {
 
     if (!fixed.fixesApplied.length) {
       setErrorBanner(
-        `Fix All ran, but 0 fixes were safely applied. Remaining blockers require manual edits (e.g., Missing Title, Published like "maybe", Price like "free").`
+        `No safe auto-fixable blockers found. Remaining blockers need manual edits (for example: Missing Title, Published like "maybe", Price like "free").`
       );
       return;
     }
@@ -398,11 +402,7 @@ export default function AppClient() {
       const a = document.createElement("a");
       a.href = url;
 
-      const base =
-        (exportBaseName ?? fileName ?? "fixed")
-          .replace(/\.csv$/i, "")
-          .trim() || "fixed";
-
+      const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
       a.download = `${base}_fixed.csv`;
 
       document.body.appendChild(a);
@@ -429,10 +429,7 @@ export default function AppClient() {
 
     const now = new Date();
     const iso = now.toISOString();
-    const base =
-      (exportBaseName ?? fileName ?? "fixed")
-        .replace(/\.csv$/i, "")
-        .trim() || "fixed";
+    const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
 
     const lines: string[] = [];
     lines.push("StriveFormats – Auto-fix Change Log");
@@ -446,7 +443,9 @@ export default function AppClient() {
       warnings: issuesForTable.filter((i) => i.severity === "warning").length,
       tips: issuesForTable.filter((i) => i.severity === "info").length,
     };
-    lines.push(`Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`);
+    lines.push(
+      `Issues after auto-fix: ${counts.errors} errors, ${counts.warnings} warnings, ${counts.tips} tips`
+    );
     lines.push(`Total auto-fixes applied: ${fixList.length}`);
     lines.push("");
 
@@ -494,15 +493,18 @@ export default function AppClient() {
 
   const used = Number(quota?.used ?? 0);
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
-  const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
+  const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? Number(limit ?? 0) - used));
 
   // ✅ FIX: show button ONLY if fixer can truly apply at least 1 safe fix
-  const fixAllVisible =
+  const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
+  const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
+
+  // ✅ UX: if there are blockers but none are safely fixable, show a friendly hint
+  const showNoFixableHint =
     formatId === "shopify_products" &&
     rows.length > 0 &&
-    realFixableBlockingCount > 0;
-
-  const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
+    validation.counts.blockingErrors > 0 &&
+    realFixableBlockingCount === 0;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -587,9 +589,7 @@ export default function AppClient() {
                             <button
                               type="button"
                               className="rg-btn"
-                              onClick={() =>
-                                issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-                              }
+                              onClick={() => issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
                             >
                               Jump to issues
                             </button>
@@ -599,6 +599,14 @@ export default function AppClient() {
                               <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
                             </span>
                           </div>
+
+                          {/* ✅ UX hint when nothing safe is fixable */}
+                          {showNoFixableHint ? (
+                            <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                              No safe auto-fixable blockers found. Use <span className="font-semibold text-[var(--text)]">Manual fixes</span> below to resolve items like
+                              missing Title or non-numeric Price.
+                            </div>
+                          ) : null}
                         </div>
                       ) : null}
 
@@ -609,9 +617,7 @@ export default function AppClient() {
                             {lastFixAll.applied.slice(0, 5).map((t, idx) => (
                               <li key={idx}>{t}</li>
                             ))}
-                            {lastFixAll.applied.length > 5 ? (
-                              <li>…and {lastFixAll.applied.length - 5} more</li>
-                            ) : null}
+                            {lastFixAll.applied.length > 5 ? <li>…and {lastFixAll.applied.length - 5} more</li> : null}
                           </ul>
                         </div>
                       ) : null}
@@ -627,8 +633,7 @@ export default function AppClient() {
                             title={n.note}
                           >
                             <div className="font-semibold text-[var(--text)]">
-                              {n.label}{" "}
-                              <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
+                              {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>
                             <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
                           </div>
@@ -694,8 +699,7 @@ export default function AppClient() {
         </div>
 
         <div className="mt-3 text-xs text-[var(--muted)]">
-          Built-in formats are available to everyone. Custom formats appear here when you save or
-          import them.
+          Built-in formats are available to everyone. Custom formats appear here when you save or import them.
         </div>
       </div>
 
