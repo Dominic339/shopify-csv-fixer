@@ -1,177 +1,222 @@
+// src/lib/validation/issueMetaShopify.ts
 import type { IssueMetaMap } from "./issueMeta";
 
-/**
- * Shopify issue metadata.
- *
- * IMPORTANT:
- * - Keys must match issue.code produced by Shopify validators.
- * - Keep these stable once published; they become part of UX + scoring.
- */
 export const SHOPIFY_ISSUE_META: IssueMetaMap = {
   "shopify/missing_required_header": {
     code: "shopify/missing_required_header",
     title: "Missing required column",
-    explanation: "Your CSV is missing a column Shopify expects for the Products import template.",
-    whyPlatformCares:
-      "Shopify maps columns by header name. Missing required headers causes Shopify to reject the file or skip critical fields.",
-    howToFix:
-      "Add the missing column header exactly as Shopify expects (spelling + casing). If you don’t have values yet, leave the cells blank.",
+    explanation: "Your CSV is missing a column Shopify expects for product imports/updates.",
+    whyPlatformCares: "Shopify maps fields by header name. Missing required columns can block imports or updates.",
+    howToFix: "Add the missing column header exactly as Shopify expects. Values can be blank if not needed yet.",
     category: "structure",
     blocking: true,
-    autoFixable: true, // we can add the header column safely
+    autoFixable: true,
+  },
+
+  "shopify/blank_title": {
+    code: "shopify/blank_title",
+    title: "Blank Title",
+    explanation: "A row is missing the product Title.",
+    whyPlatformCares: "Shopify requires Title to create/import products.",
+    howToFix: "Fill Title with the product name.",
+    category: "structure",
+    blocking: true,
   },
 
   "shopify/blank_handle": {
     code: "shopify/blank_handle",
-    title: "Blank Handle",
-    explanation:
-      "At least one row has an empty Handle. Handles identify products and group variants in Shopify imports.",
-    whyPlatformCares:
-      "Shopify uses Handle as the product identifier in the import. A blank Handle means Shopify cannot attach the row to a product.",
-    howToFix:
-      "Fill in a unique handle for that product. For variants, every row for the same product must share the same Handle.",
+    title: "Blank URL handle",
+    explanation: "A row has an empty URL handle (Handle). Handles group variants and identify products.",
+    whyPlatformCares: "Shopify uses URL handle to identify and update products, and to group variants.",
+    howToFix: "Fill URL handle (letters, numbers, dashes; no spaces). For variants, all rows share the same handle.",
     category: "variant",
     blocking: true,
+    autoFixable: true, // we can generate from Title
   },
 
-  "shopify/duplicate_handle": {
-    code: "shopify/duplicate_handle",
-    title: "Duplicate Handle",
-    explanation:
-      "The same Handle appears multiple times, but the rows do not look like valid variants of the same product.",
-    whyPlatformCares:
-      "Shopify expects duplicate handles to represent variants. If variant fields don’t align, Shopify may import incorrectly or overwrite data.",
-    howToFix:
-      "If these rows are variants, ensure Option and Variant fields are consistent (Option names/values, SKU, etc.). If they are different products, change the Handle.",
+  "shopify/invalid_handle": {
+    code: "shopify/invalid_handle",
+    title: "Invalid URL handle",
+    explanation: "URL handle contains invalid characters (e.g., spaces).",
+    whyPlatformCares: "Handles are used in URLs and must be URL-safe.",
+    howToFix: "Use only letters, numbers, and dashes. No spaces.",
     category: "variant",
     blocking: true,
-  },
-
-  "shopify/duplicate_sku": {
-    code: "shopify/duplicate_sku",
-    title: "Duplicate SKU",
-    explanation: "Two or more variants share the same SKU.",
-    whyPlatformCares:
-      "SKUs should uniquely identify variants. Duplicate SKUs can break inventory updates and confuse fulfillment workflows.",
-    howToFix:
-      "Make each SKU unique per variant. If you don’t use SKUs, consider leaving SKU blank consistently.",
-    category: "variant",
-    blocking: false,
-  },
-
-  "shopify/invalid_inventory_policy": {
-    code: "shopify/invalid_inventory_policy",
-    title: "Invalid Inventory Policy",
-    explanation:
-      "Variant Inventory Policy must be either 'deny' or 'continue' for Shopify product imports.",
-    whyPlatformCares:
-      "Shopify validates this field strictly. Any other value will fail validation or be ignored.",
-    howToFix:
-      "Use 'deny' to prevent overselling, or 'continue' to allow selling when inventory reaches 0.",
-    category: "inventory",
-    blocking: true,
-    autoFixable: true, // safe normalization
-  },
-
-  "shopify/negative_inventory": {
-    code: "shopify/negative_inventory",
-    title: "Negative inventory",
-    explanation: "Inventory quantity is below zero for at least one variant row.",
-    whyPlatformCares:
-      "Negative inventory is usually a data error and can cause unexpected out-of-stock behavior depending on Shopify inventory settings.",
-    howToFix:
-      "Set inventory to 0 or a positive number. If backorders are intended, use Inventory Policy = 'continue' and keep quantity at 0.",
-    category: "inventory",
-    blocking: false,
+    autoFixable: true,
   },
 
   "shopify/invalid_boolean_published": {
     code: "shopify/invalid_boolean_published",
     title: "Invalid Published value",
-    explanation: "Published must be TRUE or FALSE (Shopify accepts these boolean literals).",
-    whyPlatformCares:
-      "Shopify rejects unrecognized boolean values (like 'Yes', 'No', '1', '0') in the Published column.",
-    howToFix:
-      "Change Published to TRUE or FALSE for each row.",
+    explanation: "Published on online store must be true or false.",
+    whyPlatformCares: "Shopify rejects invalid boolean values in boolean columns.",
+    howToFix: 'Set Published on online store to "true" or "false".',
     category: "structure",
     blocking: true,
-    autoFixable: true, // safe normalization
+    autoFixable: true,
+  },
+
+  "shopify/invalid_boolean_continue_selling": {
+    code: "shopify/invalid_boolean_continue_selling",
+    title: "Invalid Continue selling value",
+    explanation: "Continue selling when out of stock must be true or false.",
+    whyPlatformCares: "Shopify needs a valid boolean to interpret overselling behavior.",
+    howToFix: 'Set Continue selling when out of stock to "true" or "false".',
+    category: "inventory",
+    blocking: true,
+    autoFixable: true,
   },
 
   "shopify/invalid_status": {
     code: "shopify/invalid_status",
     title: "Invalid Status",
-    explanation: "Status must be one of: active, draft, archived.",
-    whyPlatformCares:
-      "Shopify validates Status against a strict allowed set. Invalid values can prevent import.",
-    howToFix:
-      "Set Status to active, draft, or archived (lowercase recommended).",
+    explanation: "Status must be active, draft, or archived.",
+    whyPlatformCares: "Shopify only supports these values in the Status column.",
+    howToFix: "Change Status to active, draft, or archived.",
     category: "structure",
     blocking: true,
-    autoFixable: true, // safe normalization to lowercase if it matches allowed set
-  },
-
-  "shopify/option_order_invalid": {
-    code: "shopify/option_order_invalid",
-    title: "Option hierarchy invalid",
-    explanation:
-      "Option2 cannot be used unless Option1 exists, and Option3 cannot be used unless Option2 exists.",
-    whyPlatformCares:
-      "Shopify expects variant option columns to be defined in order. Skipping an option breaks variant mapping.",
-    howToFix:
-      "Move option names/values up (fill Option1 before Option2, Option2 before Option3), or clear later options if unused.",
-    category: "variant",
-    blocking: true,
-  },
-
-  "shopify/compare_at_lt_price": {
-    code: "shopify/compare_at_lt_price",
-    title: "Compare-at price lower than price",
-    explanation:
-      "Compare-at price is meant to represent the original price. If it’s below the actual price, it may be a data mistake.",
-    whyPlatformCares:
-      "Shopify doesn’t always hard-reject this, but it can produce confusing sale displays or unexpected merchandising behavior.",
-    howToFix:
-      "Set Compare at Price to a value >= Price, or leave it blank if not used.",
-    category: "pricing",
-    blocking: false,
+    autoFixable: true,
   },
 
   "shopify/invalid_numeric_price": {
     code: "shopify/invalid_numeric_price",
-    title: "Invalid price number",
-    explanation:
-      "Price (or Compare at Price) is not parseable as a number after cleanup (currency symbols, commas, etc.).",
-    whyPlatformCares:
-      "Shopify validates pricing as numeric values. Non-numeric values are rejected or imported incorrectly.",
-    howToFix:
-      "Use plain numbers like 19.99. Remove currency symbols and commas.",
+    title: "Invalid Price",
+    explanation: "Price must be a numeric value.",
+    whyPlatformCares: "Shopify rejects non-numeric pricing values.",
+    howToFix: "Use numbers like 19.99 (avoid currency symbols).",
     category: "pricing",
     blocking: true,
-    autoFixable: true, // safe numeric cleanup for common cases
+    autoFixable: true,
+  },
+
+  "shopify/invalid_numeric_compare_at": {
+    code: "shopify/invalid_numeric_compare_at",
+    title: "Invalid Compare-at price",
+    explanation: "Compare-at price must be a numeric value.",
+    whyPlatformCares: "Shopify rejects non-numeric pricing values.",
+    howToFix: "Use numbers like 29.99 (avoid currency symbols).",
+    category: "pricing",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/compare_at_less_than_price": {
+    code: "shopify/compare_at_less_than_price",
+    title: "Compare-at price looks wrong",
+    explanation: "Compare-at price is less than price, which is usually the reverse for a sale.",
+    whyPlatformCares: "Not always rejected, but commonly indicates a pricing mistake.",
+    howToFix: "Set Compare-at price higher than Price (or leave it blank if not used).",
+    category: "pricing",
+    blocking: false,
+  },
+
+  "shopify/invalid_integer_inventory_qty": {
+    code: "shopify/invalid_integer_inventory_qty",
+    title: "Invalid Inventory quantity",
+    explanation: "Inventory quantity must be a whole number.",
+    whyPlatformCares: "Shopify expects integer stock values in this column.",
+    howToFix: "Use whole numbers like 0, 5, 12.",
+    category: "inventory",
+    blocking: true,
+  },
+
+  "shopify/negative_inventory_qty": {
+    code: "shopify/negative_inventory_qty",
+    title: "Negative inventory quantity",
+    explanation: "Inventory is negative.",
+    whyPlatformCares: "Not always rejected, but often indicates an inventory sync issue.",
+    howToFix: "Double-check whether negative stock is intended for your workflow.",
+    category: "inventory",
+    blocking: false,
   },
 
   "shopify/invalid_image_url": {
     code: "shopify/invalid_image_url",
-    title: "Invalid Image URL",
-    explanation: "Image Src must be a valid http(s) URL.",
-    whyPlatformCares:
-      "Shopify downloads images from the URL during import. Invalid URLs cause missing images or import warnings/errors.",
-    howToFix:
-      "Use a publicly accessible URL starting with http:// or https://. Ensure it points directly to an image file.",
-    category: "structure",
+    title: "Invalid image URL",
+    explanation: "Image URL must be a valid http(s) URL.",
+    whyPlatformCares: "Shopify imports images by downloading them from public URLs.",
+    howToFix: "Use a publicly accessible https:// image URL.",
+    category: "images",
+    blocking: true,
+  },
+
+  "shopify/invalid_image_position": {
+    code: "shopify/invalid_image_position",
+    title: "Invalid image position",
+    explanation: "Image position should be a positive integer (1, 2, 3...).",
+    whyPlatformCares: "Position controls ordering; invalid values can cause confusing results.",
+    howToFix: "Use 1, 2, 3... or leave blank.",
+    category: "images",
     blocking: false,
   },
 
-  "shopify/duplicate_image_url": {
-    code: "shopify/duplicate_image_url",
-    title: "Duplicate Image URL",
-    explanation: "The same image URL appears multiple times (often accidental duplication).",
-    whyPlatformCares:
-      "Duplicate images can clutter product media and cause confusing image ordering after import.",
-    howToFix:
-      "Remove duplicate Image Src rows or adjust Image Position if they represent distinct images.",
-    category: "structure",
+  "shopify/option_order_invalid": {
+    code: "shopify/option_order_invalid",
+    title: "Option order invalid",
+    explanation: "Option2 requires Option1; Option3 requires Option2.",
+    whyPlatformCares: "Variant option data depends on previous option columns.",
+    howToFix: "Fill Option1 name/value before Option2, and Option2 before Option3.",
+    category: "variant",
+    blocking: true,
+  },
+
+  "shopify/variant_option_missing_value": {
+    code: "shopify/variant_option_missing_value",
+    title: "Option name missing a value",
+    explanation: "An option name is present but its value is blank.",
+    whyPlatformCares: "Blank option values can create confusing variants or defaults.",
+    howToFix: "Fill the corresponding Option value (e.g., Size = Small).",
+    category: "variant",
+    blocking: false,
+  },
+
+  "shopify/duplicate_handle_not_variants": {
+    code: "shopify/duplicate_handle_not_variants",
+    title: "Duplicate handle rows look identical",
+    explanation: "Multiple rows share the same handle and appear to repeat identical variant details.",
+    whyPlatformCares: "This can cause overwrites or duplicate variants during import.",
+    howToFix: "Ensure variants differ by option values/SKU, or make extra rows image-only rows.",
+    category: "variant",
+    blocking: false,
+  },
+
+  "shopify/seo_title_too_long": {
+    code: "shopify/seo_title_too_long",
+    title: "SEO title too long",
+    explanation: "SEO titles are commonly recommended to stay within ~70 characters.",
+    whyPlatformCares: "Long titles may be truncated in search results.",
+    howToFix: "Shorten the SEO title.",
+    category: "seo",
+    blocking: false,
+  },
+
+  "shopify/seo_description_too_long": {
+    code: "shopify/seo_description_too_long",
+    title: "SEO description too long",
+    explanation: "SEO descriptions are commonly recommended to stay within ~320 characters.",
+    whyPlatformCares: "Long descriptions may be truncated in search results.",
+    howToFix: "Shorten the SEO description.",
+    category: "seo",
+    blocking: false,
+  },
+
+  "shopify/seo_title_missing": {
+    code: "shopify/seo_title_missing",
+    title: "SEO title missing",
+    explanation: "SEO title is blank (Shopify will fall back to Title).",
+    whyPlatformCares: "Optional optimization for better search snippets.",
+    howToFix: "Optional: add a custom SEO title.",
+    category: "seo",
+    blocking: false,
+  },
+
+  "shopify/seo_description_missing": {
+    code: "shopify/seo_description_missing",
+    title: "SEO description missing",
+    explanation: "SEO description is blank (Shopify will fall back to Description).",
+    whyPlatformCares: "Optional optimization for better search snippets.",
+    howToFix: "Optional: add a custom SEO description.",
+    category: "seo",
     blocking: false,
   },
 };

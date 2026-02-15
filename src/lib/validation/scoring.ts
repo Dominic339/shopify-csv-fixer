@@ -21,6 +21,7 @@ const CATEGORY_WEIGHTS: Record<ValidationCategory, number> = {
   pricing: 20,
   inventory: 20,
   seo: 10,
+  images: 0, // keep overall scoring behavior unchanged; blocking still handled separately
 };
 
 function clamp(n: number, lo: number, hi: number) {
@@ -40,24 +41,35 @@ function severityPenalty(sev: "error" | "warning" | "info") {
 function inferCategory(issue: CsvIssue): ValidationCategory {
   const col = (issue.column ?? "").toLowerCase();
 
+  // Images
   if (
-    col.includes("price") ||
-    col.includes("compare") ||
-    col.includes("cost") ||
-    col.includes("tax") ||
-    col.includes("currency")
+    col.includes("image") ||
+    col.includes("img") ||
+    col.includes("alt text") ||
+    col.includes("src") ||
+    col.includes("url")
   ) {
+    // NOTE: "url" is broad; but image columns in Shopify contain both "image" and "url"
+    // and this only runs when meta is missing. If your meta exists, it takes priority.
+    if (col.includes("image") || col.includes("img") || col.includes("alt")) return "images";
+  }
+
+  // Pricing
+  if (col.includes("price") || col.includes("compare") || col.includes("cost") || col.includes("tax") || col.includes("currency")) {
     return "pricing";
   }
 
+  // Inventory
   if (col.includes("inventory") || col.includes("qty") || col.includes("quantity") || col.includes("policy")) {
     return "inventory";
   }
 
+  // Variants
   if (col.includes("option") || col.includes("variant") || col.includes("sku") || col.includes("handle")) {
     return "variant";
   }
 
+  // SEO
   if (col.includes("seo") || col.includes("title") || col.includes("body") || col.includes("description")) {
     return "seo";
   }
@@ -84,6 +96,7 @@ export function computeValidationBreakdown(
     pricing: [],
     inventory: [],
     seo: [],
+    images: [],
   };
 
   let errors = 0;
@@ -115,6 +128,7 @@ export function computeValidationBreakdown(
     pricing: 100,
     inventory: 100,
     seo: 100,
+    images: 100,
   };
 
   for (const cat of Object.keys(categoryScores) as ValidationCategory[]) {

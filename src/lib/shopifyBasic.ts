@@ -1,4 +1,14 @@
-import { CsvRow } from "./csv";
+// src/lib/shopifyBasic.ts
+import type { CsvRow } from "./csv";
+import {
+  canonicalizeShopifyProductCsv,
+  slugifyShopifyHandle,
+  normalizeShopifyBool,
+  isValidShopifyBool,
+  parseShopifyMoney,
+  formatShopifyMoney,
+  isHttpUrl,
+} from "./shopifySchema";
 
 export type IssueSeverity = "error" | "warning" | "info";
 
@@ -18,662 +28,481 @@ export type FixResult = {
   fixesApplied: string[];
 };
 
-/**
- * Shopify has (at least) two widely-used product CSV schemas:
- *
- * Legacy schema:
- *  - Handle, Body (HTML), Published, Variant SKU, Variant Price, Image Src, ...
- *
- * New Admin template schema (Shopify's current product_template.csv):
- *  - URL handle, Description, Published on online store, Status, SKU, Price,
- *    Product image URL, Image position, SEO title/description, ...
- *
- * StriveFormats must accept BOTH without forcing the user's file to match our engine.
- * We detect the schema from headers and validate/fix using canonical field keys.
- */
-export type ShopifySchema = "legacy" | "new";
-
-type CanonKey =
-  | "title"
-  | "handle"
-  | "description"
-  | "vendor"
-  | "type"
-  | "tags"
-  | "published"
-  | "status"
-  | "sku"
-  | "price"
-  | "compareAtPrice"
-  | "inventoryQty"
-  | "inventoryPolicy"
-  | "continueSelling"
-  | "imageSrc"
-  | "imagePosition"
-  | "seoTitle"
-  | "seoDescription"
-  | "opt1Name"
-  | "opt1Value"
-  | "opt2Name"
-  | "opt2Value"
-  | "opt3Name"
-  | "opt3Value";
-
-type SchemaDef = {
-  schema: ShopifySchema;
-  // canonical key -> possible header labels
-  aliases: Record<CanonKey, string[]>;
-  required: CanonKey[];
-  recommended: CanonKey[];
-};
-
-function normHeader(h: string) {
-  return h.trim().replace(/\s+/g, " ");
-}
-
-function normKey(h: string) {
-  return normHeader(h).toLowerCase();
-}
-
-function detectShopifySchema(headers: string[]): ShopifySchema {
-  const set = new Set(headers.map(normKey));
-  // New template signatures
-  if (set.has("url handle") || set.has("product image url") || set.has("published on online store")) return "new";
-  // Legacy signatures
-  if (set.has("handle") || set.has("body (html)") || set.has("image src") || set.has("variant price")) return "legacy";
-  // Default to new (Shopify is migrating toward it)
-  return "new";
-}
-
-const LEGACY: SchemaDef = {
-  schema: "legacy",
-  aliases: {
-    title: ["Title"],
-    handle: ["Handle"],
-    description: ["Body (HTML)", "Body HTML", "Body"],
-    vendor: ["Vendor"],
-    type: ["Type"],
-    tags: ["Tags"],
-    published: ["Published"],
-    status: ["Status"],
-    sku: ["Variant SKU", "SKU"],
-    price: ["Variant Price", "Price"],
-    compareAtPrice: ["Variant Compare At Price", "Compare-at price", "Compare at price"],
-    inventoryQty: ["Variant Inventory Qty", "Inventory quantity", "Inventory Qty"],
-    inventoryPolicy: ["Variant Inventory Policy"],
-    continueSelling: ["Continue selling when out of stock"],
-    imageSrc: ["Image Src", "Product image URL", "Product image Url", "Image URL"],
-    imagePosition: ["Image Position", "Image position"],
-    seoTitle: ["SEO Title", "SEO title"],
-    seoDescription: ["SEO Description", "SEO description"],
-    opt1Name: ["Option1 Name", "Option1 name"],
-    opt1Value: ["Option1 Value", "Option1 value"],
-    opt2Name: ["Option2 Name", "Option2 name"],
-    opt2Value: ["Option2 Value", "Option2 value"],
-    opt3Name: ["Option3 Name", "Option3 name"],
-    opt3Value: ["Option3 Value", "Option3 value"],
-  },
-  required: ["handle", "title"],
-  recommended: ["description", "vendor", "type", "tags", "published", "status", "sku", "price"],
-};
-
-const NEW: SchemaDef = {
-  schema: "new",
-  aliases: {
-    title: ["Title"],
-    handle: ["URL handle", "Handle"],
-    description: ["Description", "Body (HTML)", "Body HTML"],
-    vendor: ["Vendor"],
-    type: ["Type"],
-    tags: ["Tags"],
-    published: ["Published on online store", "Published"],
-    status: ["Status"],
-    sku: ["SKU", "Variant SKU"],
-    price: ["Price", "Variant Price"],
-    compareAtPrice: ["Compare-at price", "Variant Compare At Price"],
-    inventoryQty: ["Inventory quantity", "Variant Inventory Qty"],
-    inventoryPolicy: ["Variant Inventory Policy"],
-    continueSelling: ["Continue selling when out of stock"],
-    imageSrc: ["Product image URL", "Image Src"],
-    imagePosition: ["Image position", "Image Position"],
-    seoTitle: ["SEO title", "SEO Title"],
-    seoDescription: ["SEO description", "SEO Description"],
-    opt1Name: ["Option1 name", "Option1 Name"],
-    opt1Value: ["Option1 value", "Option1 Value"],
-    opt2Name: ["Option2 name", "Option2 Name"],
-    opt2Value: ["Option2 value", "Option2 Value"],
-    opt3Name: ["Option3 name", "Option3 Name"],
-    opt3Value: ["Option3 value", "Option3 Value"],
-  },
-  required: ["title", "handle"],
-  recommended: [
-    "description",
-    "vendor",
-    "type",
-    "tags",
-    "status",
-    "published",
-    "sku",
-    "price",
-    "inventoryQty",
-    "continueSelling",
-    "imageSrc",
-  ],
-};
-
-function defFor(headers: string[]): SchemaDef {
-  const schema = detectShopifySchema(headers);
-  return schema === "legacy" ? LEGACY : NEW;
-}
-
-function buildHeaderLookup(headers: string[]) {
-  const byNorm = new Map<string, string>();
-  for (const h of headers) byNorm.set(normKey(h), h);
-  return byNorm;
-}
-
-function resolveCol(headers: string[], possible: string[]): string | null {
-  const lookup = buildHeaderLookup(headers);
-  for (const p of possible) {
-    const hit = lookup.get(normKey(p));
-    if (hit) return hit;
-  }
-  return null;
-}
-
-function getStr(r: CsvRow, col: string | null) {
-  if (!col) return "";
-  const v = r[col];
-  return (typeof v === "string" ? v : String(v ?? "")).trim();
-}
-
-function setStr(r: CsvRow, col: string | null, val: string) {
-  if (!col) return;
-  r[col] = val;
-}
-
-function isTruthyBool(s: string) {
-  const v = s.trim().toLowerCase();
-  return v === "true" || v === "yes" || v === "1";
-}
-
-function isFalsyBool(s: string) {
-  const v = s.trim().toLowerCase();
-  return v === "false" || v === "no" || v === "0";
-}
-
 function dedupe(arr: string[]) {
   return Array.from(new Set(arr));
+}
+
+function get(r: CsvRow, k: string) {
+  const v = r?.[k];
+  return typeof v === "string" ? v : v == null ? "" : String(v);
+}
+function set(r: CsvRow, k: string, v: string) {
+  r[k] = v;
 }
 
 export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): FixResult {
   const issues: Issue[] = [];
   const fixesApplied: string[] = [];
 
-  // Normalize spacing only (do not rename columns)
-  const fixedHeaders = headers.map(normHeader);
+  // 1) Canonicalize to modern Shopify column names + order, append unknowns
+  const canon = canonicalizeShopifyProductCsv(headers ?? [], rows ?? []);
+  const fixedHeaders = canon.fixedHeaders;
+  const fixedRows = canon.fixedRows;
 
-  const schemaDef = defFor(fixedHeaders);
-  const schema = schemaDef.schema;
+  // Canonical column names we operate on
+  const cTitle = "Title";
+  const cHandle = "URL handle";
+  const cDesc = "Description";
+  const cVendor = "Vendor";
+  const cTags = "Tags";
+  const cPublished = "Published on online store";
+  const cStatus = "Status";
+  const cSku = "SKU";
+  const cPrice = "Price";
+  const cCompare = "Compare-at price";
+  const cInvQty = "Inventory quantity";
+  const cContinue = "Continue selling when out of stock";
+  const cImgUrl = "Product image URL";
+  const cImgPos = "Image position";
+  const cSeoTitle = "SEO title";
+  const cSeoDesc = "SEO description";
 
-  const col: Record<CanonKey, string | null> = {} as any;
-  for (const k of Object.keys(schemaDef.aliases) as CanonKey[]) {
-    col[k] = resolveCol(fixedHeaders, schemaDef.aliases[k]);
-  }
+  const optNames = ["Option1 name", "Option2 name", "Option3 name"];
+  const optVals = ["Option1 value", "Option2 value", "Option3 value"];
 
-  // File-level required/recommended checks
-  for (const req of schemaDef.required) {
-    if (!col[req]) {
-      issues.push({
-        severity: "error",
-        code: "missing_required_header",
-        message: `Missing required Shopify column: "${schemaDef.aliases[req][0]}".`,
-        column: schemaDef.aliases[req][0],
-        suggestion: `Add the "${schemaDef.aliases[req][0]}" column (even if blank) to meet Shopify import expectations.`,
-      });
-    }
-  }
-  for (const rec of schemaDef.recommended) {
-    if (!col[rec]) {
-      issues.push({
-        severity: "info",
-        code: "missing_recommended_header",
-        message: `Recommended column not found: "${schemaDef.aliases[rec][0]}".`,
-        column: schemaDef.aliases[rec][0],
-        suggestion: "Not always required, but commonly used in Shopify imports.",
-      });
-    }
-  }
-
-  // Ensure all rows have keys for each header
-  const fixedRows: CsvRow[] = rows.map((r) => {
-    const out: CsvRow = {};
-    for (const h of fixedHeaders) out[h] = r?.[h] ?? "";
-    // preserve any extra columns
-    for (const [k, v] of Object.entries(r ?? {})) out[k] = typeof v === "string" ? v : String(v ?? "");
-    return out;
+  // 2) File-level checks (match Shopify docs reality: Title always required; URL handle required if variants are present)
+  const anyVariantSignals = fixedRows.some((r) => {
+    return (
+      get(r, cSku).trim() ||
+      get(r, cPrice).trim() ||
+      get(r, optNames[0]).trim() ||
+      get(r, optVals[0]).trim() ||
+      get(r, optNames[1]).trim() ||
+      get(r, optVals[1]).trim() ||
+      get(r, optNames[2]).trim() ||
+      get(r, optVals[2]).trim()
+    );
   });
 
-  // Per-row validation + safe fixes
-  for (let idx = 0; idx < fixedRows.length; idx++) {
-    const r = fixedRows[idx];
-    const rowNumber = idx + 1;
+  // Title is required for creating/importing products. Shopify: Title is required; URL handle required for variants.
+  // We treat missing Title column as blocking.
+  if (!fixedHeaders.includes(cTitle)) {
+    issues.push({
+      severity: "error",
+      code: "shopify/missing_required_header",
+      message: `Missing required Shopify column: "Title".`,
+      column: "Title",
+      suggestion: `Add the "Title" column (even if blank) to meet Shopify import expectations.`,
+    });
+  }
 
-    // Handle: required, normalize to Shopify-friendly slug
-    if (col.handle) {
-      const handle = getStr(r, col.handle);
-      if (!handle) {
+  // URL handle column should always exist in our canonical export, but still verify
+  if (!fixedHeaders.includes(cHandle)) {
+    issues.push({
+      severity: "error",
+      code: "shopify/missing_required_header",
+      message: `Missing required Shopify column: "URL handle".`,
+      column: "URL handle",
+      suggestion: `Add the "URL handle" column (even if blank). Shopify requires it when updating products and when importing variants.`,
+    });
+  }
+
+  // 3) Per-row validation + deterministic fixes
+  // We also do variant grouping sanity checks by handle.
+  const byHandle = new Map<string, number[]>();
+
+  for (let i = 0; i < fixedRows.length; i++) {
+    const r = fixedRows[i];
+    const row = i + 1;
+
+    // Title required (row-level)
+    const title = get(r, cTitle).trim();
+    if (!title) {
+      issues.push({
+        severity: "error",
+        code: "shopify/blank_title",
+        row,
+        column: cTitle,
+        message: `Row ${row}: Title is blank.`,
+        suggestion: "Fill Title with the product name.",
+      });
+    }
+
+    // URL handle: if blank, try deterministic autofill from Title
+    const rawHandle = get(r, cHandle).trim();
+    if (!rawHandle) {
+      if (title) {
+        const slug = slugifyShopifyHandle(title);
+        if (slug) {
+          set(r, cHandle, slug);
+          fixesApplied.push(`Generated URL handle from Title on row ${row}`);
+        } else {
+          issues.push({
+            severity: "error",
+            code: "shopify/blank_handle",
+            row,
+            column: cHandle,
+            message: `Row ${row}: URL handle is blank.`,
+            suggestion: "Fill URL handle (letters, numbers, dashes; no spaces).",
+          });
+        }
+      } else if (anyVariantSignals) {
         issues.push({
           severity: "error",
-          code: "missing_handle",
-          message: `Row ${rowNumber}: "${col.handle}" is blank.`,
-          row: rowNumber,
-          column: col.handle,
-          suggestion:
-            "Handle must be a unique identifier (e.g., 'my-product-name'). For variants, all rows share the same handle.",
+          code: "shopify/blank_handle",
+          row,
+          column: cHandle,
+          message: `Row ${row}: URL handle is blank.`,
+          suggestion: "Fill URL handle. Shopify requires it for variants and updates.",
+        });
+      }
+    } else {
+      const slug = slugifyShopifyHandle(rawHandle);
+      if (slug && slug !== rawHandle) {
+        // Only normalize if it results in a non-empty safe slug
+        set(r, cHandle, slug);
+        fixesApplied.push(`Normalized URL handle on row ${row}`);
+      }
+      const after = get(r, cHandle).trim();
+      if (after.includes(" ")) {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_handle",
+          row,
+          column: cHandle,
+          message: `Row ${row}: URL handle contains spaces ("${after}").`,
+          suggestion: "Use only letters, numbers, and dashes (no spaces).",
+        });
+      }
+    }
+
+    // Published on online store: normalize to true/false (lowercase)
+    const pub = get(r, cPublished).trim();
+    if (pub) {
+      const norm = normalizeShopifyBool(pub);
+      if (norm !== pub) {
+        set(r, cPublished, norm);
+        fixesApplied.push(`Normalized Published on online store to "${norm}" on row ${row}`);
+      }
+      if (!isValidShopifyBool(get(r, cPublished))) {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_boolean_published",
+          row,
+          column: cPublished,
+          message: `Row ${row}: Published on online store must be true or false (got "${pub}").`,
+          suggestion: `Change to "true" or "false".`,
+        });
+      }
+    }
+
+    // Continue selling when out of stock:
+    // - If it looks like legacy inventory policy (continue/deny), map deterministically
+    const cs = get(r, cContinue).trim();
+    if (cs) {
+      const lower = cs.toLowerCase();
+      if (lower === "continue" || lower === "deny") {
+        const mapped = lower === "continue" ? "true" : "false";
+        set(r, cContinue, mapped);
+        fixesApplied.push(`Mapped legacy inventory policy "${cs}" to Continue selling = "${mapped}" on row ${row}`);
+      } else {
+        const norm = normalizeShopifyBool(cs);
+        if (norm !== cs) {
+          set(r, cContinue, norm);
+          fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
+        }
+      }
+      if (!isValidShopifyBool(get(r, cContinue))) {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_boolean_continue_selling",
+          row,
+          column: cContinue,
+          message: `Row ${row}: Continue selling when out of stock must be true or false (got "${cs}").`,
+          suggestion: `Change to "true" or "false".`,
+        });
+      }
+    }
+
+    // Price + compare-at normalization
+    const priceRaw = get(r, cPrice).trim();
+    if (priceRaw) {
+      const n = parseShopifyMoney(priceRaw);
+      if (n == null) {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_numeric_price",
+          row,
+          column: cPrice,
+          message: `Row ${row}: Price is not a valid number ("${priceRaw}").`,
+          suggestion: "Use numbers like 19.99 (no currency symbols).",
         });
       } else {
-        const normalized = handle
-          .toLowerCase()
-          .replace(/[^a-z0-9\- ]/g, "")
-          .trim()
-          .replace(/\s+/g, "-")
-          .replace(/\-+/g, "-");
-        if (normalized && normalized !== handle) {
-          setStr(r, col.handle, normalized);
-          fixesApplied.push(`Row ${rowNumber}: Normalized Handle to "${normalized}".`);
+        const formatted = formatShopifyMoney(n);
+        if (formatted !== priceRaw) {
+          set(r, cPrice, formatted);
+          fixesApplied.push(`Normalized Price to "${formatted}" on row ${row}`);
         }
       }
     }
 
-    // Published on online store (TRUE/FALSE)
-    if (col.published) {
-      const raw = getStr(r, col.published);
-      if (!raw) {
+    const compareRaw = get(r, cCompare).trim();
+    if (compareRaw) {
+      const n = parseShopifyMoney(compareRaw);
+      if (n == null) {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_numeric_compare_at",
+          row,
+          column: cCompare,
+          message: `Row ${row}: Compare-at price is not a valid number ("${compareRaw}").`,
+          suggestion: "Use numbers like 29.99 (no currency symbols).",
+        });
+      } else {
+        const formatted = formatShopifyMoney(n);
+        if (formatted !== compareRaw) {
+          set(r, cCompare, formatted);
+          fixesApplied.push(`Normalized Compare-at price to "${formatted}" on row ${row}`);
+        }
+      }
+    }
+
+    // Compare-at sanity: compare-at < price is suspicious (warn)
+    const p = priceRaw ? parseShopifyMoney(get(r, cPrice)) : null;
+    const c = compareRaw ? parseShopifyMoney(get(r, cCompare)) : null;
+    if (p != null && c != null && c > 0 && p > 0 && c < p) {
+      issues.push({
+        severity: "warning",
+        code: "shopify/compare_at_less_than_price",
+        row,
+        column: cCompare,
+        message: `Row ${row}: Compare-at price (${get(r, cCompare)}) is less than Price (${get(r, cPrice)}).`,
+        suggestion: "Compare-at price is usually higher than Price when showing a sale.",
+      });
+    }
+
+    // Inventory quantity: integer; negative warning
+    const invRaw = get(r, cInvQty).trim();
+    if (invRaw) {
+      const n = Number(invRaw);
+      if (!Number.isInteger(n)) {
+        issues.push({
+          severity: "error",
+          code: "shopify/invalid_integer_inventory_qty",
+          row,
+          column: cInvQty,
+          message: `Row ${row}: Inventory quantity must be an integer (got "${invRaw}").`,
+          suggestion: "Use whole numbers like 0, 5, 12.",
+        });
+      } else if (n < 0) {
         issues.push({
           severity: "warning",
-          code: "published_blank",
-          message: `Row ${rowNumber}: "${col.published}" is blank.`,
-          row: rowNumber,
-          column: col.published,
-          suggestion: `Use "TRUE" or "FALSE".`,
+          code: "shopify/negative_inventory_qty",
+          row,
+          column: cInvQty,
+          message: `Row ${row}: Inventory quantity is negative (${invRaw}).`,
+          suggestion: "Negative inventory can be valid in some workflows, but double-check before importing.",
         });
-      } else {
-        const normalized = isTruthyBool(raw) ? "TRUE" : isFalsyBool(raw) ? "FALSE" : "";
-        if (!normalized) {
-          issues.push({
-            severity: "error",
-            code: "published_invalid",
-            message: `Row ${rowNumber}: "${col.published}" should be TRUE/FALSE but is "${raw}".`,
-            row: rowNumber,
-            column: col.published,
-            suggestion: `Change it to "TRUE" or "FALSE".`,
-          });
-        } else if (raw !== normalized) {
-          setStr(r, col.published, normalized);
-          fixesApplied.push(`Row ${rowNumber}: Normalized Published to "${normalized}".`);
-        }
       }
     }
 
-    // Continue selling when out of stock (TRUE/FALSE)
-    if (col.continueSelling) {
-      const raw = getStr(r, col.continueSelling);
-      if (raw) {
-        const normalized = isTruthyBool(raw) ? "TRUE" : isFalsyBool(raw) ? "FALSE" : "";
-        if (!normalized) {
-          issues.push({
-            severity: "error",
-            code: "continue_selling_invalid",
-            message: `Row ${rowNumber}: "${col.continueSelling}" must be TRUE or FALSE (got "${raw}").`,
-            row: rowNumber,
-            column: col.continueSelling,
-            suggestion: `Set it to TRUE or FALSE.`,
-          });
-        } else if (raw !== normalized) {
-          setStr(r, col.continueSelling, normalized);
-          fixesApplied.push(`Row ${rowNumber}: Normalized Continue selling when out of stock to "${normalized}".`);
-        }
-      }
-    }
-
-    // Price normalization/validation
-    if (col.price) {
-      const raw = getStr(r, col.price);
-      if (raw) {
-        const cleaned = raw.replace(/[$,]/g, "").trim();
-        if (/^\d+(\.\d{1,2})?$/.test(cleaned)) {
-          if (cleaned !== raw) {
-            setStr(r, col.price, cleaned);
-            fixesApplied.push(`Row ${rowNumber}: Normalized Price to "${cleaned}".`);
-          }
-        } else {
-          issues.push({
-            severity: "error",
-            code: "price_invalid",
-            message: `Row ${rowNumber}: "${col.price}" looks invalid ("${raw}").`,
-            row: rowNumber,
-            column: col.price,
-            suggestion: `Use a number like 19.99 (no currency symbols).`,
-          });
-        }
-      }
-    }
-
-    // Compare-at price validation
-    if (col.compareAtPrice) {
-      const raw = getStr(r, col.compareAtPrice);
-      if (raw) {
-        const cleaned = raw.replace(/[$,]/g, "").trim();
-        if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) {
-          issues.push({
-            severity: "error",
-            code: "compare_at_invalid",
-            message: `Row ${rowNumber}: "${col.compareAtPrice}" looks invalid ("${raw}").`,
-            row: rowNumber,
-            column: col.compareAtPrice,
-            suggestion: `Use a number like 29.99 (no currency symbols).`,
-          });
-        } else if (cleaned !== raw) {
-          setStr(r, col.compareAtPrice, cleaned);
-          fixesApplied.push(`Row ${rowNumber}: Normalized Compare-at price to "${cleaned}".`);
-        }
-      }
-    }
-
-    // Inventory quantity normalization/validation
-    if (col.inventoryQty) {
-      const raw = getStr(r, col.inventoryQty);
-      if (raw) {
-        const cleaned = raw.replace(/,/g, "").trim();
-        if (/^-?\d+$/.test(cleaned)) {
-          if (cleaned !== raw) {
-            setStr(r, col.inventoryQty, cleaned);
-            fixesApplied.push(`Row ${rowNumber}: Normalized Inventory quantity to "${cleaned}".`);
-          }
-          const n = Number(cleaned);
-          if (Number.isFinite(n) && n < 0) {
-            issues.push({
-              severity: "warning",
-              code: "inventory_qty_negative",
-              message: `Row ${rowNumber}: "${col.inventoryQty}" is negative (${n}).`,
-              row: rowNumber,
-              column: col.inventoryQty,
-              suggestion: `Double-check if you really want negative inventory. Usually this should be 0 or higher.`,
-            });
-          }
-        } else {
-          issues.push({
-            severity: "error",
-            code: "inventory_qty_invalid",
-            message: `Row ${rowNumber}: "${col.inventoryQty}" looks invalid ("${raw}").`,
-            row: rowNumber,
-            column: col.inventoryQty,
-            suggestion: `Use a whole number like 0, 5, 10 (no words).`,
-          });
-        }
-      }
-    }
-
-    // Legacy inventory policy validation (deny/continue)
-    if (col.inventoryPolicy) {
-      const raw = getStr(r, col.inventoryPolicy);
-      if (raw) {
-        const lower = raw.toLowerCase();
-        if (lower !== "deny" && lower !== "continue") {
-          issues.push({
-            severity: "error",
-            code: "inventory_policy_invalid",
-            message: `Row ${rowNumber}: "${col.inventoryPolicy}" must be "deny" or "continue" (got "${raw}").`,
-            row: rowNumber,
-            column: col.inventoryPolicy,
-            suggestion: `Use "deny" (stop selling when out of stock) or "continue" (allow overselling).`,
-          });
-        } else if (raw !== lower) {
-          setStr(r, col.inventoryPolicy, lower);
-          fixesApplied.push(`Row ${rowNumber}: Normalized Inventory Policy to "${lower}".`);
-        }
-      }
-    }
-
-    // Tags normalization
-    if (col.tags) {
-      const raw = getStr(r, col.tags);
-      if (raw) {
-        const normalized = raw
-          .split(",")
-          .map((t) => t.trim())
-          .filter((t) => t.length > 0)
-          .join(", ");
-        if (normalized !== raw) {
-          setStr(r, col.tags, normalized);
-          fixesApplied.push(`Row ${rowNumber}: Normalized Tags spacing.`);
-        }
-      }
-    }
-
-    // Helpful info for blanks
-    for (const key of ["title", "vendor", "type"] as const) {
-      const hdr = col[key];
-      if (!hdr) continue;
-      const v = getStr(r, hdr);
-      if (!v) {
+    // Images: URL format + position integer if present
+    const img = get(r, cImgUrl).trim();
+    if (img) {
+      if (!isHttpUrl(img)) {
         issues.push({
-          severity: "info",
-          code: `${key}_blank`,
-          message: `Row ${rowNumber}: "${hdr}" is blank.`,
-          row: rowNumber,
-          column: hdr,
-          suggestion: `Not always required, but Shopify listings usually need a ${key}.`,
+          severity: "error",
+          code: "shopify/invalid_image_url",
+          row,
+          column: cImgUrl,
+          message: `Row ${row}: Product image URL is not a valid http(s) URL ("${img}").`,
+          suggestion: "Use a publicly accessible image URL starting with https://",
         });
       }
+    }
+    const pos = get(r, cImgPos).trim();
+    if (pos) {
+      const pn = Number(pos);
+      if (!Number.isInteger(pn) || pn < 1) {
+        issues.push({
+          severity: "warning",
+          code: "shopify/invalid_image_position",
+          row,
+          column: cImgPos,
+          message: `Row ${row}: Image position should be a positive integer (got "${pos}").`,
+          suggestion: "Use 1, 2, 3... to control image ordering.",
+        });
+      }
+    }
+
+    // Options dependency rules (matches Shopify dependency concept)
+    const n1 = get(r, optNames[0]).trim();
+    const n2 = get(r, optNames[1]).trim();
+    const n3 = get(r, optNames[2]).trim();
+    const v1 = get(r, optVals[0]).trim();
+    const v2 = get(r, optVals[1]).trim();
+    const v3 = get(r, optVals[2]).trim();
+
+    if ((n2 || v2) && !(n1 || v1)) {
+      issues.push({
+        severity: "error",
+        code: "shopify/option_order_invalid",
+        row,
+        column: optNames[1],
+        message: `Row ${row}: Option2 cannot be used unless Option1 is present.`,
+        suggestion: "Fill Option1 name/value before using Option2.",
+      });
+    }
+    if ((n3 || v3) && !(n2 || v2)) {
+      issues.push({
+        severity: "error",
+        code: "shopify/option_order_invalid",
+        row,
+        column: optNames[2],
+        message: `Row ${row}: Option3 cannot be used unless Option2 is present.`,
+        suggestion: "Fill Option2 name/value before using Option3.",
+      });
+    }
+
+    if (n1 && !v1) {
+      issues.push({
+        severity: "warning",
+        code: "shopify/variant_option_missing_value",
+        row,
+        column: optVals[0],
+        message: `Row ${row}: Option1 name is set ("${n1}") but Option1 value is blank.`,
+        suggestion: "Fill Option1 value (e.g., Size = Small).",
+      });
+    }
+    if (n2 && !v2) {
+      issues.push({
+        severity: "warning",
+        code: "shopify/variant_option_missing_value",
+        row,
+        column: optVals[1],
+        message: `Row ${row}: Option2 name is set ("${n2}") but Option2 value is blank.`,
+        suggestion: "Fill Option2 value (e.g., Color = Blue).",
+      });
+    }
+    if (n3 && !v3) {
+      issues.push({
+        severity: "warning",
+        code: "shopify/variant_option_missing_value",
+        row,
+        column: optVals[2],
+        message: `Row ${row}: Option3 name is set ("${n3}") but Option3 value is blank.`,
+        suggestion: "Fill Option3 value if you use a third option.",
+      });
+    }
+
+    // Group rows by handle for duplicate/variant logic
+    const h = get(r, cHandle).trim();
+    if (h) {
+      const list = byHandle.get(h) ?? [];
+      list.push(i);
+      byHandle.set(h, list);
     }
   }
 
-  // Variant intelligence (group by handle)
-  if (col.handle) {
-    const byHandle = new Map<string, number[]>();
-    for (let idx = 0; idx < fixedRows.length; idx++) {
-      const handle = getStr(fixedRows[idx], col.handle);
-      if (!handle) continue;
-      const list = byHandle.get(handle) ?? [];
+  // 4) Variant grouping + duplicate handle sanity
+  for (const [handle, idxs] of byHandle.entries()) {
+    if (idxs.length <= 1) continue;
+
+    // Shopify expects multiple rows with the same handle to represent variants/images.
+    // We'll warn only when it looks like duplicates that aren't variants (same SKU + same option values, etc.)
+    const sigs = new Map<string, number[]>();
+
+    for (const idx of idxs) {
+      const r = fixedRows[idx];
+      const sku = get(r, cSku).trim();
+      const ov1 = get(r, "Option1 value").trim();
+      const ov2 = get(r, "Option2 value").trim();
+      const ov3 = get(r, "Option3 value").trim();
+      const img = get(r, "Product image URL").trim();
+      // Signature: if all are empty except image, treat as image row, not a duplicate
+      const sig = [sku, ov1, ov2, ov3, img ? "IMG" : ""].join("|");
+      const list = sigs.get(sig) ?? [];
       list.push(idx);
-      byHandle.set(handle, list);
+      sigs.set(sig, list);
     }
 
-    const optionNameHeaders = [col.opt1Name, col.opt2Name, col.opt3Name].filter(Boolean) as string[];
-    const optionValueHeaders = [col.opt1Value, col.opt2Value, col.opt3Value].filter(Boolean) as string[];
-    const hasOptionCols = optionNameHeaders.length > 0 && optionValueHeaders.length > 0;
-    const hasSku = Boolean(col.sku);
+    for (const [sig, list] of sigs.entries()) {
+      // More than 1 row with identical variant signature AND no image differentiation -> suspicious duplicates
+      const onlyImageRows = sig.endsWith("|IMG") && sig.startsWith("|||");
+      if (onlyImageRows) continue;
 
-    for (const [handle, idxs] of byHandle.entries()) {
-      if (idxs.length <= 1) continue;
-
-      const skuSet = new Set<string>();
-      const optValueSet = new Set<string>();
-      for (const i of idxs) {
-        const r = fixedRows[i];
-        if (hasSku && col.sku) {
-          const sku = getStr(r, col.sku);
-          if (sku) skuSet.add(sku);
-        }
-        if (hasOptionCols) {
-          const vals = optionValueHeaders.map((c) => getStr(r, c)).filter(Boolean).join("|");
-          if (vals) optValueSet.add(vals);
-        }
-      }
-
-      const looksLikeVariants =
-        (hasOptionCols && optValueSet.size >= 1) ||
-        (hasSku && skuSet.size >= 1) ||
-        (hasOptionCols && optValueSet.size > 1) ||
-        (hasSku && skuSet.size > 1);
-
-      const baseIdx = idxs[0];
-      const baseRowNumber = baseIdx + 1;
-      const base = fixedRows[baseIdx];
-
-      const CONSISTENT_FIELDS: Array<{ key: CanonKey; label: string }> = [
-        { key: "title", label: "Title" },
-        { key: "description", label: schema === "new" ? "Description" : "Body (HTML)" },
-        { key: "vendor", label: "Vendor" },
-        { key: "type", label: "Type" },
-      ];
-
-      if (!looksLikeVariants) {
-        const rowsList = idxs.map((i) => i + 1).join(", ");
-        for (const idx of idxs) {
-          issues.push({
-            severity: "error",
-            code: "duplicate_handle_not_variants",
-            message: `Row ${idx + 1}: Handle "${handle}" appears multiple times (rows ${rowsList}) but does not look like a variant set.`,
-            row: idx + 1,
-            column: col.handle,
-            suggestion:
-              "If these are variants, add option values (Option1/2/3) or distinct SKUs. Otherwise, handles should be unique per product.",
-          });
-        }
-        continue;
-      }
-
-      issues.push({
-        severity: "info",
-        code: "variant_group_detected",
-        message: `Handle "${handle}" appears on ${idxs.length} rows (likely variants).`,
-        row: baseRowNumber,
-        column: col.handle,
-        suggestion: "Shopify variants share a handle. Ensure option columns and SKUs are consistent and unique.",
-      });
-
-      // Warn if first row missing key product fields
-      for (const f of CONSISTENT_FIELDS) {
-        const hdr = col[f.key];
-        if (!hdr) continue;
-        const v = getStr(base, hdr);
-        if (!v) {
+      if (list.length > 1) {
+        const rowsList = list.map((i) => i + 1).join(", ");
+        for (const idx of list) {
           issues.push({
             severity: "warning",
-            code: "variant_group_base_missing",
-            message: `Row ${baseRowNumber}: "${hdr}" is blank for the first row of a variant group ("${handle}").`,
-            row: baseRowNumber,
-            column: hdr,
-            suggestion: `Usually the first row for a product should include ${f.label}.`,
+            code: "shopify/duplicate_handle_not_variants",
+            row: idx + 1,
+            column: "URL handle",
+            message: `Row ${idx + 1}: Handle "${handle}" appears multiple times with identical variant details (rows ${rowsList}).`,
+            suggestion:
+              "If these are meant to be variants, make sure option values differ per row (or SKUs differ). If they are extra images, keep only URL handle + image fields on the extra rows.",
           });
-        }
-      }
-
-      // Consistency checks
-      for (const idx of idxs) {
-        if (idx === baseIdx) continue;
-        const rowNum = idx + 1;
-        const r = fixedRows[idx];
-
-        for (const f of CONSISTENT_FIELDS) {
-          const hdr = col[f.key];
-          if (!hdr) continue;
-          const baseVal = getStr(base, hdr);
-          const thisVal = getStr(r, hdr);
-          if (thisVal && baseVal && thisVal !== baseVal) {
-            issues.push({
-              severity: "warning",
-              code: "variant_group_inconsistent_field",
-              message: `Row ${rowNum}: "${hdr}" differs from row ${baseRowNumber} for handle "${handle}".`,
-              row: rowNum,
-              column: hdr,
-              suggestion: `For variants, "${f.label}" is usually consistent across all rows with the same handle. Consider moving the shared value to the first row and leaving this blank.`,
-            });
-          }
-        }
-
-        // Option validation
-        if (hasOptionCols) {
-          for (let oi = 0; oi < 3; oi++) {
-            const nameCol = optionNameHeaders[oi];
-            const valCol = optionValueHeaders[oi];
-            if (!nameCol || !valCol) continue;
-            const name = getStr(r, nameCol);
-            const val = getStr(r, valCol);
-            const baseName = getStr(base, nameCol);
-            const groupName = baseName || name;
-            if (groupName && !val) {
-              issues.push({
-                severity: "warning",
-                code: "variant_option_missing_value",
-                message: `Row ${rowNum}: "${valCol}" is blank but "${nameCol}" is set for handle "${handle}".`,
-                row: rowNum,
-                column: valCol,
-                suggestion: "Variants usually require option values (e.g., Size = Small).",
-              });
-            }
-          }
-
-          // Enforce Option3 requires Option2; Option2 requires Option1
-          const opt1v = optionValueHeaders[0] ? getStr(r, optionValueHeaders[0]) : "";
-          const opt2v = optionValueHeaders[1] ? getStr(r, optionValueHeaders[1]) : "";
-          const opt3v = optionValueHeaders[2] ? getStr(r, optionValueHeaders[2]) : "";
-          if (opt3v && !opt2v) {
-            issues.push({
-              severity: "error",
-              code: "option3_requires_option2",
-              message: `Row ${rowNum}: Option3 cannot be used unless Option2 is present.`,
-              row: rowNum,
-              column: optionValueHeaders[2] ?? optionNameHeaders[2],
-              suggestion: "Fill Option2 Name/Value before using Option3.",
-            });
-          }
-          if (opt2v && !opt1v) {
-            issues.push({
-              severity: "error",
-              code: "option2_requires_option1",
-              message: `Row ${rowNum}: Option2 cannot be used unless Option1 is present.`,
-              row: rowNum,
-              column: optionValueHeaders[1] ?? optionNameHeaders[1],
-              suggestion: "Fill Option1 Name/Value before using Option2.",
-            });
-          }
-        }
-      }
-
-      // SKU uniqueness within this file
-      if (hasSku && col.sku) {
-        const skuToRows = new Map<string, number[]>();
-        for (const idx of idxs) {
-          const sku = getStr(fixedRows[idx], col.sku);
-          if (!sku) continue;
-          const list = skuToRows.get(sku) ?? [];
-          list.push(idx);
-          skuToRows.set(sku, list);
-        }
-        for (const [sku, list] of skuToRows.entries()) {
-          if (list.length <= 1) continue;
-          const rowsList = list.map((i) => i + 1).join(", ");
-          for (const idx of list) {
-            issues.push({
-              severity: "warning",
-              code: "duplicate_sku_in_file",
-              message: `Row ${idx + 1}: SKU "${sku}" appears multiple times in this file (rows ${rowsList}).`,
-              row: idx + 1,
-              column: col.sku,
-              suggestion: "Shopify usually expects SKUs to be unique per variant.",
-            });
-          }
         }
       }
     }
   }
 
-  // Ensure required headers exist for export (keep schema)
-  const exportHeaders = [...fixedHeaders];
-  for (const req of schemaDef.required) {
-    const preferred = schemaDef.aliases[req][0];
-    if (!resolveCol(exportHeaders, [preferred])) exportHeaders.push(preferred);
-  }
-  for (const r of fixedRows) {
-    for (const h of exportHeaders) r[h] = r[h] ?? "";
+  // 5) Lightweight SEO guidance (non-blocking; doesn’t “scare” template uploads)
+  for (let i = 0; i < fixedRows.length; i++) {
+    const r = fixedRows[i];
+    const row = i + 1;
+
+    const st = get(r, cSeoTitle).trim();
+    const sd = get(r, cSeoDesc).trim();
+
+    if (st && st.length > 70) {
+      issues.push({
+        severity: "info",
+        code: "shopify/seo_title_too_long",
+        row,
+        column: cSeoTitle,
+        message: `Row ${row}: SEO title is ${st.length} characters (recommended ≤ 70).`,
+        suggestion: "Shorten the SEO title to improve search snippet display.",
+      });
+    }
+    if (sd && sd.length > 320) {
+      issues.push({
+        severity: "info",
+        code: "shopify/seo_description_too_long",
+        row,
+        column: cSeoDesc,
+        message: `Row ${row}: SEO description is ${sd.length} characters (recommended ≤ 320).`,
+        suggestion: "Shorten the SEO description to improve search snippet display.",
+      });
+    }
+
+    // Optional: encourage SEO fields if description exists
+    const desc = get(r, cDesc).trim();
+    if (desc && !st) {
+      issues.push({
+        severity: "info",
+        code: "shopify/seo_title_missing",
+        row,
+        column: cSeoTitle,
+        message: `Row ${row}: SEO title is blank (Shopify will fall back to Title).`,
+        suggestion: "Optional: set a custom SEO title if you want different search wording.",
+      });
+    }
+    if (desc && !sd) {
+      issues.push({
+        severity: "info",
+        code: "shopify/seo_description_missing",
+        row,
+        column: cSeoDesc,
+        message: `Row ${row}: SEO description is blank (Shopify will fall back to Description).`,
+        suggestion: "Optional: add an SEO description for better search snippets.",
+      });
+    }
   }
 
   return {
-    fixedHeaders: exportHeaders,
+    fixedHeaders,
     fixedRows,
     issues,
     fixesApplied: dedupe(fixesApplied),

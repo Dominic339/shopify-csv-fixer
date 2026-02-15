@@ -13,14 +13,19 @@ export const shopifyProductsFormat: CsvFormat = {
   apply: (headers: string[], rows: CsvRow[]) => {
     const res = validateAndFixShopifyOptimizer(headers ?? [], rows ?? []);
 
-    const issues = (res.issues ?? []).map((i: any) => ({
-      rowIndex: typeof i.row === "number" ? Math.max(0, i.row - 1) : -1,
-      column: i.column ?? "(file)",
-      message: i.message,
-      severity: (i.severity ?? i.level ?? "error") as "error" | "warning" | "info",
-      code: i.code,
-      suggestion: i.suggestion,
-    }));
+    const issues = (res.issues ?? []).map((i: any) => {
+      const row1 = typeof i.row === "number" ? i.row : typeof i.rowIndex === "number" ? i.rowIndex + 1 : undefined;
+      const rowIndex = typeof row1 === "number" ? Math.max(0, row1 - 1) : -1;
+
+      return {
+        rowIndex, // -1 = file-level
+        column: i.column ?? "(file)",
+        message: i.message,
+        severity: (i.severity ?? i.level ?? "error") as "error" | "warning" | "info",
+        code: i.code,
+        suggestion: i.suggestion,
+      };
+    });
 
     return {
       fixedHeaders: res.fixedHeaders ?? (headers ?? []),

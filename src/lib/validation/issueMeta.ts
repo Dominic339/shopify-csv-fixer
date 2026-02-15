@@ -1,4 +1,10 @@
-export type ValidationCategory = "structure" | "variant" | "pricing" | "inventory" | "seo";
+export type ValidationCategory =
+  | "structure"
+  | "variant"
+  | "pricing"
+  | "inventory"
+  | "seo"
+  | "images";
 
 export type IssueMeta = {
   /** Stable id used by scoring + tooltip system (ex: "shopify/missing_handle"). */
