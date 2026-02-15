@@ -1,3 +1,4 @@
+// src/components/EditableIssuesTable.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -34,6 +35,15 @@ type Props = {
 
   /** Needed for preset-specific tooltip metadata (Shopify, WooCommerce, etc.) */
   formatId?: string;
+
+  /**
+   * Rows pinned in the Issues list. Rows can remain pinned even after their issues are resolved.
+   * They only leave the pinned list when the user clicks Unpin.
+   */
+  pinnedRows?: number[];
+
+  /** Called when a pinned row is manually unpinned. */
+  onUnpinRow?: (rowIndex: number) => void;
 };
 
 function sevRank(sev: Severity) {
@@ -67,7 +77,27 @@ function severityChip(sev: Severity) {
   );
 }
 
-export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetKey, formatId }: Props) {
+function resolvedChip() {
+  const base = "rounded-full px-2 py-0.5 text-xs font-semibold border";
+  return (
+    <span
+      className={`${base} border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]`}
+    >
+      Resolved
+    </span>
+  );
+}
+
+export function EditableIssuesTable({
+  headers,
+  rows,
+  issues,
+  onUpdateRow,
+  resetKey,
+  formatId,
+  pinnedRows,
+  onUnpinRow,
+}: Props) {
   const normalized = useMemo<NormalizedIssue[]>(() => {
     return (issues ?? [])
       .map((it) => {
@@ -122,10 +152,13 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
     return map;
   }, [rowIssues]);
 
-  // Stable row order (ascending)
+  // Stable row order: union of current-problem rows + pinned rows
   const problemRows = useMemo(() => {
-    return Array.from(issuesByRow.keys()).sort((a, b) => a - b);
-  }, [issuesByRow]);
+    const set = new Set<number>();
+    for (const k of issuesByRow.keys()) set.add(k);
+    for (const k of pinnedRows ?? []) set.add(k);
+    return Array.from(set).sort((a, b) => a - b);
+  }, [issuesByRow, pinnedRows]);
 
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -167,17 +200,27 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
           className="pointer-events-none absolute left-1/2 top-full z-50 hidden w-[340px] -translate-x-1/2 rounded-2xl border border-[var(--border)] p-3 text-xs text-[var(--text)] shadow-2xl group-hover:block"
           style={{ backgroundColor: "rgba(10,10,10,0.96)" }}
         >
-          <div className="text-sm font-semibold">{meta.title}</div>
+          <div className="text-sm font-semibold">{(meta as any).title ?? "Issue"}</div>
 
-          <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{meta.explanation}</div>
+          {(meta as any).explanation ? (
+            <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).explanation}</div>
+          ) : null}
 
-          <div className="mt-3 font-semibold text-[var(--text)]">Why the platform cares</div>
-          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{meta.whyPlatformCares}</div>
+          {(meta as any).whyPlatformCares ? (
+            <>
+              <div className="mt-3 font-semibold text-[var(--text)]">Why the platform cares</div>
+              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).whyPlatformCares}</div>
+            </>
+          ) : null}
 
-          <div className="mt-3 font-semibold text-[var(--text)]">How to fix</div>
-          <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{meta.howToFix}</div>
+          {(meta as any).howToFix ? (
+            <>
+              <div className="mt-3 font-semibold text-[var(--text)]">How to fix</div>
+              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{(meta as any).howToFix}</div>
+            </>
+          ) : null}
 
-          {meta.autoFixable ? (
+          {(meta as any).autoFixable ? (
             <div className="mt-3 rounded-xl border border-[color:rgba(var(--accent-rgb),0.25)] bg-[color:rgba(var(--accent-rgb),0.10)] px-2 py-1 text-[11px]">
               Auto-fixable (safe)
             </div>
@@ -187,7 +230,7 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
     );
   }
 
-  if (!normalized.length) {
+  if (!normalized.length && !(pinnedRows?.length ?? 0)) {
     return (
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
         No issues detected.
@@ -243,13 +286,17 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
             else infos++;
           }
 
+          const hasActiveIssues = rowArr.length > 0;
+
           // Use the "worst" severity for the row box tone
-          const rowTone: Severity = rowArr.reduce<Severity>((acc, cur) => {
-            if (acc === "error") return acc;
-            if (acc === "warning" && cur.severity === "error") return "error";
-            if (acc === "info" && (cur.severity === "error" || cur.severity === "warning")) return cur.severity;
-            return acc;
-          }, "info");
+          const rowTone: Severity = hasActiveIssues
+            ? rowArr.reduce<Severity>((acc, cur) => {
+                if (acc === "error") return acc;
+                if (acc === "warning" && cur.severity === "error") return "error";
+                if (acc === "info" && (cur.severity === "error" || cur.severity === "warning")) return cur.severity;
+                return acc;
+              }, "info")
+            : "info";
 
           return (
             <div key={`row-${rowIndex}`} className={`rounded-2xl border p-3 ${issueBoxClass(rowTone)}`}>
@@ -261,59 +308,87 @@ export function EditableIssuesTable({ headers, rows, issues, onUpdateRow, resetK
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-[var(--text)]">
                     Row {rowIndex + 1}
-                    <span className="ml-2 text-xs font-normal text-[color:rgba(var(--muted-rgb),1)]">
-                      {errors ? `${errors} errors` : ""}
-                      {warnings ? (errors ? `, ${warnings} warnings` : `${warnings} warnings`) : ""}
-                      {infos ? ((errors || warnings) ? `, ${infos} tips` : `${infos} tips`) : ""}
-                    </span>
+                    {hasActiveIssues ? (
+                      <span className="ml-2 text-xs font-normal text-[color:rgba(var(--muted-rgb),1)]">
+                        {errors ? `${errors} errors` : ""}
+                        {warnings ? (errors ? `, ${warnings} warnings` : `${warnings} warnings`) : ""}
+                        {infos ? ((errors || warnings) ? `, ${infos} tips` : `${infos} tips`) : ""}
+                      </span>
+                    ) : (
+                      <span className="ml-2 text-xs font-normal text-[color:rgba(var(--muted-rgb),1)]">0 issues</span>
+                    )}
                   </div>
-                  {severityChip(rowTone)}
+
+                  {hasActiveIssues ? (
+                    severityChip(rowTone)
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {resolvedChip()}
+                      {onUnpinRow ? (
+                        <button
+                          type="button"
+                          className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)]"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onUnpinRow(rowIndex);
+                          }}
+                          title="Remove this resolved row from the Issues list"
+                        >
+                          Unpin
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                  {isOpen ? "Click to collapse" : "Click to expand and fix"}
+                  {isOpen ? "Click to collapse" : hasActiveIssues ? "Click to expand and fix" : "Resolved (unpin when you’re ready)"}
                 </div>
               </button>
 
-              {/* Expanded: show issues list + inline editor grid */}
               {isOpen ? (
                 <div className="mt-3 space-y-3">
                   {/* Issues for this row */}
                   <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
                     <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">Issues in this row</div>
                     <div className="mt-2 space-y-2">
-                      {rowArr.map((iss, idx) => (
-                        <div key={`${rowIndex}-iss-${idx}`} className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="text-sm font-semibold text-[var(--text)]">
-                              {iss.column ? iss.column : "(row)"} {issueTooltip(iss)}
+                      {hasActiveIssues ? (
+                        rowArr.map((iss, idx) => (
+                          <div key={`${rowIndex}-iss-${idx}`} className={`rounded-2xl border p-3 ${issueBoxClass(iss.severity)}`}>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-sm font-semibold text-[var(--text)]">
+                                {iss.column ? iss.column : "(row)"} {issueTooltip(iss)}
+                              </div>
+                              {severityChip(iss.severity)}
                             </div>
-                            {severityChip(iss.severity)}
-                          </div>
 
-                          <div className="mt-1 text-sm text-[var(--text)]">
-                            {iss.message} {issueTooltip(iss)}
-                          </div>
-
-                          {iss.suggestion ? (
-                            <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              Suggestion: {iss.suggestion}
+                            <div className="mt-1 text-sm text-[var(--text)]">
+                              {iss.message} {issueTooltip(iss)}
                             </div>
-                          ) : null}
+
+                            {iss.suggestion ? (
+                              <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                                Suggestion: {iss.suggestion}
+                              </div>
+                            ) : null}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                          No current issues remain on this row. You can unpin it when you’re ready.
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 
-                  {/* Inline editor grid (your existing “sub-table”) */}
+                  {/* Inline editor grid */}
                   <div className="grid gap-2 md:grid-cols-2">
                     {headers.map((h) => {
                       const v = rows[rowIndex]?.[h] ?? "";
                       return (
                         <label key={`${rowIndex}-${h}`} className="block">
-                          <div className="mb-1 text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">
-                            {h}
-                          </div>
+                          <div className="mb-1 text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">{h}</div>
                           <input
                             className={`w-full rounded-xl border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none ${inputToneClass(
                               rowIndex,
