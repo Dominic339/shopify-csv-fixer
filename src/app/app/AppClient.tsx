@@ -678,7 +678,7 @@ export default function AppClient() {
                     </div>
                   </div>
 
-                  {/* NEW: Auto-fix log (collapsible) */}
+                  {/* Auto-fix log (collapsible). Single download location lives here. */}
                   {autoFixes.length > 0 ? (
                     <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -782,24 +782,8 @@ export default function AppClient() {
             >
               {busy ? "Working..." : "Export fixed CSV"}
             </button>
-
-            {/* NEW: quick download fix log (only when fixes exist) */}
-            {autoFixes.length > 0 ? (
-              <button
-                className="pill-btn"
-                type="button"
-                onClick={() => {
-                  const header = `Auto fix log\nFile: ${fileName ?? "unknown"}\nFormat: ${formatId}\nApplied: ${autoFixes.length}\n\n`;
-                  const body = autoFixes.map((x, idx) => `${idx + 1}. ${x}`).join("\n");
-                  downloadText(`${fixLogBase}_fix_log.txt`, header + body + "\n");
-                }}
-              >
-                Download fix log
-              </button>
-            ) : null}
           </div>
 
-          {/* NEW: small inline hint if there are no fixes */}
           {rows.length > 0 && autoFixes.length === 0 ? (
             <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">
               No auto fixes were applied for this upload.
