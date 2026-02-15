@@ -386,4 +386,55 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     blocking: false,
     autoFixable: false,
   },
+
+  // NEW: Shopify group sanity checks
+  "shopify/option_name_inconsistent": {
+    code: "shopify/option_name_inconsistent",
+    title: "Option names differ across variants",
+    explanation: "Option1/Option2/Option3 names should be consistent across all rows that share a handle.",
+    whyPlatformCares:
+      "Inconsistent option names can cause variants to import incorrectly or appear mis-grouped.",
+    howToFix: "Use the same Option1/Option2/Option3 names for every variant row under the same handle.",
+    category: "variant",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/mixed_default_title_with_options": {
+    code: "shopify/mixed_default_title_with_options",
+    title: 'Mixed "Default Title" with real options',
+    explanation: 'A handle includes both "Default Title" rows and option-based variant rows.',
+    whyPlatformCares:
+      "This usually indicates accidental mixing of single-variant and multi-variant product structures.",
+    howToFix:
+      'Use "Default Title" only when the product has a single variant. For multi-variant products, use real option values (Size/Color/etc) on every variant row.',
+    category: "variant",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/image_row_has_variant_fields": {
+    code: "shopify/image_row_has_variant_fields",
+    title: "Image-only row contains variant fields",
+    explanation: "An image-only row should not include SKU/Price/Options/Inventory fields.",
+    whyPlatformCares:
+      "Extra image rows are intended to attach additional images to an existing product/variant grouping.",
+    howToFix:
+      "Move variant fields to the main product/variant rows. Keep only handle + image fields on extra image rows.",
+    category: "images",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/duplicate_image_position": {
+    code: "shopify/duplicate_image_position",
+    title: "Duplicate image position",
+    explanation: "Multiple image rows under the same handle share the same Image position value.",
+    whyPlatformCares:
+      "Image position controls ordering; duplicates can lead to unpredictable ordering.",
+    howToFix: "Use unique Image position values per handle (1, 2, 3, ...).",
+    category: "images",
+    blocking: false,
+    autoFixable: false,
+  },
 };

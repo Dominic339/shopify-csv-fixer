@@ -78,6 +78,44 @@ function normalizeStatus(raw: string): { value: string | null; mappedFrom?: stri
   return { value: "__invalid__" };
 }
 
+function isImageOnlyRow(
+  r: CsvRow,
+  cTitle: string,
+  cHandle: string,
+  cImgUrl: string,
+  cSku: string,
+  cPrice: string,
+  cInvQty: string,
+  optNames: string[],
+  optVals: string[]
+) {
+  // Shopify allows extra image rows where Title is blank as long as:
+  // - URL handle present
+  // - Product image URL present
+  // - No variant-ish fields are present (SKU/Price/Inventory/Options)
+  const title = get(r, cTitle).trim();
+  const handle = get(r, cHandle).trim();
+  const img = get(r, cImgUrl).trim();
+
+  if (title) return false;
+  if (!handle) return false;
+  if (!img) return false;
+
+  const sku = get(r, cSku).trim();
+  const price = get(r, cPrice).trim();
+  const inv = get(r, cInvQty).trim();
+
+  const hasOptionSignals =
+    !!get(r, optNames[0]).trim() ||
+    !!get(r, optVals[0]).trim() ||
+    !!get(r, optNames[1]).trim() ||
+    !!get(r, optVals[1]).trim() ||
+    !!get(r, optNames[2]).trim() ||
+    !!get(r, optVals[2]).trim();
+
+  return !sku && !price && !inv && !hasOptionSignals;
+}
+
 export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): FixResult {
   const issues: Issue[] = [];
   const fixesApplied: string[] = [];
@@ -159,14 +197,17 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
 
     const title = get(r, cTitle).trim();
-    if (!title) {
+
+    // Allow Shopify image-only rows to have blank Title
+    const imageOnly = isImageOnlyRow(r, cTitle, cHandle, cImgUrl, cSku, cPrice, cInvQty, optNames, optVals);
+    if (!title && !imageOnly) {
       issues.push({
         severity: "error",
         code: "shopify/blank_title",
         row,
         column: cTitle,
         message: `Row ${row}: Title is blank.`,
-        suggestion: "Fill Title with the product name.",
+        suggestion: "Fill Title with the product name (Title can be blank only for image-only rows).",
       });
     }
 
@@ -188,13 +229,14 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           });
         }
       } else if (anyVariantSignals) {
+        // If the file contains variants/updates, missing handle is still a blocker (including image-only rows)
         issues.push({
           severity: "error",
           code: "shopify/blank_handle",
           row,
           column: cHandle,
           message: `Row ${row}: URL handle is blank.`,
-          suggestion: "Fill URL handle. Shopify requires it for variants and updates.",
+          suggestion: "Fill URL handle. Shopify requires it for variants, updates, and image rows.",
         });
       }
     } else {
@@ -244,7 +286,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
 
       if (st.value === null) {
         // Status column exists but value is blank => derive safely
-        // If Published is valid, map published true->active, false->draft; else default to draft (safer).
         let derived = "draft";
         if (isValidShopifyBool(pubNorm)) {
           derived = pubNorm === "true" ? "active" : "draft";
@@ -261,7 +302,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           suggestion: `Use "active", "draft", or "archived".`,
         });
       } else {
-        // Valid (or mapped) value; normalize casing + map legacy
         const target = st.value;
         if (target !== statusRaw.trim()) {
           set(r, cStatus, target);
@@ -417,8 +457,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     const v3 = get(r, optVals[2]).trim();
 
     // --- Default Title normalization (NEW, safe)
-    // Shopify docs: if a product has only one option, it should be Default Title.
-    // If Option1 value is Default Title and Option2/3 are blank, normalize Option1 name to Default Title.
     if (v1.toLowerCase() === "default title" && !v2 && !v3) {
       const n1Lower = n1.toLowerCase();
       if (!n1 || n1Lower === "title" || n1Lower === "default title") {
@@ -427,7 +465,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           fixesApplied.push(`Normalized Option1 name to "Default Title" on row ${row}`);
         }
       }
-      // Also ensure the value is properly cased
       if (v1 !== "Default Title") {
         set(r, optVals[0], "Default Title");
         fixesApplied.push(`Normalized Option1 value to "Default Title" on row ${row}`);
@@ -494,10 +531,160 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
   }
 
-  // 4) Variant grouping + duplicate handle sanity (FIXED)
+  // 4) Variant grouping + duplicate handle sanity (FIXED + EXTENDED)
   for (const [handle, idxs] of byHandle.entries()) {
     if (idxs.length <= 1) continue;
 
+    // Collect variant rows (non image-only) for option consistency checks
+    const variantIdxs = idxs.filter((idx) => {
+      const r = fixedRows[idx];
+      return !isImageOnlyRow(r, cTitle, cHandle, cImgUrl, cSku, cPrice, cInvQty, optNames, optVals);
+    });
+
+    // 4a) Option name consistency per handle (warn)
+    if (variantIdxs.length >= 2) {
+      const base = fixedRows[variantIdxs[0]];
+      const baseN1 = get(base, optNames[0]).trim();
+      const baseN2 = get(base, optNames[1]).trim();
+      const baseN3 = get(base, optNames[2]).trim();
+
+      for (const idx of variantIdxs.slice(1)) {
+        const r = fixedRows[idx];
+        const row = idx + 1;
+
+        const n1 = get(r, optNames[0]).trim();
+        const n2 = get(r, optNames[1]).trim();
+        const n3 = get(r, optNames[2]).trim();
+
+        if ((baseN1 || n1) && n1 !== baseN1) {
+          issues.push({
+            severity: "warning",
+            code: "shopify/option_name_inconsistent",
+            row,
+            column: optNames[0],
+            message: `Row ${row}: Option1 name "${n1 || "(blank)"}" differs from other rows for handle "${handle}" ("${baseN1 || "(blank)"}").`,
+            suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
+          });
+        }
+        if ((baseN2 || n2) && n2 !== baseN2) {
+          issues.push({
+            severity: "warning",
+            code: "shopify/option_name_inconsistent",
+            row,
+            column: optNames[1],
+            message: `Row ${row}: Option2 name "${n2 || "(blank)"}" differs from other rows for handle "${handle}" ("${baseN2 || "(blank)"}").`,
+            suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
+          });
+        }
+        if ((baseN3 || n3) && n3 !== baseN3) {
+          issues.push({
+            severity: "warning",
+            code: "shopify/option_name_inconsistent",
+            row,
+            column: optNames[2],
+            message: `Row ${row}: Option3 name "${n3 || "(blank)"}" differs from other rows for handle "${handle}" ("${baseN3 || "(blank)"}").`,
+            suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
+          });
+        }
+      }
+    }
+
+    // 4b) Mixed Default Title with real options (warn)
+    if (variantIdxs.length >= 2) {
+      let hasDefaultTitle = false;
+      let hasRealOptions = false;
+
+      for (const idx of variantIdxs) {
+        const r = fixedRows[idx];
+        const v1 = get(r, optVals[0]).trim().toLowerCase();
+        const v2 = get(r, optVals[1]).trim();
+        const v3 = get(r, optVals[2]).trim();
+
+        if (v1 === "default title") hasDefaultTitle = true;
+        if (v1 && v1 !== "default title") hasRealOptions = true;
+        if (v2 || v3) hasRealOptions = true;
+      }
+
+      if (hasDefaultTitle && hasRealOptions) {
+        for (const idx of variantIdxs) {
+          const row = idx + 1;
+          issues.push({
+            severity: "warning",
+            code: "shopify/mixed_default_title_with_options",
+            row,
+            column: optVals[0],
+            message: `Row ${row}: Handle "${handle}" mixes "Default Title" rows with option-based variant rows.`,
+            suggestion:
+              'Use "Default Title" only when the product has a single variant. For multi-variant products, use real option values (Size/Color/etc) on every variant row.',
+          });
+        }
+      }
+    }
+
+    // 4c) Image-only rows that contain variant fields (warn)
+    for (const idx of idxs) {
+      const r = fixedRows[idx];
+      const row = idx + 1;
+
+      const isImgOnly = isImageOnlyRow(r, cTitle, cHandle, cImgUrl, cSku, cPrice, cInvQty, optNames, optVals);
+      if (!isImgOnly) continue;
+
+      const sku = get(r, cSku).trim();
+      const price = get(r, cPrice).trim();
+      const inv = get(r, cInvQty).trim();
+
+      const hasOptionSignals =
+        !!get(r, optNames[0]).trim() ||
+        !!get(r, optVals[0]).trim() ||
+        !!get(r, optNames[1]).trim() ||
+        !!get(r, optVals[1]).trim() ||
+        !!get(r, optNames[2]).trim() ||
+        !!get(r, optVals[2]).trim();
+
+      if (sku || price || inv || hasOptionSignals) {
+        issues.push({
+          severity: "warning",
+          code: "shopify/image_row_has_variant_fields",
+          row,
+          column: cImgUrl,
+          message: `Row ${row}: This looks like an image-only row for handle "${handle}", but it contains variant fields (SKU/Price/Options/Inventory).`,
+          suggestion:
+            "For extra image rows, keep only URL handle + image fields. Move variant fields to the main product/variant rows.",
+        });
+      }
+    }
+
+    // 4d) Duplicate Image position per handle (warn)
+    const imagePosMap = new Map<string, number[]>();
+    for (const idx of idxs) {
+      const r = fixedRows[idx];
+      const img = get(r, cImgUrl).trim();
+      if (!img) continue;
+
+      const pos = get(r, cImgPos).trim();
+      if (!pos) continue;
+
+      const list = imagePosMap.get(pos) ?? [];
+      list.push(idx);
+      imagePosMap.set(pos, list);
+    }
+
+    for (const [pos, list] of imagePosMap.entries()) {
+      if (list.length <= 1) continue;
+      const rowsList = list.map((i) => i + 1).join(", ");
+      for (const idx of list) {
+        issues.push({
+          severity: "warning",
+          code: "shopify/duplicate_image_position",
+          row: idx + 1,
+          column: cImgPos,
+          message: `Row ${idx + 1}: Handle "${handle}" has duplicate Image position "${pos}" (rows ${rowsList}).`,
+          suggestion: "Use unique Image position values per handle (1, 2, 3, ...) to control ordering.",
+        });
+      }
+    }
+
+    // Existing duplicate-handle signature logic (kept)
     const sigs = new Map<string, number[]>();
 
     for (const idx of idxs) {
@@ -540,7 +727,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           column: "URL handle",
           message: `Row ${idx + 1}: Handle "${handle}" appears multiple times with identical variant details (rows ${rowsList}).`,
           suggestion:
-            "If these are meant to be variants, make sure option values differ per row (or SKUs differ). If they are extra images, keep only URL handle + image fields on the extra rows.",
+            "If these are meant to be variants, make sure option values differ per row (or SKUs differ). If these are extra images, keep only URL handle + image fields on additional rows.",
         });
       }
     }
