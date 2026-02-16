@@ -224,6 +224,15 @@ export default function AppClient() {
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
   const scoreNotes = useMemo(() => buildScoreNotes(validation as any, issuesForTable, formatId), [validation, issuesForTable, formatId]);
 
+  // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
+  // We keep this as a simple alias of the existing validation score so it stays stable and explainable.
+  const shopifyImportConfidence = useMemo(() => {
+    if (formatId !== "shopify_products") return null;
+    const s = Number((validation as any)?.score ?? 0);
+    if (!Number.isFinite(s)) return 0;
+    return Math.max(0, Math.min(100, Math.round(s)));
+  }, [formatId, validation]);
+
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
     const first = rows[0];
@@ -573,6 +582,15 @@ export default function AppClient() {
                 <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
                   Validation score: <span className="font-semibold">{validation.score}</span>/100
                 </span>
+
+                {shopifyImportConfidence != null ? (
+                  <span
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]"
+                    title="A quick readiness indicator based on your current Shopify issues. Aim for 90%+ for a clean import."
+                  >
+                    Shopify import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>
+                  </span>
+                ) : null}
 
                 <span
                   className={
