@@ -2,56 +2,70 @@
 import type { CsvRow } from "./csv";
 import { validateAndFixShopifyBasic, type FixResult, type Issue as BaseIssue } from "./shopifyBasic";
 
-function slugifyHandle(input: string) {
-  // Shopify handle: lowercase letters, numbers, hyphens. Deterministic and conservative.
-  const s = (input ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-/g, "")
-    .replace(/-$/g, "");
-  return s.slice(0, 255);
-}
-
-function normalizeMoney2dp(raw: string) {
-  const s = String(raw ?? "").trim();
-  if (!s) return s;
-
-  // Safe parse: strip currency symbols and thousand separators, then format to 2dp.
-  const cleaned = s.replace(/[$£€¥]/g, "").replace(/,/g, "");
-  const n = Number(cleaned);
-  if (!Number.isFinite(n)) return s;
-
-  return n.toFixed(2);
-}
-
 /**
  * Shopify Import Optimizer
  *
  * Design goals:
- * - DO NOT break existing Shopify basic validator.
- * - Wrap the base engine, then append stricter checks + deterministic safe autofixes.
- * - Return shape remains compatible: { fixedHeaders, fixedRows, issues, fixesApplied }.
+ * - DO NOT break existing Shopify validator.
+ * - Add higher-signal Shopify import safety checks:
+ *   1) Duplicate SKUs across different products (different URL handles) => error
+ *   2) Same URL handle used with conflicting Titles => warning
+ *   3) Variant option collisions are already enforced in shopifyBasic (blocking), keep dedupe + normalization here
+ *
+ * Return shape remains compatible: { fixedHeaders, fixedRows, issues, fixesApplied }.
  */
 export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]): FixResult {
   const base = validateAndFixShopifyBasic(headers, rows);
 
   const fixedHeaders = base.fixedHeaders;
-
-  // Apply deterministic *safe* autofixes on top of the base output.
-  // (Clone rows so we don't mutate base.fixedRows in place.)
-  const fixedRows = (base.fixedRows ?? []).map((r) => ({ ...(r as any) })) as CsvRow[];
-
+  const fixedRows = base.fixedRows;
   const fixesApplied = [...(base.fixesApplied ?? [])];
 
-  // Dedupe issues aggressively:
-  // - base validator may emit both summary + row-specific versions
-  // - optimizer adds its own checks
   const issues: BaseIssue[] = [];
   const seen = new Set<string>();
+
+  // Shopify modern canonical columns (shopifyBasic canonicalizes to these)
+  const cTitle = "Title";
+  const cHandle = "URL handle";
+  const cSku = "SKU";
+  const cPrice = "Price";
+  const cInvQty = "Inventory quantity";
+  const cImgUrl = "Product image URL";
+  const optNames = ["Option1 name", "Option2 name", "Option3 name"];
+  const optVals = ["Option1 value", "Option2 value", "Option3 value"];
+
+  function get(r: CsvRow, k: string) {
+    const v = (r as any)?.[k];
+    return typeof v === "string" ? v : v == null ? "" : String(v);
+  }
+
+  function isImageOnlyRow(r: CsvRow) {
+    // Shopify allows extra image rows where Title is blank as long as:
+    // - URL handle present
+    // - Product image URL present
+    // - No variant-ish fields are present (SKU/Price/Inventory/Options)
+    const title = get(r, cTitle).trim();
+    const handle = get(r, cHandle).trim();
+    const img = get(r, cImgUrl).trim();
+
+    if (title) return false;
+    if (!handle) return false;
+    if (!img) return false;
+
+    const sku = get(r, cSku).trim();
+    const price = get(r, cPrice).trim();
+    const inv = get(r, cInvQty).trim();
+
+    const hasOptionSignals =
+      !!get(r, optNames[0]).trim() ||
+      !!get(r, optVals[0]).trim() ||
+      !!get(r, optNames[1]).trim() ||
+      !!get(r, optVals[1]).trim() ||
+      !!get(r, optNames[2]).trim() ||
+      !!get(r, optVals[2]).trim();
+
+    return !sku && !price && !inv && !hasOptionSignals;
+  }
 
   function normalizeCode(code: string | undefined | null): string {
     const c = (code ?? "").trim();
@@ -90,7 +104,6 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
     const code = normalizeCode((issue as any).code);
     (issue as any).code = code;
 
-    // Prefer 1-based row if present; base may use row or rowIndex
     const row =
       (issue as any).row ?? (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
 
@@ -104,110 +117,111 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
     issues.push(issue);
   }
 
-  // --- Deterministic safe autofixes (Shopify) ---
-  // 1) Auto-generate Handle from Title when missing
-  // 2) Normalize key money fields to 2 decimals when parseable
-  const priceCols = ["Variant Price", "Variant Compare At Price", "Cost per item"];
+  // 0) Pull base issues in, normalize + dedupe
+  for (const issue of base.issues ?? []) add(issue);
+
+  // ---------------------------------------------------------------------------
+  // Step 1: Duplicate SKU detection across different URL handles (cross-product)
+  // ---------------------------------------------------------------------------
+  // Build sku -> { handles, rows }
+  const skuMap = new Map<
+    string,
+    {
+      handles: Set<string>;
+      rows: number[]; // 0-based indexes
+    }
+  >();
 
   for (let i = 0; i < fixedRows.length; i++) {
-    const rowNum = i + 1;
-    const r = fixedRows[i] as any;
+    const r = fixedRows[i];
+    if (isImageOnlyRow(r)) continue;
 
-    const title = String(r["Title"] ?? "").trim();
-    const handle = String(r["Handle"] ?? "").trim();
-    if (!handle && title) {
-      const next = slugifyHandle(title);
-      if (next) {
-        r["Handle"] = next;
-        fixesApplied.push(`Row ${rowNum}: Auto-generated Handle from Title.`);
-      }
-    }
+    const sku = get(r, cSku).trim();
+    if (!sku) continue;
 
-    for (const pc of priceCols) {
-      const before = String(r[pc] ?? "");
-      if (!before.trim()) continue;
-      const after = normalizeMoney2dp(before);
-      if (after !== before) {
-        r[pc] = after;
-        fixesApplied.push(`Row ${rowNum}: Normalized ${pc} to 2 decimals.`);
-      }
-    }
+    const handle = get(r, cHandle).trim().toLowerCase();
+    const entry = skuMap.get(sku) ?? { handles: new Set<string>(), rows: [] };
+    if (handle) entry.handles.add(handle);
+    entry.rows.push(i);
+    skuMap.set(sku, entry);
   }
 
-  // 0) Pull base issues in, normalize codes + dedupe.
-  // Skip issues that are now resolved by our deterministic safe autofixes.
-  for (const issue of base.issues ?? []) {
-    const code = normalizeCode((issue as any).code);
+  for (const [sku, entry] of skuMap.entries()) {
+    if (entry.rows.length <= 1) continue;
 
-    const rowIndex =
-      typeof (issue as any).rowIndex === "number"
-        ? (issue as any).rowIndex
-        : typeof (issue as any).row === "number"
-          ? (issue as any).row - 1
-          : -1;
-
-    if (rowIndex >= 0 && rowIndex < fixedRows.length) {
-      const r = fixedRows[rowIndex] as any;
-
-      if (code === "shopify/blank_handle") {
-        const v = String(r["Handle"] ?? "").trim();
-        if (v) continue;
-      }
-
-      if (code === "shopify/invalid_numeric_price") {
-        const v = String(r["Variant Price"] ?? "").trim();
-        if (v && normalizeMoney2dp(v) === v) {
-          continue;
-        }
-      }
-
-      if (code === "shopify/invalid_numeric_compare_at") {
-        const v = String(r["Variant Compare At Price"] ?? "").trim();
-        if (v && normalizeMoney2dp(v) === v) {
-          continue;
-        }
-      }
-    }
-
-    add(issue);
-  }
-
-  // Helper columns (supports both legacy + new Shopify template)
-  const col = (name: string) => fixedHeaders.find((h) => h.toLowerCase() === name.toLowerCase());
-  const colAny = (...names: string[]) => names.map(col).find(Boolean);
-
-  const cHandle = colAny("Handle", "URL handle");
-  const cTitle = col("Title");
-
-  // If there are variants, handle is required (Shopify reality)
-  const anyVariantSignals = fixedRows.some((r) => {
-    return (
-      String((r as any)["Option1 Value"] ?? "").trim() ||
-      String((r as any)["Option2 Value"] ?? "").trim() ||
-      String((r as any)["Option3 Value"] ?? "").trim() ||
-      String((r as any)["Variant SKU"] ?? "").trim() ||
-      String((r as any)["Variant Price"] ?? "").trim()
-    );
-  });
-
-  if (anyVariantSignals && cHandle) {
-    for (let i = 0; i < fixedRows.length; i++) {
-      const row = i + 1;
-      const v = String((fixedRows[i] as any)[cHandle] ?? "").trim();
-      if (!v) {
+    // Upgrade to error if the SKU is shared across different products (different handles)
+    if (entry.handles.size >= 2) {
+      const rowsList = entry.rows.map((x) => x + 1).join(", ");
+      for (const idx of entry.rows) {
         add({
           severity: "error",
-          code: "shopify/blank_handle",
-          row,
-          column: cHandle,
-          message: `Row ${row}: URL handle is blank (required for variants/updates).`,
-          suggestion: cTitle
-            ? `Fill URL handle. If you have a Title, you can slugify it (e.g., "My Product" → "my-product").`
-            : "Fill URL handle (letters, numbers, dashes; no spaces).",
+          code: "shopify/duplicate_sku_across_products",
+          row: idx + 1,
+          column: cSku,
+          message: `Row ${idx + 1}: SKU "${sku}" is reused across different URL handles (rows ${rowsList}).`,
+          suggestion:
+            "Make SKUs unique per variant across your catalog, or verify you truly intend to share SKUs across products.",
         } as any);
       }
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Step 2: Duplicate URL handle with conflicting Titles
+  // ---------------------------------------------------------------------------
+  // handle -> distinct titles (case-insensitive)
+  const handleTitles = new Map<string, { primary: string; titles: Map<string, string>; rows: number[] }>();
+
+  for (let i = 0; i < fixedRows.length; i++) {
+    const r = fixedRows[i];
+    // image-only rows can be blank title and should not affect this check
+    if (isImageOnlyRow(r)) continue;
+
+    const handle = get(r, cHandle).trim().toLowerCase();
+    if (!handle) continue;
+
+    const title = get(r, cTitle).trim();
+    if (!title) continue;
+
+    const key = title.toLowerCase();
+    const e = handleTitles.get(handle) ?? { primary: title, titles: new Map<string, string>(), rows: [] };
+
+    if (!e.titles.size) {
+      e.primary = title;
+    }
+
+    e.titles.set(key, title);
+    e.rows.push(i);
+    handleTitles.set(handle, e);
+  }
+
+  for (const [handle, e] of handleTitles.entries()) {
+    if (e.titles.size <= 1) continue;
+
+    const distinct = [...e.titles.values()];
+    const rowsList = [...new Set(e.rows)].map((x) => x + 1).join(", ");
+
+    for (const idx of new Set(e.rows)) {
+      const actual = get(fixedRows[idx], cTitle).trim();
+      add({
+        severity: "warning",
+        code: "shopify/handle_title_mismatch",
+        row: idx + 1,
+        column: cTitle,
+        message: `Row ${idx + 1}: URL handle "${handle}" is used with multiple different Titles (rows ${rowsList}).`,
+        suggestion: `Pick a single Title for this handle (Shopify groups rows by URL handle). Titles seen: ${distinct
+          .slice(0, 4)
+          .join(" | ")}${distinct.length > 4 ? " | ..." : ""}`,
+      } as any);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Step 3: Variant option collision detection
+  // ---------------------------------------------------------------------------
+  // This is already enforced (blocking) in shopifyBasic via shopify/options_not_unique.
+  // No additional logic needed here; optimizer is primarily for higher-level catalog consistency.
+  // ---------------------------------------------------------------------------
 
   return {
     fixedHeaders,

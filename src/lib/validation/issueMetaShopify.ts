@@ -1,77 +1,102 @@
 // src/lib/validation/issueMetaShopify.ts
-import type { IssueMetaMap } from "./issueMeta";
 
-export const SHOPIFY_ISSUE_META: IssueMetaMap = {
+export type ShopifyIssueCategory =
+  | "required"
+  | "handle"
+  | "variant"
+  | "pricing"
+  | "inventory"
+  | "images"
+  | "seo"
+  | "publishing"
+  | "status"
+  | "other";
+
+export type IssueMeta = {
+  code: string;
+  title: string;
+  explanation: string;
+  whyPlatformCares: string;
+  howToFix: string;
+  category: ShopifyIssueCategory;
+  blocking: boolean;
+  autoFixable: boolean;
+};
+
+export const ISSUE_META_SHOPIFY: Record<string, IssueMeta> = {
   "shopify/missing_required_header": {
     code: "shopify/missing_required_header",
     title: "Missing required column",
-    explanation: "Your CSV is missing a required Shopify column header.",
+    explanation: "A required Shopify column is missing from the CSV.",
     whyPlatformCares:
-      "Shopify validates column headers during import. Missing required headers can prevent Shopify from creating or updating products.",
-    howToFix: "Add the missing required column header (even if values are blank).",
-    category: "structure",
+      "Shopify requires certain columns to correctly create or update products and variants.",
+    howToFix:
+      "Add the missing column(s). Download the Shopify sample CSV for the correct header list.",
+    category: "required",
     blocking: true,
-    autoFixable: true,
+    autoFixable: false,
   },
 
   "shopify/blank_title": {
     code: "shopify/blank_title",
     title: "Missing Title",
-    explanation: "Title is blank on at least one row.",
+    explanation: "A product row is missing a Title.",
     whyPlatformCares:
-      "Shopify requires a product Title to create products. Rows without a Title can fail import or create incomplete products.",
-    howToFix: "Fill Title with the product name for each product row.",
-    category: "structure",
+      "Shopify needs a product title to create a product (Title can be blank only for image-only rows).",
+    howToFix: "Fill Title with the product name.",
+    category: "required",
     blocking: true,
     autoFixable: false,
   },
 
   "shopify/blank_handle": {
     code: "shopify/blank_handle",
-    title: "Missing Handle",
-    explanation: "URL handle is blank on at least one row.",
+    title: "Missing URL handle",
+    explanation: "A row is missing a URL handle.",
     whyPlatformCares:
-      "Handles are used to group variants/images and to update existing products. Missing handles can break variant grouping and updates.",
-    howToFix: "Fill URL handle using letters/numbers/dashes (no spaces).",
-    category: "variant",
+      "Shopify groups variant rows by URL handle. Missing handles can break grouping and updates.",
+    howToFix:
+      "Fill URL handle using lowercase letters, numbers, and hyphens (no spaces).",
+    category: "handle",
     blocking: true,
-    autoFixable: false,
+    autoFixable: true,
   },
 
   "shopify/invalid_handle": {
     code: "shopify/invalid_handle",
-    title: "Invalid Handle",
-    explanation: "URL handle contains invalid characters (often spaces).",
+    title: "Invalid URL handle",
+    explanation: "The URL handle contains invalid characters.",
     whyPlatformCares:
-      "Shopify requires handles to be URL-safe. Spaces and invalid characters can cause import failures or weird URL behavior.",
-    howToFix: "Use only letters, numbers, and dashes (no spaces).",
-    category: "variant",
+      "Invalid handles can cause Shopify import errors and broken product URLs.",
+    howToFix:
+      "Use lowercase letters, numbers, and hyphens only (no spaces or special characters).",
+    category: "handle",
     blocking: true,
-    autoFixable: false,
+    autoFixable: true,
   },
 
   "shopify/invalid_boolean_published": {
     code: "shopify/invalid_boolean_published",
     title: "Invalid Published value",
-    explanation: 'Published must be TRUE or FALSE (Shopify template).',
+    explanation: "Published on online store has a non-boolean value.",
     whyPlatformCares:
-      "Shopify parses Published as a boolean. Invalid values can fail import or mis-publish products.",
-    howToFix: 'Change Published to TRUE or FALSE.',
-    category: "structure",
+      "Shopify expects TRUE or FALSE (or blank). Invalid values can block import.",
+    howToFix: "Use TRUE, FALSE, or leave blank.",
+    category: "publishing",
     blocking: true,
     autoFixable: true,
   },
 
-  "shopify/invalid_inventory_policy": {
-    code: "shopify/invalid_inventory_policy",
-    title: "Invalid inventory policy",
-    explanation: 'Continue selling when out of stock must be "deny" or "continue".',
+  "shopify/invalid_boolean_continue_selling": {
+    code: "shopify/invalid_boolean_continue_selling",
+    title: "Invalid Continue selling value",
+    explanation: "Continue selling when out of stock has a non-boolean value.",
     whyPlatformCares:
-      "Shopify expects a specific inventory policy value. Invalid values can cause import errors or incorrect oversell behavior.",
-    howToFix: 'Use "deny" (stop selling) or "continue" (allow selling when out of stock).',
+      "Shopify expects DENY or CONTINUE (or boolean in some contexts). Invalid values can block import.",
+    howToFix: 'Use "DENY" or "CONTINUE" (recommended), or TRUE/FALSE if your export uses that style.',
     category: "inventory",
     blocking: true,
-    autoFixable: true,
+    autoFixable: false,
   },
 
   "shopify/invalid_numeric_price": {
@@ -79,11 +104,11 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     title: "Invalid Price",
     explanation: "Price is not a valid number.",
     whyPlatformCares:
-      "Shopify requires numeric pricing. Non-numeric values commonly cause import failures.",
-    howToFix: 'Use a number like "19.99" (no currency symbols).',
+      "Shopify requires numeric values for pricing fields.",
+    howToFix: "Use a number like 19.99.",
     category: "pricing",
     blocking: true,
-    autoFixable: true,
+    autoFixable: false,
   },
 
   "shopify/invalid_numeric_compare_at": {
@@ -91,20 +116,21 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     title: "Invalid Compare-at price",
     explanation: "Compare-at price is not a valid number.",
     whyPlatformCares:
-      "Shopify requires numeric pricing. Non-numeric values in compare-at fields can cause import failures.",
-    howToFix: 'Use a number like "29.99" (no currency symbols).',
+      "Shopify requires numeric values for pricing fields.",
+    howToFix: "Use a number like 24.99 or leave blank.",
     category: "pricing",
     blocking: true,
-    autoFixable: true,
+    autoFixable: false,
   },
 
   "shopify/compare_at_lt_price": {
     code: "shopify/compare_at_lt_price",
-    title: "Compare-at price lower than price",
-    explanation: "Compare-at price is less than price.",
+    title: "Compare-at price lower than Price",
+    explanation: "Compare-at price is lower than Price.",
     whyPlatformCares:
-      "This usually indicates incorrect sale pricing. Shopify may still import it, but it’s often unintended.",
-    howToFix: "Set Compare-at price higher than Price when showing a discount.",
+      "Compare-at price is meant to represent an original higher price (for sales).",
+    howToFix:
+      "Ensure Compare-at price is greater than or equal to Price, or leave it blank.",
     category: "pricing",
     blocking: false,
     autoFixable: false,
@@ -112,11 +138,11 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/invalid_integer_inventory_qty": {
     code: "shopify/invalid_integer_inventory_qty",
-    title: "Invalid inventory quantity",
-    explanation: "Inventory quantity is not a whole number.",
+    title: "Invalid Inventory quantity",
+    explanation: "Inventory quantity is not a valid integer.",
     whyPlatformCares:
-      "Shopify inventory quantities should be integers. Non-integers can cause import errors.",
-    howToFix: "Use whole numbers like 0, 10, 50.",
+      "Inventory quantities must be whole numbers.",
+    howToFix: "Use an integer like 0, 5, 100.",
     category: "inventory",
     blocking: true,
     autoFixable: false,
@@ -124,11 +150,12 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/negative_inventory": {
     code: "shopify/negative_inventory",
-    title: "Negative inventory quantity",
+    title: "Negative inventory",
     explanation: "Inventory quantity is negative.",
     whyPlatformCares:
-      "Negative inventory can be valid in some workflows but often indicates a mistake.",
-    howToFix: "Double-check the quantity. Set to 0+ if appropriate.",
+      "Negative inventory is usually a data error and can create fulfillment issues.",
+    howToFix:
+      "Use 0 or a positive quantity, or configure backorders using Continue selling settings.",
     category: "inventory",
     blocking: false,
     autoFixable: false,
@@ -139,20 +166,20 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     title: "Invalid image URL",
     explanation: "Product image URL is not a valid http(s) URL.",
     whyPlatformCares:
-      "Shopify requires publicly accessible image URLs. Invalid URLs cause images to fail import.",
-    howToFix: "Use a publicly accessible https:// image URL.",
+      "Shopify must be able to fetch images via a valid URL.",
+    howToFix: "Use a full http(s) URL to a publicly accessible image.",
     category: "images",
-    blocking: true,
+    blocking: false,
     autoFixable: false,
   },
 
   "shopify/invalid_image_position": {
     code: "shopify/invalid_image_position",
     title: "Invalid image position",
-    explanation: "Image position is not a positive integer.",
+    explanation: "Image position is not a valid integer.",
     whyPlatformCares:
-      "Shopify uses Image position to order product images. Invalid values may be ignored.",
-    howToFix: "Use 1, 2, 3…",
+      "Image position controls ordering; invalid values can cause unpredictable ordering.",
+    howToFix: "Use 1, 2, 3... or leave blank.",
     category: "images",
     blocking: false,
     autoFixable: false,
@@ -160,171 +187,15 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/option_order_invalid": {
     code: "shopify/option_order_invalid",
-    title: "Invalid option order",
-    explanation: "Option2 requires Option1; Option3 requires Option2.",
+    title: "Option columns out of order",
+    explanation: "Option2/Option3 has values while Option1 is blank.",
     whyPlatformCares:
-      "Shopify expects options to be defined in order. Out-of-order options can break variants.",
-    howToFix: "Fill Option1 before Option2, and Option2 before Option3.",
-    category: "variant",
-    blocking: true,
-    autoFixable: false,
-  },
-
-  "shopify/variant_option_missing_value": {
-    code: "shopify/variant_option_missing_value",
-    title: "Option name missing value",
-    explanation: "An option name exists but its corresponding value is blank.",
-    whyPlatformCares:
-      "Variant differentiation depends on option values. Missing values can cause duplicates or invalid variants.",
-    howToFix: "Fill the option value (e.g., Size = Small).",
-    category: "variant",
-    blocking: false,
-    autoFixable: false,
-  },
-
-  "shopify/duplicate_handle_not_variants": {
-    code: "shopify/duplicate_handle_not_variants",
-    title: "Duplicate handle row",
-    explanation: "Multiple rows share a handle with identical variant details.",
-    whyPlatformCares:
-      "Duplicate variant rows can cause duplicate variants or unexpected overwrites.",
+      "Shopify expects options to be filled sequentially (Option1, then Option2, then Option3).",
     howToFix:
-      "If these are variants, ensure option values/SKU differ. If these are extra images, keep only handle + image fields on additional rows.",
+      "Fill Option1 before using Option2, and fill Option2 before Option3.",
     category: "variant",
-    blocking: false,
-    autoFixable: false,
-  },
-
-  "shopify/seo_title_too_long": {
-    code: "shopify/seo_title_too_long",
-    title: "SEO title too long",
-    explanation: "SEO title exceeds recommended length.",
-    whyPlatformCares:
-      "Search engines may truncate long titles in results.",
-    howToFix: "Shorten SEO title (recommended ≤ 70 chars).",
-    category: "seo",
-    blocking: false,
-    autoFixable: false,
-  },
-
-  "shopify/seo_description_too_long": {
-    code: "shopify/seo_description_too_long",
-    title: "SEO description too long",
-    explanation: "SEO description exceeds recommended length.",
-    whyPlatformCares:
-      "Search engines may truncate long descriptions in results.",
-    howToFix: "Shorten SEO description (recommended ≤ 320 chars).",
-    category: "seo",
-    blocking: false,
-    autoFixable: false,
-  },
-
-  "shopify/seo_title_missing": {
-    code: "shopify/seo_title_missing",
-    title: "SEO title missing",
-    explanation: "SEO title is blank; Shopify will fall back to Title.",
-    whyPlatformCares:
-      "You may miss the chance to optimize search snippet wording.",
-    howToFix: "Optional: provide a custom SEO title.",
-    category: "seo",
-    blocking: false,
-    autoFixable: false,
-  },
-
-  "shopify/seo_description_missing": {
-    code: "shopify/seo_description_missing",
-    title: "SEO description missing",
-    explanation: "SEO description is blank; Shopify will fall back to Description.",
-    whyPlatformCares:
-      "You may miss the chance to optimize search snippet wording.",
-    howToFix: "Optional: add an SEO description.",
-    category: "seo",
-    blocking: false,
-    autoFixable: false,
-  },
-
-  "shopify/missing_status_value": {
-    code: "shopify/missing_status_value",
-    title: "Missing Status value",
-    explanation: "Status column exists but Status is blank on one or more rows.",
-    whyPlatformCares:
-      "When the Status column is included, Shopify expects a valid status value.",
-    howToFix: 'Set Status to "active", "draft", or "archived" on each product row.',
-    category: "structure",
     blocking: true,
     autoFixable: false,
-  },
-
-  "shopify/invalid_status": {
-    code: "shopify/invalid_status",
-    title: "Invalid Status",
-    explanation: "Status must be active, draft, or archived.",
-    whyPlatformCares:
-      "Shopify only recognizes these values for Status in the product CSV.",
-    howToFix: 'Use "active", "draft", or "archived".',
-    category: "structure",
-    blocking: true,
-    autoFixable: true,
-  },
-
-  "shopify/invalid_inventory_tracker": {
-    code: "shopify/invalid_inventory_tracker",
-    title: "Invalid Inventory tracker",
-    explanation: "Inventory tracker is not a supported value.",
-    whyPlatformCares:
-      "Shopify supports a limited set of inventory trackers in CSV import.",
-    howToFix: 'Use "shopify", "shipwire", "amazon_marketplace_web", or leave blank.',
-    category: "inventory",
-    blocking: true,
-    autoFixable: true,
-  },
-
-  "shopify/invalid_weight_unit": {
-    code: "shopify/invalid_weight_unit",
-    title: "Invalid Weight unit",
-    explanation: "Weight unit must be g, kg, lb, or oz.",
-    whyPlatformCares:
-      "Shopify uses standardized units for shipping and fulfillment calculations.",
-    howToFix: "Use one of: g, kg, lb, oz.",
-    category: "inventory",
-    blocking: true,
-    autoFixable: true,
-  },
-
-  "shopify/invalid_requires_shipping": {
-    code: "shopify/invalid_requires_shipping",
-    title: "Invalid Requires shipping",
-    explanation: "Requires shipping must be TRUE or FALSE.",
-    whyPlatformCares:
-      "Shopify uses this to determine whether a variant requires shipping.",
-    howToFix: 'Use "true" or "false".',
-    category: "structure",
-    blocking: true,
-    autoFixable: true,
-  },
-
-  "shopify/invalid_charge_tax": {
-    code: "shopify/invalid_charge_tax",
-    title: "Invalid Charge tax",
-    explanation: "Charge tax must be TRUE or FALSE.",
-    whyPlatformCares:
-      "Shopify uses this to determine whether tax is charged for the product/variant.",
-    howToFix: 'Use "true" or "false".',
-    category: "structure",
-    blocking: true,
-    autoFixable: true,
-  },
-
-  "shopify/invalid_gift_card": {
-    code: "shopify/invalid_gift_card",
-    title: "Invalid Gift card",
-    explanation: "Gift card must be TRUE or FALSE.",
-    whyPlatformCares:
-      "Shopify uses this flag to treat items as gift cards.",
-    howToFix: 'Use "true" or "false".',
-    category: "structure",
-    blocking: true,
-    autoFixable: true,
   },
 
   "shopify/missing_option1_for_variant_data": {
@@ -368,9 +239,37 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     title: "Duplicate SKU",
     explanation: "The same SKU appears on multiple rows.",
     whyPlatformCares:
-      "Many inventory/fulfillment workflows expect unique SKUs per variant.",
+      "Many inventory and fulfillment workflows expect unique SKUs per variant.",
     howToFix: "Make SKUs unique per variant (or leave blank if you don’t use SKUs).",
     category: "variant",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  // ✅ NEW: Step 1 (stronger): duplicate SKU across different products (different URL handles)
+  "shopify/duplicate_sku_across_products": {
+    code: "shopify/duplicate_sku_across_products",
+    title: "Duplicate SKU across products",
+    explanation: "The same SKU appears under different URL handles (different products).",
+    whyPlatformCares:
+      "Reusing SKUs across products can cause confusion in inventory systems, shipping tools, and analytics.",
+    howToFix:
+      "Make SKUs unique across your catalog, or confirm you truly intend to share SKUs across multiple products.",
+    category: "variant",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  // ✅ NEW: Step 2: handle grouping conflict
+  "shopify/handle_title_mismatch": {
+    code: "shopify/handle_title_mismatch",
+    title: "Same URL handle with different Titles",
+    explanation: "Multiple different Titles are used for rows sharing the same URL handle.",
+    whyPlatformCares:
+      "Shopify groups rows by URL handle. Conflicting titles can cause unexpected overwrites or confusing imports.",
+    howToFix:
+      "Use a single consistent Title for all rows under the same URL handle (variants and image rows).",
+    category: "handle",
     blocking: false,
     autoFixable: false,
   },
@@ -387,7 +286,6 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
   },
 
-  // NEW: Shopify group sanity checks
   "shopify/option_name_inconsistent": {
     code: "shopify/option_name_inconsistent",
     title: "Option names differ across variants",
@@ -415,12 +313,12 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/image_row_has_variant_fields": {
     code: "shopify/image_row_has_variant_fields",
-    title: "Image-only row contains variant fields",
-    explanation: "An image-only row should not include SKU/Price/Options/Inventory fields.",
+    title: "Image row contains variant fields",
+    explanation: "A row looks like an image-only row, but it contains variant fields like SKU/Price/Options/Inventory.",
     whyPlatformCares:
-      "Extra image rows are intended to attach additional images to an existing product/variant grouping.",
+      "This can break variant grouping and cause confusing imports.",
     howToFix:
-      "Move variant fields to the main product/variant rows. Keep only handle + image fields on extra image rows.",
+      "For extra image rows, keep only URL handle + image fields. Move variant fields to the main product/variant rows.",
     category: "images",
     blocking: false,
     autoFixable: false,
@@ -429,11 +327,59 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
   "shopify/duplicate_image_position": {
     code: "shopify/duplicate_image_position",
     title: "Duplicate image position",
-    explanation: "Multiple image rows under the same handle share the same Image position value.",
+    explanation: "Two or more rows share the same Image position for the same handle.",
     whyPlatformCares:
       "Image position controls ordering; duplicates can lead to unpredictable ordering.",
-    howToFix: "Use unique Image position values per handle (1, 2, 3, ...).",
+    howToFix: "Use unique Image position values per handle (1, 2, 3...).",
     category: "images",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/seo_title_too_long": {
+    code: "shopify/seo_title_too_long",
+    title: "SEO title too long",
+    explanation: "SEO title exceeds recommended length.",
+    whyPlatformCares:
+      "Long titles may be truncated in search results.",
+    howToFix: "Shorten SEO title to 70 characters or fewer.",
+    category: "seo",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/seo_description_too_long": {
+    code: "shopify/seo_description_too_long",
+    title: "SEO description too long",
+    explanation: "SEO description exceeds recommended length.",
+    whyPlatformCares:
+      "Long descriptions may be truncated in search snippets.",
+    howToFix: "Shorten SEO description to 320 characters or fewer.",
+    category: "seo",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/seo_title_missing": {
+    code: "shopify/seo_title_missing",
+    title: "SEO title missing",
+    explanation: "SEO title is blank (Shopify will fall back to Title).",
+    whyPlatformCares:
+      "Custom SEO titles can improve click-through rate.",
+    howToFix: "Optional: provide a custom SEO title.",
+    category: "seo",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/seo_description_missing": {
+    code: "shopify/seo_description_missing",
+    title: "SEO description missing",
+    explanation: "SEO description is blank (Shopify may auto-generate one).",
+    whyPlatformCares:
+      "Custom descriptions can improve click-through rate and clarity in search results.",
+    howToFix: "Optional: provide a custom SEO description.",
+    category: "seo",
     blocking: false,
     autoFixable: false,
   },

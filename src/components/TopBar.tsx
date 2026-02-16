@@ -43,7 +43,6 @@ export default function TopBar() {
     (async () => {
       try {
         const res = await supabase.auth.getUser();
-        // res shape varies by supabase-js version, so read safely
         const userEmail = (res as any)?.data?.user?.email ?? (res as any)?.user?.email ?? null;
 
         if (!mounted) return;
@@ -54,11 +53,9 @@ export default function TopBar() {
       }
     })();
 
-    const { data: authSub } = supabase.auth.onAuthStateChange(
-      (_event: unknown, session: SupabaseSession) => {
-        setEmail(session?.user?.email ?? null);
-      }
-    );
+    const { data: authSub } = supabase.auth.onAuthStateChange((_event: unknown, session: SupabaseSession) => {
+      setEmail(session?.user?.email ?? null);
+    });
 
     return () => {
       mounted = false;
@@ -111,22 +108,20 @@ export default function TopBar() {
     router.push("/#pricing");
   }
 
+  const brandSrc = theme === "dark" ? "/StriveFormatsDark.png" : "/StriveFormatsLight.png";
+
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           <Image
-            src="/CSV%20Nest%20Logo.png"
-            alt="CSNest"
-            width={28}
-            height={28}
+            src={brandSrc}
+            alt="StriveFormats"
+            width={160}
+            height={36}
             priority
-            className="rounded-md"
+            className="h-[32px] w-auto"
           />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold text-[var(--text)]">CSNest</div>
-            <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
-          </div>
         </Link>
 
         <div className="relative flex items-center gap-3">
@@ -154,9 +149,7 @@ export default function TopBar() {
 
           {canAccessCustomFormats ? (
             <Link href="/formats" className="rgb-btn" onClick={() => setOpen(false)}>
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
-                Custom Formats
-              </span>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
             </Link>
           ) : (
             <button
@@ -165,9 +158,7 @@ export default function TopBar() {
               onClick={() => setUpgradeOpen(true)}
               aria-label="Custom Formats (Advanced)"
             >
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
-                Custom Formats
-              </span>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
             </button>
           )}
 
