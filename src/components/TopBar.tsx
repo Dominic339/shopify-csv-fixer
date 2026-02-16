@@ -114,12 +114,26 @@ export default function TopBar() {
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
-      {/* Fixed height header area so the logo can truly “fill” it */}
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex h-full items-center" onClick={() => setOpen(false)} aria-label="StriveFormats Home">
-          {/* Fill height of TopBar */}
-          <div className="relative h-full w-[320px]">
-            <Image src={logoSrc} alt="StriveFormats" fill priority className="object-contain" />
+      {/* Taller bar so logo can actually fill it */}
+      <div className="mx-auto flex h-20 md:h-24 max-w-7xl items-center justify-between px-6">
+        {/* Logo block */}
+        <Link
+          href="/"
+          className="flex h-full items-center"
+          onClick={() => setOpen(false)}
+          aria-label="StriveFormats Home"
+        >
+          {/* Make the logo box tall + wide so it reads like a real brand mark */}
+          <div className="relative h-full w-[260px] sm:w-[320px] md:w-[420px]">
+            <Image
+              src={logoSrc}
+              alt="StriveFormats"
+              fill
+              priority
+              // Fill the TopBar top-to-bottom, keep aspect ratio, align left for better “brand” feel
+              className="object-contain object-left"
+              sizes="(max-width: 640px) 260px, (max-width: 768px) 320px, 420px"
+            />
           </div>
         </Link>
 
@@ -134,6 +148,7 @@ export default function TopBar() {
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
 
+          {/* Keep your existing nav/buttons; just make them feel “full height” visually */}
           <Link href="/app" className="rgb-btn" onClick={() => setOpen(false)}>
             <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
           </Link>
@@ -164,7 +179,7 @@ export default function TopBar() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="h-9 w-9 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
+            className="h-10 w-10 md:h-11 md:w-11 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
             aria-label="Account menu"
           >
             {email ? email[0]?.toUpperCase() : "?"}
@@ -172,7 +187,7 @@ export default function TopBar() {
 
           {open ? (
             <div
-              className="absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border"
+              className="absolute right-0 top-12 md:top-14 w-64 overflow-hidden rounded-2xl border"
               style={{
                 background: "var(--popover)",
                 borderColor: "var(--popover-border)",
