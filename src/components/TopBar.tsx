@@ -21,9 +21,11 @@ type SupabaseUser = {
   email?: string | null;
 };
 
-type SupabaseSession = {
-  user?: SupabaseUser | null;
-} | null;
+type SupabaseSession =
+  | {
+      user?: SupabaseUser | null;
+    }
+  | null;
 
 export default function TopBar() {
   const supabase = createClient();
@@ -43,6 +45,7 @@ export default function TopBar() {
     (async () => {
       try {
         const res = await supabase.auth.getUser();
+        // res shape varies by supabase-js version, so read safely
         const userEmail = (res as any)?.data?.user?.email ?? (res as any)?.user?.email ?? null;
 
         if (!mounted) return;
@@ -108,19 +111,21 @@ export default function TopBar() {
     router.push("/#pricing");
   }
 
-  const brandSrc = theme === "dark" ? "/StriveFormatsDark.png" : "/StriveFormatsLight.png";
+  const logoSrc = theme === "dark" ? "/StriveFormatsDark.png" : "/StriveFormatsLight.png";
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+      {/* Slightly tighter vertical padding so the logo can “fill” the bar */}
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <Link href="/" className="flex items-center" onClick={() => setOpen(false)} aria-label="StriveFormats Home">
+          {/* Bigger logo: fills TopBar height visually */}
           <Image
-            src={brandSrc}
+            src={logoSrc}
             alt="StriveFormats"
-            width={160}
-            height={36}
+            width={260}
+            height={48}
             priority
-            className="h-[32px] w-auto"
+            className="h-12 w-auto object-contain"
           />
         </Link>
 
@@ -181,9 +186,7 @@ export default function TopBar() {
             >
               <div className="px-4 py-3">
                 <div className="text-xs text-[var(--muted)]">{email ? "Signed in" : "Guest"}</div>
-                <div className="truncate text-sm font-semibold text-[var(--text)]">
-                  {email ?? "Not signed in"}
-                </div>
+                <div className="truncate text-sm font-semibold text-[var(--text)]">{email ?? "Not signed in"}</div>
               </div>
 
               <div className="border-t" style={{ borderColor: "var(--popover-border)" }} />
