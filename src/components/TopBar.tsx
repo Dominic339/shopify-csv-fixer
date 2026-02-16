@@ -4,7 +4,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -29,8 +28,6 @@ type SupabaseSession =
 
 export default function TopBar() {
   const supabase = createClient();
-  const router = useRouter();
-  const pathname = usePathname();
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
@@ -45,9 +42,7 @@ export default function TopBar() {
     (async () => {
       try {
         const res = await supabase.auth.getUser();
-        // res shape varies by supabase-js version, so read safely
         const userEmail = (res as any)?.data?.user?.email ?? (res as any)?.user?.email ?? null;
-
         if (!mounted) return;
         setEmail(userEmail);
       } catch {
@@ -98,7 +93,10 @@ export default function TopBar() {
   function goToPricing() {
     setOpen(false);
 
-    if (pathname === "/") {
+    if (typeof window === "undefined") return;
+
+    // If we're on home, scroll to pricing section
+    if (window.location.pathname === "/" || window.location.pathname === "") {
       const el = document.getElementById("pricing");
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -108,25 +106,21 @@ export default function TopBar() {
       return;
     }
 
-    router.push("/#pricing");
+    // Otherwise just navigate to home#pricing without using router.push
+    window.location.href = "/#pricing";
   }
 
   const logoSrc = theme === "dark" ? "/StriveFormatsDark.png" : "/StriveFormatsLight.png";
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
-      {/* Slightly tighter vertical padding so the logo can “fill” the bar */}
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <Link href="/" className="flex items-center" onClick={() => setOpen(false)} aria-label="StriveFormats Home">
-          {/* Bigger logo: fills TopBar height visually */}
-          <Image
-            src={logoSrc}
-            alt="StriveFormats"
-            width={260}
-            height={48}
-            priority
-            className="h-12 w-auto object-contain"
-          />
+      {/* Fixed height header area so the logo can truly “fill” it */}
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <Link href="/" className="flex h-full items-center" onClick={() => setOpen(false)} aria-label="StriveFormats Home">
+          {/* Fill height of TopBar */}
+          <div className="relative h-full w-[320px]">
+            <Image src={logoSrc} alt="StriveFormats" fill priority className="object-contain" />
+          </div>
         </Link>
 
         <div className="relative flex items-center gap-3">

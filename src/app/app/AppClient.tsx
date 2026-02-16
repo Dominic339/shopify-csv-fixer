@@ -222,7 +222,10 @@ export default function AppClient() {
 
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
-  const scoreNotes = useMemo(() => buildScoreNotes(validation as any, issuesForTable, formatId), [validation, issuesForTable, formatId]);
+  const scoreNotes = useMemo(
+    () => buildScoreNotes(validation as any, issuesForTable, formatId),
+    [validation, issuesForTable, formatId]
+  );
 
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
   // We keep this as a simple alias of the existing validation score so it stays stable and explainable.
@@ -511,10 +514,7 @@ export default function AppClient() {
       const a = document.createElement("a");
       a.href = url;
 
-      const base =
-        (exportBaseName ?? fileName ?? "fixed")
-          .replace(/\.csv$/i, "")
-          .trim() || "fixed";
+      const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
 
       a.download = `${base}_fixed.csv`;
 
@@ -572,9 +572,7 @@ export default function AppClient() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            Pick a format → upload → auto-fix safe issues → export.
-          </p>
+          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
 
           {rows.length > 0 ? (
             <div className="mt-3 space-y-2 text-sm">
@@ -657,8 +655,7 @@ export default function AppClient() {
                             </button>
 
                             <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              Auto-fixable blockers:{" "}
-                              <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
+                              Auto-fixable blockers: <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
                             </span>
                           </div>
                         </div>
@@ -701,7 +698,8 @@ export default function AppClient() {
                     <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="text-sm font-semibold text-[var(--text)]">
-                          Auto fixes applied <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length})</span>
+                          Auto fixes applied{" "}
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length})</span>
                         </div>
 
                         <button
@@ -718,9 +716,7 @@ export default function AppClient() {
                       </div>
 
                       <details className="mt-2">
-                        <summary className="cursor-pointer text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                          View auto fixes
-                        </summary>
+                        <summary className="cursor-pointer text-sm text-[color:rgba(var(--muted-rgb),1)]">View auto fixes</summary>
                         <ul className="mt-2 list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
                           {autoFixes.slice(0, 50).map((t, idx) => (
                             <li key={idx}>{t}</li>
@@ -753,12 +749,7 @@ export default function AppClient() {
           {allFormats.map((f) => {
             const active = f.id === formatId;
             return (
-              <button
-                key={f.id}
-                type="button"
-                className={`pill-btn ${active ? "is-active" : ""}`}
-                onClick={() => setFormatId(f.id)}
-              >
+              <button key={f.id} type="button" className={`pill-btn ${active ? "is-active" : ""}`} onClick={() => setFormatId(f.id)}>
                 {f.name}
               </button>
             );
@@ -803,9 +794,7 @@ export default function AppClient() {
           </div>
 
           {rows.length > 0 && autoFixes.length === 0 ? (
-            <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-              No auto fixes were applied for this upload.
-            </div>
+            <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">No auto fixes were applied for this upload.</div>
           ) : null}
         </div>
 
@@ -884,9 +873,7 @@ export default function AppClient() {
                                     autoFocus
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
                                     value={editing.value}
-                                    onChange={(e) =>
-                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
-                                    }
+                                    onChange={(e) => setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))}
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
                                       if (e.key === "Enter") commitEdit();
@@ -934,7 +921,9 @@ export default function AppClient() {
         <Link href="/formats/presets" className="hover:underline">
           Preset Formats
         </Link>
-        <Link href="/pricing" className="hover:underline">
+
+        {/* ✅ FIX: you don't have a /pricing route; pricing is a section on home */}
+        <Link href="/#pricing" className="hover:underline">
           Pricing
         </Link>
       </div>
