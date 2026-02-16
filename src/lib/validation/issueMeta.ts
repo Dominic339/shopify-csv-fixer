@@ -1,41 +1,40 @@
-export type ValidationCategory =
-  | "structure"
-  | "variant"
-  | "pricing"
-  | "inventory"
-  | "images"
-  | "seo";
+// src/lib/validation/issueMeta.ts
+
+/**
+ * Shared IssueMeta types used across the app.
+ *
+ * IMPORTANT DESIGN NOTE:
+ * Different formats (Shopify, WooCommerce, etc.) may have different category sets.
+ * So category must be flexible enough to accept format-specific labels.
+ *
+ * This file must remain compatible with ShopifyIssueCategory values like:
+ * "required" | "handle" | "variant" | "pricing" | "inventory" | "images" | "seo" | "publishing" | "status" | "other"
+ */
+
+export type ValidationCategory = string;
 
 export type IssueMeta = {
-  /** Stable id used by scoring + tooltip system (ex: "shopify/missing_handle"). */
   code: string;
-
-  /** Short label shown in tooltips. */
   title: string;
-
-  /** Plain-English explanation (what it means). */
   explanation: string;
-
-  /** Why the platform rejects it / why it matters. */
   whyPlatformCares: string;
-
-  /** Clear next step instruction. */
   howToFix: string;
 
-  /** Category used by scoring + UI grouping. */
+  /**
+   * Category is intentionally flexible to allow format-specific groupings.
+   * The UI can still group/sort by known categories (Shopify ones, etc.).
+   */
   category: ValidationCategory;
 
   /**
-   * If true, issue blocks “ready for import”.
-   * (In UI this shows as a blocker.)
+   * blocking means "treat as import-stopping error" for readiness summary.
    */
   blocking: boolean;
 
   /**
-   * If true, our “Fix all blockers” button is allowed to automatically fix it.
-   * IMPORTANT: Only use for deterministic, non-guessy fixes.
+   * autoFixable means the app can apply an automated fix for this issue.
    */
-  autoFixable?: boolean;
+  autoFixable: boolean;
 };
 
 export type IssueMetaMap = Record<string, IssueMeta>;
