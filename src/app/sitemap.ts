@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { getPresetFormats } from "@/lib/presets";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://csnest.vercel.app";
+  const base = "https://striveformats.com";
   const now = new Date();
 
   const presets = getPresetFormats();

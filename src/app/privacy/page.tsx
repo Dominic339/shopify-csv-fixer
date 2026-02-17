@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | CSNest",
-  description: "Privacy policy for CSNest.",
+  title: "Privacy Policy | StriveFormats",
+  description: "Privacy policy for StriveFormats.",
 };
 
 export default function PrivacyPage() {
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <h1 className="text-3xl font-semibold">Privacy Policy</h1>
 
       <p className="mt-4 text-white/80">
-        CSNest is designed to process CSV files in your browser and provide export-ready output.
+        StriveFormats is designed to process CSV files in your browser and provide export-ready output.
       </p>
 
       <h2 className="mt-8 text-xl font-semibold">Data we collect</h2>
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
 
       <h2 className="mt-8 text-xl font-semibold">Payments</h2>
       <p className="mt-2 text-white/80">
-        Payments are handled by Stripe. CSNest does not store your full payment card details.
+        Payments are handled by Stripe. StriveFormats does not store your full payment card details.
       </p>
 
       <h2 className="mt-8 text-xl font-semibold">Contact</h2>

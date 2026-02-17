@@ -12,29 +12,29 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://csnest.vercel.app"),
+  metadataBase: new URL("https://striveformats.com"),
   title: {
-    default: "CSNest | CSV Fixer for Shopify",
-    template: "%s | CSNest",
+    default: "StriveFormats | Clean. Standardize. Validate.",
+    template: "%s | StriveFormats",
   },
   description:
     "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
-  applicationName: "CSNest",
+  applicationName: "StriveFormats",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    url: "https://csnest.vercel.app",
-    title: "CSNest | CSV Fixer for Shopify",
+    url: "https://striveformats.com",
+    title: "StriveFormats | Clean. Standardize. Validate.",
     description:
       "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
-    siteName: "CSNest",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "CSNest" }],
+    siteName: "StriveFormats",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "StriveFormats" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CSNest | CSV Fixer for Shopify",
+    title: "StriveFormats | Clean. Standardize. Validate.",
     description:
       "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
     images: ["/opengraph-image"],

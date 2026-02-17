@@ -27,7 +27,7 @@ export default function PresetsPage() {
       <JsonLd data={jsonLd} />
 
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <p className="text-sm text-[var(--muted)]">CSNest</p>
+        <p className="text-sm text-[var(--muted)]">StriveFormats</p>
         <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">Preset CSV Formats</h1>
         <p className="mt-3 text-sm text-[var(--muted)]">
           Pick your platform and open the CSV Fixer already configured for that import.
