@@ -10,9 +10,7 @@ export const metadata: Metadata = {
   title: "Ecommerce CSV Fixer | StriveFormats",
   description:
     "Clean, standardize, and validate ecommerce CSV files before import. StriveFormats supports Shopify, WooCommerce, BigCommerce, eBay, and Amazon templates with safe auto-fixes and clear warnings.",
-  alternates: {
-    canonical: "/ecommerce-csv-fixer",
-  },
+  alternates: { canonical: "/ecommerce-csv-fixer" },
   openGraph: {
     title: "Ecommerce CSV Fixer | StriveFormats",
     description:
@@ -50,6 +48,28 @@ const faqItems = [
   },
 ] as const;
 
+// Derive platform id type from the registry (avoids guessing exported types)
+type PlatformId = (typeof ECOMMERCE_PLATFORMS)[number]["id"];
+
+function getPlatformBlurb(id: PlatformId): string {
+  switch (id) {
+    case "shopify":
+      return "Validate products CSVs against Shopify’s template, normalize handles, variants, prices, and image rows.";
+    case "woocommerce":
+      return "Clean WooCommerce product exports and standardize headers, numbers, and required fields before import.";
+    case "bigcommerce":
+      return "Prep BigCommerce product CSVs with safe normalization and clear template validation warnings.";
+    case "etsy":
+      return "Fix Etsy listings CSV issues like formatting, missing fields, and invalid values before upload.";
+    case "ebay":
+      return "Validate basic eBay listing CSVs and standardize fields to reduce import failures.";
+    case "amazon":
+      return "Run safe checks on Amazon inventory loader files and normalize common formatting problems.";
+    default:
+      return "Validate platform templates and export a clean CSV you can trust.";
+  }
+}
+
 export default function EcommerceCsvFixerPage() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -60,11 +80,7 @@ export default function EcommerceCsvFixerPage() {
     description:
       "Clean, standardize, and validate ecommerce CSV files before import. StriveFormats applies only safe auto-fixes and flags risky issues for review.",
     url: "/ecommerce-csv-fixer",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
 
   return (
@@ -110,30 +126,36 @@ export default function EcommerceCsvFixerPage() {
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <h2 className="text-2xl font-semibold text-[var(--text)]">Supported ecommerce platforms</h2>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Start with these five apps. Each page includes a template preview, a sample CSV you can download, and a
-          one-click link that opens the fixer with the right preset selected.
+          Start with these apps. Each page includes a template preview, a sample CSV you can download, and a link to the
+          platform tools.
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {ECOMMERCE_PLATFORMS.map((p) => (
-            <div
-              key={p.id}
-              className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6"
-            >
-              <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
-              <div className="mt-2 text-sm text-[var(--muted)]">{p.blurb}</div>
+          {ECOMMERCE_PLATFORMS.map((p) => {
+            // IMPORTANT: the property is presetIds (NOT presetsIds)
+            const firstPresetId = p.presetIds && p.presetIds.length > 0 ? p.presetIds[0] : "";
 
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={`/ecommerce/${p.id}`} className="rgb-btn">
-                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open {p.name} tool</span>
-                </Link>
+            return (
+              <div key={p.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
+                <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
+                <div className="mt-2 text-sm text-[var(--muted)]">{getPlatformBlurb(p.id)}</div>
 
-                <Link href={`/presets/${encodeURIComponent(p.presetId)}`} className="rgb-btn">
-                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Template preview</span>
-                </Link>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link href={`/ecommerce/${p.id}`} className="rgb-btn">
+                    <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open {p.name} tool</span>
+                  </Link>
+
+                  {firstPresetId ? (
+                    <Link href={`/presets/${encodeURIComponent(firstPresetId)}`} className="rgb-btn">
+                      <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Template preview</span>
+                    </Link>
+                  ) : (
+                    <span className="pill-btn">Template preview unavailable</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -165,8 +187,8 @@ export default function EcommerceCsvFixerPage() {
         </div>
 
         <div className="mt-6 text-sm text-[var(--muted)]">
-          If you have repeat workflows, Custom Formats let you save your own templates and rules so future cleanups take
-          seconds.
+          If you have repeat workflows, Custom Formats let you save reusable column templates and rules so future cleanups
+          take seconds.
         </div>
       </section>
 
