@@ -45,7 +45,7 @@ export default function HomeClient() {
 
       <section className="grid gap-10 md:grid-cols-2">
         <div>
-          <p className="text-sm text-[var(--muted)]">CSNest</p>
+          <p className="text-sm text-[var(--muted)]">StriveFormats</p>
 
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-[var(--text)]">
             Clean, validate, and reshape CSV files with confidence
