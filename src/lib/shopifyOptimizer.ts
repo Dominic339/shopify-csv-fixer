@@ -1,5 +1,6 @@
 // src/lib/shopifyOptimizer.ts
-import { validateAndFixShopifyBasic, type Issue as BaseIssue } from "./shopifyBasic";
+import type { CsvRow } from "./csv";
+import { validateAndFixShopifyBasic, type FixResult, type Issue as BaseIssue } from "./shopifyBasic";
 
 /**
  * Shopify Import Optimizer
@@ -12,24 +13,12 @@ import { validateAndFixShopifyBasic, type Issue as BaseIssue } from "./shopifyBa
  *
  * Return shape remains compatible: { fixedHeaders, fixedRows, issues, fixesApplied }.
  */
+export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]): FixResult {
+  const base = validateAndFixShopifyBasic(headers, rows);
 
-// Use a local CsvRow type so we don't depend on any particular export shape.
-export type CsvRow = Record<string, string>;
-
-export type ShopifyOptimizerResult = {
-  fixedHeaders: string[];
-  fixedRows: CsvRow[];
-  issues: BaseIssue[];
-  fixesApplied: string[];
-};
-
-export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]): ShopifyOptimizerResult {
-  // validateAndFixShopifyBasic return type differs across versions, so treat it defensively.
-  const base: any = validateAndFixShopifyBasic(headers ?? [], rows ?? []);
-
-  const fixedHeaders: string[] = (base?.fixedHeaders ?? headers ?? []) as string[];
-  const fixedRows: CsvRow[] = (base?.fixedRows ?? rows ?? []) as CsvRow[];
-  const fixesApplied: string[] = [...((base?.fixesApplied ?? []) as string[])];
+  const fixedHeaders = base.fixedHeaders ?? headers;
+  const fixedRows = base.fixedRows ?? rows;
+  const fixesApplied = [...(base.fixesApplied ?? [])];
 
   const issues: BaseIssue[] = [];
   const seen = new Set<string>();
@@ -50,10 +39,6 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   }
 
   function isImageOnlyRow(r: CsvRow) {
-    // Shopify allows extra image rows where Title is blank as long as:
-    // - URL handle present
-    // - Product image URL present
-    // - No variant-ish fields are present (SKU/Price/Inventory/Options)
     const title = get(r, cTitle).trim();
     const handle = get(r, cHandle).trim();
     const img = get(r, cImgUrl).trim();
@@ -80,11 +65,8 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   function normalizeCode(code: string | undefined | null): string {
     const c = (code ?? "").trim();
     if (!c) return "";
-
-    // Keep canonical Shopify codes
     if (c.startsWith("shopify/")) return c;
 
-    // Legacy/base codes -> canonical codes used by your UI registry
     const map: Record<string, string> = {
       missing_required_header: "shopify/missing_required_header",
       blank_title: "shopify/blank_title",
@@ -111,16 +93,15 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   }
 
   function add(issue: BaseIssue) {
-    const anyIssue = issue as any;
-
-    const code = normalizeCode(anyIssue.code);
-    anyIssue.code = code;
+    const code = normalizeCode((issue as any).code);
+    (issue as any).code = code;
 
     const row =
-      anyIssue.row ?? (typeof anyIssue.rowIndex === "number" ? anyIssue.rowIndex + 1 : undefined);
+      (issue as any).row ??
+      (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
 
-    const col = anyIssue.column ?? anyIssue.field ?? "(file)";
-    const sev = (anyIssue.severity ?? anyIssue.level ?? "error") as "error" | "warning" | "info";
+    const col = (issue as any).column ?? "(file)";
+    const sev = (issue as any).severity ?? "error";
 
     const key = `${sev}|${code}|${row ?? -1}|${col}`;
     if (seen.has(key)) return;
@@ -130,11 +111,9 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   }
 
   // 0) Pull base issues in, normalize + dedupe
-  for (const issue of (base?.issues ?? []) as BaseIssue[]) add(issue);
+  for (const issue of base.issues ?? []) add(issue);
 
-  // ---------------------------------------------------------------------------
-  // Step 1: Duplicate SKU detection across different URL handles (cross-product)
-  // ---------------------------------------------------------------------------
+  // 1) Duplicate SKU detection across different URL handles (cross-product)
   const skuMap = new Map<
     string,
     {
@@ -152,10 +131,8 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
 
     const handle = get(r, cHandle).trim().toLowerCase();
     const entry = skuMap.get(sku) ?? { handles: new Set<string>(), rows: [] };
-
     if (handle) entry.handles.add(handle);
     entry.rows.push(i);
-
     skuMap.set(sku, entry);
   }
 
@@ -178,9 +155,7 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Step 2: Duplicate URL handle with conflicting Titles
-  // ---------------------------------------------------------------------------
+  // 2) Duplicate URL handle with conflicting Titles
   const handleTitles = new Map<string, { titles: Map<string, string>; rows: number[] }>();
 
   for (let i = 0; i < fixedRows.length; i++) {
@@ -198,7 +173,6 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
 
     e.titles.set(key, title);
     e.rows.push(i);
-
     handleTitles.set(handle, e);
   }
 

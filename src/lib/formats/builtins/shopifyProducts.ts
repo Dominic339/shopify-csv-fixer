@@ -1,5 +1,6 @@
 // src/lib/formats/builtins/shopifyProducts.ts
-import type { CsvFormat, CsvRow } from "../types";
+import type { CsvFormat } from "../types";
+import type { CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyOptimizer } from "@/lib/shopifyOptimizer";
 
 export const shopifyProductsFormat: CsvFormat = {
@@ -14,12 +15,18 @@ export const shopifyProductsFormat: CsvFormat = {
     const res = validateAndFixShopifyOptimizer(headers ?? [], rows ?? []);
 
     const issues = (res.issues ?? []).map((i: any) => {
-      const row1 = typeof i.row === "number" ? i.row : typeof i.rowIndex === "number" ? i.rowIndex + 1 : undefined;
+      const row1 =
+        typeof i.row === "number"
+          ? i.row
+          : typeof i.rowIndex === "number"
+            ? i.rowIndex + 1
+            : undefined;
+
       const rowIndex = typeof row1 === "number" ? Math.max(0, row1 - 1) : -1;
 
       return {
         rowIndex, // -1 = file-level
-        column: i.column ?? i.field ?? "(file)",
+        column: i.column ?? "(file)",
         message: i.message,
         severity: (i.severity ?? i.level ?? "error") as "error" | "warning" | "info",
         code: i.code,
