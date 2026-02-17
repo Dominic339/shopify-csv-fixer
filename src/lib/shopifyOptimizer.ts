@@ -92,28 +92,8 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
     return map[c] ?? c;
   }
 
-  function add(issue: BaseIssue) {
-    const code = normalizeCode((issue as any).code);
-    (issue as any).code = code;
-
-    const row =
-      (issue as any).row ??
-      (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
-
-    const col = (issue as any).column ?? "(file)";
-    const sev = (issue as any).severity ?? "error";
-
-    const key = `${sev}|${code}|${row ?? -1}|${col}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-
-    issues.push(issue);
-  }
-
-  // 0) Pull base issues in, normalize + dedupe
-  for (const issue of base.issues ?? []) add(issue);
-
   // 1) Duplicate SKU detection across different URL handles (cross-product)
+  // Build first so we can suppress redundant base "duplicate_sku" warnings for those same rows.
   const skuMap = new Map<
     string,
     {
@@ -136,6 +116,58 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
     skuMap.set(sku, entry);
   }
 
+  // Exact SKUs that are reused across multiple handles
+  const skusAcrossProducts = new Set<string>();
+  for (const [sku, entry] of skuMap.entries()) {
+    if (entry.rows.length > 1 && entry.handles.size >= 2) {
+      skusAcrossProducts.add(sku);
+    }
+  }
+
+  function shouldSuppressBaseDuplicateSku(issue: BaseIssue): boolean {
+    const code = normalizeCode((issue as any).code);
+    if (code !== "shopify/duplicate_sku") return false;
+
+    const col = ((issue as any).column ?? "").toString();
+    if (col && col !== cSku) return false;
+
+    const row =
+      (issue as any).row ??
+      (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
+
+    if (!row || row < 1 || row > fixedRows.length) return false;
+
+    const skuVal = get(fixedRows[row - 1], cSku).trim();
+    if (!skuVal) return false;
+
+    // If this SKU is used across different products, we show the stronger ERROR only.
+    return skusAcrossProducts.has(skuVal);
+  }
+
+  function add(issue: BaseIssue) {
+    if (shouldSuppressBaseDuplicateSku(issue)) return;
+
+    const code = normalizeCode((issue as any).code);
+    (issue as any).code = code;
+
+    const row =
+      (issue as any).row ??
+      (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
+
+    const col = (issue as any).column ?? "(file)";
+    const sev = (issue as any).severity ?? "error";
+
+    const key = `${sev}|${code}|${row ?? -1}|${col}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    issues.push(issue);
+  }
+
+  // 0) Pull base issues in, normalize + dedupe (with suppression rule above)
+  for (const issue of base.issues ?? []) add(issue);
+
+  // Emit the cross-product SKU error (and ONLY this, since base warning is suppressed for these rows)
   for (const [sku, entry] of skuMap.entries()) {
     if (entry.rows.length <= 1) continue;
 
