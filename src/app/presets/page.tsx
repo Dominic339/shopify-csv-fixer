@@ -5,7 +5,7 @@ import { getPresetFormats, groupPresetsByCategory } from "@/lib/presets";
 import JsonLd from "@/components/JsonLd";
 
 export const metadata = {
-  title: "Preset CSV Formats",
+  title: "Preset CSV Formats | StriveFormats",
   description:
     "Pick a preset CSV format for Shopify, WooCommerce, Google Ads, Mailchimp, QuickBooks and more. Open the fixer preconfigured for your platform.",
 };
@@ -30,15 +30,49 @@ export default function PresetsPage() {
         <p className="text-sm text-[var(--muted)]">StriveFormats</p>
         <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">Preset CSV Formats</h1>
         <p className="mt-3 text-sm text-[var(--muted)]">
-          Pick your platform and open the CSV Fixer already configured for that import.
+          Presets are ready-made “format packs” that tell the fixer how to validate, auto-fix safe issues, and export a clean CSV
+          for a specific platform. Pick your target import and you’ll open the fixer already configured.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/app" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-              Open CSV Fixer
-            </span>
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
           </Link>
+          <Link href="/shopify-csv-fixer" className="rgb-btn">
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Shopify CSV Fixer</span>
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+          <div className="text-sm font-semibold text-[var(--text)]">Most popular</div>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Shopify imports are the strictest. If you sell products with variants, this is the fastest way to prevent import failures.
+          </p>
+          <div className="mt-4">
+            <Link href="/shopify-csv-fixer" className="rg-btn">Open Shopify landing page</Link>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+          <div className="text-sm font-semibold text-[var(--text)]">Run a quick test</div>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Try the fixer with a sample file. You can download messy CSVs on the Shopify page and see the fix log instantly.
+          </p>
+          <div className="mt-4">
+            <Link href="/shopify-csv-fixer" className="rg-btn">Get sample downloads</Link>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+          <div className="text-sm font-semibold text-[var(--text)]">Need reusable rules</div>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            If you repeatedly clean similar files, Custom Formats lets you save templates and rules so repeat jobs take seconds.
+          </p>
+          <div className="mt-4">
+            <Link href="/formats" className="rg-btn">Custom Formats</Link>
+          </div>
         </div>
       </div>
 
