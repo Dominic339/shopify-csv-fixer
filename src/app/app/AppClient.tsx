@@ -18,6 +18,9 @@ import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 import { computeReadinessSummary } from "@/lib/validation/readiness";
 import { buildScoreNotes } from "@/lib/validation/scoreNotes";
 
+// Phase 1: strict mode preference (Shopify)
+import { getStrictMode, setStrictMode } from "@/lib/validation/strictMode";
+
 type SubStatus = {
   ok: boolean;
   plan?: "free" | "basic" | "advanced";
@@ -96,6 +99,12 @@ export default function AppClient() {
 
   // ✅ Pinned rows = the "Manual fixes" worklist
   const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
+
+  // Phase 1: Shopify strict mode toggle (stored local)
+  const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
+
+  // Phase 1: Severity filter
+  const [issueSeverityFilter, setIssueSeverityFilter] = useState<"all" | "error" | "warning" | "info">("all");
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
@@ -184,6 +193,12 @@ export default function AppClient() {
     void refreshQuotaAndPlan();
   }, []);
 
+  const isAdvancedActive = useMemo(() => {
+    const status = (subStatus?.status ?? "").toLowerCase();
+    const plan = subStatus?.plan ?? "free";
+    return plan === "advanced" && status === "active";
+  }, [subStatus]);
+
   const isUnlimited = useMemo(() => {
     const status = (subStatus?.status ?? "").toLowerCase();
     const plan = subStatus?.plan ?? "free";
@@ -220,6 +235,11 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
+  const issuesForDisplay = useMemo(() => {
+    if (issueSeverityFilter === "all") return issuesForTable;
+    return issuesForTable.filter((i) => i.severity === issueSeverityFilter);
+  }, [issuesForTable, issueSeverityFilter]);
+
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
   const scoreNotes = useMemo(
@@ -228,7 +248,6 @@ export default function AppClient() {
   );
 
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
-  // We keep this as a simple alias of the existing validation score so it stays stable and explainable.
   const shopifyImportConfidence = useMemo(() => {
     if (formatId !== "shopify_products") return null;
     const s = Number((validation as any)?.score ?? 0);
@@ -242,11 +261,11 @@ export default function AppClient() {
     return first ? Object.keys(first) : [];
   }, [headers, rows]);
 
-  // Build cell highlight map from CURRENT issues
+  // Build cell highlight map from CURRENT issues (respect filter)
   const issueCellMap = useMemo(() => {
     const map = new Map<string, "error" | "warning" | "info">();
-    for (const i of issuesForTable) {
-      if (!i.column || i.column === "(file)") continue; // ✅ ignore file-level issues for cell highlighting
+    for (const i of issuesForDisplay) {
+      if (!i.column || i.column === "(file)") continue;
 
       const key = `${i.rowIndex}|||${i.column}`;
       const prev = map.get(key);
@@ -255,17 +274,17 @@ export default function AppClient() {
       map.set(key, i.severity);
     }
     return map;
-  }, [issuesForTable]);
+  }, [issuesForDisplay]);
 
   const rowsWithAnyIssue = useMemo(() => {
     const set = new Set<number>();
-    for (const i of issuesForTable) {
+    for (const i of issuesForDisplay) {
       if (i.rowIndex >= 0) set.add(i.rowIndex);
     }
     return [...set].sort((a, b) => a - b);
-  }, [issuesForTable]);
+  }, [issuesForDisplay]);
 
-  // ✅ Auto-pin any row that has issues (so it appears in Manual fixes by default)
+  // ✅ Auto-pin any row that has issues (filtered)
   useEffect(() => {
     if (!rowsWithAnyIssue.length) return;
     setPinnedRows((prev) => {
@@ -273,7 +292,7 @@ export default function AppClient() {
       for (const idx of rowsWithAnyIssue) next.add(idx);
       return next;
     });
-  }, [rowsWithAnyIssue.join("|")]);
+  }, [rowsWithAnyIssue.length, formatId]);
 
   const pinnedSorted = useMemo(() => {
     return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
@@ -306,9 +325,8 @@ export default function AppClient() {
   }, [pinnedSorted, rowsWithAnyIssue, rows.length]);
 
   const rowSeverity = useMemo(() => {
-    // highest severity per row
     const m = new Map<number, "error" | "warning" | "info">();
-    for (const i of issuesForTable) {
+    for (const i of issuesForDisplay) {
       if (i.rowIndex < 0) continue;
       const prev = m.get(i.rowIndex);
       if (prev === "error") continue;
@@ -316,7 +334,7 @@ export default function AppClient() {
       m.set(i.rowIndex, i.severity);
     }
     return m;
-  }, [issuesForTable]);
+  }, [issuesForDisplay]);
 
   function pinRow(rowIndex: number) {
     setPinnedRows((prev) => {
@@ -334,7 +352,7 @@ export default function AppClient() {
     });
   }
 
-  // ✅ Revalidate issues WITHOUT applying fixes (so typing doesn't get "corrected")
+  // ✅ Revalidate issues WITHOUT applying fixes
   const revalidateTimerRef = useRef<number | null>(null);
   function revalidateIssuesOnly(nextHeaders: string[], nextRows: CsvRow[]) {
     if (!activeFormat) return;
@@ -409,6 +427,11 @@ export default function AppClient() {
   function handleFixAllBlocking() {
     if (formatId !== "shopify_products") return;
 
+    if (!isAdvancedActive) {
+      setErrorBanner("Fix All is an Advanced feature. Upgrade to run bulk safe auto-fixes.");
+      return;
+    }
+
     const fixed = fixAllDryRun ?? fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
 
     if (!fixed.fixesApplied.length) {
@@ -448,7 +471,7 @@ export default function AppClient() {
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      setPinnedRows(new Set()); // will auto-pin issue rows via effect
+      setPinnedRows(new Set());
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -486,6 +509,7 @@ export default function AppClient() {
     }
   }
 
+  // Re-run when format changes
   useEffect(() => {
     setIssues([]);
     setParseIssues([]);
@@ -495,10 +519,20 @@ export default function AppClient() {
     setPinnedRows(new Set());
 
     if (!lastUploadedText || !activeFormat) return;
-
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formatId]);
+
+  // Persist + re-run when strict mode toggles (Shopify only)
+  useEffect(() => {
+    setStrictMode(Boolean(strictShopify));
+
+    if (formatId !== "shopify_products") return;
+    if (!lastUploadedText || !activeFormat) return;
+
+    void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strictShopify]);
 
   async function exportFixedCsv() {
     setBusy(true);
@@ -515,7 +549,6 @@ export default function AppClient() {
       a.href = url;
 
       const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
-
       a.download = `${base}_fixed.csv`;
 
       document.body.appendChild(a);
@@ -557,33 +590,37 @@ export default function AppClient() {
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
 
   const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
-  const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
+  const fixAllLabel = isAdvancedActive
+    ? `Fix ${realFixableBlockingCount} auto-fixable blockers`
+    : `Upgrade for Fix All (${realFixableBlockingCount})`;
 
   const fixLogBase = safeBaseName(exportBaseName ?? fileName ?? "csv");
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-7xl px-8 py-12">
       {errorBanner ? (
-        <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--text)]">
+        <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[var(--text)] text-base">
           {errorBanner}
         </div>
       ) : null}
 
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-8 flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
+          <h1 className="text-3xl font-semibold text-[var(--text)]">CSV Fixer</h1>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+            Pick a format → upload → auto-fix safe issues → export.
+          </p>
 
           {rows.length > 0 ? (
-            <div className="mt-3 space-y-2 text-sm">
+            <div className="mt-4 space-y-3 text-base">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-[var(--text)]">
                   Validation score: <span className="font-semibold">{validation.score}</span>/100
                 </span>
 
                 {shopifyImportConfidence != null ? (
                   <span
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[var(--text)]"
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-[var(--text)]"
                     title="A quick readiness indicator based on your current Shopify issues. Aim for 90%+ for a clean import."
                   >
                     Shopify import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>
@@ -592,7 +629,7 @@ export default function AppClient() {
 
                 <span
                   className={
-                    "rounded-full border px-3 py-1 font-semibold " +
+                    "rounded-full border px-4 py-1.5 font-semibold " +
                     (validation.readyForShopifyImport
                       ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
                       : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
@@ -609,34 +646,52 @@ export default function AppClient() {
                 {fixAllVisible ? (
                   <button
                     type="button"
-                    className="pill-btn"
+                    className={"pill-btn" + (isAdvancedActive ? "" : " opacity-60")}
                     onClick={handleFixAllBlocking}
-                    disabled={busy}
-                    title="Applies safe, deterministic fixes to Shopify blocking issues only."
+                    disabled={busy || !isAdvancedActive}
+                    title={isAdvancedActive ? "Applies safe, deterministic fixes to Shopify blockers." : "Advanced required"}
                     style={busy ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
                   >
                     {fixAllLabel}
                   </button>
                 ) : null}
+
+                {formatId === "shopify_products" ? (
+                  <button
+                    type="button"
+                    className={"pill-btn" + (isAdvancedActive ? "" : " opacity-60")}
+                    onClick={() => {
+                      if (!isAdvancedActive) {
+                        setErrorBanner("Strict mode is an Advanced feature. Upgrade to enable stricter Shopify validations.");
+                        return;
+                      }
+                      setStrictShopify((v) => !v);
+                    }}
+                    disabled={busy || !isAdvancedActive}
+                    title={isAdvancedActive ? "Strict mode adds extra Shopify checks." : "Advanced required"}
+                  >
+                    {strictShopify ? "Strict mode: ON" : "Strict mode: OFF"}
+                  </button>
+                ) : null}
               </div>
 
               {formatId === "shopify_products" ? (
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div className="min-w-[260px]">
-                      <div className="text-sm font-semibold text-[var(--text)]">
+                <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+                  <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-[320px]">
+                      <div className="text-base font-semibold text-[var(--text)]">
                         {validation.readyForShopifyImport ? "🟢 Ready for Shopify Import" : "Not ready for Shopify Import"}
                       </div>
-                      <div className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                      <div className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
                         {validation.readyForShopifyImport
                           ? "No blocking issues detected. Exporting should import cleanly."
                           : "Blocking issues are preventing a clean import. Fix blockers to safely import."}
                       </div>
 
                       {!validation.readyForShopifyImport ? (
-                        <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                        <div className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
                           <div className="font-semibold text-[var(--text)]">Top blockers</div>
-                          <ul className="mt-1 list-disc pl-5">
+                          <ul className="mt-2 list-disc pl-6">
                             {readiness.blockingGroups.slice(0, 3).map((g) => (
                               <li key={g.code}>
                                 <span className="font-semibold text-[var(--text)]">{g.title}</span>{" "}
@@ -645,7 +700,7 @@ export default function AppClient() {
                             ))}
                           </ul>
 
-                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <div className="mt-4 flex flex-wrap items-center gap-3">
                             <button
                               type="button"
                               className="rg-btn"
@@ -654,17 +709,18 @@ export default function AppClient() {
                               Jump to issues
                             </button>
 
-                            <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                              Auto-fixable blockers: <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
+                            <span className="text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                              Auto-fixable blockers:{" "}
+                              <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
                             </span>
                           </div>
                         </div>
                       ) : null}
 
                       {lastFixAll ? (
-                        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
-                          <div className="text-sm font-semibold text-[var(--text)]">Last Fix All</div>
-                          <ul className="mt-2 list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                        <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                          <div className="text-base font-semibold text-[var(--text)]">Last Fix All</div>
+                          <ul className="mt-3 list-disc pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
                             {lastFixAll.applied.slice(0, 5).map((t, idx) => (
                               <li key={idx}>{t}</li>
                             ))}
@@ -674,30 +730,29 @@ export default function AppClient() {
                       ) : null}
                     </div>
 
-                    <div className="min-w-[240px] rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
-                      <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
-                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                    <div className="min-w-[300px] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                      <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                         {scoreNotes.map((n) => (
                           <div
                             key={n.key}
-                            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2"
+                            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
                             title={n.note}
                           >
                             <div className="font-semibold text-[var(--text)]">
                               {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>
-                            <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
+                            <div className="mt-2 text-[color:rgba(var(--muted-rgb),1)]">{n.note}</div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Auto-fix log (collapsible). Single download location lives here. */}
                   {autoFixes.length > 0 ? (
-                    <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="text-sm font-semibold text-[var(--text)]">
+                    <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="text-base font-semibold text-[var(--text)]">
                           Auto fixes applied{" "}
                           <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length})</span>
                         </div>
@@ -715,9 +770,11 @@ export default function AppClient() {
                         </button>
                       </div>
 
-                      <details className="mt-2">
-                        <summary className="cursor-pointer text-sm text-[color:rgba(var(--muted-rgb),1)]">View auto fixes</summary>
-                        <ul className="mt-2 list-disc pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                      <details className="mt-3">
+                        <summary className="cursor-pointer text-base text-[color:rgba(var(--muted-rgb),1)]">
+                          View auto fixes
+                        </summary>
+                        <ul className="mt-3 list-disc pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
                           {autoFixes.slice(0, 50).map((t, idx) => (
                             <li key={idx}>{t}</li>
                           ))}
@@ -734,41 +791,46 @@ export default function AppClient() {
           ) : null}
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-base text-[var(--text)]">
           <div className="font-medium">Monthly exports</div>
           {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
-          <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+          <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        <div className="text-sm font-semibold text-[var(--text)]">Format</div>
-        <div className="mt-3 flex flex-wrap gap-2">
+      <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
+        <div className="text-base font-semibold text-[var(--text)]">Format</div>
+        <div className="mt-4 flex flex-wrap gap-2">
           {allFormats.map((f) => {
             const active = f.id === formatId;
             return (
-              <button key={f.id} type="button" className={`pill-btn ${active ? "is-active" : ""}`} onClick={() => setFormatId(f.id)}>
+              <button
+                key={f.id}
+                type="button"
+                className={`pill-btn ${active ? "is-active" : ""}`}
+                onClick={() => setFormatId(f.id)}
+              >
                 {f.name}
               </button>
             );
           })}
         </div>
 
-        <div className="mt-3 text-xs text-[var(--muted)]">
+        <div className="mt-4 text-sm text-[var(--muted)]">
           Built-in formats are available to everyone. Custom formats appear here when you save or import them.
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--text)]">Upload CSV</h2>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+      <div className="mt-7 grid gap-7 md:grid-cols-2">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
+          <h2 className="text-xl font-semibold text-[var(--text)]">Upload CSV</h2>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
             We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
               Choose file
               <input
@@ -794,26 +856,46 @@ export default function AppClient() {
           </div>
 
           {rows.length > 0 && autoFixes.length === 0 ? (
-            <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">No auto fixes were applied for this upload.</div>
+            <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">No auto fixes were applied for this upload.</div>
           ) : null}
         </div>
 
-        <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--text)]">Issues</h2>
-          <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+        <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
+          <h2 className="text-xl font-semibold text-[var(--text)]">Issues</h2>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
             Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
           </p>
 
-          <div className="mt-4 data-table-wrap">
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Issue filter</span>
+            {(["all", "error", "warning", "info"] as const).map((k) => {
+              const active = issueSeverityFilter === k;
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  className={`pill-btn ${active ? "is-active" : ""}`}
+                  onClick={() => setIssueSeverityFilter(k)}
+                >
+                  {k === "all" ? "All" : k[0].toUpperCase() + k.slice(1)}
+                </button>
+              );
+            })}
+            <span className="ml-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+              Showing {issuesForDisplay.length} of {issuesForTable.length}
+            </span>
+          </div>
+
+          <div className="mt-5 data-table-wrap">
             <div className="data-table-scroll">
               {rows.length === 0 ? (
-                <div className="p-6 text-sm text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
+                <div className="p-7 text-base text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
               ) : (
-                <table className="data-table">
+                <table className="data-table text-sm">
                   <thead>
                     <tr>
                       <th style={{ width: 70 }}>Row</th>
-                      <th style={{ width: 96 }}></th>
+                      <th style={{ width: 110 }}></th>
                       {tableHeaders.slice(0, 10).map((h) => (
                         <th key={h}>{h}</th>
                       ))}
@@ -838,11 +920,21 @@ export default function AppClient() {
                             {sev === "error" ? "Error" : "Warning"}
                           </span>
                         ) : isPinned ? (
-                          <button type="button" className="pill-btn" onClick={() => unpinRow(rowIndex)} title="Remove from Manual fixes">
+                          <button
+                            type="button"
+                            className="pill-btn"
+                            onClick={() => unpinRow(rowIndex)}
+                            title="Remove from Manual fixes"
+                          >
                             Unpin
                           </button>
                         ) : (
-                          <button type="button" className="pill-btn" onClick={() => pinRow(rowIndex)} title="Add to Manual fixes">
+                          <button
+                            type="button"
+                            className="pill-btn"
+                            onClick={() => pinRow(rowIndex)}
+                            title="Add to Manual fixes"
+                          >
                             Pin
                           </button>
                         );
@@ -871,9 +963,11 @@ export default function AppClient() {
                                 {isEditing ? (
                                   <input
                                     autoFocus
-                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs outline-none"
+                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-sm outline-none"
                                     value={editing.value}
-                                    onChange={(e) => setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))}
+                                    onChange={(e) =>
+                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
+                                    }
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
                                       if (e.key === "Enter") commitEdit();
@@ -895,16 +989,17 @@ export default function AppClient() {
             </div>
 
             {rows.length > 0 ? (
-              <div className="border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--muted)]">
-                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until unpinned.
+              <div className="border-t border-[var(--border)] px-5 py-4 text-sm text-[var(--muted)]">
+                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until
+                unpinned.
               </div>
             ) : null}
           </div>
 
-          <div className="mt-6">
+          <div className="mt-7">
             <EditableIssuesTable
               headers={tableHeaders}
-              issues={issues as any}
+              issues={issuesForDisplay as any}
               rows={rows}
               onUpdateRow={onUpdateRow}
               resetKey={formatId}
@@ -917,12 +1012,11 @@ export default function AppClient() {
         </div>
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+      <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/formats/presets" className="hover:underline">
           Preset Formats
         </Link>
 
-        {/* ✅ FIX: you don't have a /pricing route; pricing is a section on home */}
         <Link href="/#pricing" className="hover:underline">
           Pricing
         </Link>

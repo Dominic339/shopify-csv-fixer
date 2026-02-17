@@ -19,7 +19,7 @@ export const shopifyProductsFormat: CsvFormat = {
 
       return {
         rowIndex, // -1 = file-level
-        column: i.column ?? "(file)",
+        column: i.column ?? i.field ?? "(file)",
         message: i.message,
         severity: (i.severity ?? i.level ?? "error") as "error" | "warning" | "info",
         code: i.code,
