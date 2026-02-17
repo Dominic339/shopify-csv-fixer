@@ -5,6 +5,8 @@ import {
   slugifyShopifyHandle,
   normalizeShopifyBool,
   isValidShopifyBool,
+  normalizeShopifyInventoryPolicy,
+  isValidShopifyInventoryPolicy,
   parseShopifyMoney,
   formatShopifyMoney,
   isHttpUrl,
@@ -317,29 +319,24 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // --- Continue selling normalization (already present, but align code with meta)
+    // --- Continue selling normalization (aligned with Shopify inventory policy: deny | continue)
     const cs = get(r, cContinue).trim();
     if (cs) {
-      const lower = cs.toLowerCase();
-      if (lower === "continue" || lower === "deny") {
-        const mapped = lower === "continue" ? "true" : "false";
-        set(r, cContinue, mapped);
-        fixesApplied.push(`Mapped legacy inventory policy "${cs}" to Continue selling = "${mapped}" on row ${row}`);
-      } else {
-        const norm = normalizeShopifyBool(cs);
-        if (norm !== cs) {
-          set(r, cContinue, norm);
-          fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
-        }
+      // Shopify's "Continue selling when out of stock" is an inventory policy: deny | continue.
+      // We accept boolean-ish inputs and normalize deterministically to deny/continue.
+      const norm = normalizeShopifyInventoryPolicy(cs);
+      if (norm !== cs) {
+        set(r, cContinue, norm);
+        fixesApplied.push(`Normalized Continue selling when out of stock to "${norm}" on row ${row}`);
       }
-      if (!isValidShopifyBool(get(r, cContinue))) {
+      if (!isValidShopifyInventoryPolicy(get(r, cContinue))) {
         issues.push({
           severity: "error",
           code: "shopify/invalid_inventory_policy",
           row,
           column: cContinue,
-          message: `Row ${row}: Continue selling when out of stock must be true or false (got "${cs}").`,
-          suggestion: `Change to "true" or "false".`,
+          message: `Row ${row}: Continue selling when out of stock must be "deny" or "continue" (got "${cs}").`,
+          suggestion: `Use "deny" (stop selling) or "continue" (allow oversell).`,
         });
       }
     }

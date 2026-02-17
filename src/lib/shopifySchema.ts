@@ -26,6 +26,11 @@ export const SHOPIFY_CANONICAL_HEADERS: string[] = [
   "Published on online store",
   "Status",
 
+  // Common product/variant boolean fields
+  "Charge tax",
+  "Requires shipping",
+  "Gift card",
+
   // Variant identifiers + options
   "SKU",
   "Barcode",
@@ -41,11 +46,20 @@ export const SHOPIFY_CANONICAL_HEADERS: string[] = [
   "Compare-at price",
 
   // Inventory (single-location quantity + key flags)
+  "Inventory tracker",
   "Inventory quantity",
   "Continue selling when out of stock",
 
+  // Shipping / weight
+  "Weight unit for display",
+  "Weight value (grams)",
+
+  // Fulfillment
+  "Fulfillment service",
+
   // Images
   "Product image URL",
+  "Variant image URL",
   "Image position",
   "Image alt text",
 
@@ -64,6 +78,9 @@ export type CanonKey =
   | "Tags"
   | "Published on online store"
   | "Status"
+  | "Charge tax"
+  | "Requires shipping"
+  | "Gift card"
   | "SKU"
   | "Barcode"
   | "Option1 name"
@@ -74,9 +91,14 @@ export type CanonKey =
   | "Option3 value"
   | "Price"
   | "Compare-at price"
+  | "Inventory tracker"
   | "Inventory quantity"
   | "Continue selling when out of stock"
+  | "Weight unit for display"
+  | "Weight value (grams)"
+  | "Fulfillment service"
   | "Product image URL"
+  | "Variant image URL"
   | "Image position"
   | "Image alt text"
   | "SEO title"
@@ -107,6 +129,9 @@ export const SHOPIFY_HEADER_ALIASES: Record<CanonKey, string[]> = {
   "Tags": ["Tags"],
   "Published on online store": ["Published on online store", "Published"],
   "Status": ["Status"],
+  "Charge tax": ["Charge tax"],
+  "Requires shipping": ["Requires shipping"],
+  "Gift card": ["Gift card"],
   "SKU": ["SKU", "Variant SKU"],
   "Barcode": ["Barcode"],
   "Option1 name": ["Option1 name", "Option1 Name"],
@@ -117,9 +142,14 @@ export const SHOPIFY_HEADER_ALIASES: Record<CanonKey, string[]> = {
   "Option3 value": ["Option3 value", "Option3 Value"],
   "Price": ["Price", "Variant Price"],
   "Compare-at price": ["Compare-at price", "Variant Compare At Price", "Compare at price"],
+  "Inventory tracker": ["Inventory tracker", "Variant Inventory Tracker", "Inventory Tracker"],
   "Inventory quantity": ["Inventory quantity", "Variant Inventory Qty", "Inventory Qty"],
   "Continue selling when out of stock": ["Continue selling when out of stock", "Variant Inventory Policy"],
+  "Weight unit for display": ["Weight unit for display", "Variant Weight Unit", "Weight Unit"],
+  "Weight value (grams)": ["Weight value (grams)", "Variant Grams", "Grams", "Weight (g)", "Weight (grams)"],
+  "Fulfillment service": ["Fulfillment service", "Variant Fulfillment Service", "Fulfillment Service"],
   "Product image URL": ["Product image URL", "Image Src", "Image URL"],
+  "Variant image URL": ["Variant image URL", "Variant Image"],
   "Image position": ["Image position", "Image Position"],
   "Image alt text": ["Image alt text", "Image Alt Text"],
   "SEO title": ["SEO title", "SEO Title"],

@@ -1,6 +1,7 @@
 // src/lib/shopifyOptimizer.ts
 import type { CsvRow } from "./csv";
 import { validateAndFixShopifyBasic, type FixResult, type Issue as BaseIssue } from "./shopifyBasic";
+import { validateShopifyStrict } from "./shopifyStrictValidate";
 
 /**
  * Shopify Import Optimizer
@@ -166,6 +167,10 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
 
   // 0) Pull base issues in, normalize + dedupe (with suppression rule above)
   for (const issue of base.issues ?? []) add(issue);
+
+  // Strict Shopify template checks (adds additional Shopify Help Center aligned rules)
+  // NOTE: validateShopifyStrict may apply safe normalizations (e.g., lowercasing allowlists).
+  for (const issue of validateShopifyStrict(fixedHeaders, fixedRows)) add(issue);
 
   // Emit the cross-product SKU error (and ONLY this, since base warning is suppressed for these rows)
   for (const [sku, entry] of skuMap.entries()) {
