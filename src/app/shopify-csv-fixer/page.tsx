@@ -16,57 +16,65 @@ export const metadata: Metadata = {
   },
 };
 
-const sampleDownloads = [
+type DownloadItem = {
+  name: string;
+  href: string;
+  note: string;
+};
+
+const downloads: DownloadItem[] = [
   {
-    name: "Messy Shopify export 1 (Classic Tee)",
+    name: "Shopify product template (ready-to-fill)",
+    href: "/samples/shopify_product_template.csv",
+    note: "A clean, template-shaped file you can fill in and import.",
+  },
+  {
+    name: "Messy export 1 (Classic Tee)",
     href: "/samples/messy_shopify_export_1_classic_tee.csv",
-    note: "Missing handles, mixed booleans, messy tags, and formatting problems.",
+    note: "Mixed booleans, messy tags, formatting problems, and common import pitfalls.",
   },
   {
-    name: "Messy Shopify export 2 (Duplicate SKU)",
+    name: "Messy export 2 (Duplicate SKU)",
     href: "/samples/messy_shopify_export_2_duplicate_sku.csv",
-    note: "Duplicate SKUs, inconsistent grouping, and import blockers.",
+    note: "Duplicate SKUs and grouping inconsistencies that often cause rejected imports.",
   },
   {
-    name: "Messy Shopify export 3 (Multi-variant edge cases)",
+    name: "Messy export 3 (Multi-variant edge cases)",
     href: "/samples/messy_shopify_export_3_multivariant_edges.csv",
     note: "Option collisions, duplicate variant combinations, and tricky rows.",
   },
   {
     name: "Stress test (5,500 rows)",
     href: "/samples/shopify_stress_test_5500_rows.csv",
-    note: "Large file to test stability, performance, and fix logging.",
-  },
-  {
-    name: "Stress test (fixed output)",
-    href: "/samples/shopify_stress_test_5500_rows_fixed.csv",
-    note: "Optional: compare exported output after safe fixes.",
+    note: "Large file for performance, stability, and fix-log verification.",
   },
 ];
 
-const faq = [
+type FAQItem = { q: string; a: string };
+
+const faq: FAQItem[] = [
   {
     q: "Does my CSV get uploaded to a server?",
-    a: "The core parsing, validation, and edits run in your browser. Exporting generates the cleaned CSV locally. Your subscription status may be checked server-side, but your CSV content does not need to be uploaded for the fixer to work.",
+    a: "The core parsing, validation, and edits run in your browser. Export generates a cleaned CSV locally. Subscription status may be checked server-side, but your CSV content does not need to be uploaded for the fixer to work.",
   },
   {
     q: "What does StriveFormats fix automatically?",
-    a: "Safe, deterministic fixes only: trimming extra spaces, normalizing Shopify booleans, enforcing price formatting, mapping inventory policy values, normalizing tags, and enforcing Shopify’s expected header names and export order. Anything that could change meaning is flagged for review.",
+    a: "Safe, deterministic fixes only: trimming extra spaces, normalizing Shopify booleans, enforcing price formatting, mapping inventory policy values, normalizing tags, and enforcing Shopify’s expected headers and export order. Anything that could change meaning is flagged for manual review.",
   },
   {
     q: "What does StriveFormats refuse to auto-fix?",
-    a: "Anything that requires business judgement: choosing a new handle in a conflict, inventing option values, selecting product titles/vendors, or guessing images. Those are flagged so you can decide before export.",
+    a: "Anything that requires business judgement: choosing a new handle in a conflict, inventing option values, selecting titles/vendors, or guessing images. Those issues are flagged so you decide before export.",
   },
   {
     q: "Why does Shopify reject CSVs that look fine in Excel?",
-    a: "Many failures are cross-row: duplicate handles that do not represent valid variants, duplicate option combinations under the same handle, duplicate SKUs across products, and inconsistent variant structure. Excel hides these issues; Shopify enforces them.",
+    a: "Many failures are cross-row rules: duplicate handles that merge products, duplicate option combinations under the same handle, duplicate SKUs across products, and inconsistent variant structure. Excel hides these problems; Shopify enforces them.",
   },
   {
-    q: "Will the exported file match Shopify’s template column order?",
-    a: "Yes. The Shopify preset exports using Shopify’s official header names and a consistent template-shaped column order so you can import directly.",
+    q: "Will the exported file match Shopify’s template order?",
+    a: "Yes. The Shopify preset exports using Shopify’s official header names and a template-shaped header order so you can import directly.",
   },
   {
-    q: "Do you support other formats (WooCommerce, Etsy, eBay, etc.)?",
+    q: "Do you support other formats?",
     a: "Yes. StriveFormats supports multiple preset formats and continues to expand. Shopify is the most hardened preset today.",
   },
 ];
@@ -89,6 +97,11 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle?: string })
 }
 
 export default function ShopifyCsvFixerPage() {
+  // Primary actions
+  const openFixerHref = "/app?preset=shopify_products&exportName=shopify-products";
+  const templatePreviewHref = "/presets/shopify_products";
+  const presetsHref = "/presets";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -103,10 +116,6 @@ export default function ShopifyCsvFixerPage() {
       priceCurrency: "USD",
     },
   };
-
-  const openFixerHref = "/app?preset=shopify_products&exportName=shopify-products";
-  const templatePreviewHref = "/presets/shopify_products";
-  const presetsHref = "/presets";
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -124,15 +133,14 @@ export default function ShopifyCsvFixerPage() {
         <h1 className="mt-4 text-3xl font-semibold text-[var(--text)]">Shopify CSV Fixer</h1>
 
         <p className="mt-3 text-base text-[var(--muted)]">
-          Shopify CSV imports fail for reasons that are easy to miss in spreadsheets: invalid booleans, inconsistent
-          pricing formats, variant rows that don’t agree with each other, duplicate option combinations, duplicate SKUs,
-          and “handle collisions” where multiple products accidentally share the same handle.
+          Shopify imports fail for reasons that are easy to miss in spreadsheets: invalid booleans, inconsistent pricing formats,
+          variant rows that don’t agree with each other, duplicate option combinations, duplicate SKUs, and handle collisions where
+          multiple products accidentally share the same handle.
         </p>
 
         <p className="mt-3 text-base text-[var(--muted)]">
-          StriveFormats is built to clean, standardize, and validate your Shopify Products CSV before you import. It
-          auto-fixes only safe issues and clearly flags anything risky, so you can export an import-ready CSV with
-          confidence.
+          StriveFormats helps you clean, standardize, and validate your Shopify Products CSV before import. It auto-fixes only safe issues and
+          flags anything risky so you can export an import-ready CSV with confidence.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -151,65 +159,71 @@ export default function ShopifyCsvFixerPage() {
 
         <div className="mt-4 flex flex-wrap gap-6 text-xs text-[var(--muted)]">
           <span>Files processed locally</span>
-          <span>No forced signup</span>
+          <span>Safe auto-fixes only</span>
           <span>Export import-ready CSV</span>
         </div>
       </section>
 
-      {/* QUICK VALUE GRID */}
+      {/* VALUE GRID */}
       <section className="mt-10 grid gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <SectionTitle
-            title="Common Shopify import problems (and what we do)"
-            subtitle="These are the issues that routinely cause failed imports or partial imports."
+            title="Common Shopify import problems"
+            subtitle="These are the issues that most commonly cause failed imports or partial imports."
           />
           <ul className="mt-4 space-y-2 text-sm text-[var(--muted)]">
             <li>
-              <strong className="text-[var(--text)]">Published and boolean fields:</strong> normalized to strict TRUE/FALSE.
+              <strong className="text-[var(--text)]">Booleans and Published values:</strong> normalized to strict TRUE/FALSE.
             </li>
             <li>
               <strong className="text-[var(--text)]">Inventory policy:</strong> validated and mapped to Shopify-safe meaning.
             </li>
             <li>
-              <strong className="text-[var(--text)]">Pricing formats:</strong> currency symbols, commas, whitespace, and decimals standardized.
+              <strong className="text-[var(--text)]">Pricing formats:</strong> symbols, commas, whitespace, and decimals standardized.
             </li>
             <li>
-              <strong className="text-[var(--text)]">Required headers:</strong> ensured so export matches Shopify’s expected template shape.
+              <strong className="text-[var(--text)]">Variant grouping:</strong> cross-row checks for broken variant structure.
             </li>
             <li>
-              <strong className="text-[var(--text)]">Variant grouping:</strong> cross-row checks for broken variant structures and collisions.
+              <strong className="text-[var(--text)]">Options:</strong> detects duplicate option combinations under the same handle.
             </li>
             <li>
-              <strong className="text-[var(--text)]">Options:</strong> detects duplicate option combinations and inconsistent Option1/2/3 rules.
+              <strong className="text-[var(--text)]">Images:</strong> validates URLs and flags common image row problems.
             </li>
             <li>
-              <strong className="text-[var(--text)]">Images:</strong> validates URLs and flags common image row issues.
-            </li>
-            <li>
-              <strong className="text-[var(--text)]">SEO:</strong> surfaces missing/duplicate fields that hurt listings.
+              <strong className="text-[var(--text)]">SEO basics:</strong> flags missing/duplicate text fields that hurt listings.
             </li>
           </ul>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href={openFixerHref} className="rgb-btn">
+              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Fix my file</span>
+            </Link>
+            <Link href={templatePreviewHref} className="rg-btn">
+              See columns
+            </Link>
+          </div>
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <SectionTitle
-            title="What you get inside the fixer"
-            subtitle="Designed for trust: it shows the why, the risk, and exactly what changed."
+            title="What you get in StriveFormats"
+            subtitle="Designed for trust: it shows what changed, why it matters, and what still needs review."
           />
           <ul className="mt-4 space-y-2 text-sm text-[var(--muted)]">
-            <li>Import confidence score and category breakdown (structure, variants, pricing, inventory, images, SEO)</li>
-            <li>Safe auto-fixes applied instantly (with a downloadable fix log)</li>
-            <li>Issues table with manual edits for risky cells (you choose final values)</li>
+            <li>Import confidence score with category breakdown</li>
+            <li>Safe auto-fixes applied instantly with a downloadable fix log</li>
+            <li>Issues table with manual edits for risky cells (you decide final values)</li>
             <li>Pinned blockers so you can fix import-stoppers first</li>
-            <li>Export that produces Shopify-template-shaped CSV output</li>
+            <li>Export that enforces Shopify template headers and order</li>
           </ul>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={openFixerHref} className="rg-btn">
-              Try it now
+              Open the fixer
             </Link>
-            <Link href={templatePreviewHref} className="rg-btn">
-              See the template
+            <Link href={presetsHref} className="rg-btn">
+              Browse presets
             </Link>
           </div>
         </div>
@@ -218,12 +232,12 @@ export default function ShopifyCsvFixerPage() {
       {/* DOWNLOADS */}
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <SectionTitle
-          title="Download messy Shopify CSV examples"
-          subtitle="Use these to validate that the Shopify preset, fix log, and export behavior match real-world edge cases."
+          title="Download Shopify CSV examples"
+          subtitle="Use these to verify behavior, test edge cases, and confirm export results."
         />
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {sampleDownloads.map((d) => (
+          {downloads.map((d) => (
             <a
               key={d.href}
               href={d.href}
@@ -245,17 +259,13 @@ export default function ShopifyCsvFixerPage() {
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">View template preview</span>
           </Link>
         </div>
-
-        <p className="mt-4 text-xs text-[var(--muted)]">
-          Tip: If a download link 404s, ensure you uploaded the sample CSVs into <code>public/samples/</code>.
-        </p>
       </section>
 
-      {/* BEFORE / AFTER */}
+      {/* BEFORE / AFTER (SEO DETAILS) */}
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <SectionTitle
-          title="Before and after: what safe fixes look like"
-          subtitle="The Shopify preset only auto-fixes deterministic changes. Anything that could change meaning is flagged for review."
+          title="Before and after: safe fixes"
+          subtitle="Auto-fixes only apply to deterministic formatting and schema rules. Anything risky is flagged for review."
         />
 
         <div className="mt-6 grid gap-6 md:grid-cols-2">
@@ -264,70 +274,66 @@ export default function ShopifyCsvFixerPage() {
             <p className="mt-2 text-sm text-[var(--muted)]">
               Shopify expects strict TRUE/FALSE in multiple columns. CSVs often contain true/false, yes/no, 1/0, or blanks.
             </p>
-            <div className="mt-3 text-xs text-[var(--muted)]">Example</div>
-            <pre className="mt-2 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
+            <pre className="mt-3 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
 {`Published on online store
-true  →  TRUE
-False →  FALSE
-""    →  "" (left blank if unknown)`}
+true   → TRUE
+False  → FALSE
+""     → "" (left blank if unknown)`}
             </pre>
           </div>
 
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Pricing normalization</div>
+            <div className="text-sm font-semibold text-[var(--text)]">Pricing formats</div>
             <p className="mt-2 text-sm text-[var(--muted)]">
               Prices commonly arrive with currency symbols, commas, or extra whitespace. Shopify expects numeric formats.
             </p>
-            <div className="mt-3 text-xs text-[var(--muted)]">Example</div>
-            <pre className="mt-2 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
+            <pre className="mt-3 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
 {`Variant Price
-"$19.9 "   →  19.90
-"1,299.00" →  1299.00
-"  15"     →  15.00`}
+"$19.9 "    → 19.90
+"1,299.00"  → 1299.00
+"  15"      → 15.00`}
             </pre>
           </div>
 
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
             <div className="text-sm font-semibold text-[var(--text)]">Inventory policy mapping</div>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Legacy policies from exports or third-party tools are mapped to a Shopify-safe meaning.
+              Legacy policy values are mapped to Shopify’s meaning (continue selling true/false).
             </p>
-            <div className="mt-3 text-xs text-[var(--muted)]">Example</div>
-            <pre className="mt-2 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
+            <pre className="mt-3 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
 {`Variant Inventory Policy
-deny      →  Continue selling = FALSE
-continue  →  Continue selling = TRUE`}
+deny     → Continue selling = FALSE
+continue → Continue selling = TRUE`}
             </pre>
           </div>
 
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
             <div className="text-sm font-semibold text-[var(--text)]">Template-shaped export</div>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Even if your CSV has missing columns or wrong header order, export enforces Shopify’s expected headers and order.
+              Even if your CSV has missing headers or wrong order, export enforces Shopify’s expected header names and order.
             </p>
-            <div className="mt-3 text-xs text-[var(--muted)]">Result</div>
-            <pre className="mt-2 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
-{`Export header matches Shopify template order
-Missing required headers added as blank columns (no data invented)`}
+            <pre className="mt-3 overflow-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--text)]">
+{`Export matches Shopify template header order
+Missing required headers added as blank columns
+(no data invented)`}
             </pre>
           </div>
         </div>
       </section>
 
-      {/* WHY SHOPIFY IMPORTS FAIL (SEO HEAVY) */}
+      {/* WHY SHOPIFY IMPORTS FAIL (LONG FORM SEO) */}
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <SectionTitle
           title="Why Shopify CSV imports fail"
-          subtitle="This section is intentionally detailed. These are the real rules that trip people up."
+          subtitle="These rules are the real reason imports fail even when rows look fine in a spreadsheet."
         />
 
         <div className="mt-6 space-y-6 text-sm text-[var(--muted)]">
           <div>
             <div className="text-sm font-semibold text-[var(--text)]">Handle grouping is cross-row</div>
             <p className="mt-2">
-              Shopify uses the Handle column to group rows into a single product with variants. If two different products accidentally share
-              a handle, Shopify can merge them, overwrite variants, or reject combinations. StriveFormats detects collisions and flags them
-              clearly.
+              Shopify groups variant rows by Handle. If two different products share a handle, Shopify can merge them, overwrite variants,
+              or reject combinations. StriveFormats checks handle grouping consistency and flags collisions clearly.
             </p>
           </div>
 
@@ -335,31 +341,31 @@ Missing required headers added as blank columns (no data invented)`}
             <div className="text-sm font-semibold text-[var(--text)]">Variant option combinations must be unique</div>
             <p className="mt-2">
               Under a single handle, the combination of Option1 Value, Option2 Value, and Option3 Value must be unique. Duplicate combinations
-              are a frequent “looks fine in Excel” issue that Shopify rejects. The fixer checks this across the entire group, not just per row.
+              are a frequent import blocker. The Shopify preset checks this across the entire handle group.
             </p>
           </div>
 
           <div>
             <div className="text-sm font-semibold text-[var(--text)]">SKUs collide across products</div>
             <p className="mt-2">
-              If your workflow expects SKUs to be unique, duplicated SKUs across different handles are a serious operational problem. Some stores
-              also run apps that require SKU uniqueness. StriveFormats flags duplicates so you can decide the correct SKU assignment.
+              Duplicate SKUs across different products cause fulfillment and inventory problems, and some Shopify apps require uniqueness.
+              StriveFormats flags duplicates so you can fix them intentionally.
             </p>
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-[var(--text)]">Prices need strict numeric formatting</div>
+            <div className="text-sm font-semibold text-[var(--text)]">Prices must be numeric (no symbols/commas)</div>
             <p className="mt-2">
-              Shopify expects numeric values for price columns. Currency symbols, commas, and hidden whitespace cause imports to fail or behave
-              unpredictably. StriveFormats standardizes prices and flags outliers that should be reviewed.
+              Shopify expects strict numeric formats. Currency symbols, commas, and invisible whitespace cause import errors or incorrect values.
+              StriveFormats standardizes formatting and flags outliers.
             </p>
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-[var(--text)]">Images rely on consistent row logic</div>
+            <div className="text-sm font-semibold text-[var(--text)]">Image URL rules are stricter than they look</div>
             <p className="mt-2">
-              Shopify image rows have rules around URLs, positions, and association with variants. Messy exports often include invalid URLs, bad
-              schemes, or duplicates. StriveFormats validates URLs and flags patterns that commonly break import expectations.
+              Broken schemes, invalid URLs, and inconsistent image rows cause partial imports. The Shopify preset validates URLs and flags patterns
+              that commonly break import expectations.
             </p>
           </div>
         </div>
@@ -376,85 +382,29 @@ Missing required headers added as blank columns (no data invented)`}
 
       {/* HOW IT WORKS */}
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <SectionTitle title="How the Shopify preset works" subtitle="Simple workflow. Strict validation. Safe fixes only." />
+        <SectionTitle title="How it works" subtitle="Upload → validate + safe fixes → export." />
 
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
             <div className="text-sm font-semibold text-[var(--text)]">1 Upload</div>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Upload a Shopify Products CSV. StriveFormats reads headers, rows, and variant groups.
-            </p>
+            <p className="mt-2 text-sm text-[var(--muted)]">Upload a Shopify Products CSV. StriveFormats reads headers, rows, and variant groups.</p>
           </div>
 
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
             <div className="text-sm font-semibold text-[var(--text)]">2 Validate + standardize</div>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              The validator checks structure, variants, options, pricing, inventory, images, and SEO. Safe fixes apply automatically.
+              Checks structure, variants, options, pricing, inventory, images, and SEO. Applies safe fixes automatically and logs changes.
             </p>
           </div>
 
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
             <div className="text-sm font-semibold text-[var(--text)]">3 Export</div>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Export a Shopify-shaped CSV with consistent formatting, plus a fix log you can keep for records.
-            </p>
+            <p className="mt-2 text-sm text-[var(--muted)]">Export a template-shaped CSV that imports cleanly into Shopify.</p>
           </div>
-        </div>
-
-        <p className="mt-6 text-sm text-[var(--muted)]">
-          Important: Shopify import success is not just about a single row. Many failures are cross-row. That’s why the Shopify preset
-          groups variants and checks the full product set for collisions and inconsistencies.
-        </p>
-      </section>
-
-      {/* PLAN GUIDANCE */}
-      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <SectionTitle
-          title="Which plan do I need?"
-          subtitle="Start free. Upgrade if you need higher usage, advanced controls, or saved reusable rules."
-        />
-
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Free</div>
-            <ul className="mt-3 space-y-2 text-sm text-[var(--muted)]">
-              <li>Use Shopify preset</li>
-              <li>Safe auto-fixes</li>
-              <li>Manual cell edits</li>
-              <li>Export fixed CSV</li>
-            </ul>
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Basic</div>
-            <ul className="mt-3 space-y-2 text-sm text-[var(--muted)]">
-              <li>Higher monthly exports</li>
-              <li>Best for regular imports</li>
-              <li>More breathing room for revisions</li>
-            </ul>
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Advanced</div>
-            <ul className="mt-3 space-y-2 text-sm text-[var(--muted)]">
-              <li>Custom Formats (save reusable rules)</li>
-              <li>Best for agencies and high volume</li>
-              <li>Repeat workflow optimized</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/#pricing" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">View pricing</span>
-          </Link>
-          <Link href="/formats" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
-          </Link>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ + BOTTOM CTAS (FIXED) */}
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <SectionTitle title="FAQ" subtitle="Quick answers to common questions." />
 
@@ -467,7 +417,7 @@ Missing required headers added as blank columns (no data invented)`}
           ))}
         </div>
 
-        {/* FIXED: bottom CTAs to match app styling */}
+        {/* Buttons here are now consistent with the rest of the app */}
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href={openFixerHref} className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Fix my Shopify CSV</span>
@@ -480,52 +430,6 @@ Missing required headers added as blank columns (no data invented)`}
           <Link href={templatePreviewHref} className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">View template preview</span>
           </Link>
-        </div>
-      </section>
-
-      {/* INTERNAL LINKS */}
-      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <SectionTitle
-          title="Explore more in StriveFormats"
-          subtitle="If you’re cleaning CSVs for other platforms, start with presets or build reusable rules with Custom Formats."
-        />
-
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Preset formats</div>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Open the fixer preconfigured for other import targets.
-            </p>
-            <div className="mt-4">
-              <Link href="/presets" className="rg-btn">
-                Browse presets
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Custom Formats</div>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Save reusable column templates and rules for repeat work.
-            </p>
-            <div className="mt-4">
-              <Link href="/formats" className="rg-btn">
-                Open Custom Formats
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">Start fixing now</div>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Upload a file, fix the safe issues automatically, then export.
-            </p>
-            <div className="mt-4">
-              <Link href="/app" className="rg-btn">
-                Open CSV Fixer
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
     </main>
