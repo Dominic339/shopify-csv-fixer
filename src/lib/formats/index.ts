@@ -1,23 +1,11 @@
 import type { CsvFormat } from "./types";
 import { generalCsvFormat } from "./builtins/general";
 import { shopifyProductsFormat } from "./builtins/shopifyProducts";
-import {
-  formatPackEcommerce,
-  formatPackMarketing,
-  formatPackCrm,
-  formatPackAccounting,
-  formatPackShipping,
-  formatPackSupport,
-} from "./builtins/packs";
+import { formatPackEcommerce } from "./builtins/packs";
 
-export const builtinPackFormats: CsvFormat[] = [
-  ...formatPackEcommerce,
-  ...formatPackMarketing,
-  ...formatPackCrm,
-  ...formatPackAccounting,
-  ...formatPackShipping,
-  ...formatPackSupport,
-];
+// Ecommerce-first scope: only ship Ecommerce formats in the initial release.
+// (Other category packs remain defined in packs.ts for later expansion.)
+export const builtinPackFormats: CsvFormat[] = [...formatPackEcommerce];
 
 const BUILTINS: CsvFormat[] = [generalCsvFormat, shopifyProductsFormat, ...builtinPackFormats];
 

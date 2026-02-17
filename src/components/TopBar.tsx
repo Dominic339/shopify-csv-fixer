@@ -16,144 +16,106 @@ type SubStatus = {
 };
 
 // Minimal local types to avoid depending on supabase-js exported types.
+// These are enough for what TopBar uses.
 type SupabaseUser = {
   email?: string | null;
 };
 
-type SupabaseSession =
-  | {
-      user?: SupabaseUser | null;
-    }
-  | null;
+type SupabaseSession = {
+  user?: SupabaseUser | null;
+};
 
-export default function TopBar() {
-  const supabase = createClient();
+export function TopBar() {
+  const supabase = useMemo(() => createClient(), []);
 
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState<string | null>(null);
-  const [sub, setSub] = useState<SubStatus | null>(null);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
-
+  // ✅ FIX: ThemeProvider exposes "toggle", not "toggleTheme"
   const { theme, toggle } = useTheme();
 
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      try {
-        const res = await supabase.auth.getUser();
-        const userEmail = (res as any)?.data?.user?.email ?? (res as any)?.user?.email ?? null;
-        if (!mounted) return;
-        setEmail(userEmail);
-      } catch {
-        if (!mounted) return;
-        setEmail(null);
-      }
-    })();
-
-    const { data: authSub } = supabase.auth.onAuthStateChange((_event: unknown, session: SupabaseSession) => {
-      setEmail(session?.user?.email ?? null);
-    });
-
-    return () => {
-      mounted = false;
-      authSub.subscription.unsubscribe();
-    };
-  }, [supabase]);
+  const [sub, setSub] = useState<SubStatus | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
+    async function load() {
       try {
-        const r = await fetch("/api/subscription/status", { cache: "no-store" });
-        const j = (await r.json()) as SubStatus;
-        if (!cancelled) setSub(j);
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session as SupabaseSession | null;
+
+        if (!session?.user) {
+          if (!cancelled) setSub({ signedIn: false, plan: "free", status: "signed_out" });
+          return;
+        }
+
+        const res = await fetch("/api/subscription", { cache: "no-store" }).catch(() => null);
+        if (!res || !res.ok) {
+          if (!cancelled) setSub({ signedIn: true, plan: "free", status: "unknown" });
+          return;
+        }
+
+        const json = (await res.json()) as Partial<SubStatus>;
+        if (!cancelled) {
+          setSub({
+            signedIn: Boolean(json?.signedIn ?? true),
+            plan: (json?.plan as SubStatus["plan"]) ?? "free",
+            status: (json?.status as string) ?? "ok",
+          });
+        }
       } catch {
-        if (!cancelled) setSub(null);
+        if (!cancelled) setSub({ signedIn: false, plan: "free", status: "error" });
       }
-    })();
+    }
+
+    load();
 
     return () => {
       cancelled = true;
     };
-  }, [email]);
+  }, [supabase]);
 
-  const isAdvanced = useMemo(() => {
-    return !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
+  const canAccessCustomFormats = useMemo(() => {
+    if (ALLOW_CUSTOM_FORMATS_FOR_ALL) return true;
+    return sub?.plan === "advanced";
   }, [sub]);
 
-  const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvanced;
+  function goToPricing() {
+    const el = document.getElementById("pricing");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.location.href = "/#pricing";
+    }
+    setOpen(false);
+  }
 
   async function signOut() {
     await supabase.auth.signOut();
-    setOpen(false);
+    window.location.href = "/";
   }
-
-  function goToPricing() {
-    setOpen(false);
-
-    if (typeof window === "undefined") return;
-
-    // If we're on home, scroll to pricing section
-    if (window.location.pathname === "/" || window.location.pathname === "") {
-      const el = document.getElementById("pricing");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.location.hash = "pricing";
-      }
-      return;
-    }
-
-    // Otherwise just navigate to home#pricing without using router.push
-    window.location.href = "/#pricing";
-  }
-
-  const logoSrc = theme === "dark" ? "/StriveFormatsDark.png" : "/StriveFormatsLight.png";
 
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
-      {/* Taller bar so logo can actually fill it */}
-      <div className="mx-auto flex h-20 md:h-24 max-w-7xl items-center justify-between px-6">
-        {/* Logo block */}
-        <Link
-          href="/"
-          className="flex h-full items-center"
-          onClick={() => setOpen(false)}
-          aria-label="StriveFormats Home"
-        >
-          {/* Make the logo box tall + wide so it reads like a real brand mark */}
-          <div className="relative h-full w-[260px] sm:w-[320px] md:w-[420px]">
-            <Image
-              src={logoSrc}
-              alt="StriveFormats"
-              fill
-              priority
-              // Fill the TopBar top-to-bottom, keep aspect ratio, align left for better “brand” feel
-              className="object-contain object-left"
-              sizes="(max-width: 640px) 260px, (max-width: 768px) 320px, 420px"
-            />
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/CSV Nest Logo.png" alt="StriveFormats" width={36} height={36} priority />
+          <div className="flex flex-col leading-tight">
+            <div className="text-sm font-semibold text-white">StriveFormats</div>
+            <div className="text-xs text-white/70">CSV validation and safe auto-fixes</div>
           </div>
         </Link>
 
-        <div className="relative flex items-center gap-3">
-          <button
-            type="button"
-            onClick={toggle}
-            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
-            aria-label="Toggle theme"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? "Light mode" : "Dark mode"}
-          </button>
-
-          {/* Keep your existing nav/buttons; just make them feel “full height” visually */}
-          <Link href="/app" className="rgb-btn" onClick={() => setOpen(false)}>
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
+        {/* Desktop */}
+        <div className="hidden items-center gap-2 md:flex">
+          <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Ecommerce CSV Fixer</span>
           </Link>
 
-          <Link href="/presets" className="rgb-btn" onClick={() => setOpen(false)}>
+          <Link href="/app" className="rgb-btn">
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Open Fixer</span>
+          </Link>
+
+          <Link href="/presets" className="rgb-btn">
             <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Preset Formats</span>
           </Link>
 
@@ -162,112 +124,128 @@ export default function TopBar() {
           </button>
 
           {canAccessCustomFormats ? (
-            <Link href="/formats" className="rgb-btn" onClick={() => setOpen(false)}>
+            <Link href="/formats" className="rgb-btn">
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
             </Link>
           ) : (
             <button
               type="button"
-              className="rgb-btn opacity-60"
+              className="rgb-btn"
               onClick={() => setUpgradeOpen(true)}
-              aria-label="Custom Formats (Advanced)"
+              aria-label="Custom Formats require upgrade"
             >
               <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="h-10 w-10 md:h-11 md:w-11 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
-            aria-label="Account menu"
-          >
-            {email ? email[0]?.toUpperCase() : "?"}
+          <button type="button" className="rgb-btn" onClick={toggle} aria-label="Toggle theme">
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </span>
           </button>
 
-          {open ? (
-            <div
-              className="absolute right-0 top-12 md:top-14 w-64 overflow-hidden rounded-2xl border"
-              style={{
-                background: "var(--popover)",
-                borderColor: "var(--popover-border)",
-              }}
-            >
-              <div className="px-4 py-3">
-                <div className="text-xs text-[var(--muted)]">{email ? "Signed in" : "Guest"}</div>
-                <div className="truncate text-sm font-semibold text-[var(--text)]">{email ?? "Not signed in"}</div>
-              </div>
+          {sub?.signedIn ? (
+            <>
+              <Link href="/profile" className="rgb-btn">
+                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Profile</span>
+              </Link>
+              <button type="button" className="rgb-btn" onClick={signOut}>
+                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign out</span>
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="rgb-btn">
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign in</span>
+            </Link>
+          )}
+        </div>
 
-              <div className="border-t" style={{ borderColor: "var(--popover-border)" }} />
-
-              <div className="p-2">
-                {email ? (
-                  <Link
-                    className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                    href="/profile"
-                    onClick={() => setOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                ) : null}
-
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/"
-                  onClick={() => setOpen(false)}
-                >
-                  Home
-                </Link>
-
-                <Link
-                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  href="/presets"
-                  onClick={() => setOpen(false)}
-                >
-                  Preset Formats
-                </Link>
-
-                <button
-                  type="button"
-                  className="mt-1 block w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
-                  onClick={goToPricing}
-                >
-                  View pricing
-                </button>
-
-                <div className="mt-2 border-t" style={{ borderColor: "var(--popover-border)" }} />
-
-                {email ? (
-                  <button
-                    className="mt-2 w-full rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                    onClick={signOut}
-                    type="button"
-                  >
-                    Sign out
-                  </button>
-                ) : (
-                  <Link
-                    className="mt-2 block w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-center text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface)]/80"
-                    href="/login"
-                    onClick={() => setOpen(false)}
-                  >
-                    Sign in
-                  </Link>
-                )}
-              </div>
-            </div>
-          ) : null}
+        {/* Mobile */}
+        <div className="flex items-center gap-2 md:hidden">
+          <button type="button" className="rgb-btn" onClick={() => setOpen((v) => !v)} aria-label="Open menu">
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">{open ? "Close" : "Menu"}</span>
+          </button>
         </div>
       </div>
 
+      {open ? (
+        <div className="border-t border-white/10 bg-black/60 backdrop-blur md:hidden">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3">
+            <Link href="/ecommerce-csv-fixer" className="rgb-btn" onClick={() => setOpen(false)}>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Ecommerce CSV Fixer</span>
+            </Link>
+
+            <Link href="/app" className="rgb-btn" onClick={() => setOpen(false)}>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Open Fixer</span>
+            </Link>
+
+            <Link href="/presets" className="rgb-btn" onClick={() => setOpen(false)}>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Preset Formats</span>
+            </Link>
+
+            <button type="button" onClick={goToPricing} className="rgb-btn" aria-label="View pricing">
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">View pricing</span>
+            </button>
+
+            {canAccessCustomFormats ? (
+              <Link href="/formats" className="rgb-btn" onClick={() => setOpen(false)}>
+                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  setUpgradeOpen(true);
+                }}
+                className="rgb-btn"
+                aria-label="Custom Formats require upgrade"
+              >
+                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="rgb-btn"
+              onClick={() => {
+                toggle();
+                setOpen(false);
+              }}
+              aria-label="Toggle theme"
+            >
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
+                {theme === "dark" ? "Light mode" : "Dark mode"}
+              </span>
+            </button>
+
+            {sub?.signedIn ? (
+              <>
+                <Link href="/profile" className="rgb-btn" onClick={() => setOpen(false)}>
+                  <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Profile</span>
+                </Link>
+                <button type="button" className="rgb-btn" onClick={signOut}>
+                  <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign out</span>
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className="rgb-btn" onClick={() => setOpen(false)}>
+                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign in</span>
+              </Link>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       <UpgradeModal
         open={upgradeOpen}
-        title="Advanced only"
+        title="Upgrade required"
         message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
         signedIn={Boolean(sub?.signedIn)}
-        upgradePlan="advanced"
         onClose={() => setUpgradeOpen(false)}
       />
     </header>
   );
 }
+
+export default TopBar;
