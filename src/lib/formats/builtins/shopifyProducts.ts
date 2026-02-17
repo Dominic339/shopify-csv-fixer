@@ -1,39 +1,44 @@
-import type { CsvFormat, CsvRow, CsvIssue, CsvFixResult } from "../types";
-import { validateAndFixShopifyBasic } from "@/lib/shopifyBasic";
+// src/lib/formats/builtins/shopifyProducts.ts
+import type { CsvFormat } from "../types";
+import type { CsvRow } from "@/lib/csv";
+import { validateAndFixShopifyOptimizer } from "@/lib/shopifyOptimizer";
 
 export const shopifyProductsFormat: CsvFormat = {
   id: "shopify_products",
-  name: "Shopify Products",
-  description: "Fixes common product import issues and exports a Shopify-ready CSV.",
+  name: "Shopify Import Optimizer",
+  description:
+    "Strict Shopify schema validation + safe auto-fixes for products, variants, pricing, inventory, images, and SEO.",
   category: "Ecommerce",
   source: "builtin",
-  apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
-    const result = validateAndFixShopifyBasic(headers, rows);
 
-    const issues: CsvIssue[] = (result.issues ?? []).map((it: any) => {
-      const rowIndex =
-        typeof it.rowIndex === "number"
-          ? it.rowIndex
-          : typeof it.row === "number"
-            ? Math.max(0, it.row - 1)
-            : 0;
+  apply: (headers: string[], rows: CsvRow[]) => {
+    const res = validateAndFixShopifyOptimizer(headers ?? [], rows ?? []);
 
-      const column = (it.column ?? it.field ?? "").toString() || (headers[0] ?? "");
-      const severity = ((it.severity ?? it.level ?? "error") as any) as "error" | "warning" | "info";
+    const issues = (res.issues ?? []).map((i: any) => {
+      const row1 =
+        typeof i.row === "number"
+          ? i.row
+          : typeof i.rowIndex === "number"
+            ? i.rowIndex + 1
+            : undefined;
+
+      const rowIndex = typeof row1 === "number" ? Math.max(0, row1 - 1) : -1;
 
       return {
-        rowIndex,
-        column,
-        message: it.message ?? "Issue",
-        severity,
+        rowIndex, // -1 = file-level
+        column: i.column ?? "(file)",
+        message: i.message,
+        severity: (i.severity ?? i.level ?? "error") as "error" | "warning" | "info",
+        code: i.code,
+        suggestion: i.suggestion,
       };
     });
 
     return {
-      fixedHeaders: result.fixedHeaders ?? headers,
-      fixedRows: result.fixedRows ?? rows,
+      fixedHeaders: res.fixedHeaders ?? (headers ?? []),
+      fixedRows: res.fixedRows ?? (rows ?? []),
       issues,
-      fixesApplied: result.fixesApplied ?? [],
+      fixesApplied: res.fixesApplied ?? [],
     };
   },
 };

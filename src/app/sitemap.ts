@@ -1,26 +1,33 @@
-import { MetadataRoute } from "next";
+// src/app/sitemap.ts
+import type { MetadataRoute } from "next";
+import { getPresetFormats } from "../lib/presets";
+import { getEcommercePlatforms } from "../lib/ecommercePlatforms";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://csv-nest.vercel.app";
+  const baseUrl = "https://striveformats.com";
 
-  return [
-    {
-      url: base,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1
-    },
-    {
-      url: `${base}/app`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9
-    },
-    {
-      url: `${base}/formats`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8
-    }
+  const core: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/`, changeFrequency: "weekly", priority: 1 },
+    { url: `${baseUrl}/presets`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/formats`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/ecommerce`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/pricing`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/about`, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/privacy`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/terms`, changeFrequency: "yearly", priority: 0.2 },
   ];
+
+  const ecommercePages: MetadataRoute.Sitemap = getEcommercePlatforms().map((platform) => ({
+    url: `${baseUrl}${platform.href}`,
+    changeFrequency: "monthly",
+    priority: 0.75,
+  }));
+
+  const presetPages: MetadataRoute.Sitemap = getPresetFormats().map((preset) => ({
+    url: `${baseUrl}/presets/${encodeURIComponent(preset.id)}`,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...core, ...ecommercePages, ...presetPages];
 }

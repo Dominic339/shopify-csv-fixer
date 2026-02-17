@@ -1,106 +1,34 @@
+// src/lib/formats/engine.ts
 import type { CsvFixResult, CsvRow, CsvIssue, CsvFormat } from "./types";
 
 export function applyFormatToParsedCsv(headers: string[], rows: CsvRow[], format: CsvFormat): CsvFixResult {
-  // Step 1: Base cleanup (very safe) before any format logic runs
-  const pre = normalizeRowsBase(headers, rows);
+  const res = format.apply(headers, rows);
 
-  // Step 2: Let the selected format do its mapping/validation/reordering
-  const mid = format.apply(pre.fixedHeaders ?? headers, pre.fixedRows ?? rows);
+  // ✅ Enforce strict Shopify template output (headers + order + key mappings)
+  if (format.id === "shopify_products") {
+    const inHeaders = res.fixedHeaders ?? headers;
+    const inRows = res.fixedRows ?? rows;
 
-  // Step 3: Apply universal cleanup again on the final shape so new / reordered columns also benefit
-  const post = normalizeRowsUniversal(mid.fixedHeaders ?? pre.fixedHeaders ?? headers, mid.fixedRows ?? pre.fixedRows ?? rows);
+    const enforced = enforceShopifyOfficialTemplate(inHeaders, inRows);
+    const remappedIssues = remapIssuesToShopifyTemplate(res.issues ?? [], inHeaders);
 
-  // Merge results
-  const mergedFixes = mergeFixes(pre.fixesApplied ?? [], mid.fixesApplied ?? [], post.fixesApplied ?? []);
-
-  return {
-    fixedHeaders: post.fixedHeaders ?? mid.fixedHeaders ?? pre.fixedHeaders ?? headers,
-    fixedRows: post.fixedRows ?? mid.fixedRows ?? pre.fixedRows ?? rows,
-    issues: [...(mid.issues ?? []), ...(post.issues ?? [])],
-    fixesApplied: mergedFixes,
-  };
-}
-
-function mergeFixes(...lists: string[][]) {
-  const out: string[] = [];
-  const seen = new Set<string>();
-  for (const list of lists) {
-    for (const x of list) {
-      const key = x.trim();
-      if (!key) continue;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(x);
-    }
+    return {
+      ...res,
+      fixedHeaders: enforced.headers,
+      fixedRows: enforced.rows,
+      issues: remappedIssues,
+      fixesApplied: [
+        ...(res.fixesApplied ?? []),
+        "Shopify: forced official import template header names + order",
+      ],
+    };
   }
-  return out;
+
+  return res;
 }
 
-function stripInvisibles(s: string) {
-  // NBSP -> space, remove zero-width chars that commonly break imports
-  return s
-    .replace(/\u00A0/g, " ")
-    .replace(/[\u200B-\u200D\uFEFF]/g, "");
-}
-
-function collapseInnerWhitespace(s: string) {
-  // Collapse runs of whitespace inside the string
-  return s.replace(/\s+/g, " ");
-}
-
-function normalizeEmail(s: string) {
-  // Remove spaces and lowercase
-  return s.replace(/\s+/g, "").toLowerCase();
-}
-
-function normalizePhone(s: string) {
-  // Keep leading + if present; strip common separators
-  const trimmed = s.trim();
-  const hasPlus = trimmed.startsWith("+");
-  const digits = trimmed.replace(/[^0-9]/g, "");
-  return hasPlus ? "+" + digits : digits;
-}
-
-function normalizeTags(s: string) {
-  // Split by comma, trim parts, remove empties, join with comma+space
-  const parts = s
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-  return parts.join(", ");
-}
-
-function normalizeBoolean(s: string) {
-  const v = s.trim().toLowerCase();
-  if (v === "true" || v === "t" || v === "yes" || v === "y" || v === "1") return "TRUE";
-  if (v === "false" || v === "f" || v === "no" || v === "n" || v === "0") return "FALSE";
-  return s;
-}
-
-function normalizeNumeric(s: string) {
-  // Remove currency symbols/commas/spaces but keep - and .
-  const cleaned = s.trim().replace(/[,\\s\\$£€¥]/g, "");
-  // If it's not a number-ish string, leave it alone
-  if (!/^[-+]?\\d*(\\.\\d+)?$/.test(cleaned) || cleaned === "" || cleaned === "-" || cleaned === "+") return s.trim();
-  return cleaned;
-}
-
-function keepAllowedChars(s: string, allowed: RegExp, toUpper = false, toLower = false) {
-  let out = s;
-  if (toUpper) out = out.toUpperCase();
-  if (toLower) out = out.toLowerCase();
-  out = out.replace(/\s+/g, "");
-  out = out.replace(allowed, "");
-  return out;
-}
-
-/**
- * Base cleanup:
- * - ensure strings
- * - strip invisible characters
- * - trim
- */
-export function normalizeRowsBase(headers: string[], rows: CsvRow[]) {
+// Safe general cleanup used by multiple formats
+export function normalizeRowsSafe(headers: string[], rows: CsvRow[]) {
   const fixesApplied: string[] = [];
   const fixedRows: CsvRow[] = rows.map((r) => {
     const out: CsvRow = {};
@@ -111,186 +39,286 @@ export function normalizeRowsBase(headers: string[], rows: CsvRow[]) {
     return out;
   });
 
-  let invisCount = 0;
+  // Trim whitespace everywhere (safe default)
   let trimmedCount = 0;
-
   for (const r of fixedRows) {
     for (const h of headers) {
-      const before0 = r[h] ?? "";
-      const before1 = stripInvisibles(before0);
-      if (before1 !== before0) {
-        r[h] = before1;
-        invisCount++;
-      }
-
-      const before2 = r[h] ?? "";
-      const after = before2.trim();
-      if (after !== before2) {
+      const before = r[h] ?? "";
+      const after = (before ?? "").toString().trim();
+      if (after !== before) {
         r[h] = after;
         trimmedCount++;
       }
     }
   }
+  if (trimmedCount) fixesApplied.push("Trimmed whitespace in cells");
 
-  if (invisCount > 0) fixesApplied.push("Removed hidden characters in cells");
-  if (trimmedCount > 0) fixesApplied.push("Trimmed whitespace in cells");
-
-  const issues: CsvIssue[] = [];
-  return { fixedHeaders: headers, fixedRows, issues, fixesApplied };
+  return { fixedRows, fixesApplied };
 }
 
-/**
- * Universal cleanup (Option A):
- * Applies a conservative, format-agnostic cleanup across common column types.
- * This intentionally avoids heavy transformations on free-text columns.
- */
-export function normalizeRowsUniversal(headers: string[], rows: CsvRow[]) {
-  // Start from base cleanup (safe)
-  const base = normalizeRowsBase(headers, rows);
+/* -------------------------------------------
+   Shopify official template enforcement
+-------------------------------------------- */
 
-  const fixedRows = (base.fixedRows ?? rows).map((r) => ({ ...r }));
+const SHOPIFY_OFFICIAL_HEADERS: string[] = [
+  "Title",
+  "URL handle",
+  "Description",
+  "Vendor",
+  "Product category",
+  "Type",
+  "Tags",
+  "Published on online store",
+  "Status",
+  "SKU",
+  "Barcode",
+  "Option1 name",
+  "Option1 value",
+  "Option1 Linked To",
+  "Option2 name",
+  "Option2 value",
+  "Option2 Linked To",
+  "Option3 name",
+  "Option3 value",
+  "Option3 Linked To",
+  "Price",
+  "Compare-at price",
+  "Cost per item",
+  "Charge tax",
+  "Tax code",
+  "Unit price total measure",
+  "Unit price total measure unit",
+  "Unit price base measure",
+  "Unit price base measure unit",
+  "Inventory tracker",
+  "Inventory quantity",
+  "Continue selling when out of stock",
+  "Weight value (grams)",
+  "Weight unit for display",
+  "Requires shipping",
+  "Fulfillment service",
+  "Product image URL",
+  "Image position",
+  "Image alt text",
+  "Variant image URL",
+  "Gift card",
+  "SEO title",
+  "SEO description",
+  "Color (product.metafields.shopify.color-pattern)",
+  "Google Shopping / Google product category",
+  "Google Shopping / Gender",
+  "Google Shopping / Age group",
+  "Google Shopping / Manufacturer part number (MPN)",
+  "Google Shopping / Ad group name",
+  "Google Shopping / Ads labels",
+  "Google Shopping / Condition",
+  "Google Shopping / Custom product",
+  "Google Shopping / Custom label 0",
+  "Google Shopping / Custom label 1",
+  "Google Shopping / Custom label 2",
+  "Google Shopping / Custom label 3",
+  "Google Shopping / Custom label 4",
+];
 
-  let collapsedCount = 0;
-  let emailCount = 0;
-  let phoneCount = 0;
-  let tagsCount = 0;
-  let boolCount = 0;
-  let numericCount = 0;
-  let skuCount = 0;
-  let handleCount = 0;
+// Legacy → Official mapping (common Shopify “old template” / variant style)
+const SHOPIFY_LEGACY_TO_OFFICIAL: Record<string, string> = {
+  // handle/body/published
+  "Handle": "URL handle",
+  "URL handle": "URL handle",
+  "Body (HTML)": "Description",
+  "Description": "Description",
+  "Published": "Published on online store",
+  "Published on online store": "Published on online store",
 
-  const headerKinds = headers.map((h) => {
-    const n = h.trim().toLowerCase();
+  // variant identity
+  "Variant SKU": "SKU",
+  "SKU": "SKU",
+  "Variant Barcode": "Barcode",
+  "Barcode": "Barcode",
 
-    const isEmail = n.includes("email");
-    const isPhone = n.includes("phone") || n.includes("mobile") || n.includes("tel");
-    const isTags = n === "tags" || n.includes("tag");
-    const isSku = n.includes("sku");
-    const isHandle = n.includes("handle") || n.includes("slug");
+  // options
+  "Option1 Name": "Option1 name",
+  "Option1 name": "Option1 name",
+  "Option1 Value": "Option1 value",
+  "Option1 value": "Option1 value",
+  "Option2 Name": "Option2 name",
+  "Option2 name": "Option2 name",
+  "Option2 Value": "Option2 value",
+  "Option2 value": "Option2 value",
+  "Option3 Name": "Option3 name",
+  "Option3 name": "Option3 name",
+  "Option3 Value": "Option3 value",
+  "Option3 value": "Option3 value",
 
-    const isBool =
-      n === "published" ||
-      n.endsWith("_published") ||
-      n.includes("is_published") ||
-      n === "active" ||
-      n.includes("is_active") ||
-      n.includes("enabled") ||
-      n.includes("is_enabled");
+  // pricing
+  "Variant Price": "Price",
+  "Price": "Price",
+  "Variant Compare At Price": "Compare-at price",
+  "Compare-at price": "Compare-at price",
 
-    const isNumeric =
-      n.includes("price") ||
-      n.includes("amount") ||
-      n.includes("qty") ||
-      n.includes("quantity") ||
-      n.includes("inventory") ||
-      n.includes("count") ||
-      n.includes("weight");
+  // inventory / shipping
+  "Variant Inventory Qty": "Inventory quantity",
+  "Inventory quantity": "Inventory quantity",
+  "Variant Inventory Policy": "Continue selling when out of stock",
+  "Continue selling when out of stock": "Continue selling when out of stock",
+  "Variant Requires Shipping": "Requires shipping",
+  "Requires shipping": "Requires shipping",
+  "Variant Fulfillment Service": "Fulfillment service",
+  "Fulfillment service": "Fulfillment service",
 
-    // Collapsing inner whitespace can be risky for large HTML/text fields.
-    // Only do it for short-ish, non-text-like headers.
-    const looksLikeFreeText =
-      n.includes("body") || n.includes("description") || n.includes("html") || n.includes("notes") || n.includes("message");
+  // weight
+  "Variant Grams": "Weight value (grams)",
+  "Weight value (grams)": "Weight value (grams)",
+  "Variant Weight": "Weight value (grams)", // (used with Variant Weight Unit)
 
-    const allowCollapse = !looksLikeFreeText;
+  // images
+  "Image Src": "Product image URL",
+  "Product image URL": "Product image URL",
+  "Image Position": "Image position",
+  "Image position": "Image position",
+  "Image Alt Text": "Image alt text",
+  "Image alt text": "Image alt text",
+  "Variant Image": "Variant image URL",
+  "Variant image URL": "Variant image URL",
 
-    return { h, isEmail, isPhone, isTags, isSku, isHandle, isBool, isNumeric, allowCollapse };
+  // seo / gift
+  "Gift Card": "Gift card",
+  "Gift card": "Gift card",
+  "SEO Title": "SEO title",
+  "SEO title": "SEO title",
+  "SEO Description": "SEO description",
+  "SEO description": "SEO description",
+};
+
+function enforceShopifyOfficialTemplate(inputHeaders: string[], inputRows: CsvRow[]) {
+  const headerIndex = new Map<string, string>();
+  for (const h of inputHeaders) headerIndex.set(h, h);
+
+  // Build per-row output with only official headers, mapped from legacy keys
+  const outRows: CsvRow[] = inputRows.map((row) => {
+    const mapped: CsvRow = {};
+
+    // 1) Pull values from matching official columns (if already present)
+    for (const h of SHOPIFY_OFFICIAL_HEADERS) {
+      mapped[h] = (row?.[h] ?? "").toString();
+    }
+
+    // 2) Pull values from legacy columns into official columns (if official missing)
+    for (const [legacy, official] of Object.entries(SHOPIFY_LEGACY_TO_OFFICIAL)) {
+      const v = row?.[legacy];
+      if (v == null) continue;
+      const s = typeof v === "string" ? v : String(v);
+      if (!mapped[official]) mapped[official] = s;
+    }
+
+    // 3) Normalize key Shopify booleans + numbers to what Shopify expects
+    mapped["Published on online store"] = normalizeBool(mapped["Published on online store"]);
+    mapped["Continue selling when out of stock"] = normalizeBool(mapped["Continue selling when out of stock"]);
+    mapped["Requires shipping"] = normalizeBool(mapped["Requires shipping"]);
+    mapped["Charge tax"] = normalizeBool(mapped["Charge tax"]);
+    mapped["Gift card"] = normalizeBool(mapped["Gift card"]);
+
+    // 4) Normalize prices (Shopify expects numeric text or blank)
+    mapped["Price"] = normalizeMoney(mapped["Price"]);
+    mapped["Compare-at price"] = normalizeMoney(mapped["Compare-at price"]);
+    mapped["Cost per item"] = normalizeMoney(mapped["Cost per item"]);
+
+    // 5) Weight: support legacy Variant Weight + Variant Weight Unit → grams
+    const legacyWeight = (row?.["Variant Weight"] ?? "").toString().trim();
+    const legacyUnit = (row?.["Variant Weight Unit"] ?? "").toString().trim().toLowerCase();
+    if (!mapped["Weight value (grams)"] && legacyWeight) {
+      const grams = weightToGramsSafe(legacyWeight, legacyUnit);
+      if (grams != null) mapped["Weight value (grams)"] = String(grams);
+    }
+    if (!mapped["Weight unit for display"]) {
+      // if they provided Variant Weight Unit, keep display unit sensible; otherwise default blank
+      if (legacyUnit) mapped["Weight unit for display"] = normalizeWeightDisplayUnit(legacyUnit);
+    }
+
+    // 6) Inventory quantity should be integer text
+    mapped["Inventory quantity"] = normalizeInteger(mapped["Inventory quantity"]);
+
+    // 7) Common cleanup: avoid "undefined"
+    for (const h of SHOPIFY_OFFICIAL_HEADERS) {
+      const v = mapped[h];
+      mapped[h] = v == null ? "" : String(v);
+    }
+
+    return mapped;
   });
 
-  for (const r of fixedRows) {
-    for (const kind of headerKinds) {
-      const h = kind.h;
-      const before = r[h] ?? "";
-      let after = before;
-
-      if (kind.allowCollapse) {
-        const collapsed = collapseInnerWhitespace(after);
-        if (collapsed !== after) {
-          after = collapsed;
-          collapsedCount++;
-        }
-      }
-
-      if (kind.isEmail) {
-        const e = normalizeEmail(after);
-        if (e !== after) {
-          after = e;
-          emailCount++;
-        }
-      }
-
-      if (kind.isPhone) {
-        const p = normalizePhone(after);
-        if (p !== after) {
-          after = p;
-          phoneCount++;
-        }
-      }
-
-      if (kind.isTags) {
-        const t = normalizeTags(after);
-        if (t !== after) {
-          after = t;
-          tagsCount++;
-        }
-      }
-
-      if (kind.isBool) {
-        const b = normalizeBoolean(after);
-        if (b !== after) {
-          after = b;
-          boolCount++;
-        }
-      }
-
-      if (kind.isNumeric) {
-        const n = normalizeNumeric(after);
-        if (n !== after) {
-          after = n;
-          numericCount++;
-        }
-      }
-
-      // Slug/SKU style cleanup: remove spaces + strip disallowed chars.
-      // This is where "no spaces" / "no special characters" feel comes from,
-      // but it only applies to headers that look like identifiers.
-      if (kind.isSku) {
-        // allow A-Z0-9-_ only
-        const cleaned = keepAllowedChars(after, /[^A-Z0-9_-]/g, true, false);
-        if (cleaned !== after) {
-          after = cleaned;
-          skuCount++;
-        }
-      }
-
-      if (kind.isHandle) {
-        // allow a-z0-9-_ only
-        const cleaned = keepAllowedChars(after, /[^a-z0-9_-]/g, false, true);
-        if (cleaned !== after) {
-          after = cleaned;
-          handleCount++;
-        }
-      }
-
-      if (after !== before) r[h] = after;
-    }
-  }
-
-  const fixesApplied: string[] = [...(base.fixesApplied ?? [])];
-
-  if (collapsedCount > 0) fixesApplied.push("Normalized spacing in cells");
-  if (emailCount > 0) fixesApplied.push("Normalized email formatting");
-  if (phoneCount > 0) fixesApplied.push("Normalized phone formatting");
-  if (tagsCount > 0) fixesApplied.push("Normalized tag spacing");
-  if (boolCount > 0) fixesApplied.push("Normalized boolean values");
-  if (numericCount > 0) fixesApplied.push("Normalized numeric values");
-  if (skuCount > 0) fixesApplied.push("Cleaned SKU values");
-  if (handleCount > 0) fixesApplied.push("Cleaned handle/slug values");
-
-  const issues: CsvIssue[] = [];
-  return { fixedHeaders: headers, fixedRows, issues, fixesApplied };
+  return { headers: SHOPIFY_OFFICIAL_HEADERS, rows: outRows };
 }
 
-// Backwards compatible name used by older formats
-export function normalizeRowsSafe(headers: string[], rows: CsvRow[]) {
-  return normalizeRowsBase(headers, rows);
+function remapIssuesToShopifyTemplate(issues: CsvIssue[], inputHeaders: string[]) {
+  if (!issues?.length) return issues;
+
+  // If your format currently emits legacy column names, remap them so the UI highlights
+  return issues.map((it) => {
+    const col = it.column ?? "(file)";
+    const mappedCol = SHOPIFY_LEGACY_TO_OFFICIAL[col] ?? col;
+    return { ...it, column: mappedCol };
+  });
+}
+
+/* -------------------------------------------
+   Normalizers
+-------------------------------------------- */
+
+function normalizeBool(v: string): string {
+  const s = (v ?? "").toString().trim().toLowerCase();
+  if (!s) return "";
+  if (["true", "t", "yes", "y", "1"].includes(s)) return "true";
+  if (["false", "f", "no", "n", "0"].includes(s)) return "false";
+
+  // Shopify legacy "published"/blank sometimes appears
+  if (s === "published") return "true";
+  if (s === "unpublished") return "false";
+
+  // If unknown, keep original (so validation can flag it)
+  return (v ?? "").toString().trim();
+}
+
+function normalizeMoney(v: string): string {
+  const s = (v ?? "").toString().trim();
+  if (!s) return "";
+  // Strip $, commas, spaces
+  const cleaned = s.replace(/[$,\s]/g, "");
+  // Allow plain numbers like 12, 12.3, 12.30
+  if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return s; // keep as-is so validator can complain
+  return cleaned;
+}
+
+function normalizeInteger(v: string): string {
+  const s = (v ?? "").toString().trim();
+  if (!s) return "";
+  // allow "5", "0", "-1" (Shopify typically expects non-negative, but we won't hard force here)
+  if (!/^-?\d+$/.test(s)) return s;
+  return s;
+}
+
+function weightToGramsSafe(valueRaw: string, unitRaw: string): number | null {
+  const s = valueRaw.trim();
+  if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
+  const n = Number(s);
+  if (!isFinite(n)) return null;
+
+  const u = (unitRaw ?? "").trim().toLowerCase();
+  if (!u || u === "g" || u === "gram" || u === "grams") return Math.round(n);
+  if (u === "kg" || u === "kilogram" || u === "kilograms") return Math.round(n * 1000);
+  if (u === "lb" || u === "lbs" || u === "pound" || u === "pounds") return Math.round(n * 453.59237);
+  if (u === "oz" || u === "ounce" || u === "ounces") return Math.round(n * 28.349523125);
+
+  // unknown unit
+  return null;
+}
+
+function normalizeWeightDisplayUnit(u: string): string {
+  const s = (u ?? "").trim().toLowerCase();
+  if (!s) return "";
+  if (["g", "gram", "grams"].includes(s)) return "g";
+  if (["kg", "kilogram", "kilograms"].includes(s)) return "kg";
+  if (["lb", "lbs", "pound", "pounds"].includes(s)) return "lb";
+  if (["oz", "ounce", "ounces"].includes(s)) return "oz";
+  return s;
 }

@@ -58,7 +58,7 @@ export default function PresetFormatDetailPage({ params }: Props) {
         <p className="mt-4 max-w-3xl text-base text-[var(--muted)]">{preset.shortDescription}</p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href={`/app?preset=${encodeURIComponent(preset.id)}`} className="rgb-btn">
+          <Link href={`/app?preset=${encodeURIComponent(preset.id)}&exportName=${encodeURIComponent(preset.slug)}`} className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer with this preset</span>
           </Link>
           <Link href="/formats" className="rgb-btn">
@@ -89,6 +89,26 @@ export default function PresetFormatDetailPage({ params }: Props) {
           </ul>
         </div>
       </section>
+
+      {preset.id === "shopify_products" && (
+        <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+          <h2 className="text-lg font-semibold text-[var(--text)]">How to import into Shopify</h2>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-[var(--muted)]">
+            <li>In Shopify Admin, go to Products.</li>
+            <li>Click Import.</li>
+            <li>Select the CSV you exported from CSV Fixer (it will download as "{preset.slug}_fixed.csv").</li>
+            <li>Choose whether you want to overwrite existing products (Shopify will show this option during import).</li>
+            <li>Start the import and review the Shopify results screen for any remaining warnings.</li>
+          </ol>
+          <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+            <div className="text-sm font-semibold text-[var(--text)]">Tip</div>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              In the app, aim for a <span className="font-semibold text-[var(--text)]">Ready to import</span> badge
+              before exporting. Warnings are usually safe, but errors commonly block Shopify imports.
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <h2 className="text-lg font-semibold text-[var(--text)]">Tips</h2>

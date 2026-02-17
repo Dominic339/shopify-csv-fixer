@@ -6,7 +6,7 @@ import { getPresetsByCategory } from "@/lib/presetRegistry";
 export const metadata: Metadata = {
   title: "Preset Formats",
   description:
-    "Browse built-in preset CSV formats for ecommerce, marketing, CRM, accounting, shipping, and support. Open the CSV Fixer with a preset selected in one click.",
+    "Browse built-in ecommerce CSV presets. Open the fixer with a preset selected in one click.",
   alternates: { canonical: "/formats/presets" },
   robots: { index: true, follow: true },
 };
@@ -30,8 +30,8 @@ export default function PresetFormatsPage() {
           <Link href="/formats" className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
           </Link>
-          <Link href="/app" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
+          <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Ecommerce CSV Fixer</span>
           </Link>
         </div>
       </div>

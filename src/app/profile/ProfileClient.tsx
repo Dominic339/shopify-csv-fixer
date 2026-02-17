@@ -201,10 +201,10 @@ export default function ProfileClient() {
               ) : null}
 
               <Link
-                href="/app"
+                href="/ecommerce-csv-fixer"
                 className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
               >
-                Back to app
+                Back to Ecommerce
               </Link>
             </div>
 

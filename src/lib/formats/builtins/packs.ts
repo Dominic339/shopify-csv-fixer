@@ -1,18 +1,15 @@
-import type { CsvFormat, CsvFixResult, CsvIssue, CsvRow } from "../types";
+// src/lib/formats/builtins/packs.ts
+import type { CsvFixResult, CsvFormat, CsvFormatCategory, CsvRow, CsvIssue } from "../types";
 
 type FormatSpec = {
   id: string;
   name: string;
   description: string;
-  category: string;
+  category: CsvFormatCategory;
 
   expectedHeaders: string[];
-
-  // These are “required fields” for the format. If a column is missing in the upload,
-  // we still include it in the output template and generate row issues so the user can fill it in.
   requiredHeaders: string[];
 
-  // Optional light validation
   emailHeaders?: string[];
   numericHeaders?: string[];
 };
@@ -25,27 +22,26 @@ function isBlank(v: unknown) {
   return v == null || String(v).trim() === "";
 }
 
-function buildSimpleFormat(spec: FormatSpec): CsvFormat {
+export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
   return {
     id: spec.id,
     name: spec.name,
     description: spec.description,
     category: spec.category,
     source: "builtin",
-    apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
-      // Universal cleanup runs in the engine for ALL formats.
-      // Here we only do mapping to expected headers + validation issues.
 
+    apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
       const inHeaders = headers ?? [];
       const inRows = rows ?? [];
 
-      // Map expected headers to actual headers (case-insensitive match)
+      const issues: CsvIssue[] = [];
+      const fixesApplied: string[] = [];
+
       const actualByNorm = new Map<string, string>();
       for (const h of inHeaders) actualByNorm.set(normHeader(h), h);
 
       const fixedHeaders = [...spec.expectedHeaders];
 
-      // Build rows with exactly the expected headers
       const fixedRows: CsvRow[] = inRows.map((r) => {
         const out: CsvRow = {};
         for (const expected of spec.expectedHeaders) {
@@ -55,9 +51,7 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
         return out;
       });
 
-      const issues: CsvIssue[] = [];
-
-      // Header-level checks (still useful), but we ALSO create row-level issues so the manual editor works like Shopify.
+      // File-level: missing required columns
       for (const required of spec.requiredHeaders) {
         const actual = actualByNorm.get(normHeader(required));
         if (!actual) {
@@ -65,20 +59,19 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
             rowIndex: -1,
             column: required,
             severity: "error",
-            message: `Missing required column: ${required}. The output includes this column so you can fill it in.`,
+            message: `Missing required column "${required}".`,
+            code: `${spec.id}/missing_required_column`,
+            suggestion: `Add the "${required}" column header.`,
           });
         }
       }
 
-      // Row-level required value checks (this is the key change)
-      // Cap issues so huge files don’t explode the UI.
+      // Row-level required blanks (cap)
       const MAX_ROW_ISSUES = 800;
+      let rowIssueCount = 0;
 
-      for (let i = 0; i < fixedRows.length; i++) {
-        if (issues.length >= MAX_ROW_ISSUES) break;
-
+      for (let i = 0; i < fixedRows.length && rowIssueCount < MAX_ROW_ISSUES; i++) {
         const row = fixedRows[i];
-
         for (const required of spec.requiredHeaders) {
           const v = row?.[required];
           if (isBlank(v)) {
@@ -86,98 +79,72 @@ function buildSimpleFormat(spec: FormatSpec): CsvFormat {
               rowIndex: i,
               column: required,
               severity: "error",
-              message: `Missing required value: ${required}`,
+              message: `Required field "${required}" is blank.`,
+              code: `${spec.id}/required_blank`,
+              suggestion: `Fill in "${required}".`,
             });
-            if (issues.length >= MAX_ROW_ISSUES) break;
+            rowIssueCount++;
+            if (rowIssueCount >= MAX_ROW_ISSUES) break;
           }
         }
       }
 
-      // Optional validations (also row-level so manual fixes can target exact cells)
-      const emailCols = spec.emailHeaders ?? [];
-      const numericCols = spec.numericHeaders ?? [];
-
-      if (emailCols.length) {
-        const emailSet = new Set(emailCols.map(normHeader));
+      // Email validators
+      if (spec.emailHeaders?.length) {
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
         for (let i = 0; i < fixedRows.length; i++) {
-          if (issues.length >= MAX_ROW_ISSUES) break;
-
-          const row = fixedRows[i];
-          for (const h of spec.expectedHeaders) {
-            if (!emailSet.has(normHeader(h))) continue;
-
-            const v = (row[h] ?? "").trim();
-            if (!v) continue; // required check handles blanks if the field is required
-
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+          for (const col of spec.emailHeaders) {
+            const v = String(fixedRows[i]?.[col] ?? "").trim();
+            if (!v) continue;
+            if (!emailRe.test(v)) {
               issues.push({
                 rowIndex: i,
-                column: h,
+                column: col,
                 severity: "warning",
-                message: "Email looks invalid",
+                message: `Invalid email format: "${v}".`,
+                code: `${spec.id}/invalid_email`,
+                suggestion: `Fix the email formatting (example: name@domain.com).`,
               });
-              if (issues.length >= MAX_ROW_ISSUES) break;
             }
           }
         }
       }
 
-      if (numericCols.length) {
-        const numSet = new Set(numericCols.map(normHeader));
+      // Numeric validators
+      if (spec.numericHeaders?.length) {
         for (let i = 0; i < fixedRows.length; i++) {
-          if (issues.length >= MAX_ROW_ISSUES) break;
-
-          const row = fixedRows[i];
-          for (const h of spec.expectedHeaders) {
-            if (!numSet.has(normHeader(h))) continue;
-
-            const v = (row[h] ?? "").trim();
-            if (!v) continue; // required check handles blanks if the field is required
-
-            const cleaned = v.replace(/[,\\s\\$£€¥]/g, "");
-            if (!/^[-+]?\\d*(\\.\\d+)?$/.test(cleaned)) {
+          for (const col of spec.numericHeaders) {
+            const raw = String(fixedRows[i]?.[col] ?? "").trim();
+            if (!raw) continue;
+            const cleaned = raw.replace(/[$,]/g, "").trim();
+            const n = Number(cleaned);
+            if (!Number.isFinite(n)) {
               issues.push({
                 rowIndex: i,
-                column: h,
+                column: col,
                 severity: "warning",
-                message: "Value should be numeric",
+                message: `Not a valid number: "${raw}".`,
+                code: `${spec.id}/invalid_number`,
+                suggestion: `Use a plain numeric value (no currency symbols).`,
               });
-              if (issues.length >= MAX_ROW_ISSUES) break;
             }
           }
         }
       }
 
-      return {
-        fixedHeaders,
-        fixedRows,
-        issues,
-        fixesApplied: [],
-      };
+      return { fixedHeaders, fixedRows, issues, fixesApplied };
     },
   };
 }
 
-// Ecommerce / marketplaces
+// Ecommerce
 export const formatPackEcommerce: CsvFormat[] = [
   buildSimpleFormat({
     id: "woocommerce_products",
     name: "WooCommerce Products",
     description: "Maps products into a WooCommerce-friendly template and flags common issues.",
     category: "Ecommerce",
-    expectedHeaders: [
-      "ID",
-      "Type",
-      "SKU",
-      "Name",
-      "Published",
-      "Regular price",
-      "Sale price",
-      "Stock",
-      "Categories",
-      "Tags",
-      "Images",
-    ],
+    expectedHeaders: ["ID", "Type", "SKU", "Name", "Published", "Regular price", "Sale price", "Stock", "Categories", "Tags", "Images"],
     requiredHeaders: ["SKU", "Name"],
     numericHeaders: ["Regular price", "Sale price", "Stock"],
   }),
@@ -186,15 +153,7 @@ export const formatPackEcommerce: CsvFormat[] = [
     name: "BigCommerce Products",
     description: "Maps product columns for BigCommerce imports and flags missing required fields.",
     category: "Ecommerce",
-    expectedHeaders: [
-      "Product Name",
-      "Product SKU",
-      "Price",
-      "Weight",
-      "Category",
-      "Description",
-      "Product Image URL",
-    ],
+    expectedHeaders: ["Product Name", "Product SKU", "Price", "Weight", "Category", "Description", "Product Image URL"],
     requiredHeaders: ["Product Name", "Product SKU", "Price"],
     numericHeaders: ["Price", "Weight"],
   }),
@@ -203,17 +162,7 @@ export const formatPackEcommerce: CsvFormat[] = [
     name: "Etsy Listings",
     description: "Prepares a listings template and highlights missing or suspicious values.",
     category: "Ecommerce",
-    expectedHeaders: [
-      "Title",
-      "Description",
-      "Price",
-      "Quantity",
-      "SKU",
-      "Tags",
-      "Who made it",
-      "When was it made",
-      "What is it",
-    ],
+    expectedHeaders: ["Title", "Description", "Price", "Quantity", "SKU", "Tags", "Who made it", "When was it made", "What is it"],
     requiredHeaders: ["Title", "Price", "Quantity"],
     numericHeaders: ["Price", "Quantity"],
   }),
@@ -237,7 +186,7 @@ export const formatPackEcommerce: CsvFormat[] = [
   }),
 ];
 
-// Marketing / ads
+// Marketing
 export const formatPackMarketing: CsvFormat[] = [
   buildSimpleFormat({
     id: "mailchimp_contacts",
@@ -308,7 +257,7 @@ export const formatPackCrm: CsvFormat[] = [
   }),
 ];
 
-// Accounting / finance
+// Accounting
 export const formatPackAccounting: CsvFormat[] = [
   buildSimpleFormat({
     id: "quickbooks_transactions",
@@ -337,18 +286,7 @@ export const formatPackShipping: CsvFormat[] = [
     name: "ShipStation Orders",
     description: "Maps order fields for ShipStation and flags missing required address fields.",
     category: "Shipping",
-    expectedHeaders: [
-      "Order Number",
-      "Order Date",
-      "Recipient Name",
-      "Address 1",
-      "City",
-      "State",
-      "Postal Code",
-      "Country",
-      "SKU",
-      "Quantity",
-    ],
+    expectedHeaders: ["Order Number", "Order Date", "Recipient Name", "Address 1", "City", "State", "Postal Code", "Country", "SKU", "Quantity"],
     requiredHeaders: ["Order Number", "Recipient Name", "Address 1", "City", "Postal Code", "Country"],
     numericHeaders: ["Quantity"],
   }),

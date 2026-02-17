@@ -4,7 +4,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -17,24 +16,22 @@ type SubStatus = {
 };
 
 // Minimal local types to avoid depending on supabase-js exported types.
-// These are enough for what TopBar uses.
 type SupabaseUser = {
   email?: string | null;
 };
 
-type SupabaseSession = {
-  user?: SupabaseUser | null;
-} | null;
+type SupabaseSession =
+  | {
+      user?: SupabaseUser | null;
+    }
+  | null;
 
 export default function TopBar() {
   const supabase = createClient();
-  const router = useRouter();
-  const pathname = usePathname();
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const [sub, setSub] = useState<SubStatus | null>(null);
-
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const { theme, toggle } = useTheme();
@@ -45,9 +42,7 @@ export default function TopBar() {
     (async () => {
       try {
         const res = await supabase.auth.getUser();
-        // res shape varies by supabase-js version, so read safely
         const userEmail = (res as any)?.data?.user?.email ?? (res as any)?.user?.email ?? null;
-
         if (!mounted) return;
         setEmail(userEmail);
       } catch {
@@ -56,11 +51,9 @@ export default function TopBar() {
       }
     })();
 
-    const { data: authSub } = supabase.auth.onAuthStateChange(
-      (_event: string, session: SupabaseSession) => {
-        setEmail(session?.user?.email ?? null);
-      }
-    );
+    const { data: authSub } = supabase.auth.onAuthStateChange((_event: unknown, session: SupabaseSession) => {
+      setEmail(session?.user?.email ?? null);
+    });
 
     return () => {
       mounted = false;
@@ -100,8 +93,10 @@ export default function TopBar() {
   function goToPricing() {
     setOpen(false);
 
-    // If already on home, scroll to #pricing
-    if (pathname === "/") {
+    if (typeof window === "undefined") return;
+
+    // If we're on home, scroll to pricing section
+    if (window.location.pathname === "/" || window.location.pathname === "") {
       const el = document.getElementById("pricing");
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -111,25 +106,34 @@ export default function TopBar() {
       return;
     }
 
-    // Otherwise navigate to home + hash
-    router.push("/#pricing");
+    // Otherwise just navigate to home#pricing without using router.push
+    window.location.href = "/#pricing";
   }
+
+  const logoSrc = theme === "dark" ? "/StriveFormatsDark.png" : "/StriveFormatsLight.png";
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)]/60 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-          <Image
-            src="/CSV%20Nest%20Logo.png"
-            alt="CSNest"
-            width={28}
-            height={28}
-            priority
-            className="rounded-md"
-          />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold text-[var(--text)]">CSNest</div>
-            <div className="text-xs text-[var(--muted)]">Fix imports fast</div>
+      {/* Taller bar so logo can actually fill it */}
+      <div className="mx-auto flex h-20 md:h-24 max-w-7xl items-center justify-between px-6">
+        {/* Logo block */}
+        <Link
+          href="/"
+          className="flex h-full items-center"
+          onClick={() => setOpen(false)}
+          aria-label="StriveFormats Home"
+        >
+          {/* Make the logo box tall + wide so it reads like a real brand mark */}
+          <div className="relative h-full w-[260px] sm:w-[320px] md:w-[420px]">
+            <Image
+              src={logoSrc}
+              alt="StriveFormats"
+              fill
+              priority
+              // Fill the TopBar top-to-bottom, keep aspect ratio, align left for better “brand” feel
+              className="object-contain object-left"
+              sizes="(max-width: 640px) 260px, (max-width: 768px) 320px, 420px"
+            />
           </div>
         </Link>
 
@@ -144,8 +148,13 @@ export default function TopBar() {
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
 
-          <Link href="/app" className="rgb-btn">
+          {/* Keep your existing nav/buttons; just make them feel “full height” visually */}
+          <Link href="/app" className="rgb-btn" onClick={() => setOpen(false)}>
             <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
+          </Link>
+
+          <Link href="/presets" className="rgb-btn" onClick={() => setOpen(false)}>
+            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Preset Formats</span>
           </Link>
 
           <button type="button" onClick={goToPricing} className="rgb-btn" aria-label="View pricing">
@@ -153,10 +162,8 @@ export default function TopBar() {
           </button>
 
           {canAccessCustomFormats ? (
-            <Link href="/formats" className="rgb-btn">
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
-                Custom Formats
-              </span>
+            <Link href="/formats" className="rgb-btn" onClick={() => setOpen(false)}>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
             </Link>
           ) : (
             <button
@@ -165,16 +172,14 @@ export default function TopBar() {
               onClick={() => setUpgradeOpen(true)}
               aria-label="Custom Formats (Advanced)"
             >
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
-                Custom Formats
-              </span>
+              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
             </button>
           )}
 
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="h-9 w-9 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
+            className="h-10 w-10 md:h-11 md:w-11 rounded-full border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text)]"
             aria-label="Account menu"
           >
             {email ? email[0]?.toUpperCase() : "?"}
@@ -182,7 +187,7 @@ export default function TopBar() {
 
           {open ? (
             <div
-              className="absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border"
+              className="absolute right-0 top-12 md:top-14 w-64 overflow-hidden rounded-2xl border"
               style={{
                 background: "var(--popover)",
                 borderColor: "var(--popover-border)",
@@ -190,9 +195,7 @@ export default function TopBar() {
             >
               <div className="px-4 py-3">
                 <div className="text-xs text-[var(--muted)]">{email ? "Signed in" : "Guest"}</div>
-                <div className="truncate text-sm font-semibold text-[var(--text)]">
-                  {email ?? "Not signed in"}
-                </div>
+                <div className="truncate text-sm font-semibold text-[var(--text)]">{email ?? "Not signed in"}</div>
               </div>
 
               <div className="border-t" style={{ borderColor: "var(--popover-border)" }} />
@@ -214,6 +217,14 @@ export default function TopBar() {
                   onClick={() => setOpen(false)}
                 >
                   Home
+                </Link>
+
+                <Link
+                  className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-black/10 hover:dark:bg-white/10"
+                  href="/presets"
+                  onClick={() => setOpen(false)}
+                >
+                  Preset Formats
                 </Link>
 
                 <button

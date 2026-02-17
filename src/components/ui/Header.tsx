@@ -46,7 +46,7 @@ export function Header() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface)] shadow-sm">
             🧾
           </span>
-          <span className="text-sm font-semibold text-[var(--text)]">CSNest</span>
+          <span className="text-sm font-semibold text-[var(--text)]">StriveFormats</span>
         </Link>
 
         <nav className="flex items-center gap-3">

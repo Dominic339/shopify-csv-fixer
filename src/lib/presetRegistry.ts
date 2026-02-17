@@ -24,9 +24,10 @@ export const PRESET_FORMATS: PresetFormat[] = [
   {
     id: "shopify_products",
     slug: "shopify-products",
-    name: "Shopify Products",
+    name: "Shopify Import Optimizer",
     category: "Ecommerce",
-    shortDescription: "Fix and prepare Shopify product import CSVs (products, variants, images, handles, and more).",
+    shortDescription:
+      "Strict Shopify schema validation + safe auto-fixes for products, variants, images, pricing, inventory, and SEO.",
     searchKeywords: ["shopify csv", "shopify product csv", "shopify import csv", "fix shopify csv"],
   },
   {

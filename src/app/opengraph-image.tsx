@@ -23,7 +23,7 @@ export default function OpenGraphImage() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 18, padding: 64 }}>
-          <div style={{ fontSize: 72, fontWeight: 800, letterSpacing: -1 }}>CSNest</div>
+          <div style={{ fontSize: 72, fontWeight: 800, letterSpacing: -1 }}>StriveFormats</div>
           <div style={{ fontSize: 34, opacity: 0.92, maxWidth: 900 }}>
             Fix and convert messy CSV files for Shopify and other tools.
           </div>
