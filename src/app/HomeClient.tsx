@@ -48,17 +48,21 @@ export default function HomeClient() {
           <p className="text-sm text-[var(--muted)]">StriveFormats</p>
 
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-[var(--text)]">
-            Clean, validate, and reshape CSV files with confidence
+            Clean. Standardize. Validate.
           </h1>
 
           <p className="mt-4 text-lg text-[var(--muted)]">
-            Fix broken CSVs fast for any platform. Auto-fix what is safe, flag what is risky, and export a clean file you
-            can trust.
+            Fix broken ecommerce CSVs fast. Auto-fix what is safe, flag what is risky, and export a clean file you can
+            trust.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/app" className="rgb-btn">
-              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
+            <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Ecommerce CSV Fixer</span>
+            </Link>
+
+            <Link href="/presets" className="rgb-btn">
+              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Browse templates</span>
             </Link>
 
             {canAccessCustomFormats ? (
@@ -82,8 +86,8 @@ export default function HomeClient() {
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
           <h2 className="text-sm font-semibold text-[var(--text)]">What it does</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Fix common CSV issues that break imports</li>
-            <li>Normalize formatting such as spacing, casing, and columns</li>
+            <li>Fix common CSV issues that break ecommerce imports</li>
+            <li>Normalize formatting such as spacing, casing, and numeric fields</li>
             <li>Manually edit problem cells and export a clean CSV</li>
           </ul>
         </div>
@@ -98,15 +102,15 @@ export default function HomeClient() {
           <div className="grid gap-10 md:grid-cols-2 md:items-start">
             <div>
               <div className="text-sm font-semibold text-[var(--text)]">CSV Fixer</div>
-              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">Fix broken CSV files in seconds</div>
+              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">Fix ecommerce CSV files in seconds</div>
               <p className="mt-3 text-sm text-[var(--muted)]">
-                Upload a CSV, apply a format, and let the tool auto-fix safe issues. Review anything risky, then export a
-                clean file.
+                Choose a platform, upload your CSV, and let the tool auto-fix safe issues. Review anything risky, then
+                export a clean file.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/app" className="rgb-btn">
-                  <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
+                <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+                  <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Ecommerce CSV Fixer</span>
                 </Link>
               </div>
             </div>

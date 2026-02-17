@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "@/lib/presets";
+import { ECOMMERCE_PLATFORMS } from "@/lib/ecommercePlatforms";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://striveformats.com").replace(/\/+$/, "");
@@ -7,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const core: MetadataRoute.Sitemap = [
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/ecommerce-csv-fixer`, lastModified: now, changeFrequency: "weekly", priority: 0.95 },
     { url: `${base}/app`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/formats`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/formats/presets`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
@@ -25,5 +27,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: p.id === "shopify_products" ? 0.7 : 0.6,
   }));
 
-  return [...core, ...presetPages];
+  const ecommercePages: MetadataRoute.Sitemap = ECOMMERCE_PLATFORMS.map((p) => ({
+    url: `${base}/ecommerce/${encodeURIComponent(p.id)}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: p.id === "shopify" ? 0.85 : 0.75,
+  }));
+
+  return [...core, ...ecommercePages, ...presetPages];
 }

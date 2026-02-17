@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 export const metadata = {
   title: "Preset CSV Formats | StriveFormats",
   description:
-    "Pick a preset CSV format for Shopify, WooCommerce, Google Ads, Mailchimp, QuickBooks and more. Open the fixer preconfigured for your platform.",
+    "Browse ecommerce CSV templates for Shopify, WooCommerce, BigCommerce, eBay, and Amazon. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
 };
 
 export default function PresetsPage() {
@@ -19,7 +19,7 @@ export default function PresetsPage() {
     "@type": "CollectionPage",
     name: "Preset CSV Formats",
     description:
-      "Preset CSV formats for popular platforms. Open the CSV Fixer preconfigured for your import target.",
+      "Ecommerce CSV templates for Shopify, WooCommerce, BigCommerce, eBay, and Amazon. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
   };
 
   return (
@@ -35,8 +35,8 @@ export default function PresetsPage() {
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/app" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
+          <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Ecommerce CSV Fixer</span>
           </Link>
           <Link href="/shopify-csv-fixer" className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Shopify CSV Fixer</span>
@@ -51,7 +51,9 @@ export default function PresetsPage() {
             Shopify imports are the strictest. If you sell products with variants, this is the fastest way to prevent import failures.
           </p>
           <div className="mt-4">
-            <Link href="/shopify-csv-fixer" className="rg-btn">Open Shopify landing page</Link>
+            <Link href="/shopify-csv-fixer" className="rgb-btn">
+              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Shopify guide</span>
+            </Link>
           </div>
         </div>
 
@@ -61,7 +63,9 @@ export default function PresetsPage() {
             Try the fixer with a sample file. You can download messy CSVs on the Shopify page and see the fix log instantly.
           </p>
           <div className="mt-4">
-            <Link href="/shopify-csv-fixer" className="rg-btn">Get sample downloads</Link>
+            <Link href="/shopify-csv-fixer" className="rgb-btn">
+              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Get sample downloads</span>
+            </Link>
           </div>
         </div>
 
@@ -71,7 +75,9 @@ export default function PresetsPage() {
             If you repeatedly clean similar files, Custom Formats lets you save templates and rules so repeat jobs take seconds.
           </p>
           <div className="mt-4">
-            <Link href="/formats" className="rg-btn">Custom Formats</Link>
+            <Link href="/formats" className="rgb-btn">
+              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -97,11 +103,11 @@ export default function PresetsPage() {
                       <p className="mt-2 text-sm text-[var(--muted)]">{p.description}</p>
 
                       <div className="mt-5 flex flex-wrap gap-3">
-                        <Link href={detailHref} className="rg-btn">
-                          View details
+                        <Link href={detailHref} className="rgb-btn">
+                          <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">View details</span>
                         </Link>
-                        <Link href={openHref} className="rg-btn">
-                          Open in fixer
+                        <Link href={openHref} className="rgb-btn">
+                          <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open in fixer</span>
                         </Link>
                       </div>
                     </div>

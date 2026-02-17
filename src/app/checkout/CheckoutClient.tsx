@@ -66,9 +66,9 @@ export default function CheckoutClient() {
       <div className="mt-6 flex gap-3">
         <Link
           className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
-          href="/app"
+          href="/ecommerce-csv-fixer"
         >
-          Back to app
+          Back to Ecommerce
         </Link>
 
         <Link

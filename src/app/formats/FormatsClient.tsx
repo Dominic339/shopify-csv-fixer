@@ -488,10 +488,10 @@ export default function FormatsClient() {
         </div>
 
         <Link
-          href="/app"
+          href="/ecommerce-csv-fixer"
           className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
         >
-          CSV Fixer
+          Ecommerce
         </Link>
       </div>
 

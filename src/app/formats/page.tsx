@@ -32,8 +32,8 @@ export default function FormatsPage() {
           <Link href="/formats/presets" className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Browse all presets</span>
           </Link>
-          <Link href="/app" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
+          <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Ecommerce CSV Fixer</span>
           </Link>
         </div>
 
