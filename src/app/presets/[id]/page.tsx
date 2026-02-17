@@ -1,4 +1,3 @@
-// src/app/presets/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -29,9 +28,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   // Shopify-specific SEO
   if (preset.id === "shopify_products") {
-    const title = "Shopify Product CSV Template and Fixer | StriveFormats";
+    const title = "Shopify Products CSV Template Preview | StriveFormats";
     const description =
-      "Download the official Shopify product CSV template and validate your import. StriveFormats flags handle, SKU, variant option collisions, pricing, inventory, images, and SEO issues before you import to Shopify.";
+      "Preview the official Shopify Products CSV columns, download a ready-to-fill sample template, or open the fixer to validate handles, variants, options, pricing, inventory, images, and SEO before you import to Shopify.";
 
     return {
       title,
@@ -137,7 +136,10 @@ export default async function PresetDetailPage({ params }: PageProps) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: preset.id === "shopify_products" ? "Shopify Product CSV Template and Fixer" : `${preset.name} CSV Format`,
+    name:
+      preset.id === "shopify_products"
+        ? "Shopify Products CSV Template Preview"
+        : `${preset.name} CSV Format`,
     description: preset.description ?? "",
     url: `/presets/${encodeURIComponent(preset.id)}`,
   };
@@ -157,13 +159,15 @@ export default async function PresetDetailPage({ params }: PageProps) {
 
         <p className="mt-3 text-sm text-[var(--muted)]">
           {isShopify
-            ? "Use the official Shopify product CSV headers and validate your file before importing. StriveFormats flags handle, SKU, variant, pricing, inventory, image, and SEO issues and applies only safe auto-fixes."
+            ? "Preview Shopify’s Products CSV layout, download a ready-to-fill sample, or open the fixer to validate your import before you upload to Shopify."
             : preset.description}
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href={openHref} className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open fixer with this preset</span>
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
+              Open fixer with this preset
+            </span>
           </Link>
 
           {isShopify ? (
@@ -175,7 +179,9 @@ export default async function PresetDetailPage({ params }: PageProps) {
           ) : null}
 
           <Link href="/presets" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Back to all presets</span>
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
+              Back to all presets
+            </span>
           </Link>
         </div>
 
@@ -187,7 +193,9 @@ export default async function PresetDetailPage({ params }: PageProps) {
           <div>
             <h2 className="text-lg font-semibold text-[var(--text)]">CSV preview</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
-              {isShopify ? "This preview mirrors the official Shopify product CSV template." : "This is what the CSV layout looks like for this preset."}
+              {isShopify
+                ? "This preview mirrors the official Shopify product CSV template."
+                : "This is what the CSV layout looks like for this preset."}
             </p>
           </div>
 
@@ -228,14 +236,17 @@ export default async function PresetDetailPage({ params }: PageProps) {
           </div>
         </div>
 
-        <p className="mt-4 text-xs text-[var(--muted)]">Tip: Download the sample to get a ready-to-fill template for this import.</p>
+        <p className="mt-4 text-xs text-[var(--muted)]">
+          Tip: Download the sample to get a ready-to-fill template for this import.
+        </p>
       </section>
 
       {isShopify ? (
         <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
           <h2 className="text-lg font-semibold text-[var(--text)]">What this Shopify preset checks</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Shopify imports can fail silently or partially when grouping and variant rules are violated. This preset is built to catch the common problems before you import.
+            Shopify imports can fail silently or partially when grouping and variant rules are violated. This preset is
+            built to catch the common problems before you import.
           </p>
 
           <ul className="mt-4 list-disc pl-6 text-sm text-[var(--muted)]">
@@ -250,7 +261,9 @@ export default async function PresetDetailPage({ params }: PageProps) {
           </ul>
 
           <p className="mt-4 text-sm text-[var(--muted)]">
-            If you want, the next improvements can be Shopify specific autofix packs (safer “fix all” rules) and deeper catalog consistency checks like duplicate barcodes, missing required tax codes, and Google Shopping field completeness.
+            If you want, the next improvements can be Shopify specific autofix packs (safer “fix all” rules) and deeper
+            catalog consistency checks like duplicate barcodes, missing required tax codes, and Google Shopping field
+            completeness.
           </p>
         </section>
       ) : null}
