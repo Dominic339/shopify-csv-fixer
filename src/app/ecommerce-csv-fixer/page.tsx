@@ -70,6 +70,29 @@ function getPlatformBlurb(id: PlatformId): string {
   }
 }
 
+/**
+ * Some branches used `presetId` (string), others used `presetIds` (string[]),
+ * and at least one typo variant `presetsIds`.
+ *
+ * We do NOT change the shared platform registry here.
+ * We only read whichever field exists, so this page compiles across versions.
+ */
+function getFirstPresetId(p: unknown): string {
+  const anyP = p as any;
+
+  const presetIdsCandidate = anyP?.presetIds ?? anyP?.presetsIds;
+  if (Array.isArray(presetIdsCandidate) && presetIdsCandidate.length > 0) {
+    return String(presetIdsCandidate[0] ?? "");
+  }
+
+  const presetIdCandidate = anyP?.presetId;
+  if (typeof presetIdCandidate === "string" && presetIdCandidate.trim()) {
+    return presetIdCandidate.trim();
+  }
+
+  return "";
+}
+
 export default function EcommerceCsvFixerPage() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -132,8 +155,7 @@ export default function EcommerceCsvFixerPage() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {ECOMMERCE_PLATFORMS.map((p) => {
-            // IMPORTANT: the property is presetIds (NOT presetsIds)
-            const firstPresetId = p.presetIds && p.presetIds.length > 0 ? p.presetIds[0] : "";
+            const firstPresetId = getFirstPresetId(p);
 
             return (
               <div key={p.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
