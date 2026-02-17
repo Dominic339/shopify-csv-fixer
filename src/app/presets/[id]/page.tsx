@@ -169,7 +169,7 @@ export default async function PresetDetailPage({ params }: PageProps) {
           {isShopify ? (
             <Link href="/shopify-csv-fixer" className="rgb-btn">
               <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                Shopify CSV Fixer landing page
+                Shopify guide + examples
               </span>
             </Link>
           ) : null}
@@ -187,9 +187,7 @@ export default async function PresetDetailPage({ params }: PageProps) {
           <div>
             <h2 className="text-lg font-semibold text-[var(--text)]">CSV preview</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
-              {isShopify
-                ? "This preview mirrors the official Shopify product CSV template."
-                : "This is what the CSV layout looks like for this preset."}
+              {isShopify ? "This preview mirrors the official Shopify product CSV template." : "This is what the CSV layout looks like for this preset."}
             </p>
           </div>
 
@@ -237,8 +235,7 @@ export default async function PresetDetailPage({ params }: PageProps) {
         <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
           <h2 className="text-lg font-semibold text-[var(--text)]">What this Shopify preset checks</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Shopify imports can fail silently or partially when grouping and variant rules are violated. This preset is built
-            to catch the common problems before you import.
+            Shopify imports can fail silently or partially when grouping and variant rules are violated. This preset is built to catch the common problems before you import.
           </p>
 
           <ul className="mt-4 list-disc pl-6 text-sm text-[var(--muted)]">
@@ -253,8 +250,7 @@ export default async function PresetDetailPage({ params }: PageProps) {
           </ul>
 
           <p className="mt-4 text-sm text-[var(--muted)]">
-            If you want, the next improvements can be Shopify specific autofix packs (safer “fix all” rules) and deeper catalog
-            consistency checks like duplicate barcodes, missing required tax codes, and Google Shopping field completeness.
+            If you want, the next improvements can be Shopify specific autofix packs (safer “fix all” rules) and deeper catalog consistency checks like duplicate barcodes, missing required tax codes, and Google Shopping field completeness.
           </p>
         </section>
       ) : null}
