@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 export const metadata = {
   title: "Preset CSV Formats | StriveFormats",
   description:
-    "Browse ecommerce CSV templates for Shopify, WooCommerce, BigCommerce, eBay, and Amazon. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
+    "Browse ecommerce CSV templates for Shopify, WooCommerce, Amazon Seller Central, eBay, and Etsy. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
 };
 
 export default function PresetsPage() {
@@ -19,7 +19,7 @@ export default function PresetsPage() {
     "@type": "CollectionPage",
     name: "Preset CSV Formats",
     description:
-      "Ecommerce CSV templates for Shopify, WooCommerce, BigCommerce, eBay, and Amazon. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
+      "Ecommerce CSV templates for Shopify, WooCommerce, Amazon Seller Central, eBay, and Etsy. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
   };
 
   return (
@@ -30,8 +30,8 @@ export default function PresetsPage() {
         <p className="text-sm text-[var(--muted)]">StriveFormats</p>
         <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">Preset CSV Formats</h1>
         <p className="mt-3 text-sm text-[var(--muted)]">
-          Presets are ready-made “format packs” that tell the fixer how to validate, auto-fix safe issues, and export a clean CSV
-          for a specific platform. Pick your target import and you’ll open the fixer already configured.
+          Presets are ready made format packs that tell the fixer how to validate, auto fix safe issues, and export a clean CSV
+          for a specific ecommerce platform. Pick your target import and you will open the fixer already configured.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -60,11 +60,11 @@ export default function PresetsPage() {
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <div className="text-sm font-semibold text-[var(--text)]">Run a quick test</div>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Try the fixer with a sample file. You can download messy CSVs on the Shopify page and see the fix log instantly.
+            Try the fixer with a sample file. Download a sample CSV, upload it, and see the fix log instantly.
           </p>
           <div className="mt-4">
-            <Link href="/shopify-csv-fixer" className="rgb-btn">
-              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Get sample downloads</span>
+            <Link href="/presets/shopify_products/sample.csv" className="rgb-btn">
+              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Download a sample</span>
             </Link>
           </div>
         </div>
@@ -95,10 +95,7 @@ export default function PresetsPage() {
                   const openHref = `/app?preset=${encodeURIComponent(p.formatId)}`;
 
                   return (
-                    <div
-                      key={p.id}
-                      className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6"
-                    >
+                    <div key={p.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
                       <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
                       <p className="mt-2 text-sm text-[var(--muted)]">{p.description}</p>
 

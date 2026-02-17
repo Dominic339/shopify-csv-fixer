@@ -30,9 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: {
-      canonical: `/ecommerce/${encodeURIComponent(p.id)}`,
-    },
+    alternates: { canonical: `/ecommerce/${encodeURIComponent(p.id)}` },
     openGraph: {
       title,
       description,
@@ -73,22 +71,7 @@ function platformLongCopy(platformId: string) {
           "Validate numeric prices and clean obvious formatting issues",
           "Keep descriptions, categories, and image links consistent",
         ],
-        extra:
-          "This preset focuses on predictable product imports and clean spreadsheet handoffs for bulk edits.",
-      };
-    case "bigcommerce":
-      return {
-        headline: "BigCommerce CSV Fixer",
-        subhead:
-          "BigCommerce imports often fail due to missing required columns or non-numeric values in numeric fields like price and inventory.",
-        bullets: [
-          "Validate required product fields like SKU and Product Name",
-          "Check numeric fields like Price and Inventory Level",
-          "Normalize blanks and trim hidden whitespace",
-          "Keep category and image URL fields consistent",
-        ],
-        extra:
-          "Use the template preview to confirm your columns match the expected layout before you upload.",
+        extra: "This preset focuses on predictable product imports and clean spreadsheet handoffs for bulk edits.",
       };
     case "ebay":
       return {
@@ -102,21 +85,34 @@ function platformLongCopy(platformId: string) {
           "Keep image URLs and descriptions consistent",
         ],
         extra:
-          "This is a simplified listing template intended for fast cleanup and repeatable bulk edits.",
+          "This includes a basic listing template plus a variations template so you can keep parent and child rows consistent.",
       };
     case "amazon":
       return {
-        headline: "Amazon CSV Fixer",
+        headline: "Amazon Seller Central CSV Fixer",
         subhead:
-          "Amazon inventory style uploads depend on consistent identifiers and clean numeric fields. Formatting drift across spreadsheets can cause costly upload errors.",
+          "Amazon uploads depend on consistent identifiers and clean numeric fields. Formatting drift across spreadsheets can cause costly upload errors.",
         bullets: [
-          "Validate SKU, product name, price, and quantity",
+          "Validate required identifiers (SKU and key ID columns)",
           "Normalize numeric formatting to plain values",
           "Standardize blanks so spreadsheets don’t invent values",
-          "Keep condition and image URL fields consistent",
+          "Keep URLs and core product fields consistent",
         ],
         extra:
-          "This is a simplified inventory loader style template for reliable cleanup and import prep.",
+          "This includes an Inventory Loader style template plus a minimal Product Template starter for category-based workflows.",
+      };
+    case "etsy":
+      return {
+        headline: "Etsy CSV Fixer",
+        subhead:
+          "Etsy listing exports often drift in formatting and required values. Small inconsistencies can cause upload errors or messy bulk edits.",
+        bullets: [
+          "Validate core listing fields like Title, Price, and Quantity",
+          "Normalize numeric values (plain numbers)",
+          "Clean hidden whitespace and blank inconsistencies",
+          "Keep tags and description fields consistent",
+        ],
+        extra: "This preset focuses on reliable cleanup for repeat bulk listing edits.",
       };
     default:
       return null;
@@ -131,9 +127,12 @@ export default async function EcommercePlatformPage({ params }: PageProps) {
   const copy = platformLongCopy(p.id);
   if (!copy) return notFound();
 
-  const openFixerHref = `/app?preset=${encodeURIComponent(p.formatId)}`;
-  const templatePreviewHref = `/presets/${encodeURIComponent(p.presetId)}`;
-  const sampleCsvHref = `/presets/${encodeURIComponent(p.presetId)}/sample.csv`;
+  const primary = p.formats[0];
+  if (!primary) return notFound();
+
+  const openFixerHref = `/app?preset=${encodeURIComponent(primary.formatId)}`;
+  const templatePreviewHref = `/presets/${encodeURIComponent(primary.presetId)}`;
+  const sampleCsvHref = `/presets/${encodeURIComponent(primary.presetId)}/sample.csv`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -158,7 +157,6 @@ export default async function EcommercePlatformPage({ params }: PageProps) {
         <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text)]">{copy.headline}</h1>
 
         <p className="mt-4 text-lg text-[var(--muted)]">{copy.subhead}</p>
-
         <p className="mt-4 text-sm text-[var(--muted)]">{copy.extra}</p>
 
         <div className="mt-8 flex flex-wrap gap-3">
@@ -191,10 +189,35 @@ export default async function EcommercePlatformPage({ params }: PageProps) {
       </section>
 
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <h2 className="text-2xl font-semibold text-[var(--text)]">Supported formats for {p.name}</h2>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Start with the primary template, then use the additional formats as needed. All formats prioritize safe validation and safe auto-fixes only.
+        </p>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {p.formats.map((f) => (
+            <div key={f.formatId} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
+              <div className="text-sm font-semibold text-[var(--text)]">{f.label}</div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link href={`/app?preset=${encodeURIComponent(f.formatId)}`} className="rgb-btn">
+                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open in fixer</span>
+                </Link>
+                <Link href={`/presets/${encodeURIComponent(f.presetId)}`} className="rgb-btn">
+                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Template preview</span>
+                </Link>
+                <a href={`/presets/${encodeURIComponent(f.presetId)}/sample.csv`} className="rgb-btn">
+                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Sample CSV</span>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <h2 className="text-2xl font-semibold text-[var(--text)]">What this preset checks</h2>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          These checks are designed to catch the common problems that cause failed imports, partial imports, or silent
-          data drift.
+          These checks are designed to catch the common problems that cause failed imports, partial imports, or silent data drift.
         </p>
 
         <ul className="mt-4 list-disc pl-6 text-sm text-[var(--muted)]">
@@ -204,33 +227,36 @@ export default async function EcommercePlatformPage({ params }: PageProps) {
         </ul>
 
         <p className="mt-4 text-sm text-[var(--muted)]">
-          Next steps for this platform can include additional, platform-specific autofix packs (still safe by default)
-          and deeper catalog consistency checks.
+          Next steps for this platform can include additional, platform-specific autofix packs (still safe by default) and deeper catalog consistency checks.
         </p>
       </section>
 
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <h2 className="text-2xl font-semibold text-[var(--text)]">Other supported platforms</h2>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          StriveFormats v1 focuses on ecommerce. These pages keep the tool focused while still letting you move between
-          templates quickly.
+          StriveFormats v1 focuses on ecommerce. These pages keep the tool focused while still letting you move between templates quickly.
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {ECOMMERCE_PLATFORMS.filter((x) => x.id !== p.id).map((x) => (
-            <div key={x.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
-              <div className="text-sm font-semibold text-[var(--text)]">{x.name}</div>
-              <div className="mt-2 text-sm text-[var(--muted)]">{x.blurb}</div>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={`/ecommerce/${x.id}`} className="rgb-btn">
-                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open {x.name}</span>
-                </Link>
-                <Link href={`/presets/${encodeURIComponent(x.presetId)}`} className="rgb-btn">
-                  <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Template preview</span>
-                </Link>
+          {ECOMMERCE_PLATFORMS.filter((x) => x.id !== p.id).map((x) => {
+            const primaryX = x.formats[0];
+            return (
+              <div key={x.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
+                <div className="text-sm font-semibold text-[var(--text)]">{x.name}</div>
+                <div className="mt-2 text-sm text-[var(--muted)]">{x.blurb}</div>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link href={`/ecommerce/${x.id}`} className="rgb-btn">
+                    <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open {x.name}</span>
+                  </Link>
+                  {primaryX ? (
+                    <Link href={`/presets/${encodeURIComponent(primaryX.presetId)}`} className="rgb-btn">
+                      <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Template preview</span>
+                    </Link>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </main>

@@ -9,12 +9,12 @@ import { ECOMMERCE_PLATFORMS } from "@/lib/ecommercePlatforms";
 export const metadata: Metadata = {
   title: "Ecommerce CSV Fixer | StriveFormats",
   description:
-    "Clean, standardize, and validate ecommerce CSV files before import. StriveFormats supports Shopify, WooCommerce, BigCommerce, eBay, and Amazon templates with safe auto-fixes and clear warnings.",
+    "Clean, standardize, and validate ecommerce CSV files before import. StriveFormats supports Shopify, WooCommerce, Amazon Seller Central, eBay, and Etsy templates with safe auto-fixes and clear warnings.",
   alternates: { canonical: "/ecommerce-csv-fixer" },
   openGraph: {
     title: "Ecommerce CSV Fixer | StriveFormats",
     description:
-      "Fix messy ecommerce CSV files with safe auto-fixes and clear validation. Supports Shopify, WooCommerce, BigCommerce, eBay, and Amazon.",
+      "Fix messy ecommerce CSV files with safe auto-fixes and clear validation. Supports Shopify, WooCommerce, Amazon Seller Central, eBay, and Etsy.",
     type: "website",
     url: "/ecommerce-csv-fixer",
   },
@@ -57,40 +57,15 @@ function getPlatformBlurb(id: PlatformId): string {
       return "Validate products CSVs against Shopify’s template, normalize handles, variants, prices, and image rows.";
     case "woocommerce":
       return "Clean WooCommerce product exports and standardize headers, numbers, and required fields before import.";
-    case "bigcommerce":
-      return "Prep BigCommerce product CSVs with safe normalization and clear template validation warnings.";
     case "etsy":
       return "Fix Etsy listings CSV issues like formatting, missing fields, and invalid values before upload.";
     case "ebay":
-      return "Validate basic eBay listing CSVs and standardize fields to reduce import failures.";
+      return "Validate eBay listing templates and standardize fields to reduce import failures.";
     case "amazon":
-      return "Run safe checks on Amazon inventory loader files and normalize common formatting problems.";
+      return "Run safe checks on Amazon Seller Central templates and normalize common formatting problems.";
     default:
       return "Validate platform templates and export a clean CSV you can trust.";
   }
-}
-
-/**
- * Some branches used `presetId` (string), others used `presetIds` (string[]),
- * and at least one typo variant `presetsIds`.
- *
- * We do NOT change the shared platform registry here.
- * We only read whichever field exists, so this page compiles across versions.
- */
-function getFirstPresetId(p: unknown): string {
-  const anyP = p as any;
-
-  const presetIdsCandidate = anyP?.presetIds ?? anyP?.presetsIds;
-  if (Array.isArray(presetIdsCandidate) && presetIdsCandidate.length > 0) {
-    return String(presetIdsCandidate[0] ?? "");
-  }
-
-  const presetIdCandidate = anyP?.presetId;
-  if (typeof presetIdCandidate === "string" && presetIdCandidate.trim()) {
-    return presetIdCandidate.trim();
-  }
-
-  return "";
 }
 
 export default function EcommerceCsvFixerPage() {
@@ -122,13 +97,11 @@ export default function EcommerceCsvFixerPage() {
         <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text)]">Ecommerce CSV Fixer</h1>
 
         <p className="mt-4 text-lg text-[var(--muted)]">
-          Fix ecommerce CSV files before you import. Auto-fix safe issues, flag risky ones, and export a clean file you
-          can trust.
+          Fix ecommerce CSV files before you import. Auto-fix safe issues, flag risky ones, and export a clean file you can trust.
         </p>
 
         <p className="mt-4 text-sm text-[var(--muted)]">
-          This page is the starting point for the ecommerce tools in StriveFormats. Pick the platform you are importing
-          into, then upload your CSV and validate it against that platform’s template.
+          Pick the platform you are importing into, then upload your CSV and validate it against that platform’s template.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
@@ -139,24 +112,18 @@ export default function EcommerceCsvFixerPage() {
           <Link href="/presets" className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Browse templates</span>
           </Link>
-
-          <Link href="/pricing#pricing" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">View pricing</span>
-          </Link>
         </div>
       </section>
 
       <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <h2 className="text-2xl font-semibold text-[var(--text)]">Supported ecommerce platforms</h2>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Start with these apps. Each page includes a template preview, a sample CSV you can download, and a link to the
-          platform tools.
+          Each platform page includes a template preview, sample CSV downloads, and links to the platform tools.
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {ECOMMERCE_PLATFORMS.map((p) => {
-            const firstPresetId = getFirstPresetId(p);
-
+            const first = p.formats[0];
             return (
               <div key={p.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
                 <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
@@ -167,8 +134,8 @@ export default function EcommerceCsvFixerPage() {
                     <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open {p.name} tool</span>
                   </Link>
 
-                  {firstPresetId ? (
-                    <Link href={`/presets/${encodeURIComponent(firstPresetId)}`} className="rgb-btn">
+                  {first ? (
+                    <Link href={`/presets/${encodeURIComponent(first.presetId)}`} className="rgb-btn">
                       <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Template preview</span>
                     </Link>
                   ) : (
@@ -188,15 +155,14 @@ export default function EcommerceCsvFixerPage() {
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
             <div className="text-sm font-semibold text-[var(--text)]">1) Choose a platform</div>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Each platform has its own column expectations. Pick Shopify, WooCommerce, BigCommerce, eBay, or Amazon.
+              Each platform has its own column expectations. Pick Shopify, WooCommerce, Amazon Seller Central, eBay, or Etsy.
             </p>
           </div>
 
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
             <div className="text-sm font-semibold text-[var(--text)]">2) Upload your CSV</div>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              StriveFormats validates header names and scans for common issues like invalid numbers, blanks, and
-              inconsistent values.
+              StriveFormats validates header names and scans for common issues like invalid numbers, blanks, and inconsistent values.
             </p>
           </div>
 
@@ -209,8 +175,7 @@ export default function EcommerceCsvFixerPage() {
         </div>
 
         <div className="mt-6 text-sm text-[var(--muted)]">
-          If you have repeat workflows, Custom Formats let you save reusable column templates and rules so future cleanups
-          take seconds.
+          If you have repeat workflows, Custom Formats let you save reusable column templates and rules so future cleanups take seconds.
         </div>
       </section>
 
@@ -218,10 +183,10 @@ export default function EcommerceCsvFixerPage() {
         <h2 className="text-2xl font-semibold text-[var(--text)]">FAQ</h2>
         <div className="mt-6 grid gap-4">
           {faqItems.map((f) => (
-            <details key={f.question} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">{f.question}</summary>
-              <p className="mt-3 text-sm text-[var(--muted)]">{f.answer}</p>
-            </details>
+            <div key={f.question} className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
+              <div className="text-sm font-semibold text-[var(--text)]">{f.question}</div>
+              <p className="mt-2 text-sm text-[var(--muted)]">{f.answer}</p>
+            </div>
           ))}
         </div>
       </section>
