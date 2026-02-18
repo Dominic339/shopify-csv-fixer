@@ -110,6 +110,13 @@ export type CanonicalizeResult = {
   unknownHeaders: string[];
   // Map of canonical header -> source header we copied from (useful for debugging)
   sourceMap: Record<string, string | null>;
+
+  // Safety diagnostics (to prevent silent data loss)
+  duplicateInputHeaders: Array<{ header: string; count: number }>;
+  // Cases where multiple source columns map to the same canonical column via aliases
+  headerCollisions: Array<{ canonical: string; sources: string[] }>;
+  // Any duplicates in the final fixed header list (should be empty)
+  duplicateOutputHeaders: Array<{ header: string; count: number }>;
 };
 
 function normHeader(h: string) {
@@ -169,26 +176,15 @@ function resolveSourceHeader(inputHeaders: string[], possible: string[]): string
 export function canonicalizeShopifyProductCsv(headers: string[], rows: CsvRow[]): CanonicalizeResult {
   const inputHeaders = (headers ?? []).map(normHeader).filter((h) => h.length > 0);
 
-  // Detect duplicate input headers after normalization (case/space differences)
-  const inputKeyCounts = new Map<string, { header: string; count: number }>();
+  // Detect duplicate headers in the input after normalization (risk of overwriting data)
+  const dupMap = new Map<string, { header: string; count: number }>();
   for (const h of inputHeaders) {
     const k = normKey(h);
-    const cur = inputKeyCounts.get(k);
-    if (cur) cur.count += 1;
-    else inputKeyCounts.set(k, { header: h, count: 1 });
+    const prev = dupMap.get(k);
+    if (prev) prev.count += 1;
+    else dupMap.set(k, { header: h, count: 1 });
   }
-  const duplicateInputHeaders = [...inputKeyCounts.values()].filter((v) => v.count > 1);
-
-  // Detect collisions: multiple distinct headers map to the same canonical key (via aliases)
-  const headerCollisions: Array<{ canonical: string; headers: string[] }> = [];
-  for (const canon of SHOPIFY_CANONICAL_HEADERS) {
-    const key = canon as CanonKey;
-    const aliases = SHOPIFY_HEADER_ALIASES[key] ?? [canon];
-    const aliasKeys = new Set([canon, ...aliases].map((s) => normKey(s)));
-    const matched = inputHeaders.filter((h) => aliasKeys.has(normKey(h)));
-    const uniq = [...new Set(matched)];
-    if (uniq.length > 1) headerCollisions.push({ canonical: canon, headers: uniq });
-  }
+  const duplicateInputHeaders = [...dupMap.values()].filter((v) => v.count > 1);
 
 
   // Determine unknown headers (preserve them exactly; appended after canonical)
@@ -202,19 +198,24 @@ export function canonicalizeShopifyProductCsv(headers: string[], rows: CsvRow[])
     sourceMap[canon] = resolveSourceHeader(inputHeaders, SHOPIFY_HEADER_ALIASES[key] ?? [canon]);
   }
 
+  // Detect alias collisions: more than one input column matches the same canonical field
+  const headerCollisions: Array<{ canonical: string; sources: string[] }> = [];
+  for (const canon of SHOPIFY_CANONICAL_HEADERS) {
+    const key = canon as CanonKey;
+    const aliases = SHOPIFY_HEADER_ALIASES[key] ?? [canon];
+    const matches: string[] = [];
+    for (const h of inputHeaders) {
+      const hk = normKey(h);
+      if (aliases.some((a) => normKey(a) === hk)) {
+        if (!matches.includes(h)) matches.push(h);
+      }
+    }
+    if (matches.length > 1) headerCollisions.push({ canonical: canon, sources: matches });
+  }
+
+
   // Build fixed header order: canonical first, then unknown appended (stable)
   const fixedHeaders = [...SHOPIFY_CANONICAL_HEADERS, ...unknownHeaders];
-
-  // Detect duplicate output headers (would overwrite values)
-  const outKeyCounts = new Map<string, { header: string; count: number }>();
-  for (const h of fixedHeaders) {
-    const k = normKey(h);
-    const cur = outKeyCounts.get(k);
-    if (cur) cur.count += 1;
-    else outKeyCounts.set(k, { header: h, count: 1 });
-  }
-  const duplicateOutputHeaders = [...outKeyCounts.values()].filter((v) => v.count > 1);
-
 
   // Build rows with canonical keys filled from whichever source exists (prefer direct canonical col if present)
   const fixedRows: CsvRow[] = (rows ?? []).map((r) => {
@@ -245,7 +246,19 @@ export function canonicalizeShopifyProductCsv(headers: string[], rows: CsvRow[])
     return out;
   });
 
-  return { fixedHeaders, fixedRows, unknownHeaders, sourceMap, headerCollisions, duplicateInputHeaders, duplicateOutputHeaders };
+
+  // Detect duplicates in the output header list (should generally be empty; duplicates break imports)
+  const outMap = new Map<string, { header: string; count: number }>();
+  for (const h of fixedHeaders) {
+    const k = normKey(h);
+    const prev = outMap.get(k);
+    if (prev) prev.count += 1;
+    else outMap.set(k, { header: h, count: 1 });
+  }
+  const duplicateOutputHeaders = [...outMap.values()].filter((v) => v.count > 1);
+
+  return { fixedHeaders, fixedRows, unknownHeaders, sourceMap, duplicateInputHeaders, headerCollisions, duplicateOutputHeaders };
+
 }
 
 export function slugifyShopifyHandle(input: string): string {

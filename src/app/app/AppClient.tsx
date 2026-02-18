@@ -87,14 +87,7 @@ export default function AppClient() {
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
-  // Initialize the selected format from the URL query param if present.
-  // This prevents the "keep valid" fallback from snapping to the first format
-  // before the preset can be applied.
-  const [formatId, setFormatId] = useState<string>(() => {
-    if (typeof window === "undefined") return "shopify_products";
-    const preset = new URLSearchParams(window.location.search).get("preset");
-    return preset?.trim() ? preset.trim() : "shopify_products";
-  });
+  const [formatId, setFormatId] = useState<string>("general_csv");
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -165,13 +158,11 @@ export default function AppClient() {
   }, []);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
-  // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
-  // latest selected id (including a preset from the URL) and does not overwrite it.
   useEffect(() => {
-    if (!allFormats.length) return;
     if (allFormats.some((f) => f.id === formatId)) return;
-    setFormatId(allFormats[0]!.id);
-  }, [allFormats, formatId]);
+    setFormatId(allFormats[0]?.id ?? "general_csv");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFormats.length]);
 
   const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
 
