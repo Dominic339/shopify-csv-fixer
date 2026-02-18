@@ -49,9 +49,17 @@ export function EditableIssuesTable(props: {
   // Expand state for pinned rows
   const [open, setOpen] = useState<Set<number>>(() => new Set());
 
+  // Expand state for "Why is this blocking?" panels per issue instance
+  const [openWhy, setOpenWhy] = useState<Record<string, boolean>>({});
+
+  const toggleWhy = (key: string) => {
+    setOpenWhy((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   // When switching formats/files, collapse
   useEffect(() => {
     setOpen(new Set());
+    setOpenWhy({});
   }, [resetKey]);
 
   const issuesByRow = useMemo(() => {
@@ -254,21 +262,26 @@ export function EditableIssuesTable(props: {
                                 </div>
                               ) : null}
 
-                              {code === "shopify/options_not_unique" && details?.duplicateCombo ? (
+                              {code === "shopify/options_not_unique" && (Array.isArray(details?.duplicateCombos) ? details.duplicateCombos.length > 0 : Boolean(details?.duplicateCombo)) ? (
                                 <div className="mt-2 rounded-lg border border-[color:rgba(255,200,0,0.25)] bg-[color:rgba(255,200,0,0.06)] p-2 text-xs">
                                   <div className="font-semibold">Show duplicate combinations</div>
                                   <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">
-                                    <div>Duplicate combo:</div>
-                                    <div className="mt-1 space-y-0.5">
-                                      {Object.entries(details.duplicateCombo as Record<string, string>).map(([k, v]) => (
-                                        <div key={k}>
-                                          <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>{k}:</span> {v}
+                                    {(Array.isArray(details?.duplicateCombos) ? details.duplicateCombos : [{ options: details?.duplicateCombo, rows: details?.rows }]).slice(0, 3).map((c: any, i: number) => (
+                                      <div key={i} className={i ? "mt-2 pt-2 border-t border-[color:rgba(255,200,0,0.2)]" : ""}>
+                                        <div>Duplicate combo:</div>
+                                        <div className="mt-1 space-y-0.5">
+                                          {Object.entries((c?.options ?? c ?? {}) as Record<string, string>).map(([k, v]) => (
+                                            <div key={k}>
+                                              <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>{k}:</span> {String(v)}
+                                            </div>
+                                          ))}
                                         </div>
-                                      ))}
-                                    </div>
-                                    {Array.isArray(details.rows) ? (
-                                      <div className="mt-1">Rows: {(details.rows as number[]).join(", \ ")}</div>
-                                    ) : null}
+                                        {Array.isArray(c?.rows) ? <div className="mt-1">Rows: {(c.rows as number[]).join(", ")}</div> : null}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : null}
                                   </div>
                                 </div>
                               ) : null}
