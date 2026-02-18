@@ -282,9 +282,6 @@ export function EditableIssuesTable(props: {
                                   </div>
                                 </div>
                               ) : null}
-                                  </div>
-                                </div>
-                              ) : null}
 
                               {suggestion ? (
                                 <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
