@@ -526,7 +526,9 @@ function unpinRow(rowIndex: number) {
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      setPinnedRows(new Set());
+      // Reset pin state for a new run
+      setManualPinnedRows(new Set());
+      setSuppressedAutoPins(new Set());
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -551,7 +553,9 @@ function unpinRow(rowIndex: number) {
       setAutoFixes([]);
       setEditing(null);
       setLastFixAll(null);
-      setPinnedRows(new Set());
+      // Reset pin state for a new run
+      setManualPinnedRows(new Set());
+      setSuppressedAutoPins(new Set());
 
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
@@ -571,7 +575,9 @@ function unpinRow(rowIndex: number) {
     setAutoFixes([]);
     setEditing(null);
     setLastFixAll(null);
-    setPinnedRows(new Set());
+      // Reset pin state for a new run
+      setManualPinnedRows(new Set());
+      setSuppressedAutoPins(new Set());
 
     if (!lastUploadedText || !activeFormat) return;
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
