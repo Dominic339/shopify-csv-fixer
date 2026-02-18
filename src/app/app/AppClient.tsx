@@ -3,7 +3,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
@@ -67,8 +66,6 @@ function safeBaseName(name: string | null) {
 }
 
 export default function AppClient() {
-  const searchParams = useSearchParams();
-  const presetParam = (searchParams.get("preset") ?? "").trim();
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
@@ -90,20 +87,12 @@ export default function AppClient() {
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
-  const [formatId, setFormatId] = useState<string>(() => {
-    // Default selection is Shopify, but if a preset query is present we will apply it.
-    // Note: with Next.js client navigation, this component may stay mounted while
-    // only the querystring changes, so we also sync in a useEffect below.
-    return "general_csv";
-  });
+  const initialPreset = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return (new URLSearchParams(window.location.search).get("preset") ?? "").trim();
+  }, []);
 
-  // Keep formatId in sync with /app?preset=... even on client-side navigation.
-  useEffect(() => {
-    if (!presetParam) return;
-    if (presetParam === formatId) return;
-    setFormatId(presetParam);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presetParam]);
+  const [formatId, setFormatId] = useState<string>(() => initialPreset || "shopify_products");
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -131,25 +120,37 @@ export default function AppClient() {
 
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
-  // Validate current selection and safely fall back if needed.
-  // If we were initialized with a preset that isn't available yet (custom formats),
-  // wait until it appears instead of falling back to Shopify.
+  // Support selecting a preset via /app?preset=<formatId>
+  // We initialize formatId from the querystring on first mount (above).
+
+  // support exportName via /app?exportName=<base>
+  const appliedExportNameRef = useRef(false);
+  useEffect(() => {
+    if (appliedExportNameRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const qp = new URLSearchParams(window.location.search);
+    const exportName = qp.get("exportName");
+    if (exportName) {
+      setExportBaseName(exportName);
+      appliedExportNameRef.current = true;
+      return;
+    }
+
+    const preset = qp.get("preset");
+    if (preset) setExportBaseName(preset);
+    appliedExportNameRef.current = true;
+  }, []);
+
+
+  // Keep selected format valid (if a custom format is deleted or formats load)
   useEffect(() => {
     if (allFormats.length === 0) return;
-
     if (allFormats.some((f) => f.id === formatId)) return;
+    setFormatId(allFormats[0]?.id ?? "shopify_products");
+  }, [allFormats, formatId]);
 
-    // If a preset query param exists and it matches the selected formatId,
-    // we're likely waiting for that preset to become available (custom formats).
-    if (presetParam && presetParam === formatId) return;
-
-    setFormatId(allFormats[0]?.id ?? "general_csv");
-  }, [allFormats, formatId, presetParam]);
-
-  const activeFormat = useMemo(
-    () => allFormats.find((f) => f.id === formatId) ?? allFormats[0],
-    [allFormats, formatId]
-  );
+  const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
 
   async function refreshQuotaAndPlan() {
     try {
