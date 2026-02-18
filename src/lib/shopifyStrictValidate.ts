@@ -332,9 +332,9 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
       const n1 = n1Raw || 'Option1';
       const n2 = n2Raw || 'Option2';
       const n3 = n3Raw || 'Option3';
-      const v1 = String(sample[COL.opt1Value] ?? '').trim();
-      const v2 = String(sample[COL.opt2Value] ?? '').trim();
-      const v3 = String(sample[COL.opt3Value] ?? '').trim();
+      const v1 = String(sample[COL.opt1Val] ?? '').trim();
+      const v2 = String(sample[COL.opt2Val] ?? '').trim();
+      const v3 = String(sample[COL.opt3Val] ?? '').trim();
 
       const duplicateCombo: Record<string, string> = {};
       if (v1) duplicateCombo[n1] = v1;
@@ -347,7 +347,7 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
           severity: "error",
           code: "shopify/options_not_unique",
           rowIndex: idx,
-          column: COL.opt1Value,
+          column: COL.opt1Val,
           message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${duplicateRows.join(", ")}).`,
           suggestion: "Make each variant option combination unique (Option1/2/3 values).",
           details: {
