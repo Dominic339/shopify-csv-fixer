@@ -285,6 +285,17 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
+  // Debug hook for DevTools inspection.
+  // Usage: window.__DEBUG_ISSUES__
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      (window as any).__DEBUG_ISSUES__ = issuesForTable;
+    } catch {
+      // ignore
+    }
+  }, [issuesForTable]);
+
   const issuesForDisplay = useMemo(() => {
     if (issueSeverityFilter === "all") return issuesForTable;
     return issuesForTable.filter((i) => i.severity === issueSeverityFilter);
