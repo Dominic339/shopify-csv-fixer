@@ -1,272 +1,128 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+
 import JsonLd from "@/components/JsonLd";
-import { getPresetFormats, getPresetById } from "@/lib/presets";
+import { getPresetById } from "@/lib/presets";
+import { getFormatById } from "@/lib/formats";
 
 type PageProps = {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 };
 
-export const dynamicParams = false;
-
-export async function generateStaticParams() {
-  const presets = getPresetFormats();
-  return presets.map((p) => ({ id: p.id }));
+function sampleValueFor(header: string) {
+  const h = header.toLowerCase();
+  if (h.includes("title") || h.includes("name") || h.includes("item")) return "Sample Product";
+  if (h.includes("sku")) return "SKU-1001";
+  if (h.includes("handle")) return "sample-product";
+  if (h.includes("price")) return "19.99";
+  if (h.includes("quantity") || h.includes("stock") || h.includes("inventory")) return "10";
+  if (h.includes("published")) return "TRUE";
+  if (h.includes("url") || h.includes("image")) return "https://example.com/image.jpg";
+  if (h.includes("category")) return "Example Category";
+  if (h.includes("tag")) return "tag-one, tag-two";
+  return "";
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params;
-  const preset = getPresetById(id);
-
-  if (!preset) {
-    return {
-      title: "Preset not found",
-      description: "This preset CSV format does not exist.",
-    };
-  }
-
-  // Shopify-specific SEO
-  if (preset.id === "shopify_products") {
-    const title = "Shopify Products CSV Template Preview | StriveFormats";
-    const description =
-      "Preview the official Shopify Products CSV columns, download a ready-to-fill sample template, or open the fixer to validate handles, variants, options, pricing, inventory, images, and SEO before you import to Shopify.";
-
-    return {
-      title,
-      description,
-      alternates: {
-        canonical: `/presets/${encodeURIComponent(preset.id)}`,
-      },
-      openGraph: {
-        title,
-        description,
-        type: "website",
-        url: `/presets/${encodeURIComponent(preset.id)}`,
-      },
-    };
-  }
-
-  const title = `${preset.name} CSV Format`;
-  const description =
-    preset.description ||
-    `Preset CSV format for ${preset.name}. View columns, download a sample CSV, or open the fixer with this preset selected.`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: `/presets/${encodeURIComponent(preset.id)}`,
-    },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url: `/presets/${encodeURIComponent(preset.id)}`,
-    },
-  };
-}
-
-function sampleValueForColumn(colName: string) {
-  const c = colName.trim().toLowerCase();
-
-  if (c === "url handle" || c === "handle") return "example-item";
-  if (c === "title" || c.includes("name")) return "Example Item";
-  if (c.includes("description") || c.includes("html")) return "Example description text";
-  if (c.includes("vendor") || c.includes("brand")) return "Example Brand";
-  if (c.includes("category")) return "Example Category";
-  if (c === "type") return "Example Type";
-  if (c.includes("tag")) return "tag1, tag2";
-  if (c.includes("published")) return "TRUE";
-  if (c.includes("status")) return "Active";
-
-  if (c.includes("price") || c.includes("cost") || c.includes("amount")) return "19.99";
-  if (c.includes("qty") || c.includes("quantity") || c.includes("inventory") || c.includes("stock")) return "10";
-
-  if (c === "sku" || c.includes("sku")) return "SKU-EXAMPLE-001";
-  if (c.includes("barcode")) return "1234567890";
-
-  if (c.includes("option") && c.includes("name")) return "Size";
-  if (c.includes("option") && c.includes("value")) return "M";
-
-  if (c.includes("image") && c.includes("alt")) return "Example image alt text";
-  if (c.includes("image") || c.includes("url") || c.includes("link")) return "https://example.com/item";
-
-  if (c.includes("email")) return "customer@example.com";
-  if (c.includes("phone")) return "555-0100";
-
-  if (c.includes("address")) return "123 Main St";
-  if (c.includes("city")) return "Boston";
-  if (c.includes("state") || c.includes("province")) return "MA";
-  if (c.includes("zip") || c.includes("postal")) return "02101";
-  if (c.includes("country")) return "US";
-
-  if (c.includes("date")) return "2026-01-01";
-
-  return "Example";
-}
-
-function buildSampleRows(columns: string[]) {
-  const row1: Record<string, string> = {};
-  for (const c of columns) row1[c] = sampleValueForColumn(c);
-
-  const row2: Record<string, string> = {};
-  const row3: Record<string, string> = {};
-  for (const c of columns) {
-    row2[c] = "";
-    row3[c] = "";
-  }
-
-  return [row1, row2, row3];
-}
-
-export default async function PresetDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  const preset = getPresetById(id);
-
+export default function PresetDetailPage({ params }: PageProps) {
+  const preset = getPresetById(params.id);
   if (!preset) return notFound();
 
-  const openHref = `/app?preset=${encodeURIComponent(preset.formatId)}`;
-  const sampleHref = `/presets/${encodeURIComponent(preset.id)}/sample.csv`;
+  const format = getFormatById(preset.formatId);
+  const expectedHeaders = (format as any)?.expectedHeaders as string[] | undefined;
+  const headers = Array.isArray(expectedHeaders) && expectedHeaders.length ? expectedHeaders : [];
 
-  const columns = preset.columns ?? [];
-  const sampleRows =
-    preset.sampleRows && preset.sampleRows.length > 0 ? preset.sampleRows : buildSampleRows(columns);
+  const openFixerHref = `/app?preset=${encodeURIComponent(preset.formatId)}`;
+  const sampleCsvHref = `/presets/${encodeURIComponent(preset.id)}/sample.csv`;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name:
-      preset.id === "shopify_products"
-        ? "Shopify Products CSV Template Preview"
-        : `${preset.name} CSV Format`,
-    description: preset.description ?? "",
+    name: `${preset.name} Template`,
+    description: preset.description,
     url: `/presets/${encodeURIComponent(preset.id)}`,
   };
-
-  const isShopify = preset.id === "shopify_products";
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd data={jsonLd} />
 
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <p className="text-sm text-[var(--muted)]">Preset format</p>
-
-        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">
-          {isShopify ? "Shopify Products CSV" : preset.name}
-        </h1>
-
-        <p className="mt-3 text-sm text-[var(--muted)]">
-          {isShopify
-            ? "Preview Shopify’s Products CSV layout, download a ready-to-fill sample, or open the fixer to validate your import before you upload to Shopify."
-            : preset.description}
-        </p>
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href={openHref} className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-              Open fixer with this preset
-            </span>
-          </Link>
-
-          {isShopify ? (
-            <Link href="/shopify-csv-fixer" className="rgb-btn">
-              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                Shopify guide + examples
-              </span>
-            </Link>
-          ) : null}
-
-          <Link href="/presets" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-              Back to all presets
-            </span>
-          </Link>
-        </div>
-
-        <div className="mt-4 text-xs text-[var(--muted)]">Preset ID: {preset.id}</div>
-      </div>
-
-      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--text)]">CSV preview</h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              {isShopify
-                ? "This preview mirrors the official Shopify product CSV template."
-                : "This is what the CSV layout looks like for this preset."}
-            </p>
+        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-3xl">
+            <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">{preset.category}</div>
+            <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">{preset.name}</h1>
+            <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{preset.description}</p>
           </div>
 
-          <a href={sampleHref} className="rg-btn">
-            Download sample CSV
-          </a>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link className="rg-btn" href={openFixerHref}>
+              Open with preset
+            </Link>
+            <Link className="pill-btn" href={sampleCsvHref}>
+              Download sample CSV
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-7 md:grid-cols-2">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
+          <h2 className="text-xl font-semibold text-[var(--text)]">Expected columns</h2>
+          {headers.length ? (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {headers.map((h) => (
+                <div key={h} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm">
+                  {h}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
+              This preset does not expose a fixed column list yet.
+            </p>
+          )}
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--border)]">
-          <div className="w-full overflow-x-auto">
-            <table className="min-w-[900px] w-full text-left text-sm">
-              <thead className="bg-[var(--surface-2)]">
-                <tr>
-                  <th className="px-4 py-3 font-semibold text-[var(--text)]" style={{ width: 80 }}>
-                    Row
-                  </th>
-                  {columns.map((c) => (
-                    <th key={c} className="px-4 py-3 font-semibold text-[var(--text)] whitespace-nowrap">
-                      {c}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-
-              <tbody>
-                {sampleRows.map((r, idx) => (
-                  <tr key={idx} className="border-t border-[var(--border)]">
-                    <td className="px-4 py-3 text-[var(--muted)]">{idx + 1}</td>
-                    {columns.map((c) => (
-                      <td key={`${idx}-${c}`} className="px-4 py-3 text-[var(--text)] whitespace-nowrap">
-                        {r[c] ?? ""}
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
+          <h2 className="text-xl font-semibold text-[var(--text)]">Example row</h2>
+          {headers.length ? (
+            <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border)]">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--surface-2)]">
+                  <tr>
+                    {headers.slice(0, 6).map((h) => (
+                      <th key={h} className="px-3 py-2 text-left font-semibold text-[var(--text)]">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {headers.slice(0, 6).map((h) => (
+                      <td key={h} className="px-3 py-2 text-[color:rgba(var(--muted-rgb),1)]">
+                        {sampleValueFor(h)}
                       </td>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+              <div className="border-t border-[var(--border)] px-4 py-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                Showing 6 columns for readability. Download the sample CSV for the full header set.
+              </div>
+            </div>
+          ) : null}
         </div>
+      </div>
 
-        <p className="mt-4 text-xs text-[var(--muted)]">
-          Tip: Download the sample to get a ready-to-fill template for this import.
-        </p>
-      </section>
-
-      {isShopify ? (
-        <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h2 className="text-lg font-semibold text-[var(--text)]">What this Shopify preset checks</h2>
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            Shopify imports can fail silently or partially when grouping and variant rules are violated. This preset is
-            built to catch the common problems before you import.
-          </p>
-
-          <ul className="mt-4 list-disc pl-6 text-sm text-[var(--muted)]">
-            <li>URL handle grouping and handle formatting rules</li>
-            <li>Duplicate handle rows that do not represent valid variants</li>
-            <li>Variant option collisions: identical option combinations under the same handle</li>
-            <li>Duplicate SKUs (and a stronger alert when the same SKU appears across different products)</li>
-            <li>Pricing numeric validation and compare at price sanity checks</li>
-            <li>Inventory quantity integer validation</li>
-            <li>Image URL validation and image position consistency</li>
-            <li>Basic SEO guidance for title and description length</li>
-          </ul>
-
-          <p className="mt-4 text-sm text-[var(--muted)]">
-            If you want, the next improvements can be Shopify specific autofix packs (safer “fix all” rules) and deeper
-            catalog consistency checks like duplicate barcodes, missing required tax codes, and Google Shopping field
-            completeness.
-          </p>
-        </section>
-      ) : null}
+      <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
+        <Link href="/presets" className="hover:underline">
+          Preset Formats
+        </Link>
+        <Link href="/#pricing" className="hover:underline">
+          Pricing
+        </Link>
+      </div>
     </main>
   );
 }

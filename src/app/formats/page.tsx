@@ -47,7 +47,7 @@ export default function FormatsPage() {
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/formats/presets" className="rgb-btn">
+          <Link href="/presets" className="rgb-btn">
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Browse preset formats</span>
           </Link>
 

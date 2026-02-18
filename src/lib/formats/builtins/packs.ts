@@ -137,7 +137,7 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
   };
 }
 
-// Ecommerce (refocus scope: Shopify, WooCommerce, Amazon, eBay, Etsy)
+// Ecommerce
 export const formatPackEcommerce: CsvFormat[] = [
   buildSimpleFormat({
     id: "woocommerce_products",
@@ -148,7 +148,6 @@ export const formatPackEcommerce: CsvFormat[] = [
     requiredHeaders: ["SKU", "Name"],
     numericHeaders: ["Regular price", "Sale price", "Stock"],
   }),
-
   buildSimpleFormat({
     id: "etsy_listings",
     name: "Etsy Listings",
@@ -158,7 +157,6 @@ export const formatPackEcommerce: CsvFormat[] = [
     requiredHeaders: ["Title", "Price", "Quantity"],
     numericHeaders: ["Price", "Quantity"],
   }),
-
   buildSimpleFormat({
     id: "ebay_listings",
     name: "eBay Listings",
@@ -168,17 +166,6 @@ export const formatPackEcommerce: CsvFormat[] = [
     requiredHeaders: ["Title", "Quantity", "Price"],
     numericHeaders: ["Quantity", "Price"],
   }),
-
-  buildSimpleFormat({
-    id: "ebay_variations",
-    name: "eBay Variations",
-    description: "Variation-friendly template that helps keep parent/child rows consistent (safe checks only).",
-    category: "Ecommerce",
-    expectedHeaders: ["ParentSKU", "SKU", "Title", "VariationName", "VariationValue", "Quantity", "Price", "PictureURL"],
-    requiredHeaders: ["ParentSKU", "SKU", "Title", "Quantity", "Price"],
-    numericHeaders: ["Quantity", "Price"],
-  }),
-
   buildSimpleFormat({
     id: "amazon_inventory_loader",
     name: "Amazon Inventory Loader",
@@ -186,27 +173,6 @@ export const formatPackEcommerce: CsvFormat[] = [
     category: "Ecommerce",
     expectedHeaders: ["sku", "product-id", "product-id-type", "price", "quantity", "item-name", "brand-name"],
     requiredHeaders: ["sku", "item-name", "price", "quantity"],
-    numericHeaders: ["price", "quantity"],
-  }),
-
-  buildSimpleFormat({
-    id: "amazon_product_template",
-    name: "Amazon Product Template (Minimal)",
-    description: "Minimal product template starter with identifiers + basic numeric checks.",
-    category: "Ecommerce",
-    expectedHeaders: [
-      "sku",
-      "item-name",
-      "brand-name",
-      "manufacturer",
-      "product-id",
-      "product-id-type",
-      "description",
-      "price",
-      "quantity",
-      "main-image-url",
-    ],
-    requiredHeaders: ["sku", "item-name", "product-id", "product-id-type"],
     numericHeaders: ["price", "quantity"],
   }),
 ];
@@ -287,18 +253,18 @@ export const formatPackAccounting: CsvFormat[] = [
   buildSimpleFormat({
     id: "quickbooks_transactions",
     name: "QuickBooks Transactions",
-    description: "Maps a basic transactions template and flags invalid numeric values.",
+    description: "Builds a basic transaction import template and flags non-numeric amounts.",
     category: "Accounting",
-    expectedHeaders: ["Date", "Description", "Amount", "Category", "Account"],
+    expectedHeaders: ["Date", "Description", "Amount", "Category"],
     requiredHeaders: ["Date", "Amount"],
     numericHeaders: ["Amount"],
   }),
   buildSimpleFormat({
     id: "xero_bank_statement",
     name: "Xero Bank Statement",
-    description: "Maps a basic bank statement template and flags invalid numeric values.",
+    description: "Creates a simple bank statement import template and flags invalid amounts.",
     category: "Accounting",
-    expectedHeaders: ["Date", "Payee", "Description", "Amount", "Reference"],
+    expectedHeaders: ["Date", "Payee", "Description", "Amount"],
     requiredHeaders: ["Date", "Amount"],
     numericHeaders: ["Amount"],
   }),
@@ -309,28 +275,28 @@ export const formatPackShipping: CsvFormat[] = [
   buildSimpleFormat({
     id: "shipstation_orders",
     name: "ShipStation Orders",
-    description: "Maps basic order fields and flags missing required values.",
+    description: "Maps order fields for ShipStation and flags missing required address fields.",
     category: "Shipping",
-    expectedHeaders: ["Order Number", "Name", "Address", "City", "State", "Postal Code", "Country", "Items", "Total"],
-    requiredHeaders: ["Order Number", "Name"],
-    numericHeaders: ["Total"],
+    expectedHeaders: ["Order Number", "Order Date", "Recipient Name", "Address 1", "City", "State", "Postal Code", "Country", "SKU", "Quantity"],
+    requiredHeaders: ["Order Number", "Recipient Name", "Address 1", "City", "Postal Code", "Country"],
+    numericHeaders: ["Quantity"],
   }),
   buildSimpleFormat({
     id: "pirate_ship_addresses",
     name: "Pirate Ship Addresses",
-    description: "Maps address fields for import and flags missing required values.",
+    description: "Builds an address import template for Pirate Ship and flags missing essentials.",
     category: "Shipping",
-    expectedHeaders: ["Name", "Address 1", "Address 2", "City", "State", "Zip", "Country", "Phone", "Email"],
-    requiredHeaders: ["Name", "Address 1", "City", "State", "Zip"],
+    expectedHeaders: ["Name", "Company", "Address 1", "Address 2", "City", "State", "Zip", "Country", "Phone", "Email"],
+    requiredHeaders: ["Name", "Address 1", "City", "Zip", "Country"],
     emailHeaders: ["Email"],
   }),
   buildSimpleFormat({
     id: "ups_addresses",
     name: "UPS Address Import",
-    description: "Maps address fields for UPS imports and flags missing required values.",
+    description: "Creates a basic UPS address import template and flags missing required fields.",
     category: "Shipping",
-    expectedHeaders: ["Company or Name", "Address Line 1", "Address Line 2", "City", "State", "Postal Code", "Country", "Phone"],
-    requiredHeaders: ["Company or Name", "Address Line 1", "City", "State", "Postal Code"],
+    expectedHeaders: ["Name", "Address Line 1", "City", "State/Province", "Postal Code", "Country"],
+    requiredHeaders: ["Name", "Address Line 1", "City", "Postal Code", "Country"],
   }),
 ];
 
@@ -339,16 +305,16 @@ export const formatPackSupport: CsvFormat[] = [
   buildSimpleFormat({
     id: "zendesk_users",
     name: "Zendesk Users",
-    description: "Maps basic user fields and flags invalid emails.",
+    description: "Builds a Zendesk user import template and flags invalid emails.",
     category: "Support",
-    expectedHeaders: ["Email", "Name", "Phone", "Role"],
-    requiredHeaders: ["Email", "Name"],
-    emailHeaders: ["Email"],
+    expectedHeaders: ["name", "email", "phone", "organization"],
+    requiredHeaders: ["name", "email"],
+    emailHeaders: ["email"],
   }),
   buildSimpleFormat({
     id: "gorgias_contacts",
     name: "Gorgias Contacts",
-    description: "Maps contacts for import and flags invalid emails.",
+    description: "Creates a contact template for Gorgias imports and flags invalid emails.",
     category: "Support",
     expectedHeaders: ["email", "first_name", "last_name", "phone"],
     requiredHeaders: ["email"],
