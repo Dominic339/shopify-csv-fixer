@@ -277,6 +277,11 @@ useEffect(() => {
     [validation, issuesForTable, formatId]
   );
 
+  // Generic readiness signal ("blocking" errors prevent a clean import/export for any preset)
+  const readyForImport = useMemo(() => {
+    return Number((validation as any)?.counts?.blockingErrors ?? 0) === 0;
+  }, [validation]);
+
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
   const shopifyImportConfidence = useMemo(() => {
     if (formatId !== "shopify_products") return null;
@@ -716,7 +721,7 @@ useEffect(() => {
                 <span
                   className={
                     "rounded-full border px-4 py-1.5 font-semibold " +
-                    (validation.readyForShopifyImport
+                    (readyForImport
                       ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
                       : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
                   }
