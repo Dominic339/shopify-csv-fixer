@@ -316,7 +316,6 @@ export default function AppClient() {
     // NOTE: Some issues are *not* rejections in Shopify; e.g. duplicate option combos typically result
     // in Shopify merging variant rows. We exclude those from rejectedRows and count them as merges.
     const reject = new Set<number>();
-const seenDuplicateGroups = new Set<string>();
 
     // Estimate variant merges by grouping rows by (Handle + option value combination).
     // This is more reliable than depending on Issue.details always being present.
@@ -362,35 +361,7 @@ const seenDuplicateGroups = new Set<string>();
       if (!code || typeof rowIndex !== "number" || rowIndex < 0) continue;
 
       // Duplicate option combos: treat as merge behavior, not an import reject.
-      if (code === "shopify/options_not_unique") {
-        const details = (it as any).details as any | undefined;
-        const handle = typeof details?.handle === "string" ? details.handle : "";
-        const groups: Array<{ rows: number[]; options?: Record<string, string> }> = [];
-      
-        if (Array.isArray(details?.mergeGroups)) {
-          for (const g of details.mergeGroups as any[]) {
-            if (Array.isArray(g?.rows)) groups.push({ rows: g.rows as number[], options: g.options });
-          }
-        } else if (Array.isArray(details?.duplicateCombos)) {
-          for (const g of details.duplicateCombos as any[]) {
-            if (Array.isArray(g?.rows)) groups.push({ rows: g.rows as number[], options: g.options });
-          }
-        } else if (Array.isArray(details?.rows)) {
-          groups.push({ rows: details.rows as number[], options: details.duplicateCombo });
-        }
-      
-        for (const g of groups) {
-          const rowsArr = Array.isArray(g?.rows) ? (g.rows as number[]) : null;
-          if (!rowsArr || rowsArr.length < 2) continue;
-          const combo = g?.options ? JSON.stringify(g.options) : "";
-          const key = `${handle}|${rowsArr.join(",")}|${combo}`;
-          if (seenDuplicateGroups.has(key)) continue;
-          seenDuplicateGroups.add(key);
-          mergedVariants += Math.max(0, rowsArr.length - 1);
-        }
-      
-        continue;
-      }
+      if (code === "shopify/options_not_unique") continue;
 
       // ✅ issue meta is keyed by (formatId, code)
       const meta = getIssueMeta(formatId, code);
