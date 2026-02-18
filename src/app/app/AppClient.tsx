@@ -100,6 +100,8 @@ export default function AppClient() {
 
   // ✅ Pinned rows = the "Manual fixes" worklist
   const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
+  // ✅ Rows the user explicitly unpinned (don’t auto-repin them)
+  const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
 
   // Phase 1: Shopify strict mode toggle (stored local)
   const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
@@ -289,25 +291,39 @@ export default function AppClient() {
     return map;
   }, [issuesForDisplay]);
 
-  const rowsWithAnyIssue = useMemo(() => {
-    const set = new Set<number>();
-    for (const i of issuesForDisplay) {
-      if (i.rowIndex >= 0) set.add(i.rowIndex);
+  
+// Rows that should be auto-pinned based on the CURRENT severity filter.
+// IMPORTANT: "All" intentionally pins only error + warning (info can be extremely noisy).
+const rowsToAutoPin = useMemo(() => {
+  const allowed =
+    issueSeverityFilter === "all"
+      ? new Set(["error", "warning"])
+      : new Set([issueSeverityFilter]);
+
+  const set = new Set<number>();
+  for (const i of issuesForDisplay) {
+    if (i.rowIndex < 0) continue;
+    if (!allowed.has(i.severity)) continue;
+    set.add(i.rowIndex);
+  }
+  return [...set].sort((a, b) => a - b);
+}, [issuesForDisplay, issueSeverityFilter]);
+
+// ✅ Auto-pin rows that have issues for the CURRENT filter.
+// Rows the user explicitly unpinned are suppressed and will not be auto-repinned.
+useEffect(() => {
+  if (!rowsToAutoPin.length) return;
+  setPinnedRows((prev) => {
+    const next = new Set(prev);
+    for (const idx of rowsToAutoPin) {
+      if (suppressedAutoPins.has(idx)) continue;
+      next.add(idx);
     }
-    return [...set].sort((a, b) => a - b);
-  }, [issuesForDisplay]);
+    return next;
+  });
+}, [rowsToAutoPin.join(","), suppressedAutoPins, formatId]);
 
-  // ✅ Auto-pin any row that has issues (filtered)
-  useEffect(() => {
-    if (!rowsWithAnyIssue.length) return;
-    setPinnedRows((prev) => {
-      const next = new Set(prev);
-      for (const idx of rowsWithAnyIssue) next.add(idx);
-      return next;
-    });
-  }, [rowsWithAnyIssue.length, formatId]);
-
-  const pinnedSorted = useMemo(() => {
+const pinnedSorted = useMemo(() => {
     return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
   }, [pinnedRows, rows.length]);
 
@@ -322,7 +338,7 @@ export default function AppClient() {
         seen.add(idx);
       }
     }
-    for (const idx of rowsWithAnyIssue) {
+    for (const idx of rowsToAutoPin) {
       if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
@@ -335,7 +351,7 @@ export default function AppClient() {
       }
     }
     return out.slice(0, 25);
-  }, [pinnedSorted, rowsWithAnyIssue, rows.length]);
+  }, [pinnedSorted, rowsToAutoPin, rows.length]);
 
   const rowSeverity = useMemo(() => {
     const m = new Map<number, "error" | "warning" | "info">();
@@ -350,20 +366,35 @@ export default function AppClient() {
   }, [issuesForDisplay]);
 
   function pinRow(rowIndex: number) {
-    setPinnedRows((prev) => {
-      const next = new Set(prev);
-      next.add(rowIndex);
-      return next;
-    });
-  }
+  // If the user manually pins, allow it to be auto-pinned again in the future.
+  setSuppressedAutoPins((prev) => {
+    if (!prev.has(rowIndex)) return prev;
+    const next = new Set(prev);
+    next.delete(rowIndex);
+    return next;
+  });
+
+  setPinnedRows((prev) => {
+    const next = new Set(prev);
+    next.add(rowIndex);
+    return next;
+  });
+}
 
   function unpinRow(rowIndex: number) {
-    setPinnedRows((prev) => {
-      const next = new Set(prev);
-      next.delete(rowIndex);
-      return next;
-    });
-  }
+  // User intent: keep it unpinned even if it still has issues.
+  setSuppressedAutoPins((prev) => {
+    const next = new Set(prev);
+    next.add(rowIndex);
+    return next;
+  });
+
+  setPinnedRows((prev) => {
+    const next = new Set(prev);
+    next.delete(rowIndex);
+    return next;
+  });
+}
 
   // ✅ Revalidate issues WITHOUT applying fixes
   const revalidateTimerRef = useRef<number | null>(null);
