@@ -6,7 +6,9 @@ import { getPresetById } from "@/lib/presets";
 import { getFormatById } from "@/lib/formats";
 
 type PageProps = {
-  params: { id: string };
+  // Next.js versions differ on whether `params` is plain or a Promise.
+  // Support both so we never accidentally 404 in production.
+  params: { id: string } | Promise<{ id: string }>;
 };
 
 function sampleValueFor(header: string) {
@@ -23,8 +25,15 @@ function sampleValueFor(header: string) {
   return "";
 }
 
-export default function PresetDetailPage({ params }: PageProps) {
-  const preset = getPresetById(params.id);
+export default async function PresetDetailPage({ params }: PageProps) {
+  const resolved = await Promise.resolve(params as any);
+  const rawId = typeof resolved?.id === "string" ? resolved.id : "";
+  const id = decodeURIComponent(rawId);
+
+  // Primary lookup by preset id
+  let preset = getPresetById(id);
+  // Fallback: some links may pass formatId instead of preset id.
+  if (!preset) preset = getPresetById(id.replace(/\s+/g, ""));
   if (!preset) return notFound();
 
   const format = getFormatById(preset.formatId);

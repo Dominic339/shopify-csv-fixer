@@ -167,8 +167,8 @@ export default function EcommercePlatformPage({ params }: PageProps) {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-        <Link href="/ecommerce-csv-fixer" className="hover:underline">
-          Ecommerce CSV Fixer
+        <Link href="/presets" className="hover:underline">
+          Templates
         </Link>
         <Link href="/presets" className="hover:underline">
           Templates

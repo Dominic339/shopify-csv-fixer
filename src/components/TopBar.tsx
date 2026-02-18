@@ -153,7 +153,7 @@ export default function TopBar() {
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
           </Link>
 
-          <Link className="rgb-btn" href="/ecommerce-csv-fixer">
+          <Link className="rgb-btn" href="/presets">
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
           </Link>
 
