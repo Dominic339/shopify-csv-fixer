@@ -5,6 +5,8 @@ import JsonLd from "@/components/JsonLd";
 import { getPresetById } from "@/lib/presets";
 import { getFormatById } from "@/lib/formats";
 
+const SITE_URL = "https://striveformats.com";
+
 export async function generateMetadata({ params }: PageProps) {
   const resolved = await Promise.resolve(params as any);
   const rawId = typeof resolved?.id === "string" ? resolved.id : "";
@@ -22,12 +24,34 @@ export async function generateMetadata({ params }: PageProps) {
     title: `${preset.name} | StriveFormats`,
     description: preset.description,
     alternates: { canonical: `/presets/${encodeURIComponent(preset.id)}` },
+    keywords:
+      preset.id === "shopify_products"
+        ? [
+            "shopify csv template",
+            "shopify product csv",
+            "shopify import csv",
+            "shopify csv fixer",
+            "shopify bulk upload",
+            "fix shopify csv",
+            "shopify variants csv",
+            "shopify product import errors",
+          ]
+        : undefined,
     openGraph: {
       title: `${preset.name} | StriveFormats`,
       description: preset.description,
       url: `/presets/${encodeURIComponent(preset.id)}`,
       type: "website",
     },
+    twitter:
+      preset.id === "shopify_products"
+        ? {
+            card: "summary_large_image",
+            title: `${preset.name} | StriveFormats`,
+            description: preset.description,
+            images: ["/opengraph-image"],
+          }
+        : undefined,
   };
 }
 
@@ -87,12 +111,44 @@ export default async function PresetDetailPage({ params }: PageProps) {
   const openFixerHref = `/app?preset=${encodeURIComponent(preset.formatId)}`;
   const sampleCsvHref = `/presets/${encodeURIComponent(preset.id)}/sample.csv`;
 
+  const isShopify = preset.id === "shopify_products" || preset.formatId === "shopify_products";
+  const pageUrl = `${SITE_URL}/presets/${encodeURIComponent(preset.id)}`;
+
+  const breadcrumbLd = isShopify
+    ? {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+          { "@type": "ListItem", position: 2, name: "Preset Formats", item: `${SITE_URL}/presets` },
+          { "@type": "ListItem", position: 3, name: preset.name, item: pageUrl },
+        ],
+      }
+    : null;
+
+  const faqLd =
+    isShopify && seo?.faq?.length
+      ? {
+          "@type": "FAQPage",
+          mainEntity: seo.faq.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }
+      : null;
+
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: `${preset.name} Template`,
-    description: preset.description,
-    url: `/presets/${encodeURIComponent(preset.id)}`,
+    "@graph": [
+      {
+        "@type": "WebPage",
+        name: `${preset.name} CSV Template`,
+        description: preset.description,
+        url: pageUrl,
+      },
+      ...(breadcrumbLd ? [breadcrumbLd] : []),
+      ...(faqLd ? [faqLd] : []),
+    ],
   };
 
   return (
@@ -219,7 +275,62 @@ export default async function PresetDetailPage({ params }: PageProps) {
                 </li>
               ))}
             </ul>
+          
+        {isShopify ? (
+          <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
+            <h2 className="text-xl font-semibold text-[var(--text)]">Common Shopify import errors this helps prevent</h2>
+            <div className="mt-4 space-y-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
+              <p>
+                Shopify CSV imports often fail for small, easy-to-miss problems: mismatched headers, invalid TRUE/FALSE values,
+                prices with currency symbols, broken image URLs, or variant rows with incomplete option fields.
+              </p>
+              <p>
+                StriveFormats validates against Shopify’s official product template, applies safe normalization where possible,
+                and flags risky issues so you can fix them before upload. This reduces “Import failed” errors and improves
+                consistency across products, variants, images, inventory, and SEO fields.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+                <div className="text-base font-semibold text-[var(--text)]">Variants & options</div>
+                <ul className="mt-3 space-y-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+                  <li>Missing Option1 name/value on variant rows</li>
+                  <li>Accidental duplicate SKUs across variants</li>
+                  <li>Inconsistent option naming (size vs Size) across rows</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+                <div className="text-base font-semibold text-[var(--text)]">Prices, inventory, and status</div>
+                <ul className="mt-3 space-y-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+                  <li>Prices formatted as “$19.99” instead of “19.99”</li>
+                  <li>Inventory quantity not numeric or missing tracker values</li>
+                  <li>Status and boolean fields not using valid Shopify values</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+                <div className="text-base font-semibold text-[var(--text)]">Images</div>
+                <ul className="mt-3 space-y-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+                  <li>Image URLs missing protocol (http/https)</li>
+                  <li>Image position gaps or non-numeric values</li>
+                  <li>Image rows that don’t map cleanly to the product handle</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+                <div className="text-base font-semibold text-[var(--text)]">SEO fields</div>
+                <ul className="mt-3 space-y-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+                  <li>Overlong SEO titles/descriptions</li>
+                  <li>Empty SEO fields where you want consistent defaults</li>
+                  <li>Whitespace and formatting inconsistencies across rows</li>
+                </ul>
+              </div>
+            </div>
           </section>
+        ) : null}
+</section>
         </div>
 
         {seo?.faq?.length ? (

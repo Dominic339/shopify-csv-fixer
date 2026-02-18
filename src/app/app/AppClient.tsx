@@ -116,25 +116,24 @@ export default function AppClient() {
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
+  // NOTE: read the query param *inside* this effect to avoid a first-mount race
+  // between multiple useEffects.
   // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
-  const desiredPresetRef = useRef<string | null>(null);
   const appliedPresetRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (desiredPresetRef.current !== null) return; // already captured
-    desiredPresetRef.current = new URLSearchParams(window.location.search).get("preset");
-  }, []);
-
-  useEffect(() => {
     if (appliedPresetRef.current) return;
-    const preset = desiredPresetRef.current;
+    if (typeof window === "undefined") return;
+
+    const preset = new URLSearchParams(window.location.search).get("preset");
     if (!preset) {
       appliedPresetRef.current = true;
       return;
     }
+
     const exists = allFormats.some((f) => f.id === preset);
     if (!exists) return; // wait until formats load
+
     setFormatId(preset);
     appliedPresetRef.current = true;
   }, [allFormats]);
