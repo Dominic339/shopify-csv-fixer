@@ -140,7 +140,10 @@ export default function AppClient() {
     setFormatId(allFormats[0]?.id ?? "general_csv");
   }, [allFormats, formatId]);
 
-  const activeFormat = useMemoconst activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
+  const activeFormat = useMemo(
+    () => allFormats.find((f) => f.id === formatId) ?? allFormats[0],
+    [allFormats, formatId]
+  );
 
   async function refreshQuotaAndPlan() {
     try {
