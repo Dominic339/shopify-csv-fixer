@@ -652,16 +652,12 @@ export default function AppClient() {
                 {formatId === "shopify_products" ? (
                   <button
                     type="button"
-                    className={"pill-btn" + (isAdvancedActive ? "" : " opacity-60")}
+                    className="pill-btn"
                     onClick={() => {
-                      if (!isAdvancedActive) {
-                        setErrorBanner("Strict mode is an Advanced feature. Upgrade to enable stricter Shopify validations.");
-                        return;
-                      }
                       setStrictShopify((v) => !v);
                     }}
-                    disabled={busy || !isAdvancedActive}
-                    title={isAdvancedActive ? "Strict mode adds extra Shopify checks." : "Advanced required"}
+                    disabled={busy}
+                    title="Strict mode adds extra Shopify checks."
                   >
                     {strictShopify ? "Strict mode: ON" : "Strict mode: OFF"}
                   </button>

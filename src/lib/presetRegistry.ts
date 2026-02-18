@@ -1,97 +1,76 @@
 // src/lib/presetRegistry.ts
+// Central registry for built-in preset format landing pages.
+// Keep this small, human-readable, and stable so URLs do not change.
 
-export type PresetCategory =
-  | "Ecommerce"
-  | "Accounting"
-  | "CRM"
-  | "Marketing"
-  | "Analytics"
-  | "Shipping"
-  | "Other";
+export type PresetCategory = "Ecommerce";
 
 export type PresetFormat = {
-  id: string; // must match a CsvFormat id (ex: "shopify_products")
-  slug?: string; // legacy/SEO-friendly slug (defaults to id)
-  name: string;
+  id: string; // matches CsvFormat.id
+  slug: string; // stable slug (legacy) used in a few places
+  name: string; // display name
   category: PresetCategory;
-
-  // SEO + UI helpers
-  shortDescription?: string;
-  longDescription?: string;
-  searchKeywords?: string[];
+  shortDescription: string;
+  searchKeywords: string[];
 };
 
+// IMPORTANT: keep slugs stable once published.
 export const PRESET_FORMATS: PresetFormat[] = [
   {
     id: "shopify_products",
-    slug: "shopify_products",
-    name: "Shopify Products CSV",
+    slug: "shopify-products",
+    name: "Shopify Import Optimizer",
     category: "Ecommerce",
-    shortDescription: "Validate and auto-fix Shopify product imports (variants, prices, booleans, images).",
-    searchKeywords: ["shopify", "products", "variants", "import", "csv"],
+    shortDescription:
+      "Strict Shopify schema validation + safe auto-fixes for products, variants, images, pricing, inventory, and SEO.",
+    searchKeywords: ["shopify csv", "shopify product csv", "shopify import csv", "fix shopify csv"],
   },
   {
     id: "woocommerce_products",
-    slug: "woocommerce_products",
-    name: "WooCommerce Products CSV",
+    slug: "woocommerce-products",
+    name: "WooCommerce Products",
     category: "Ecommerce",
-    shortDescription: "Clean WooCommerce product exports and standardize fields before import.",
-    searchKeywords: ["woocommerce", "products", "import", "csv"],
+    shortDescription: "Clean WooCommerce product CSV exports and prep them for reliable import.",
+    searchKeywords: ["woocommerce csv", "woocommerce product csv", "fix woocommerce csv"],
   },
   {
     id: "etsy_listings",
-    slug: "etsy_listings",
-    name: "Etsy Listings CSV",
+    slug: "etsy-listings",
+    name: "Etsy Listings",
     category: "Ecommerce",
-    shortDescription: "Validate Etsy listing templates and flag missing or invalid listing values.",
-    searchKeywords: ["etsy", "listings", "csv"],
+    shortDescription: "Fix Etsy listing CSV files and make them consistent before upload or analysis.",
+    searchKeywords: ["etsy csv", "etsy listing csv", "fix etsy csv"],
   },
   {
     id: "ebay_listings",
-    slug: "ebay_listings",
-    name: "eBay Listings CSV",
+    slug: "ebay-listings",
+    name: "eBay Listings",
     category: "Ecommerce",
-    shortDescription: "Normalize eBay listing fields and catch common import blockers.",
-    searchKeywords: ["ebay", "listings", "csv"],
+    shortDescription: "Clean up eBay listing CSV data for faster bulk edits and listing management.",
+    searchKeywords: ["ebay csv", "ebay listing csv", "fix ebay csv"],
   },
   {
     id: "amazon_inventory_loader",
-    slug: "amazon_inventory_loader",
+    slug: "amazon-inventory-loader",
     name: "Amazon Inventory Loader",
     category: "Ecommerce",
-    shortDescription: "Validate Amazon inventory loader templates and standardize numbers and required fields.",
-    searchKeywords: ["amazon", "inventory", "loader", "csv"],
+    shortDescription: "Normalize Amazon inventory CSV templates so uploads are less error prone.",
+    searchKeywords: ["amazon inventory csv", "amazon csv", "fix amazon csv"],
   },
 ];
 
-function normKey(v: string) {
-  return (v ?? "").trim().toLowerCase();
+export function getPresetById(id: string) {
+  return PRESET_FORMATS.find((p) => p.id === id) ?? null;
 }
 
-export function getPresetById(id: string): PresetFormat | null {
-  const key = normKey(id);
-  if (!key) return null;
-  return PRESET_FORMATS.find((p) => normKey(p.id) === key) ?? null;
+export function getPresetBySlug(slug: string) {
+  return PRESET_FORMATS.find((p) => p.slug === slug) ?? null;
 }
 
-export function getPresetBySlug(slug: string): PresetFormat | null {
-  const key = normKey(slug);
-  if (!key) return null;
+// Some pages call this with no args, others used to pass a param.
+// Keep the param optional for backwards compatibility.
+export function getPresetsByCategory(_opts?: unknown) {
+  const out: Record<PresetCategory, PresetFormat[]> = { Ecommerce: [] };
 
-  // slug first (if present), then fall back to id
-  return (
-    PRESET_FORMATS.find((p) => normKey(p.slug ?? "") === key) ??
-    PRESET_FORMATS.find((p) => normKey(p.id) === key) ??
-    null
-  );
-}
-
-export function getPresetsByCategory(): Record<string, PresetFormat[]> {
-  const groups: Record<string, PresetFormat[]> = {};
-  for (const p of PRESET_FORMATS) {
-    const cat = p.category || "Other";
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(p);
-  }
-  return groups;
+  for (const p of PRESET_FORMATS) out[p.category].push(p);
+  return out;
 }
