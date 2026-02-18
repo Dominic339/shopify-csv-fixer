@@ -315,19 +315,10 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
 
     for (const idx of idxs) {
       const r = fixedRows[idx];
-      const v1 = get(r, COL.opt1Val).trim();
-      const v2 = get(r, COL.opt2Val).trim();
-      const v3 = get(r, COL.opt3Val).trim();
 
-      // Image-only rows shouldn't be treated as variants.
-      const sku = get(r, COL.sku).trim();
-      const price = get(r, COL.price).trim();
-      const hasVariantSignals = Boolean(sku || price || v1 || v2 || v3);
-      if (!hasVariantSignals) continue;
-
-      const combo = [v1, v2, v3].join("|const r = fixedRows[idx];
-
+      // Use the shared variant signature helper so validator + simulator normalize the same way.
       const sig = getShopifyVariantSignature(
+
         r,
         variantCols,
         (row, col) => get(row as any, col)
