@@ -373,6 +373,27 @@ const effectivePinnedRows = useMemo(() => {
 
 const pinnedSorted = useMemo(() => Array.from(effectivePinnedRows).sort((a, b) => a - b), [effectivePinnedRows]);
 
+// Rows shown in the main table preview.
+// Always include pinned rows (manual + auto for current filter), then fill with early non-pinned rows.
+const previewRows = useMemo(() => {
+  const LIMIT = 50;
+  if (!rows.length) return [] as number[];
+
+  const out: number[] = [];
+
+  // Include pinned rows first (sorted)
+  for (const r of pinnedSorted) out.push(r);
+
+  // Fill with non-pinned rows up to the preview limit
+  if (out.length < LIMIT) {
+    for (let i = 0; i < rows.length && out.length < LIMIT; i++) {
+      if (!effectivePinnedRows.has(i)) out.push(i);
+    }
+  }
+
+  return out;
+}, [rows.length, pinnedSorted, effectivePinnedRows]);
+
 function pinRow(rowIndex: number) {
   // User explicitly pins a row -> it becomes manual and stays until they unpin.
   setManualPinnedRows((prev) => {
