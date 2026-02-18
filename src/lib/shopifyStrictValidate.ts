@@ -346,7 +346,8 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
         issues.push({
           severity: "error",
           code: "shopify/options_not_unique",
-          rowIndex: idx,
+          // Issue.row is 1-based (matches the rest of this validator and the UI)
+          row: idx + 1,
           column: COL.opt1Val,
           message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${duplicateRows.join(", ")}).`,
           suggestion: "Make each variant option combination unique (Option1/2/3 values).",
