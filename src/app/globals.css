@@ -20,7 +20,8 @@
   --accent-4: #a855f7;
   --accent-5: #f97316;
 
-  --popover: rgba(255, 255, 255, 0.96);
+  /* Solid popover background for readability (no transparency) */
+  --popover: rgb(255, 255, 255);
   --popover-border: rgba(10, 10, 20, 0.14);
 
   color-scheme: light;
@@ -38,7 +39,8 @@
 
   --primary: #60a5fa;
 
-  --popover: rgba(18, 22, 32, 0.96);
+  /* Solid popover background for readability (no transparency) */
+  --popover: rgb(18, 22, 32);
   --popover-border: rgba(255, 255, 255, 0.14);
 
   color-scheme: dark;
@@ -79,8 +81,9 @@ a {
   background: var(--popover);
   border: 1px solid var(--popover-border);
   color: var(--text);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Disable blur so text stays crisp and the surface reads as opaque. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* Peacock RGB outline button (OLD LOOK) */

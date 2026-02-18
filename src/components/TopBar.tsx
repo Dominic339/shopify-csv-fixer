@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 
 type SubStatus = {
   signedIn: boolean;
@@ -106,6 +107,8 @@ export default function TopBar() {
   const plan = sub?.plan ?? "free";
   const status = (sub?.status ?? "none").toLowerCase();
   const isActive = status === "active";
+  const isAdvancedActive = plan === "advanced" && isActive;
+  const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvancedActive;
 
   const profileLabel = useMemo(() => {
     const email = session?.user?.email ?? "";
@@ -117,6 +120,10 @@ export default function TopBar() {
   const upgradeMessage = signedIn
     ? "Upgrade to unlock higher export limits and advanced Shopify tools."
     : "Sign in to upgrade and unlock higher export limits and advanced Shopify tools.";
+
+  const customFormatsUpgradeMessage = signedIn
+    ? "Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+    : "Sign in to upgrade to Advanced and unlock Custom Formats.";
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur">
@@ -150,13 +157,23 @@ export default function TopBar() {
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
           </Link>
 
-          <button
-            type="button"
-            className="rgb-btn"
-            onClick={() => (window.location.href = "/#pricing")}
-          >
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">View pricing</span>
-          </button>
+          {canAccessCustomFormats ? (
+            <Link className="rgb-btn" href="/formats" title="Open Custom Formats builder">
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="rgb-btn"
+              onClick={() => {
+                setMenuOpen(false);
+                setUpgradeOpen(true);
+              }}
+              title="Advanced plan required"
+            >
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
+            </button>
+          )}
 
           <div className="relative" ref={menuRef}>
             <button
@@ -170,7 +187,7 @@ export default function TopBar() {
             </button>
 
             {menuOpen ? (
-              <div className="absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg">
+              <div className="popover-surface absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl shadow-xl">
                 <div className="px-4 py-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
                   {signedIn ? (
                     <div>
@@ -192,6 +209,14 @@ export default function TopBar() {
                 <div className="border-t border-[var(--border)]" />
 
                 <div className="p-2">
+                  <Link
+                    href="/#pricing"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Pricing
+                  </Link>
+
                   <Link
                     href="/"
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
@@ -264,7 +289,7 @@ export default function TopBar() {
       <UpgradeModal
         open={upgradeOpen}
         title={upgradeTitle}
-        message={upgradeMessage}
+        message={canAccessCustomFormats ? upgradeMessage : customFormatsUpgradeMessage}
         signedIn={signedIn}
         onClose={() => setUpgradeOpen(false)}
       />
