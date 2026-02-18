@@ -158,13 +158,17 @@ export default function AppClient() {
   }, []);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
-  // IMPORTANT: do not override a preset selection on first mount.
+  // IMPORTANT: This must depend on `formatId`.
+  // On first mount, effects capture the initial render state. If we only depend on
+  // `allFormats.length`, this fallback can run with the initial `formatId` ("general_csv")
+  // and overwrite a preset selection that was scheduled earlier in the same commit.
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const qp = new URLSearchParams(window.location.search);
-      const preset = qp.get("preset");
-      // While a preset exists and hasn't been applied yet, don't force a fallback.
-      if (preset && !appliedPresetRef.current) return;
+      const preset = new URLSearchParams(window.location.search).get("preset");
+      if (preset && !appliedPresetRef.current) {
+        // A preset is present but hasn't been applied yet; don't force a fallback.
+        return;
+      }
     }
 
     if (allFormats.some((f) => f.id === formatId)) return;
