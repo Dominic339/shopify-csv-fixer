@@ -2,6 +2,7 @@
 import type { CsvRow } from "./csv";
 import type { Issue } from "./shopifyBasic";
 import { isHttpUrl, isValidShopifyBool, normalizeShopifyBool, isValidShopifyInventoryPolicy, normalizeShopifyInventoryPolicy } from "./shopifySchema";
+import { getShopifyVariantSignature } from "./shopifyVariantSignature";
 
 /**
  * Shopify Strict Validator
@@ -57,6 +58,16 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
     imageAlt: "Image alt text",
     fulfillmentService: "Fulfillment service",
   };
+
+  const variantCols = {
+    handle: COL.handle,
+    opt1Val: COL.opt1Val,
+    opt2Val: COL.opt2Val,
+    opt3Val: COL.opt3Val,
+    sku: COL.sku,
+    price: COL.price,
+  };
+
 
   // 1) Status: if the column exists, it must have a value (Shopify rule)
   if (has(COL.status)) {
@@ -314,7 +325,16 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
       const hasVariantSignals = Boolean(sku || price || v1 || v2 || v3);
       if (!hasVariantSignals) continue;
 
-      const combo = [v1, v2, v3].join("|").toLowerCase();
+      const combo = [v1, v2, v3].join("|const r = fixedRows[idx];
+
+      const sig = getShopifyVariantSignature(
+        r,
+        variantCols,
+        (row, col) => get(row as any, col)
+      );
+      if (!sig.hasVariantSignals) continue;
+
+      const combo = sig.comboKey;
       const list = seenCombos.get(combo) ?? [];
       list.push(idx);
       seenCombos.set(combo, list);

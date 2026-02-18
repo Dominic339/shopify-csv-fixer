@@ -43,6 +43,10 @@ export function EditableIssuesTable(props: {
 
   // ✅ NEW: cell-level highlight map (key = `${rowIndex}|||${header}`)
   cellSeverityMap: Map<string, "error" | "warning" | "info">;
+
+  // Optional: let parent lock pinned rows while the user is editing.
+  onRowEditStart?: (rowIndex: number) => void;
+  onRowEditEnd?: (rowIndex: number) => void;
 }) {
   const { headers, issues, rows, onUpdateRow, resetKey, formatId, pinnedRows, onUnpinRow, cellSeverityMap } = props;
 
@@ -145,7 +149,15 @@ export function EditableIssuesTable(props: {
             const list = issuesByRow.get(rowIndex) ?? [];
 
             return (
-              <div key={rowIndex} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+              <div
+                key={rowIndex}
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]"
+                onFocusCapture={() => props.onRowEditStart?.(rowIndex)}
+                onBlurCapture={(e) => {
+                  const next = (e.relatedTarget as Node | null);
+                  if (!next || !(e.currentTarget as any).contains(next)) props.onRowEditEnd?.(rowIndex);
+                }}
+              >
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
                   <button
                     type="button"

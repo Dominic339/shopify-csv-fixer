@@ -7,6 +7,8 @@ import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
+import { getShopifyVariantSignature, resolveShopifyVariantColumns } from "@/lib/shopifyVariantSignature";
+
 import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
 import type { CsvFormat, CsvIssue } from "@/lib/formats/types";
@@ -134,12 +136,21 @@ export default function AppClient() {
   // If the user unpins an auto-pinned row, we suppress auto-pinning it again until the issues change.
   const [manualPinnedRows, setManualPinnedRows] = useState<Set<number>>(() => new Set());
   const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
+  const [editingLockedRows, setEditingLockedRows] = useState<Set<number>>(() => new Set());
 
   // Phase 1: Shopify strict mode toggle (stored local)
   const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
 
   // Phase 1: Severity filter
   const [issueSeverityFilter, setIssueSeverityFilter] = useState<"all" | "error" | "warning" | "info">("all");
+
+  // When the user changes the issue filter, we want the app to re-pin the relevant rows for that filter.
+  // Suppression is only meant to apply within the current filter scope.
+  useEffect(() => {
+    if (suppressedAutoPins.size) setSuppressedAutoPins(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [issueSeverityFilter]);
+
   const [simulateShopify, setSimulateShopify] = useState(false);
 
   function refreshCustomFormats() {
@@ -329,43 +340,17 @@ export default function AppClient() {
     // - Skip "image-only" rows (no variant signals)
     // NOTE: Header forcing / user files may still produce small header variations.
     // We resolve the actual header keys from the current headers list to avoid false 0 merges.
-    const normHeader = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
-    const headerKey = (preferred: string, fallbacks: string[] = []) => {
-      const want = [preferred, ...fallbacks].map(normHeader);
-      for (const h of headers) {
-        const nh = normHeader(h);
-        if (want.includes(nh)) return h;
-      }
-      return preferred; // best-effort fallback
-    };
-    const H_HANDLE = headerKey("Handle");
-    const H_O1 = headerKey("Option1 Value", ["Option 1 Value", "Option1Value"]);
-    const H_O2 = headerKey("Option2 Value", ["Option 2 Value", "Option2Value"]);
-    const H_O3 = headerKey("Option3 Value", ["Option 3 Value", "Option3Value"]);
-    const H_SKU = headerKey("Variant SKU", ["SKU"]);
-    const H_PRICE = headerKey("Variant Price", ["Price"]);
+    const cols = resolveShopifyVariantColumns(headers);
 
     const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i] ?? {};
-      const handle = get(r, H_HANDLE).trim();
-      if (!handle) continue;
+      const sig = getShopifyVariantSignature(r, cols, (row, col) => get(row as any, col));
+      if (!sig.handle) continue;
+      if (!sig.hasVariantSignals) continue;
+      if (!sig.comboKey.replace(/\|/g, "").trim()) continue;
 
-      const v1 = get(r, H_O1).trim();
-      const v2 = get(r, H_O2).trim();
-      const v3 = get(r, H_O3).trim();
-
-      // Match strict validator behavior: ignore rows that do not look like variant rows.
-      // (Shopify CSV allows image-only rows where variant fields are blank.)
-      const sku = get(r, H_SKU).trim();
-      const price = get(r, H_PRICE).trim();
-      const hasVariantSignals = Boolean(sku || price || v1 || v2 || v3);
-      if (!hasVariantSignals) continue;
-
-      const combo = [v1, v2, v3].join("|").toLowerCase();
-      if (!combo.replace(/\|/g, "").trim()) continue;
-
-      const key = `${handle.toLowerCase()}||${combo}`;
+      const key = `${sig.handle.toLowerCase()}||${sig.comboKey}`;
       mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
     }
 
@@ -516,8 +501,9 @@ export default function AppClient() {
     const merged = new Set<number>();
     manualPinnedRows.forEach((r) => merged.add(r));
     autoPinnedRows.forEach((r) => merged.add(r));
+    editingLockedRows.forEach((r) => merged.add(r));
     return merged;
-  }, [manualPinnedRows, autoPinnedRows]);
+  }, [manualPinnedRows, autoPinnedRows, editingLockedRows]);
 
   const pinnedSorted = useMemo(() => Array.from(effectivePinnedRows).sort((a, b) => a - b), [effectivePinnedRows]);
 
@@ -579,6 +565,25 @@ export default function AppClient() {
         return next;
       });
     }
+  }
+
+
+  function lockEditingRow(rowIndex: number) {
+    setEditingLockedRows((prev) => {
+      if (prev.has(rowIndex)) return prev;
+      const next = new Set(prev);
+      next.add(rowIndex);
+      return next;
+    });
+  }
+
+  function unlockEditingRow(rowIndex: number) {
+    setEditingLockedRows((prev) => {
+      if (!prev.has(rowIndex)) return prev;
+      const next = new Set(prev);
+      next.delete(rowIndex);
+      return next;
+    });
   }
 
   // ✅ Revalidate issues WITHOUT applying fixes
@@ -1155,7 +1160,15 @@ export default function AppClient() {
                       const row = rows[rowIndex] ?? {};
                       const isPinned = effectivePinnedRows.has(rowIndex);
                       return (
-                        <tr key={rowIndex} className="border-b border-[color:rgba(var(--border-rgb),0.65)] last:border-b-0">
+                        <tr
+                          key={rowIndex}
+                          className="border-b border-[color:rgba(var(--border-rgb),0.65)] last:border-b-0"
+                          onFocusCapture={() => lockEditingRow(rowIndex)}
+                          onBlurCapture={(e) => {
+                            const next = (e.relatedTarget as Node | null);
+                            if (!next || !(e.currentTarget as any).contains(next)) unlockEditingRow(rowIndex);
+                          }}
+                        >
                           <td className="px-3 py-2">
                             <button
                               type="button"
@@ -1210,6 +1223,8 @@ export default function AppClient() {
               pinnedRows={pinnedSorted}
               onUnpinRow={unpinRow}
               cellSeverityMap={issueCellMap}
+              onRowEditStart={lockEditingRow}
+              onRowEditEnd={unlockEditingRow}
             />
           </div>
         </div>
