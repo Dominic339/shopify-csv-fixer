@@ -324,6 +324,21 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
     return map;
   }, [issuesForDisplay]);
 
+  // Row-level severity (highest severity issue in the row, across ALL issues)
+  const rowSeverity = useMemo(() => {
+    const rank = { info: 1, warning: 2, error: 3 } as const;
+    const map = new Map<number, "error" | "warning" | "info">();
+    for (const i of issuesForTable) {
+      if (typeof i.rowIndex !== "number" || i.rowIndex < 0) continue;
+      const prev = map.get(i.rowIndex);
+      if (!prev || rank[i.severity] > rank[prev]) {
+        map.set(i.rowIndex, i.severity);
+      }
+    }
+    return map;
+  }, [issuesForTable]);
+
+
   const autoPinnedRows = useMemo(() => {
   const set = new Set<number>();
   if (!rows.length) return set;
