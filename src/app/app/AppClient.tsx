@@ -607,9 +607,7 @@ export default function AppClient() {
       <div className="mb-8 flex items-start justify-between gap-6">
         <div>
           <h1 className="text-3xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-            Pick a format → upload → auto-fix safe issues → export.
-          </p>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
 
           {rows.length > 0 ? (
             <div className="mt-4 space-y-3 text-base">
@@ -771,9 +769,7 @@ export default function AppClient() {
                       </div>
 
                       <details className="mt-3">
-                        <summary className="cursor-pointer text-base text-[color:rgba(var(--muted-rgb),1)]">
-                          View auto fixes
-                        </summary>
+                        <summary className="cursor-pointer text-base text-[color:rgba(var(--muted-rgb),1)]">View auto fixes</summary>
                         <ul className="mt-3 list-disc pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
                           {autoFixes.slice(0, 50).map((t, idx) => (
                             <li key={idx}>{t}</li>
@@ -965,9 +961,7 @@ export default function AppClient() {
                                     autoFocus
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-sm outline-none"
                                     value={editing.value}
-                                    onChange={(e) =>
-                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
-                                    }
+                                    onChange={(e) => setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))}
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
                                       if (e.key === "Enter") commitEdit();
@@ -990,8 +984,7 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-5 py-4 text-sm text-[var(--muted)]">
-                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until
-                unpinned.
+                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until unpinned.
               </div>
             ) : null}
           </div>

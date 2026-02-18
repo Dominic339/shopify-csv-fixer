@@ -1,25 +1,27 @@
 // src/app/presets/page.tsx
 
 import Link from "next/link";
-import { getPresetFormats, groupPresetsByCategory } from "@/lib/presets";
+import { groupPresetsByCategory } from "@/lib/presets";
+import { getPublicEcommercePresetFormats } from "@/lib/publicEcommerce";
 import JsonLd from "@/components/JsonLd";
 
 export const metadata = {
-  title: "Preset CSV Formats | StriveFormats",
+  title: "Ecommerce CSV Templates | StriveFormats",
   description:
-    "Browse ecommerce CSV templates for Shopify, WooCommerce, Amazon Seller Central, eBay, and Etsy. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
+    "Browse ecommerce CSV templates for Shopify, WooCommerce, Etsy, eBay, and Amazon. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
 };
 
 export default function PresetsPage() {
-  const presets = getPresetFormats();
+  // Refocus: only show the 5 ecommerce presets.
+  const presets = getPublicEcommercePresetFormats();
   const { categories, map } = groupPresetsByCategory(presets);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Preset CSV Formats",
+    name: "Ecommerce CSV Templates",
     description:
-      "Ecommerce CSV templates for Shopify, WooCommerce, Amazon Seller Central, eBay, and Etsy. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
+      "Ecommerce CSV templates for Shopify, WooCommerce, Etsy, eBay, and Amazon. Preview columns, download a sample CSV, and open the fixer with the right preset selected.",
   };
 
   return (
@@ -28,10 +30,10 @@ export default function PresetsPage() {
 
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <p className="text-sm text-[var(--muted)]">StriveFormats</p>
-        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">Preset CSV Formats</h1>
+        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">Ecommerce CSV Templates</h1>
         <p className="mt-3 text-sm text-[var(--muted)]">
-          Presets are ready made format packs that tell the fixer how to validate, auto fix safe issues, and export a clean CSV
-          for a specific ecommerce platform. Pick your target import and you will open the fixer already configured.
+          These templates are “preset format packs” that tell the fixer how to validate, auto-fix safe issues, and
+          export a clean CSV for a specific ecommerce platform.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -39,44 +41,33 @@ export default function PresetsPage() {
             <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Ecommerce CSV Fixer</span>
           </Link>
           <Link href="/shopify-csv-fixer" className="rgb-btn">
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Shopify CSV Fixer</span>
+            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Shopify guide + examples</span>
           </Link>
         </div>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <div className="text-sm font-semibold text-[var(--text)]">Most popular</div>
+          <div className="text-sm font-semibold text-[var(--text)]">Fastest path</div>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Shopify imports are the strictest. If you sell products with variants, this is the fastest way to prevent import failures.
+            Shopify is the strictest importer. If you sell products with variants, start here to prevent handle, option,
+            and SKU failures.
           </p>
           <div className="mt-4">
-            <Link href="/shopify-csv-fixer" className="rgb-btn">
-              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Shopify guide</span>
+            <Link href="/app?preset=shopify_products" className="rgb-btn">
+              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Open Shopify in fixer</span>
             </Link>
           </div>
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <div className="text-sm font-semibold text-[var(--text)]">Run a quick test</div>
+          <div className="text-sm font-semibold text-[var(--text)]">Need columns + sample data?</div>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Try the fixer with a sample file. Download a sample CSV, upload it, and see the fix log instantly.
+            Open any template below to preview the exact columns and download a starter sample you can edit.
           </p>
           <div className="mt-4">
-            <Link href="/presets/shopify_products/sample.csv" className="rgb-btn">
-              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Download a sample</span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <div className="text-sm font-semibold text-[var(--text)]">Need reusable rules</div>
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            If you repeatedly clean similar files, Custom Formats lets you save templates and rules so repeat jobs take seconds.
-          </p>
-          <div className="mt-4">
-            <Link href="/formats" className="rgb-btn">
-              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
+            <Link href="/presets/shopify_products" className="rgb-btn">
+              <span className="px-5 py-3 text-sm font-semibold text-[var(--text)]">View Shopify template</span>
             </Link>
           </div>
         </div>
