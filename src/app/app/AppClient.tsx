@@ -327,20 +327,38 @@ export default function AppClient() {
     // - Handle + (Option1/2/3 *values*) define a variant combo
     // - Comparison is case-insensitive
     // - Skip "image-only" rows (no variant signals)
+    // NOTE: Header forcing / user files may still produce small header variations.
+    // We resolve the actual header keys from the current headers list to avoid false 0 merges.
+    const normHeader = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+    const headerKey = (preferred: string, fallbacks: string[] = []) => {
+      const want = [preferred, ...fallbacks].map(normHeader);
+      for (const h of headers) {
+        const nh = normHeader(h);
+        if (want.includes(nh)) return h;
+      }
+      return preferred; // best-effort fallback
+    };
+    const H_HANDLE = headerKey("Handle");
+    const H_O1 = headerKey("Option1 Value", ["Option 1 Value", "Option1Value"]);
+    const H_O2 = headerKey("Option2 Value", ["Option 2 Value", "Option2Value"]);
+    const H_O3 = headerKey("Option3 Value", ["Option 3 Value", "Option3Value"]);
+    const H_SKU = headerKey("Variant SKU", ["SKU"]);
+    const H_PRICE = headerKey("Variant Price", ["Price"]);
+
     const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i] ?? {};
-      const handle = get(r, "Handle").trim();
+      const handle = get(r, H_HANDLE).trim();
       if (!handle) continue;
 
-      const v1 = get(r, "Option1 Value").trim();
-      const v2 = get(r, "Option2 Value").trim();
-      const v3 = get(r, "Option3 Value").trim();
+      const v1 = get(r, H_O1).trim();
+      const v2 = get(r, H_O2).trim();
+      const v3 = get(r, H_O3).trim();
 
       // Match strict validator behavior: ignore rows that do not look like variant rows.
       // (Shopify CSV allows image-only rows where variant fields are blank.)
-      const sku = get(r, "Variant SKU").trim();
-      const price = get(r, "Variant Price").trim();
+      const sku = get(r, H_SKU).trim();
+      const price = get(r, H_PRICE).trim();
       const hasVariantSignals = Boolean(sku || price || v1 || v2 || v3);
       if (!hasVariantSignals) continue;
 
@@ -1083,6 +1101,104 @@ export default function AppClient() {
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Click a cell in the table to edit it. Red and yellow highlight errors and warnings.</p>
 
           <div className="mt-7">
+            {/* Severity filters */}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className={`pill-btn ${issueSeverityFilter === "all" ? "is-active" : ""}`}
+                onClick={() => setIssueSeverityFilter("all")}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`pill-btn ${issueSeverityFilter === "error" ? "is-active" : ""}`}
+                onClick={() => setIssueSeverityFilter("error")}
+              >
+                Errors
+              </button>
+              <button
+                type="button"
+                className={`pill-btn ${issueSeverityFilter === "warning" ? "is-active" : ""}`}
+                onClick={() => setIssueSeverityFilter("warning")}
+              >
+                Warnings
+              </button>
+              <button
+                type="button"
+                className={`pill-btn ${issueSeverityFilter === "info" ? "is-active" : ""}`}
+                onClick={() => setIssueSeverityFilter("info")}
+              >
+                Info
+              </button>
+
+              <div className="ml-auto text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                Showing {issuesForDisplay.length} {issueSeverityFilter === "all" ? "issues" : `${issueSeverityFilter} issues`}
+              </div>
+            </div>
+
+            {/* Preview table (pins + inline edits) */}
+            {rows.length ? (
+              <div className="mb-6 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
+                <table className="min-w-[720px] w-full text-left text-sm">
+                  <thead className="border-b border-[var(--border)]">
+                    <tr>
+                      <th className="px-3 py-2">Pin</th>
+                      <th className="px-3 py-2">Row</th>
+                      {tableHeaders.slice(0, 10).map((h) => (
+                        <th key={h} className="px-3 py-2 whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.map((rowIndex) => {
+                      const row = rows[rowIndex] ?? {};
+                      const isPinned = effectivePinnedRows.has(rowIndex);
+                      return (
+                        <tr key={rowIndex} className="border-b border-[color:rgba(var(--border-rgb),0.65)] last:border-b-0">
+                          <td className="px-3 py-2">
+                            <button
+                              type="button"
+                              className="pill-btn"
+                              onClick={() => (isPinned ? unpinRow(rowIndex) : pinRow(rowIndex))}
+                              title={isPinned ? "Unpin from Manual fixes" : "Pin to Manual fixes"}
+                            >
+                              {isPinned ? "Unpin" : "Pin"}
+                            </button>
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-[color:rgba(var(--muted-rgb),1)]">{rowIndex + 1}</td>
+                          {tableHeaders.slice(0, 10).map((h) => {
+                            const sev = issueCellMap.get(`${rowIndex}|||${h}`);
+                            const base = "w-full rounded-xl border px-2 py-1 text-sm text-[var(--text)] outline-none";
+                            const cls =
+                              sev === "error"
+                                ? base + " border-[color:rgba(255,80,80,0.55)] bg-[color:rgba(255,80,80,0.12)]"
+                                : sev === "warning"
+                                  ? base + " border-[color:rgba(255,200,0,0.55)] bg-[color:rgba(255,200,0,0.12)]"
+                                  : base + " border-[var(--border)] bg-[var(--surface)]";
+
+                            return (
+                              <td key={h} className="px-3 py-2">
+                                <input
+                                  className={cls}
+                                  value={row?.[h] ?? ""}
+                                  onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
+                                />
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                <div className="px-3 py-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                  Preview shows pinned rows first, then fills up to 50 rows. Only the first 10 columns are shown here for speed.
+                </div>
+              </div>
+            ) : null}
+
             <EditableIssuesTable
               headers={tableHeaders}
               issues={issuesForDisplay as any}
