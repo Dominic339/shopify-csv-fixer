@@ -304,7 +304,7 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
       const code = (it as any).code as string | undefined;
       const rowIndex = (it as any).rowIndex as number | undefined;
       if (code && typeof rowIndex === "number" && rowIndex >= 0) {
-        const meta = getIssueMeta(code);
+        const meta = getIssueMeta(code, (it as any).severity);
         if (meta?.blocking) reject.add(rowIndex);
       }
 
