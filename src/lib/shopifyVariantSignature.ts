@@ -33,7 +33,7 @@ export function resolveShopifyVariantColumns(headers: string[]): ShopifyVariantC
   };
 
   return {
-    handle: pick("Handle"),
+    handle: pick("Handle", ["URL handle", "Url handle", "URL Handle", "url handle", "Handle (URL)", "Product handle"]),
     opt1Val: pick("Option1 Value", ["Option 1 Value", "Option1Value"]),
     opt2Val: pick("Option2 Value", ["Option 2 Value", "Option2Value"]),
     opt3Val: pick("Option3 Value", ["Option 3 Value", "Option3Value"]),

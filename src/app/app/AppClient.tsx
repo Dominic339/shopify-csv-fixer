@@ -1144,7 +1144,7 @@ export default function AppClient() {
 
             {/* Preview table (pins + inline edits) */}
             {rows.length ? (
-              <div className="mb-6 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
+              <div className="mb-6 max-h-[520px] overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
                 <table className="min-w-[720px] w-full text-left text-sm">
                   <thead className="border-b border-[var(--border)]">
                     <tr>
