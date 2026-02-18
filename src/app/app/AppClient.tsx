@@ -14,6 +14,7 @@ import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import { computeValidationBreakdown } from "@/lib/validation/scoring";
 import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
+import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 // Phase helpers
 import { computeReadinessSummary } from "@/lib/validation/readiness";
