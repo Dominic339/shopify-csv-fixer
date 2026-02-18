@@ -1145,7 +1145,7 @@ export default function AppClient() {
                     <tr>
                       <th className="px-3 py-2">Pin</th>
                       <th className="px-3 py-2">Row</th>
-                      {tableHeaders.slice(0, 10).map((h) => (
+                      {tableHeaders.map((h) => (
                         <th key={h} className="px-3 py-2 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -1167,7 +1167,7 @@ export default function AppClient() {
                             </button>
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-[color:rgba(var(--muted-rgb),1)]">{rowIndex + 1}</td>
-                          {tableHeaders.slice(0, 10).map((h) => {
+                          {tableHeaders.map((h) => {
                             const sev = issueCellMap.get(`${rowIndex}|||${h}`);
                             const base = "w-full rounded-xl border px-2 py-1 text-sm text-[var(--text)] outline-none";
                             const cls =
@@ -1178,11 +1178,12 @@ export default function AppClient() {
                                   : base + " border-[var(--border)] bg-[var(--surface)]";
 
                             return (
-                              <td key={h} className="px-3 py-2">
+                              <td key={h} className="px-3 py-2 min-w-[220px]">
                                 <input
                                   className={cls}
                                   value={row?.[h] ?? ""}
                                   onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
+                                  title={row?.[h] ?? ""}
                                 />
                               </td>
                             );
@@ -1194,7 +1195,7 @@ export default function AppClient() {
                 </table>
 
                 <div className="px-3 py-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                  Preview shows pinned rows first, then fills up to 50 rows. Only the first 10 columns are shown here for speed.
+                  Preview shows pinned rows first, then fills up to 50 rows. Scroll horizontally to see all columns. Hover a cell to view the full value.
                 </div>
               </div>
             ) : null}
