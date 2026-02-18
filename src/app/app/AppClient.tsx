@@ -11,7 +11,6 @@ import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
 import type { CsvFormat, CsvIssue } from "@/lib/formats/types";
 import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats/customUser";
-import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import { computeValidationBreakdown } from "@/lib/validation/scoring";
 import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 
@@ -113,31 +112,36 @@ export default function AppClient() {
     setCustomFormats(next);
   }
 
+  useEffect(() => {
+    refreshCustomFormats();
+    const onChanged = () => refreshCustomFormats();
+    window.addEventListener("csnest-formats-changed", onChanged);
+    return () => window.removeEventListener("csnest-formats-changed", onChanged);
+  }, []);
+
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
-  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
-  const desiredPresetRef = useRef<string | null>(null);
   const appliedPresetRef = useRef(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (desiredPresetRef.current !== null) return; // already captured
-    desiredPresetRef.current = new URLSearchParams(window.location.search).get("preset");
-  }, []);
-
   useEffect(() => {
     if (appliedPresetRef.current) return;
-    const preset = desiredPresetRef.current;
+    if (typeof window === "undefined") return;
+
+    const preset = new URLSearchParams(window.location.search).get("preset");
     if (!preset) {
       appliedPresetRef.current = true;
       return;
     }
-    const exists = allFormats.some((f) => f.id === preset);
-    if (!exists) return; // wait until formats load
+
+    const exists = builtinFormats.some((f) => f.id === preset);
+    if (!exists) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
     setFormatId(preset);
     appliedPresetRef.current = true;
-  }, [allFormats]);
+  }, [builtinFormats]);
 
   // support exportName via /app?exportName=<base>
   const appliedExportNameRef = useRef(false);
@@ -194,24 +198,6 @@ export default function AppClient() {
     const plan = subStatus?.plan ?? "free";
     return plan === "advanced" && status === "active";
   }, [subStatus]);
-
-  const canAccessCustomFormats = useMemo(() => {
-    return ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvancedActive;
-  }, [isAdvancedActive]);
-
-  // Load (and live-refresh) Custom Formats only when the user can access them.
-  useEffect(() => {
-    if (!canAccessCustomFormats) {
-      setCustomFormats([]);
-      return;
-    }
-
-    refreshCustomFormats();
-    const onChanged = () => refreshCustomFormats();
-    window.addEventListener("csnest-formats-changed", onChanged);
-    return () => window.removeEventListener("csnest-formats-changed", onChanged);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccessCustomFormats]);
 
   const isUnlimited = useMemo(() => {
     const status = (subStatus?.status ?? "").toLowerCase();
@@ -822,15 +808,7 @@ export default function AppClient() {
         </div>
 
         <div className="mt-4 text-sm text-[var(--muted)]">
-          Built-in formats are available to everyone.{" "}
-          {canAccessCustomFormats ? (
-            <>Custom formats appear here when you save or import them.</>
-          ) : (
-            <>
-              Custom formats are Advanced only. <Link className="underline" href="/checkout">Upgrade to Advanced</Link> to
-              create and use saved formats.
-            </>
-          )}
+          Built-in formats are available to everyone. Custom formats appear here when you save or import them.
         </div>
       </div>
 
