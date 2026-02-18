@@ -14,11 +14,11 @@ import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import { computeValidationBreakdown } from "@/lib/validation/scoring";
 import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
-import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 // Phase helpers
 import { computeReadinessSummary } from "@/lib/validation/readiness";
 import { buildScoreNotes } from "@/lib/validation/scoreNotes";
+import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 // Phase 1: strict mode preference (Shopify)
 import { getStrictMode, setStrictMode } from "@/lib/validation/strictMode";
@@ -139,7 +139,8 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
   const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
 
   // Phase 1: Severity filter
-  const [issueSeverityFilter, setIssueSeverityFilter] = useState<"all" | "error" | "warning" | "info">("all");
+  const \[issueSeverityFilter, setIssueSeverityFilter\] = useState<"all" \| "error" \| "warning" \| "info">\("all"\);
+  const [simulateShopify, setSimulateShopify] = useState(false);
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
