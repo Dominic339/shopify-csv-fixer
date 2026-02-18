@@ -44,7 +44,7 @@ export function EditableIssuesTable(props: {
   // ✅ NEW: cell-level highlight map (key = `${rowIndex}|||${header}`)
   cellSeverityMap: Map<string, "error" | "warning" | "info">;
 }) {
-  const { headers, issues, rows, onUpdateRow, resetKey, pinnedRows, onUnpinRow, cellSeverityMap } = props;
+  const { headers, issues, rows, onUpdateRow, resetKey, formatId, pinnedRows, onUnpinRow, cellSeverityMap } = props;
 
   // Expand state for pinned rows
   const [open, setOpen] = useState<Set<number>>(() => new Set());
@@ -219,7 +219,7 @@ export function EditableIssuesTable(props: {
                           const title = (it.column ?? it.field ?? "(field)").toString();
                           const suggestion = (it as any).suggestion as string | undefined;
                           const code = (it as any).code as string | undefined;
-                          const meta = code ? getIssueMeta(code, (it as any).severity) : undefined;
+                          const meta = code ? getIssueMeta(formatId, code) : undefined;
                           const why = meta?.whyPlatformCares;
                           const isBlocking = Boolean(meta?.blocking);
                           const whyKey = `${rowIndex}:${idx}:${code ?? title}`;

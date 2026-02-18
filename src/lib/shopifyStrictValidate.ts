@@ -352,9 +352,14 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
           message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${duplicateRows.join(", ")}).`,
           suggestion: "Make each variant option combination unique (Option1/2/3 values).",
           details: {
-            handle,
-            duplicateCombo,
-            rows: duplicateRows,
+            // Used by premium UI: structured duplicate-combo preview
+            duplicateCombos: [
+              {
+                handle,
+                options: duplicateCombo,
+                rows: duplicateRows,
+              },
+            ],
           },
         });
       }

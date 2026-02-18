@@ -129,6 +129,19 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
   },
 
+  "shopify/missing_option1_for_variant_data": {
+    code: "shopify/missing_option1_for_variant_data",
+    title: "Missing Option1 value for variant",
+    explanation: "This row looks like variant data but Option1 value is blank.",
+    whyPlatformCares:
+      "Shopify uses option values to create variant combinations. Missing option values can cause the row to be rejected or imported incorrectly.",
+    howToFix: "Fill in Option1 value (or remove variant-only fields from this row).",
+    category: "variant",
+    blocking: true,
+    autoFixable: false,
+  },
+
+
   "shopify/mixed_default_title_with_options": {
     code: "shopify/mixed_default_title_with_options",
     title: 'Mixed "Default Title" with real options',
