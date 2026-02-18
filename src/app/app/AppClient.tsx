@@ -139,7 +139,7 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
   const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
 
   // Phase 1: Severity filter
-  const \[issueSeverityFilter, setIssueSeverityFilter\] = useState<"all" \| "error" \| "warning" \| "info">\("all"\);
+  const [issueSeverityFilter, setIssueSeverityFilter] = useState<"all" | "error" | "warning" | "info">("all");
   const [simulateShopify, setSimulateShopify] = useState(false);
 
   function refreshCustomFormats() {
