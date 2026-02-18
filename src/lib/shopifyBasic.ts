@@ -602,6 +602,20 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
         if (list.length <= 1) continue;
 
         const rowsList = list.map((i) => i + 1).join(", ");
+
+        // Structured details for UI + simulation
+        const parts = key.split("|");
+        const duplicateCombo = {
+          "Option1 value": parts[0] ?? "",
+          "Option2 value": parts[1] ?? "",
+          "Option3 value": parts[2] ?? "",
+        };
+        const details = {
+          handle,
+          rows: list.map((i) => i + 1), // 1-based for display
+          duplicateCombo,
+        };
+
         for (const idx of list) {
           issues.push({
             severity: "error",
@@ -610,6 +624,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
             column: optVals[0],
             message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${rowsList}).`,
             suggestion: "Make each variant option combination unique (Option1/2/3 values).",
+            details,
           });
         }
       }

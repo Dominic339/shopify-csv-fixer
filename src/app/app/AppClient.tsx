@@ -344,18 +344,34 @@ export default function AppClient() {
     }
 
     // Rows that are completely empty are typically ignored by imports.
+    // PapaParse is configured with skipEmptyLines, so true blank lines won't appear in `rows`.
+    // To simulate Shopify's "ignored row" behavior, estimate how many blank data lines were
+    // present in the raw upload.
     let deletedRows = 0;
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i] ?? {};
-      let any = false;
-      for (const h of headers) {
-        const v = (r as any)[h];
-        if (typeof v === "string" ? v.trim() : String(v ?? "").trim()) {
-          any = true;
+
+    const raw = (lastUploadedText ?? "").replace(/^\uFEFF/, "");
+    if (raw) {
+      const lines = raw.split(/\r?\n/);
+      // Find the header line (first non-empty line)
+      let headerIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        if ((lines[i] ?? "").trim().length) {
+          headerIdx = i;
           break;
         }
       }
-      if (!any) deletedRows += 1;
+      if (headerIdx >= 0) {
+        for (let i = headerIdx + 1; i < lines.length; i++) {
+          const line = (lines[i] ?? "").trim();
+          if (!line) {
+            deletedRows += 1;
+            continue;
+          }
+          // lines like ",,," or ", , ," are effectively empty rows
+          const stripped = line.replace(/,/g, "").replace(/\"/g, "").replace(/\s+/g, "");
+          if (!stripped) deletedRows += 1;
+        }
+      }
     }
 
     return {
@@ -363,7 +379,7 @@ export default function AppClient() {
       deletedRows,
       rejectedRows: reject.size,
     };
-  }, [formatId, issuesForTable, rows, headers]);
+  }, [formatId, issuesForTable, rows, headers, lastUploadedText]);
 
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
   const scoreNotes = useMemo(
