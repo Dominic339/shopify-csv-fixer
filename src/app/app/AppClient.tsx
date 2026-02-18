@@ -71,6 +71,25 @@ export default function AppClient() {
   const [issues, setIssues] = useState<UiIssue[]>([]);
   const [parseIssues, setParseIssues] = useState<UiIssue[]>([]);
   const [autoFixes, setAutoFixes] = useState<string[]>([]);
+
+  // The Shopify auto-fixer can log one entry per row for the same action (e.g., normalize tags).
+  // That is useful for downloads, but noisy in the UI. We collapse repeated messages for display.
+  const collapsedAutoFixes = useMemo(() => {
+    if (!autoFixes.length) return [] as string[];
+    const groups = new Map<string, { count: number; first: string }>();
+    for (const msg of autoFixes) {
+      const m = msg.match(/^(.*) on row (\d+)$/i);
+      const base = m ? m[1] : msg;
+      const g = groups.get(base);
+      if (g) g.count += 1;
+      else groups.set(base, { count: 1, first: msg });
+    }
+    const out: string[] = [];
+    for (const [base, g] of groups.entries()) {
+      out.push(g.count === 1 ? g.first : `${base} on ${g.count} rows`);
+    }
+    return out;
+  }, [autoFixes]);
   const [fileName, setFileName] = useState<string | null>(null);
 
   const [quota, setQuota] = useState<any>(null);
@@ -87,7 +106,14 @@ export default function AppClient() {
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
-  const [formatId, setFormatId] = useState<string>("general_csv");
+  // Initialize the selected format from the URL query param if present.
+  // This prevents the "keep valid" fallback from snapping to the first format
+  // before the preset can be applied.
+  const [formatId, setFormatId] = useState<string>(() => {
+    if (typeof window === "undefined") return "shopify_products";
+    const preset = new URLSearchParams(window.location.search).get("preset");
+    return preset?.trim() ? preset.trim() : "shopify_products";
+  });
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -98,12 +124,8 @@ export default function AppClient() {
   // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
-  // ✅ Manually pinned rows = the "Manual fixes" worklist.
-  // NOTE: Auto-pins (rows with issues) are computed from the active filter
-  // and should appear/disappear when the filter changes.
-  const [manualPinnedRows, setManualPinnedRows] = useState<Set<number>>(() => new Set());
-  // ✅ Rows the user explicitly unpinned (don’t auto-repin them)
-  const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
+  // ✅ Pinned rows = the "Manual fixes" worklist
+  const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
 
   // Phase 1: Shopify strict mode toggle (stored local)
   const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
@@ -162,11 +184,13 @@ export default function AppClient() {
   }, []);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
+  // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
+  // latest selected id (including a preset from the URL) and does not overwrite it.
   useEffect(() => {
+    if (!allFormats.length) return;
     if (allFormats.some((f) => f.id === formatId)) return;
-    setFormatId(allFormats[0]?.id ?? "general_csv");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allFormats.length]);
+    setFormatId(allFormats[0]!.id);
+  }, [allFormats, formatId]);
 
   const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
 
@@ -293,55 +317,40 @@ export default function AppClient() {
     return map;
   }, [issuesForDisplay]);
 
-  
-// Rows that should be auto-pinned based on the CURRENT severity filter.
-// IMPORTANT: "All" intentionally pins only error + warning (info can be extremely noisy).
-const rowsToAutoPin = useMemo(() => {
-  const allowed =
-    issueSeverityFilter === "all"
-      ? new Set(["error", "warning"])
-      : new Set([issueSeverityFilter]);
+  const rowsWithAnyIssue = useMemo(() => {
+    const set = new Set<number>();
+    for (const i of issuesForDisplay) {
+      if (i.rowIndex >= 0) set.add(i.rowIndex);
+    }
+    return [...set].sort((a, b) => a - b);
+  }, [issuesForDisplay]);
 
-  const set = new Set<number>();
-  for (const i of issuesForDisplay) {
-    if (i.rowIndex < 0) continue;
-    if (!allowed.has(i.severity)) continue;
-    set.add(i.rowIndex);
-  }
-  return [...set].sort((a, b) => a - b);
-}, [issuesForDisplay, issueSeverityFilter]);
+  // ✅ Auto-pin any row that has issues (filtered)
+  useEffect(() => {
+    if (!rowsWithAnyIssue.length) return;
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      for (const idx of rowsWithAnyIssue) next.add(idx);
+      return next;
+    });
+  }, [rowsWithAnyIssue.length, formatId]);
 
-// Effective pins = manual pins + current-filter auto-pins (minus suppressed).
-// This ensures switching filters updates the pin list (e.g., warnings disappear on Error-only).
-const effectivePinnedSorted = useMemo(() => {
-  const next = new Set<number>();
-
-  // manual pins always included
-  for (const idx of manualPinnedRows) next.add(idx);
-
-  // auto pins are derived from current filter and can be suppressed by user intent
-  for (const idx of rowsToAutoPin) {
-    if (suppressedAutoPins.has(idx)) continue;
-    next.add(idx);
-  }
-
-  return [...next].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
-}, [manualPinnedRows, rowsToAutoPin, suppressedAutoPins, rows.length]);
-
-const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effectivePinnedSorted]);
+  const pinnedSorted = useMemo(() => {
+    return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
+  }, [pinnedRows, rows.length]);
 
   // Preview table: pinned rows first, then issue rows, then rest up to 25
   const previewRows = useMemo(() => {
     const out: number[] = [];
     const seen = new Set<number>();
 
-    for (const idx of effectivePinnedSorted) {
+    for (const idx of pinnedSorted) {
       if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
       }
     }
-    for (const idx of rowsToAutoPin) {
+    for (const idx of rowsWithAnyIssue) {
       if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
@@ -354,7 +363,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
       }
     }
     return out.slice(0, 25);
-  }, [effectivePinnedSorted, rowsToAutoPin, rows.length]);
+  }, [pinnedSorted, rowsWithAnyIssue, rows.length]);
 
   const rowSeverity = useMemo(() => {
     const m = new Map<number, "error" | "warning" | "info">();
@@ -369,35 +378,20 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
   }, [issuesForDisplay]);
 
   function pinRow(rowIndex: number) {
-  // If the user manually pins, allow it to be auto-pinned again in the future.
-  setSuppressedAutoPins((prev) => {
-    if (!prev.has(rowIndex)) return prev;
-    const next = new Set(prev);
-    next.delete(rowIndex);
-    return next;
-  });
-
-  setManualPinnedRows((prev) => {
-    const next = new Set(prev);
-    next.add(rowIndex);
-    return next;
-  });
-}
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      next.add(rowIndex);
+      return next;
+    });
+  }
 
   function unpinRow(rowIndex: number) {
-  // User intent: keep it unpinned even if it still has issues.
-  setSuppressedAutoPins((prev) => {
-    const next = new Set(prev);
-    next.add(rowIndex);
-    return next;
-  });
-
-  setManualPinnedRows((prev) => {
-    const next = new Set(prev);
-    next.delete(rowIndex);
-    return next;
-  });
-}
+    setPinnedRows((prev) => {
+      const next = new Set(prev);
+      next.delete(rowIndex);
+      return next;
+    });
+  }
 
   // ✅ Revalidate issues WITHOUT applying fixes
   const revalidateTimerRef = useRef<number | null>(null);
@@ -513,8 +507,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      setManualPinnedRows(new Set());
-      setSuppressedAutoPins(new Set());
+      setPinnedRows(new Set());
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -539,8 +532,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
       setAutoFixes([]);
       setEditing(null);
       setLastFixAll(null);
-      setManualPinnedRows(new Set());
-      setSuppressedAutoPins(new Set());
+      setPinnedRows(new Set());
 
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
@@ -560,8 +552,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
     setAutoFixes([]);
     setEditing(null);
     setLastFixAll(null);
-    setManualPinnedRows(new Set());
-    setSuppressedAutoPins(new Set());
+    setPinnedRows(new Set());
 
     if (!lastUploadedText || !activeFormat) return;
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
@@ -793,7 +784,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="text-base font-semibold text-[var(--text)]">
                           Auto fixes applied{" "}
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length})</span>
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length} actions, {collapsedAutoFixes.length} lines)</span>
                         </div>
 
                         <button
@@ -814,11 +805,11 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
                           View auto fixes
                         </summary>
                         <ul className="mt-3 list-disc pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
-                          {autoFixes.slice(0, 50).map((t, idx) => (
+                          {collapsedAutoFixes.slice(0, 50).map((t, idx) => (
                             <li key={idx}>{t}</li>
                           ))}
-                          {autoFixes.length > 50 ? (
-                            <li>…and {autoFixes.length - 50} more (download the log for the full list)</li>
+                          {collapsedAutoFixes.length > 50 ? (
+                            <li>…and {collapsedAutoFixes.length - 50} more (download the log for the full list)</li>
                           ) : null}
                         </ul>
                       </details>
@@ -951,7 +942,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
                   <tbody>
                     {previewRows.map((rowIndex) => {
                       const row = rows[rowIndex] ?? {};
-                      const isPinned = effectivePinnedSet.has(rowIndex);
+                      const isPinned = pinnedRows.has(rowIndex);
                       const sev = rowSeverity.get(rowIndex);
 
                       const actionCell =
@@ -1051,7 +1042,7 @@ const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effect
               onUpdateRow={onUpdateRow}
               resetKey={formatId}
               formatId={formatId}
-              pinnedRows={effectivePinnedSorted}
+              pinnedRows={pinnedSorted}
               onUnpinRow={unpinRow}
               cellSeverityMap={issueCellMap}
             />

@@ -127,43 +127,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
   const fixedHeaders = canon.fixedHeaders;
   const fixedRows = canon.fixedRows;
 
-  // 1a) Header collisions / duplicates (risk of data loss)
-  if ((canon.duplicateInputHeaders ?? []).length) {
-    for (const d of canon.duplicateInputHeaders) {
-      issues.push({
-        severity: "error",
-        code: "shopify/duplicate_header",
-        column: d.header,
-        message: `Duplicate header detected (after normalization): "${d.header}" appears ${d.count} times.`,
-        suggestion: "Ensure each column header is unique. Duplicate headers can overwrite values on import.",
-      });
-    }
-  }
-  if ((canon.headerCollisions ?? []).length) {
-    for (const c of canon.headerCollisions) {
-      issues.push({
-        severity: "error",
-        code: "shopify/header_collision",
-        column: c.canonical,
-        message: `Header collision: multiple input headers map to Shopify field "${c.canonical}": ${c.sources.join(", ")}.`,
-        suggestion:
-          "Keep only one of the colliding columns. If you have both the modern Shopify header and an older alias, delete the alias column to avoid ambiguity.",
-      });
-    }
-  }
-  if ((canon.duplicateOutputHeaders ?? []).length) {
-    for (const d of canon.duplicateOutputHeaders) {
-      issues.push({
-        severity: "error",
-        code: "shopify/output_header_duplicate",
-        column: d.header,
-        message: `Output header would be duplicated: "${d.header}" appears ${d.count} times after canonicalization.`,
-        suggestion: "Remove or rename duplicate/alias columns so the output has unique headers.",
-      });
-    }
-  }
-
-
   // Canonical column names we operate on
   const cTitle = "Title";
   const cHandle = "URL handle";
@@ -503,14 +466,20 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
         !!get(r, cInvQty).trim() ||
         !!get(r, cContinue).trim();
 
-      if (hasVariantFields && !(n1 || v1)) {
+      // If variant columns are used, Option1 name + value must be present.
+      // Otherwise Shopify may treat the row as a product-only row and drop variants.
+      if (hasVariantFields && (!n1 || !v1)) {
         issues.push({
           severity: "error",
           code: "shopify/missing_option1_for_variant_data",
           row,
-          column: optNames[0],
-          message: "Variant data exists on a row but Option1 name/value are missing.",
-          suggestion: "Include Option1 name and Option1 value on variant rows.",
+          column: !n1 ? optNames[0] : optVals[0],
+          message:
+            !n1
+              ? "Variant data exists on a row but Option1 name is missing (risk: Shopify may drop variants)."
+              : "Variant data exists on a row but Option1 value is missing (risk: Shopify may drop variants).",
+          suggestion:
+            "If this row represents a variant, set Option1 name (e.g., Size/Color) and Option1 value (e.g., M/Blue). If this product is single-variant, clear variant-specific columns (Variant SKU/Price/Inventory/etc.) so Shopify treats it as one variant.",
         });
       }
     }
@@ -551,7 +520,9 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       });
     }
 
-    if (n1 && !v1) {
+    // Only warn about a missing option value when variant columns are NOT used.
+    // If variant columns are used, the blocking error above will already explain what to do.
+    if (!hasVariantFields && n1 && !v1) {
       issues.push({
         severity: "warning",
         code: "shopify/variant_option_missing_value",
@@ -692,46 +663,6 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-
-    // 4a2) Option value required when option name is present (BLOCKING)
-    for (const idx of variantIdxs) {
-      const r = fixedRows[idx];
-      const row = idx + 1;
-
-      for (let j = 0; j < 3; j++) {
-        const n = get(r, optNames[j]).trim();
-        const v = get(r, optVals[j]).trim();
-        if (n && !v) {
-          issues.push({
-            severity: "error",
-            code: "shopify/missing_option_value",
-            row,
-            column: optVals[j],
-            message: `Row ${row}: Option${j + 1} name is set ("${n}") but Option${j + 1} value is blank for handle "${handle}".`,
-            suggestion: "If you use an option name, every variant row must include a value for that option.",
-          });
-        }
-      }
-    }
-
-    // 4a3) Multi-variant products require Option1 value on every variant row (BLOCKING)
-    if (variantIdxs.length >= 2) {
-      for (const idx of variantIdxs) {
-        const r = fixedRows[idx];
-        const row = idx + 1;
-        const v1 = get(r, optVals[0]).trim();
-        if (!v1) {
-          issues.push({
-            severity: "error",
-            code: "shopify/missing_option1_value",
-            row,
-            column: optVals[0],
-            message: `Row ${row}: Multi-variant product "${handle}" is missing Option1 value.`,
-            suggestion: "For multi-variant products, every variant row must have Option1 value (e.g., Size/Color).",
-          });
-        }
-      }
-    }
     // 4b) Mixed Default Title with real options (warn)
     if (variantIdxs.length >= 2) {
       let hasDefaultTitle = false;
@@ -944,10 +875,21 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
   }
 
+  // Final pass: de-duplicate noisy overlaps (same row + code + column).
+  // This keeps the UI readable and avoids showing the same issue multiple times.
+  const issueDeduped: Issue[] = [];
+  const seenIssue = new Set<string>();
+  for (const it of issues) {
+    const key = `${it.row ?? -1}::${it.code}::${it.column ?? ""}`;
+    if (seenIssue.has(key)) continue;
+    seenIssue.add(key);
+    issueDeduped.push(it);
+  }
+
   return {
     fixedHeaders,
     fixedRows,
-    issues,
+    issues: issueDeduped,
     fixesApplied: dedupe(fixesApplied),
   };
 }
