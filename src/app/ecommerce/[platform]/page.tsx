@@ -14,6 +14,67 @@ function titleFor(platformName: string) {
   return `${platformName} CSV Fixer`;
 }
 
+function checksFor(platformId: string): string[] {
+  switch (platformId) {
+    case "shopify":
+      return [
+        "Strict headers and Shopify-friendly ordering",
+        "Handle normalization and duplicate handle detection",
+        "Variant grouping consistency checks",
+        "Price formatting normalization",
+        "TRUE/FALSE boolean normalization",
+        "Image URL checks and image-row structure hints",
+        "SKU duplication checks (where available)",
+        "Tag formatting and cleanup",
+      ];
+    case "woocommerce":
+      return [
+        "Required header presence and normalization",
+        "Type and status field normalization",
+        "Price formatting normalization",
+        "Stock status / quantity sanity checks",
+        "Category and tag cleanup",
+        "Image URL formatting checks",
+        "Blank/whitespace cleanup across rows",
+        "Safer export formatting for import tools",
+      ];
+    case "etsy":
+      return [
+        "Header mapping and basic required fields",
+        "Price and quantity format normalization",
+        "Title length / empty field checks",
+        "Tag formatting cleanup",
+        "Image URL formatting checks",
+        "Whitespace cleanup and standardization",
+      ];
+    case "ebay":
+      return [
+        "Header presence and basic template alignment",
+        "Required field checks (title, price, quantity)",
+        "Category / condition format sanity checks",
+        "Whitespace cleanup and standardization",
+        "Image URL formatting checks",
+        "Safer export formatting for upload tools",
+      ];
+    case "amazon":
+      return [
+        "Basic template checks for common seller uploads",
+        "Price formatting normalization",
+        "Quantity / inventory sanity checks",
+        "Whitespace cleanup and standardization",
+        "Image URL formatting checks",
+        "Safer export formatting for upload tools",
+      ];
+    default:
+      return [
+        "Header checks and normalization",
+        "Whitespace cleanup and standardization",
+        "Basic required-field checks",
+        "Safer export formatting",
+      ];
+  }
+}
+
 export default function EcommercePlatformPage({ params }: PageProps) {
   const platform = getEcommercePlatformById(params.platform);
   if (!platform) return notFound();
@@ -21,10 +82,12 @@ export default function EcommercePlatformPage({ params }: PageProps) {
   const preset = getPresetById(platform.presetId);
   if (!preset) return notFound();
 
-  // ✅ PresetFormat does not have formatId — the preset id is the formatId used by /app?preset=
+  // PresetFormat does not have formatId — preset.id is the formatId for /app?preset=
   const openFixerHref = `/app?preset=${encodeURIComponent(preset.id)}`;
   const templatePreviewHref = `/presets/${encodeURIComponent(preset.id)}`;
   const sampleCsvHref = `/presets/${encodeURIComponent(preset.id)}/sample.csv`;
+
+  const bullets = checksFor(platform.id);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -65,7 +128,7 @@ export default function EcommercePlatformPage({ params }: PageProps) {
           <div className="min-w-[260px] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
             <div className="text-sm font-semibold text-[var(--text)]">Included checks</div>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-              {platform.bullets?.slice(0, 8).map((b) => (
+              {bullets.slice(0, 8).map((b) => (
                 <li key={b}>{b}</li>
               ))}
             </ul>
