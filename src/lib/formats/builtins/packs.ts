@@ -22,6 +22,26 @@ function isBlank(v: unknown) {
   return v == null || String(v).trim() === "";
 }
 
+function sampleValueFor(header: string) {
+  const h = header.toLowerCase();
+  if (h === "id") return "";
+  if (h.includes("email")) return "name@domain.com";
+  if (h.includes("first")) return "Sam";
+  if (h.includes("last")) return "Example";
+  if (h.includes("phone")) return "+15551234567";
+  if (h.includes("sku")) return "SKU-1001";
+  if (h.includes("name") || h.includes("title") || h.includes("item")) return "Sample Item";
+  if (h.includes("description")) return "Sample description.";
+  if (h.includes("price")) return "19.99";
+  if (h.includes("quantity") || h.includes("stock")) return "10";
+  if (h.includes("category")) return "Example Category";
+  if (h.includes("tag")) return "tag-one, tag-two";
+  if (h.includes("image") || h.includes("url")) return "https://example.com/image.jpg";
+  if (h.includes("published")) return "1";
+  if (h.includes("type")) return "simple";
+  return "";
+}
+
 export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
   return {
     id: spec.id,
@@ -29,6 +49,25 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
     description: spec.description,
     category: spec.category,
     source: "builtin",
+
+    expectedHeaders: spec.expectedHeaders,
+    exampleRow: Object.fromEntries(spec.expectedHeaders.map((h) => [h, sampleValueFor(h)])),
+    seo: {
+      longDescription: [
+        spec.description,
+        "This preset provides a clean template layout, validates required fields, and helps you export a consistent CSV that is easier to import into the target platform.",
+      ],
+      howItWorks: [
+        "Upload your CSV.",
+        "We map columns into the expected header set and validate required fields.",
+        "We flag missing or suspicious values and export a cleaner file.",
+      ],
+      commonFixes: [
+        "Map input headers into a consistent template.",
+        "Flag missing required fields.",
+        "Validate basic number fields (price, quantity, stock) where applicable.",
+      ],
+    },
 
     apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
       const inHeaders = headers ?? [];

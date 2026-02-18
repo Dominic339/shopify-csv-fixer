@@ -39,8 +39,8 @@ export default function PresetsPage() {
               <Link className="rg-btn" href={`/app?preset=${encodeURIComponent(p.formatId)}`}>
                 Open with preset
               </Link>
-              <Link className="pill-btn" href={`/presets/${encodeURIComponent(p.id)}`}>
-                View template
+              <Link className="rg-btn" href={`/presets/${encodeURIComponent(p.id)}`}>
+                View information
               </Link>
             </div>
           </div>
