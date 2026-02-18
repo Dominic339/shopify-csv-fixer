@@ -166,10 +166,15 @@ export default function FormatsClient() {
 
   function addColumn() {
     if (!selected) return;
+    // IMPORTANT UX:
+    // Default the header name to "Column N" so users can immediately edit it.
+    // Leaving it blank was confusing because the UI still *shows* Column N via fallback,
+    // but the input looked empty.
+    const defaultTitle = `Column ${selected.columns.length + 1}`;
     const col: UserFormatColumn = {
       id: uid(),
       key: "",
-      title: "",
+      title: defaultTitle,
       required: false,
       defaultValue: "",
     };
