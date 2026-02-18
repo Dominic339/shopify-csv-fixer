@@ -87,7 +87,13 @@ export default function AppClient() {
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
-  const [formatId, setFormatId] = useState<string>("general_csv");
+  const [formatId, setFormatId] = useState<string>(() => {
+    // Initialize from /app?preset=<formatId> so the correct tab is selected on first paint.
+    // This avoids first-mount effect races that can overwrite the preset with the default format.
+    if (typeof window === "undefined") return "general_csv";
+    const p = new URLSearchParams(window.location.search).get("preset");
+    return p && p.trim() ? p.trim() : "general_csv";
+  });
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -115,67 +121,26 @@ export default function AppClient() {
 
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
-  // Support selecting a preset via /app?preset=<formatId>
-  // NOTE: read the query param *inside* this effect to avoid a first-mount race
-  // between multiple useEffects.
-  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
-  const appliedPresetRef = useRef(false);
-
+  // Validate current selection and safely fall back if needed.
+  // If we were initialized with a preset that isn't available yet (custom formats),
+  // wait until it appears instead of falling back to Shopify.
   useEffect(() => {
-    if (appliedPresetRef.current) return;
-    if (typeof window === "undefined") return;
+    if (allFormats.length === 0) return;
 
-    const preset = new URLSearchParams(window.location.search).get("preset");
-    if (!preset) {
-      appliedPresetRef.current = true;
-      return;
-    }
+    if (allFormats.some((f) => f.id === formatId)) return;
 
-    const exists = allFormats.some((f) => f.id === preset);
-    if (!exists) return; // wait until formats load
-
-    setFormatId(preset);
-    appliedPresetRef.current = true;
-  }, [allFormats]);
-
-  // support exportName via /app?exportName=<base>
-  const appliedExportNameRef = useRef(false);
-  useEffect(() => {
-    if (appliedExportNameRef.current) return;
-    if (typeof window === "undefined") return;
-
-    const qp = new URLSearchParams(window.location.search);
-    const exportName = qp.get("exportName");
-    if (exportName) {
-      setExportBaseName(exportName);
-      appliedExportNameRef.current = true;
-      return;
-    }
-
-    const preset = qp.get("preset");
-    if (preset) setExportBaseName(preset);
-    appliedExportNameRef.current = true;
-  }, []);
-
-  // Keep selected format valid (if a custom format is deleted, fall back)
-  // IMPORTANT: This must depend on `formatId`.
-  // On first mount, effects capture the initial render state. If we only depend on
-  // `allFormats.length`, this fallback can run with the initial `formatId` ("general_csv")
-  // and overwrite a preset selection that was scheduled earlier in the same commit.
-  useEffect(() => {
     if (typeof window !== "undefined") {
       const preset = new URLSearchParams(window.location.search).get("preset");
-      if (preset && !appliedPresetRef.current) {
-        // A preset is present but hasn't been applied yet; don't force a fallback.
+      if (preset && preset.trim() === formatId) {
+        // still waiting for that preset to load
         return;
       }
     }
 
-    if (allFormats.some((f) => f.id === formatId)) return;
     setFormatId(allFormats[0]?.id ?? "general_csv");
   }, [allFormats, formatId]);
 
-  const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
+  const activeFormat = useMemoconst activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
 
   async function refreshQuotaAndPlan() {
     try {
