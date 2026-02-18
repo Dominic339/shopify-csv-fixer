@@ -21,6 +21,7 @@ export type Issue = {
   row?: number; // 1-based
   column?: string;
   suggestion?: string;
+  details?: unknown;
 };
 
 export type FixResult = {
