@@ -294,6 +294,14 @@ export default function AppClient() {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
+  // ✅ ALWAYS expose debug data so your console never hits undefined
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    (window as any).__DEBUG_ISSUES__ = issuesForTable;
+    (window as any).__DEBUG_HEADERS__ = tableHeaders;
+    (window as any).__DEBUG_ROWS__ = rows;
+  }, [issuesForTable, rows]); // tableHeaders is derived and stable enough; rows change triggers refresh too
+
   const issuesForDisplay = useMemo(() => {
     if (issueSeverityFilter === "all") return issuesForTable;
     return issuesForTable.filter((i) => i.severity === issueSeverityFilter);
@@ -313,8 +321,10 @@ export default function AppClient() {
     for (const it of issuesForTable) {
       const code = (it as any).code as string | undefined;
       const rowIndex = (it as any).rowIndex as number | undefined;
+
       if (code && typeof rowIndex === "number" && rowIndex >= 0) {
-        const meta = getIssueMeta(code, (it as any).severity);
+        // ✅ FIX: issue meta is keyed by (formatId, code)
+        const meta = getIssueMeta(formatId, code);
         if (meta?.blocking) reject.add(rowIndex);
       }
 
@@ -1032,118 +1042,6 @@ export default function AppClient() {
           <h2 className="text-xl font-semibold text-[var(--text)]">Issues</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Click a cell in the table to edit it. Red and yellow highlight errors and warnings.</p>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Issue filter</span>
-            {(["all", "error", "warning", "info"] as const).map((k) => {
-              const active = issueSeverityFilter === k;
-              return (
-                <button key={k} type="button" className={`pill-btn ${active ? "is-active" : ""}`} onClick={() => setIssueSeverityFilter(k)}>
-                  {k === "all" ? "All" : k[0].toUpperCase() + k.slice(1)}
-                </button>
-              );
-            })}
-            <span className="ml-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-              Showing {issuesForDisplay.length} of {issuesForTable.length}
-            </span>
-          </div>
-
-          <div className="mt-5 data-table-wrap">
-            <div className="data-table-scroll">
-              {rows.length === 0 ? (
-                <div className="p-7 text-base text-[var(--muted)]">No table yet. Upload a CSV to see it here.</div>
-              ) : (
-                <table className="data-table text-sm">
-                  <thead>
-                    <tr>
-                      <th style={{ width: 70 }}>Row</th>
-                      <th style={{ width: 110 }}></th>
-                      {tableHeaders.slice(0, 10).map((h) => (
-                        <th key={h}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {previewRows.map((rowIndex) => {
-                      const row = rows[rowIndex] ?? {};
-                      const isPinned = effectivePinnedRows.has(rowIndex);
-                      const sev = rowSeverity.get(rowIndex);
-
-                      const actionCell =
-                        sev === "error" || sev === "warning" ? (
-                          <span
-                            className={
-                              "rounded-full border px-2 py-0.5 text-xs font-semibold " +
-                              (sev === "error"
-                                ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.10)]"
-                                : "border-[color:rgba(255,200,0,0.35)] bg-[color:rgba(255,200,0,0.10)]")
-                            }
-                          >
-                            {sev === "error" ? "Error" : "Warning"}
-                          </span>
-                        ) : isPinned ? (
-                          <button type="button" className="pill-btn" onClick={() => unpinRow(rowIndex)} title="Remove from Manual fixes">
-                            Unpin
-                          </button>
-                        ) : (
-                          <button type="button" className="pill-btn" onClick={() => pinRow(rowIndex)} title="Add to Manual fixes">
-                            Pin
-                          </button>
-                        );
-
-                      return (
-                        <tr key={rowIndex}>
-                          <td className="text-[var(--muted)]">{rowIndex + 1}</td>
-                          <td>{actionCell}</td>
-
-                          {tableHeaders.slice(0, 10).map((h) => {
-                            const cellSev = issueCellMap.get(`${rowIndex}|||${h}`);
-                            const isEditing = editing?.rowIndex === rowIndex && editing?.col === h;
-
-                            const cellClass =
-                              (cellSev === "error" ? "cell-error" : cellSev === "warning" ? "cell-warning" : "") +
-                              (isEditing ? " cell-editing" : "");
-
-                            return (
-                              <td
-                                key={`${rowIndex}-${h}`}
-                                className={cellClass}
-                                onClick={() => startEdit(rowIndex, h)}
-                                style={{ cursor: "pointer" }}
-                                title={cellSev ? `${cellSev}` : "Click to edit"}
-                              >
-                                {isEditing ? (
-                                  <input
-                                    autoFocus
-                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-sm outline-none"
-                                    value={editing.value}
-                                    onChange={(e) => setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))}
-                                    onBlur={commitEdit}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") commitEdit();
-                                      if (e.key === "Escape") cancelEdit();
-                                    }}
-                                  />
-                                ) : (
-                                  <span>{row[h] ?? ""}</span>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            {rows.length > 0 ? (
-              <div className="border-t border-[var(--border)] px-5 py-4 text-sm text-[var(--muted)]">
-                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until unpinned.
-              </div>
-            ) : null}
-          </div>
-
           <div className="mt-7">
             <EditableIssuesTable
               headers={tableHeaders}
@@ -1161,13 +1059,8 @@ export default function AppClient() {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-        <Link href="/presets" className="hover:underline">
-          Preset Formats
-        </Link>
-
-        <Link href="/#pricing" className="hover:underline">
-          Pricing
-        </Link>
+        <Link href="/presets" className="hover:underline">Preset Formats</Link>
+        <Link href="/#pricing" className="hover:underline">Pricing</Link>
       </div>
     </div>
   );

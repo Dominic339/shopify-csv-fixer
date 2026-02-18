@@ -4,7 +4,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
-
 type CsvRow = Record<string, string>;
 
 type AnyIssue = {
@@ -17,6 +16,7 @@ type AnyIssue = {
   level?: "error" | "warning" | "info";
   code?: string;
   suggestion?: string;
+  details?: Record<string, unknown>;
 };
 
 function normalizeRowIndex(it: AnyIssue) {
@@ -112,21 +112,14 @@ export function EditableIssuesTable(props: {
   }
 
   function inputClassFor(sev?: "error" | "warning" | "info") {
-    const base =
-      "w-full rounded-xl border px-3 py-2 text-sm text-[var(--text)] outline-none";
+    const base = "w-full rounded-xl border px-3 py-2 text-sm text-[var(--text)] outline-none";
 
     if (sev === "error") {
-      return (
-        base +
-        " border-[color:rgba(255,80,80,0.55)] bg-[color:rgba(255,80,80,0.12)] ring-1 ring-[color:rgba(255,80,80,0.25)]"
-      );
+      return base + " border-[color:rgba(255,80,80,0.55)] bg-[color:rgba(255,80,80,0.12)] ring-1 ring-[color:rgba(255,80,80,0.25)]";
     }
 
     if (sev === "warning") {
-      return (
-        base +
-        " border-[color:rgba(255,200,0,0.55)] bg-[color:rgba(255,200,0,0.12)] ring-1 ring-[color:rgba(255,200,0,0.22)]"
-      );
+      return base + " border-[color:rgba(255,200,0,0.55)] bg-[color:rgba(255,200,0,0.12)] ring-1 ring-[color:rgba(255,200,0,0.22)]";
     }
 
     return base + " border-[var(--border)] bg-[var(--surface)]";
@@ -136,9 +129,7 @@ export function EditableIssuesTable(props: {
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-semibold text-[var(--text)]">Manual fixes</div>
-        <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
-          Pinned rows stay here until you unpin them.
-        </div>
+        <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">Pinned rows stay here until you unpin them.</div>
       </div>
 
       {pinnedRows.length === 0 ? (
@@ -190,18 +181,11 @@ export function EditableIssuesTable(props: {
                         </span>
                       ) : null}
 
-                      <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                        {isOpen ? "Click to collapse" : "Click to expand and fix"}
-                      </span>
+                      <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{isOpen ? "Click to collapse" : "Click to expand and fix"}</span>
                     </div>
                   </button>
 
-                  <button
-                    type="button"
-                    className="pill-btn"
-                    onClick={() => onUnpinRow(rowIndex)}
-                    title="Remove this row from Manual fixes"
-                  >
+                  <button type="button" className="pill-btn" onClick={() => onUnpinRow(rowIndex)} title="Remove this row from Manual fixes">
                     Unpin
                   </button>
                 </div>
@@ -210,18 +194,18 @@ export function EditableIssuesTable(props: {
                   <div className="border-t border-[var(--border)] px-4 py-4">
                     {list.length ? (
                       <div className="mb-4 space-y-2">
-                        <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">
-                          Issues in this row
-                        </div>
+                        <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">Issues in this row</div>
 
                         {list.slice(0, 6).map((it, idx) => {
                           const sev = normalizeSeverity(it);
                           const title = (it.column ?? it.field ?? "(field)").toString();
                           const suggestion = (it as any).suggestion as string | undefined;
                           const code = (it as any).code as string | undefined;
+
                           const meta = code ? getIssueMeta(formatId, code) : undefined;
                           const why = meta?.whyPlatformCares;
                           const isBlocking = Boolean(meta?.blocking);
+
                           const whyKey = `${rowIndex}:${idx}:${code ?? title}`;
                           const showWhy = Boolean(openWhy[whyKey]);
                           const details = (it as any).details as any | undefined;
@@ -262,23 +246,29 @@ export function EditableIssuesTable(props: {
                                 </div>
                               ) : null}
 
-                              {code === "shopify/options_not_unique" && (Array.isArray(details?.duplicateCombos) ? details.duplicateCombos.length > 0 : Boolean(details?.duplicateCombo)) ? (
+                              {code === "shopify/options_not_unique" &&
+                              (Array.isArray(details?.duplicateCombos) ? details.duplicateCombos.length > 0 : Boolean(details?.duplicateCombo)) ? (
                                 <div className="mt-2 rounded-lg border border-[color:rgba(255,200,0,0.25)] bg-[color:rgba(255,200,0,0.06)] p-2 text-xs">
                                   <div className="font-semibold">Show duplicate combinations</div>
                                   <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">
-                                    {(Array.isArray(details?.duplicateCombos) ? details.duplicateCombos : [{ options: details?.duplicateCombo, rows: details?.rows }]).slice(0, 3).map((c: any, i: number) => (
-                                      <div key={i} className={i ? "mt-2 pt-2 border-t border-[color:rgba(255,200,0,0.2)]" : ""}>
-                                        <div>Duplicate combo:</div>
-                                        <div className="mt-1 space-y-0.5">
-                                          {Object.entries((c?.options ?? c ?? {}) as Record<string, string>).map(([k, v]) => (
-                                            <div key={k}>
-                                              <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>{k}:</span> {String(v)}
-                                            </div>
-                                          ))}
+                                    {(Array.isArray(details?.duplicateCombos) ? details.duplicateCombos : [{ options: details?.duplicateCombo, rows: details?.rows }])
+                                      .slice(0, 3)
+                                      .map((c: any, i: number) => (
+                                        <div key={i} className={i ? "mt-2 pt-2 border-t border-[color:rgba(255,200,0,0.2)]" : ""}>
+                                          <div>Duplicate combo:</div>
+                                          <div className="mt-1 space-y-0.5">
+                                            {Object.entries((c?.options ?? c ?? {}) as Record<string, string>).map(([k, v]) => (
+                                              <div key={k}>
+                                                <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>
+                                                  {k}:
+                                                </span>{" "}
+                                                {String(v)}
+                                              </div>
+                                            ))}
+                                          </div>
+                                          {Array.isArray(c?.rows) ? <div className="mt-1">Rows: {(c.rows as number[]).join(", ")}</div> : null}
                                         </div>
-                                        {Array.isArray(c?.rows) ? <div className="mt-1">Rows: {(c.rows as number[]).join(", ")}</div> : null}
-                                      </div>
-                                    ))}
+                                      ))}
                                   </div>
                                 </div>
                               ) : null}
@@ -286,10 +276,7 @@ export function EditableIssuesTable(props: {
                               {suggestion ? (
                                 <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
                                   Suggestion:{" "}
-                                  <span
-                                    className="font-semibold"
-                                    style={{ color: "rgba(255,255,255,0.92)" }} // ✅ brighter white
-                                  >
+                                  <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>
                                     {suggestion}
                                   </span>
                                 </div>
@@ -298,14 +285,10 @@ export function EditableIssuesTable(props: {
                           );
                         })}
 
-                        {list.length > 6 ? (
-                          <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">…and {list.length - 6} more</div>
-                        ) : null}
+                        {list.length > 6 ? <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">…and {list.length - 6} more</div> : null}
                       </div>
                     ) : (
-                      <div className="mb-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                        No active issues on this row. You can still edit, then unpin when done.
-                      </div>
+                      <div className="mb-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">No active issues on this row. You can still edit, then unpin when done.</div>
                     )}
 
                     {/* ✅ FIELD-LEVEL highlighting happens here */}
@@ -327,9 +310,7 @@ export function EditableIssuesTable(props: {
                     </div>
 
                     {headers.length > visibleHeaders.length ? (
-                      <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                        Showing first {visibleHeaders.length} fields for performance.
-                      </div>
+                      <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">Showing first {visibleHeaders.length} fields for performance.</div>
                     ) : null}
                   </div>
                 ) : null}
