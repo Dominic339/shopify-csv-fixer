@@ -1,70 +1,76 @@
 // src/lib/presetRegistry.ts
-// Central registry for built-in preset format landing pages.
-// Keep this small, human-readable, and stable so URLs do not change.
 
-export type PresetCategory = "Ecommerce";
+export type PresetCategory =
+  | "Ecommerce"
+  | "Accounting"
+  | "CRM"
+  | "Marketing"
+  | "Analytics"
+  | "Shipping"
+  | "Other";
 
 export type PresetFormat = {
-  id: string; // matches CsvFormat.id
-  slug: string; // stable slug (legacy) used in a few places
-  name: string; // display name
+  id: string; // must match a CsvFormat id (ex: "shopify_products")
+  name: string;
   category: PresetCategory;
-  shortDescription: string;
-  searchKeywords: string[];
+
+  // SEO + UI helpers (optional but recommended)
+  shortDescription?: string;
+  longDescription?: string;
+  searchKeywords?: string[];
 };
 
-// IMPORTANT: keep slugs stable once published.
 export const PRESET_FORMATS: PresetFormat[] = [
+  // Ecommerce (keep to your ecommerce-only set)
   {
     id: "shopify_products",
-    slug: "shopify-products",
-    name: "Shopify Import Optimizer",
+    name: "Shopify Products CSV",
     category: "Ecommerce",
-    shortDescription:
-      "Strict Shopify schema validation + safe auto-fixes for products, variants, images, pricing, inventory, and SEO.",
-    searchKeywords: ["shopify csv", "shopify product csv", "shopify import csv", "fix shopify csv"],
+    shortDescription: "Validate and auto-fix Shopify product imports (variants, prices, booleans, images).",
+    searchKeywords: ["shopify", "products", "variants", "import", "csv"],
   },
   {
     id: "woocommerce_products",
-    slug: "woocommerce-products",
-    name: "WooCommerce Products",
+    name: "WooCommerce Products CSV",
     category: "Ecommerce",
-    shortDescription: "Clean WooCommerce product CSV exports and prep them for reliable import.",
-    searchKeywords: ["woocommerce csv", "woocommerce product csv", "fix woocommerce csv"],
+    shortDescription: "Clean WooCommerce product exports and standardize fields before import.",
+    searchKeywords: ["woocommerce", "products", "import", "csv"],
   },
   {
     id: "etsy_listings",
-    slug: "etsy-listings",
-    name: "Etsy Listings",
+    name: "Etsy Listings CSV",
     category: "Ecommerce",
-    shortDescription: "Fix Etsy listing CSV files and make them consistent before upload or analysis.",
-    searchKeywords: ["etsy csv", "etsy listing csv", "fix etsy csv"],
+    shortDescription: "Validate Etsy listing templates and flag missing or invalid listing values.",
+    searchKeywords: ["etsy", "listings", "csv"],
   },
   {
     id: "ebay_listings",
-    slug: "ebay-listings",
-    name: "eBay Listings",
+    name: "eBay Listings CSV",
     category: "Ecommerce",
-    shortDescription: "Clean up eBay listing CSV data for faster bulk edits and listing management.",
-    searchKeywords: ["ebay csv", "ebay listing csv", "fix ebay csv"],
+    shortDescription: "Normalize eBay listing fields and catch common import blockers.",
+    searchKeywords: ["ebay", "listings", "csv"],
   },
   {
     id: "amazon_inventory_loader",
-    slug: "amazon-inventory-loader",
     name: "Amazon Inventory Loader",
     category: "Ecommerce",
-    shortDescription: "Normalize Amazon inventory CSV templates so uploads are less error prone.",
-    searchKeywords: ["amazon inventory csv", "amazon csv", "fix amazon csv"],
+    shortDescription: "Validate Amazon inventory loader templates and standardize numbers and required fields.",
+    searchKeywords: ["amazon", "inventory", "loader", "csv"],
   },
 ];
 
-export function getPresetBySlug(slug: string) {
-  return PRESET_FORMATS.find((p) => p.slug === slug) ?? null;
+export function getPresetById(id: string): PresetFormat | null {
+  const key = (id ?? "").trim();
+  if (!key) return null;
+  return PRESET_FORMATS.find((p) => p.id === key) ?? null;
 }
 
-export function getPresetsByCategory() {
-  const out: Record<PresetCategory, PresetFormat[]> = { Ecommerce: [] };
-
-  for (const p of PRESET_FORMATS) out[p.category].push(p);
-  return out;
+export function getPresetsByCategory(): Record<string, PresetFormat[]> {
+  const groups: Record<string, PresetFormat[]> = {};
+  for (const p of PRESET_FORMATS) {
+    const cat = p.category || "Other";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(p);
+  }
+  return groups;
 }
