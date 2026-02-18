@@ -266,11 +266,9 @@ export default function AppClient() {
 
         const col = (it.column ?? it.field ?? "").toString();
         const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
+        const details = (it as any).details;
 
         if (rowIndex == null) return null;
-
-        // ✅ preserve details for premium UI + simulation
-        const details = (it as any).details;
 
         return {
           rowIndex,
@@ -282,8 +280,9 @@ export default function AppClient() {
           details,
         } as any;
       })
-      .filter(Boolean) as CsvIssue[];
+      .filter(Boolean) as any;
   }, [issues]);
+
 
   // Debug hook for DevTools inspection.
   // Usage: window.__DEBUG_ISSUES__
