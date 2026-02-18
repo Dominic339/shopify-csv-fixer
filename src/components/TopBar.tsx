@@ -28,10 +28,9 @@ function isActiveAdvanced(sub?: Partial<SubStatus> | null) {
 }
 
 export default function TopBar() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggle } = useTheme();
 
   const logoSrc = useMemo(() => {
-    // ThemeProvider in your project uses "light"/"dark"
     return theme === "light" ? "/StriveFormatsLight.png" : "/StriveFormatsDark.png";
   }, [theme]);
 
@@ -52,7 +51,6 @@ export default function TopBar() {
 
         const signedIn = Boolean(session?.user?.email);
 
-        // Subscription status API (already in your project)
         let plan: "free" | "basic" | "advanced" = "free";
         let status = "none";
 
@@ -62,7 +60,7 @@ export default function TopBar() {
           plan = (j?.plan ?? "free") as "free" | "basic" | "advanced";
           status = (j?.status ?? "none") as string;
         } catch {
-          // ignore — keep defaults
+          // ignore
         }
 
         if (!mounted) return;
@@ -115,7 +113,7 @@ export default function TopBar() {
           <button
             type="button"
             className="pill-btn"
-            onClick={toggleTheme}
+            onClick={toggle}
             aria-label="Toggle theme"
             title="Toggle light/dark mode"
           >
