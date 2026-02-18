@@ -3,6 +3,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
@@ -66,6 +67,8 @@ function safeBaseName(name: string | null) {
 }
 
 export default function AppClient() {
+  const searchParams = useSearchParams();
+  const presetParam = (searchParams.get("preset") ?? "").trim();
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
@@ -88,12 +91,19 @@ export default function AppClient() {
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
   const [formatId, setFormatId] = useState<string>(() => {
-    // Initialize from /app?preset=<formatId> so the correct tab is selected on first paint.
-    // This avoids first-mount effect races that can overwrite the preset with the default format.
-    if (typeof window === "undefined") return "general_csv";
-    const p = new URLSearchParams(window.location.search).get("preset");
-    return p && p.trim() ? p.trim() : "general_csv";
+    // Default selection is Shopify, but if a preset query is present we will apply it.
+    // Note: with Next.js client navigation, this component may stay mounted while
+    // only the querystring changes, so we also sync in a useEffect below.
+    return "general_csv";
   });
+
+  // Keep formatId in sync with /app?preset=... even on client-side navigation.
+  useEffect(() => {
+    if (!presetParam) return;
+    if (presetParam === formatId) return;
+    setFormatId(presetParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presetParam]);
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -129,16 +139,12 @@ export default function AppClient() {
 
     if (allFormats.some((f) => f.id === formatId)) return;
 
-    if (typeof window !== "undefined") {
-      const preset = new URLSearchParams(window.location.search).get("preset");
-      if (preset && preset.trim() === formatId) {
-        // still waiting for that preset to load
-        return;
-      }
-    }
+    // If a preset query param exists and it matches the selected formatId,
+    // we're likely waiting for that preset to become available (custom formats).
+    if (presetParam && presetParam === formatId) return;
 
     setFormatId(allFormats[0]?.id ?? "general_csv");
-  }, [allFormats, formatId]);
+  }, [allFormats, formatId, presetParam]);
 
   const activeFormat = useMemo(
     () => allFormats.find((f) => f.id === formatId) ?? allFormats[0],
