@@ -324,11 +324,12 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
     return map;
   }, [issuesForDisplay]);
 
-  // Row-level severity (highest severity issue in the row, across ALL issues)
+  // Row-level severity (highest severity issue in the row, for the CURRENT filter)
+  // This keeps the row badges consistent with the active issue filter.
   const rowSeverity = useMemo(() => {
     const rank = { info: 1, warning: 2, error: 3 } as const;
     const map = new Map<number, "error" | "warning" | "info">();
-    for (const i of issuesForTable) {
+    for (const i of issuesForDisplay) {
       if (typeof i.rowIndex !== "number" || i.rowIndex < 0) continue;
       const prev = map.get(i.rowIndex);
       if (!prev || rank[i.severity] > rank[prev]) {
@@ -336,25 +337,33 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
       }
     }
     return map;
-  }, [issuesForTable]);
+  }, [issuesForDisplay]);
+
+  // When the filter is "all", only auto-pin actionable issues (errors + warnings).
+  // For specific filters, auto-pin only that severity.
+  const autoPinSeverities = useMemo(() => {
+    if (issueSeverityFilter === "all") return new Set(["error", "warning"] as const);
+    return new Set([issueSeverityFilter] as const);
+  }, [issueSeverityFilter]);
 
 
   const autoPinnedRows = useMemo(() => {
-  const set = new Set<number>();
-  if (!rows.length) return set;
+    const set = new Set<number>();
+    if (!rows.length) return set;
 
-  // Auto-pin rows that have issues under the CURRENT issue filter.
-  // issuesForDisplay already honors the filter (All / Error / Warning / Info).
-  const rowsWithAnyIssue = new Set<number>();
-  for (const iss of issuesForDisplay) {
-    if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
-  }
+    // Auto-pin rows that have issues under the CURRENT issue filter,
+    // but keep "all" scoped to actionable severities (errors + warnings).
+    const rowsWithAnyIssue = new Set<number>();
+    for (const iss of issuesForDisplay) {
+      if (!autoPinSeverities.has(iss.severity as any)) continue;
+      if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
+    }
 
-  for (const r of rowsWithAnyIssue) {
-    if (!suppressedAutoPins.has(r)) set.add(r);
-  }
-  return set;
-}, [issuesForDisplay, rows.length, suppressedAutoPins]);
+    for (const r of rowsWithAnyIssue) {
+      if (!suppressedAutoPins.has(r)) set.add(r);
+    }
+    return set;
+  }, [issuesForDisplay, autoPinSeverities, rows.length, suppressedAutoPins]);
 
 // If a suppressed row no longer has issues for the current filter, remove suppression.
 useEffect(() => {
@@ -399,15 +408,16 @@ const previewRows = useMemo(() => {
   // Include pinned rows first (sorted)
   for (const r of pinnedSorted) out.push(r);
 
-  // Fill with non-pinned rows up to the preview limit
-  if (out.length < LIMIT) {
+  // Only fill with non-issue rows when the user is viewing "All".
+  // When a specific filter is active, the table should focus on the matching rows.
+  if (issueSeverityFilter === "all" && out.length < LIMIT) {
     for (let i = 0; i < rows.length && out.length < LIMIT; i++) {
       if (!effectivePinnedRows.has(i)) out.push(i);
     }
   }
 
   return out;
-}, [rows.length, pinnedSorted, effectivePinnedRows]);
+}, [rows.length, pinnedSorted, effectivePinnedRows, issueSeverityFilter]);
 
 function pinRow(rowIndex: number) {
   // User explicitly pins a row -> it becomes manual and stays until they unpin.
