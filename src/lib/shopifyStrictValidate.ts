@@ -325,14 +325,36 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
       if (list.length <= 1) continue;
 
       const rowsList = list.map((i) => i + 1).join(", ");
+      const sample = fixedRows[list[0]] ?? {};
+      const n1Raw = String(sample[COL.opt1Name] ?? '').trim();
+      const n2Raw = String(sample[COL.opt2Name] ?? '').trim();
+      const n3Raw = String(sample[COL.opt3Name] ?? '').trim();
+      const n1 = n1Raw || 'Option1';
+      const n2 = n2Raw || 'Option2';
+      const n3 = n3Raw || 'Option3';
+      const v1 = String(sample[COL.opt1Value] ?? '').trim();
+      const v2 = String(sample[COL.opt2Value] ?? '').trim();
+      const v3 = String(sample[COL.opt3Value] ?? '').trim();
+
+      const duplicateCombo: Record<string, string> = {};
+      if (v1) duplicateCombo[n1] = v1;
+      if (v2) duplicateCombo[n2] = v2;
+      if (v3) duplicateCombo[n3] = v3;
+      const duplicateRows = list.map((i) => i + 1);
+
       for (const idx of list) {
         issues.push({
           severity: "error",
           code: "shopify/options_not_unique",
-          row: idx + 1,
-          column: COL.opt1Val,
-          message: `Row ${idx + 1}: Option values for handle "${handle}" are not unique (rows ${rowsList}).`,
+          rowIndex: idx,
+          column: COL.opt1Value,
+          message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${duplicateRows.join(", ")}).`,
           suggestion: "Make each variant option combination unique (Option1/2/3 values).",
+          details: {
+            handle,
+            duplicateCombo,
+            rows: duplicateRows,
+          },
         });
       }
     }

@@ -208,6 +208,13 @@ export function EditableIssuesTable(props: {
                           const sev = normalizeSeverity(it);
                           const title = (it.column ?? it.field ?? "(field)").toString();
                           const suggestion = (it as any).suggestion as string | undefined;
+                          const code = (it as any).code as string | undefined;
+                          const meta = code ? getIssueMeta(code) : undefined;
+                          const why = meta?.whyPlatformCares;
+                          const isBlocking = Boolean(meta?.blocking);
+                          const whyKey = `${rowIndex}:${idx}:${code ?? title}`;
+                          const showWhy = Boolean(openWhy[whyKey]);
+                          const details = (it as any).details as any | undefined;
 
                           return (
                             <div
@@ -227,6 +234,42 @@ export function EditableIssuesTable(props: {
                               </div>
 
                               <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{it.message}</div>
+
+                              {isBlocking && why ? (
+                                <div className="mt-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleWhy(whyKey)}
+                                    className="text-xs font-semibold underline decoration-[color:rgba(var(--muted-rgb),0.6)] underline-offset-4 hover:opacity-90"
+                                  >
+                                    Why is this blocking?
+                                  </button>
+                                  {showWhy ? (
+                                    <div className="mt-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                                      {why}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              ) : null}
+
+                              {code === "shopify/options_not_unique" && details?.duplicateCombo ? (
+                                <div className="mt-2 rounded-lg border border-[color:rgba(255,200,0,0.25)] bg-[color:rgba(255,200,0,0.06)] p-2 text-xs">
+                                  <div className="font-semibold">Show duplicate combinations</div>
+                                  <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">
+                                    <div>Duplicate combo:</div>
+                                    <div className="mt-1 space-y-0.5">
+                                      {Object.entries(details.duplicateCombo as Record<string, string>).map(([k, v]) => (
+                                        <div key={k}>
+                                          <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>{k}:</span> {v}
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {Array.isArray(details.rows) ? (
+                                      <div className="mt-1">Rows: {(details.rows as number[]).join(", \ ")}</div>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              ) : null}
 
                               {suggestion ? (
                                 <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">

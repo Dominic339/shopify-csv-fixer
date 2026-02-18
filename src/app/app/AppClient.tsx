@@ -289,6 +289,61 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
   }, [issuesForTable, issueSeverityFilter]);
 
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
+
+  const shopifySimulation = useMemo(() => {
+    if (formatId !== "shopify_products") return null;
+
+    // Rows that Shopify would likely reject due to blocking import errors.
+    const reject = new Set<number>();
+    // Groups of duplicate variant option combinations (Shopify merges duplicates).
+    const seenDuplicateGroups = new Set<string>();
+    let mergedVariants = 0;
+
+    for (const it of issuesForTable) {
+      const code = (it as any).code as string | undefined;
+      const rowIndex = (it as any).rowIndex as number | undefined;
+      if (code && typeof rowIndex === "number" && rowIndex >= 0) {
+        const meta = getIssueMeta(code);
+        if (meta?.blocking) reject.add(rowIndex);
+      }
+
+      if (code === "shopify/options_not_unique") {
+        const details = (it as any).details as any | undefined;
+        const rows = Array.isArray(details?.rows) ? (details.rows as number[]) : null;
+        const handle = typeof details?.handle === "string" ? details.handle : "";
+        const combo = details?.duplicateCombo ? JSON.stringify(details.duplicateCombo) : "";
+        if (rows && rows.length >= 2) {
+          const key = `${handle}|${rows.join(",")}|${combo}`;
+          if (!seenDuplicateGroups.has(key)) {
+            seenDuplicateGroups.add(key);
+            mergedVariants += Math.max(0, rows.length - 1);
+          }
+        }
+      }
+    }
+
+    // Rows that are completely empty are typically ignored by imports.
+    let deletedRows = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i] ?? {};
+      let any = false;
+      for (const h of headers) {
+        const v = (r as any)[h];
+        if (typeof v === "string" ? v.trim() : String(v ?? "").trim()) {
+          any = true;
+          break;
+        }
+      }
+      if (!any) deletedRows += 1;
+    }
+
+    return {
+      mergedVariants,
+      deletedRows,
+      rejectedRows: reject.size,
+    };
+  }, [formatId, issuesForTable, rows, headers]);
+
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
   const scoreNotes = useMemo(
     () => buildScoreNotes(validation as any, issuesForTable, formatId),
@@ -324,12 +379,11 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
     return map;
   }, [issuesForDisplay]);
 
-  // Row-level severity (highest severity issue in the row, for the CURRENT filter)
-  // This keeps the row badges consistent with the active issue filter.
+  // Row-level severity (highest severity issue in the row, across ALL issues)
   const rowSeverity = useMemo(() => {
     const rank = { info: 1, warning: 2, error: 3 } as const;
     const map = new Map<number, "error" | "warning" | "info">();
-    for (const i of issuesForDisplay) {
+    for (const i of issuesForTable) {
       if (typeof i.rowIndex !== "number" || i.rowIndex < 0) continue;
       const prev = map.get(i.rowIndex);
       if (!prev || rank[i.severity] > rank[prev]) {
@@ -337,33 +391,25 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
       }
     }
     return map;
-  }, [issuesForDisplay]);
-
-  // When the filter is "all", only auto-pin actionable issues (errors + warnings).
-  // For specific filters, auto-pin only that severity.
-  const autoPinSeverities = useMemo(() => {
-    if (issueSeverityFilter === "all") return new Set(["error", "warning"] as const);
-    return new Set([issueSeverityFilter] as const);
-  }, [issueSeverityFilter]);
+  }, [issuesForTable]);
 
 
   const autoPinnedRows = useMemo(() => {
-    const set = new Set<number>();
-    if (!rows.length) return set;
+  const set = new Set<number>();
+  if (!rows.length) return set;
 
-    // Auto-pin rows that have issues under the CURRENT issue filter,
-    // but keep "all" scoped to actionable severities (errors + warnings).
-    const rowsWithAnyIssue = new Set<number>();
-    for (const iss of issuesForDisplay) {
-      if (!autoPinSeverities.has(iss.severity as any)) continue;
-      if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
-    }
+  // Auto-pin rows that have issues under the CURRENT issue filter.
+  // issuesForDisplay already honors the filter (All / Error / Warning / Info).
+  const rowsWithAnyIssue = new Set<number>();
+  for (const iss of issuesForDisplay) {
+    if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
+  }
 
-    for (const r of rowsWithAnyIssue) {
-      if (!suppressedAutoPins.has(r)) set.add(r);
-    }
-    return set;
-  }, [issuesForDisplay, autoPinSeverities, rows.length, suppressedAutoPins]);
+  for (const r of rowsWithAnyIssue) {
+    if (!suppressedAutoPins.has(r)) set.add(r);
+  }
+  return set;
+}, [issuesForDisplay, rows.length, suppressedAutoPins]);
 
 // If a suppressed row no longer has issues for the current filter, remove suppression.
 useEffect(() => {
@@ -408,16 +454,15 @@ const previewRows = useMemo(() => {
   // Include pinned rows first (sorted)
   for (const r of pinnedSorted) out.push(r);
 
-  // Only fill with non-issue rows when the user is viewing "All".
-  // When a specific filter is active, the table should focus on the matching rows.
-  if (issueSeverityFilter === "all" && out.length < LIMIT) {
+  // Fill with non-pinned rows up to the preview limit
+  if (out.length < LIMIT) {
     for (let i = 0; i < rows.length && out.length < LIMIT; i++) {
       if (!effectivePinnedRows.has(i)) out.push(i);
     }
   }
 
   return out;
-}, [rows.length, pinnedSorted, effectivePinnedRows, issueSeverityFilter]);
+}, [rows.length, pinnedSorted, effectivePinnedRows]);
 
 function pinRow(rowIndex: number) {
   // User explicitly pins a row -> it becomes manual and stays until they unpin.
@@ -726,26 +771,51 @@ function unpinRow(rowIndex: number) {
                 {shopifyImportConfidence != null ? (
                   <span
                     className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-[var(--text)]"
-                    title="A quick readiness indicator based on your current Shopify issues. Aim for 90%+ for a clean import."
+                    title={"Based on:\n- Blocking errors\n- Variant integrity\n- Option structure\n- Inventory consistency"}
                   >
                     Shopify import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>
                   </span>
                 ) : null}
 
-                <span
-                  className={
-                    "rounded-full border px-4 py-1.5 font-semibold " +
-                    (validation.readyForShopifyImport
-                      ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
-                      : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
-                  }
-                >
-                  {validation.label}
-                </span>
+                {formatId === "shopify_products" ? (
+                  <button
+                    type="button"
+                    onClick={() => setSimulateShopify((v) => !v)}
+                    className={
+                      "rounded-full border px-4 py-1.5 font-semibold hover:opacity-90 " +
+                      (simulateShopify
+                        ? "border-[color:rgba(var(--accent-rgb),0.45)] bg-[color:rgba(var(--accent-rgb),0.14)] text-[var(--text)]"
+                        : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                    }
+                    title={
+                      simulateShopify
+                        ? "Simulation is ON. Click to turn off."
+                        : "Simulate how Shopify would treat this CSV on import."
+                    }
+                  >
+                    Simulate Shopify Import{simulateShopify ? ": ON" : ""}
+                  </button>
+                ) : (
+                  <span
+                    className={
+                      "rounded-full border px-4 py-1.5 font-semibold " +
+                      (validation.readyForShopifyImport
+                        ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
+                        : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                    }
+                  >
+                    {validation.label}
+                  </span>
+                )}
 
                 <span className="text-[color:rgba(var(--muted-rgb),1)]">
                   {validation.counts.errors} errors, {validation.counts.warnings} warnings
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
+                  {formatId === "shopify_products" && simulateShopify && shopifySimulation ? (
+                    <>
+                      {` · Shopify would merge ${shopifySimulation.mergedVariants} variants, delete ${shopifySimulation.deletedRows} rows, reject ${shopifySimulation.rejectedRows} rows`}
+                    </>
+                  ) : null}
                 </span>
 
                 {fixAllVisible ? (

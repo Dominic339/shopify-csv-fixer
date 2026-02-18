@@ -15,6 +15,10 @@ export type CsvIssue = {
   // Safe: older code can ignore these.
   code?: string;
   suggestion?: string;
+
+  // Optional machine-readable context for richer UI (e.g., duplicate previews).
+  // Keep this flexible so individual validators can attach structured details.
+  details?: Record<string, unknown>;
 };
 
 export type CsvFixResult = {
