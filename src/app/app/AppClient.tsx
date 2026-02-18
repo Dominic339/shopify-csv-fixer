@@ -87,12 +87,14 @@ export default function AppClient() {
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
 
-  const initialPreset = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return (new URLSearchParams(window.location.search).get("preset") ?? "").trim();
-  }, []);
-
-  const [formatId, setFormatId] = useState<string>(() => initialPreset || "shopify_products");
+  // Initialize the selected format from the URL query param if present.
+  // This prevents the "keep valid" fallback from snapping to the first format
+  // before the preset can be applied.
+  const [formatId, setFormatId] = useState<string>(() => {
+    if (typeof window === "undefined") return "shopify_products";
+    const preset = new URLSearchParams(window.location.search).get("preset");
+    return preset?.trim() ? preset.trim() : "shopify_products";
+  });
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);
@@ -121,7 +123,27 @@ export default function AppClient() {
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
-  // We initialize formatId from the querystring on first mount (above).
+  // NOTE: read the query param *inside* this effect to avoid a first-mount race
+  // between multiple useEffects.
+  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
+  const appliedPresetRef = useRef(false);
+
+  useEffect(() => {
+    if (appliedPresetRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const preset = new URLSearchParams(window.location.search).get("preset");
+    if (!preset) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
+    const exists = allFormats.some((f) => f.id === preset);
+    if (!exists) return; // wait until formats load
+
+    setFormatId(preset);
+    appliedPresetRef.current = true;
+  }, [allFormats]);
 
   // support exportName via /app?exportName=<base>
   const appliedExportNameRef = useRef(false);
@@ -142,12 +164,13 @@ export default function AppClient() {
     appliedExportNameRef.current = true;
   }, []);
 
-
-  // Keep selected format valid (if a custom format is deleted or formats load)
+  // Keep selected format valid (if a custom format is deleted, fall back)
+  // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
+  // latest selected id (including a preset from the URL) and does not overwrite it.
   useEffect(() => {
-    if (allFormats.length === 0) return;
+    if (!allFormats.length) return;
     if (allFormats.some((f) => f.id === formatId)) return;
-    setFormatId(allFormats[0]?.id ?? "shopify_products");
+    setFormatId(allFormats[0]!.id);
   }, [allFormats, formatId]);
 
   const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
