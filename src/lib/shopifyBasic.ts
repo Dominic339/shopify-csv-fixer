@@ -145,7 +145,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
         severity: "error",
         code: "shopify/header_collision",
         column: c.canonical,
-        message: `Header collision: multiple input headers map to Shopify field "${c.canonical}": ${c.headers.join(", ")}.`,
+        message: `Header collision: multiple input headers map to Shopify field "${c.canonical}": ${c.sources.join(", ")}.`,
         suggestion:
           "Keep only one of the colliding columns. If you have both the modern Shopify header and an older alias, delete the alias column to avoid ambiguity.",
       });
