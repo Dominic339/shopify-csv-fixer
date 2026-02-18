@@ -3,9 +3,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { parseCsv, toCsv } from "@/lib/csv";
-import { getPresetById } from "@/lib/presets";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
@@ -104,8 +102,6 @@ export default function AppClient() {
   // “Jump to issues”
   const issuesPanelRef = useRef<HTMLDivElement | null>(null);
 
-  const [showPresetColumns, setShowPresetColumns] = useState(false);
-
   // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
@@ -125,21 +121,29 @@ export default function AppClient() {
   }
 
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
-// Support selecting a preset via /app?preset=<formatId>
-// This MUST respond to client-side navigation (search param changes),
-// and MUST NOT be overwritten by the "keep selection valid" fallback.
-const searchParams = useSearchParams();
-const presetParam = (searchParams?.get("preset") ?? "").trim();
 
-useEffect(() => {
-  if (!presetParam) return;
+  // Support selecting a preset via /app?preset=<formatId>
+  // NOTE: read the query param *inside* this effect to avoid a first-mount race
+  // between multiple useEffects.
+  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
+  const appliedPresetRef = useRef(false);
 
-  // Wait until the preset id exists in the format list (custom formats may load later).
-  const exists = allFormats.some((f) => f.id === presetParam);
-  if (!exists) return;
+  useEffect(() => {
+    if (appliedPresetRef.current) return;
+    if (typeof window === "undefined") return;
 
-  if (formatId !== presetParam) setFormatId(presetParam);
-}, [presetParam, allFormats, formatId]);
+    const preset = new URLSearchParams(window.location.search).get("preset");
+    if (!preset) {
+      appliedPresetRef.current = true;
+      return;
+    }
+
+    const exists = allFormats.some((f) => f.id === preset);
+    if (!exists) return; // wait until formats load
+
+    setFormatId(preset);
+    appliedPresetRef.current = true;
+  }, [allFormats]);
 
   // support exportName via /app?exportName=<base>
   const appliedExportNameRef = useRef(false);
@@ -163,25 +167,13 @@ useEffect(() => {
   // Keep selected format valid (if a custom format is deleted, fall back)
   // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
   // latest selected id (including a preset from the URL) and does not overwrite it.
-  
-// Keep the selected format id valid.
-// IMPORTANT: If the URL includes ?preset=..., do NOT overwrite the selection
-// while we are waiting for that preset id to appear in allFormats (custom formats may load later).
-useEffect(() => {
-  if (!allFormats.length) return;
-
-  if (presetParam && formatId === presetParam) {
-    const exists = allFormats.some((f) => f.id === presetParam);
-    if (!exists) return; // wait
-  }
-
-  if (allFormats.some((f) => f.id === formatId)) return;
-  setFormatId(allFormats[0]!.id);
-}, [allFormats, formatId, presetParam]);
+  useEffect(() => {
+    if (!allFormats.length) return;
+    if (allFormats.some((f) => f.id === formatId)) return;
+    setFormatId(allFormats[0]!.id);
+  }, [allFormats, formatId]);
 
   const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
-
-  const activePreset = useMemo(() => (presetParam ? getPresetById(presetParam) : null), [presetParam]);
 
   async function refreshQuotaAndPlan() {
     try {
@@ -276,11 +268,6 @@ useEffect(() => {
     () => buildScoreNotes(validation as any, issuesForTable, formatId),
     [validation, issuesForTable, formatId]
   );
-
-  // Generic readiness signal ("blocking" errors prevent a clean import/export for any preset)
-  const readyForImport = useMemo(() => {
-    return Number((validation as any)?.counts?.blockingErrors ?? 0) === 0;
-  }, [validation]);
 
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
   const shopifyImportConfidence = useMemo(() => {
@@ -639,69 +626,6 @@ useEffect(() => {
             Pick a format → upload → auto-fix safe issues → export.
           </p>
 
-
-{activePreset ? (
-  <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-sm">
-    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-      <div className="min-w-0">
-        <div className="text-xs uppercase tracking-wide text-[color:rgba(var(--muted-rgb),1)]">Active preset</div>
-        <div className="mt-1 text-lg font-semibold text-[var(--text)]">{activePreset.name}</div>
-        <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">{activePreset.description}</p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <Link className="rg-btn" href={`/presets/${encodeURIComponent(activePreset.formatId)}`}>View information</Link>
-        <a className="rg-btn" href={`/presets/${encodeURIComponent(activePreset.formatId)}/sample.csv`} download>
-          Download sample CSV
-        </a>
-      </div>
-    </div>
-
-    {activeFormat?.expectedHeaders?.length ? (
-      <div className="mt-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-[var(--text)]">Expected columns</div>
-          <button
-            type="button"
-            onClick={() => setShowPresetColumns((v) => !v)}
-            className="text-sm text-[color:rgba(var(--muted-rgb),1)] hover:underline"
-          >
-            {showPresetColumns ? "Hide" : "Show"}
-          </button>
-        </div>
-
-        {showPresetColumns ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {activeFormat.expectedHeaders.map((h) => (
-              <span
-                key={h}
-                className="rounded-full border border-[var(--border)] bg-[color:rgba(var(--panel-rgb),0.6)] px-3 py-1 text-xs text-[color:rgba(var(--muted-rgb),1)]"
-              >
-                {h}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-            This preset has {activeFormat.expectedHeaders.length} expected columns. Click “Show” to preview them.
-          </p>
-        )}
-      </div>
-    ) : null}
-
-    {activeFormat?.seo?.howItWorks?.length ? (
-      <div className="mt-4">
-        <div className="text-sm font-semibold text-[var(--text)]">How it works</div>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-          {activeFormat.seo.howItWorks.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ul>
-      </div>
-    ) : null}
-  </div>
-) : null}
-
           {rows.length > 0 ? (
             <div className="mt-4 space-y-3 text-base">
               <div className="flex flex-wrap items-center gap-2">
@@ -721,7 +645,7 @@ useEffect(() => {
                 <span
                   className={
                     "rounded-full border px-4 py-1.5 font-semibold " +
-                    (readyForImport
+                    (validation.readyForShopifyImport
                       ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
                       : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
                   }
