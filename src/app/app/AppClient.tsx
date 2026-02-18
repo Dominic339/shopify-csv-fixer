@@ -313,20 +313,60 @@ export default function AppClient() {
     if (formatId !== "shopify_products") return null;
 
     // Rows that Shopify would likely reject due to blocking import errors.
+    // NOTE: Some issues are *not* rejections in Shopify; e.g. duplicate option combos typically result
+    // in Shopify merging variant rows. We exclude those from rejectedRows and count them as merges.
     const reject = new Set<number>();
-    // Groups of duplicate variant option combinations (Shopify merges duplicates).
-    const seenDuplicateGroups = new Set<string>();
-    let mergedVariants = 0;
 
+    // Estimate variant merges by grouping rows by (Handle + option value combination).
+    // This is more reliable than depending on Issue.details always being present.
+    let mergedVariants = 0;
+    const mergeGroups = new Map<string, number>();
+
+    // Build merge groups directly from the data.
+    const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i] ?? {};
+      const handle = get(r, "Handle").trim();
+      if (!handle) continue;
+
+      const o1n = get(r, "Option1 Name").trim();
+      const o1v = get(r, "Option1 Value").trim();
+      const o2n = get(r, "Option2 Name").trim();
+      const o2v = get(r, "Option2 Value").trim();
+      const o3n = get(r, "Option3 Name").trim();
+      const o3v = get(r, "Option3 Value").trim();
+
+      // Shopify treats a variant as defined by option *values* (names are mostly cosmetic).
+      const combo = [
+        `${o1n || "Option1"}=${o1v}`,
+        o2v ? `${o2n || "Option2"}=${o2v}` : "",
+        o3v ? `${o3n || "Option3"}=${o3v}` : "",
+      ]
+        .filter(Boolean)
+        .join("|");
+
+      if (!combo) continue;
+      const key = `${handle}||${combo}`;
+      mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
+    }
+
+    for (const c of mergeGroups.values()) {
+      if (c > 1) mergedVariants += c - 1;
+    }
+
+    // Rejections from blocking issues (excluding merge-only conditions).
     for (const it of issuesForTable) {
       const code = (it as any).code as string | undefined;
       const rowIndex = (it as any).rowIndex as number | undefined;
+      if (!code || typeof rowIndex !== "number" || rowIndex < 0) continue;
 
-      if (code && typeof rowIndex === "number" && rowIndex >= 0) {
-        // ✅ FIX: issue meta is keyed by (formatId, code)
-        const meta = getIssueMeta(formatId, code);
-        if (meta?.blocking) reject.add(rowIndex);
-      }
+      // Duplicate option combos: treat as merge behavior, not an import reject.
+      if (code === "shopify/options_not_unique") continue;
+
+      // ✅ issue meta is keyed by (formatId, code)
+      const meta = getIssueMeta(formatId, code);
+      if (meta?.blocking) reject.add(rowIndex);
+    }
 
       if (code === "shopify/options_not_unique") {
         const details = (it as any).details as any | undefined;
