@@ -2,6 +2,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
+
 
 type CsvRow = Record<string, string>;
 
@@ -209,7 +211,7 @@ export function EditableIssuesTable(props: {
                           const title = (it.column ?? it.field ?? "(field)").toString();
                           const suggestion = (it as any).suggestion as string | undefined;
                           const code = (it as any).code as string | undefined;
-                          const meta = code ? getIssueMeta(code) : undefined;
+                          const meta = code ? getIssueMeta(code, (it as any).severity) : undefined;
                           const why = meta?.whyPlatformCares;
                           const isBlocking = Boolean(meta?.blocking);
                           const whyKey = `${rowIndex}:${idx}:${code ?? title}`;
