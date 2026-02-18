@@ -60,6 +60,12 @@ function colLabel(i: number) {
   return `Column ${i + 1}`;
 }
 
+function headerLabelForColumn(c: UserFormatColumn, idx: number) {
+  const t = (c.title ?? "").trim();
+  const k = (c.key ?? "").trim();
+  return t || k || colLabel(idx);
+}
+
 const RULES: { type: RuleType; label: string; needsValue?: boolean; valueLabel?: string }[] = [
   { type: "trim", label: "Trim" },
   { type: "uppercase", label: "Uppercase" },
@@ -283,7 +289,20 @@ export default function FormatsClient() {
   // Preview grid headers
   const previewHeaders = useMemo(() => {
     if (!selected) return [];
-    return selected.columns.map((c, i) => (c.title && c.title.trim() ? c.title.trim() : colLabel(i)));
+    return selected.columns.map((c, i) => headerLabelForColumn(c, i));
+  }, [selected]);
+
+  const headerNameProblems = useMemo(() => {
+    if (!selected) return { duplicates: [] as string[] };
+    const names = selected.columns.map((c, i) => headerLabelForColumn(c, i).trim());
+    const norm = names.map((n) => n.toLowerCase());
+    const counts = new Map<string, number>();
+    for (const n of norm) counts.set(n, (counts.get(n) ?? 0) + 1);
+    const dups = [...counts.entries()]
+      .filter(([k, v]) => k && v > 1)
+      .map(([k]) => k)
+      .slice(0, 12);
+    return { duplicates: dups };
   }, [selected]);
 
   // Preview rows (fake sample showing rule effects)
@@ -381,6 +400,16 @@ export default function FormatsClient() {
           <Link href="/app" className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]">
             CSV Fixer
           </Link>
+
+          {selected ? (
+            <Link
+              href={`/app?preset=${encodeURIComponent(selected.id)}&exportName=${encodeURIComponent(selected.name ?? selected.id)}`}
+              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
+              title="Open the CSV Fixer with this format selected"
+            >
+              Open this format
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -550,6 +579,18 @@ export default function FormatsClient() {
                   Row 1 is sample input. Row 2 shows the output after applying your current rules.
                 </div>
 
+                {headerNameProblems.duplicates.length > 0 ? (
+                  <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text)]">
+                    <div className="font-semibold">Duplicate header names detected</div>
+                    <div className="mt-1 text-xs text-[var(--muted)]">
+                      Duplicate headers can overwrite data on export. Rename one of the duplicates.
+                    </div>
+                    <div className="mt-2 text-xs text-[var(--muted)]">
+                      Duplicates: {headerNameProblems.duplicates.join(", ")}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
                   <table className="min-w-full text-left text-xs">
                     <thead>
@@ -580,7 +621,8 @@ export default function FormatsClient() {
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
                 <div className="text-sm font-semibold text-[var(--text)]">Columns</div>
                 <div className="mt-2 text-xs text-[var(--muted)]">
-                  Keys and titles can be left blank. The preview will label them as Column 1, Column 2, and so on.
+                  Header name becomes the actual CSV column header your file exports with. If you leave it blank,
+                  we’ll fall back to Key or a default (Column 1, Column 2, …).
                 </div>
 
                 <div className="mt-4 space-y-3">
@@ -591,7 +633,7 @@ export default function FormatsClient() {
                   ) : null}
 
                   {selected.columns.map((c, idx) => {
-                    const label = colLabel(idx);
+                    const label = headerLabelForColumn(c, idx);
 
                     return (
                       <div key={c.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
@@ -622,12 +664,12 @@ export default function FormatsClient() {
                           </div>
 
                           <div>
-                            <div className="text-xs text-[var(--muted)]">Title (optional)</div>
+                            <div className="text-xs text-[var(--muted)]">Header name (optional)</div>
                             <input
                               className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
                               value={c.title ?? ""}
                               onChange={(e) => updateColumn(idx, { title: e.target.value })}
-                              placeholder=""
+                              placeholder="Example: Title"
                             />
                           </div>
 

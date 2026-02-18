@@ -116,26 +116,28 @@ export default function AppClient() {
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
+  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
+  const desiredPresetRef = useRef<string | null>(null);
   const appliedPresetRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (desiredPresetRef.current !== null) return; // already captured
+    desiredPresetRef.current = new URLSearchParams(window.location.search).get("preset");
+  }, []);
+
   useEffect(() => {
     if (appliedPresetRef.current) return;
-    if (typeof window === "undefined") return;
-
-    const preset = new URLSearchParams(window.location.search).get("preset");
+    const preset = desiredPresetRef.current;
     if (!preset) {
       appliedPresetRef.current = true;
       return;
     }
-
-    const exists = builtinFormats.some((f) => f.id === preset);
-    if (!exists) {
-      appliedPresetRef.current = true;
-      return;
-    }
-
+    const exists = allFormats.some((f) => f.id === preset);
+    if (!exists) return; // wait until formats load
     setFormatId(preset);
     appliedPresetRef.current = true;
-  }, [builtinFormats]);
+  }, [allFormats]);
 
   // support exportName via /app?exportName=<base>
   const appliedExportNameRef = useRef(false);
