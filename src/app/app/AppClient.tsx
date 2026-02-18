@@ -158,11 +158,18 @@ export default function AppClient() {
   }, []);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
+  // IMPORTANT: do not override a preset selection on first mount.
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const qp = new URLSearchParams(window.location.search);
+      const preset = qp.get("preset");
+      // While a preset exists and hasn't been applied yet, don't force a fallback.
+      if (preset && !appliedPresetRef.current) return;
+    }
+
     if (allFormats.some((f) => f.id === formatId)) return;
     setFormatId(allFormats[0]?.id ?? "general_csv");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allFormats.length]);
+  }, [allFormats, formatId]);
 
   const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
 
