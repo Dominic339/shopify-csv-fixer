@@ -125,7 +125,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     whyPlatformCares: "Why this matters: Shopify merges variants with identical option combinations. This may cause data loss or variant overwrites.",
     howToFix: "Make each variant option combination unique (or remove duplicates).",
     category: "variant",
-    blocking: true,
+    blocking: false,
     autoFixable: false,
   },
 

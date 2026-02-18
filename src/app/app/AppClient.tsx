@@ -323,30 +323,31 @@ export default function AppClient() {
     const mergeGroups = new Map<string, number>();
 
     // Build merge groups directly from the data.
+    // IMPORTANT: This must match the validator's notion of "duplicate option combos":
+    // - Handle + (Option1/2/3 *values*) define a variant combo
+    // - Comparison is case-insensitive
+    // - Skip "image-only" rows (no variant signals)
     const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i] ?? {};
       const handle = get(r, "Handle").trim();
       if (!handle) continue;
 
-      const o1n = get(r, "Option1 Name").trim();
-      const o1v = get(r, "Option1 Value").trim();
-      const o2n = get(r, "Option2 Name").trim();
-      const o2v = get(r, "Option2 Value").trim();
-      const o3n = get(r, "Option3 Name").trim();
-      const o3v = get(r, "Option3 Value").trim();
+      const v1 = get(r, "Option1 Value").trim();
+      const v2 = get(r, "Option2 Value").trim();
+      const v3 = get(r, "Option3 Value").trim();
 
-      // Shopify treats a variant as defined by option *values* (names are mostly cosmetic).
-      const combo = [
-        `${o1n || "Option1"}=${o1v}`,
-        o2v ? `${o2n || "Option2"}=${o2v}` : "",
-        o3v ? `${o3n || "Option3"}=${o3v}` : "",
-      ]
-        .filter(Boolean)
-        .join("|");
+      // Match strict validator behavior: ignore rows that do not look like variant rows.
+      // (Shopify CSV allows image-only rows where variant fields are blank.)
+      const sku = get(r, "Variant SKU").trim();
+      const price = get(r, "Variant Price").trim();
+      const hasVariantSignals = Boolean(sku || price || v1 || v2 || v3);
+      if (!hasVariantSignals) continue;
 
-      if (!combo) continue;
-      const key = `${handle}||${combo}`;
+      const combo = [v1, v2, v3].join("|").toLowerCase();
+      if (!combo.replace(/\|/g, "").trim()) continue;
+
+      const key = `${handle.toLowerCase()}||${combo}`;
       mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
     }
 
