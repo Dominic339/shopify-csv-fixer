@@ -47,6 +47,8 @@ type UiIssue = {
   severity?: "error" | "warning" | "info";
   code?: string;
   suggestion?: string;
+  // ✅ allow metadata passthrough for premium UI + simulation
+  details?: unknown;
 };
 
 function downloadText(filename: string, text: string) {
@@ -91,6 +93,7 @@ export default function AppClient() {
     }
     return out;
   }, [autoFixes]);
+
   const [fileName, setFileName] = useState<string | null>(null);
 
   const [quota, setQuota] = useState<any>(null);
@@ -126,14 +129,12 @@ export default function AppClient() {
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
   // ✅ Pinned rows = the "Manual fixes" worklist
-  // ✅ Pinned rows = the "Manual fixes" worklist
-// We keep two concepts:
-// - manualPinnedRows: rows the user explicitly pinned (never auto-removed)
-// - autoPinnedRows: rows that currently match the active issue filter (auto updates when filter changes)
-// If the user unpins an auto-pinned row, we suppress auto-pinning it again until the issues change.
-const [manualPinnedRows, setManualPinnedRows] = useState<Set<number>>(() => new Set());
-const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
-
+  // We keep two concepts:
+  // - manualPinnedRows: rows the user explicitly pinned (never auto-removed)
+  // - autoPinnedRows: rows that currently match the active issue filter (auto updates when filter changes)
+  // If the user unpins an auto-pinned row, we suppress auto-pinning it again until the issues change.
+  const [manualPinnedRows, setManualPinnedRows] = useState<Set<number>>(() => new Set());
+  const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
 
   // Phase 1: Shopify strict mode toggle (stored local)
   const [strictShopify, setStrictShopify] = useState<boolean>(() => getStrictMode());
@@ -151,9 +152,6 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
-  // NOTE: read the query param *inside* this effect to avoid a first-mount race
-  // between multiple useEffects.
-  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
   const appliedPresetRef = useRef(false);
 
   useEffect(() => {
@@ -193,8 +191,6 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
   }, []);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
-  // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
-  // latest selected id (including a preset from the URL) and does not overwrite it.
   useEffect(() => {
     if (!allFormats.length) return;
     if (allFormats.some((f) => f.id === formatId)) return;
@@ -273,6 +269,9 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
 
         if (rowIndex == null) return null;
 
+        // ✅ preserve details for premium UI + simulation
+        const details = (it as any).details;
+
         return {
           rowIndex,
           column: col || "(file)",
@@ -280,6 +279,8 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
           severity: sev,
           code: (it as any).code,
           suggestion: (it as any).suggestion,
+          // @ts-expect-error - CsvIssue doesn’t declare details, but we keep it for internal UI
+          details,
         };
       })
       .filter(Boolean) as CsvIssue[];
@@ -292,33 +293,56 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
 
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
 
+  // ✅ Shopify Simulation Mode
   const shopifySimulation = useMemo(() => {
     if (formatId !== "shopify_products") return null;
 
-    // Rows that Shopify would likely reject due to blocking import errors.
+    // Shopify behaviors we simulate:
+    // - Duplicate option combos (options_not_unique) => would MERGE variants (not reject)
+    // - Certain blocking issues => would REJECT rows
+    // - Completely empty rows => would be ignored/deleted by import tooling (best-effort)
+    const rejectCodes = new Set<string>([
+      "shopify/missing_option1_for_variant_data",
+      "shopify/blank_title",
+      "shopify/blank_handle",
+      "shopify/missing_required_header",
+    ]);
+
     const reject = new Set<number>();
-    // Groups of duplicate variant option combinations (Shopify merges duplicates).
+
+    // Dedup groups so we don’t count the same duplicate combo multiple times
     const seenDuplicateGroups = new Set<string>();
     let mergedVariants = 0;
 
     for (const it of issuesForTable) {
       const code = (it as any).code as string | undefined;
       const rowIndex = (it as any).rowIndex as number | undefined;
-      if (code && typeof rowIndex === "number" && rowIndex >= 0) {
-        const meta = getIssueMeta(code, (it as any).severity);
-        if (meta?.blocking) reject.add(rowIndex);
+
+      // ✅ only count real “reject” codes as rejected rows
+      if (code && typeof rowIndex === "number" && rowIndex >= 0 && rejectCodes.has(code)) {
+        reject.add(rowIndex);
       }
 
+      // ✅ merged variants based on duplicateCombos details
       if (code === "shopify/options_not_unique") {
         const details = (it as any).details as any | undefined;
-        const rows = Array.isArray(details?.rows) ? (details.rows as number[]) : null;
-        const handle = typeof details?.handle === "string" ? details.handle : "";
-        const combo = details?.duplicateCombo ? JSON.stringify(details.duplicateCombo) : "";
-        if (rows && rows.length >= 2) {
-          const key = `${handle}|${rows.join(",")}|${combo}`;
-          if (!seenDuplicateGroups.has(key)) {
+
+        // supports new shape: details.duplicateCombos: [{ handle, options, rows }]
+        const combos = Array.isArray(details?.duplicateCombos) ? (details.duplicateCombos as any[]) : null;
+
+        if (combos && combos.length) {
+          for (const c of combos) {
+            const handle = typeof c?.handle === "string" ? c.handle : "";
+            const rowsList = Array.isArray(c?.rows) ? (c.rows as number[]) : null;
+            const optionsObj = c?.options ? c.options : null;
+
+            if (!rowsList || rowsList.length < 2) continue;
+
+            const key = `${handle}|${rowsList.join(",")}|${optionsObj ? JSON.stringify(optionsObj) : ""}`;
+            if (seenDuplicateGroups.has(key)) continue;
             seenDuplicateGroups.add(key);
-            mergedVariants += Math.max(0, rows.length - 1);
+
+            mergedVariants += Math.max(0, rowsList.length - 1);
           }
         }
       }
@@ -347,10 +371,7 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
   }, [formatId, issuesForTable, rows, headers]);
 
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
-  const scoreNotes = useMemo(
-    () => buildScoreNotes(validation as any, issuesForTable, formatId),
-    [validation, issuesForTable, formatId]
-  );
+  const scoreNotes = useMemo(() => buildScoreNotes(validation as any, issuesForTable, formatId), [validation, issuesForTable, formatId]);
 
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
   const shopifyImportConfidence = useMemo(() => {
@@ -395,115 +416,104 @@ const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => 
     return map;
   }, [issuesForTable]);
 
-
   const autoPinnedRows = useMemo(() => {
-  const set = new Set<number>();
-  if (!rows.length) return set;
+    const set = new Set<number>();
+    if (!rows.length) return set;
 
-  // Auto-pin rows that have issues under the CURRENT issue filter.
-  // issuesForDisplay already honors the filter (All / Error / Warning / Info).
-  const rowsWithAnyIssue = new Set<number>();
-  for (const iss of issuesForDisplay) {
-    if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
-  }
-
-  for (const r of rowsWithAnyIssue) {
-    if (!suppressedAutoPins.has(r)) set.add(r);
-  }
-  return set;
-}, [issuesForDisplay, rows.length, suppressedAutoPins]);
-
-// If a suppressed row no longer has issues for the current filter, remove suppression.
-useEffect(() => {
-  if (!rows.length) {
-    if (suppressedAutoPins.size) setSuppressedAutoPins(new Set());
-    return;
-  }
-  if (!suppressedAutoPins.size) return;
-
-  const stillRelevant = new Set<number>();
-  for (const iss of issuesForDisplay) {
-    if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) stillRelevant.add(iss.rowIndex);
-  }
-
-  let changed = false;
-  const next = new Set<number>();
-  suppressedAutoPins.forEach((r) => {
-    if (stillRelevant.has(r)) next.add(r);
-    else changed = true;
-  });
-
-  if (changed) setSuppressedAutoPins(next);
-}, [rows.length, issuesForDisplay, suppressedAutoPins]);
-
-const effectivePinnedRows = useMemo(() => {
-  const merged = new Set<number>();
-  manualPinnedRows.forEach((r) => merged.add(r));
-  autoPinnedRows.forEach((r) => merged.add(r));
-  return merged;
-}, [manualPinnedRows, autoPinnedRows]);
-
-const pinnedSorted = useMemo(() => Array.from(effectivePinnedRows).sort((a, b) => a - b), [effectivePinnedRows]);
-
-// Rows shown in the main table preview.
-// Always include pinned rows (manual + auto for current filter), then fill with early non-pinned rows.
-const previewRows = useMemo(() => {
-  const LIMIT = 50;
-  if (!rows.length) return [] as number[];
-
-  const out: number[] = [];
-
-  // Include pinned rows first (sorted)
-  for (const r of pinnedSorted) out.push(r);
-
-  // Fill with non-pinned rows up to the preview limit
-  if (out.length < LIMIT) {
-    for (let i = 0; i < rows.length && out.length < LIMIT; i++) {
-      if (!effectivePinnedRows.has(i)) out.push(i);
+    const rowsWithAnyIssue = new Set<number>();
+    for (const iss of issuesForDisplay) {
+      if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
     }
-  }
 
-  return out;
-}, [rows.length, pinnedSorted, effectivePinnedRows]);
+    for (const r of rowsWithAnyIssue) {
+      if (!suppressedAutoPins.has(r)) set.add(r);
+    }
+    return set;
+  }, [issuesForDisplay, rows.length, suppressedAutoPins]);
 
-function pinRow(rowIndex: number) {
-  // User explicitly pins a row -> it becomes manual and stays until they unpin.
-  setManualPinnedRows((prev) => {
-    const next = new Set(prev);
-    next.add(rowIndex);
-    return next;
-  });
+  // If a suppressed row no longer has issues for the current filter, remove suppression.
+  useEffect(() => {
+    if (!rows.length) {
+      if (suppressedAutoPins.size) setSuppressedAutoPins(new Set());
+      return;
+    }
+    if (!suppressedAutoPins.size) return;
 
-  // Also remove any suppression so it can be auto-pinned again if they later remove the manual pin.
-  setSuppressedAutoPins((prev) => {
-    if (!prev.has(rowIndex)) return prev;
-    const next = new Set(prev);
-    next.delete(rowIndex);
-    return next;
-  });
-}
+    const stillRelevant = new Set<number>();
+    for (const iss of issuesForDisplay) {
+      if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) stillRelevant.add(iss.rowIndex);
+    }
 
-function unpinRow(rowIndex: number) {
-  // If it's a manual pin, remove the manual pin.
-  setManualPinnedRows((prev) => {
-    if (!prev.has(rowIndex)) return prev;
-    const next = new Set(prev);
-    next.delete(rowIndex);
-    return next;
-  });
+    let changed = false;
+    const next = new Set<number>();
+    suppressedAutoPins.forEach((r) => {
+      if (stillRelevant.has(r)) next.add(r);
+      else changed = true;
+    });
 
-  // If it would be auto-pinned (because it has issues for the current filter),
-  // suppress it so the user can keep it out of the worklist.
-  const hasIssueUnderCurrentFilter = issuesForDisplay.some((iss) => iss.rowIndex === rowIndex);
-  if (hasIssueUnderCurrentFilter) {
-    setSuppressedAutoPins((prev) => {
-      if (prev.has(rowIndex)) return prev;
+    if (changed) setSuppressedAutoPins(next);
+  }, [rows.length, issuesForDisplay, suppressedAutoPins]);
+
+  const effectivePinnedRows = useMemo(() => {
+    const merged = new Set<number>();
+    manualPinnedRows.forEach((r) => merged.add(r));
+    autoPinnedRows.forEach((r) => merged.add(r));
+    return merged;
+  }, [manualPinnedRows, autoPinnedRows]);
+
+  const pinnedSorted = useMemo(() => Array.from(effectivePinnedRows).sort((a, b) => a - b), [effectivePinnedRows]);
+
+  // Rows shown in the main table preview.
+  const previewRows = useMemo(() => {
+    const LIMIT = 50;
+    if (!rows.length) return [] as number[];
+
+    const out: number[] = [];
+
+    for (const r of pinnedSorted) out.push(r);
+
+    if (out.length < LIMIT) {
+      for (let i = 0; i < rows.length && out.length < LIMIT; i++) {
+        if (!effectivePinnedRows.has(i)) out.push(i);
+      }
+    }
+
+    return out;
+  }, [rows.length, pinnedSorted, effectivePinnedRows]);
+
+  function pinRow(rowIndex: number) {
+    setManualPinnedRows((prev) => {
       const next = new Set(prev);
       next.add(rowIndex);
       return next;
     });
+
+    setSuppressedAutoPins((prev) => {
+      if (!prev.has(rowIndex)) return prev;
+      const next = new Set(prev);
+      next.delete(rowIndex);
+      return next;
+    });
   }
-}
+
+  function unpinRow(rowIndex: number) {
+    setManualPinnedRows((prev) => {
+      if (!prev.has(rowIndex)) return prev;
+      const next = new Set(prev);
+      next.delete(rowIndex);
+      return next;
+    });
+
+    const hasIssueUnderCurrentFilter = issuesForDisplay.some((iss) => iss.rowIndex === rowIndex);
+    if (hasIssueUnderCurrentFilter) {
+      setSuppressedAutoPins((prev) => {
+        if (prev.has(rowIndex)) return prev;
+        const next = new Set(prev);
+        next.add(rowIndex);
+        return next;
+      });
+    }
+  }
 
   // ✅ Revalidate issues WITHOUT applying fixes
   const revalidateTimerRef = useRef<number | null>(null);
@@ -619,7 +629,6 @@ function unpinRow(rowIndex: number) {
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      // Reset pin state for a new run
       setManualPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
 
@@ -646,7 +655,6 @@ function unpinRow(rowIndex: number) {
       setAutoFixes([]);
       setEditing(null);
       setLastFixAll(null);
-      // Reset pin state for a new run
       setManualPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
 
@@ -668,9 +676,8 @@ function unpinRow(rowIndex: number) {
     setAutoFixes([]);
     setEditing(null);
     setLastFixAll(null);
-      // Reset pin state for a new run
-      setManualPinnedRows(new Set());
-      setSuppressedAutoPins(new Set());
+    setManualPinnedRows(new Set());
+    setSuppressedAutoPins(new Set());
 
     if (!lastUploadedText || !activeFormat) return;
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
@@ -789,11 +796,7 @@ function unpinRow(rowIndex: number) {
                         ? "border-[color:rgba(var(--accent-rgb),0.45)] bg-[color:rgba(var(--accent-rgb),0.14)] text-[var(--text)]"
                         : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
                     }
-                    title={
-                      simulateShopify
-                        ? "Simulation is ON. Click to turn off."
-                        : "Simulate how Shopify would treat this CSV on import."
-                    }
+                    title={simulateShopify ? "Simulation is ON. Click to turn off." : "Simulate how Shopify would treat this CSV on import."}
                   >
                     Simulate Shopify Import{simulateShopify ? ": ON" : ""}
                   </button>
@@ -927,7 +930,9 @@ function unpinRow(rowIndex: number) {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="text-base font-semibold text-[var(--text)]">
                           Auto fixes applied{" "}
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({autoFixes.length} actions, {collapsedAutoFixes.length} lines)</span>
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">
+                            ({autoFixes.length} actions, {collapsedAutoFixes.length} lines)
+                          </span>
                         </div>
 
                         <button
@@ -1146,9 +1151,7 @@ function unpinRow(rowIndex: number) {
                                     autoFocus
                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-sm outline-none"
                                     value={editing.value}
-                                    onChange={(e) =>
-                                      setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
-                                    }
+                                    onChange={(e) => setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))}
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
                                       if (e.key === "Enter") commitEdit();
