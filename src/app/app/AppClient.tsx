@@ -47,8 +47,7 @@ type UiIssue = {
   severity?: "error" | "warning" | "info";
   code?: string;
   suggestion?: string;
-  // ✅ allow metadata passthrough for premium UI + simulation
-  details?: unknown;
+  details?: Record<string, unknown>;
 };
 
 function downloadText(filename: string, text: string) {
@@ -152,6 +151,9 @@ export default function AppClient() {
   const allFormats = useMemo<CsvFormat[]>(() => [...builtinFormats, ...customFormats], [builtinFormats, customFormats]);
 
   // Support selecting a preset via /app?preset=<formatId>
+  // NOTE: read the query param *inside* this effect to avoid a first-mount race
+  // between multiple useEffects.
+  // (Built-ins always work; Custom Formats will work once they load for Advanced users.)
   const appliedPresetRef = useRef(false);
 
   useEffect(() => {
@@ -191,13 +193,18 @@ export default function AppClient() {
   }, []);
 
   // Keep selected format valid (if a custom format is deleted, fall back)
+  // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
+  // latest selected id (including a preset from the URL) and does not overwrite it.
   useEffect(() => {
     if (!allFormats.length) return;
     if (allFormats.some((f) => f.id === formatId)) return;
     setFormatId(allFormats[0]!.id);
   }, [allFormats, formatId]);
 
-  const activeFormat = useMemo(() => allFormats.find((f) => f.id === formatId) ?? allFormats[0], [allFormats, formatId]);
+  const activeFormat = useMemo(
+    () => allFormats.find((f) => f.id === formatId) ?? allFormats[0],
+    [allFormats, formatId]
+  );
 
   async function refreshQuotaAndPlan() {
     try {
@@ -254,46 +261,38 @@ export default function AppClient() {
     return false;
   }, [subStatus, quota, planLimits]);
 
+  // ✅ FIXED: preserve Issue.details without @ts-expect-error
   const issuesForTable: CsvIssue[] = useMemo(() => {
     return (issues ?? [])
       .map((it) => {
         const rowIndex =
           typeof (it as any).rowIndex === "number"
             ? (it as any).rowIndex
-            : typeof it.row === "number"
-              ? Math.max(0, it.row - 1)
+            : typeof (it as any).row === "number"
+              ? Math.max(0, (it as any).row - 1)
               : -1;
 
-        const col = (it.column ?? it.field ?? "").toString();
-        const sev = (it.severity ?? it.level ?? "error") as "error" | "warning" | "info";
-        const details = (it as any).details;
+        const col = ((it as any).column ?? (it as any).field ?? "").toString();
+        const sev = (((it as any).severity ?? (it as any).level ?? "error") as "error" | "warning" | "info") ?? "error";
 
-        if (rowIndex == null) return null;
+        if (typeof rowIndex !== "number") return null;
 
-        return {
+        const details = (it as any).details as Record<string, unknown> | undefined;
+
+        const out: CsvIssue = {
           rowIndex,
           column: col || "(file)",
-          message: it.message,
+          message: String((it as any).message ?? ""),
           severity: sev,
           code: (it as any).code,
           suggestion: (it as any).suggestion,
           details,
-        } as any;
+        };
+
+        return out;
       })
-      .filter(Boolean) as any;
+      .filter(Boolean) as CsvIssue[];
   }, [issues]);
-
-
-  // Debug hook for DevTools inspection.
-  // Usage: window.__DEBUG_ISSUES__
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      (window as any).__DEBUG_ISSUES__ = issuesForTable;
-    } catch {
-      // ignore
-    }
-  }, [issuesForTable]);
 
   const issuesForDisplay = useMemo(() => {
     if (issueSeverityFilter === "all") return issuesForTable;
@@ -302,56 +301,33 @@ export default function AppClient() {
 
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
 
-  // ✅ Shopify Simulation Mode
   const shopifySimulation = useMemo(() => {
     if (formatId !== "shopify_products") return null;
 
-    // Shopify behaviors we simulate:
-    // - Duplicate option combos (options_not_unique) => would MERGE variants (not reject)
-    // - Certain blocking issues => would REJECT rows
-    // - Completely empty rows => would be ignored/deleted by import tooling (best-effort)
-    const rejectCodes = new Set<string>([
-      "shopify/missing_option1_for_variant_data",
-      "shopify/blank_title",
-      "shopify/blank_handle",
-      "shopify/missing_required_header",
-    ]);
-
+    // Rows that Shopify would likely reject due to blocking import errors.
     const reject = new Set<number>();
-
-    // Dedup groups so we don’t count the same duplicate combo multiple times
+    // Groups of duplicate variant option combinations (Shopify merges duplicates).
     const seenDuplicateGroups = new Set<string>();
     let mergedVariants = 0;
 
     for (const it of issuesForTable) {
       const code = (it as any).code as string | undefined;
       const rowIndex = (it as any).rowIndex as number | undefined;
-
-      // ✅ only count real “reject” codes as rejected rows
-      if (code && typeof rowIndex === "number" && rowIndex >= 0 && rejectCodes.has(code)) {
-        reject.add(rowIndex);
+      if (code && typeof rowIndex === "number" && rowIndex >= 0) {
+        const meta = getIssueMeta(code, (it as any).severity);
+        if (meta?.blocking) reject.add(rowIndex);
       }
 
-      // ✅ merged variants based on duplicateCombos details
       if (code === "shopify/options_not_unique") {
         const details = (it as any).details as any | undefined;
-
-        // supports new shape: details.duplicateCombos: [{ handle, options, rows }]
-        const combos = Array.isArray(details?.duplicateCombos) ? (details.duplicateCombos as any[]) : null;
-
-        if (combos && combos.length) {
-          for (const c of combos) {
-            const handle = typeof c?.handle === "string" ? c.handle : "";
-            const rowsList = Array.isArray(c?.rows) ? (c.rows as number[]) : null;
-            const optionsObj = c?.options ? c.options : null;
-
-            if (!rowsList || rowsList.length < 2) continue;
-
-            const key = `${handle}|${rowsList.join(",")}|${optionsObj ? JSON.stringify(optionsObj) : ""}`;
-            if (seenDuplicateGroups.has(key)) continue;
+        const rowsArr = Array.isArray(details?.rows) ? (details.rows as number[]) : null;
+        const handle = typeof details?.handle === "string" ? details.handle : "";
+        const combo = details?.duplicateCombo ? JSON.stringify(details.duplicateCombo) : "";
+        if (rowsArr && rowsArr.length >= 2) {
+          const key = `${handle}|${rowsArr.join(",")}|${combo}`;
+          if (!seenDuplicateGroups.has(key)) {
             seenDuplicateGroups.add(key);
-
-            mergedVariants += Math.max(0, rowsList.length - 1);
+            mergedVariants += Math.max(0, rowsArr.length - 1);
           }
         }
       }
@@ -380,7 +356,10 @@ export default function AppClient() {
   }, [formatId, issuesForTable, rows, headers]);
 
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
-  const scoreNotes = useMemo(() => buildScoreNotes(validation as any, issuesForTable, formatId), [validation, issuesForTable, formatId]);
+  const scoreNotes = useMemo(
+    () => buildScoreNotes(validation as any, issuesForTable, formatId),
+    [validation, issuesForTable, formatId]
+  );
 
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
   const shopifyImportConfidence = useMemo(() => {
@@ -429,6 +408,8 @@ export default function AppClient() {
     const set = new Set<number>();
     if (!rows.length) return set;
 
+    // Auto-pin rows that have issues under the CURRENT issue filter.
+    // issuesForDisplay already honors the filter (All / Error / Warning / Info).
     const rowsWithAnyIssue = new Set<number>();
     for (const iss of issuesForDisplay) {
       if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
@@ -473,14 +454,17 @@ export default function AppClient() {
   const pinnedSorted = useMemo(() => Array.from(effectivePinnedRows).sort((a, b) => a - b), [effectivePinnedRows]);
 
   // Rows shown in the main table preview.
+  // Always include pinned rows (manual + auto for current filter), then fill with early non-pinned rows.
   const previewRows = useMemo(() => {
     const LIMIT = 50;
     if (!rows.length) return [] as number[];
 
     const out: number[] = [];
 
+    // Include pinned rows first (sorted)
     for (const r of pinnedSorted) out.push(r);
 
+    // Fill with non-pinned rows up to the preview limit
     if (out.length < LIMIT) {
       for (let i = 0; i < rows.length && out.length < LIMIT; i++) {
         if (!effectivePinnedRows.has(i)) out.push(i);
@@ -491,12 +475,14 @@ export default function AppClient() {
   }, [rows.length, pinnedSorted, effectivePinnedRows]);
 
   function pinRow(rowIndex: number) {
+    // User explicitly pins a row -> it becomes manual and stays until they unpin.
     setManualPinnedRows((prev) => {
       const next = new Set(prev);
       next.add(rowIndex);
       return next;
     });
 
+    // Also remove any suppression so it can be auto-pinned again if they later remove the manual pin.
     setSuppressedAutoPins((prev) => {
       if (!prev.has(rowIndex)) return prev;
       const next = new Set(prev);
@@ -506,6 +492,7 @@ export default function AppClient() {
   }
 
   function unpinRow(rowIndex: number) {
+    // If it's a manual pin, remove the manual pin.
     setManualPinnedRows((prev) => {
       if (!prev.has(rowIndex)) return prev;
       const next = new Set(prev);
@@ -513,6 +500,8 @@ export default function AppClient() {
       return next;
     });
 
+    // If it would be auto-pinned (because it has issues for the current filter),
+    // suppress it so the user can keep it out of the worklist.
     const hasIssueUnderCurrentFilter = issuesForDisplay.some((iss) => iss.rowIndex === rowIndex);
     if (hasIssueUnderCurrentFilter) {
       setSuppressedAutoPins((prev) => {
@@ -638,6 +627,7 @@ export default function AppClient() {
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
+      // Reset pin state for a new run
       setManualPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
 
@@ -664,6 +654,7 @@ export default function AppClient() {
       setAutoFixes([]);
       setEditing(null);
       setLastFixAll(null);
+      // Reset pin state for a new run
       setManualPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
 
@@ -685,6 +676,7 @@ export default function AppClient() {
     setAutoFixes([]);
     setEditing(null);
     setLastFixAll(null);
+    // Reset pin state for a new run
     setManualPinnedRows(new Set());
     setSuppressedAutoPins(new Set());
 
@@ -775,9 +767,7 @@ export default function AppClient() {
       <div className="mb-8 flex items-start justify-between gap-6">
         <div>
           <h1 className="text-3xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-            Pick a format → upload → auto-fix safe issues → export.
-          </p>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
 
           {rows.length > 0 ? (
             <div className="mt-4 space-y-3 text-base">
@@ -826,9 +816,7 @@ export default function AppClient() {
                   {validation.counts.errors} errors, {validation.counts.warnings} warnings
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
                   {formatId === "shopify_products" && simulateShopify && shopifySimulation ? (
-                    <>
-                      {` · Shopify would merge ${shopifySimulation.mergedVariants} variants, delete ${shopifySimulation.deletedRows} rows, reject ${shopifySimulation.rejectedRows} rows`}
-                    </>
+                    <>{` · Shopify would merge ${shopifySimulation.mergedVariants} variants, delete ${shopifySimulation.deletedRows} rows, reject ${shopifySimulation.rejectedRows} rows`}</>
                   ) : null}
                 </span>
 
@@ -895,8 +883,7 @@ export default function AppClient() {
                             </button>
 
                             <span className="text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                              Auto-fixable blockers:{" "}
-                              <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
+                              Auto-fixable blockers: <span className="font-semibold text-[var(--text)]">{realFixableBlockingCount}</span>
                             </span>
                           </div>
                         </div>
@@ -919,11 +906,7 @@ export default function AppClient() {
                       <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
                       <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                         {scoreNotes.map((n) => (
-                          <div
-                            key={n.key}
-                            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
-                            title={n.note}
-                          >
+                          <div key={n.key} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3" title={n.note}>
                             <div className="font-semibold text-[var(--text)]">
                               {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>
@@ -958,9 +941,7 @@ export default function AppClient() {
                       </div>
 
                       <details className="mt-3">
-                        <summary className="cursor-pointer text-base text-[color:rgba(var(--muted-rgb),1)]">
-                          View auto fixes
-                        </summary>
+                        <summary className="cursor-pointer text-base text-[color:rgba(var(--muted-rgb),1)]">View auto fixes</summary>
                         <ul className="mt-3 list-disc pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
                           {collapsedAutoFixes.slice(0, 50).map((t, idx) => (
                             <li key={idx}>{t}</li>
@@ -993,12 +974,7 @@ export default function AppClient() {
           {allFormats.map((f) => {
             const active = f.id === formatId;
             return (
-              <button
-                key={f.id}
-                type="button"
-                className={`pill-btn ${active ? "is-active" : ""}`}
-                onClick={() => setFormatId(f.id)}
-              >
+              <button key={f.id} type="button" className={`pill-btn ${active ? "is-active" : ""}`} onClick={() => setFormatId(f.id)}>
                 {f.name}
               </button>
             );
@@ -1011,8 +987,7 @@ export default function AppClient() {
             <>Custom formats appear here when you save or import them.</>
           ) : (
             <>
-              Custom formats are Advanced only. <Link className="underline" href="/checkout">Upgrade to Advanced</Link> to
-              create and use saved formats.
+              Custom formats are Advanced only. <Link className="underline" href="/checkout">Upgrade to Advanced</Link> to create and use saved formats.
             </>
           )}
         </div>
@@ -1021,9 +996,7 @@ export default function AppClient() {
       <div className="mt-7 grid gap-7 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">Upload CSV</h2>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-            We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.
-          </p>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.</p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
@@ -1057,21 +1030,14 @@ export default function AppClient() {
 
         <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">Issues</h2>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-            Click a cell in the table to edit it. Red and yellow highlight errors and warnings.
-          </p>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Click a cell in the table to edit it. Red and yellow highlight errors and warnings.</p>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <span className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Issue filter</span>
             {(["all", "error", "warning", "info"] as const).map((k) => {
               const active = issueSeverityFilter === k;
               return (
-                <button
-                  key={k}
-                  type="button"
-                  className={`pill-btn ${active ? "is-active" : ""}`}
-                  onClick={() => setIssueSeverityFilter(k)}
-                >
+                <button key={k} type="button" className={`pill-btn ${active ? "is-active" : ""}`} onClick={() => setIssueSeverityFilter(k)}>
                   {k === "all" ? "All" : k[0].toUpperCase() + k.slice(1)}
                 </button>
               );
@@ -1115,21 +1081,11 @@ export default function AppClient() {
                             {sev === "error" ? "Error" : "Warning"}
                           </span>
                         ) : isPinned ? (
-                          <button
-                            type="button"
-                            className="pill-btn"
-                            onClick={() => unpinRow(rowIndex)}
-                            title="Remove from Manual fixes"
-                          >
+                          <button type="button" className="pill-btn" onClick={() => unpinRow(rowIndex)} title="Remove from Manual fixes">
                             Unpin
                           </button>
                         ) : (
-                          <button
-                            type="button"
-                            className="pill-btn"
-                            onClick={() => pinRow(rowIndex)}
-                            title="Add to Manual fixes"
-                          >
+                          <button type="button" className="pill-btn" onClick={() => pinRow(rowIndex)} title="Add to Manual fixes">
                             Pin
                           </button>
                         );
@@ -1183,8 +1139,7 @@ export default function AppClient() {
 
             {rows.length > 0 ? (
               <div className="border-t border-[var(--border)] px-5 py-4 text-sm text-[var(--muted)]">
-                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until
-                unpinned.
+                Showing first 10 columns and up to 25 rows for speed. “Pin” adds a row to Manual fixes. Rows stay there until unpinned.
               </div>
             ) : null}
           </div>
