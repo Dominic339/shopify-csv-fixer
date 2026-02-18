@@ -98,8 +98,10 @@ export default function AppClient() {
   // show last “Fix All” audit snippet
   const [lastFixAll, setLastFixAll] = useState<null | { at: number; applied: string[] }>(null);
 
-  // ✅ Pinned rows = the "Manual fixes" worklist
-  const [pinnedRows, setPinnedRows] = useState<Set<number>>(() => new Set());
+  // ✅ Manually pinned rows = the "Manual fixes" worklist.
+  // NOTE: Auto-pins (rows with issues) are computed from the active filter
+  // and should appear/disappear when the filter changes.
+  const [manualPinnedRows, setManualPinnedRows] = useState<Set<number>>(() => new Set());
   // ✅ Rows the user explicitly unpinned (don’t auto-repin them)
   const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
 
@@ -309,30 +311,31 @@ const rowsToAutoPin = useMemo(() => {
   return [...set].sort((a, b) => a - b);
 }, [issuesForDisplay, issueSeverityFilter]);
 
-// ✅ Auto-pin rows that have issues for the CURRENT filter.
-// Rows the user explicitly unpinned are suppressed and will not be auto-repinned.
-useEffect(() => {
-  if (!rowsToAutoPin.length) return;
-  setPinnedRows((prev) => {
-    const next = new Set(prev);
-    for (const idx of rowsToAutoPin) {
-      if (suppressedAutoPins.has(idx)) continue;
-      next.add(idx);
-    }
-    return next;
-  });
-}, [rowsToAutoPin.join(","), suppressedAutoPins, formatId]);
+// Effective pins = manual pins + current-filter auto-pins (minus suppressed).
+// This ensures switching filters updates the pin list (e.g., warnings disappear on Error-only).
+const effectivePinnedSorted = useMemo(() => {
+  const next = new Set<number>();
 
-const pinnedSorted = useMemo(() => {
-    return [...pinnedRows].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
-  }, [pinnedRows, rows.length]);
+  // manual pins always included
+  for (const idx of manualPinnedRows) next.add(idx);
+
+  // auto pins are derived from current filter and can be suppressed by user intent
+  for (const idx of rowsToAutoPin) {
+    if (suppressedAutoPins.has(idx)) continue;
+    next.add(idx);
+  }
+
+  return [...next].filter((i) => i >= 0 && i < rows.length).sort((a, b) => a - b);
+}, [manualPinnedRows, rowsToAutoPin, suppressedAutoPins, rows.length]);
+
+const effectivePinnedSet = useMemo(() => new Set(effectivePinnedSorted), [effectivePinnedSorted]);
 
   // Preview table: pinned rows first, then issue rows, then rest up to 25
   const previewRows = useMemo(() => {
     const out: number[] = [];
     const seen = new Set<number>();
 
-    for (const idx of pinnedSorted) {
+    for (const idx of effectivePinnedSorted) {
       if (!seen.has(idx)) {
         out.push(idx);
         seen.add(idx);
@@ -351,7 +354,7 @@ const pinnedSorted = useMemo(() => {
       }
     }
     return out.slice(0, 25);
-  }, [pinnedSorted, rowsToAutoPin, rows.length]);
+  }, [effectivePinnedSorted, rowsToAutoPin, rows.length]);
 
   const rowSeverity = useMemo(() => {
     const m = new Map<number, "error" | "warning" | "info">();
@@ -374,7 +377,7 @@ const pinnedSorted = useMemo(() => {
     return next;
   });
 
-  setPinnedRows((prev) => {
+  setManualPinnedRows((prev) => {
     const next = new Set(prev);
     next.add(rowIndex);
     return next;
@@ -389,7 +392,7 @@ const pinnedSorted = useMemo(() => {
     return next;
   });
 
-  setPinnedRows((prev) => {
+  setManualPinnedRows((prev) => {
     const next = new Set(prev);
     next.delete(rowIndex);
     return next;
@@ -510,7 +513,8 @@ const pinnedSorted = useMemo(() => {
       if (typeof name === "string") setFileName(name);
 
       setLastFixAll(null);
-      setPinnedRows(new Set());
+      setManualPinnedRows(new Set());
+      setSuppressedAutoPins(new Set());
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -535,7 +539,8 @@ const pinnedSorted = useMemo(() => {
       setAutoFixes([]);
       setEditing(null);
       setLastFixAll(null);
-      setPinnedRows(new Set());
+      setManualPinnedRows(new Set());
+      setSuppressedAutoPins(new Set());
 
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
@@ -555,7 +560,8 @@ const pinnedSorted = useMemo(() => {
     setAutoFixes([]);
     setEditing(null);
     setLastFixAll(null);
-    setPinnedRows(new Set());
+    setManualPinnedRows(new Set());
+    setSuppressedAutoPins(new Set());
 
     if (!lastUploadedText || !activeFormat) return;
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
@@ -945,7 +951,7 @@ const pinnedSorted = useMemo(() => {
                   <tbody>
                     {previewRows.map((rowIndex) => {
                       const row = rows[rowIndex] ?? {};
-                      const isPinned = pinnedRows.has(rowIndex);
+                      const isPinned = effectivePinnedSet.has(rowIndex);
                       const sev = rowSeverity.get(rowIndex);
 
                       const actionCell =
@@ -1045,7 +1051,7 @@ const pinnedSorted = useMemo(() => {
               onUpdateRow={onUpdateRow}
               resetKey={formatId}
               formatId={formatId}
-              pinnedRows={pinnedSorted}
+              pinnedRows={effectivePinnedSorted}
               onUnpinRow={unpinRow}
               cellSeverityMap={issueCellMap}
             />
