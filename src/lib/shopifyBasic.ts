@@ -458,30 +458,29 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
 
     // NEW (Enforcement 1): Variant data exists but Option1 missing (BLOCKING)
     // Only applies to non-image-only rows.
-    if (!imageOnly) {
-      const hasVariantFields =
-        !!get(r, cSku).trim() ||
+    const hasVariantFields =
+      !imageOnly &&
+      (!!get(r, cSku).trim() ||
         !!get(r, cPrice).trim() ||
         !!get(r, cCompare).trim() ||
         !!get(r, cInvQty).trim() ||
-        !!get(r, cContinue).trim();
+        !!get(r, cContinue).trim());
 
-      // If variant columns are used, Option1 name + value must be present.
-      // Otherwise Shopify may treat the row as a product-only row and drop variants.
-      if (hasVariantFields && (!n1 || !v1)) {
-        issues.push({
-          severity: "error",
-          code: "shopify/missing_option1_for_variant_data",
-          row,
-          column: !n1 ? optNames[0] : optVals[0],
-          message:
-            !n1
-              ? "Variant data exists on a row but Option1 name is missing (risk: Shopify may drop variants)."
-              : "Variant data exists on a row but Option1 value is missing (risk: Shopify may drop variants).",
-          suggestion:
-            "If this row represents a variant, set Option1 name (e.g., Size/Color) and Option1 value (e.g., M/Blue). If this product is single-variant, clear variant-specific columns (Variant SKU/Price/Inventory/etc.) so Shopify treats it as one variant.",
-        });
-      }
+    // If variant columns are used, Option1 name + value must be present.
+    // Otherwise Shopify may treat the row as a product-only row and drop variants.
+    if (hasVariantFields && (!n1 || !v1)) {
+      issues.push({
+        severity: "error",
+        code: "shopify/missing_option1_for_variant_data",
+        row,
+        column: !n1 ? optNames[0] : optVals[0],
+        message:
+          !n1
+            ? "Variant data exists on a row but Option1 name is missing (risk: Shopify may drop variants)."
+            : "Variant data exists on a row but Option1 value is missing (risk: Shopify may drop variants).",
+        suggestion:
+          "If this row represents a variant, set Option1 name (e.g., Size/Color) and Option1 value (e.g., M/Blue). If this product is single-variant, clear variant-specific columns (Variant SKU/Price/Inventory/etc.) so Shopify treats it as one variant.",
+      });
     }
 
     // --- Default Title normalization (NEW, safe)
