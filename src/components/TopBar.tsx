@@ -1,3 +1,4 @@
+// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
@@ -9,10 +10,9 @@ import { useTheme } from "@/components/theme/ThemeProvider";
 type SubStatus = {
   signedIn: boolean;
   plan: "free" | "basic" | "advanced";
-  status: string;
+  status: string; // "active" etc
 };
 
-// Minimal local types to avoid depending on supabase-js exported types.
 type SupabaseUser = {
   email?: string | null;
 };
@@ -21,92 +21,114 @@ type SupabaseSession = {
   user?: SupabaseUser | null;
 };
 
-export function TopBar() {
-  const { theme, toggle } = useTheme();
-  const [sub, setSub] = useState<SubStatus | null>(null);
-  const [session, setSession] = useState<SupabaseSession | null>(null);
+function isActiveAdvanced(sub?: Partial<SubStatus> | null) {
+  const plan = (sub?.plan ?? "free") as "free" | "basic" | "advanced";
+  const status = (sub?.status ?? "").toLowerCase();
+  return plan === "advanced" && status === "active";
+}
 
-  const supabase = useMemo(() => createClient(), []);
+export default function TopBar() {
+  const { theme, toggleTheme } = useTheme();
 
-  const signedIn = Boolean(session?.user);
+  const logoSrc = useMemo(() => {
+    // ThemeProvider in your project uses "light"/"dark"
+    return theme === "light" ? "/StriveFormatsLight.png" : "/StriveFormatsDark.png";
+  }, [theme]);
+
+  const [sub, setSub] = useState<SubStatus>({
+    signedIn: false,
+    plan: "free",
+    status: "none",
+  });
 
   useEffect(() => {
-    let cancelled = false;
+    let mounted = true;
 
-    async function load() {
+    async function loadStatus() {
       try {
+        const supabase = createClient();
         const { data } = await supabase.auth.getSession();
-        if (!cancelled) setSession((data?.session as any) ?? null);
-      } catch {
-        // ignore
-      }
+        const session = (data?.session as SupabaseSession | null) ?? null;
 
-      try {
-        const res = await fetch("/api/subscription/status", { cache: "no-store" });
-        const json = (await res.json()) as SubStatus;
-        if (!cancelled) setSub(json);
+        const signedIn = Boolean(session?.user?.email);
+
+        // Subscription status API (already in your project)
+        let plan: "free" | "basic" | "advanced" = "free";
+        let status = "none";
+
+        try {
+          const r = await fetch("/api/subscription/status", { cache: "no-store" });
+          const j = await r.json();
+          plan = (j?.plan ?? "free") as "free" | "basic" | "advanced";
+          status = (j?.status ?? "none") as string;
+        } catch {
+          // ignore — keep defaults
+        }
+
+        if (!mounted) return;
+
+        setSub({
+          signedIn,
+          plan,
+          status,
+        });
       } catch {
         // ignore
       }
     }
 
-    void load();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession((nextSession as any) ?? null);
-    });
-
+    void loadStatus();
     return () => {
-      cancelled = true;
-      subscription?.unsubscribe();
+      mounted = false;
     };
-  }, [supabase]);
+  }, []);
 
-  const logoSrc = theme === "light" ? "/StriveFormatsLight.png" : "/StriveFormatsDark.png";
+  const showCustomFormats = isActiveAdvanced(sub);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--bg)]/70 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
-          <Image src={logoSrc} alt="StriveFormats" width={44} height={44} priority className="rounded-xl" />
-          <div className="hidden sm:block">
-            <div className="text-sm font-semibold text-[var(--text)]">StriveFormats</div>
-            <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">CSV fixer for ecommerce imports</div>
-          </div>
+          <Image src={logoSrc} alt="StriveFormats" width={44} height={44} priority />
+          <div className="text-lg font-semibold tracking-tight text-[var(--text)]">StriveFormats</div>
         </Link>
 
         <nav className="flex items-center gap-2">
-          <button type="button" className="pill-btn" onClick={toggle}>
+          <Link className="rgb-btn" href="/app">
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
+          </Link>
+
+          <Link className="rgb-btn" href="/presets">
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
+          </Link>
+
+          <Link className="rgb-btn" href="/#pricing">
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">View pricing</span>
+          </Link>
+
+          {showCustomFormats ? (
+            <Link className="rgb-btn" href="/formats">
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
+            </Link>
+          ) : null}
+
+          <button
+            type="button"
+            className="pill-btn"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title="Toggle light/dark mode"
+          >
             {theme === "light" ? "Dark mode" : "Light mode"}
           </button>
 
-          <Link className="rg-btn" href="/app?preset=shopify_products">
-            CSV Fixer
+          <Link
+            className="pill-btn"
+            href={sub.signedIn ? "/profile" : "/auth"}
+            title={sub.signedIn ? "Profile" : "Sign in"}
+          >
+            {sub.signedIn ? "Profile" : "Sign in"}
           </Link>
-          <Link className="rg-btn" href="/presets">
-            Templates
-          </Link>
-          <Link className="rg-btn" href="/#pricing">
-            View pricing
-          </Link>
-
-          {signedIn ? (
-            <Link className="pill-btn" href="/profile">
-              Profile
-            </Link>
-          ) : (
-            <Link className="pill-btn" href="/auth">
-              Sign in
-            </Link>
-          )}
-
-          {sub?.plan === "advanced" && sub?.status === "active" ? (
-            <Link className="pill-btn" href="/formats">
-              Custom formats
-            </Link>
-          ) : null}
         </nav>
       </div>
     </header>
