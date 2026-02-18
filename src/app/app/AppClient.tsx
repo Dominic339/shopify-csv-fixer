@@ -279,9 +279,8 @@ export default function AppClient() {
           severity: sev,
           code: (it as any).code,
           suggestion: (it as any).suggestion,
-          // @ts-expect-error - CsvIssue doesn’t declare details, but we keep it for internal UI
           details,
-        };
+        } as any;
       })
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
