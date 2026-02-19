@@ -417,10 +417,32 @@ export default function AppClient() {
   // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
   const shopifyImportConfidence = useMemo(() => {
     if (formatId !== "shopify_products") return null;
-    const s = Number((validation as any)?.score ?? 0);
-    if (!Number.isFinite(s)) return 0;
-    return Math.max(0, Math.min(100, Math.round(s)));
-  }, [formatId, validation]);
+    const base = Number((validation as any)?.score ?? 0);
+    if (!Number.isFinite(base)) return 0;
+
+    // Confidence is a user-facing "how safe is import" metric.
+    // It is intentionally stricter than the generic validation score:
+    // - Any blocking error caps confidence (import will not complete cleanly)
+    // - Predicted merges reduce confidence slightly (silent data overwrites)
+    // - Ignored blank rows are low risk and lightly penalized
+    const blocking = Number((validation as any)?.counts?.blockingErrors ?? 0);
+
+    let conf = base;
+
+    if (blocking > 0) {
+      // If import is blocked, keep confidence firmly below "good" territory.
+      conf = Math.min(conf, 60);
+      conf -= (blocking - 1) * 8;
+    }
+
+    if (formatId === "shopify_products" && simulateShopify && shopifySimulation) {
+      conf -= Math.min(12, Number(shopifySimulation.mergedVariants ?? 0) * 2);
+      conf -= Math.min(6, Number(shopifySimulation.deletedRows ?? 0) * 1);
+      conf -= Math.min(18, Number(shopifySimulation.rejectedRows ?? 0) * 6);
+    }
+
+    return Math.max(0, Math.min(100, Math.round(conf)));
+  }, [formatId, validation, simulateShopify, shopifySimulation]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -851,8 +873,17 @@ export default function AppClient() {
 
                 {shopifyImportConfidence != null ? (
                   <span
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-[var(--text)]"
-                    title={"Based on:\n- Blocking errors\n- Variant integrity\n- Option structure\n- Inventory consistency"}
+                    className={
+                      "rounded-full border px-4 py-1.5 text-[var(--text)] " +
+                      (validation.counts.blockingErrors
+                        ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.08)]"
+                        : shopifyImportConfidence >= 90
+                          ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.10)]"
+                          : "border-[var(--border)] bg-[var(--surface)]")
+                    }
+                    title={
+                      "Shopify import confidence estimates how safely this file will import.\n\nIt is stricter than the validation score and accounts for:\n- Blocking errors (import failures)\n- Duplicate variants (possible merges)\n- Blank lines (ignored rows)"
+                    }
                   >
                     Shopify import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>
                   </span>
@@ -885,11 +916,25 @@ export default function AppClient() {
                   </span>
                 )}
 
-                <span className="text-[color:rgba(var(--muted-rgb),1)]">
+                <span
+                  className="text-[color:rgba(var(--muted-rgb),1)]"
+                  title={
+                    formatId === "shopify_products" && simulateShopify && shopifySimulation
+                      ? "Import simulation is an estimate of Shopify's behavior:\n- Merge: duplicate Handle + option combinations\n- Ignore: blank/empty CSV lines\n- Reject: rows with blocking errors"
+                      : undefined
+                  }
+                >
                   {validation.counts.errors} errors, {validation.counts.warnings} warnings
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
                   {formatId === "shopify_products" && simulateShopify && shopifySimulation ? (
-                    <>{` · Shopify would merge ${shopifySimulation.mergedVariants} variants, delete ${shopifySimulation.deletedRows} rows, reject ${shopifySimulation.rejectedRows} rows`}</>
+                    <>
+                      {` · Import simulation: merge ${shopifySimulation.mergedVariants} duplicate `}
+                      {shopifySimulation.mergedVariants === 1 ? "variant" : "variants"}
+                      {`, ignore ${shopifySimulation.deletedRows} blank `}
+                      {shopifySimulation.deletedRows === 1 ? "row" : "rows"}
+                      {`, reject ${shopifySimulation.rejectedRows} `}
+                      {shopifySimulation.rejectedRows === 1 ? "row" : "rows"}
+                    </>
                   ) : null}
                 </span>
 

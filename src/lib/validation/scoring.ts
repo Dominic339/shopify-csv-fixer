@@ -35,10 +35,26 @@ function clamp(n: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, n));
 }
 
-function severityPenalty(sev: "error" | "warning" | "info") {
-  if (sev === "error") return 6;
-  if (sev === "warning") return 2;
-  return 0.5;
+/**
+ * Scoring philosophy (v1):
+ * - The overall score should feel "tight" (a handful of issues should visibly move the needle).
+ * - Errors matter much more than warnings; infos are almost cosmetic.
+ * - Blocking errors represent import risk and should hit the score harder.
+ * - Many repeated issues should have diminishing returns so the score doesn't crater unfairly.
+ */
+function penaltyFromCounts(counts: { errors: number; warnings: number; infos: number; blockingErrors: number }) {
+  const { errors, warnings, infos, blockingErrors } = counts;
+
+  // Base penalties
+  const base = errors * 10 + warnings * 4 + infos * 1;
+
+  // Diminishing returns for large counts (prevents extreme cliffs)
+  const diminishing = 6 * Math.log1p(errors) + 2.5 * Math.log1p(warnings) + 1.25 * Math.log1p(infos);
+
+  // Blocking errors represent import failure risk
+  const blocking = blockingErrors * 12;
+
+  return base + diminishing + blocking;
 }
 
 /**
@@ -73,11 +89,12 @@ export function computeValidationBreakdown(
   let infos = 0;
   let blockingErrors = 0;
 
-  // Penalty per category
-  const penalty: Record<ValidationCategory, number> = Object.keys(CATEGORY_WEIGHTS).reduce((acc, k) => {
-    acc[k as ValidationCategory] = 0;
-    return acc;
-  }, {} as Record<ValidationCategory, number>);
+  // Counts per category (for tighter + more interpretable scoring)
+  const catCounts: Record<ValidationCategory, { errors: number; warnings: number; infos: number; blockingErrors: number }> =
+    Object.keys(CATEGORY_WEIGHTS).reduce((acc, k) => {
+      acc[k as ValidationCategory] = { errors: 0, warnings: 0, infos: 0, blockingErrors: 0 };
+      return acc;
+    }, {} as Record<ValidationCategory, { errors: number; warnings: number; infos: number; blockingErrors: number }>);
 
   for (const issue of issues ?? []) {
     const sev = issue.severity ?? "error";
@@ -88,15 +105,21 @@ export function computeValidationBreakdown(
     const meta = getIssueMeta(formatId, issue.code);
     const cat = (meta?.category ?? inferCategory(issue)) as ValidationCategory;
 
-    penalty[cat] += severityPenalty(sev);
+    if (sev === "error") catCounts[cat].errors += 1;
+    else if (sev === "warning") catCounts[cat].warnings += 1;
+    else catCounts[cat].infos += 1;
 
     // Blocking = “errors that matter for import”
     const isBlocking = Boolean(meta?.blocking && sev === "error");
-    if (isBlocking) blockingErrors++;
+    if (isBlocking) {
+      blockingErrors++;
+      catCounts[cat].blockingErrors += 1;
+    }
   }
 
   for (const k of Object.keys(categories) as ValidationCategory[]) {
-    categories[k] = clamp(100 - penalty[k], 0, 100);
+    const p = penaltyFromCounts(catCounts[k]);
+    categories[k] = clamp(Math.round(100 - p), 0, 100);
   }
 
   // Overall weighted score (keeps existing behavior: only weighted buckets affect overall)
