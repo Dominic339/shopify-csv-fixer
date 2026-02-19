@@ -4,10 +4,11 @@ import { validateAndFixWooCommerceProducts } from "@/lib/woocommerceOptimizer";
 
 export const woocommerceVariableProductsFormat: CsvFormat = {
   id: "woocommerce_variable_products",
-  label: "WooCommerce Variable Products",
-  platform: "WooCommerce",
+  name: "WooCommerce Variable Products",
   description:
     "Optimized for WooCommerce variable products + variations (auto-creates missing parent rows and validates variation structure).",
+  category: "Ecommerce",
+  source: "builtin",
   expectedHeaders: [
     "ID",
     "Type",
