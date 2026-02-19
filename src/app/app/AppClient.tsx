@@ -885,7 +885,15 @@ export default function AppClient() {
                       "Shopify import confidence estimates how safely this file will import.\n\nIt is stricter than the validation score and accounts for:\n- Blocking errors (import failures)\n- Duplicate variants (possible merges)\n- Blank lines (ignored rows)"
                     }
                   >
-                    Shopify import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>
+                    {(() => {
+                      const blocked = Number((validation as any)?.counts?.blockingErrors ?? 0) > 0;
+                      return (
+                        <>
+                          Import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>{" "}
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({blocked ? "blocked" : "safe to import"})</span>
+                        </>
+                      );
+                    })()}
                   </span>
                 ) : null}
 
@@ -971,12 +979,20 @@ export default function AppClient() {
                   <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-[320px]">
                       <div className="text-base font-semibold text-[var(--text)]">
-                        {validation.readyForShopifyImport ? "🟢 Ready for Shopify Import" : "Not ready for Shopify Import"}
+                        {(() => {
+                          const blocking = Number((validation as any)?.counts?.blockingErrors ?? 0);
+                          if (blocking > 0) {
+                            return `Import blocked – resolve ${blocking} blocking ${blocking === 1 ? "issue" : "issues"} to continue`;
+                          }
+                          return "Ready for Shopify import";
+                        })()}
                       </div>
                       <div className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-                        {validation.readyForShopifyImport
-                          ? "No blocking issues detected. Exporting should import cleanly."
-                          : "Blocking issues are preventing a clean import. Fix blockers to safely import."}
+                        {(() => {
+                          const blocking = Number((validation as any)?.counts?.blockingErrors ?? 0);
+                          if (blocking > 0) return "Fix blocking issues to complete a clean Shopify import.";
+                          return "No blocking issues detected. Exporting should import cleanly.";
+                        })()}
                       </div>
 
                       {!validation.readyForShopifyImport ? (
@@ -1024,7 +1040,20 @@ export default function AppClient() {
                       <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
                       <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                         {scoreNotes.map((n) => (
-                          <div key={n.key} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3" title={n.note}>
+                          <div
+                            key={n.key}
+                            className={
+                              "rounded-xl border p-3 " +
+                              (n.key === "variant" && n.score < 70
+                                ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.08)]"
+                                : "border-[var(--border)] bg-[var(--surface)]")
+                            }
+                            title={
+                              n.key === "variant" && n.score < 70
+                                ? n.note + "\n\nWhy this matters: Shopify variants are keyed by Handle + Option values. Missing or duplicate option combinations can block imports or merge variants."
+                                : n.note
+                            }
+                          >
                             <div className="font-semibold text-[var(--text)]">
                               {n.label} <span className="text-[color:rgba(var(--muted-rgb),1)]">{n.score}</span>
                             </div>

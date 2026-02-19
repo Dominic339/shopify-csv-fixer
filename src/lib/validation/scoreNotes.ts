@@ -51,10 +51,16 @@ export function buildScoreNotes(validation: any, issues: CsvIssue[], formatId?: 
     const s = Number(validation?.categories?.[k] ?? 0);
     const c = counts[k];
     const parts: string[] = [];
-    if (c.blocking) parts.push(`${c.blocking} blocking`);
-    if (c.errors && !c.blocking) parts.push(`${c.errors} errors`);
-    if (c.warnings) parts.push(`${c.warnings} warnings`);
-    const note = parts.length ? parts.join(", ") : "No issues detected";
+    if (c.blocking) parts.push(`${c.blocking} blocking ${c.blocking === 1 ? "issue" : "issues"}`);
+    if (c.errors && !c.blocking) parts.push(`${c.errors} ${c.errors === 1 ? "error" : "errors"}`);
+    if (c.warnings) parts.push(`${c.warnings} ${c.warnings === 1 ? "warning" : "warnings"}`);
+
+    let note = parts.length ? parts.join(", ") : "No issues detected";
+
+    // Extra context for the variants driver so a low number feels intentional, not broken.
+    if (k === "variant" && s < 70 && parts.length) {
+      note += " · Variant issues often come from missing option values or duplicate option combinations.";
+    }
     return { key: k, label: LABELS[k], score: s, note };
   });
 }
