@@ -138,6 +138,7 @@ export default function AppClient() {
   // If the user unpins an auto-pinned row, we suppress auto-pinning it again until the issues change.
   const [manualPinnedRows, setManualPinnedRows] = useState<Set<number>>(() => new Set());
   const [suppressedAutoPins, setSuppressedAutoPins] = useState<Set<number>>(() => new Set());
+  const [autoPinnedRows, setAutoPinnedRows] = useState<Set<number>>(() => new Set());
   const [editingLockedRows, setEditingLockedRows] = useState<Set<number>>(() => new Set());
 
   // Phase 1: Shopify strict mode toggle (stored local)
@@ -481,45 +482,53 @@ export default function AppClient() {
     return map;
   }, [issuesForTable]);
 
-  const autoPinnedRows = useMemo(() => {
-    const set = new Set<number>();
-    if (!rows.length) return set;
+  // Rows that should be auto-pinned for the *current filter scope*.
+// Important behavior:
+// - Auto-pins are "sticky" within the current filter: once a row is auto-pinned, it stays pinned
+//   until the user unpins it OR the filter changes to a scope where it is irrelevant.
+// - This avoids rows disappearing immediately after the user fixes an issue, which feels jarring.
+const relevantRowsForCurrentFilter = useMemo(() => {
+  const set = new Set<number>();
+  for (const iss of issuesForDisplay) {
+    if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) set.add(iss.rowIndex);
+  }
+  return set;
+}, [issuesForDisplay]);
 
-    // Auto-pin rows that have issues under the CURRENT issue filter.
-    // issuesForDisplay already honors the filter (All / Error / Warning / Info).
-    const rowsWithAnyIssue = new Set<number>();
-    for (const iss of issuesForDisplay) {
-      if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) rowsWithAnyIssue.add(iss.rowIndex);
+// When the filter changes, reset sticky auto-pins to only rows relevant to the new scope (minus suppressed).
+useEffect(() => {
+  const next = new Set<number>();
+  relevantRowsForCurrentFilter.forEach((r) => {
+    if (!suppressedAutoPins.has(r)) next.add(r);
+  });
+  setAutoPinnedRows(next);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [issueSeverityFilter]);
+
+// While staying in the same filter scope, only ADD new relevant rows (sticky pins).
+useEffect(() => {
+  if (!rows.length) {
+    if (autoPinnedRows.size) setAutoPinnedRows(new Set());
+    return;
+  }
+
+  let changed = false;
+  const next = new Set(autoPinnedRows);
+
+  relevantRowsForCurrentFilter.forEach((r) => {
+    if (suppressedAutoPins.has(r)) return;
+    if (!next.has(r)) {
+      next.add(r);
+      changed = true;
     }
+  });
 
-    for (const r of rowsWithAnyIssue) {
-      if (!suppressedAutoPins.has(r)) set.add(r);
-    }
-    return set;
-  }, [issuesForDisplay, rows.length, suppressedAutoPins]);
+  if (changed) setAutoPinnedRows(next);
+}, [rows.length, relevantRowsForCurrentFilter, suppressedAutoPins, autoPinnedRows]);
 
-  // If a suppressed row no longer has issues for the current filter, remove suppression.
-  useEffect(() => {
-    if (!rows.length) {
-      if (suppressedAutoPins.size) setSuppressedAutoPins(new Set());
-      return;
-    }
-    if (!suppressedAutoPins.size) return;
-
-    const stillRelevant = new Set<number>();
-    for (const iss of issuesForDisplay) {
-      if (typeof iss.rowIndex === "number" && iss.rowIndex >= 0) stillRelevant.add(iss.rowIndex);
-    }
-
-    let changed = false;
-    const next = new Set<number>();
-    suppressedAutoPins.forEach((r) => {
-      if (stillRelevant.has(r)) next.add(r);
-      else changed = true;
-    });
-
-    if (changed) setSuppressedAutoPins(next);
-  }, [rows.length, issuesForDisplay, suppressedAutoPins]);
+  // Suppressed auto-pins are cleared when the filter changes (see effect above).
+// We intentionally DO NOT clear suppression just because an issue was fixed, otherwise a row the user
+// explicitly unpinned could reappear during the same workflow.
 
   const effectivePinnedRows = useMemo(() => {
     const merged = new Set<number>();
