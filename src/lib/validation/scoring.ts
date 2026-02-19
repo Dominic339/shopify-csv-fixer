@@ -1,3 +1,4 @@
+// src/lib/validation/scoring.ts
 import type { CsvIssue } from "@/lib/formats/types";
 import type { ValidationCategory } from "./issueMeta";
 import { getIssueMeta } from "./issueMetaRegistry";
@@ -11,90 +12,126 @@ export type ValidationBreakdown = {
     infos: number;
     blockingErrors: number;
   };
+  // Kept for backwards compatibility with the UI text; interpreted as "ready for import".
   readyForShopifyImport: boolean;
   label: string;
 };
 
-const CATEGORY_WEIGHTS: Record<ValidationCategory, number> = {
-  structure: 25,
-  variant: 25,
-  pricing: 20,
-  inventory: 20,
-  seo: 10,
-  images: 0, // keep overall scoring behavior unchanged; blocking still handled separately
-
-  // Shopify-specific buckets (kept for grouping + tooltips; no scoring weight)
-  required: 0,
-  handle: 0,
-  publishing: 0,
-  status: 0,
-  other: 0,
-};
+const ALL_CATEGORIES: ValidationCategory[] = [
+  "structure",
+  "variant",
+  "pricing",
+  "inventory",
+  "seo",
+  "images",
+  "sku",
+  "attributes",
+  "media",
+  "compliance",
+  "tags",
+  "shipping",
+];
 
 function clamp(n: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, n));
 }
 
+function normalizeWeights(weights: Partial<Record<ValidationCategory, number>>): Record<ValidationCategory, number> {
+  const out: Record<ValidationCategory, number> = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 0])) as any;
+  for (const [k, v] of Object.entries(weights)) {
+    out[k as ValidationCategory] = Math.max(0, Number(v ?? 0));
+  }
+  const sum = Object.values(out).reduce((a, b) => a + b, 0) || 1;
+  for (const k of ALL_CATEGORIES) out[k] = out[k] / sum;
+  return out;
+}
+
+function weightsForFormat(formatId: string): Record<ValidationCategory, number> {
+  if (formatId === "woocommerce_products" || formatId === "woocommerce_variable_products") {
+    return normalizeWeights({
+      structure: 0.14,
+      variant: 0.16,
+      sku: 0.18,
+      attributes: 0.14,
+      pricing: 0.14,
+      inventory: 0.10,
+      media: 0.10,
+      seo: 0.04,
+    });
+  }
+
+  if (formatId === "etsy_listings") {
+    return normalizeWeights({
+      compliance: 0.22,
+      tags: 0.16,
+      pricing: 0.18,
+      variant: 0.12,
+      seo: 0.12,
+      shipping: 0.12,
+      images: 0.08,
+    });
+  }
+
+  // Default: Shopify-like profile
+  return normalizeWeights({
+    structure: 0.18,
+    variant: 0.24,
+    pricing: 0.18,
+    inventory: 0.14,
+    seo: 0.14,
+    images: 0.12,
+  });
+}
+
 /**
- * Scoring philosophy (v1):
- * - The overall score should feel "tight" (a handful of issues should visibly move the needle).
- * - Errors matter much more than warnings; infos are almost cosmetic.
- * - Blocking errors represent import risk and should hit the score harder.
- * - Many repeated issues should have diminishing returns so the score doesn't crater unfairly.
+ * Category penalty with diminishing returns.
+ *
+ * - Errors move the needle a lot.
+ * - Warnings less.
+ * - Infos are mostly cosmetic.
+ * - Blocking errors represent import failure risk.
  */
 function penaltyFromCounts(counts: { errors: number; warnings: number; infos: number; blockingErrors: number }) {
   const { errors, warnings, infos, blockingErrors } = counts;
 
-  // Base penalties
   const base = errors * 10 + warnings * 4 + infos * 1;
-
-  // Diminishing returns for large counts (prevents extreme cliffs)
   const diminishing = 6 * Math.log1p(errors) + 2.5 * Math.log1p(warnings) + 1.25 * Math.log1p(infos);
-
-  // Blocking errors represent import failure risk
   const blocking = blockingErrors * 12;
 
   return base + diminishing + blocking;
 }
 
-/**
- * Fallback category guess when a preset does not have issue meta for the code.
- * This keeps scoring working for all presets today while allowing richer meta later.
- */
 function inferCategory(issue: CsvIssue): ValidationCategory {
   const col = (issue.column ?? "").toLowerCase();
   const msg = (issue.message ?? "").toLowerCase();
 
+  if (col.includes("shipping") || msg.includes("shipping")) return "shipping";
+  if (col.includes("tag") || msg.includes("tag")) return "tags";
+  if (col.includes("title") || msg.includes("compliance") || msg.includes("required field")) return "compliance";
+  if (col.includes("attribute") || msg.includes("attribute")) return "attributes";
+  if (col.includes("sku") || msg.includes("sku")) return "sku";
   if (col.includes("price") || msg.includes("price") || msg.includes("compare")) return "pricing";
   if (col.includes("inventory") || col.includes("qty") || msg.includes("inventory")) return "inventory";
   if (col.includes("image") || msg.includes("image")) return "images";
   if (col.includes("seo") || msg.includes("seo") || msg.includes("search")) return "seo";
-  if (col.includes("option") || col.includes("variant") || msg.includes("variant") || msg.includes("sku")) return "variant";
+  if (col.includes("option") || col.includes("variant") || msg.includes("variant")) return "variant";
+  if (col.includes("media") || msg.includes("media")) return "media";
   return "structure";
 }
 
-export function computeValidationBreakdown(
-  issues: CsvIssue[],
-  opts: { formatId: string }
-): ValidationBreakdown {
+export function computeValidationBreakdown(issues: CsvIssue[], opts: { formatId: string }): ValidationBreakdown {
   const formatId = opts.formatId;
+  const weights = weightsForFormat(formatId);
 
-  const categories: Record<ValidationCategory, number> = Object.keys(CATEGORY_WEIGHTS).reduce((acc, k) => {
-    acc[k as ValidationCategory] = 100;
-    return acc;
-  }, {} as Record<ValidationCategory, number>);
+  const categories: Record<ValidationCategory, number> = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 100])) as any;
 
   let errors = 0;
   let warnings = 0;
   let infos = 0;
   let blockingErrors = 0;
 
-  // Counts per category (for tighter + more interpretable scoring)
   const catCounts: Record<ValidationCategory, { errors: number; warnings: number; infos: number; blockingErrors: number }> =
-    Object.keys(CATEGORY_WEIGHTS).reduce((acc, k) => {
-      acc[k as ValidationCategory] = { errors: 0, warnings: 0, infos: 0, blockingErrors: 0 };
-      return acc;
-    }, {} as Record<ValidationCategory, { errors: number; warnings: number; infos: number; blockingErrors: number }>);
+    Object.fromEntries(ALL_CATEGORIES.map((c) => [c, { errors: 0, warnings: 0, infos: 0, blockingErrors: 0 }])) as any;
 
   for (const issue of issues ?? []) {
     const sev = issue.severity ?? "error";
@@ -109,7 +146,6 @@ export function computeValidationBreakdown(
     else if (sev === "warning") catCounts[cat].warnings += 1;
     else catCounts[cat].infos += 1;
 
-    // Blocking = “errors that matter for import”
     const isBlocking = Boolean(meta?.blocking && sev === "error");
     if (isBlocking) {
       blockingErrors++;
@@ -117,16 +153,15 @@ export function computeValidationBreakdown(
     }
   }
 
-  for (const k of Object.keys(categories) as ValidationCategory[]) {
-    const p = penaltyFromCounts(catCounts[k]);
-    categories[k] = clamp(Math.round(100 - p), 0, 100);
+  for (const cat of ALL_CATEGORIES) {
+    const p = penaltyFromCounts(catCounts[cat]);
+    categories[cat] = clamp(Math.round(100 - p), 0, 100);
   }
 
-  // Overall weighted score (keeps existing behavior: only weighted buckets affect overall)
-  const totalWeight = Object.values(CATEGORY_WEIGHTS).reduce((a, b) => a + b, 0) || 1;
+  // Weighted overall score. Categories not relevant for this format are weight ~0.
   let score = 0;
-  for (const k of Object.keys(CATEGORY_WEIGHTS) as ValidationCategory[]) {
-    score += (categories[k] * CATEGORY_WEIGHTS[k]) / totalWeight;
+  for (const cat of ALL_CATEGORIES) {
+    score += categories[cat] * (weights[cat] ?? 0);
   }
   score = Math.round(clamp(score, 0, 100));
 

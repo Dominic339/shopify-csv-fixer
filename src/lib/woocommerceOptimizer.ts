@@ -4,6 +4,15 @@ import type { CsvFixResult, CsvIssue, CsvRow } from "@/lib/formats/types";
 import { normalizeRowsSafe } from "@/lib/formats/engine";
 import { isHttpUrl, parseShopifyMoney, formatShopifyMoney } from "@/lib/shopifySchema";
 
+export type WooMode = "products" | "variable";
+
+export type WooOptimizerOptions = {
+  mode?: WooMode;
+  // When enabled (used by the Variable preset), missing parent rows are auto-created
+  // as safe placeholders so variations aren't orphaned.
+  autoCreateMissingParents?: boolean;
+};
+
 // Canonical header order pulled from WooCommerce's import UI mapping list.
 // It is intentionally "core" (plugin meta columns are preserved but appended).
 export const WOO_EXPECTED_HEADERS = [
@@ -186,9 +195,11 @@ function normalizeWooType(v: string) {
   return t;
 }
 
-export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRow[]): CsvFixResult {
+export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRow[], opts: WooOptimizerOptions = {}): CsvFixResult {
   const { fixedRows, fixesApplied } = normalizeRowsSafe(headers, rows);
   const issues: CsvIssue[] = [];
+  const mode: WooMode = opts.mode ?? "products";
+  const autoCreateMissingParents = Boolean(opts.autoCreateMissingParents) || mode === "variable";
 
   // Canonicalize headers where possible, but keep unknown columns (plugins often add meta columns).
   const map = canonicalHeaderMap(headers);

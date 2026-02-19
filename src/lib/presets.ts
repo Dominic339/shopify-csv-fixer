@@ -27,6 +27,13 @@ export const PRESET_FORMATS: PresetFormat[] = [
       "Clean WooCommerce product templates: required fields, pricing formats, SKUs, categories, and common import mistakes.",
   },
   {
+    id: "woocommerce_variable_products",
+    title: "WooCommerce Variable Products",
+    description: "WooCommerce variable products + variations (auto-creates missing parents).",
+    formatId: "woocommerce_variable_products",
+    landingHref: "/woocommerce-variable-csv-fixer",
+  },
+  {
     id: "etsy_listings",
     formatId: "etsy_listings",
     name: "Etsy Listings",

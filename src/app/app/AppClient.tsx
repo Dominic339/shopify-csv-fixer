@@ -325,37 +325,25 @@ export default function AppClient() {
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
 
   const importSimulation = useMemo(() => {
-    // Supported ecommerce formats.
-    const supported = new Set(["shopify_products", "woocommerce_products", "etsy_listings"]);
-    if (!supported.has(formatId)) return null;
+    if (!simulateImport) return null;
 
-    // Rows that the platform would likely reject due to blocking import errors.
+    // Infer how many rows will be ignored/rejected based on common import behavior.
     const reject = new Set<number>();
-    for (const it of issuesForTable) {
-      const code = (it as any).code as string | undefined;
-      const rowIndex = (it as any).rowIndex as number | undefined;
-      if (!code || typeof rowIndex !== "number" || rowIndex < 0) continue;
+    let ignoredRows = 0;
 
-      // Shopify duplicate option combos are merge/overwrite behavior, not a hard reject.
-      if (formatId === "shopify_products" && code === "shopify/options_not_unique") continue;
-
-      const meta = getIssueMeta(formatId, code);
-      if (meta?.blocking) reject.add(rowIndex);
+    // Any blocking issue on a row means that row is effectively rejected.
+    for (const iss of issuesForTable) {
+      if (typeof iss.rowIndex !== "number" || iss.rowIndex < 0) continue;
+      const meta = getIssueMeta(formatId, iss.code);
+      if (iss.severity === "error" && (meta?.blocking ?? true)) reject.add(iss.rowIndex);
     }
 
-    // Blank/empty lines ignored by import.
-    let ignoredRows = 0;
-    const raw = (lastUploadedText ?? "").replace(/^\uFEFF/, "");
-    if (raw) {
-      const lines = raw.split(/\r?\n/);
-      // Find the header line (first non-empty line)
-      let headerIdx = -1;
-      for (let i = 0; i < lines.length; i++) {
-        if ((lines[i] ?? "").trim().length) {
-          headerIdx = i;
-          break;
-        }
-      }
+    // Count blank / empty rows in the original CSV text (best effort).
+    if (lastUploadedText) {
+      const lines = lastUploadedText.split(/
+?
+/);
+      const headerIdx = lines.findIndex((l) => (l ?? "").trim().length > 0);
       if (headerIdx >= 0) {
         for (let i = headerIdx + 1; i < lines.length; i++) {
           const line = (lines[i] ?? "").trim();
@@ -363,17 +351,15 @@ export default function AppClient() {
             ignoredRows += 1;
             continue;
           }
-          // lines like ",,," or ", , ," are effectively empty rows
-          const stripped = line.replace(/,/g, "").replace(/\"/g, "").replace(/\s+/g, "");
+          const stripped = line.replace(/,/g, "").replace(/"/g, "").replace(/\s+/g, "");
           if (!stripped) ignoredRows += 1;
         }
       }
     }
 
-    // Duplicate/merge/overwrite estimate (platform specific).
-    let mergedVariants = 0;
-
+    // Platform-specific merge/overwrite estimates.
     if (formatId === "shopify_products") {
+      let mergedVariants = 0;
       const mergeGroups = new Map<string, number>();
       const cols = resolveShopifyVariantColumns(headers);
       const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
@@ -392,40 +378,115 @@ export default function AppClient() {
       for (const c of mergeGroups.values()) {
         if (c > 1) mergedVariants += c - 1;
       }
+
+      return {
+        mergedVariants,
+        deletedRows: ignoredRows,
+        rejectedRows: reject.size,
+      };
     }
 
-    if (formatId === "woocommerce_products") {
-      // WooCommerce importer typically uses (Parent + attributes) to define unique variations.
-      // If the same variation combo appears more than once under a parent, later rows may overwrite.
-      const mergeGroups = new Map<string, number>();
+    if (formatId === "woocommerce_products" || formatId === "woocommerce_variable_products") {
+      let mergedVariants = 0;
+      let overwriteSkuRisk = 0;
+      let orphanedVariations = 0;
+      let variationRebuildImpact = 0;
+
+      const parentKeys = new Set<string>();
+      const skuCounts = new Map<string, number>();
+      const comboCounts = new Map<string, number>();
       const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
 
       for (let i = 0; i < rows.length; i++) {
         const r = rows[i] ?? {};
         const type = get(r, "Type").trim().toLowerCase();
+        const sku = get(r, "SKU").trim();
+        if (sku) skuCounts.set(sku, (skuCounts.get(sku) ?? 0) + 1);
+
+        if (type && type !== "variation") {
+          const id = get(r, "ID").trim();
+          const name = get(r, "Name").trim();
+          if (id) parentKeys.add(id);
+          if (name) parentKeys.add(name);
+        }
+      }
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i] ?? {};
+        const type = get(r, "Type").trim().toLowerCase();
         if (type !== "variation") continue;
+        variationRebuildImpact += 1;
 
-        const parent = get(r, "Parent").trim().toLowerCase();
-        if (!parent) continue;
+        const parent = get(r, "Parent").trim();
+        if (!parent || !parentKeys.has(parent)) {
+          orphanedVariations += 1;
+          continue;
+        }
 
-        const an = get(r, "Attribute name").trim().toLowerCase();
-        const av = get(r, "Attribute value(s)").trim().toLowerCase();
+        const an = get(r, "Attribute 1 name").trim().toLowerCase();
+        const av = get(r, "Attribute 1 value(s)").trim().toLowerCase();
         const combo = `${an}=${av}`.replace(/\s+/g, " ");
         if (!combo.replace(/[=\s]/g, "").trim()) continue;
 
-        const key = `${parent}||${combo}`;
-        mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
+        const key = `${parent.toLowerCase()}||${combo}`;
+        comboCounts.set(key, (comboCounts.get(key) ?? 0) + 1);
       }
 
-      for (const c of mergeGroups.values()) {
+      for (const c of comboCounts.values()) {
         if (c > 1) mergedVariants += c - 1;
       }
+
+      for (const c of skuCounts.values()) {
+        if (c > 1) overwriteSkuRisk += c - 1;
+      }
+
+      // Treat SKU overwrite as part of merge/overwrite risk.
+      mergedVariants += overwriteSkuRisk;
+
+      return {
+        mergedVariants,
+        deletedRows: ignoredRows,
+        rejectedRows: reject.size,
+        overwriteSkuRisk,
+        orphanedVariations,
+        variationRebuildImpact,
+      };
     }
 
-    // Etsy doesn't have multi-variant "merge" behavior the same way in the base listing import.
+    if (formatId === "etsy_listings") {
+      let overwriteListingIdRisk = 0;
+      let overwriteSkuRisk = 0;
+
+      const listingIdCounts = new Map<string, number>();
+      const skuCounts = new Map<string, number>();
+      const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i] ?? {};
+        const id = get(r, "Listing ID").trim();
+        if (id) listingIdCounts.set(id, (listingIdCounts.get(id) ?? 0) + 1);
+        const sku = get(r, "SKU").trim();
+        if (sku) skuCounts.set(sku, (skuCounts.get(sku) ?? 0) + 1);
+      }
+
+      for (const c of listingIdCounts.values()) {
+        if (c > 1) overwriteListingIdRisk += c - 1;
+      }
+      for (const c of skuCounts.values()) {
+        if (c > 1) overwriteSkuRisk += c - 1;
+      }
+
+      return {
+        mergedVariants: overwriteListingIdRisk + overwriteSkuRisk,
+        deletedRows: ignoredRows,
+        rejectedRows: reject.size,
+        overwriteListingIdRisk,
+        overwriteSkuRisk,
+      };
+    }
 
     return {
-      mergedVariants,
+      mergedVariants: 0,
       deletedRows: ignoredRows,
       rejectedRows: reject.size,
     };
@@ -440,35 +501,79 @@ export default function AppClient() {
   // Import Confidence: user-facing "how safe is import" metric.
   // Applies to supported ecommerce formats.
   const importConfidence = useMemo(() => {
-    const supported = new Set(["shopify_products", "woocommerce_products", "etsy_listings"]);
+    const supported = new Set(["shopify_products", "woocommerce_products", "woocommerce_variable_products", "etsy_listings"]);
     if (!supported.has(formatId)) return null;
+
     const base = Number((validation as any)?.score ?? 0);
     if (!Number.isFinite(base)) return 0;
 
-    // Confidence is a user-facing "how safe is import" metric.
-    // It is intentionally stricter than the generic validation score:
-    // - Any blocking error caps confidence (import will not complete cleanly)
-    // - Predicted merges reduce confidence slightly (silent data overwrites)
-    // - Ignored blank rows are low risk and lightly penalized
-    const blocking = Number((validation as any)?.counts?.blockingErrors ?? 0);
+    const blockingCount = Number((validation as any)?.counts?.blockingErrors ?? 0);
+    const errors = Number((validation as any)?.counts?.errors ?? 0);
+    const warnings = Number((validation as any)?.counts?.warnings ?? 0);
 
     let conf = base;
 
-    if (blocking > 0) {
-      // If import is blocked, keep confidence firmly below "good" territory.
-      conf = Math.min(conf, 60);
-      conf -= (blocking - 1) * 8;
+    // Enterprise-style weighted decay with compounding.
+    const issueWeight = (sev: "error" | "warning" | "info") => {
+      if (sev === "error") return 1.0;
+      if (sev === "warning") return 0.6;
+      return 0.2;
+    };
+
+    let decay = 1;
+
+    if (blockingCount > 0) {
+      decay *= Math.pow(0.72, Math.min(8, blockingCount));
+    }
+
+    const nonBlockingErrors = Math.max(0, errors - blockingCount);
+    if (nonBlockingErrors > 0) decay *= Math.pow(0.93, Math.min(20, nonBlockingErrors));
+    if (warnings > 0) decay *= Math.pow(0.97, Math.min(25, warnings));
+
+    const riskyCats = new Set<string>();
+    if (formatId.startsWith("woocommerce")) {
+      riskyCats.add("variant");
+      riskyCats.add("sku");
+      riskyCats.add("attributes");
+    } else if (formatId === "etsy_listings") {
+      riskyCats.add("compliance");
+      riskyCats.add("variant");
+      riskyCats.add("sku");
+    } else {
+      riskyCats.add("variant");
+    }
+
+    let riskyIssueCount = 0;
+    let seoIssueCount = 0;
+
+    for (const issue of issuesForTable) {
+      const meta = getIssueMeta(formatId, issue.code);
+      const cat = String(meta?.category ?? "structure");
+      if (cat === "seo") seoIssueCount += 1;
+      if (riskyCats.has(cat)) riskyIssueCount += issueWeight(issue.severity);
+    }
+
+    if (riskyIssueCount > 0) {
+      decay *= Math.pow(0.88, Math.min(12, riskyIssueCount));
+    }
+
+    if (seoIssueCount > 0) {
+      decay *= Math.pow(0.985, Math.min(20, seoIssueCount));
     }
 
     if (simulateImport && importSimulation) {
-      // Duplicates/overwrites are moderate risk; ignored blanks are low risk; rejects are high risk.
-      conf -= Math.min(12, Number(importSimulation.mergedVariants ?? 0) * 2);
-      conf -= Math.min(6, Number(importSimulation.deletedRows ?? 0) * 1);
-      conf -= Math.min(18, Number(importSimulation.rejectedRows ?? 0) * 6);
+      const merged = Number(importSimulation.mergedVariants ?? 0);
+      const rejected = Number(importSimulation.rejectedRows ?? 0);
+      decay *= Math.pow(0.985, Math.min(30, merged));
+      decay *= Math.pow(0.78, Math.min(8, rejected));
     }
 
+    conf = conf * decay;
+
+    if (blockingCount > 0) conf = Math.min(conf, 85);
+
     return Math.max(0, Math.min(100, Math.round(conf)));
-  }, [formatId, validation, simulateImport, importSimulation]);
+  }, [formatId, validation, simulateImport, importSimulation, issuesForTable]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -965,7 +1070,13 @@ useEffect(() => {
                   className="text-[color:rgba(var(--muted-rgb),1)]"
                   title={
                     simulateImport && importSimulation
-                      ? "Import simulation is an estimate of platform behavior:\n- Merge/overwrite: duplicate variant keys\n- Ignore: blank/empty CSV lines\n- Reject: rows with blocking errors"
+                      ? formatId === "shopify_products"
+                        ? "Shopify simulation: merges duplicate variant combos, ignores blank rows, rejects rows with blockers."
+                        : formatId?.startsWith("woocommerce")
+                          ? "WooCommerce simulation: estimates SKU overwrite risk, duplicate variation merges, and orphaned variation rejects."
+                          : formatId === "etsy_listings"
+                            ? "Etsy simulation: estimates listing rejects and overwrite risks from duplicate listing IDs."
+                            : "Import simulation is an estimate of platform behavior."
                       : undefined
                   }
                 >
@@ -973,12 +1084,37 @@ useEffect(() => {
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
                   {simulateImport && importSimulation ? (
                     <>
-                      {` · Import simulation: merge/overwrite ${importSimulation.mergedVariants} duplicate `}
-                      {importSimulation.mergedVariants === 1 ? "variant" : "variants"}
-                      {`, ignore ${importSimulation.deletedRows} blank `}
-                      {importSimulation.deletedRows === 1 ? "row" : "rows"}
-                      {`, reject ${importSimulation.rejectedRows} `}
-                      {importSimulation.rejectedRows === 1 ? "row" : "rows"}
+                      {formatId === "shopify_products" ? (
+                        <>
+                          {` · Import simulation: merge ${importSimulation.mergedVariants} duplicate `}
+                          {importSimulation.mergedVariants === 1 ? "variant" : "variants"}
+                          {`, ignore ${importSimulation.deletedRows} blank `}
+                          {importSimulation.deletedRows === 1 ? "row" : "rows"}
+                          {`, reject ${importSimulation.rejectedRows} `}
+                          {importSimulation.rejectedRows === 1 ? "row" : "rows"}
+                        </>
+                      ) : formatId?.startsWith("woocommerce") ? (
+                        <>
+                          {` · Import simulation: overwrite ${Number(importSimulation.overwriteSkuRisk ?? 0)} SKU `}
+                          {Number(importSimulation.overwriteSkuRisk ?? 0) === 1 ? "conflict" : "conflicts"}
+                          {`, merge ${Number(importSimulation.mergedVariants ?? 0)} duplicate `}
+                          {Number(importSimulation.mergedVariants ?? 0) === 1 ? "variation" : "variations"}
+                          {`, reject ${Number(importSimulation.orphanedVariations ?? 0)} orphaned `}
+                          {Number(importSimulation.orphanedVariations ?? 0) === 1 ? "variation" : "variations"}
+                        </>
+                      ) : formatId === "etsy_listings" ? (
+                        <>
+                          {` · Import simulation: reject ${importSimulation.rejectedRows} `}
+                          {importSimulation.rejectedRows === 1 ? "listing" : "listings"}
+                          {`, overwrite ${Number(importSimulation.overwriteListingIdRisk ?? 0)} duplicate listing `}
+                          {Number(importSimulation.overwriteListingIdRisk ?? 0) === 1 ? "id" : "ids"}
+                        </>
+                      ) : (
+                        <>
+                          {` · Import simulation: reject ${importSimulation.rejectedRows} `}
+                          {importSimulation.rejectedRows === 1 ? "row" : "rows"}
+                        </>
+                      )}
                     </>
                   ) : null}
                 </span>

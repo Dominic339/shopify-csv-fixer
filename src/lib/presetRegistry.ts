@@ -33,6 +33,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     searchKeywords: ["woocommerce csv", "woocommerce product csv", "fix woocommerce csv"],
   },
   {
+    id: "woocommerce_variable_products",
+    slug: "woocommerce-variable-products",
+    name: "WooCommerce Variable Products",
+    category: "Ecommerce",
+    shortDescription: "Optimize variable products + variations (auto-create missing parents, detect orphaned variations, and prevent overwrite risks).",
+    searchKeywords: ["woocommerce variable csv", "woocommerce variations csv", "fix woocommerce variations"],
+  },
+  {
     id: "etsy_listings",
     slug: "etsy-listings",
     name: "Etsy Listings",
