@@ -340,9 +340,7 @@ export default function AppClient() {
 
     // Count blank / empty rows in the original CSV text (best effort).
     if (lastUploadedText) {
-      const lines = lastUploadedText.split(/
-?
-/);
+      const lines = lastUploadedText.split(/\r?\n/);
       const headerIdx = lines.findIndex((l) => (l ?? "").trim().length > 0);
       if (headerIdx >= 0) {
         for (let i = headerIdx + 1; i < lines.length; i++) {
