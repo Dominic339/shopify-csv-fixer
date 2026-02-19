@@ -28,10 +28,10 @@ export const PRESET_FORMATS: PresetFormat[] = [
   },
   {
     id: "woocommerce_variable_products",
-    title: "WooCommerce Variable Products",
-    description: "WooCommerce variable products + variations (auto-creates missing parents).",
     formatId: "woocommerce_variable_products",
-    landingHref: "/woocommerce-variable-csv-fixer",
+    name: "WooCommerce Variable Products",
+    category: "Ecommerce",
+    description: "WooCommerce variable products + variations (auto-creates missing parent rows and validates variation structure).",
   },
   {
     id: "etsy_listings",
