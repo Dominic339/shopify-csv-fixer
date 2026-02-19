@@ -1,5 +1,7 @@
 // src/lib/formats/builtins/packs.ts
 import type { CsvFixResult, CsvFormat, CsvFormatCategory, CsvRow, CsvIssue } from "../types";
+import { woocommerceProducts } from "./woocommerceProducts";
+import { etsyListings } from "./etsyListings";
 
 type FormatSpec = {
   id: string;
@@ -178,24 +180,8 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
 
 // Ecommerce
 export const formatPackEcommerce: CsvFormat[] = [
-  buildSimpleFormat({
-    id: "woocommerce_products",
-    name: "WooCommerce Products",
-    description: "Maps products into a WooCommerce-friendly template and flags common issues.",
-    category: "Ecommerce",
-    expectedHeaders: ["ID", "Type", "SKU", "Name", "Published", "Regular price", "Sale price", "Stock", "Categories", "Tags", "Images"],
-    requiredHeaders: ["SKU", "Name"],
-    numericHeaders: ["Regular price", "Sale price", "Stock"],
-  }),
-  buildSimpleFormat({
-    id: "etsy_listings",
-    name: "Etsy Listings",
-    description: "Prepares a listings template and highlights missing or suspicious values.",
-    category: "Ecommerce",
-    expectedHeaders: ["Title", "Description", "Price", "Quantity", "SKU", "Tags", "Who made it", "When was it made", "What is it"],
-    requiredHeaders: ["Title", "Price", "Quantity"],
-    numericHeaders: ["Price", "Quantity"],
-  }),
+  woocommerceProducts,
+  etsyListings,
   buildSimpleFormat({
     id: "ebay_listings",
     name: "eBay Listings",

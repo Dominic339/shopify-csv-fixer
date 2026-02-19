@@ -2,10 +2,14 @@
 import type { IssueMeta, IssueMetaMap } from "./issueMeta";
 import { SHOPIFY_ISSUE_META } from "./issueMetaShopify";
 import { getGenericMetaForCode } from "./issueMetaGeneric";
+import { WOO_ISSUE_META } from "./issueMetaWooCommerce";
+import { ETSY_ISSUE_META } from "./issueMetaEtsy";
 
 // Keyed by formatId (must match your preset formatId like "shopify_products")
 export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
   shopify_products: SHOPIFY_ISSUE_META,
+  woocommerce_products: WOO_ISSUE_META,
+  etsy_listings: ETSY_ISSUE_META,
 };
 
 export function getIssueMeta(formatId: string | undefined, code: string | undefined): IssueMeta | null {
