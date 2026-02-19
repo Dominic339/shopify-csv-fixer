@@ -96,6 +96,8 @@ export default function AppClient() {
   }, [autoFixes]);
 
   const [fileName, setFileName] = useState<string | null>(null);
+  const [uploadRunId, setUploadRunId] = useState(0);
+  const lastAutoFixRunIdRef = useRef<number>(-1);
 
   const [quota, setQuota] = useState<any>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>({ ok: true, plan: "free" });
@@ -696,6 +698,20 @@ export default function AppClient() {
     setLastFixAll({ at: Date.now(), applied: fixed.fixesApplied });
     runFormatOnCurrentData(fixed.fixedHeaders, fixed.fixedRows, fixed.fixesApplied);
   }
+  // Auto-apply safe, deterministic fixes for Shopify auto-fixable blockers after each new upload run.
+  useEffect(() => {
+    if (formatId !== "shopify_products") return;
+    if (busy) return;
+    if (rows.length === 0) return;
+    if (editing) return; // do not auto-change data while the user is actively editing a row
+    if (realFixableBlockingCount <= 0) return;
+    // Only run once per upload run id to avoid loops.
+    if (lastAutoFixRunIdRef.current === uploadRunId) return;
+    lastAutoFixRunIdRef.current = uploadRunId;
+    handleFixAllBlocking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formatId, uploadRunId, busy, rows.length, editing, realFixableBlockingCount]);
+
 
   async function runFormatOnText(format: CsvFormat, csvText: string, name?: string) {
     setBusy(true);
@@ -720,6 +736,7 @@ export default function AppClient() {
 
       setAutoFixes(res.fixesApplied ?? []);
       if (typeof name === "string") setFileName(name);
+      setUploadRunId((v) => v + 1);
 
       setLastFixAll(null);
       // Reset pin state for a new run
@@ -739,6 +756,7 @@ export default function AppClient() {
     setBusy(true);
     setErrorBanner(null);
     setFileName(file.name);
+    setUploadRunId((v) => v + 1);
 
     try {
       const text = await file.text();
@@ -946,18 +964,7 @@ export default function AppClient() {
                   ) : null}
                 </span>
 
-                {fixAllVisible ? (
-                  <button
-                    type="button"
-                    className="pill-btn"
-                    onClick={handleFixAllBlocking}
-                    disabled={busy}
-                    title="Applies safe, deterministic fixes to Shopify blockers."
-                    style={busy ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
-                  >
-                    {fixAllLabel}
-                  </button>
-                ) : null}
+                {/* Auto-fixable blockers are applied automatically */}
 
                 {formatId === "shopify_products" ? (
                   <button
