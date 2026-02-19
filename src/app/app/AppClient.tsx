@@ -154,7 +154,8 @@ export default function AppClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueSeverityFilter]);
 
-  const [simulateShopify, setSimulateShopify] = useState(false);
+  // Import simulation toggle (Shopify/Woo/Etsy).
+  const [simulateImport, setSimulateImport] = useState(false);
 
   function refreshCustomFormats() {
     const user = loadUserFormatsFromStorage();
@@ -323,62 +324,27 @@ export default function AppClient() {
 
   const validation = useMemo(() => computeValidationBreakdown(issuesForTable, { formatId }), [issuesForTable, formatId]);
 
-  const shopifySimulation = useMemo(() => {
-    if (formatId !== "shopify_products") return null;
+  const importSimulation = useMemo(() => {
+    // Supported ecommerce formats.
+    const supported = new Set(["shopify_products", "woocommerce_products", "etsy_listings"]);
+    if (!supported.has(formatId)) return null;
 
-    // Rows that Shopify would likely reject due to blocking import errors.
-    // NOTE: Some issues are *not* rejections in Shopify; e.g. duplicate option combos typically result
-    // in Shopify merging variant rows. We exclude those from rejectedRows and count them as merges.
+    // Rows that the platform would likely reject due to blocking import errors.
     const reject = new Set<number>();
-
-    // Estimate variant merges by grouping rows by (Handle + option value combination).
-    // This is more reliable than depending on Issue.details always being present.
-    let mergedVariants = 0;
-    const mergeGroups = new Map<string, number>();
-
-    // Build merge groups directly from the data.
-    // IMPORTANT: This must match the validator's notion of "duplicate option combos":
-    // - Handle + (Option1/2/3 *values*) define a variant combo
-    // - Comparison is case-insensitive
-    // - Skip "image-only" rows (no variant signals)
-    // NOTE: Header forcing / user files may still produce small header variations.
-    // We resolve the actual header keys from the current headers list to avoid false 0 merges.
-    const cols = resolveShopifyVariantColumns(headers);
-
-    const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i] ?? {};
-      const sig = getShopifyVariantSignature(r, cols, (row, col) => get(row as any, col));
-      if (!sig.handle) continue;
-      if (!sig.hasVariantSignals) continue;
-      if (!sig.comboKey.replace(/\|/g, "").trim()) continue;
-
-      const key = `${sig.handle.toLowerCase()}||${sig.comboKey}`;
-      mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
-    }
-
-    for (const c of mergeGroups.values()) {
-      if (c > 1) mergedVariants += c - 1;
-    }
-
-    // Rejections from blocking issues (excluding merge-only conditions).
     for (const it of issuesForTable) {
       const code = (it as any).code as string | undefined;
       const rowIndex = (it as any).rowIndex as number | undefined;
       if (!code || typeof rowIndex !== "number" || rowIndex < 0) continue;
 
-      // Duplicate option combos: treat as merge behavior, not an import reject.
-      if (code === "shopify/options_not_unique") continue;
+      // Shopify duplicate option combos are merge/overwrite behavior, not a hard reject.
+      if (formatId === "shopify_products" && code === "shopify/options_not_unique") continue;
 
-      // ✅ issue meta is keyed by (formatId, code)
       const meta = getIssueMeta(formatId, code);
       if (meta?.blocking) reject.add(rowIndex);
     }
 
-    // To simulate Shopify's "ignored row" behavior, estimate how many blank data lines were
-    // present in the raw upload.
-    let deletedRows = 0;
-
+    // Blank/empty lines ignored by import.
+    let ignoredRows = 0;
     const raw = (lastUploadedText ?? "").replace(/^\uFEFF/, "");
     if (raw) {
       const lines = raw.split(/\r?\n/);
@@ -394,19 +360,73 @@ export default function AppClient() {
         for (let i = headerIdx + 1; i < lines.length; i++) {
           const line = (lines[i] ?? "").trim();
           if (!line) {
-            deletedRows += 1;
+            ignoredRows += 1;
             continue;
           }
           // lines like ",,," or ", , ," are effectively empty rows
           const stripped = line.replace(/,/g, "").replace(/\"/g, "").replace(/\s+/g, "");
-          if (!stripped) deletedRows += 1;
+          if (!stripped) ignoredRows += 1;
         }
       }
     }
 
+    // Duplicate/merge/overwrite estimate (platform specific).
+    let mergedVariants = 0;
+
+    if (formatId === "shopify_products") {
+      const mergeGroups = new Map<string, number>();
+      const cols = resolveShopifyVariantColumns(headers);
+      const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i] ?? {};
+        const sig = getShopifyVariantSignature(r, cols, (row, col) => get(row as any, col));
+        if (!sig.handle) continue;
+        if (!sig.hasVariantSignals) continue;
+        if (!sig.comboKey.replace(/\|/g, "").trim()) continue;
+
+        const key = `${sig.handle.toLowerCase()}||${sig.comboKey}`;
+        mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
+      }
+
+      for (const c of mergeGroups.values()) {
+        if (c > 1) mergedVariants += c - 1;
+      }
+    }
+
+    if (formatId === "woocommerce_products") {
+      // WooCommerce importer typically uses (Parent + attributes) to define unique variations.
+      // If the same variation combo appears more than once under a parent, later rows may overwrite.
+      const mergeGroups = new Map<string, number>();
+      const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i] ?? {};
+        const type = get(r, "Type").trim().toLowerCase();
+        if (type !== "variation") continue;
+
+        const parent = get(r, "Parent").trim().toLowerCase();
+        if (!parent) continue;
+
+        const an = get(r, "Attribute name").trim().toLowerCase();
+        const av = get(r, "Attribute value(s)").trim().toLowerCase();
+        const combo = `${an}=${av}`.replace(/\s+/g, " ");
+        if (!combo.replace(/[=\s]/g, "").trim()) continue;
+
+        const key = `${parent}||${combo}`;
+        mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
+      }
+
+      for (const c of mergeGroups.values()) {
+        if (c > 1) mergedVariants += c - 1;
+      }
+    }
+
+    // Etsy doesn't have multi-variant "merge" behavior the same way in the base listing import.
+
     return {
       mergedVariants,
-      deletedRows,
+      deletedRows: ignoredRows,
       rejectedRows: reject.size,
     };
   }, [formatId, issuesForTable, rows, headers, lastUploadedText]);
@@ -417,9 +437,11 @@ export default function AppClient() {
     [validation, issuesForTable, formatId]
   );
 
-  // Shopify-only: "Import Confidence" is a user-facing label for overall readiness.
-  const shopifyImportConfidence = useMemo(() => {
-    if (formatId !== "shopify_products") return null;
+  // Import Confidence: user-facing "how safe is import" metric.
+  // Applies to supported ecommerce formats.
+  const importConfidence = useMemo(() => {
+    const supported = new Set(["shopify_products", "woocommerce_products", "etsy_listings"]);
+    if (!supported.has(formatId)) return null;
     const base = Number((validation as any)?.score ?? 0);
     if (!Number.isFinite(base)) return 0;
 
@@ -438,14 +460,15 @@ export default function AppClient() {
       conf -= (blocking - 1) * 8;
     }
 
-    if (formatId === "shopify_products" && simulateShopify && shopifySimulation) {
-      conf -= Math.min(12, Number(shopifySimulation.mergedVariants ?? 0) * 2);
-      conf -= Math.min(6, Number(shopifySimulation.deletedRows ?? 0) * 1);
-      conf -= Math.min(18, Number(shopifySimulation.rejectedRows ?? 0) * 6);
+    if (simulateImport && importSimulation) {
+      // Duplicates/overwrites are moderate risk; ignored blanks are low risk; rejects are high risk.
+      conf -= Math.min(12, Number(importSimulation.mergedVariants ?? 0) * 2);
+      conf -= Math.min(6, Number(importSimulation.deletedRows ?? 0) * 1);
+      conf -= Math.min(18, Number(importSimulation.rejectedRows ?? 0) * 6);
     }
 
     return Math.max(0, Math.min(100, Math.round(conf)));
-  }, [formatId, validation, simulateShopify, shopifySimulation]);
+  }, [formatId, validation, simulateImport, importSimulation]);
 
   const tableHeaders = useMemo(() => {
     if (headers.length) return headers;
@@ -898,25 +921,25 @@ useEffect(() => {
                   Validation score: <span className="font-semibold">{validation.score}</span>/100
                 </span>
 
-                {shopifyImportConfidence != null ? (
+                {importConfidence != null ? (
                   <span
                     className={
                       "rounded-full border px-4 py-1.5 text-[var(--text)] " +
                       (validation.counts.blockingErrors
                         ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.08)]"
-                        : shopifyImportConfidence >= 90
+                        : importConfidence >= 90
                           ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.10)]"
                           : "border-[var(--border)] bg-[var(--surface)]")
                     }
                     title={
-                      "Shopify import confidence estimates how safely this file will import.\n\nIt is stricter than the validation score and accounts for:\n- Blocking errors (import failures)\n- Duplicate variants (possible merges)\n- Blank lines (ignored rows)"
+                      "Import confidence estimates how safely this file will import.\n\nIt is stricter than the validation score and accounts for:\n- Blocking errors (import failures)\n- Duplicate/overwrite risk (platform-specific)\n- Blank lines (ignored rows)"
                     }
                   >
                     {(() => {
                       const blocked = Number((validation as any)?.counts?.blockingErrors ?? 0) > 0;
                       return (
                         <>
-                          Import confidence: <span className="font-semibold">{shopifyImportConfidence}%</span>{" "}
+                          Import confidence: <span className="font-semibold">{importConfidence}%</span>{" "}
                           <span className="text-[color:rgba(var(--muted-rgb),1)]">({blocked ? "blocked" : "safe to import"})</span>
                         </>
                       );
@@ -924,51 +947,38 @@ useEffect(() => {
                   </span>
                 ) : null}
 
-                {formatId === "shopify_products" ? (
-                  <button
-                    type="button"
-                    onClick={() => setSimulateShopify((v) => !v)}
-                    className={
-                      "rounded-full border px-4 py-1.5 font-semibold hover:opacity-90 " +
-                      (simulateShopify
-                        ? "border-[color:rgba(var(--accent-rgb),0.45)] bg-[color:rgba(var(--accent-rgb),0.14)] text-[var(--text)]"
-                        : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
-                    }
-                    title={simulateShopify ? "Simulation is ON. Click to turn off." : "Simulate how Shopify would treat this CSV on import."}
-                  >
-                    Simulate Shopify Import{simulateShopify ? ": ON" : ""}
-                  </button>
-                ) : (
-                  <span
-                    className={
-                      "rounded-full border px-4 py-1.5 font-semibold " +
-                      (validation.readyForShopifyImport
-                        ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.12)] text-[var(--text)]"
-                        : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
-                    }
-                  >
-                    {validation.label}
-                  </span>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setSimulateImport((v) => !v)}
+                  className={
+                    "rounded-full border px-4 py-1.5 font-semibold hover:opacity-90 " +
+                    (simulateImport
+                      ? "border-[color:rgba(var(--accent-rgb),0.45)] bg-[color:rgba(var(--accent-rgb),0.14)] text-[var(--text)]"
+                      : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
+                  }
+                  title={simulateImport ? "Simulation is ON. Click to turn off." : "Simulate how the target platform would treat this CSV on import."}
+                >
+                  Simulate Import{simulateImport ? ": ON" : ""}
+                </button>
 
                 <span
                   className="text-[color:rgba(var(--muted-rgb),1)]"
                   title={
-                    formatId === "shopify_products" && simulateShopify && shopifySimulation
-                      ? "Import simulation is an estimate of Shopify's behavior:\n- Merge: duplicate Handle + option combinations\n- Ignore: blank/empty CSV lines\n- Reject: rows with blocking errors"
+                    simulateImport && importSimulation
+                      ? "Import simulation is an estimate of platform behavior:\n- Merge/overwrite: duplicate variant keys\n- Ignore: blank/empty CSV lines\n- Reject: rows with blocking errors"
                       : undefined
                   }
                 >
                   {validation.counts.errors} errors, {validation.counts.warnings} warnings
                   {validation.counts.blockingErrors ? ` • ${validation.counts.blockingErrors} blocking` : ""}
-                  {formatId === "shopify_products" && simulateShopify && shopifySimulation ? (
+                  {simulateImport && importSimulation ? (
                     <>
-                      {` · Import simulation: merge ${shopifySimulation.mergedVariants} duplicate `}
-                      {shopifySimulation.mergedVariants === 1 ? "variant" : "variants"}
-                      {`, ignore ${shopifySimulation.deletedRows} blank `}
-                      {shopifySimulation.deletedRows === 1 ? "row" : "rows"}
-                      {`, reject ${shopifySimulation.rejectedRows} `}
-                      {shopifySimulation.rejectedRows === 1 ? "row" : "rows"}
+                      {` · Import simulation: merge/overwrite ${importSimulation.mergedVariants} duplicate `}
+                      {importSimulation.mergedVariants === 1 ? "variant" : "variants"}
+                      {`, ignore ${importSimulation.deletedRows} blank `}
+                      {importSimulation.deletedRows === 1 ? "row" : "rows"}
+                      {`, reject ${importSimulation.rejectedRows} `}
+                      {importSimulation.rejectedRows === 1 ? "row" : "rows"}
                     </>
                   ) : null}
                 </span>
@@ -990,7 +1000,7 @@ useEffect(() => {
                 ) : null}
               </div>
 
-              {formatId === "shopify_products" ? (
+              {(["shopify_products", "woocommerce_products", "etsy_listings"] as const).includes(formatId as any) ? (
                 <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
                   <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-[320px]">
@@ -1000,18 +1010,24 @@ useEffect(() => {
                           if (blocking > 0) {
                             return `Import blocked – resolve ${blocking} blocking ${blocking === 1 ? "issue" : "issues"} to continue`;
                           }
-                          return "Ready for Shopify import";
+                          const platform =
+                            formatId === "woocommerce_products" ? "WooCommerce" : formatId === "etsy_listings" ? "Etsy" : "Shopify";
+                          return `Ready for ${platform} import`;
                         })()}
                       </div>
                       <div className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
                         {(() => {
                           const blocking = Number((validation as any)?.counts?.blockingErrors ?? 0);
-                          if (blocking > 0) return "Fix blocking issues to complete a clean Shopify import.";
+                          if (blocking > 0) {
+                            const platform =
+                              formatId === "woocommerce_products" ? "WooCommerce" : formatId === "etsy_listings" ? "Etsy" : "Shopify";
+                            return `Fix blocking issues to complete a clean ${platform} import.`;
+                          }
                           return "No blocking issues detected. Exporting should import cleanly.";
                         })()}
                       </div>
 
-                      {!validation.readyForShopifyImport ? (
+                      {readiness.blockingCount > 0 ? (
                         <div className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
                           <div className="font-semibold text-[var(--text)]">Top blockers</div>
                           <ul className="mt-2 list-disc pl-6">
