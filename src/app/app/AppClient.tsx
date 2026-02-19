@@ -1027,7 +1027,7 @@ useEffect(() => {
                         })()}
                       </div>
 
-                      {readiness.blockingCount > 0 ? (
+                      {readiness.blockingErrors > 0 ? (
                         <div className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
                           <div className="font-semibold text-[var(--text)]">Top blockers</div>
                           <ul className="mt-2 list-disc pl-6">
