@@ -1,0 +1,2 @@
+Handle,Title,Body (HTML),Vendor,Tags,Published,Variant SKU,Variant Price,Variant Compare At Price,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Image Src,Image Position,SEO Title,SEO Description,Custom Extra Column
+cool-hat,Cool Hat,"<p>Nice hat</p>",Strive,"hats, hats, Cool",YES,CH-001,$19.99,$29.99,Shopify,10,deny,https://example.com/hat.jpg,1,Cool Hat SEO,"A cool hat",keep me

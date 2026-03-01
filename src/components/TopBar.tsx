@@ -1,9 +1,9 @@
-// src/components/TopBar.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -16,236 +16,283 @@ type SubStatus = {
 };
 
 // Minimal local types to avoid depending on supabase-js exported types.
-// These are enough for what TopBar uses.
-type SupabaseUser = {
-  email?: string | null;
-};
+type SupabaseUser = { email?: string | null };
+type SupabaseSession = { user?: SupabaseUser };
 
-type SupabaseSession = {
-  user?: SupabaseUser | null;
-};
-
-export function TopBar() {
-  const supabase = useMemo(() => createClient(), []);
-
-  // ✅ FIX: ThemeProvider exposes "toggle", not "toggleTheme"
+export default function TopBar() {
   const { theme, toggle } = useTheme();
 
   const [sub, setSub] = useState<SubStatus | null>(null);
+  const [session, setSession] = useState<SupabaseSession | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const logoSrc = useMemo(() => {
+    // ThemeProvider uses "light"/"dark"
+    return theme === "light" ? "/StriveFormatsLight.png" : "/StriveFormatsDark.png";
+  }, [theme]);
 
   useEffect(() => {
-    let cancelled = false;
+    const supabase = createClient();
 
-    async function load() {
+    let unsub: { data?: { subscription?: { unsubscribe: () => void } } } | null = null;
+
+    (async () => {
       try {
         const { data } = await supabase.auth.getSession();
-        const session = data?.session as SupabaseSession | null;
-
-        if (!session?.user) {
-          if (!cancelled) setSub({ signedIn: false, plan: "free", status: "signed_out" });
-          return;
-        }
-
-        const res = await fetch("/api/subscription", { cache: "no-store" }).catch(() => null);
-        if (!res || !res.ok) {
-          if (!cancelled) setSub({ signedIn: true, plan: "free", status: "unknown" });
-          return;
-        }
-
-        const json = (await res.json()) as Partial<SubStatus>;
-        if (!cancelled) {
-          setSub({
-            signedIn: Boolean(json?.signedIn ?? true),
-            plan: (json?.plan as SubStatus["plan"]) ?? "free",
-            status: (json?.status as string) ?? "ok",
-          });
-        }
+        setSession((data?.session as any) ?? null);
       } catch {
-        if (!cancelled) setSub({ signedIn: false, plan: "free", status: "error" });
+        // ignore
       }
-    }
+    })();
 
-    load();
+    unsub = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession((nextSession as any) ?? null);
+    });
 
     return () => {
-      cancelled = true;
+      try {
+        unsub?.data?.subscription?.unsubscribe();
+      } catch {
+        // ignore
+      }
     };
-  }, [supabase]);
+  }, []);
 
-  const canAccessCustomFormats = useMemo(() => {
-    if (ALLOW_CUSTOM_FORMATS_FOR_ALL) return true;
-    return sub?.plan === "advanced";
-  }, [sub]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/subscription/status", { cache: "no-store" });
+        const json = await res.json();
+        if (!alive) return;
+        setSub({
+          signedIn: Boolean(json?.signedIn),
+          plan: (json?.plan ?? "free") as any,
+          status: (json?.status ?? "none") as any,
+        });
+      } catch {
+        if (!alive) return;
+        setSub({ signedIn: Boolean(session?.user?.email), plan: "free", status: "none" });
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [session?.user?.email]);
 
-  function goToPricing() {
-    const el = document.getElementById("pricing");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      window.location.href = "/#pricing";
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!menuOpen) return;
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (menuRef.current && !menuRef.current.contains(target)) setMenuOpen(false);
     }
-    setOpen(false);
-  }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [menuOpen]);
 
   async function signOut() {
-    await supabase.auth.signOut();
-    window.location.href = "/";
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } finally {
+      setMenuOpen(false);
+      window.location.href = "/";
+    }
   }
 
+  const signedIn = Boolean(session?.user?.email);
+  const plan = sub?.plan ?? "free";
+  const status = (sub?.status ?? "none").toLowerCase();
+  const isActive = status === "active";
+  const isAdvancedActive = plan === "advanced" && isActive;
+  const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvancedActive;
+
+  const profileLabel = useMemo(() => {
+    const email = session?.user?.email ?? "";
+    if (!email) return "?";
+    return email.slice(0, 1).toUpperCase();
+  }, [session?.user?.email]);
+
+  const upgradeTitle = plan === "advanced" ? "Advanced" : "Upgrade";
+  const upgradeMessage = signedIn
+    ? "Upgrade to unlock higher export limits and advanced Shopify tools."
+    : "Sign in to upgrade and unlock higher export limits and advanced Shopify tools.";
+
+  const customFormatsUpgradeMessage = signedIn
+    ? "Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+    : "Sign in to upgrade to Advanced and unlock Custom Formats.";
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/CSV Nest Logo.png" alt="StriveFormats" width={36} height={36} priority />
-          <div className="flex flex-col leading-tight">
-            <div className="text-sm font-semibold text-white">StriveFormats</div>
-            <div className="text-xs text-white/70">CSV validation and safe auto-fixes</div>
-          </div>
+          <Image
+            src={logoSrc}
+            alt="StriveFormats"
+            width={180}
+            height={36}
+            priority
+            className="h-8 w-auto"
+          />
         </Link>
 
-        {/* Desktop */}
-        <div className="hidden items-center gap-2 md:flex">
-          <Link href="/ecommerce-csv-fixer" className="rgb-btn">
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Ecommerce CSV Fixer</span>
-          </Link>
-
-          <Link href="/app" className="rgb-btn">
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Open Fixer</span>
-          </Link>
-
-          <Link href="/presets" className="rgb-btn">
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Preset Formats</span>
-          </Link>
-
-          <button type="button" onClick={goToPricing} className="rgb-btn" aria-label="View pricing">
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">View pricing</span>
+        <nav className="flex items-center gap-3">
+          <button
+            type="button"
+            className="pill-btn"
+            onClick={() => toggle()}
+            title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          >
+            {theme === "light" ? "Dark mode" : "Light mode"}
           </button>
+
+          <Link className="rgb-btn" href="/app">
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
+          </Link>
+
+          <Link className="rgb-btn" href="/presets">
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
+          </Link>
 
           {canAccessCustomFormats ? (
-            <Link href="/formats" className="rgb-btn">
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
+            <Link className="rgb-btn" href="/formats" title="Open Custom Formats builder">
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
             </Link>
           ) : (
-            <button
-              type="button"
-              className="rgb-btn"
-              onClick={() => setUpgradeOpen(true)}
-              aria-label="Custom Formats require upgrade"
-            >
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
-            </button>
-          )}
-
-          <button type="button" className="rgb-btn" onClick={toggle} aria-label="Toggle theme">
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </span>
-          </button>
-
-          {sub?.signedIn ? (
-            <>
-              <Link href="/profile" className="rgb-btn">
-                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Profile</span>
-              </Link>
-              <button type="button" className="rgb-btn" onClick={signOut}>
-                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign out</span>
-              </button>
-            </>
-          ) : (
-            <Link href="/login" className="rgb-btn">
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign in</span>
-            </Link>
-          )}
-        </div>
-
-        {/* Mobile */}
-        <div className="flex items-center gap-2 md:hidden">
-          <button type="button" className="rgb-btn" onClick={() => setOpen((v) => !v)} aria-label="Open menu">
-            <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">{open ? "Close" : "Menu"}</span>
-          </button>
-        </div>
-      </div>
-
-      {open ? (
-        <div className="border-t border-white/10 bg-black/60 backdrop-blur md:hidden">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3">
-            <Link href="/ecommerce-csv-fixer" className="rgb-btn" onClick={() => setOpen(false)}>
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Ecommerce CSV Fixer</span>
-            </Link>
-
-            <Link href="/app" className="rgb-btn" onClick={() => setOpen(false)}>
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Open Fixer</span>
-            </Link>
-
-            <Link href="/presets" className="rgb-btn" onClick={() => setOpen(false)}>
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Preset Formats</span>
-            </Link>
-
-            <button type="button" onClick={goToPricing} className="rgb-btn" aria-label="View pricing">
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">View pricing</span>
-            </button>
-
-            {canAccessCustomFormats ? (
-              <Link href="/formats" className="rgb-btn" onClick={() => setOpen(false)}>
-                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  setUpgradeOpen(true);
-                }}
-                className="rgb-btn"
-                aria-label="Custom Formats require upgrade"
-              >
-                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Custom Formats</span>
-              </button>
-            )}
-
             <button
               type="button"
               className="rgb-btn"
               onClick={() => {
-                toggle();
-                setOpen(false);
+                setMenuOpen(false);
+                setUpgradeOpen(true);
               }}
-              aria-label="Toggle theme"
+              title="Advanced plan required"
             >
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">
-                {theme === "dark" ? "Light mode" : "Dark mode"}
-              </span>
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
+            </button>
+          )}
+
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-base font-semibold text-[var(--text)]"
+              onClick={() => setMenuOpen((v) => !v)}
+              title={signedIn ? "Account" : "Sign in"}
+              aria-label="Account menu"
+            >
+              {signedIn ? profileLabel : "?"}
             </button>
 
-            {sub?.signedIn ? (
-              <>
-                <Link href="/profile" className="rgb-btn" onClick={() => setOpen(false)}>
-                  <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Profile</span>
-                </Link>
-                <button type="button" className="rgb-btn" onClick={signOut}>
-                  <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign out</span>
-                </button>
-              </>
-            ) : (
-              <Link href="/login" className="rgb-btn" onClick={() => setOpen(false)}>
-                <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Sign in</span>
-              </Link>
-            )}
+            {menuOpen ? (
+              <div className="popover-surface absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl shadow-xl">
+                <div className="px-4 py-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                  {signedIn ? (
+                    <div>
+                      <div className="font-semibold text-[var(--text)]">{session?.user?.email}</div>
+                      <div className="mt-1">
+                        Plan: <span className="font-semibold text-[var(--text)]">{plan}</span>{" "}
+                        {isActive ? (
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">(active)</span>
+                        ) : (
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({status})</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="font-semibold text-[var(--text)]">Not signed in</div>
+                  )}
+                </div>
+
+                <div className="border-t border-[var(--border)]" />
+
+                <div className="p-2">
+                  <Link
+                    href="/#pricing"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Pricing
+                  </Link>
+
+                  <Link
+                    href="/"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Home
+                  </Link>
+
+                  <Link
+                    href="/profile"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+
+                  <Link
+                    href="/app"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    CSV Fixer
+                  </Link>
+
+                  <Link
+                    href="/formats"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Custom Formats
+                  </Link>
+
+                  <button
+                    type="button"
+                    className="mt-1 w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setUpgradeOpen(true);
+                    }}
+                  >
+                    {upgradeTitle}
+                  </button>
+
+                  <div className="mt-2 border-t border-[var(--border)]" />
+
+                  {signedIn ? (
+                    <button
+                      type="button"
+                      className="mt-2 w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                      onClick={signOut}
+                    >
+                      Sign out
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="mt-2 block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Sign in
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
-        </div>
-      ) : null}
+        </nav>
+      </div>
 
       <UpgradeModal
         open={upgradeOpen}
-        title="Upgrade required"
-        message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
-        signedIn={Boolean(sub?.signedIn)}
+        title={upgradeTitle}
+        message={canAccessCustomFormats ? upgradeMessage : customFormatsUpgradeMessage}
+        signedIn={signedIn}
         onClose={() => setUpgradeOpen(false)}
       />
     </header>
   );
 }
-
-export default TopBar;

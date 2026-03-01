@@ -1,12 +1,14 @@
-// src/app/formats/page.tsx
+import type { Metadata } from "next";
+import FormatsClient from "@/lib/formats/FormatsClient";
 
-import { getPresetFormats } from "@/lib/presets";
-import FormatsClient from "./FormatsClient";
+export const metadata: Metadata = {
+  title: "Custom Formats | StriveFormats",
+  description:
+    "Create and manage reusable CSV formats with column templates and cleanup rules. Browse preset formats to get started quickly.",
+  alternates: { canonical: "/formats" },
+  robots: { index: true, follow: true },
+};
 
 export default function FormatsPage() {
-  const presets = getPresetFormats();
-
-  // Pass the simplest, most stable data shape to the client:
-  // a flat list of presets. The client can group for display.
-  return <FormatsClient presets={presets} />;
+  return <FormatsClient />;
 }

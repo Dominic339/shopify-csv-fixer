@@ -1,0 +1,63 @@
+// src/lib/formats/builtins/woocommerceVariableProducts.ts
+import type { CsvFormat } from "../types";
+import { validateAndFixWooCommerceProducts } from "@/lib/woocommerceOptimizer";
+
+export const woocommerceVariableProductsFormat: CsvFormat = {
+  id: "woocommerce_variable_products",
+  name: "WooCommerce Variable Products",
+  description:
+    "Optimized for WooCommerce variable products + variations (auto-creates missing parent rows and validates variation structure).",
+  category: "Ecommerce",
+  source: "builtin",
+  expectedHeaders: [
+    "ID",
+    "Type",
+    "SKU",
+    "Name",
+    "Published",
+    "Is featured?",
+    "Visibility in catalog",
+    "Short description",
+    "Description",
+    "Date sale price starts",
+    "Date sale price ends",
+    "Tax status",
+    "Tax class",
+    "In stock?",
+    "Stock",
+    "Low stock amount",
+    "Backorders allowed?",
+    "Sold individually?",
+    "Weight (kg)",
+    "Length (cm)",
+    "Width (cm)",
+    "Height (cm)",
+    "Allow customer reviews?",
+    "Purchase note",
+    "Sale price",
+    "Regular price",
+    "Categories",
+    "Tags",
+    "Shipping class",
+    "Images",
+    "Download limit",
+    "Download expiry days",
+    "Parent",
+    "Grouped products",
+    "Upsells",
+    "Cross-sells",
+    "External URL",
+    "Button text",
+    "Position",
+    "Meta: _yoast_wpseo_title",
+    "Meta: _yoast_wpseo_metadesc",
+    "Attribute 1 name",
+    "Attribute 1 value(s)",
+    "Attribute 1 visible",
+    "Attribute 1 global",
+  ],
+  apply(headers, rows) {
+    // Variable preset enables parent auto-create and stricter variation handling.
+    return validateAndFixWooCommerceProducts(headers, rows, { mode: "variable", autoCreateMissingParents: true });
+  },
+};

@@ -68,7 +68,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     explanation: "Published on online store has a non-boolean value.",
     whyPlatformCares: "Shopify expects TRUE/FALSE (or blank). Invalid values can block import.",
     howToFix: "Use TRUE, FALSE, or leave blank.",
-    category: "publishing",
+    category: "compliance",
     blocking: true,
     autoFixable: true,
   },
@@ -79,7 +79,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     explanation: "Status is not one of Active, Draft, Archived.",
     whyPlatformCares: "Unexpected status values can cause Shopify to ignore or misinterpret a row.",
     howToFix: 'Use "Active", "Draft", or "Archived" (or leave blank).',
-    category: "publishing",
+    category: "compliance",
     blocking: true,
     autoFixable: true,
   },
@@ -122,12 +122,25 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     code: "shopify/options_not_unique",
     title: "Variant options not unique",
     explanation: "Two or more variants under the same handle share identical option values.",
-    whyPlatformCares: "Shopify requires each option combination to be unique per product.",
+    whyPlatformCares: "Why this matters: Shopify merges variants with identical option combinations. This may cause data loss or variant overwrites.",
     howToFix: "Make each variant option combination unique (or remove duplicates).",
+    category: "variant",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/missing_option1_for_variant_data": {
+    code: "shopify/missing_option1_for_variant_data",
+    title: "Missing Option1 value for variant",
+    explanation: "This row looks like variant data but Option1 value is blank.",
+    whyPlatformCares:
+      "Shopify uses option values to create variant combinations. Missing option values can cause the row to be rejected or imported incorrectly.",
+    howToFix: "Fill in Option1 value (or remove variant-only fields from this row).",
     category: "variant",
     blocking: true,
     autoFixable: false,
   },
+
 
   "shopify/mixed_default_title_with_options": {
     code: "shopify/mixed_default_title_with_options",
@@ -432,7 +445,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     explanation: "Status has a value outside Shopify's common values.",
     whyPlatformCares: "Unexpected values may be ignored or produce confusing results.",
     howToFix: 'Use "Active", "Draft", or "Archived" (or leave blank).',
-    category: "publishing",
+    category: "compliance",
     blocking: false,
     autoFixable: false,
   },

@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const ecommercePages: MetadataRoute.Sitemap = getEcommercePlatforms().map((platform) => ({
-    url: `${baseUrl}${platform.href}`,
+    url: `${baseUrl}/ecommerce/${encodeURIComponent(platform.id)}`,
     changeFrequency: "monthly",
     priority: 0.75,
   }));

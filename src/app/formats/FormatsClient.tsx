@@ -1,101 +1,144 @@
-// src/app/formats/FormatsClient.tsx
 "use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { PresetFormat } from "@/lib/presets";
 
-type Props = {
-  presets: PresetFormat[];
+type PresetCategory = string;
+
+export type PresetFormatLite = {
+  id: string;
+  name: string;
+  description?: string;
+  category: PresetCategory;
 };
 
-export default function FormatsClient({ presets }: Props) {
+type Props = {
+  groups: Array<{
+    category: PresetCategory;
+    presets: PresetFormatLite[];
+  }>;
+  featured: PresetFormatLite[];
+};
+
+export default function FormatsClient({ groups, featured }: Props) {
   const [query, setQuery] = useState("");
 
-  const filtered = useMemo(() => {
+  const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return presets;
+    if (!q) return groups;
 
-    return presets.filter((p) => {
-      const hay = [p.name, p.description, p.category]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+    return groups
+      .map((g) => {
+        const presets = g.presets.filter((p) => {
+          const hay = `${p.name} ${p.description ?? ""} ${p.id}`.toLowerCase();
+          return hay.includes(q);
+        });
+        return { ...g, presets };
+      })
+      .filter((g) => g.presets.length > 0);
+  }, [groups, query]);
+
+  const filteredFeatured = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return featured;
+    return featured.filter((p) => {
+      const hay = `${p.name} ${p.description ?? ""} ${p.id}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [presets, query]);
-
-  const byCategory = useMemo(() => {
-    return filtered.reduce<Record<string, PresetFormat[]>>((acc, p) => {
-      const key = p.category || "Other";
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(p);
-      return acc;
-    }, {});
-  }, [filtered]);
-
-  const categories = useMemo(() => Object.keys(byCategory).sort(), [byCategory]);
+  }, [featured, query]);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <section className="rounded-3xl border border-white/10 bg-black/20 p-6 shadow-lg md:p-10">
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Preset Formats</h1>
-        <p className="mt-3 max-w-3xl text-sm text-white/80 md:text-base">
-          Pick a preset format to preview the columns, download a sample template, and open it in the fixer.
+    <main className="mx-auto max-w-6xl px-6 py-16">
+      <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <div className="text-sm font-semibold text-[var(--text)]">Formats</div>
+
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text)]">
+          Browse presets and start fixing faster
+        </h1>
+
+        <p className="mt-3 max-w-2xl text-sm text-[var(--muted)]">
+          Choose a preset to see the expected columns, download a sample CSV, and open the fixer with the right format
+          selected.
         </p>
 
-        <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search formats"
-            className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20 md:max-w-md"
-          />
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full sm:max-w-md">
+            <label className="sr-only" htmlFor="format-search">
+              Search presets
+            </label>
+            <input
+              id="format-search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search presets (Shopify, Etsy, Mailchimp...)"
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            />
+          </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link href="/app" className="rgb-btn">
-              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open Fixer</span>
+            <Link href="/presets" className="rgb-btn">
+              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Browse all presets</span>
             </Link>
-            <Link href="/ecommerce-csv-fixer" className="rgb-btn">
-              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Ecommerce CSV Fixer</span>
+            <Link href="/app" className="rgb-btn">
+              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Open CSV Fixer</span>
             </Link>
           </div>
         </div>
+
+        {filteredFeatured.length > 0 ? (
+          <div className="mt-8">
+            <div className="text-sm font-semibold text-[var(--text)]">Featured</div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {filteredFeatured.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/presets/${encodeURIComponent(p.id)}`}
+                  className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6 hover:border-[var(--ring)]"
+                >
+                  <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
+                  <div className="mt-1 text-xs text-[var(--muted)]">{p.category}</div>
+                  <div className="mt-3 text-sm text-[var(--muted)]">{p.description ?? ""}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </section>
 
-      <section className="mt-10 space-y-8">
-        {categories.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-white/75">
-            No formats match your search.
-          </div>
-        ) : (
-          categories.map((cat) => (
-            <div key={cat}>
-              <h2 className="text-xl font-semibold">{cat}</h2>
+      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <div className="text-sm font-semibold text-[var(--text)]">All presets</div>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Presets are grouped by category. Click one to view columns, sample data, and the download link.
+        </p>
 
-              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                {byCategory[cat].map((p) => (
-                  <div key={p.id} className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                    <div className="text-lg font-semibold">{p.name}</div>
-                    <div className="mt-1 text-sm text-white/75">{p.description}</div>
+        <div className="mt-6 grid gap-8">
+          {filteredGroups.map((g) => (
+            <div key={g.category}>
+              <div className="text-xs font-semibold tracking-wide text-[var(--muted)]">{g.category}</div>
 
-                    <div className="mt-4 flex flex-wrap gap-3">
-                      <Link href={`/presets/${encodeURIComponent(p.id)}`} className="rgb-btn">
-                        <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">View template</span>
-                      </Link>
-                      <Link href={`/app?preset=${encodeURIComponent(p.id)}`} className="rgb-btn">
-                        <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Open in fixer</span>
-                      </Link>
-                      <Link href={`/presets/${encodeURIComponent(p.id)}/sample.csv`} className="rgb-btn">
-                        <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Sample CSV</span>
-                      </Link>
-                    </div>
-                  </div>
+              <div className="mt-3 grid gap-4 md:grid-cols-2">
+                {g.presets.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/presets/${encodeURIComponent(p.id)}`}
+                    className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6 hover:border-[var(--ring)]"
+                  >
+                    <div className="text-sm font-semibold text-[var(--text)]">{p.name}</div>
+                    <div className="mt-3 text-sm text-[var(--muted)]">{p.description ?? ""}</div>
+                    <div className="mt-4 text-xs text-[var(--muted)]">Preset ID: {p.id}</div>
+                  </Link>
                 ))}
               </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
+      </section>
+
+        {filteredGroups.length === 0 ? (
+          <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6 text-sm text-[var(--muted)]">
+            No presets match your search.
+          </div>
+        ) : null}
       </section>
     </main>
   );

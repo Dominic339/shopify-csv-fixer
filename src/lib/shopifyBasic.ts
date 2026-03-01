@@ -21,6 +21,7 @@ export type Issue = {
   row?: number; // 1-based
   column?: string;
   suggestion?: string;
+  details?: unknown;
 };
 
 export type FixResult = {
@@ -458,24 +459,29 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
 
     // NEW (Enforcement 1): Variant data exists but Option1 missing (BLOCKING)
     // Only applies to non-image-only rows.
-    if (!imageOnly) {
-      const hasVariantFields =
-        !!get(r, cSku).trim() ||
+    const hasVariantFields =
+      !imageOnly &&
+      (!!get(r, cSku).trim() ||
         !!get(r, cPrice).trim() ||
         !!get(r, cCompare).trim() ||
         !!get(r, cInvQty).trim() ||
-        !!get(r, cContinue).trim();
+        !!get(r, cContinue).trim());
 
-      if (hasVariantFields && !(n1 || v1)) {
-        issues.push({
-          severity: "error",
-          code: "shopify/missing_option1_for_variant_data",
-          row,
-          column: optNames[0],
-          message: "Variant data exists on a row but Option1 name/value are missing.",
-          suggestion: "Include Option1 name and Option1 value on variant rows.",
-        });
-      }
+    // If variant columns are used, Option1 name + value must be present.
+    // Otherwise Shopify may treat the row as a product-only row and drop variants.
+    if (hasVariantFields && (!n1 || !v1)) {
+      issues.push({
+        severity: "error",
+        code: "shopify/missing_option1_for_variant_data",
+        row,
+        column: !n1 ? optNames[0] : optVals[0],
+        message:
+          !n1
+            ? "Variant data exists on a row but Option1 name is missing (risk: Shopify may drop variants)."
+            : "Variant data exists on a row but Option1 value is missing (risk: Shopify may drop variants).",
+        suggestion:
+          "If this row represents a variant, set Option1 name (e.g., Size/Color) and Option1 value (e.g., M/Blue). If this product is single-variant, clear variant-specific columns (Variant SKU/Price/Inventory/etc.) so Shopify treats it as one variant.",
+      });
     }
 
     // --- Default Title normalization (NEW, safe)
@@ -514,7 +520,9 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       });
     }
 
-    if (n1 && !v1) {
+    // Only warn about a missing option value when variant columns are NOT used.
+    // If variant columns are used, the blocking error above will already explain what to do.
+    if (!hasVariantFields && n1 && !v1) {
       issues.push({
         severity: "warning",
         code: "shopify/variant_option_missing_value",
@@ -594,6 +602,20 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
         if (list.length <= 1) continue;
 
         const rowsList = list.map((i) => i + 1).join(", ");
+
+        // Structured details for UI + simulation
+        const parts = key.split("|");
+        const duplicateCombo = {
+          "Option1 value": parts[0] ?? "",
+          "Option2 value": parts[1] ?? "",
+          "Option3 value": parts[2] ?? "",
+        };
+        const details = {
+          handle,
+          rows: list.map((i) => i + 1), // 1-based for display
+          duplicateCombo,
+        };
+
         for (const idx of list) {
           issues.push({
             severity: "error",
@@ -602,6 +624,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
             column: optVals[0],
             message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${rowsList}).`,
             suggestion: "Make each variant option combination unique (Option1/2/3 values).",
+            details,
           });
         }
       }
@@ -867,10 +890,21 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
   }
 
+  // Final pass: de-duplicate noisy overlaps (same row + code + column).
+  // This keeps the UI readable and avoids showing the same issue multiple times.
+  const issueDeduped: Issue[] = [];
+  const seenIssue = new Set<string>();
+  for (const it of issues) {
+    const key = `${it.row ?? -1}::${it.code}::${it.column ?? ""}`;
+    if (seenIssue.has(key)) continue;
+    seenIssue.add(key);
+    issueDeduped.push(it);
+  }
+
   return {
     fixedHeaders,
     fixedRows,
-    issues,
+    issues: issueDeduped,
     fixesApplied: dedupe(fixesApplied),
   };
 }

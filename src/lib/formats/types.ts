@@ -15,6 +15,10 @@ export type CsvIssue = {
   // Safe: older code can ignore these.
   code?: string;
   suggestion?: string;
+
+  // Optional machine-readable context for richer UI (e.g., duplicate previews).
+  // Keep this flexible so individual validators can attach structured details.
+  details?: Record<string, unknown>;
 };
 
 export type CsvFixResult = {
@@ -51,6 +55,26 @@ export type CsvFormat = {
 
   category: CsvFormatCategory;
   source: CsvFormatSource;
+
+  /**
+   * Optional template metadata used by preset landing pages.
+   *
+   * - expectedHeaders: canonical header list for the format/template
+   * - exampleRow: a representative row showing typical values
+   * - seo: long-form content blocks for the preset detail page
+   */
+  expectedHeaders?: string[];
+  exampleRow?: CsvRow;
+  seo?: {
+    /** One or more paragraphs (plain text). */
+    longDescription?: string[];
+    /** Short step list describing how the fixer works. */
+    howItWorks?: string[];
+    /** Bullet list of common fixes this preset makes. */
+    commonFixes?: string[];
+    /** FAQ entries for SEO + trust. */
+    faq?: Array<{ q: string; a: string }>;
+  };
 
   apply: (headers: string[], rows: CsvRow[]) => CsvFixResult;
 };
