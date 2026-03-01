@@ -875,10 +875,8 @@ useEffect(() => {
       setLastFixAll(null);
       // Reset pin state for a new run
       setManualPinnedRows(new Set());
+      setAutoPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
-
-      setLastFixAll(null);
-      setPinnedRows(new Set());
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
