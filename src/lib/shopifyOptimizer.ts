@@ -14,7 +14,20 @@ import { validateShopifyStrict } from "./shopifyStrictValidate";
  *
  * Return shape remains compatible: { fixedHeaders, fixedRows, issues, fixesApplied }.
  */
-export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]): FixResult {
+export type ShopifyOptimizerOptions = {
+  /**
+   * When true, the strict Shopify Help Center validator runs in addition to the base checks.
+   * Gate this behind the user's plan tier or localStorage preference — do NOT enable for
+   * free users unless they explicitly opt in.
+   */
+  strict?: boolean;
+};
+
+export function validateAndFixShopifyOptimizer(
+  headers: string[],
+  rows: CsvRow[],
+  options: ShopifyOptimizerOptions = {}
+): FixResult {
   const base = validateAndFixShopifyBasic(headers, rows);
 
   const fixedHeaders = base.fixedHeaders ?? headers;
@@ -168,9 +181,12 @@ export function validateAndFixShopifyOptimizer(headers: string[], rows: CsvRow[]
   // 0) Pull base issues in, normalize + dedupe (with suppression rule above)
   for (const issue of base.issues ?? []) add(issue);
 
-  // Strict Shopify template checks (adds additional Shopify Help Center aligned rules)
-  // NOTE: validateShopifyStrict may apply safe normalizations (e.g., lowercasing allowlists).
-  for (const issue of validateShopifyStrict(fixedHeaders, fixedRows)) add(issue);
+  // Strict Shopify template checks — only when the user has explicitly opted in OR their plan
+  // allows it (communicated via the `options.strict` flag from the format's apply function).
+  // Free-tier users must NOT receive strict issues automatically.
+  if (options.strict) {
+    for (const issue of validateShopifyStrict(fixedHeaders, fixedRows)) add(issue);
+  }
 
   // Emit the cross-product SKU error (and ONLY this, since base warning is suppressed for these rows)
   for (const [sku, entry] of skuMap.entries()) {

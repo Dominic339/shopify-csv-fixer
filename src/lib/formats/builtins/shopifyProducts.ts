@@ -2,9 +2,11 @@
 import type { CsvFormat } from "../types";
 import type { CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyOptimizer } from "@/lib/shopifyOptimizer";
+import { getStrictMode } from "@/lib/validation/strictMode";
 
 // Shopify's current official product template headers (matches public/samples/shopify_product_template.csv)
-const SHOPIFY_PRODUCT_TEMPLATE_HEADERS: string[] = [
+// Exported so tests can assert header parity without duplicating the list.
+export const SHOPIFY_PRODUCT_TEMPLATE_HEADERS: string[] = [
   "Title",
   "URL handle",
   "Description",
@@ -168,7 +170,9 @@ export const shopifyProductsFormat: CsvFormat = {
   },
 
   apply: (headers: string[], rows: CsvRow[]) => {
-    const res = validateAndFixShopifyOptimizer(headers ?? [], rows ?? []);
+    // Read strict mode preference from localStorage (false in SSR / Node test environments)
+    const strict = getStrictMode();
+    const res = validateAndFixShopifyOptimizer(headers ?? [], rows ?? [], { strict });
 
     const issues = (res.issues ?? []).map((i: any) => {
       const row1 =

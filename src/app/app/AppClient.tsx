@@ -25,6 +25,9 @@ import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 // Phase 1: strict mode preference (Shopify)
 import { getStrictMode, setStrictMode } from "@/lib/validation/strictMode";
 
+// Fix log utilities (grouping + downloadable .txt report)
+import { groupFixesByType, generateFixesLogText } from "@/lib/validation/fixesLog";
+
 type SubStatus = {
   ok: boolean;
   plan?: "free" | "basic" | "advanced";
@@ -337,43 +340,40 @@ export default function AppClient() {
       if (iss.severity === "error" && (meta?.blocking ?? true)) reject.add(iss.rowIndex);
     }
 
-    // Count blank / empty rows in the original CSV text (best effort).
-    if (lastUploadedText) {
-      const lines = lastUploadedText.split(/\r?\n/);
-      const headerIdx = lines.findIndex((l) => (l ?? "").trim().length > 0);
-      if (headerIdx >= 0) {
-        for (let i = headerIdx + 1; i < lines.length; i++) {
-          const line = (lines[i] ?? "").trim();
-          if (!line) {
-            ignoredRows += 1;
-            continue;
-          }
-          const stripped = line.replace(/,/g, "").replace(/"/g, "").replace(/\s+/g, "");
-          if (!stripped) ignoredRows += 1;
-        }
-      }
+    // Count truly blank rows — rows where every cell value is empty after trimming.
+    // We use the already-parsed fixed rows for precision (avoids raw-text CSV quoting edge-cases).
+    for (const r of rows) {
+      const allEmpty = Object.values(r).every((v) => !String(v ?? "").trim());
+      if (allEmpty) ignoredRows += 1;
     }
 
     // Platform-specific merge/overwrite estimates.
     if (formatId === "shopify_products") {
       let mergedVariants = 0;
-      const mergeGroups = new Map<string, number>();
+      // Groups keyed by handle||comboKey → list of row indexes
+      const mergeGroups = new Map<string, number[]>();
       const cols = resolveShopifyVariantColumns(headers);
       const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
 
       for (let i = 0; i < rows.length; i++) {
+        // Skip rejected and truly blank rows — they won't reach Shopify's merge logic
+        if (reject.has(i)) continue;
         const r = rows[i] ?? {};
+        if (Object.values(r).every((v) => !String(v ?? "").trim())) continue;
+
         const sig = getShopifyVariantSignature(r, cols, (row, col) => get(row as any, col));
         if (!sig.handle) continue;
         if (!sig.hasVariantSignals) continue;
         if (!sig.comboKey.replace(/\|/g, "").trim()) continue;
 
         const key = `${sig.handle.toLowerCase()}||${sig.comboKey}`;
-        mergeGroups.set(key, (mergeGroups.get(key) ?? 0) + 1);
+        const list = mergeGroups.get(key) ?? [];
+        list.push(i);
+        mergeGroups.set(key, list);
       }
 
-      for (const c of mergeGroups.values()) {
-        if (c > 1) mergedVariants += c - 1;
+      for (const list of mergeGroups.values()) {
+        if (list.length > 1) mergedVariants += list.length - 1;
       }
 
       return {
@@ -1124,12 +1124,21 @@ useEffect(() => {
                     type="button"
                     className="pill-btn"
                     onClick={() => {
+                      if (!isAdvancedActive) {
+                        setErrorBanner("Strict mode requires an Advanced plan. Upgrade to enable extra Shopify Help Center checks.");
+                        return;
+                      }
                       setStrictShopify((v) => !v);
                     }}
                     disabled={busy}
-                    title="Strict mode adds extra Shopify checks."
+                    title={
+                      isAdvancedActive
+                        ? "Strict mode adds extra Shopify Help Center checks (status, inventory policy, boolean fields, options uniqueness). Advanced plan."
+                        : "Strict mode requires an Advanced plan."
+                    }
                   >
                     {strictShopify ? "Strict mode: ON" : "Strict mode: OFF"}
+                    {!isAdvancedActive ? " (Advanced)" : ""}
                   </button>
                 ) : null}
               </div>
@@ -1236,7 +1245,7 @@ useEffect(() => {
                         <div className="text-base font-semibold text-[var(--text)]">
                           Auto fixes applied{" "}
                           <span className="text-[color:rgba(var(--muted-rgb),1)]">
-                            ({autoFixes.length} actions, {collapsedAutoFixes.length} lines)
+                            ({autoFixes.length} actions)
                           </span>
                         </div>
 
@@ -1244,18 +1253,33 @@ useEffect(() => {
                           type="button"
                           className="pill-btn"
                           onClick={() => {
-                            const header = `Auto fix log\nFile: ${fileName ?? "unknown"}\nFormat: ${formatId}\nApplied: ${autoFixes.length}\n\n`;
-                            const body = autoFixes.map((x, idx) => `${idx + 1}. ${x}`).join("\n");
-                            downloadText(`${fixLogBase}_fix_log.txt`, header + body + "\n");
+                            const logText = generateFixesLogText(autoFixes, {
+                              fileName: fileName ?? undefined,
+                              formatId,
+                            });
+                            downloadText(`${fixLogBase}_fix_log.txt`, logText);
                           }}
                         >
-                          Download fix log
+                          Download fix log (.txt)
                         </button>
                       </div>
 
+                      {/* Grouped type summary — safe auto fixes by category */}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {groupFixesByType(autoFixes).map((g) => (
+                          <span
+                            key={g.type}
+                            className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-sm text-[color:rgba(var(--muted-rgb),1)]"
+                            title={g.sample}
+                          >
+                            {g.count}× {g.type}
+                          </span>
+                        ))}
+                      </div>
+
                       <details className="mt-3">
-                        <summary className="cursor-pointer text-base text-[color:rgba(var(--muted-rgb),1)]">View auto fixes</summary>
-                        <ul className="mt-3 list-disc pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
+                        <summary className="cursor-pointer text-sm text-[color:rgba(var(--muted-rgb),1)]">View full list</summary>
+                        <ul className="mt-3 list-disc pl-6 text-sm text-[color:rgba(var(--muted-rgb),1)]">
                           {collapsedAutoFixes.slice(0, 50).map((t, idx) => (
                             <li key={idx}>{t}</li>
                           ))}

@@ -168,10 +168,10 @@ export default function EcommercePlatformPage({ params }: PageProps) {
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/presets" className="hover:underline">
-          Templates
+          All templates
         </Link>
-        <Link href="/presets" className="hover:underline">
-          Templates
+        <Link href="/formats" className="hover:underline">
+          Browse formats
         </Link>
         <Link href="/#pricing" className="hover:underline">
           Pricing
