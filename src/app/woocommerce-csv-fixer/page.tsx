@@ -6,6 +6,7 @@ export const metadata = {
   title: "WooCommerce CSV Fixer | StriveFormats",
   description:
     "Fix WooCommerce product CSV import issues before you import. StriveFormats validates WooCommerce’s core Product CSV columns, auto-fixes safe issues, and flags blockers (including variations).",
+  alternates: { canonical: "/woocommerce-csv-fixer" },
 };
 
 export default function WooCommerceCsvFixerPage() {

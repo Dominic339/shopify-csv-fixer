@@ -6,6 +6,7 @@ export const metadata = {
   title: "Etsy CSV Fixer | StriveFormats",
   description:
     "Clean up Etsy listing CSV data for bulk edits and catalog review. StriveFormats validates titles, prices, quantity, tags, and image URLs—auto-fixing safe issues and flagging risky ones.",
+  alternates: { canonical: "/etsy-csv-fixer" },
 };
 
 export default function EtsyCsvFixerPage() {

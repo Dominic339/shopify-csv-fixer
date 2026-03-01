@@ -29,5 +29,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...core, ...ecommercePages, ...presetPages];
+  const fixerPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/shopify-csv-fixer`, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${baseUrl}/woocommerce-csv-fixer`, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${baseUrl}/woocommerce-variable-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/etsy-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/ebay-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/amazon-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+  ];
+
+  return [...core, ...fixerPages, ...ecommercePages, ...presetPages];
 }

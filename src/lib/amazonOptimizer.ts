@@ -357,6 +357,24 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
       }
     }
 
+    // Boolean shipping fields: must be y, n, or empty
+    for (const col of ["will-ship-internationally", "expedited-shipping"]) {
+      if (col in out) {
+        const val = (out[col] ?? "").trim().toLowerCase();
+        if (val && val !== "y" && val !== "n") {
+          issues.push({
+            rowIndex,
+            column: col,
+            severity: "warning",
+            code: "amazon/invalid_boolean_field",
+            message: `${col} must be 'y' or 'n'. Found '${out[col]}'.`,
+            suggestion: "Use 'y' (yes) or 'n' (no), or leave blank.",
+            details: { column: col, value: out[col] },
+          });
+        }
+      }
+    }
+
     // image-url: validate if present
     if ("image-url" in out) {
       const imgUrl = (out["image-url"] ?? "").trim();

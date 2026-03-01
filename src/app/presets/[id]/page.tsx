@@ -7,6 +7,63 @@ import { getFormatById } from "@/lib/formats";
 
 const SITE_URL = "https://striveformats.com";
 
+const keywordMap: Record<string, string[]> = {
+  shopify_products: [
+    "shopify csv template",
+    "shopify product csv",
+    "shopify import csv",
+    "shopify csv fixer",
+    "shopify bulk upload",
+    "fix shopify csv",
+    "shopify variants csv",
+    "shopify product import errors",
+  ],
+  woocommerce_products: [
+    "woocommerce csv template",
+    "woocommerce product csv",
+    "woocommerce import csv",
+    "fix woocommerce csv",
+    "woocommerce bulk upload",
+    "woocommerce product import",
+  ],
+  woocommerce_variable_products: [
+    "woocommerce variable products csv",
+    "woocommerce variations csv",
+    "fix woocommerce variations",
+    "woocommerce variable import",
+    "woocommerce product attributes csv",
+  ],
+  etsy_listings: [
+    "etsy listing csv",
+    "etsy csv template",
+    "fix etsy csv",
+    "etsy bulk upload",
+    "etsy listing export",
+    "etsy inventory csv",
+  ],
+  ebay_listings: [
+    "ebay listing csv",
+    "ebay file exchange csv",
+    "fix ebay csv",
+    "ebay bulk listing upload",
+    "ebay csv template",
+  ],
+  ebay_variations: [
+    "ebay variations csv",
+    "ebay variation listing csv",
+    "fix ebay variations",
+    "ebay variable listing",
+  ],
+  amazon_inventory_loader: [
+    "amazon inventory csv",
+    "amazon flat file csv",
+    "fix amazon csv",
+    "amazon inventory loader",
+    "amazon seller csv",
+    "amazon bulk listing",
+  ],
+};
+
 export async function generateMetadata({ params }: PageProps) {
   const resolved = await Promise.resolve(params as any);
   const rawId = typeof resolved?.id === "string" ? resolved.id : "";
@@ -20,38 +77,27 @@ export async function generateMetadata({ params }: PageProps) {
     };
   }
 
+  const keywords = keywordMap[preset.id];
+
   return {
     title: `${preset.name} | StriveFormats`,
     description: preset.description,
     alternates: { canonical: `/presets/${encodeURIComponent(preset.id)}` },
-    keywords:
-      preset.id === "shopify_products"
-        ? [
-            "shopify csv template",
-            "shopify product csv",
-            "shopify import csv",
-            "shopify csv fixer",
-            "shopify bulk upload",
-            "fix shopify csv",
-            "shopify variants csv",
-            "shopify product import errors",
-          ]
-        : undefined,
+    keywords,
     openGraph: {
       title: `${preset.name} | StriveFormats`,
       description: preset.description,
       url: `/presets/${encodeURIComponent(preset.id)}`,
       type: "website",
     },
-    twitter:
-      preset.id === "shopify_products"
-        ? {
-            card: "summary_large_image",
-            title: `${preset.name} | StriveFormats`,
-            description: preset.description,
-            images: ["/opengraph-image"],
-          }
-        : undefined,
+    twitter: keywords
+      ? {
+          card: "summary_large_image",
+          title: `${preset.name} | StriveFormats`,
+          description: preset.description,
+          images: ["/opengraph-image"],
+        }
+      : undefined,
   };
 }
 

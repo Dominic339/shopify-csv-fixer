@@ -17,6 +17,8 @@ export const ETSY_EXPECTED_HEADERS = [
   "Tags",
   "Materials",
   "Image URLs",
+  "renewal_option",
+  "type",
 ];
 
 export const ETSY_EXAMPLE_ROW: CsvRow = {
@@ -30,6 +32,8 @@ export const ETSY_EXAMPLE_ROW: CsvRow = {
   Tags: "wallet,leather,handmade,gift",
   Materials: "leather,thread",
   "Image URLs": "https://example.com/images/wallet-1.jpg,https://example.com/images/wallet-2.jpg",
+  renewal_option: "automatic",
+  type: "physical",
 };
 
 function isEmpty(v: string) {

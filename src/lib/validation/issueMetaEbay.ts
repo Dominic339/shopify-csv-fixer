@@ -177,4 +177,26 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     whyPlatformCares: "Duplicate variation combinations will overwrite each other during upload, causing data loss.",
     howToFix: "Ensure each variation row has a unique combination of VariationSpecificsName and VariationSpecificsValue.",
   },
+
+  "ebay/missing_category_id": {
+    code: "ebay/missing_category_id",
+    title: "CategoryID column is blank",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The CategoryID column is present in the file but all values are empty.",
+    whyPlatformCares: "Without a CategoryID, eBay may place listings in an incorrect or default category, reducing buyer visibility.",
+    howToFix: "Find the correct numeric CategoryID using the eBay category tree and populate it for each listing row.",
+  },
+
+  "ebay/invalid_category_id": {
+    code: "ebay/invalid_category_id",
+    title: "Invalid CategoryID",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The CategoryID value is not a numeric eBay category identifier.",
+    whyPlatformCares: "eBay CategoryIDs are always numeric. A non-numeric value will be rejected or ignored during upload.",
+    howToFix: "Use the numeric eBay CategoryID from the eBay category tree (e.g., 9355 for Cell Phones & Smartphones).",
+  },
 };

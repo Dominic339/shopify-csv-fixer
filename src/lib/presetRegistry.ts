@@ -57,6 +57,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     searchKeywords: ["ebay csv", "ebay listing csv", "fix ebay csv"],
   },
   {
+    id: "ebay_variations",
+    slug: "ebay-variations",
+    name: "eBay Variations",
+    category: "Ecommerce",
+    shortDescription: "Validate eBay variation listing CSVs: variation specifics, duplicate combos, pricing.",
+    searchKeywords: ["ebay variations csv", "ebay variation listing csv", "fix ebay variations"],
+  },
+  {
     id: "amazon_inventory_loader",
     slug: "amazon-inventory-loader",
     name: "Amazon Inventory Loader",

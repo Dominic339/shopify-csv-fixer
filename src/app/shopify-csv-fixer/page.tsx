@@ -6,6 +6,7 @@ export const metadata = {
   title: "Shopify CSV Fixer | StriveFormats",
   description:
     "Fix Shopify product CSV import errors before they happen. StriveFormats validates the official Shopify products template, auto-fixes safe issues, and highlights blockers for manual edits.",
+  alternates: { canonical: "/shopify-csv-fixer" },
 };
 
 export default function ShopifyCsvFixerPage() {

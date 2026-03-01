@@ -6,6 +6,7 @@ export const metadata = {
   title: "WooCommerce Variations CSV Fixer | StriveFormats",
   description:
     "Fix WooCommerce variable product + variation CSV imports before you import. StriveFormats validates variation structure, detects overwrite risks, and can auto-create missing parent rows safely.",
+  alternates: { canonical: "/woocommerce-variable-csv-fixer" },
 };
 
 export default function WooCommerceVariableCsvFixerPage() {

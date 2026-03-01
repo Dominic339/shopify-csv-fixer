@@ -177,4 +177,15 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     whyPlatformCares: "Brand names exceeding the limit may be truncated or rejected.",
     howToFix: "Shorten the brand-name to 50 characters or fewer.",
   },
+
+  "amazon/invalid_boolean_field": {
+    code: "amazon/invalid_boolean_field",
+    title: "Invalid boolean field value",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A boolean shipping field (will-ship-internationally or expedited-shipping) contains a value other than 'y' or 'n'.",
+    whyPlatformCares: "Amazon's flat-file processor expects these fields to be exactly 'y', 'n', or blank. Invalid values are silently ignored or cause the row to be rejected.",
+    howToFix: "Use 'y' to enable or 'n' to disable the shipping option, or leave the field blank to use your account defaults.",
+  },
 };

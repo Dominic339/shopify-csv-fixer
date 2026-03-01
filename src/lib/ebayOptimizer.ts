@@ -16,6 +16,7 @@ export const EBAY_LISTING_EXPECTED_HEADERS = [
   "Duration",
   "ConditionID",
   "ConditionDescription",
+  "CategoryID",
   "PictureURL",
   "Category2Name",
   "DispatchTimeMax",
@@ -35,6 +36,7 @@ export const EBAY_LISTING_EXAMPLE_ROW: CsvRow = {
   Duration: "GTC",
   ConditionID: "1000",
   ConditionDescription: "",
+  CategoryID: "9355",
   PictureURL: "https://example.com/images/item.jpg",
   Category2Name: "Electronics",
   DispatchTimeMax: "3",
@@ -125,9 +127,11 @@ function canonicalEbayListingHeaders(inputHeaders: string[]): string[] {
     // Quantity
     "*quantity": "Quantity",
     qty: "Quantity",
-    // Category
+    // CategoryID (numeric eBay category)
+    "*categoryid": "CategoryID",
+    "category id": "CategoryID",
+    // Category2Name (human-readable category name)
     "*category2name": "Category2Name",
-    categoryid: "Category2Name",
     category: "Category2Name",
     "category name": "Category2Name",
     // Images
@@ -355,6 +359,21 @@ export function validateAndFixEbayListings(headers: string[], rows: CsvRow[]): C
       }
     }
 
+    // CategoryID (optional per-row; file-level blank check done after loop)
+    if ("CategoryID" in out) {
+      const cid = (out["CategoryID"] ?? "").trim();
+      if (cid && !/^\d+$/.test(cid)) {
+        issues.push({
+          rowIndex,
+          column: "CategoryID",
+          severity: "warning",
+          code: "ebay/invalid_category_id",
+          message: `CategoryID '${cid}' should be a numeric eBay category ID.`,
+          suggestion: "Use the numeric eBay CategoryID from the eBay category tree (e.g., 9355 for Cell Phones).",
+        });
+      }
+    }
+
     // Format (optional, must be FixedPriceItem or Chinese)
     if ("Format" in out) {
       const fmt = (out["Format"] ?? "").trim();
@@ -449,6 +468,21 @@ export function validateAndFixEbayListings(headers: string[], rows: CsvRow[]): C
         message: `Duplicate CustomLabel (SKU) '${sku}' found on rows ${rows1b.join(", ")}.`,
         suggestion: "Each unique listing should have a unique CustomLabel. Use Revise action for updates.",
         details: { sku, rows: rows1b },
+      });
+    }
+  }
+
+  // File-level: warn if CategoryID column is present but all values are blank.
+  if (canonHeaders.includes("CategoryID")) {
+    const allBlank = outRows.every((r) => !String(r["CategoryID"] ?? "").trim());
+    if (allBlank) {
+      issues.push({
+        rowIndex: -1,
+        column: "CategoryID",
+        severity: "warning",
+        code: "ebay/missing_category_id",
+        message: "CategoryID column is present but all values are blank.",
+        suggestion: "Provide a numeric eBay CategoryID for each listing to ensure correct category placement.",
       });
     }
   }

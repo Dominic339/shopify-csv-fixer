@@ -57,6 +57,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     description:
       "Fix common eBay listing CSV issues: missing IDs, invalid values, broken URLs, and inconsistent pricing or quantity fields.",
   },
+  {
+    id: "ebay_variations",
+    formatId: "ebay_variations",
+    name: "eBay Variations",
+    category: "Ecommerce",
+    description:
+      "Validate eBay variation listing CSVs: variation specifics pairing, duplicate variation combos, price and quantity fields.",
+  },
 ];
 
 export function getPresetFormats() {
