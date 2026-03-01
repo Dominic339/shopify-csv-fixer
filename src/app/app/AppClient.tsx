@@ -1043,7 +1043,7 @@ useEffect(() => {
                       return (
                         <>
                           Import confidence: <span className="font-semibold">{importConfidence}%</span>{" "}
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({blocked ? "blocked" : "safe to import"})</span>
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({blocked ? "blocked" : "no blocking errors"})</span>
                         </>
                       );
                     })()}
@@ -1143,7 +1143,7 @@ useEffect(() => {
                 ) : null}
               </div>
 
-              {(["shopify_products", "woocommerce_products", "etsy_listings"] as const).includes(formatId as any) ? (
+              {rows.length > 0 ? (
                 <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
                   <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-[320px]">
@@ -1154,7 +1154,15 @@ useEffect(() => {
                             return `Import blocked – resolve ${blocking} blocking ${blocking === 1 ? "issue" : "issues"} to continue`;
                           }
                           const platform =
-                            formatId === "woocommerce_products" ? "WooCommerce" : formatId === "etsy_listings" ? "Etsy" : "Shopify";
+                            formatId === "woocommerce_products" || formatId === "woocommerce_variable_products"
+                              ? "WooCommerce"
+                              : formatId === "etsy_listings"
+                                ? "Etsy"
+                                : formatId === "ebay_listings" || formatId === "ebay_variations"
+                                  ? "eBay"
+                                  : formatId === "amazon_inventory_loader"
+                                    ? "Amazon"
+                                    : "Shopify";
                           return `Ready for ${platform} import`;
                         })()}
                       </div>
@@ -1163,7 +1171,15 @@ useEffect(() => {
                           const blocking = Number((validation as any)?.counts?.blockingErrors ?? 0);
                           if (blocking > 0) {
                             const platform =
-                              formatId === "woocommerce_products" ? "WooCommerce" : formatId === "etsy_listings" ? "Etsy" : "Shopify";
+                              formatId === "woocommerce_products" || formatId === "woocommerce_variable_products"
+                                ? "WooCommerce"
+                                : formatId === "etsy_listings"
+                                  ? "Etsy"
+                                  : formatId === "ebay_listings" || formatId === "ebay_variations"
+                                    ? "eBay"
+                                    : formatId === "amazon_inventory_loader"
+                                      ? "Amazon"
+                                      : "Shopify";
                             return `Fix blocking issues to complete a clean ${platform} import.`;
                           }
                           return "No blocking issues detected. Exporting should import cleanly.";
@@ -1351,12 +1367,31 @@ useEffect(() => {
 
             <button
               className="rg-btn"
-              onClick={() => void exportFixedCsv()}
+              onClick={() => {
+                const blockingCount = Number((validation as any)?.counts?.blockingErrors ?? 0);
+                if (blockingCount > 0) {
+                  const confirmed = window.confirm(
+                    `This file has ${blockingCount} blocking ${blockingCount === 1 ? "issue" : "issues"} that will likely cause import failures.\n\nExport anyway for manual review?`
+                  );
+                  if (!confirmed) return;
+                }
+                void exportFixedCsv();
+              }}
               disabled={busy || rows.length === 0}
-              title={rows.length === 0 ? "Upload a CSV first" : "Export your fixed CSV"}
+              title={
+                rows.length === 0
+                  ? "Upload a CSV first"
+                  : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                    ? `${Number((validation as any)?.counts?.blockingErrors ?? 0)} blocking issue(s) — export will prompt for confirmation`
+                    : "Export your fixed CSV"
+              }
               type="button"
             >
-              {busy ? "Working..." : "Export fixed CSV"}
+              {busy
+                ? "Working..."
+                : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                  ? "Export anyway…"
+                  : "Export fixed CSV"}
             </button>
           </div>
 
