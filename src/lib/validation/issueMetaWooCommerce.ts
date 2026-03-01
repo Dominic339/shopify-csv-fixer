@@ -144,4 +144,70 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
     whyPlatformCares: "Imports can succeed without images, but missing images reduce listing quality and conversions.",
     howToFix: "Provide an Images URL (or multiple URLs separated by commas) for products.",
   },
+
+  "woocommerce/invalid_bool": {
+    code: "woocommerce/invalid_bool",
+    title: "Invalid boolean value",
+    category: "structure",
+    blocking: false,
+    autoFixable: true,
+    explanation: "Boolean fields like Published, In stock?, and Is featured? expect 1/0 or true/false values.",
+    whyPlatformCares: "WooCommerce's importer may interpret unexpected values incorrectly, causing products to be hidden or misconfigured.",
+    howToFix: "Use 1 (yes/true) or 0 (no/false). We can normalize common variants (yes, no, true, false) automatically.",
+  },
+
+  "woocommerce/invalid_price": {
+    code: "woocommerce/invalid_price",
+    title: "Invalid price value",
+    category: "pricing",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A price field contains a non-numeric value.",
+    whyPlatformCares: "WooCommerce expects plain decimal prices. Currency symbols or text cause import failures or zero prices.",
+    howToFix: "Use plain decimals like 19.99 (no currency symbols, commas, or text).",
+  },
+
+  "woocommerce/invalid_int": {
+    code: "woocommerce/invalid_int",
+    title: "Invalid integer value",
+    category: "inventory",
+    blocking: false,
+    autoFixable: false,
+    explanation: "An integer field (like Stock) contains a non-integer value.",
+    whyPlatformCares: "WooCommerce expects whole numbers for stock quantities. Decimal values may be truncated or rejected.",
+    howToFix: "Use a whole number like 0, 5, or 12.",
+  },
+
+  "woocommerce/invalid_visibility": {
+    code: "woocommerce/invalid_visibility",
+    title: "Invalid visibility value",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "Visibility in catalog must be one of the four accepted values.",
+    whyPlatformCares: "An unrecognized visibility value may cause the product to default to visible or fail to import.",
+    howToFix: "Use one of: visible, catalog, search, or hidden.",
+  },
+
+  "woocommerce/invalid_image_url": {
+    code: "woocommerce/invalid_image_url",
+    title: "Invalid image URL",
+    category: "media",
+    blocking: false,
+    autoFixable: false,
+    explanation: "One or more image URLs in the Images column are not valid http(s) URLs.",
+    whyPlatformCares: "WooCommerce fetches images from the provided URLs during import. Invalid URLs result in products without images.",
+    howToFix: "Use full https:// URLs separated by commas. Ensure images are publicly accessible.",
+  },
+
+  "woocommerce/sale_price_not_lower": {
+    code: "woocommerce/sale_price_not_lower",
+    title: "Sale price not lower than regular price",
+    category: "pricing",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The Sale price should be less than the Regular price for the discount to be meaningful.",
+    whyPlatformCares: "WooCommerce may display both prices as a crossed-out/sale pair. If sale price equals or exceeds regular price, it creates confusing or incorrect pricing display.",
+    howToFix: "Set Sale price to a value lower than Regular price, or clear the Sale price field.",
+  },
 };

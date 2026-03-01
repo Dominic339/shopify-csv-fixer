@@ -335,7 +335,9 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
       }
     }
 
-    // Prices
+    // Prices: parse, normalize, and cross-check sale vs regular price
+    let regularPriceParsed: number | null = null;
+    let salePriceParsed: number | null = null;
     for (const col of ["Regular price", "Sale price"]) {
       if (!(col in out)) continue;
       const raw = out[col];
@@ -357,7 +359,19 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
           out[col] = formatted;
           fixesApplied.push(`Normalized ${col} to '${formatted}' on row ${rowIndex + 1}`);
         }
+        if (col === "Regular price") regularPriceParsed = parsed;
+        if (col === "Sale price") salePriceParsed = parsed;
       }
+    }
+    if (regularPriceParsed != null && salePriceParsed != null && salePriceParsed >= regularPriceParsed) {
+      issues.push({
+        rowIndex,
+        column: "Sale price",
+        severity: "warning",
+        code: "woocommerce/sale_price_not_lower",
+        message: `Sale price (${formatShopifyMoney(salePriceParsed)}) is not lower than Regular price (${formatShopifyMoney(regularPriceParsed)}).`,
+        suggestion: "Sale price should be less than the regular price. Remove the sale price or correct the values.",
+      });
     }
 
     // Categories / Tags
@@ -433,6 +447,32 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
 
     return out;
   });
+
+  // Cross-row: duplicate SKU detection
+  const skuRows = new Map<string, number[]>();
+  for (let i = 0; i < outRows.length; i++) {
+    const sku = (outRows[i]["SKU"] ?? "").trim();
+    if (sku) {
+      const arr = skuRows.get(sku) ?? [];
+      arr.push(i);
+      skuRows.set(sku, arr);
+    }
+  }
+  for (const [sku, idxs] of skuRows.entries()) {
+    if (idxs.length < 2) continue;
+    const rows1b = idxs.map((x) => x + 1);
+    for (const idx of idxs) {
+      issues.push({
+        rowIndex: idx,
+        column: "SKU",
+        severity: "warning",
+        code: "woocommerce/duplicate_sku",
+        message: `Duplicate SKU '${sku}' found on rows ${rows1b.join(", ")}.`,
+        suggestion: "Each product/variation should have a unique SKU to avoid import conflicts.",
+        details: { sku, rows: rows1b },
+      });
+    }
+  }
 
   // Duplicate variation attribute combos under same Parent.
   const seen = new Map<string, number[]>();

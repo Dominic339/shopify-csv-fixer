@@ -44,10 +44,10 @@ function normalizeList(value: string) {
   return parts.join(",");
 }
 
-function parseIntSafe(v: string) {
+function parsePositiveIntSafe(v: string) {
   if (!String(v ?? "").trim()) return { ok: true, value: "" };
   const n = Number.parseInt(String(v).trim(), 10);
-  if (!Number.isFinite(n)) return { ok: false, value: v };
+  if (!Number.isFinite(n) || n < 0) return { ok: false, value: v };
   return { ok: true, value: String(n) };
 }
 
@@ -149,16 +149,16 @@ export function validateAndFixEtsyListings(headers: string[], rows: CsvRow[]): C
       }
     }
 
-    // Quantity
+    // Quantity (non-negative integer)
     const qRaw = out["Quantity"] ?? "";
-    const qi = parseIntSafe(qRaw);
+    const qi = parsePositiveIntSafe(qRaw);
     if (!qi.ok) {
       issues.push({
         rowIndex,
         column: "Quantity",
         severity: "error",
         code: "etsy/invalid_quantity",
-        message: `Quantity should be a whole number. Found '${qRaw}'.`,
+        message: `Quantity should be a non-negative whole number. Found '${qRaw}'.`,
         suggestion: "Use an integer like 0, 1, 10.",
       });
     } else if (qi.value !== qRaw.trim()) {
@@ -259,6 +259,58 @@ export function validateAndFixEtsyListings(headers: string[], rows: CsvRow[]): C
 
     return out;
   });
+
+  // Cross-row: duplicate Listing ID detection
+  const listingIdRows = new Map<string, number[]>();
+  for (let i = 0; i < outRows.length; i++) {
+    const lid = (outRows[i]["Listing ID"] ?? "").trim();
+    if (lid) {
+      const arr = listingIdRows.get(lid) ?? [];
+      arr.push(i);
+      listingIdRows.set(lid, arr);
+    }
+  }
+  for (const [lid, idxs] of listingIdRows.entries()) {
+    if (idxs.length < 2) continue;
+    const rows1b = idxs.map((x) => x + 1);
+    for (const idx of idxs) {
+      issues.push({
+        rowIndex: idx,
+        column: "Listing ID",
+        severity: "warning",
+        code: "etsy/duplicate_listing_id",
+        message: `Duplicate Listing ID '${lid}' found on rows ${rows1b.join(", ")}.`,
+        suggestion: "Use a unique Listing ID per row, or remove the ID to create new listings.",
+        details: { listingId: lid, rows: rows1b },
+      });
+    }
+  }
+
+  // Cross-row: duplicate SKU detection
+  const skuRows = new Map<string, number[]>();
+  for (let i = 0; i < outRows.length; i++) {
+    const sku = (outRows[i]["SKU"] ?? "").trim();
+    if (sku) {
+      const arr = skuRows.get(sku) ?? [];
+      arr.push(i);
+      skuRows.set(sku, arr);
+    }
+  }
+  for (const [sku, idxs] of skuRows.entries()) {
+    if (idxs.length < 2) continue;
+    const rows1b = idxs.map((x) => x + 1);
+    for (const idx of idxs) {
+      issues.push({
+        rowIndex: idx,
+        column: "SKU",
+        severity: "warning",
+        code: "etsy/duplicate_sku",
+        message: `Duplicate SKU '${sku}' found on rows ${rows1b.join(", ")}.`,
+        suggestion: "Make SKUs unique where possible to avoid inventory confusion.",
+        details: { sku, rows: rows1b },
+      });
+    }
+  }
 
   const extra = canonHeaders.filter((h) => !ETSY_EXPECTED_HEADERS.includes(h));
   const fixedHeaders = [...ETSY_EXPECTED_HEADERS, ...extra];

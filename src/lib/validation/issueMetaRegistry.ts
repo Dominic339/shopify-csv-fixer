@@ -4,6 +4,8 @@ import { SHOPIFY_ISSUE_META } from "./issueMetaShopify";
 import { getGenericMetaForCode } from "./issueMetaGeneric";
 import { WOOCOMMERCE_ISSUE_META } from "./issueMetaWooCommerce";
 import { ETSY_ISSUE_META } from "./issueMetaEtsy";
+import { EBAY_ISSUE_META } from "./issueMetaEbay";
+import { AMAZON_ISSUE_META } from "./issueMetaAmazon";
 
 // Keyed by formatId (must match preset formatId like "shopify_products")
 export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
@@ -11,6 +13,9 @@ export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
   woocommerce_products: WOOCOMMERCE_ISSUE_META,
   woocommerce_variable_products: WOOCOMMERCE_ISSUE_META,
   etsy_listings: ETSY_ISSUE_META,
+  ebay_listings: EBAY_ISSUE_META,
+  ebay_variations: EBAY_ISSUE_META,
+  amazon_inventory_loader: AMAZON_ISSUE_META,
 };
 
 export function getIssueMeta(formatId: string | undefined, code: string | undefined): IssueMeta | null {

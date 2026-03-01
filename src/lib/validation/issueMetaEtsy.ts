@@ -46,6 +46,84 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
     howToFix: "Keep the best 13 tags (we can automatically limit to 13).",
   },
 
+  // Emitted by optimizer as etsy/too_many_tags (matches the code used in etsyOptimizer.ts)
+  "etsy/too_many_tags": {
+    code: "etsy/too_many_tags",
+    title: "Too many tags",
+    category: "tags",
+    blocking: false,
+    autoFixable: true,
+    explanation: "Etsy listings support up to 13 tags.",
+    whyPlatformCares: "Over-limit tags are ignored and reduce search optimization.",
+    howToFix: "Keep the best 13 tags (we can automatically limit to 13).",
+  },
+
+  "etsy/tag_too_long": {
+    code: "etsy/tag_too_long",
+    title: "Tag exceeds 20 characters",
+    category: "tags",
+    blocking: false,
+    autoFixable: false,
+    explanation: "Etsy limits each tag to a maximum of 20 characters.",
+    whyPlatformCares: "Tags exceeding 20 characters are rejected by Etsy's tag input.",
+    howToFix: "Shorten the offending tags to 20 characters or fewer.",
+  },
+
+  "etsy/missing_title": {
+    code: "etsy/missing_title",
+    title: "Missing listing title",
+    category: "compliance",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A listing title is required for all Etsy listings.",
+    whyPlatformCares: "Listings without a title cannot be published or imported.",
+    howToFix: "Provide a descriptive title (up to 140 characters).",
+  },
+
+  "etsy/missing_price": {
+    code: "etsy/missing_price",
+    title: "Missing price",
+    category: "pricing",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A price is required for all Etsy listings.",
+    whyPlatformCares: "Listings without a price cannot be published.",
+    howToFix: "Provide a listing price as a plain decimal (e.g., 19.99).",
+  },
+
+  "etsy/invalid_quantity": {
+    code: "etsy/invalid_quantity",
+    title: "Invalid quantity",
+    category: "inventory",
+    blocking: true,
+    autoFixable: false,
+    explanation: "Quantity must be a non-negative whole number.",
+    whyPlatformCares: "Invalid quantity values cause listing import or publish failures.",
+    howToFix: "Use a whole number like 0, 1, or 10.",
+  },
+
+  "etsy/invalid_currency": {
+    code: "etsy/invalid_currency",
+    title: "Invalid currency code",
+    category: "compliance",
+    blocking: false,
+    autoFixable: true,
+    explanation: "Currency must be a valid 3-letter ISO 4217 code (e.g., USD, GBP, EUR).",
+    whyPlatformCares: "An invalid currency code may cause listing import failures or incorrect price display.",
+    howToFix: "Use a standard 3-letter currency code (we can auto-uppercase the value).",
+  },
+
+  "etsy/invalid_image_url": {
+    code: "etsy/invalid_image_url",
+    title: "Invalid image URL",
+    category: "media",
+    blocking: false,
+    autoFixable: false,
+    explanation: "One or more image URLs are not valid http(s) URLs.",
+    whyPlatformCares: "Etsy cannot fetch images from invalid URLs, resulting in listings with no photos.",
+    howToFix: "Use full https:// URLs pointing to publicly accessible images, separated by commas.",
+  },
+
   "etsy/duplicate_tags": {
     code: "etsy/duplicate_tags",
     title: "Duplicate tags",

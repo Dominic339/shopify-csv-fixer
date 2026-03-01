@@ -1,7 +1,10 @@
 // src/lib/formats/builtins/packs.ts
 import type { CsvFixResult, CsvFormat, CsvFormatCategory, CsvRow, CsvIssue } from "../types";
 import { woocommerceProducts } from "./woocommerceProducts";
+import { woocommerceVariableProductsFormat } from "./woocommerceVariableProducts";
 import { etsyListings } from "./etsyListings";
+import { ebayListingsFormat, ebayVariationsFormat } from "./ebayListings";
+import { amazonInventoryFormat } from "./amazonProducts";
 
 type FormatSpec = {
   id: string;
@@ -181,25 +184,11 @@ export function buildSimpleFormat(spec: FormatSpec): CsvFormat {
 // Ecommerce
 export const formatPackEcommerce: CsvFormat[] = [
   woocommerceProducts,
+  woocommerceVariableProductsFormat,
   etsyListings,
-  buildSimpleFormat({
-    id: "ebay_listings",
-    name: "eBay Listings",
-    description: "Maps to a simplified eBay listing template and flags common problems.",
-    category: "Ecommerce",
-    expectedHeaders: ["Title", "SKU", "Quantity", "Price", "ConditionID", "CategoryID", "PictureURL"],
-    requiredHeaders: ["Title", "Quantity", "Price"],
-    numericHeaders: ["Quantity", "Price"],
-  }),
-  buildSimpleFormat({
-    id: "amazon_inventory_loader",
-    name: "Amazon Inventory Loader",
-    description: "Builds a simplified Amazon inventory template and flags missing essentials.",
-    category: "Ecommerce",
-    expectedHeaders: ["sku", "product-id", "product-id-type", "price", "quantity", "item-name", "brand-name"],
-    requiredHeaders: ["sku", "item-name", "price", "quantity"],
-    numericHeaders: ["price", "quantity"],
-  }),
+  ebayListingsFormat,
+  ebayVariationsFormat,
+  amazonInventoryFormat,
 ];
 
 // Marketing
