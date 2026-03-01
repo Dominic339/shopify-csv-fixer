@@ -206,25 +206,6 @@ export default function AppClient() {
     appliedExportNameRef.current = true;
   }, []);
 
-  // support exportName via /app?exportName=<base>
-  const appliedExportNameRef = useRef(false);
-  useEffect(() => {
-    if (appliedExportNameRef.current) return;
-    if (typeof window === "undefined") return;
-
-    const qp = new URLSearchParams(window.location.search);
-    const exportName = qp.get("exportName");
-    if (exportName) {
-      setExportBaseName(exportName);
-      appliedExportNameRef.current = true;
-      return;
-    }
-
-    const preset = qp.get("preset");
-    if (preset) setExportBaseName(preset);
-    appliedExportNameRef.current = true;
-  }, []);
-
   // Keep selected format valid (if a custom format is deleted, fall back)
   // IMPORTANT: depend on `formatId` and `allFormats` so this effect sees the
   // latest selected id (including a preset from the URL) and does not overwrite it.
