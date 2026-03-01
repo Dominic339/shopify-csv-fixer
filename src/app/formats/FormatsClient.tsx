@@ -132,7 +132,6 @@ export default function FormatsClient({ groups, featured }: Props) {
             </div>
           ))}
         </div>
-      </section>
 
         {filteredGroups.length === 0 ? (
           <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6 text-sm text-[var(--muted)]">
