@@ -91,6 +91,12 @@ export default function WooCommerceVariableCsvFixerPage() {
         <Link href="/ecommerce/woocommerce" className="hover:underline">
           WooCommerce resources
         </Link>
+        <Link href="/ebay-csv-fixer" className="hover:underline">
+          eBay CSV Fixer
+        </Link>
+        <Link href="/amazon-csv-fixer" className="hover:underline">
+          Amazon CSV Fixer
+        </Link>
       </div>
     </main>
   );

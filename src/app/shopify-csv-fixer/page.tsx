@@ -120,6 +120,12 @@ export default function ShopifyCsvFixerPage() {
         <Link href="/#pricing" className="hover:underline">
           Pricing
         </Link>
+        <Link href="/ebay-csv-fixer" className="hover:underline">
+          eBay CSV Fixer
+        </Link>
+        <Link href="/amazon-csv-fixer" className="hover:underline">
+          Amazon CSV Fixer
+        </Link>
       </div>
     </main>
   );

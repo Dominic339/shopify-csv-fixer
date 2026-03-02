@@ -92,6 +92,12 @@ export default function EtsyCsvFixerPage() {
         <Link href="/ecommerce/etsy" className="hover:underline">
           Etsy resources
         </Link>
+        <Link href="/ebay-csv-fixer" className="hover:underline">
+          eBay CSV Fixer
+        </Link>
+        <Link href="/amazon-csv-fixer" className="hover:underline">
+          Amazon CSV Fixer
+        </Link>
       </div>
     </main>
   );

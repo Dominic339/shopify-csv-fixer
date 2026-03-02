@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/woocommerce-variable-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/etsy-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/ebay-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/ebay-variations-csv-fixer`, changeFrequency: "monthly", priority: 0.75 },
     { url: `${baseUrl}/amazon-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
   ];
 

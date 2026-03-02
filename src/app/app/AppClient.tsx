@@ -944,6 +944,14 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strictShopify]);
 
+  // Auto-disable strict mode if the plan drops below Advanced while it's on.
+  useEffect(() => {
+    if (strictShopify && !isAdvancedActive) {
+      setStrictShopify(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdvancedActive]);
+
   async function exportFixedCsv() {
     setBusy(true);
     setErrorBanner(null);
@@ -998,6 +1006,7 @@ useEffect(() => {
   const used = Number(quota?.used ?? 0);
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
+  const quotaExceeded = !isUnlimited && left !== null && left <= 0;
 
   const fixAllVisible = formatId === "shopify_products" && rows.length > 0 && realFixableBlockingCount > 0;
   const fixAllLabel = `Fix ${realFixableBlockingCount} auto-fixable blockers`;
@@ -1124,7 +1133,7 @@ useEffect(() => {
                     type="button"
                     className="pill-btn"
                     onClick={() => {
-                      if (!isAdvancedActive) {
+                      if (!isAdvancedActive && !strictShopify) {
                         setErrorBanner("Strict mode requires an Advanced plan. Upgrade to enable extra Shopify Help Center checks.");
                         return;
                       }
@@ -1377,13 +1386,15 @@ useEffect(() => {
                 }
                 void exportFixedCsv();
               }}
-              disabled={busy || rows.length === 0}
+              disabled={busy || rows.length === 0 || quotaExceeded}
               title={
-                rows.length === 0
-                  ? "Upload a CSV first"
-                  : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
-                    ? `${Number((validation as any)?.counts?.blockingErrors ?? 0)} blocking issue(s) — export will prompt for confirmation`
-                    : "Export your fixed CSV"
+                quotaExceeded
+                  ? "Monthly export limit reached. Upgrade to continue."
+                  : rows.length === 0
+                    ? "Upload a CSV first"
+                    : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                      ? `${Number((validation as any)?.counts?.blockingErrors ?? 0)} blocking issue(s) — export will prompt for confirmation`
+                      : "Export your fixed CSV"
               }
               type="button"
             >
@@ -1394,6 +1405,15 @@ useEffect(() => {
                   : "Export fixed CSV"}
             </button>
           </div>
+
+          {quotaExceeded ? (
+            <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+              Monthly exports used up.{" "}
+              <Link href="/checkout" className="underline">
+                Upgrade to continue.
+              </Link>
+            </div>
+          ) : null}
 
           {rows.length > 0 && autoFixes.length === 0 ? (
             <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">No auto fixes were applied for this upload.</div>

@@ -3,13 +3,13 @@ import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 
 export const metadata = {
-  title: "eBay CSV Fixer | StriveFormats",
+  title: "eBay Variations CSV Fixer | StriveFormats",
   description:
-    "Fix eBay listing CSV files before bulk upload. StriveFormats validates eBay File Exchange fields—title length, condition codes, price formatting, duration values, image URLs—and auto-fixes safe issues.",
-  alternates: { canonical: "/ebay-csv-fixer" },
+    "Fix eBay variation listing CSV files before bulk upload. StriveFormats validates VariationSpecifics pairing, duplicate variation combinations, price formatting, and image URLs for eBay File Exchange.",
+  alternates: { canonical: "/ebay-variations-csv-fixer" },
 };
 
-export default function EbayCsvFixerPage() {
+export default function EbayVariationsCsvFixerPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -24,19 +24,20 @@ export default function EbayCsvFixerPage() {
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-semibold text-[var(--text)]">eBay CSV Fixer</h1>
+            <h1 className="text-3xl font-semibold text-[var(--text)]">eBay Variations CSV Fixer</h1>
             <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{metadata.description}</p>
             <p className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-              eBay File Exchange uploads reject rows silently when condition codes are wrong, titles exceed 80 characters,
-              prices include currency symbols, or duration values don't match expected formats. Fix these before uploading.
+              eBay variation uploads fail when VariationSpecificsName and VariationSpecificsValue are mismatched, when
+              duplicate variation combinations are present, or when prices aren't formatted as plain decimals. Fix these
+              before uploading.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Link className="rg-btn" href="/app?preset=ebay_listings">
+            <Link className="rg-btn" href="/app?preset=ebay_variations">
               Open the fixer
             </Link>
-            <Link className="pill-btn" href="/presets/ebay_listings">
+            <Link className="pill-btn" href="/presets/ebay_variations">
               View template
             </Link>
           </div>
@@ -47,13 +48,12 @@ export default function EbayCsvFixerPage() {
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">What it catches</h2>
           <ul className="mt-4 list-disc space-y-2 pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
-            <li>Missing required fields (Title, StartPrice, Quantity)</li>
+            <li>Missing required columns (Title, StartPrice, Quantity, VariationSpecificsName/Value)</li>
+            <li>VariationSpecificsName and VariationSpecificsValue mismatches (one filled, one blank)</li>
+            <li>Duplicate variation combinations under the same listing</li>
             <li>Titles that exceed eBay's 80-character limit</li>
-            <li>Invalid or unrecognized ConditionID codes</li>
-            <li>Unrecognized Duration values (must be GTC or Days_N)</li>
-            <li>Invalid listing Format (FixedPriceItem or Chinese only)</li>
-            <li>Image URLs that aren't valid http(s) addresses</li>
-            <li>Duplicate CustomLabel (SKU) values across rows</li>
+            <li>Invalid or missing prices</li>
+            <li>VariationPictureURL that aren't valid http(s) addresses</li>
           </ul>
         </div>
 
@@ -62,12 +62,11 @@ export default function EbayCsvFixerPage() {
           <ul className="mt-4 list-disc space-y-2 pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
             <li>Trims hidden whitespace</li>
             <li>Normalizes price formatting (removes currency symbols)</li>
-            <li>Normalizes Action casing (e.g., "add" → "Add")</li>
-            <li>Cleans PictureURL lists and removes empty entries</li>
-            <li>Enforces canonical eBay File Exchange column order</li>
+            <li>Normalizes integer quantities</li>
+            <li>Enforces canonical eBay Variations column order</li>
           </ul>
           <p className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-            If a fix could change meaning or data, it stays as a flagged issue for manual review.
+            Variation specifics mismatches and duplicate combos stay as flagged issues — they require manual decisions.
           </p>
         </div>
       </section>
@@ -75,13 +74,13 @@ export default function EbayCsvFixerPage() {
       <section className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
         <h2 className="text-xl font-semibold text-[var(--text)]">How to use it</h2>
         <ol className="mt-4 list-decimal space-y-2 pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">
-          <li>Export your listing data or prepare a CSV using the eBay File Exchange template.</li>
-          <li>Upload the CSV in the app with the eBay Listings preset selected.</li>
-          <li>Resolve blocking errors (title length, missing price) then review warnings.</li>
+          <li>Export your variation listing data or prepare a CSV using the eBay Variations template.</li>
+          <li>Upload the CSV in the app with the eBay Variations preset selected.</li>
+          <li>Resolve blocking errors (specifics mismatches, duplicate combos) then review warnings.</li>
           <li>Export a cleaned file ready for File Exchange bulk upload.</li>
         </ol>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link className="pill-btn" href="/presets/ebay_listings/sample.csv">
+          <Link className="pill-btn" href="/presets/ebay_variations/sample.csv">
             Download sample CSV
           </Link>
         </div>
@@ -91,25 +90,27 @@ export default function EbayCsvFixerPage() {
         <h2 className="text-xl font-semibold text-[var(--text)]">FAQ</h2>
         <div className="mt-4 space-y-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
           <div>
-            <div className="font-semibold text-[var(--text)]">What is eBay File Exchange?</div>
+            <div className="font-semibold text-[var(--text)]">What is VariationSpecifics in eBay File Exchange?</div>
             <div>
-              eBay File Exchange is eBay's bulk listing management tool. It accepts CSV files with specific column names
-              and values to create, revise, or end listings in bulk. This fixer validates your CSV against those
-              requirements before you upload.
+              eBay uses VariationSpecificsName (e.g., "Color|Size") and VariationSpecificsValue (e.g., "Blue|Medium")
+              to define each variation row. Both must always be provided together — a row with only one filled causes the
+              listing to fail. This fixer flags mismatches so you can correct them.
             </div>
           </div>
           <div>
-            <div className="font-semibold text-[var(--text)]">What ConditionIDs are valid?</div>
+            <div className="font-semibold text-[var(--text)]">What counts as a duplicate variation combination?</div>
             <div>
-              Common codes: 1000 (New), 2500 (Like New), 3000 (Good), 4000 (Acceptable), 5000 (For parts or not
-              working). The fixer flags unrecognized IDs so you can correct them before upload.
+              If two rows share the same listing (CustomLabel + Title) and the same VariationSpecificsName/Value pair,
+              eBay will overwrite one with the other. The fixer detects these so you can remove or correct the duplicate
+              before uploading.
             </div>
           </div>
           <div>
-            <div className="font-semibold text-[var(--text)]">Will it fix my titles automatically?</div>
+            <div className="font-semibold text-[var(--text)]">How is this different from the eBay Listings fixer?</div>
             <div>
-              No. Shortening a title might remove important keywords, so the fixer flags over-limit titles for you to
-              edit manually rather than truncating them automatically.
+              The eBay Listings fixer targets standard (non-variation) listings using eBay File Exchange format. This
+              fixer is specifically for variation listings that use VariationSpecificsName and VariationSpecificsValue
+              columns to define product options like size and color.
             </div>
           </div>
         </div>
@@ -119,14 +120,11 @@ export default function EbayCsvFixerPage() {
         <Link href="/presets" className="hover:underline">
           Preset Formats
         </Link>
+        <Link href="/ebay-csv-fixer" className="hover:underline">
+          eBay CSV Fixer
+        </Link>
         <Link href="/ecommerce/ebay" className="hover:underline">
           eBay resources
-        </Link>
-        <Link href="/ebay-variations-csv-fixer" className="hover:underline">
-          eBay Variations CSV Fixer
-        </Link>
-        <Link href="/shopify-csv-fixer" className="hover:underline">
-          Shopify CSV Fixer
         </Link>
         <Link href="/amazon-csv-fixer" className="hover:underline">
           Amazon CSV Fixer
