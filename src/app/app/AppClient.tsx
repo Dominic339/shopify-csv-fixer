@@ -108,6 +108,7 @@ export default function AppClient() {
 
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [infoBanner, setInfoBanner] = useState<string | null>(null);
 
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
@@ -948,6 +949,7 @@ useEffect(() => {
   useEffect(() => {
     if (strictShopify && !isAdvancedActive) {
       setStrictShopify(false);
+      setInfoBanner("Strict mode was turned off because your plan is not Advanced.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdvancedActive]);
@@ -1018,6 +1020,15 @@ useEffect(() => {
       {errorBanner ? (
         <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[var(--text)] text-base">
           {errorBanner}
+        </div>
+      ) : null}
+
+      {infoBanner ? (
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+          <span>{infoBanner}</span>
+          <button type="button" onClick={() => setInfoBanner(null)} className="shrink-0 text-xs underline">
+            Dismiss
+          </button>
         </div>
       ) : null}
 

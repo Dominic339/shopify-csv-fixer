@@ -47,6 +47,30 @@ export default function PresetsPage() {
         ))}
       </div>
 
+      <section className="mt-14">
+        <h2 className="text-xl font-semibold text-[var(--text)]">Platform-specific fixers</h2>
+        <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Dedicated validation guides for each ecommerce platform.</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { href: "/shopify-csv-fixer", label: "Shopify CSV Fixer" },
+            { href: "/woocommerce-csv-fixer", label: "WooCommerce CSV Fixer" },
+            { href: "/woocommerce-variable-csv-fixer", label: "WooCommerce Variations Fixer" },
+            { href: "/etsy-csv-fixer", label: "Etsy CSV Fixer" },
+            { href: "/ebay-csv-fixer", label: "eBay CSV Fixer" },
+            { href: "/ebay-variations-csv-fixer", label: "eBay Variations Fixer" },
+            { href: "/amazon-csv-fixer", label: "Amazon CSV Fixer" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 text-base font-semibold text-[var(--text)] hover:border-[var(--ring)]"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/app?preset=shopify_products" className="hover:underline">
           CSV Fixer

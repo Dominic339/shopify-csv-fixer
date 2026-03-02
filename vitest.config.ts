@@ -12,6 +12,8 @@ export default defineConfig({
     },
     // Increase timeout for stress tests
     testTimeout: 60_000,
+    // Exclude Playwright e2e tests — those run via `npm run test:e2e`
+    exclude: ["tests/e2e/**", "node_modules/**"],
   },
   resolve: {
     alias: {
