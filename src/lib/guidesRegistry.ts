@@ -14,7 +14,7 @@ import type { IssueMetaMap } from "./validation/issueMeta";
 export type { GuidePlatform } from "./guidesConstants";
 export { GUIDE_PLATFORMS, PLATFORM_LABEL, PLATFORM_PRESET_ID, PLATFORM_FIXER_HREF } from "./guidesConstants";
 import type { GuidePlatform } from "./guidesConstants";
-import { GUIDE_PLATFORMS } from "./guidesConstants";
+import { GUIDE_PLATFORMS, PLATFORM_LABEL } from "./guidesConstants";
 
 const PLATFORM_ISSUE_META: Partial<Record<GuidePlatform, IssueMetaMap>> = {
   shopify: SHOPIFY_ISSUE_META,
@@ -55,7 +55,16 @@ function issueMetaToGuides(platform: GuidePlatform, metaMap: IssueMetaMap): Guid
     slug: issueCodeToSlug(m.code),
     title: m.title,
     description: m.explanation,
-    keywords: [m.code.replace("/", "-"), platform, m.category],
+    keywords: [
+      m.code.replace("/", "-"),
+      platform,
+      m.category,
+      `${PLATFORM_LABEL[platform]} csv`,
+      `${PLATFORM_LABEL[platform]} import error`,
+      `fix ${m.title.toLowerCase()}`,
+      "csv import",
+      "csv fix",
+    ],
     kind: "issue" as const,
     category: m.category,
     issueCode: m.code,

@@ -1,125 +1,158 @@
 ---
 title: "CSV Basics for Ecommerce Imports"
-description: "Understand headers, UTF-8 encoding, quoting, line endings, and the most common mistakes that break ecommerce CSV imports — before your first upload."
+description: "Understand headers, UTF-8 encoding, quoting, line endings, and the most common mistakes that break ecommerce CSV imports -- before your first upload."
 keywords: ["csv basics", "csv encoding utf-8", "csv headers", "csv quoting commas", "csv line endings", "csv import errors", "fix csv file"]
 lastUpdated: "2026-03-03"
 kind: "curated"
 ---
 
-# CSV Basics for Ecommerce Imports
+## What Is a CSV File?
 
-A CSV (Comma-Separated Values) file looks simple — it is. But platforms like Shopify, WooCommerce, Etsy, eBay, and Amazon are strict about formatting details that most spreadsheet editors silently mangle. This guide explains the fundamentals so your imports go through clean the first time.
+A CSV (Comma-Separated Values) file is a plain text file where each row is a record and columns are separated by commas. The first row contains the column names (the header row). Every row after that contains data.
+
+Here is what a minimal Shopify product CSV looks like in raw text:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+CSV files look simple, but platforms like Shopify, WooCommerce, Etsy, eBay, and Amazon are strict about formatting details that spreadsheet editors can silently corrupt. This guide explains every critical rule so your imports go through cleanly the first time.
 
 ---
 
 ## The Header Row
 
-The **first row** of every CSV must contain column names (headers). Platforms use these to match your data to their fields. Every rule below applies to the header row first.
+The first row of every CSV must contain column names (headers). Platforms use these names to map your data to the correct fields during import.
 
 ### Rules
 
-- **Headers are case-sensitive** on most platforms. `Handle` ≠ `handle` ≠ `HANDLE`.
-- **No leading or trailing spaces** in header names. A header of `" Title"` (with a space) will not match `"Title"`.
-- **No duplicate headers.** If you have two columns called `Price`, most parsers will use only the last one.
-- **Column order matters for some platforms.** Shopify, for example, expects specific columns in a specific order for the product template CSV.
+- **Headers are case-sensitive** on most platforms. `Handle` is not the same as `handle` or `HANDLE`.
+- **No leading or trailing spaces.** A header of `" Title"` (with a leading space) will not match `"Title"`. Data in that column is silently ignored.
+- **No duplicate headers.** If two columns share the same name, most parsers use only the last one.
+- **Column order matters for some platforms.** Shopify, for example, expects specific columns in a specific order in its product template.
 
 ### How to Check
 
-Open your CSV in a plain text editor (Notepad, TextEdit, VS Code) and look at the first line. It should look like:
+Open your CSV in a plain text editor such as Notepad (Windows), TextEdit (Mac), or VS Code. Look at line 1. It should look like comma-separated names with no blank row above it:
 
 ```
 Handle,Title,Body (HTML),Vendor,Type,Tags,...
 ```
 
-If it starts with a strange character (like `ï»¿`) before the first header name, your file has a BOM — see the encoding section below.
+If the first line starts with three strange characters before the header names, your file has a BOM. See the Encoding section below for how to fix it.
 
 ---
 
 ## UTF-8 Encoding
 
-**Encoding** is how characters are stored as bytes. The wrong encoding causes garbled text — accents become `â€™`, em-dashes become `â€"`, and so on.
+Encoding is how text characters are stored as bytes on disk. The wrong encoding causes garbled text -- for example, a right-curly apostrophe stored as UTF-8 but read as Latin-1 produces the three-character sequence that looks like garbage.
 
 ### Why UTF-8
 
-UTF-8 is the universal standard for ecommerce platforms. All major platforms (Shopify, WooCommerce, Etsy, eBay, Amazon) require UTF-8. Exporting as UTF-8 ensures that:
-- Accented characters (é, ü, ñ) render correctly.
-- Currency symbols and emoji don't break.
-- The platform's importer can read the file without errors.
+UTF-8 is the universal standard for ecommerce platforms. Shopify, WooCommerce, Etsy, eBay, and Amazon all require UTF-8. Saving as UTF-8 ensures that:
+
+- Accented characters display correctly.
+- Currency symbols and special punctuation do not break.
+- The platform importer can read the file without rejecting it.
 
 ### BOM vs No-BOM
 
-**UTF-8 with BOM** adds a hidden 3-byte sequence (`EF BB BF`) at the start of the file. Excel on Windows creates this by default when you "Save As CSV UTF-8". Most platforms reject files with a BOM or misread the first column header.
+UTF-8 with BOM adds a hidden 3-byte sequence at the very start of the file. Excel on Windows writes this by default when you use "Save As > CSV UTF-8 (Comma delimited)". Most platforms either reject files with a BOM or misread the first column header because of the extra bytes.
 
-**Fix**: When saving from Excel, choose **CSV (Comma delimited)** not **CSV UTF-8 (Comma delimited)** if you are seeing `ï»¿` at the start. Alternatively, open the file in VS Code, look at the bottom-right status bar, and if it says "UTF-8 with BOM" click it and save as "UTF-8".
+How to tell if your file has a BOM: open it in VS Code and check the bottom-right status bar. If it says "UTF-8 with BOM", you have one.
 
-### How to Re-save as UTF-8 Without BOM
+**Fix in VS Code:** Click the encoding indicator in the status bar, choose "Save with Encoding", then select "UTF-8" (without BOM).
 
-**VS Code**: Open the file → bottom-right click the encoding → "Save with Encoding" → "UTF-8".
+**Fix in Excel:** Choose "CSV (Comma delimited)" when saving -- not "CSV UTF-8 (Comma delimited)". The plain "CSV (Comma delimited)" option saves without a BOM on most Windows Excel versions.
 
-**Python**:
+**Fix with Python:**
+
 ```python
-with open("input.csv", encoding="utf-8-sig") as f:  # utf-8-sig strips BOM on read
+# utf-8-sig strips the BOM on read; plain utf-8 writes without one
+with open("input.csv", encoding="utf-8-sig") as f:
     content = f.read()
 with open("output.csv", "w", encoding="utf-8") as f:
     f.write(content)
 ```
 
+### Encoding in Other Tools
+
+**Google Sheets:** File > Download > Comma Separated Values exports as UTF-8. Some versions add a BOM -- if you see garbled characters at the start of your file, re-save in VS Code without BOM.
+
+**LibreOffice Calc:** When saving as CSV, choose "Unicode (UTF-8)" in the dialog box.
+
+**Numbers (Mac):** File > Export To > CSV exports as UTF-8 without BOM on modern macOS.
+
 ---
 
-## Quoting and Commas Inside Values
+## Quoting Rules and Commas Inside Values
 
-When a cell value contains a comma, it must be **wrapped in double quotes**. This is the CSV standard (RFC 4180).
+When a cell value contains a comma, wrap the entire value in double-quote characters. This is the CSV standard (RFC 4180).
 
-### Examples
+### Basic Example
 
 ```
 Title,Price,Description
 "Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
 ```
 
-Without quotes, the parser sees 5 columns instead of 3 and puts the wrong data in the wrong fields.
+Without the quotes, the parser sees five columns instead of three and puts the wrong data in the wrong fields.
 
 ### Quotes Inside Quoted Values
 
-If the value itself contains a double quote, escape it by **doubling the quote character**:
+If the value contains a double-quote character, escape it by doubling the quote:
 
 ```
-"He said ""this is great"""
+"She said ""this is great"""
 ```
 
-This represents the string: `He said "this is great"`
+This represents the string: She said "this is great"
 
-### Common Mistakes
+### When Do You Need Quotes?
+
+You need double-quote wrapping when a value contains:
+
+- A comma
+- A double-quote character
+- A line break inside the value
+- HTML tags (some parsers misread angle brackets when unquoted)
+
+You do not need quotes for plain values like `29.99` or `Active`. Adding quotes around everything is harmless and many tools do it automatically.
+
+### Common Quoting Mistakes
 
 | Mistake | Bad example | Correct |
 |---|---|---|
-| Unquoted commas in value | `Wallet, Brown` | `"Wallet, Brown"` |
-| Single quotes instead of double | `'Wallet, Brown'` | `"Wallet, Brown"` |
-| HTML in description (unquoted) | `<p>Great item</p>` | `"<p>Great item</p>"` |
-| Line break inside value | `Line1\nLine2` (unquoted) | `"Line1\nLine2"` |
+| Comma inside value, no quotes | `Wallet, Brown` | `"Wallet, Brown"` |
+| HTML description unquoted | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Line break inside value, no quotes | Two separate rows | `"Line1\nLine2"` in one cell |
+| Wrong escape for embedded quote | `"She said \"great\""` | `"She said ""great"""` |
 
 ---
 
 ## Line Endings
 
-Line endings tell the parser where one row ends and the next begins. There are two common formats:
+Line endings tell the parser where one row ends and the next begins. There are two formats:
 
 | Format | Bytes | Used by |
 |---|---|---|
-| `CRLF` | `\r\n` | Windows, Excel |
-| `LF` | `\n` | macOS, Linux, most web tools |
+| CRLF | carriage return + line feed | Windows, Excel |
+| LF | line feed only | macOS, Linux, most web tools |
 
-Most platforms accept either. However, inconsistent line endings — some rows ending with `\r\n` and others with `\n` — can cause a parser to see extra blank rows or misread multi-line values.
+Most platforms accept either format. Problems arise when line endings are mixed -- some rows CRLF and others LF. Mixed endings can cause parsers to see extra blank rows or misread multi-line values.
 
 ### How to Check and Fix
 
-Open the file in VS Code. The bottom-right status bar shows `CRLF` or `LF`. Click it to switch. Save.
+Open the file in VS Code. The status bar shows "CRLF" or "LF". Click it to toggle, then save.
 
-Or with Python:
+With Python:
+
 ```python
 with open("input.csv", newline="", encoding="utf-8") as f:
     content = f.read()
-# Normalize all line endings to LF
+# Normalize to LF
 content = content.replace("\r\n", "\n").replace("\r", "\n")
 with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
     f.write(content)
@@ -129,27 +162,63 @@ with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
 
 ## The Most Common Import-Breaking Mistakes
 
-1. **Extra blank rows** — Many spreadsheet tools add an empty row at the end. Platforms skip or error on blank rows. Delete them before exporting.
+**1. Extra blank rows**
 
-2. **Summary or total rows** — If you used SUM() formulas at the bottom of a sheet, those rows will appear in the CSV and confuse the importer.
+Many spreadsheet tools add a blank row at the end. Platforms skip or error on blank rows. Delete them before exporting. In Excel, press Ctrl+End to jump to the last used cell -- if it is blank, delete the empty rows below your data.
 
-3. **Merged cells** — Spreadsheet merged cells export as a value in the first cell and blanks in the rest. The importer sees those blanks as empty required fields.
+**2. Summary or total rows**
 
-4. **Formula results look correct but export wrong** — A cell showing `$29.99` from a formula might export as `29.99` or as the formula text depending on your export settings. Always use **values only** (paste-special → values before exporting).
+SUM() formulas at the bottom of a sheet appear in the CSV as product rows. Delete summary rows before exporting.
 
-5. **Trailing spaces in header names** — `"Title "` ≠ `"Title"`. Your data will silently skip that column on import.
+**3. Merged cells**
 
-6. **Wrong file extension** — Saving as `.xls` or `.xlsx` instead of `.csv`. Even with a `.csv` extension, some tools save in Excel binary format. If the platform rejects your file, open it in a text editor and verify it looks like comma-separated text, not binary gibberish.
+Merged cells export as a value in the first cell and blanks in all others. The importer sees the blank cells as empty required fields. Un-merge all cells before exporting.
+
+**4. Formula results that export unexpectedly**
+
+A cell showing `$29.99` from a formula might export as `29.99` or as the raw formula text. Use Paste Special > Values in Excel to replace all formulas with plain numbers before saving as CSV.
+
+**5. Trailing spaces in header names**
+
+`"Title "` (trailing space) is not the same as `"Title"`. Data in that column is silently ignored on import. Use Find and Replace (Ctrl+H) to remove trailing spaces from headers.
+
+**6. Wrong file format with a .csv extension**
+
+Saving as `.xlsx` but naming it `.csv` produces a file that is not actually CSV. Open it in a text editor -- if you see binary characters, it is not a real CSV. Re-export using the correct save format.
+
+**7. ANSI or Latin-1 encoding**
+
+Old Excel sometimes saves as ANSI (Windows-1252). Product names with accented characters will be garbled on import. Always explicitly choose UTF-8 when saving.
 
 ---
 
-## Quick Checklist Before Every Import
+## How Each Platform Differs
 
-- [ ] First row is headers, no blank row above it
-- [ ] Headers match the platform's expected column names exactly
+Each platform adds specific requirements on top of the basic CSV standard:
+
+- **Shopify:** The Handle column groups variant rows. Missing or invalid handles break product grouping.
+- **WooCommerce:** Uses a Type column (`simple`, `variable`, `variation`) to define product structure.
+- **Etsy:** Requires specific allowed values for fields like `when_made` and `who_made`.
+- **eBay:** Requires the Action column (`Add`, `Revise`, `Delete`, `End`) on every row.
+- **Amazon:** Column names vary by product category template; download the exact template for your category from Seller Central.
+
+---
+
+## Quick Pre-Import Checklist
+
+- [ ] Row 1 is headers -- no blank row above it
+- [ ] Headers match the platform's expected column names exactly (case-sensitive)
 - [ ] No duplicate column names
-- [ ] File is saved as UTF-8 (no BOM)
-- [ ] Values with commas, quotes, or newlines are wrapped in double quotes
+- [ ] No leading or trailing spaces in header names
+- [ ] File saved as UTF-8 without BOM
+- [ ] Values with commas, quotes, or newlines wrapped in double quotes
 - [ ] No extra blank rows at the bottom
 - [ ] No summary rows or formula cells
-- [ ] File extension is `.csv`
+- [ ] Line endings are consistent (all CRLF or all LF)
+- [ ] File extension is .csv and the file contains plain comma-separated text
+
+---
+
+## Next Step: Validate Before You Import
+
+After preparing your file, upload it to the CSV Fixer for automated validation. It checks headers, flags encoding issues, catches platform-specific problems, and auto-fixes safe issues in one click.

@@ -32,3 +32,23 @@ test("guides hub renders with platform links and search input", async ({ page })
   // At least one platform link (Shopify)
   await expect(page.getByRole("link", { name: /Shopify/i }).first()).toBeVisible();
 });
+
+test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, Examples)", async ({ page }) => {
+  // Visit a well-known Shopify boolean issue guide
+  await page.goto("/guides/shopify/invalid-boolean-published");
+
+  // Page heading
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+
+  // Fix in Excel section
+  await expect(page.getByRole("heading", { name: /Fix in Excel/i })).toBeVisible();
+
+  // Fix in Google Sheets section
+  await expect(page.getByRole("heading", { name: /Fix in Google Sheets/i })).toBeVisible();
+
+  // Examples section
+  await expect(page.getByRole("heading", { name: /Examples/i })).toBeVisible();
+
+  // Prevent it next time section
+  await expect(page.getByRole("heading", { name: /Prevent it next time/i })).toBeVisible();
+});

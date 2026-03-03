@@ -1,129 +1,189 @@
 ---
 title: "How to Merge Two CSV Files"
-description: "Step-by-step guide to combining two CSV files into one using Excel Power Query, Google Sheets, or a simple command-line approach — no programming experience required."
+description: "Step-by-step guide to combining two CSV files into one using Excel Power Query, Google Sheets, or a simple command-line approach -- no programming experience required."
 keywords: ["merge csv files", "combine csv", "join two csv", "excel power query csv", "google sheets merge csv", "append csv", "stack csv files"]
 lastUpdated: "2026-03-03"
 kind: "curated"
 ---
 
-# How to Merge Two CSV Files
+## When Do You Need to Merge CSV Files?
 
-Combining two CSVs into one is one of the most common data prep tasks before an ecommerce import. Whether you're consolidating products from two suppliers, merging last month's export with new additions, or combining variant rows, this guide walks through three reliable methods.
+Merging two CSV files into one is a common step before an ecommerce import. You might need it when:
 
----
+- Consolidating products from two suppliers into one catalog upload
+- Combining last month's product export with new additions
+- Splitting a large import into smaller batches and then re-combining them
+- Combining variant rows from different sources into a single product CSV
 
-## Before You Start
-
-Make sure both files have **the same column headers in the same order**. If the columns don't match, merging will shift data into the wrong fields and corrupt your import.
-
-Quick checklist:
-- Open both files and compare the first row (headers).
-- Ensure column names match exactly (case matters in some platforms).
-- Remove any summary or footer rows before merging.
+This guide covers three reliable methods: Excel Power Query, Google Sheets, and the command line. Each method preserves the header row from the first file and appends only data rows from the second.
 
 ---
 
-## Method 1: Excel Power Query (Recommended for Windows)
+## Before You Start: Align Your Headers
 
-Excel's Power Query lets you append multiple CSVs without any formulas or macros. It handles encoding and line-ending differences automatically.
+Both files must have the same column headers in the same order. If the columns differ, merging will shift data into the wrong fields and corrupt your import.
+
+Quick pre-merge checklist:
+
+- [ ] Open both files and compare the first row (headers) side by side
+- [ ] Column names match exactly (case-sensitive on some platforms)
+- [ ] Columns are in the same order in both files
+- [ ] No summary or footer rows in either file
+- [ ] Both files are saved as UTF-8
+
+If the headers are in different orders, reorder the columns in one file before merging. Python's DictWriter method (Method 4 below) handles mismatched column orders automatically.
+
+---
+
+## Method 1: Excel Power Query (Windows -- Recommended)
+
+Excel's Power Query appends multiple CSVs without formulas or macros. It handles encoding and line-ending differences between files automatically, and it never repeats the header row.
 
 ### Steps
 
-1. Open a **blank Excel workbook**.
-2. Go to the **Data** tab → click **Get Data** → **From File** → **From Text/CSV**.
+1. Open a blank Excel workbook.
+2. Go to the **Data** tab, click **Get Data**, then **From File**, then **From Text/CSV**.
 3. Select your **first CSV file** and click **Import**. When the preview appears, click **Transform Data** (not Load).
-4. In the Power Query Editor, go to **Home** → **Append Queries** → **Append Queries as New**.
-5. In the dialog, select **Two tables**, then choose your **second query** from the dropdown.
-6. A new combined query appears. Click **Close & Load** to write it to a sheet.
-7. Select all the data on the sheet, go to **File** → **Save As**, and choose **CSV UTF-8 (Comma delimited)** as the format.
+4. In the Power Query Editor, go to **Home** > **Append Queries** > **Append Queries as New**.
+5. In the dialog, choose **Two tables**, then select your second query from the dropdown list.
+6. A new combined query appears in the left panel. Click **Close and Load** to write it to a new sheet.
+7. Select all data on the sheet, then go to **File** > **Save As** and choose **CSV UTF-8 (Comma delimited)** or **CSV (Comma delimited)** as the file format.
 
 ### Why Power Query
 
-- Handles files of different encodings.
+- Handles files with different encodings without error.
+- Adds the header row exactly once, not once per file.
 - Does not add extra blank rows between the two files.
-- Repeats the header row only once, not twice.
+- Scales to very large files (millions of rows) without crashing.
 
 ---
 
-## Method 2: Google Sheets (Quick, Browser-Based)
+## Method 2: Google Sheets (Browser-Based, Smaller Files)
 
-If you don't have Excel, Google Sheets works well for smaller files (under ~50,000 rows per sheet).
+Google Sheets is a quick option if you do not have Excel. It works well for files with fewer than roughly 50,000 rows total.
 
 ### Steps
 
-1. **Upload the first CSV** to Google Drive: right-click → **Open with** → **Google Sheets**.
-2. Scroll to the last row of data. Note the row number (e.g., row 500).
-3. **Open the second CSV** in a second browser tab using the same method.
-4. In the second sheet, click the row number **2** (the first data row, skipping the header). Press **Ctrl+Shift+End** to select all data rows.
-5. Copy (Ctrl+C), switch back to the first tab, click the **first empty row** below your data, and paste (Ctrl+V).
-6. Go to **File** → **Download** → **Comma Separated Values (.csv)**.
+1. Open Google Drive and upload your first CSV: right-click an empty area, choose **File upload**, select the CSV, then right-click the uploaded file and choose **Open with > Google Sheets**.
+2. Note the row number of the last data row (for example, row 500 if your file has 499 data rows plus one header row).
+3. Open your second CSV the same way in a new browser tab.
+4. In the second sheet, click the row number **2** (the first data row, below the header). Press **Ctrl+Shift+End** to extend the selection to the last row and last column with data.
+5. Press **Ctrl+C** to copy. Switch to the first tab. Click on the first empty row below your data.
+6. Press **Ctrl+V** to paste the data rows (without the header).
+7. Go to **File** > **Download** > **Comma Separated Values (.csv)**.
 
 ### Watch Out For
 
-- Google Sheets adds a BOM (Byte Order Mark) in some exports. If your platform rejects the file, open the downloaded CSV in a text editor and re-save as UTF-8 without BOM.
-- Very large files (100k+ rows) can cause Google Sheets to become slow or crash. Use the CLI method below instead.
+- Google Sheets sometimes adds a BOM on export. If your platform rejects the merged file, open it in VS Code and re-save as UTF-8 without BOM.
+- Very large files (100,000+ rows) can cause Sheets to slow down or freeze. Use the CLI or Python method instead.
+- Double-check that the pasted rows align with the columns correctly -- one off-by-one column shift corrupts the entire merge.
 
 ---
 
-## Method 3: Command Line (Fast, Any OS)
+## Method 3: Command Line (Fastest, Any File Size)
 
-If you have a terminal available, this is the fastest method — it takes under a second regardless of file size.
+If you have a terminal available, the command-line approach takes under a second regardless of file size. No software installation required on macOS or Linux.
 
-### On macOS or Linux
+### macOS or Linux
 
 ```bash
-# Merge file1.csv + file2.csv into merged.csv
+# Merge file1.csv and file2.csv into merged.csv
 # tail -n +2 skips the header row of the second file
 cat file1.csv <(tail -n +2 file2.csv) > merged.csv
 ```
 
-### On Windows (Command Prompt)
+### Windows (Command Prompt)
 
 ```bat
-:: Step 1 — copy the first file
+:: Copy the first file to start
 copy file1.csv merged.csv
 
-:: Step 2 — append all rows except the header from the second file
+:: Append all rows except the header from the second file
 more +1 file2.csv >> merged.csv
 ```
 
-### Using Python (cross-platform, handles encoding)
+Note: the Windows `more +1` command skips the first line. This works correctly for standard CSVs but may have issues with very large files. Use Python (Method 4) for large files on Windows.
+
+### Verifying the Result
+
+After merging on the command line, open the result in a text editor and confirm:
+
+- The header row appears exactly once (at the top)
+- No blank line between the two files' data
+- The last row of file1 and the first data row of file2 are on consecutive lines
+- No extra newline at the end (most importers tolerate this, but it is cleaner without one)
+
+---
+
+## Method 4: Python (Cross-Platform, Handles Mismatched Columns)
+
+Python's `csv.DictWriter` is the most reliable merge method. It handles different encodings, different column orders, and large files. You do not need to be a programmer -- just install Python and run the script below.
+
+### The Script
 
 ```python
 import csv
 
-files = ["file1.csv", "file2.csv"]
-output = "merged.csv"
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
 
-with open(output, "w", newline="", encoding="utf-8") as out:
+with open(output_file, "w", newline="", encoding="utf-8") as out:
     writer = None
-    for i, fname in enumerate(files):
-        with open(fname, encoding="utf-8") as f:
+    for fname in files_to_merge:
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            # utf-8-sig strips BOM if present
             reader = csv.DictReader(f)
             if writer is None:
+                # Create writer with headers from the first file
                 writer = csv.DictWriter(out, fieldnames=reader.fieldnames)
                 writer.writeheader()
             for row in reader:
                 writer.writerow(row)
 
-print(f"Done — merged {len(files)} files into {output}")
+print(f"Done -- merged {len(files_to_merge)} files into {output_file}")
 ```
 
-Save this as `merge.py` and run: `python merge.py`
+Save this file as `merge.py` in the same folder as your CSV files. Open a terminal or command prompt in that folder and run:
+
+```
+python merge.py
+```
+
+### Why Use Python?
+
+- Works on Windows, Mac, and Linux.
+- Handles files with different encodings (utf-8-sig strips BOM automatically).
+- Handles columns in a different order -- DictWriter maps by column name, not position.
+- Processes files row by row without loading everything into memory, so it works on very large files.
 
 ---
 
-## Common Problems
+## Common Problems and How to Fix Them
 
 | Problem | Cause | Fix |
 |---|---|---|
-| Extra blank rows in the middle | Second file had a trailing newline or summary row | Delete the extra row, or add `if any(row.values()):` check in Python |
-| Duplicate header row in the middle | You forgot to skip the header of the second file | Use `tail -n +2` (CLI) or Power Query Append |
-| Wrong data in columns | Column order is different between files | Align headers before merging, or use Python's `DictWriter` which handles mismatched order |
-| Encoding errors on import | Files are different encodings (e.g., Latin-1 vs UTF-8) | Convert both to UTF-8 first: `iconv -f latin1 -t utf-8 file2.csv -o file2_utf8.csv` |
+| Extra blank row in the middle of the merged file | Second file had a trailing newline or summary row | Delete the blank row, or add `if any(row.values()):` before `writer.writerow(row)` in Python |
+| Duplicate header row in the middle | Forgot to skip the header of the second file | Use `tail -n +2` (CLI) or Power Query Append (which skips it automatically) |
+| Data shifted to wrong columns | Column order is different between files | Reorder columns in one file first, or use the Python DictWriter approach |
+| Garbled characters in the merged file | Files have different encodings | Convert both files to UTF-8 first using iconv on Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv -o file2_utf8.csv` |
+| File rejected with "invalid format" | Merged file has a BOM | Open in VS Code and re-save as UTF-8 without BOM |
 
 ---
 
-## After Merging
+## What Not to Do
 
-Before importing the merged file, run it through the CSV fixer to catch any structural issues that crept in during the merge.
+- **Do not copy-paste between sheets by hand.** It is easy to skip a row, paste one column off, or accidentally repeat the header row. Use one of the automated methods above.
+- **Do not open both files in Excel and manually cut-paste rows.** Excel sometimes reformats dates, prices, and booleans when you paste them, silently corrupting the data.
+- **Do not merge files with different numbers of columns without fixing the headers first.** The result will have misaligned data.
+
+---
+
+## After Merging: Validate Before Importing
+
+After merging, run the combined file through the CSV Fixer before importing. Merges can introduce issues that were not present in either source file:
+
+- An extra header row in the middle (caught by the fixer as a structural issue)
+- Duplicate SKUs or handles (caught by duplicate-detection validation)
+- Encoding inconsistencies (caught by the fixer's encoding analysis)
+
+Upload your merged CSV to the fixer and let it validate the complete file before you send it to your platform.
