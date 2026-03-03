@@ -7,11 +7,12 @@ export default defineConfig({
     baseURL: "http://localhost:3000",
     headless: true,
   },
-  // Do not run a web server automatically; start `npm run dev` or `npm start` separately.
+  // In CI the build has already run, so start the production server.
+  // Locally, reuse whatever dev server is already running (or start one).
   webServer: {
-    command: "npm run dev",
+    command: process.env.CI ? "npm run start" : "npm run dev",
     url: "http://localhost:3000",
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },
 });
