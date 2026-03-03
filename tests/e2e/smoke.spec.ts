@@ -19,3 +19,16 @@ test("app page loads, accepts CSV upload, shows issues table and Export button",
   // 5. Confirm the Export button exists.
   await expect(page.getByRole("button", { name: /export/i })).toBeVisible();
 });
+
+test("guides hub renders with platform links and search input", async ({ page }) => {
+  await page.goto("/guides");
+
+  // Page heading
+  await expect(page.getByRole("heading", { name: /CSV Import Guides/i })).toBeVisible();
+
+  // Search input (in sidebar)
+  await expect(page.locator('input[type="search"]')).toBeVisible();
+
+  // At least one platform link (Shopify)
+  await expect(page.getByRole("link", { name: /Shopify/i }).first()).toBeVisible();
+});

@@ -2,6 +2,7 @@
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "../lib/presets";
 import { getEcommercePlatforms } from "../lib/ecommercePlatforms";
+import { getAllGuides, GUIDE_PLATFORMS } from "../lib/guidesRegistry";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://striveformats.com";
@@ -39,5 +40,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/amazon-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
   ];
 
-  return [...core, ...fixerPages, ...ecommercePages, ...presetPages];
+  const guideHubPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/guides`, changeFrequency: "monthly", priority: 0.8 },
+    ...GUIDE_PLATFORMS.map((p) => ({
+      url: `${baseUrl}/guides/${p}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    })),
+  ];
+
+  const guideDetailPages: MetadataRoute.Sitemap = getAllGuides().map((g) => ({
+    url: `${baseUrl}/guides/${g.platform}/${g.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...core, ...fixerPages, ...ecommercePages, ...presetPages, ...guideHubPages, ...guideDetailPages];
 }

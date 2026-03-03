@@ -157,6 +157,10 @@ export default function TopBar() {
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
           </Link>
 
+          <Link className="rgb-btn" href="/guides">
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Guides</span>
+          </Link>
+
           {canAccessCustomFormats ? (
             <Link className="rgb-btn" href="/formats" title="Open Custom Formats builder">
               <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
