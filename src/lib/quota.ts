@@ -1,6 +1,6 @@
 import { getMonthKey } from "@/lib/month";
 
-const KEY = "csnest_free_quota_v1";
+const KEY = "striveformats_free_quota_v1";
 
 type LocalQuotaState = {
   monthKey: string; // YYYY-MM
