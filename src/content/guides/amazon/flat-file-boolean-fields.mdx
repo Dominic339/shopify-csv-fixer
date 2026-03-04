@@ -1,0 +1,158 @@
+---
+title: "Amazon Flat File Boolean Fields: y/n, TRUE/FALSE, and Common Pitfalls"
+description: "Learn which boolean fields in Amazon Seller Central Flat Files expect 'y' or 'n' (not TRUE/FALSE or 1/0), how to fix invalid values in bulk, and how to avoid spreadsheet auto-formatting that corrupts boolean columns."
+keywords: ["amazon flat file boolean", "amazon csv boolean fields", "amazon y n csv", "amazon flat file true false", "amazon seller central csv boolean", "amazon is_adult_product", "amazon batteries_required", "amazon flat file errors"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Which boolean values Amazon Flat Files accept (y/n vs TRUE/FALSE vs 1/0)"
+  - "Which common Flat File fields are boolean"
+  - "How Excel and Google Sheets silently corrupt y/n values"
+  - "How to find and fix invalid boolean values across hundreds of rows"
+  - "How to prevent boolean corruption in future exports"
+bestFor: "Amazon sellers using Seller Central Flat Files to bulk upload or update listings, especially for safety compliance, shipping, and item condition fields"
+timeToComplete: "8 minutes"
+---
+
+## Boolean Values in Amazon Flat Files
+
+Amazon's category-specific Flat File templates (downloaded from Seller Central) use different boolean conventions depending on the column. Getting this wrong causes upload validation errors or silent data problems.
+
+The three formats you will encounter:
+
+| Format | Example | When used |
+|---|---|---|
+| `y` / `n` | `y`, `n` | Most safety and shipping boolean fields |
+| `true` / `false` | `true`, `false` | Some template versions, case-insensitive |
+| `1` / `0` | Not common | Rare; some custom flat files |
+
+**The most common mistake:** Using `TRUE`/`FALSE` (Excel's default boolean display) in a column that expects `y`/`n`. Amazon rejects these with a validation error or silently ignores the field.
+
+---
+
+## Common Boolean Fields in Amazon Flat Files
+
+These columns appear in many category templates and require careful attention:
+
+| Column name | Expected values | What it controls |
+|---|---|---|
+| `batteries_required` | `y` / `n` | Whether the item requires batteries |
+| `batteries_included` | `y` / `n` | Whether batteries are included in the package |
+| `is_adult_product` | `y` / `n` | Adult content designation |
+| `is_expiration_dated_product` | `y` / `n` | Whether the product has an expiry date |
+| `item_package_quantity` | integer | (Not boolean, but often confused) |
+| `hazmat_applicable` | `y` / `n` | Hazmat / dangerous goods flag |
+| `fragile` | `y` / `n` | Whether item is fragile for shipping |
+| `is_discontinued_by_manufacturer` | `y` / `n` | Discontinued product flag |
+| `generic_keywords` | text | (Not boolean — listed here to avoid confusion) |
+
+> **Note:** The exact column names and accepted values vary by category template. Always refer to the data definitions tab in the template you downloaded from Seller Central for your specific category.
+
+---
+
+## How Spreadsheets Corrupt Boolean Values
+
+### Excel's auto-conversion
+
+When you type `y` in a cell, Excel leaves it as text. But problems arise when:
+
+1. **Opening a CSV that already has y/n values:** If Excel interprets the column as boolean and auto-formats it, `y` may be displayed correctly but saved as a platform-specific value on export.
+2. **Using TRUE/FALSE:** If someone enters `TRUE` or `FALSE` (Excel's built-in boolean literals), Excel stores them as booleans. When exported to CSV, Excel writes `TRUE` or `FALSE` (uppercase) — which Amazon rejects for `y`/`n` columns.
+3. **Formulas producing TRUE/FALSE:** If a formula like `=IF(A2>0, TRUE, FALSE)` is used to fill boolean columns, the result is `TRUE`/`FALSE`, not `y`/`n`.
+
+### Google Sheets
+
+Same behavior: Sheets' boolean type uses `TRUE`/`FALSE`. Formulas and checkbox columns produce these values, not `y`/`n`.
+
+---
+
+## Finding Invalid Boolean Values
+
+### In Excel
+
+1. Open your Flat File CSV via **Data → From Text/CSV** to avoid auto-formatting.
+2. For each boolean column (e.g., `batteries_required`):
+   a. Click the filter dropdown.
+   b. Look for values other than `y` and `n`.
+   c. Flag any row with `TRUE`, `FALSE`, `1`, `0`, `yes`, `no`, or blank where a value is required.
+
+### Using a helper column formula
+
+Add a column next to each boolean field to validate it:
+
+```
+=IF(OR(LOWER(A2)="y", LOWER(A2)="n", A2=""), "OK", "INVALID: "&A2)
+```
+
+Filter for rows showing `INVALID` to find all problem values.
+
+---
+
+## Fixing Invalid Boolean Values in Bulk
+
+### Find and replace in Excel
+
+1. Press **Ctrl+H** (Find & Replace).
+2. In **Find what**, enter `TRUE`.
+3. In **Replace with**, enter `y` (if TRUE should map to y) or `n`.
+4. Click **Options → Look in: Values** to match cell values, not formulas.
+5. Click **Replace All**.
+6. Repeat for `FALSE` → `n` (or `y`, depending on the field's meaning).
+
+> **Important:** Decide the mapping for each field — `TRUE` might mean `y` for `batteries_included` but may not make sense for `is_adult_product`. Review the field meaning before mass-replacing.
+
+### Replace formula results with values
+
+If your boolean columns are computed by formulas:
+
+1. Select the entire column.
+2. Copy (**Ctrl+C**).
+3. Right-click → **Paste Special → Values** (or use the Paste Special dialog).
+4. The formulas are replaced with static text.
+5. Now use Find & Replace as above to convert `TRUE`/`FALSE` to `y`/`n`.
+
+### Google Sheets equivalent
+
+1. Select the boolean column.
+2. **Edit → Find and replace** (Ctrl+H).
+3. Search for `TRUE`, replace with `y`. Apply to "This sheet."
+4. Repeat for `FALSE` → `n`.
+5. Check "Match case" to avoid accidentally replacing partial strings.
+
+---
+
+## Preventing Future Boolean Corruption
+
+### Never use Excel boolean cells for Flat File columns
+
+Format your boolean columns as **Text** (right-click → Format Cells → Text) before entering any data. This prevents Excel from interpreting `y`/`n` or `TRUE`/`FALSE` as native boolean values.
+
+### Use data validation dropdowns
+
+In Excel, set up a dropdown for boolean columns:
+
+1. Select the column cells (below the header).
+2. Go to **Data → Data Validation**.
+3. Under "Allow," choose **List**.
+4. In "Source," enter: `y,n`
+5. Click OK.
+
+Now only `y` or `n` can be entered in those cells, preventing accidental `TRUE`/`FALSE` or freeform values.
+
+### Verify before every upload
+
+Before uploading your Flat File to Seller Central:
+1. Open the final CSV in a text editor (not Excel) and visually scan the boolean columns.
+2. Confirm you see only `y` and `n` (or whatever format your template specifies).
+3. No `TRUE`, `FALSE`, `Yes`, `No`, or empty cells where the field is required.
+
+---
+
+## Amazon Upload Errors Related to Boolean Fields
+
+| Error | Likely cause |
+|---|---|
+| "Invalid value for batteries_required" | `TRUE` or `Yes` instead of `y` |
+| "batteries_required is required" | Field left blank for a physical product |
+| Row silently ignored | `FALSE` used — Amazon skips the field update |
+| "Value not in valid range" | Using `1`/`0` in a `y`/`n` column |

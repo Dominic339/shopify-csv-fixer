@@ -1,0 +1,3 @@
+Title,URL handle,Product image URL,Image position,SKU,Price,Inventory quantity,Option1 name,Option1 value,Status
+"",cool-hat,https://example.com/hat-2.jpg,2,,,,,,active
+Cool Hat,cool-hat,https://example.com/hat.jpg,1,CH-001,19.99,10,Title,Default Title,active

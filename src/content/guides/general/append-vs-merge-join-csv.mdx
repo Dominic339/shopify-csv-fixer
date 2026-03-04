@@ -1,0 +1,168 @@
+---
+title: "Append vs Merge vs Join: Combining CSV Files the Right Way"
+description: "Understand the difference between appending rows, merging files with the same structure, and joining files with related data. Choose the right approach for your ecommerce catalog workflow."
+keywords: ["append csv files", "merge csv files", "join csv files", "combine csv", "csv rows combine", "csv vlookup join", "csv catalog merge", "shopify csv append"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "The difference between append, merge, and join for CSV files"
+  - "When to use each approach in ecommerce catalog workflows"
+  - "How to append rows correctly without duplicating headers"
+  - "How to join two CSV files on a shared key column"
+  - "Common mistakes when combining CSV files"
+bestFor: "Catalog managers, developers, and sellers who combine product data from multiple sources, suppliers, or export files"
+timeToComplete: "10 minutes"
+---
+
+## Three Operations, Three Meanings
+
+When people say "combine CSV files," they usually mean one of three distinct operations. Using the wrong one causes data loss or structural errors.
+
+| Operation | What changes | Row count | Column count |
+|---|---|---|---|
+| **Append** | Add more rows | Increases | Same |
+| **Merge** | Combine two files with the same structure | Increases | Same |
+| **Join** | Add columns from a related file | Same | Increases |
+
+---
+
+## Append: Adding More Rows
+
+**What it does:** Takes rows from a second CSV and adds them to the end of the first. Both files must have identical column structures.
+
+**When to use it:**
+- Combining paginated exports (file 1 = rows 1–500, file 2 = rows 501–1000).
+- Adding a new batch of products to an existing catalog file before uploading.
+- Combining files from different regional teams that export the same format.
+
+**How to append correctly in Excel:**
+
+1. Open your base file.
+2. Open the second file.
+3. In the second file, **delete the header row** (right-click row 1 → Delete).
+4. Select all remaining data (Ctrl+A, then adjust if it selects too much).
+5. Copy (Ctrl+C).
+6. Switch to the base file, click the first empty cell below the last data row.
+7. Paste (Ctrl+V).
+8. Save as CSV UTF-8.
+
+**Critical mistake to avoid:** Skipping step 3 (deleting the header) creates duplicate header rows mid-file, which breaks every import platform.
+
+**How to append in Google Sheets:**
+
+Same process — delete the header row of the second file, copy data rows only, paste at the bottom of the base sheet.
+
+---
+
+## Merge: Combining Files with the Same Columns (from Multiple Sources)
+
+**What it does:** Essentially the same as append, but the term "merge" is typically used when combining files from different sources that represent the same entity type (e.g., two supplier product lists in the same format).
+
+**When to use it:**
+- Combining product feeds from two different suppliers into one upload file.
+- Merging separate department exports that all use the same platform CSV template.
+
+**Additional considerations for merges (vs simple appends):**
+- **Check for duplicate rows.** If both files have the same product, the merged file will have it twice. Use Handle (Shopify), SKU (WooCommerce/Amazon), or Item ID (eBay) to detect duplicates. In Excel: **Data → Remove Duplicates**, select the key column.
+- **Normalize column names.** If supplier A calls a column `Barcode` and supplier B calls it `UPC`, you need to standardize to the platform's expected column name before merging.
+- **Normalize values.** Prices may use different currencies; statuses may use different conventions (Published vs TRUE vs 1).
+
+---
+
+## Join: Adding Columns from a Related File
+
+**What it does:** Combines two files horizontally — adding columns from a second file to the first, matched on a shared key column (like a SKU or Handle).
+
+**When to use it:**
+- You have a product list from your ERP (Handle, Title, SKU, Price) and a separate inventory file (SKU, Quantity, Warehouse Location) — you want to add quantity to each product row.
+- You export products without images from one system and have a separate image URL file matched by SKU.
+- You want to add supplier-specific data (cost price, supplier part number) to your product catalog before import.
+
+### Performing a Join with VLOOKUP in Excel
+
+Assume:
+- **File A** (base): columns A=Handle, B=Title, C=Price
+- **File B** (lookup): columns A=Handle, B=Quantity
+
+You want to add Quantity from File B to File A.
+
+1. In File A, add a new column header: `Quantity` (in column D).
+2. In D2, enter:
+   ```
+   =VLOOKUP(A2, '[FileB.csv]Sheet1'!$A:$B, 2, FALSE)
+   ```
+3. If the key matches, Quantity is filled in. If no match, `#N/A` appears — which means that Handle is not in File B.
+4. Copy the formula down to all rows.
+5. Once satisfied, select column D, copy, and **Paste Special → Values** to replace formulas with static values.
+6. Close File B.
+7. Save File A as CSV UTF-8.
+
+### Performing a Join in Google Sheets
+
+Use `VLOOKUP` with the same syntax. Alternatively, use `IMPORTRANGE` to pull from another Google Sheet, then use a helper column.
+
+### Performing a Join with Python (large files)
+
+```python
+import csv
+
+# Load the lookup file into a dict keyed by Handle
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Add Quantity to the base file
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Common Mistakes When Combining CSV Files
+
+### Mistake 1: Duplicate header rows after append
+
+**Symptom:** Import fails with "unrecognized row" errors mid-file.
+**Fix:** Always delete the header row of every file except the first before appending.
+
+### Mistake 2: Column order mismatch in appended files
+
+**Symptom:** Data appears in the wrong columns after appending.
+**Fix:** Both files must have identical column order, not just identical column names. If File B has columns in a different order, reorder its columns to match File A before appending.
+
+### Mistake 3: Joining on a non-unique key
+
+**Symptom:** VLOOKUP returns the wrong quantity (picks the first match, ignoring duplicates).
+**Fix:** Ensure the key column (SKU, Handle) is unique in the lookup file before joining. Use **Data → Remove Duplicates** or check with COUNTIF.
+
+### Mistake 4: Encoding mismatch after combining
+
+**Symptom:** Garbled characters in rows from one of the source files.
+**Fix:** Ensure all source files are saved as UTF-8 before combining. Re-encode any non-UTF-8 file using VS Code (see the encoding guide).
+
+### Mistake 5: Blank rows between appended sections
+
+**Symptom:** Import stops at the blank row and ignores all subsequent rows.
+**Fix:** After appending, scroll through the combined file and delete any blank rows that appear between the sections.
+
+---
+
+## Quick Decision Guide
+
+```
+Do you need more rows? → Append or Merge
+Do you need more columns? → Join
+
+Are the source files from the same system with identical columns? → Append
+Are the source files from different systems with the same column template? → Merge (check for duplicates)
+Do you have product data in one file and enrichment data in another? → Join
+```

@@ -1,21 +1,11 @@
 User-agent: *
 Allow: /
-
-# Explicitly allow key public pages (helps some crawlers when other rules exist)
-Allow: /app
+Allow: /shopify-csv-fixer
+Allow: /presets
 Allow: /formats
+Allow: /formats/presets
 Allow: /about
 Allow: /privacy
 Allow: /terms
 
-# Block non-public / sensitive areas
-Disallow: /account
-Disallow: /profile
-Disallow: /login
-Disallow: /checkout
-Disallow: /api
-
-# Block framework internals
-Disallow: /_next/
-
-Sitemap: https://csnest.vercel.app/sitemap.xml
+Sitemap: https://striveformats.com/sitemap.xml

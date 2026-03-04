@@ -3,17 +3,13 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getStripeSecretKey } from "@/lib/stripeEnv";
 
 export const runtime = "nodejs";
 
-function requireEnv(name: string) {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing ${name} env var`);
-  return v;
-}
-
-function getStripe() {
-  return new Stripe(requireEnv("STRIPE_SECRET_KEY"));
+function getStripe(): Stripe | null {
+  const key = getStripeSecretKey();
+  return key ? new Stripe(key) : null;
 }
 
 export async function POST() {
@@ -50,6 +46,9 @@ export async function POST() {
       (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "") || "http://localhost:3000";
 
     const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
+    }
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,

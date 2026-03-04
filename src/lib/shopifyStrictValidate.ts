@@ -2,6 +2,7 @@
 import type { CsvRow } from "./csv";
 import type { Issue } from "./shopifyBasic";
 import { isHttpUrl, isValidShopifyBool, normalizeShopifyBool, isValidShopifyInventoryPolicy, normalizeShopifyInventoryPolicy } from "./shopifySchema";
+import { getShopifyVariantSignature } from "./shopifyVariantSignature";
 
 /**
  * Shopify Strict Validator
@@ -57,6 +58,16 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
     imageAlt: "Image alt text",
     fulfillmentService: "Fulfillment service",
   };
+
+  const variantCols = {
+    handle: COL.handle,
+    opt1Val: COL.opt1Val,
+    opt2Val: COL.opt2Val,
+    opt3Val: COL.opt3Val,
+    sku: COL.sku,
+    price: COL.price,
+  };
+
 
   // 1) Status: if the column exists, it must have a value (Shopify rule)
   if (has(COL.status)) {
@@ -304,17 +315,17 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
 
     for (const idx of idxs) {
       const r = fixedRows[idx];
-      const v1 = get(r, COL.opt1Val).trim();
-      const v2 = get(r, COL.opt2Val).trim();
-      const v3 = get(r, COL.opt3Val).trim();
 
-      // Image-only rows shouldn't be treated as variants.
-      const sku = get(r, COL.sku).trim();
-      const price = get(r, COL.price).trim();
-      const hasVariantSignals = Boolean(sku || price || v1 || v2 || v3);
-      if (!hasVariantSignals) continue;
+      // Use the shared variant signature helper so validator + simulator normalize the same way.
+      const sig = getShopifyVariantSignature(
 
-      const combo = [v1, v2, v3].join("|").toLowerCase();
+        r,
+        variantCols,
+        (row, col) => get(row as any, col)
+      );
+      if (!sig.hasVariantSignals) continue;
+
+      const combo = sig.comboKey;
       const list = seenCombos.get(combo) ?? [];
       list.push(idx);
       seenCombos.set(combo, list);
@@ -325,14 +336,42 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
       if (list.length <= 1) continue;
 
       const rowsList = list.map((i) => i + 1).join(", ");
+      const sample = fixedRows[list[0]] ?? {};
+      const n1Raw = String(sample[COL.opt1Name] ?? '').trim();
+      const n2Raw = String(sample[COL.opt2Name] ?? '').trim();
+      const n3Raw = String(sample[COL.opt3Name] ?? '').trim();
+      const n1 = n1Raw || 'Option1';
+      const n2 = n2Raw || 'Option2';
+      const n3 = n3Raw || 'Option3';
+      const v1 = String(sample[COL.opt1Val] ?? '').trim();
+      const v2 = String(sample[COL.opt2Val] ?? '').trim();
+      const v3 = String(sample[COL.opt3Val] ?? '').trim();
+
+      const duplicateCombo: Record<string, string> = {};
+      if (v1) duplicateCombo[n1] = v1;
+      if (v2) duplicateCombo[n2] = v2;
+      if (v3) duplicateCombo[n3] = v3;
+      const duplicateRows = list.map((i) => i + 1);
+
       for (const idx of list) {
         issues.push({
           severity: "error",
           code: "shopify/options_not_unique",
+          // Issue.row is 1-based (matches the rest of this validator and the UI)
           row: idx + 1,
           column: COL.opt1Val,
-          message: `Row ${idx + 1}: Option values for handle "${handle}" are not unique (rows ${rowsList}).`,
+          message: `Row ${idx + 1}: Two or more variants for handle "${handle}" have identical option values (rows ${duplicateRows.join(", ")}).`,
           suggestion: "Make each variant option combination unique (Option1/2/3 values).",
+          details: {
+            // Used by premium UI: structured duplicate-combo preview
+            duplicateCombos: [
+              {
+                handle,
+                options: duplicateCombo,
+                rows: duplicateRows,
+              },
+            ],
+          },
         });
       }
     }

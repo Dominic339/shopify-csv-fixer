@@ -1,5 +1,6 @@
 // src/lib/validation/fixAllShopify.ts
 import type { CsvIssue, CsvRow } from "@/lib/formats/types";
+import { normalizeShopifyInventoryPolicy } from "@/lib/shopifySchema";
 
 type FixAllResult = {
   fixedHeaders: string[];
@@ -94,21 +95,14 @@ export function fixAllShopifyBlocking(headers: string[], rows: CsvRow[], issues:
     }
 
     // Continue selling when out of stock:
-    // official expects true/false; legacy policy "continue"/"deny" can be mapped safely
+    // Shopify's column represents an inventory policy: deny | continue.
+    // We accept boolean-ish inputs and normalize deterministically to deny/continue.
+    // IMPORTANT: Keep this consistent with shopifyBasic + strict validator to avoid "flip-flop" logs.
     const contRaw = getCell(row, COL.continueSelling, LEGACY.continueSelling);
-    const contBool = normalizeBoolStrict(contRaw);
-    if (contBool != null && contBool !== contRaw) {
-      setCell(row, COL.continueSelling, contBool);
-      fixesApplied.push(`Normalized "${COL.continueSelling}" to "${contBool}" on row ${rowIndex + 1}`);
-    } else {
-      const legacyPolicy = (contRaw ?? "").toString().trim().toLowerCase();
-      if (legacyPolicy === "continue") {
-        setCell(row, COL.continueSelling, "true");
-        fixesApplied.push(`Mapped legacy inventory policy "continue" to "${COL.continueSelling}=true" on row ${rowIndex + 1}`);
-      } else if (legacyPolicy === "deny") {
-        setCell(row, COL.continueSelling, "false");
-        fixesApplied.push(`Mapped legacy inventory policy "deny" to "${COL.continueSelling}=false" on row ${rowIndex + 1}`);
-      }
+    const contNorm = normalizeShopifyInventoryPolicy(contRaw);
+    if (contNorm && contNorm !== (contRaw ?? "").toString().trim()) {
+      setCell(row, COL.continueSelling, contNorm);
+      fixesApplied.push(`Normalized "${COL.continueSelling}" to "${contNorm}" on row ${rowIndex + 1}`);
     }
 
     // Requires shipping

@@ -2,6 +2,7 @@
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "../lib/presets";
 import { getEcommercePlatforms } from "../lib/ecommercePlatforms";
+import { getAllGuides, GUIDE_PLATFORMS } from "../lib/guidesRegistry";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://striveformats.com";
@@ -18,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const ecommercePages: MetadataRoute.Sitemap = getEcommercePlatforms().map((platform) => ({
-    url: `${baseUrl}${platform.href}`,
+    url: `${baseUrl}/ecommerce/${encodeURIComponent(platform.id)}`,
     changeFrequency: "monthly",
     priority: 0.75,
   }));
@@ -29,5 +30,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...core, ...ecommercePages, ...presetPages];
+  const fixerPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/shopify-csv-fixer`, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${baseUrl}/woocommerce-csv-fixer`, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${baseUrl}/woocommerce-variable-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/etsy-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/ebay-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/ebay-variations-csv-fixer`, changeFrequency: "monthly", priority: 0.75 },
+    { url: `${baseUrl}/amazon-csv-fixer`, changeFrequency: "monthly", priority: 0.8 },
+  ];
+
+  const guideHubPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/guides`, changeFrequency: "monthly", priority: 0.8 },
+    ...GUIDE_PLATFORMS.map((p) => ({
+      url: `${baseUrl}/guides/${p}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    })),
+  ];
+
+  const guideDetailPages: MetadataRoute.Sitemap = getAllGuides().map((g) => ({
+    url: `${baseUrl}/guides/${g.platform}/${g.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...core, ...fixerPages, ...ecommercePages, ...presetPages, ...guideHubPages, ...guideDetailPages];
 }

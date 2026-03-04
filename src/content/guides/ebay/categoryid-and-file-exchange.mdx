@@ -1,0 +1,158 @@
+---
+title: "eBay CategoryID and File Exchange: What It Is and How to Set It"
+description: "Understand what the eBay CategoryID field is, why it's required in File Exchange uploads, how to find the right category ID for your products, and how to fill it in bulk across your catalog."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "ebay category id", "ebay csv import", "ebay flat file category", "ebay bulk listing upload", "ebay categoryid lookup"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "What the eBay CategoryID column represents in File Exchange CSV files"
+  - "Why a missing or incorrect CategoryID causes listing failures"
+  - "How to find the correct CategoryID for your product type"
+  - "How to fill CategoryID across hundreds of rows efficiently"
+  - "Tips for verifying category selection before uploading"
+bestFor: "eBay sellers using File Exchange or bulk listing tools who need to assign category IDs to new or existing listings"
+timeToComplete: "10 minutes"
+---
+
+## What Is CategoryID?
+
+The `Category` column (or `CategoryID` depending on the File Exchange template version) in eBay's bulk listing CSV is a **numeric identifier** for the eBay product category your item belongs to. Every active listing on eBay must be assigned to a category, and eBay uses this ID to determine:
+
+- Where your listing appears in category browsing.
+- Which item specifics (required fields) apply to your listing.
+- Which buyer searches surface your item.
+
+A missing or incorrect CategoryID is one of the most common reasons eBay File Exchange uploads fail entirely or produce listings with incomplete item specifics.
+
+---
+
+## CategoryID vs Category Path
+
+The CSV requires a **number** (the CategoryID), not the human-readable category path. For example:
+
+| Category path | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > T-Shirts | 185101 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+You cannot use the path text in the CSV — it must be the numeric ID.
+
+---
+
+## Why CategoryID Matters for Item Specifics
+
+eBay's item specifics system (Brand, Size, Color, Material, etc.) is category-dependent. Selecting the wrong category means:
+- Required item specifics for the correct category won't be prompted or validated.
+- Your listing may be suppressed in search results if mandatory specifics are missing.
+- Buyers filtering by item specifics in your category won't find your listing.
+
+Always assign the most specific category possible (the deepest leaf category that accurately describes your product), not a broad parent category.
+
+---
+
+## How to Find the Right CategoryID
+
+### Method 1: eBay's Category Suggestions (Seller Hub)
+
+1. In eBay Seller Hub, create a draft listing manually for one of your products.
+2. In the "Category" step, use the search box to find your product type.
+3. eBay suggests categories based on your keywords.
+4. Select the most specific matching category.
+5. Note the category name — use it to look up the ID via the eBay category tree or the File Exchange download.
+
+### Method 2: eBay Category Tree Download
+
+eBay publishes a full category tree as a downloadable file:
+
+1. Go to **eBay Developer Program → Trading API → GetCategories**.
+2. Or use the public category search at: `https://pages.ebay.com/sellerinformation/growing/filing.html` (check eBay's current seller resources page for the category file download).
+3. The downloaded file maps category names to their numeric IDs.
+
+### Method 3: Look at a Successful Listing URL
+
+If you have an existing listing or a competitor's listing in the same category:
+
+1. View the listing page on eBay.
+2. In the URL or in the page source, find the category ID. eBay category pages have URLs like: `https://www.ebay.com/b/Laptops-Netbooks/177/bn_317584`
+3. The number in the URL path segment is the category ID.
+
+### Method 4: File Exchange Category Download
+
+From your eBay Seller account:
+
+1. Go to **My eBay → Selling → File Exchange**.
+2. Download the "Category Change File" or use the category lookup tool provided in the File Exchange documentation.
+3. Search for your product type in the category list.
+
+---
+
+## CategoryID in the File Exchange CSV
+
+The column name in the File Exchange template is `Category` for most template versions, or `*Category` (with an asterisk indicating it's required).
+
+```
+*Action,*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,185101,19.99,...
+Add,Women's Running Shoes,63889,45.00,...
+```
+
+**Rules:**
+- The value must be a positive integer matching a valid eBay leaf category.
+- Parent/intermediate categories are generally not accepted — use the most specific (deepest) category.
+- The category must be valid for your eBay site (US categories differ from UK, DE, AU, etc.).
+
+---
+
+## Filling CategoryID in Bulk
+
+For large catalogs where most products fall into a few categories:
+
+### In Excel: Use IF or VLOOKUP to assign categories
+
+If you have a helper column with a product type code:
+
+```
+=IF(B2="T-Shirts", 185101, IF(B2="Jeans", 11554, IF(B2="Shoes", 63889, "")))
+```
+
+Or build a reference table (product type → CategoryID) and use VLOOKUP:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+### In Excel: Fill down for same-category groups
+
+1. Sort your product list by product type.
+2. Enter the CategoryID for the first product in each group.
+3. Select from that cell to the last product in the group.
+4. **Ctrl+D** to fill down.
+
+### Using a filter
+
+1. Filter your catalog by product type column.
+2. Select all visible cells in the CategoryID column.
+3. Type the CategoryID and press **Ctrl+Enter** to fill all selected cells at once.
+
+---
+
+## Verifying CategoryID Before Upload
+
+A wrong CategoryID creates listings in the wrong category — a common and hard-to-catch mistake:
+
+1. **Spot check:** Take 5 CategoryID values from your CSV and look them up on eBay to confirm they map to the expected category path.
+2. **Check against your product type reference:** Maintain a simple table of product type → CategoryID and review it when adding new product types.
+3. **Test upload:** Upload a 1–3 row test file first. View the resulting listings and confirm they appear in the correct category.
+4. **Review eBay's confirmation report:** After every File Exchange upload, eBay generates a confirmation report. Review it for any row-level errors related to invalid category IDs.
+
+---
+
+## Common Errors
+
+| Error message | Likely cause |
+|---|---|
+| "Category is required" | CategoryID column is blank |
+| "Invalid category" | ID is not a valid eBay leaf category |
+| "Category not allowed for this listing type" | Fixed-price vs auction category restriction |
+| Item specifics errors after upload | Wrong category — specifics don't match your items |
