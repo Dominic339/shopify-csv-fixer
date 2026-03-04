@@ -75,6 +75,17 @@ test("general MDX guide renders TOC on desktop viewport", async ({ page }) => {
   expect(await page.locator(`#${CSS.escape(anchorId)}`).count()).toBeGreaterThan(0);
 });
 
+test("/api/ping responds 200 and is not rate-limited on back-to-back requests", async ({ request }) => {
+  // Two rapid requests to a harmless edge endpoint — neither should be blocked
+  // (rate-limit middleware is fail-open in dev and any env without Upstash creds)
+  for (let i = 0; i < 2; i++) {
+    const res = await request.get("/api/ping");
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({ ok: true });
+  }
+});
+
 test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, Examples)", async ({ page }) => {
   // Visit a well-known Shopify boolean issue guide
   await page.goto("/guides/shopify/invalid-boolean-published");

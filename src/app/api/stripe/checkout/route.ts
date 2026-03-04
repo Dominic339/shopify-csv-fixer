@@ -2,19 +2,19 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getStripeSecretKey } from "@/lib/stripeEnv";
 
 export const runtime = "nodejs";
 
-function requireEnv(name: string) {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing ${name} env var`);
-  return v;
-}
-
-const stripe = new Stripe(requireEnv("STRIPE_SECRET_KEY"));
-
 export async function POST(req: Request) {
   try {
+    const stripeKey = getStripeSecretKey();
+    if (!stripeKey) {
+      return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
+    }
+
+    const stripe = new Stripe(stripeKey);
+
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },

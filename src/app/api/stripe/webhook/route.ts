@@ -2,22 +2,18 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getStripeSecretKey } from "@/lib/stripeEnv";
 
 export const runtime = "nodejs";
-
-function requireEnv(name: string) {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing ${name} env var`);
-  return v;
-}
 
 function toIsoFromUnixSeconds(sec: number | null | undefined) {
   if (!sec || typeof sec !== "number") return null;
   return new Date(sec * 1000).toISOString();
 }
 
-function getStripe() {
-  return new Stripe(requireEnv("STRIPE_SECRET_KEY"));
+function getStripe(): Stripe | null {
+  const key = getStripeSecretKey();
+  return key ? new Stripe(key) : null;
 }
 
 async function upsertSubscriptionRow(args: {
@@ -64,9 +60,13 @@ export async function POST(req: Request) {
 
   const body = await req.text();
 
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
+  }
+
   let event: Stripe.Event;
   try {
-    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err: any) {
     return NextResponse.json(
