@@ -32,7 +32,7 @@ function loadFormats(): UserFormatV1[] {
 function saveFormats(formats: UserFormatV1[]) {
   localStorage.setItem(USER_FORMATS_STORAGE_KEY, JSON.stringify(formats));
   // Notify Fixer tab instantly (same-tab event)
-  window.dispatchEvent(new Event("csnest-formats-changed"));
+  window.dispatchEvent(new Event("striveformats-formats-changed"));
 }
 
 function downloadJson(filename: string, obj: unknown) {
@@ -255,7 +255,7 @@ export default function FormatsClient() {
   function exportSelected() {
     if (!selected) return;
     const base = selected.name ? safeNamePart(selected.name) : selected.id;
-    downloadJson(`${base}.csnest-format.json`, selected);
+    downloadJson(`${base}.striveformats-format.json`, selected);
     setToast("Exported format file");
   }
 

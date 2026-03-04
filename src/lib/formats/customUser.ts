@@ -1,7 +1,7 @@
 // src/lib/formats/customUser.ts
 import type { CsvFormat, CsvFixResult, CsvIssue, CsvRow } from "./types";
 
-export const USER_FORMATS_STORAGE_KEY = "csnest_user_formats_v1";
+export const USER_FORMATS_STORAGE_KEY = "striveformats_user_formats_v1";
 
 export type RuleType =
   | "trim"
@@ -180,7 +180,7 @@ export function loadUserFormatsFromStorage(): UserFormatV1[] {
 export function saveUserFormatsToStorage(formats: UserFormatV1[]) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(USER_FORMATS_STORAGE_KEY, JSON.stringify(formats));
-  window.dispatchEvent(new Event("csnest-formats-changed"));
+  window.dispatchEvent(new Event("striveformats-formats-changed"));
 }
 
 export function generateUserFormatId(existing: Set<string>) {
