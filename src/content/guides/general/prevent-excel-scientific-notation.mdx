@@ -1,0 +1,145 @@
+---
+title: "Prevent Excel from Converting SKUs and Barcodes to Scientific Notation"
+description: "Stop Excel from turning SKUs, EAN codes, and UPCs into scientific notation like 1.23456E+11. Format columns as text before pasting, use the import wizard, and fix existing files."
+keywords: ["excel scientific notation csv", "sku scientific notation", "barcode excel", "leading zeros csv", "excel text format", "upc ean excel", "1.23456e+11 fix", "excel number format csv"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Why Excel converts long numbers to scientific notation and drops leading zeros"
+  - "How to format columns as Text before entering data"
+  - "How to use the Excel import wizard to set column types"
+  - "How to fix existing scientific notation values in a saved CSV"
+  - "Google Sheets equivalents for each step"
+bestFor: "Sellers managing product catalogs with SKUs, barcodes (EAN-13, UPC-A), ISBN numbers, or any numeric code that must be preserved exactly"
+timeToComplete: "8 minutes"
+---
+
+## Why This Happens
+
+Excel is designed for financial data. When it sees a cell value that looks like a number, it converts it to numeric format. This causes two problems for ecommerce CSV files:
+
+1. **Scientific notation:** A 13-digit EAN barcode like `4006381333931` becomes `4.00638E+12`. When you export to CSV, it writes `4.00638E+12` — which is invalid as a barcode.
+2. **Lost leading zeros:** A SKU like `00714` becomes `714`. An 8-digit EAN-8 like `01234565` becomes `1234565`. The import platform sees the wrong value.
+
+These conversions happen silently. You may not notice until import fails or inventory is miscounted.
+
+---
+
+## Affected Fields
+
+Any field that contains long numeric strings or strings with leading zeros is at risk:
+
+- **Barcodes:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKUs** with leading zeros (common in fashion and hardware catalogs)
+- **Variant SKUs** inherited from manufacturer part numbers
+- **Shopify Variant Barcode** column
+- **Amazon ASIN / FNSKU** (alphanumeric, but partially numeric)
+- **WooCommerce SKU** column
+
+---
+
+## Prevention: Format Columns as Text Before Entering Data
+
+The safest approach is to format the column as **Text** before you type or paste anything into it.
+
+### In Excel (new spreadsheet)
+
+1. Select the entire column(s) that will contain barcodes or SKUs (e.g., click the column letter `C` to select column C).
+2. Right-click → **Format Cells**.
+3. In the **Category** list, choose **Text**.
+4. Click **OK**.
+5. Now type or paste your values. Excel will treat them as text and preserve them exactly.
+
+> **Important:** Formatting a cell as Text *after* entering a number does not undo the conversion. You must format first, then enter the data. If you paste into a pre-formatted column, paste as **Values only** (Ctrl+Shift+V or Paste Special → Values) to avoid bringing in numeric formatting from the source.
+
+### In Excel (prefix with apostrophe)
+
+A quick workaround for individual cells: type an apostrophe (`'`) before the number:
+
+```
+'4006381333931
+```
+
+Excel treats any value starting with `'` as text. The apostrophe is not stored in the cell value — only the number is saved. This works per-cell but is tedious for bulk data.
+
+---
+
+## Fix Existing Files: Opening a CSV with the Import Wizard
+
+If you already have a CSV where Excel has corrupted the barcodes, use the import wizard rather than double-clicking the file:
+
+### Excel 2016+ (Get & Transform)
+
+1. Open a blank workbook.
+2. Go to **Data → From Text/CSV**.
+3. Select your CSV file.
+4. The preview dialog opens. Look for the barcode/SKU column — if it shows scientific notation, the type was auto-detected as "Whole Number."
+5. Click **Transform Data** (Power Query Editor opens).
+6. Select the affected columns.
+7. In the **Home** tab → **Data Type** dropdown, choose **Text**.
+8. Close and load.
+9. Export back to CSV via **File → Save As → CSV UTF-8**.
+
+### Excel (Legacy Text Import Wizard)
+
+If you have the legacy wizard available:
+
+1. Go to **Data → From Text** (or **File → Open** and change file type to `.txt`, then rename).
+2. In **Step 3** of the wizard, select the column and set its data type to **Text**.
+3. Finish the import.
+
+---
+
+## Fix Existing Scientific Notation in a Saved CSV
+
+If you already have a CSV file with `4.00638E+12` values:
+
+### Option A: Text editor find-and-replace (manual, small files)
+
+Open the file in VS Code or Notepad++ and manually correct the values. Only practical for a handful of rows.
+
+### Option B: Reconstruct from the source
+
+If the original data is in a database, PIM, or supplier file, re-export it without opening in Excel. Many supplier portals let you download as `.xlsx` — open that, format the columns as Text, then save as CSV.
+
+### Option C: Use a formula to convert back
+
+If you have the original full-precision number (e.g., Excel still holds `4006381333931` internally and only displays it in scientific notation):
+
+1. Add a helper column.
+2. Use `=TEXT(A2, "0")` to convert the number to a text string with no scientific notation.
+3. Copy the helper column, paste as **Values** over the original.
+4. Delete the helper column.
+5. Save as CSV.
+
+> This only works if Excel still has the full number stored. If the value was truncated (more than 15 significant digits), the precision is permanently lost and you must get the original data from its source.
+
+---
+
+## Google Sheets Equivalents
+
+Google Sheets has the same numeric conversion problem:
+
+- **Format as plain text before pasting:** Select the column → **Format → Number → Plain text**.
+- **Import via File → Import:** In the import dialog, the column type can be set. However, Sheets usually auto-detects — confirm your barcodes look correct after import.
+- **Fix existing:** Use `=TEXT(A2, "0")` the same way as Excel.
+
+---
+
+## Exporting Safely from Excel to CSV
+
+After fixing or formatting your columns correctly:
+
+1. **File → Save As → CSV UTF-8 (Comma delimited) (.csv)**.
+2. Excel may warn that the file format does not support multiple sheets — click **Yes/Keep Current Format**.
+3. **Do not re-open the CSV in Excel to verify** — use a text editor (VS Code, Notepad++) to confirm the barcode values are plain numbers, not scientific notation.
+
+---
+
+## Prevention Checklist
+
+- [ ] Format barcode and SKU columns as **Text** before entering any data
+- [ ] Use **Data → From Text/CSV** (not double-click) to open existing CSVs
+- [ ] Set column type to **Text** in the import wizard for numeric-looking columns
+- [ ] Verify the exported CSV in a text editor, not Excel
+- [ ] If using Google Sheets, set columns to **Plain text** format before import

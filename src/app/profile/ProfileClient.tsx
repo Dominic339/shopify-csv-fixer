@@ -29,6 +29,7 @@ export default function ProfileClient() {
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [stripeEnabled, setStripeEnabled] = useState<boolean | null>(null);
 
   const upgradeIntent = useMemo(() => {
     const u = (sp.get("upgrade") ?? "").toLowerCase();
@@ -36,16 +37,22 @@ export default function ProfileClient() {
   }, [sp]);
 
   async function load() {
-    const r = await fetch("/api/subscription/status", { cache: "no-store" });
-    const j = (await r.json()) as SubStatus;
-    setSub(j);
+    const [subRes, statusRes] = await Promise.all([
+      fetch("/api/subscription/status", { cache: "no-store" }),
+      fetch("/api/stripe/status", { cache: "no-store" }),
+    ]);
+    setSub((await subRes.json()) as SubStatus);
+    setStripeEnabled(((await statusRes.json()) as { enabled: boolean }).enabled);
   }
 
   useEffect(() => {
-    load().catch(() => setSub(null));
+    load().catch(() => { setSub(null); setStripeEnabled(true); });
   }, []);
 
+  const billingUnavailable = stripeEnabled === false;
+
   async function openPortal() {
+    if (billingUnavailable) return;
     setBusy(true);
     setMsg("");
 
@@ -55,6 +62,7 @@ export default function ProfileClient() {
       const j = await safeReadJson(r);
 
       if (!r.ok) {
+        if (j?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
         const errMsg =
           j?.error ||
           `Billing portal failed (${r.status}). Check STRIPE_SECRET_KEY + NEXT_PUBLIC_SITE_URL env vars.`;
@@ -77,6 +85,7 @@ export default function ProfileClient() {
   }
 
   async function startCheckout(plan: "basic" | "advanced") {
+    if (billingUnavailable) return;
     setBusy(true);
     setMsg("");
 
@@ -99,6 +108,7 @@ export default function ProfileClient() {
       const j = await safeReadJson(r);
 
       if (!r.ok) {
+        if (j?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
         setMsg(j?.error ?? "Could not start checkout.");
         return;
       }
@@ -120,6 +130,12 @@ export default function ProfileClient() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-semibold">Profile</h1>
       <p className="mt-2 text-sm text-[var(--muted)]">Verify your subscription and manage billing.</p>
+
+      {billingUnavailable ? (
+        <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+          Billing is temporarily unavailable. Please try again later.
+        </div>
+      ) : null}
 
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         {sub ? (
@@ -145,7 +161,7 @@ export default function ProfileClient() {
                 <button
                   className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
                   onClick={openPortal}
-                  disabled={busy}
+                  disabled={busy || billingUnavailable}
                   type="button"
                 >
                   {busy ? "Opening…" : "Manage in Stripe (upgrade/cancel)"}
@@ -157,7 +173,7 @@ export default function ProfileClient() {
                   <button
                     className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
                     onClick={() => startCheckout("basic")}
-                    disabled={busy}
+                    disabled={busy || billingUnavailable}
                     type="button"
                   >
                     Upgrade to Basic
@@ -166,7 +182,7 @@ export default function ProfileClient() {
                   <button
                     className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
                     onClick={() => startCheckout("advanced")}
-                    disabled={busy}
+                    disabled={busy || billingUnavailable}
                     type="button"
                   >
                     Upgrade to Advanced
@@ -178,7 +194,7 @@ export default function ProfileClient() {
                 <button
                   className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
                   onClick={() => startCheckout("advanced")}
-                  disabled={busy}
+                  disabled={busy || billingUnavailable}
                   type="button"
                 >
                   Upgrade to Advanced

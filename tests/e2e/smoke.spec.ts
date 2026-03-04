@@ -75,6 +75,31 @@ test("general MDX guide renders TOC on desktop viewport", async ({ page }) => {
   expect(await page.locator(`#${CSS.escape(anchorId)}`).count()).toBeGreaterThan(0);
 });
 
+test("/api/stripe/status returns JSON with enabled boolean", async ({ request }) => {
+  const res = await request.get("/api/stripe/status");
+  expect(res.status()).toBe(200);
+  const body = await res.json();
+  // enabled must be a boolean (true or false — Stripe may not be configured in CI)
+  expect(typeof body.enabled).toBe("boolean");
+  // missing must be an array
+  expect(Array.isArray(body.missing)).toBe(true);
+});
+
+test("new curated MDX guide renders with TOC and section cards on desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/guides/general/fix-mojibake-encoding");
+
+  // Page heading should be visible
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+
+  // TOC nav should exist on wide desktop viewport
+  const toc = page.locator('[data-testid="guide-toc"]');
+  await expect(toc).toBeVisible({ timeout: 5_000 });
+
+  // At least one section must exist (rehypeWrapSections wraps h2s in <section>)
+  expect(await page.locator("section").count()).toBeGreaterThan(0);
+});
+
 test("/api/ping responds 200 and is not rate-limited on back-to-back requests", async ({ request }) => {
   // Two rapid requests to a harmless edge endpoint — neither should be blocked
   // (rate-limit middleware is fail-open in dev and any env without Upstash creds)

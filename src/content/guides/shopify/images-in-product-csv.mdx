@@ -1,0 +1,169 @@
+---
+title: "Shopify Product Images in CSV: Image Src, Alt Text, and Positions"
+description: "Learn how to structure image URLs in the Shopify product CSV. Understand Image Src, Image Position, Image Alt Text columns, how to add multiple images per product, and how to avoid the most common image import failures."
+keywords: ["shopify image csv", "shopify image src", "shopify image alt text", "shopify image position csv", "shopify product images import", "shopify csv multiple images", "shopify image url"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Which image columns exist in the Shopify product CSV"
+  - "How to add multiple images to a single product"
+  - "How Image Position controls display order"
+  - "Why image imports fail and how to fix URL issues"
+  - "How to add alt text for accessibility and SEO"
+bestFor: "Shopify merchants importing or updating products with multiple images, needing to set image order, or troubleshooting missing images after import"
+timeToComplete: "10 minutes"
+---
+
+## Image Columns in the Shopify CSV
+
+The Shopify product CSV supports three image-related columns:
+
+| Column | Required | Notes |
+|---|---|---|
+| Image Src | No | Publicly accessible HTTPS URL to the image file |
+| Image Position | No | Integer (1, 2, 3...) controlling display order |
+| Image Alt Text | No | Descriptive text for the image |
+
+These columns appear in the same row as the product or variant data. Each row can hold one image URL.
+
+---
+
+## Adding a Single Image per Product
+
+The simplest case: one image per product. Place the URL in the `Image Src` column on the **parent row** (the first row for that Handle):
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+The variant rows (second and subsequent rows with the same Handle) have empty Image Src columns.
+
+---
+
+## Adding Multiple Images per Product
+
+To add more than one image to a product, add **additional rows with the same Handle** that contain only the image data. These rows have blank Title and blank variant fields — they exist only to carry additional image URLs.
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+Key rules:
+- Up to **250 images** are supported per product.
+- Each image URL goes on its own row with the same Handle.
+- The image-only rows have blank Variant Price, blank Option values, and blank Title.
+- Do not use the same row for both a variant and a non-primary image — one row, one purpose.
+
+---
+
+## Image Position
+
+`Image Position` controls the order images are displayed in the product gallery. It is an integer starting from 1.
+
+- `1` = primary/featured image (shown first).
+- `2`, `3`, etc. = additional images in order.
+
+If you omit Image Position, Shopify assigns positions in the order images appear in the CSV. You can explicitly set positions to ensure a specific display order regardless of row order.
+
+**Example:** Displaying a lifestyle shot first, then the product shot:
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## Image URL Requirements
+
+Shopify downloads images from the URL you provide at import time. The URL must meet these requirements:
+
+- **Must be HTTPS.** Plain HTTP URLs are rejected or may result in mixed-content warnings.
+- **Must be publicly accessible.** URLs behind authentication, Cloudflare challenges, or IP restrictions will not work.
+- **No spaces in the URL.** Spaces must be encoded as `%20` or the URL must be restructured.
+- **Must point to an image file.** Shopify accepts JPEG, PNG, GIF, WEBP, and SVG. The URL does not need to end in an extension if the server returns the correct content-type header, but most import pipelines work more reliably with extension-based URLs.
+- **No query strings that expire.** If you use pre-signed URLs (from S3, Cloudinary, etc.) that expire after a time, ensure they are valid for the duration of the import process.
+
+---
+
+## Common Image Import Failures
+
+### Image does not appear after import
+
+**Likely causes:**
+1. The URL returned a non-200 HTTP status (404, 403, 500). Shopify silently skips unreachable images.
+2. The URL was HTTP, not HTTPS.
+3. The URL contained a space that broke the request.
+
+**How to diagnose:** Paste the URL directly into a browser. If the image loads, the URL is valid. If you see a login page, 403, or 404, the image is not publicly accessible.
+
+### Wrong image appears as the primary image
+
+**Cause:** Image Position was not specified, and the images appeared in the CSV in the wrong order.
+
+**Fix:** Explicitly set `Image Position` to `1` on the row containing the primary image URL.
+
+### Images appear on the wrong product
+
+**Cause:** Handle typo — the image row used a slightly different Handle than the product row.
+
+**Fix:** Ensure exact Handle consistency. A single extra space or capitalization difference creates a new product.
+
+### Old images are not removed
+
+**Behavior:** Shopify's CSV import **adds** images to a product on re-import. It does not remove existing images. If you need to remove images, you must do so through the Shopify admin or API.
+
+### Too many images
+
+**Behavior:** If you specify more than 250 image URLs for a single Handle, Shopify imports only the first 250 and silently ignores the rest.
+
+---
+
+## Alt Text Best Practices
+
+Alt text (the `Image Alt Text` column) serves two purposes:
+1. **Accessibility:** Screen readers announce alt text to visually impaired users.
+2. **SEO:** Search engines index alt text and use it to understand image content.
+
+**Good alt text:**
+- Describes what is in the image: `"Blue cotton t-shirt, front view, on white background"`
+- Includes the product name and key attributes
+- Is unique per image (not repeated across all product images)
+
+**Avoid:**
+- Keyword stuffing: `"buy blue shirt cheap shirts cotton shirts"`
+- Generic text: `"image1"`, `"photo"`, `""` (empty)
+- Repeating the same alt text for every image of the product
+
+---
+
+## Quick Reference: Image Row Patterns
+
+**Single image, no alt text:**
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**Multiple images with positions:**
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**Variant image (image associated with a specific variant row):**
+Place the Image Src on the same row as the variant. Shopify associates that image with that variant:
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

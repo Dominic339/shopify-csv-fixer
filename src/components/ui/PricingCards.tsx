@@ -25,15 +25,20 @@ export function PricingCards() {
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string>("");
+  const [stripeEnabled, setStripeEnabled] = useState<boolean | null>(null);
 
   async function refresh() {
     setMsg("");
     try {
-      const r = await fetch("/api/subscription/status", { cache: "no-store" });
-      const j = (await r.json()) as SubStatus;
-      setSub(j);
+      const [subRes, statusRes] = await Promise.all([
+        fetch("/api/subscription/status", { cache: "no-store" }),
+        fetch("/api/stripe/status", { cache: "no-store" }),
+      ]);
+      setSub((await subRes.json()) as SubStatus);
+      setStripeEnabled(((await statusRes.json()) as { enabled: boolean }).enabled);
     } catch {
       setSub(null);
+      setStripeEnabled(true); // fail open
     }
   }
 
@@ -41,7 +46,10 @@ export function PricingCards() {
     refresh();
   }, []);
 
+  const billingUnavailable = stripeEnabled === false;
+
   async function startCheckout(plan: "basic" | "advanced") {
+    if (billingUnavailable) return;
     setMsg("");
     if (!sub?.signedIn) {
       router.push("/login");
@@ -53,6 +61,10 @@ export function PricingCards() {
     setBusy(null);
 
     if (!ok) {
+      if (json?.error === "stripe_not_configured") {
+        setStripeEnabled(false);
+        return;
+      }
       setMsg(json?.error ?? "Could not start checkout.");
       return;
     }
@@ -61,12 +73,17 @@ export function PricingCards() {
   }
 
   async function openPortal() {
+    if (billingUnavailable) return;
     setMsg("");
     setBusy("portal");
     const { ok, json } = await postJson("/api/stripe/portal");
     setBusy(null);
 
     if (!ok) {
+      if (json?.error === "stripe_not_configured") {
+        setStripeEnabled(false);
+        return;
+      }
       setMsg(json?.error ?? "Could not open billing portal.");
       return;
     }
@@ -81,6 +98,12 @@ export function PricingCards() {
 
     return (
       <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        {billingUnavailable ? (
+          <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+            Billing is temporarily unavailable. Please try again later.
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="text-sm text-[var(--muted)]">Your membership</div>
@@ -95,7 +118,7 @@ export function PricingCards() {
               <button
                 className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
                 onClick={() => startCheckout("advanced")}
-                disabled={busy !== null}
+                disabled={busy !== null || billingUnavailable}
                 type="button"
               >
                 {busy === "advanced" ? "Starting..." : "Upgrade to Advanced"}
@@ -105,7 +128,7 @@ export function PricingCards() {
             <button
               className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
               onClick={openPortal}
-              disabled={busy !== null}
+              disabled={busy !== null || billingUnavailable}
               type="button"
             >
               {busy === "portal" ? "Opening..." : "Manage billing in Profile"}
@@ -128,6 +151,12 @@ export function PricingCards() {
 
   return (
     <div className="mt-10">
+      {billingUnavailable ? (
+        <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+          Billing is temporarily unavailable. Please try again later.
+        </div>
+      ) : null}
+
       {msg ? <div className="mb-4 text-sm text-red-400">{msg}</div> : null}
 
       <div className="grid gap-6 md:grid-cols-3" id="pricing">
@@ -165,7 +194,7 @@ export function PricingCards() {
           <button
             className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
             onClick={() => startCheckout("basic")}
-            disabled={busy !== null}
+            disabled={busy !== null || billingUnavailable}
             type="button"
           >
             {busy === "basic" ? "Starting..." : sub?.signedIn ? "Subscribe" : "Sign in to subscribe"}
@@ -186,7 +215,7 @@ export function PricingCards() {
           <button
             className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
             onClick={() => startCheckout("advanced")}
-            disabled={busy !== null}
+            disabled={busy !== null || billingUnavailable}
             type="button"
           >
             {busy === "advanced" ? "Starting..." : sub?.signedIn ? "Subscribe" : "Sign in to subscribe"}

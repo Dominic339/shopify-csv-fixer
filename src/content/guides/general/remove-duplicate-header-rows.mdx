@@ -1,0 +1,165 @@
+---
+title: "Remove Duplicate Header Rows from CSV Files"
+description: "Find and delete repeated header rows that appear mid-file in CSV exports. Understand the common causes, detect them with Excel and Google Sheets filters, and prevent them in future exports."
+keywords: ["duplicate header rows csv", "repeated headers csv", "csv header mid-file", "remove csv headers", "csv import duplicate rows", "shopify csv headers", "woocommerce csv headers"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Why duplicate header rows appear in exported CSV files"
+  - "How to detect duplicate headers with Excel and Google Sheets filters"
+  - "Step-by-step removal using filter, sort, and delete methods"
+  - "How to use a text editor for large files"
+  - "How to prevent duplicate headers in future exports"
+bestFor: "Sellers who merge CSV files manually, use bulk export tools, or receive CSV files from suppliers that contain repeated column headers mid-file"
+timeToComplete: "8 minutes"
+---
+
+## What Are Duplicate Header Rows?
+
+A duplicate header row is when the first row of your CSV (the column names) appears again somewhere in the data section. For example:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← repeated header row
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+When an import tool encounters `Handle` in a data row, it cannot parse it as a product. Most platforms skip the row silently or throw a format error. Some count it as a failed row.
+
+---
+
+## Why Duplicate Headers Appear
+
+### Merging multiple export files
+
+The most common cause is combining two CSV files by copying and pasting in Excel or Google Sheets. The second file's header row ends up in the middle of the combined file.
+
+### Paginated exports
+
+Some platforms export data in pages (e.g., 500 rows per file). If you download all pages and combine them, each file's header row gets concatenated.
+
+### Scheduled report systems
+
+Automated CSV generation systems that append daily rows sometimes repeat the header at the start of each appended batch.
+
+### Excel's "Refresh All" or Power Query exports
+
+Refreshing data connections in Excel can sometimes reinsert the column header row if the query is configured incorrectly.
+
+---
+
+## Detecting Duplicate Header Rows
+
+### In Excel
+
+1. Open your CSV file (**Data → From Text/CSV**, not double-click, to preserve formatting).
+2. Click any cell in your data.
+3. Go to **Data → Filter** to enable filters.
+4. Click the dropdown arrow on the **Handle** column (or whichever is your first column).
+5. In the search box, type the header name exactly (e.g., `Handle`).
+6. If rows appear in the filter results, those are duplicate header rows.
+
+### In Google Sheets
+
+1. Select all data (**Ctrl+A**).
+2. Go to **Data → Create a filter**.
+3. Click the dropdown on the first column.
+4. In the filter text box, type the header name (e.g., `Handle`).
+5. Any rows showing that value are duplicate headers.
+
+### Count with a formula
+
+In an empty column, add this formula next to each row to flag duplicates:
+
+```
+=IF(A2="Handle", "DUPLICATE HEADER", "")
+```
+
+Replace `"Handle"` with your actual first column name. Filter for `DUPLICATE HEADER` to find all instances.
+
+---
+
+## Removing Duplicate Header Rows
+
+### Method 1: Filter and delete (Excel / Sheets)
+
+1. Filter the first column to show only rows matching the header value (e.g., `Handle`).
+2. Select all the visible filtered rows (click the row number of the first result, Shift+click the last).
+3. Right-click → **Delete rows**.
+4. Remove the filter (Data → Clear Filter or Filter → Turn off).
+5. Verify your data is intact.
+
+### Method 2: Sort, identify, then sort back (Excel)
+
+If your data has a natural sort key (like a Handle or SKU that is always a slug/alphanumeric):
+
+1. Add a helper column with row numbers (1, 2, 3...) to preserve original order.
+2. Sort by the first column A-Z.
+3. Header duplicates will sort to the top (since `Handle` sorts alphabetically above most slugs).
+4. Delete the duplicate header rows at the top.
+5. Sort by the helper column to restore original order.
+6. Delete the helper column.
+
+### Method 3: Text editor (large files)
+
+For files too large for Excel (over ~100,000 rows), use VS Code or Notepad++:
+
+**VS Code:**
+1. Open the file.
+2. Press **Ctrl+H** (Find & Replace).
+3. Enable **Regular Expression** mode (the `.*` icon).
+4. In Find, enter: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (replace with your actual header values, escaped as needed)
+5. Leave Replace empty.
+6. Click **Replace All**.
+7. After removing all duplicates, manually add the header back as the first line.
+
+> Be careful with regex replacement — always keep the original file as a backup and check that the header appears exactly once after replacing.
+
+**Notepad++ (Windows):**
+1. Open file → **Search → Replace** (Ctrl+H).
+2. Check **Regular expression** mode.
+3. Same pattern as VS Code above.
+4. Replace All, then add the header line back manually.
+
+---
+
+## After Removing Duplicate Headers
+
+Once the file is clean:
+
+1. Verify the header appears exactly once, on line 1.
+2. Count your rows — the count should equal the original row count minus the number of duplicate headers you removed.
+3. Spot-check a few rows near where the duplicates were to confirm data is intact.
+4. Save as **CSV UTF-8** (in Excel: **File → Save As → CSV UTF-8**).
+
+---
+
+## Preventing Duplicate Headers in Future Merges
+
+When combining multiple CSV files manually:
+
+1. Open the first file (your "base" file) in Excel or Sheets.
+2. Open each additional file.
+3. **Delete the header row** from the additional file before copying its data.
+4. Copy the data rows only.
+5. Paste at the bottom of the base file.
+
+If you are automating CSV merges with scripts, always skip the header row of every file after the first:
+
+```python
+# Python example
+import csv
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for i, filename in enumerate(files):
+        with open(filename, encoding="utf-8") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```

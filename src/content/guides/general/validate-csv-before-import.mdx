@@ -1,0 +1,181 @@
+---
+title: "Validate Your CSV Before Uploading to Any Ecommerce Platform"
+description: "A practical checklist to catch encoding errors, missing headers, row-length mismatches, quoting issues, and other problems before your CSV import fails. Covers Shopify, WooCommerce, eBay, Amazon, and Etsy."
+keywords: ["validate csv before import", "csv checklist", "csv import errors", "csv headers check", "csv encoding check", "csv quoting", "csv row length", "shopify csv validate", "woocommerce csv validate"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "What to check before uploading any CSV to an ecommerce platform"
+  - "How to verify encoding, headers, row lengths, and quoting"
+  - "How to do a safe sample upload before importing all rows"
+  - "Which tools help automate pre-import validation"
+  - "Platform-specific requirements for required columns"
+bestFor: "Catalog managers, developers, and sellers who import products regularly and want to minimize failed uploads and data corruption"
+timeToComplete: "12 minutes"
+---
+
+## Why Pre-Import Validation Matters
+
+A failed CSV import can range from harmless (nothing changes) to destructive (partial updates leave your catalog in an inconsistent state). On platforms like Shopify, a mid-file format error may cause all rows after the error to be silently skipped. On WooCommerce, a malformed row can corrupt an existing product.
+
+A five-minute validation check before uploading can save hours of cleanup.
+
+---
+
+## The Pre-Import Checklist
+
+### 1. Encoding: UTF-8 without BOM
+
+**What to check:** The file must be encoded in UTF-8. A BOM (Byte Order Mark) at the start of the file can corrupt the first column name.
+
+**How to check:**
+- Open the file in VS Code. Look at the bottom-right status bar — it should say `UTF-8`, not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
+- If it shows anything other than `UTF-8`, click the encoding label, choose **Save with Encoding → UTF-8**.
+
+**Common fix:** In Excel, always save as **CSV UTF-8 (Comma delimited)**, not plain CSV.
+
+---
+
+### 2. Header row: correct names, no extras
+
+**What to check:**
+- The first row contains column names exactly as the platform expects.
+- No leading or trailing spaces in column names.
+- No duplicate column names.
+- No extra blank columns at the end.
+
+**How to check:**
+Open the file in a text editor and read line 1 carefully. Compare against the platform's official template:
+
+- Shopify: check the [Shopify product CSV template](https://help.shopify.com/en/manual/products/import-export/import-products).
+- WooCommerce: compare against the WooCommerce sample product CSV from your admin.
+- Amazon: use the category-specific Flat File template from Seller Central.
+
+**Common issues:**
+- `"Handle "` with a trailing space (invisible in Excel).
+- `handle` (lowercase) instead of `Handle`.
+- Missing required columns entirely.
+
+---
+
+### 3. Required columns: all present and non-empty
+
+**What to check:**
+- All required columns for the platform are present in the header.
+- Required fields are not empty for any row.
+
+**Platform required fields (minimal set):**
+
+| Platform | Required columns |
+|---|---|
+| Shopify | Handle, Title, Variant Price |
+| WooCommerce | post_title (or Name), post_status |
+| eBay File Exchange | Action, Title, Category (or CategoryID) |
+| Amazon Flat File | item_sku, item_name, price, quantity |
+| Etsy | TITLE, DESCRIPTION, PRICE, QUANTITY |
+
+**How to check in Excel:**
+1. Apply filters (**Data → Filter**).
+2. For each required column, filter for blank cells.
+3. Any blanks in required fields will cause that row to fail.
+
+---
+
+### 4. Row length consistency
+
+**What to check:** Every row must have the same number of columns as the header row. Unequal rows indicate:
+- A description or title with unescaped commas.
+- A field with embedded newlines that breaks the row into multiple lines.
+- A copy-paste error that inserted extra columns.
+
+**How to check in Excel:**
+1. Add a helper column with `=COUNTA(A2:ZZ2)` (adjust the range to cover all columns).
+2. Copy down to all rows.
+3. Filter by any value that differs from the header count.
+
+**How to check in a text editor:**
+For large files, use this principle: every unquoted comma is a column separator. If any row has a different count of unquoted commas than the header row, that row is malformed.
+
+**Common fix:** Wrap any field that contains commas, quotes, or newlines in double quotes. If the field already contains double quotes, escape each one by doubling it (`""`).
+
+---
+
+### 5. Quoted fields: correct quoting and escaped quotes
+
+**What to check:**
+- Fields containing commas, double quotes, or newlines are wrapped in double quotes.
+- Any double quote inside a quoted field is escaped by doubling it (`""` not `\"`).
+
+**Example of correct quoting:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**What to look for:**
+- Fields that start with `"` must end with `"` on the same logical line.
+- A field containing `"it's great"` should be written as `"it's great"` (no escaping needed for apostrophes, only for double quotes).
+
+---
+
+### 6. No illegal characters in key fields
+
+**What to check:**
+- Handles/slugs contain only lowercase letters, numbers, and hyphens.
+- Price fields contain only numbers and a decimal point (no currency symbols, commas as thousands separators).
+- Boolean fields (e.g., Published, Featured) use the expected values (TRUE/FALSE, yes/no, 1/0 — check your platform).
+
+**Common problems:**
+- `$19.99` in a price column (should be `19.99`).
+- `Handle: blue-shirt` with a colon prefix.
+- Prices like `19,99` (European decimal convention) instead of `19.99`.
+
+---
+
+### 7. Image URLs: reachable and correct format
+
+**What to check:**
+- Image URLs start with `https://` (most platforms reject `http://`).
+- URLs do not contain spaces (spaces must be URL-encoded as `%20` or removed).
+- For Shopify: up to 250 image URLs are supported per product. The first `Image Src` row per Handle is the primary image.
+- URLs are publicly accessible (not behind login, not localhost).
+
+---
+
+### 8. No trailing blank rows
+
+**What to check:** Many spreadsheet tools add blank rows at the end. Platforms may treat a blank row as an invalid row and generate an error.
+
+**How to fix in Excel:**
+1. Press **Ctrl+End** to go to the last used cell.
+2. If the last row is blank (all empty cells), select from that row to a few rows below and delete them.
+3. Save the file.
+
+---
+
+## Sample Upload Strategy
+
+Never upload your full 10,000-row catalog as a first test. Instead:
+
+1. Make a copy of your CSV.
+2. Keep only 5–10 representative rows (include at least one variant product if applicable).
+3. Upload the sample to a test environment or a staging store.
+4. Verify each row was imported correctly.
+5. Fix any errors in the full file.
+6. Upload the full file.
+
+For Shopify: the importer shows an error summary after upload — check it even if the import completes. "X rows failed" may not always display prominently.
+
+---
+
+## Tools for Pre-Import Validation
+
+| Tool | What it checks |
+|---|---|
+| **StriveFormats CSV Fixer** | Platform-specific headers, encoding, required fields, quoting, boolean values |
+| **VS Code with Rainbow CSV extension** | Visual column alignment, mismatched rows |
+| **csvlint.io** | RFC 4180 compliance, row length consistency |
+| **Google Sheets import preview** | Column detection, encoding issues |
+| **Excel Data → From Text/CSV** | Encoding and delimiter preview before loading |
+
+A validator cannot catch semantic errors (wrong SKU, wrong category ID, invalid image URL) — those require a sample upload. But validators catch the structural errors that prevent any import from completing.

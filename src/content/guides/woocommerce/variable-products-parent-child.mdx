@@ -1,0 +1,166 @@
+---
+title: "WooCommerce Variable Products in CSV: Parent and Variation Rows"
+description: "Understand how the WooCommerce product importer represents variable products with parent and child (variation) rows. Covers attribute columns, required fields per row type, and the most common import pitfalls."
+keywords: ["woocommerce variable product csv", "woocommerce variations import", "woocommerce parent child csv", "woocommerce attributes csv", "woocommerce csv import variations", "variable product woocommerce", "woocommerce product importer"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "How WooCommerce represents variable products across parent and variation rows"
+  - "Which columns are required for parent rows vs variation rows"
+  - "How attribute columns (Attribute 1 name, Attribute 1 value(s)) work"
+  - "Common mistakes that cause orphaned variations or duplicate products"
+  - "How to structure a complete variable product CSV for import"
+bestFor: "WooCommerce store owners, developers, and catalog managers importing or updating variable products (clothing, shoes, electronics with multiple options)"
+timeToComplete: "12 minutes"
+---
+
+## How WooCommerce Models Variable Products
+
+In WooCommerce, a **variable product** is a product that has purchasable variations — for example, a T-shirt sold in Small, Medium, and Large. The CSV representation uses two types of rows:
+
+1. **Parent row** — represents the product container. Type is `variable`.
+2. **Variation rows** — each represents one purchasable option combination. Type is `variation`.
+
+Variations are linked to their parent via the parent's SKU or ID.
+
+---
+
+## The Parent Row
+
+The parent row defines product-level fields and declares which attributes the product uses.
+
+### Key columns for parent rows
+
+| Column | Value | Notes |
+|---|---|---|
+| ID | (blank or existing ID) | Leave blank for new products |
+| Type | `variable` | Must be exactly `variable` |
+| SKU | `SHIRT-BLUE` | Unique parent SKU |
+| Name | `Blue Cotton T-Shirt` | Product name |
+| Published | `1` | 1=published, 0=draft |
+| Attribute 1 name | `Size` | The dimension name |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Pipe-separated list of all available values |
+| Attribute 1 visible | `1` | Show on product page |
+| Attribute 1 global | `1` | Use global (shared) attribute |
+
+- Multiple attributes use sequentially numbered columns: `Attribute 1 name`, `Attribute 2 name`, etc.
+- The parent row's `Regular price` can be left blank or set to the lowest variant price. The actual per-variation prices are in the variation rows.
+
+---
+
+## Variation Rows
+
+Each variation row represents one purchasable option combination and must link back to the parent.
+
+### Key columns for variation rows
+
+| Column | Value | Notes |
+|---|---|---|
+| ID | (blank or existing variation ID) | Leave blank for new variations |
+| Type | `variation` | Must be exactly `variation` |
+| SKU | `SHIRT-BLUE-SM` | Unique per variation |
+| Name | `Blue Cotton T-Shirt` | Should match parent name |
+| Parent | `id:123` or `sku:SHIRT-BLUE` | Links to parent by ID or SKU |
+| Regular price | `19.99` | Required for each variation |
+| Attribute 1 name | `Size` | Must match parent's attribute name |
+| Attribute 1 value(s) | `Small` | Single value for this specific variation |
+| Stock | `50` | Per-variation inventory count |
+| Weight | `0.3` | In the store's configured unit |
+
+### Linking variations to parents
+
+The `Parent` column accepts two formats:
+- **By database ID:** `id:123` — use when you know the WooCommerce product ID.
+- **By SKU:** `sku:SHIRT-BLUE` — more portable; use when importing new products where IDs are not yet assigned.
+
+When creating new variable products from scratch, use `sku:PARENT_SKU` format. Import the parent row first (or include it in the same file above the variations).
+
+---
+
+## Full Example: Variable T-Shirt
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Note: The `Parent` column is omitted here for brevity. In practice, the variation rows should include `Parent: sku:SHIRT-BLUE`.
+
+---
+
+## Two-Dimensional Variations (Size AND Color)
+
+To add a second attribute (Color), include Attribute 2 columns on the parent row and both attribute columns on each variation:
+
+**Parent:**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Variation (Small, Blue):**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+You need 4 variation rows for 2 sizes × 2 colors.
+
+---
+
+## Common Mistakes
+
+### Mistake 1: Parent Type is `simple` instead of `variable`
+
+**Symptom:** Variations are created but do not appear on the product page. The product shows as a simple product.
+
+**Fix:** The parent row's Type column must be `variable` (lowercase). WooCommerce will not convert a simple product to variable on import without the correct type.
+
+### Mistake 2: Variation not linked to parent
+
+**Symptom:** Variations are created as standalone simple products instead of being attached to the parent.
+
+**Fix:** Ensure every variation row has a `Parent` column value in the format `sku:PARENT_SKU` or `id:123`. Missing or malformed parent references create orphaned variations.
+
+### Mistake 3: Attribute values not pipe-separated on parent row
+
+**Symptom:** The product page shows only one option value in the dropdown, or the "Add to cart" button is missing.
+
+**Fix:** On the parent row, list all possible attribute values separated by ` | ` (space-pipe-space): `Small | Medium | Large`. WooCommerce uses this list to populate the dropdown.
+
+### Mistake 4: Attribute name mismatch between parent and variation
+
+**Symptom:** Import succeeds but variations don't match their attributes, or the wrong options appear.
+
+**Fix:** The `Attribute 1 name` value must be identical on the parent row and every variation row. `Size` and ` Size` (with a space) are treated as different attributes.
+
+### Mistake 5: Missing Regular price on variation rows
+
+**Symptom:** Variations are created with no price, causing the product to show as not purchasable.
+
+**Fix:** `Regular price` is required on every variation row. It cannot be inherited from the parent.
+
+### Mistake 6: Importing variations before their parent
+
+**Symptom:** Variations are created as orphaned products because the parent ID/SKU doesn't exist yet.
+
+**Fix:** Ensure the parent row appears before its variation rows in the CSV. WooCommerce processes rows top-to-bottom.
+
+---
+
+## Update Behavior
+
+When re-importing a variable product that already exists:
+
+- **Match by ID:** The safest update method. WooCommerce updates the existing product if the ID matches.
+- **Match by SKU:** WooCommerce can also match by SKU. Leave ID blank, provide the SKU.
+- **Adding new variations:** Include existing variations in the import file along with new ones. Variations present in the admin but absent from the import file are **not** deleted, but this can vary by WooCommerce version and import plugin settings.
+
+Always test updates on a staging store or with a backup before importing to production.

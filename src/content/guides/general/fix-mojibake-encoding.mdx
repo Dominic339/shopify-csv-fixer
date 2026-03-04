@@ -1,0 +1,165 @@
+---
+title: "Fix Mojibake and Encoding Errors in CSV Files"
+description: "Resolve garbled text caused by encoding mismatches in your CSV files. Learn to detect UTF-8 vs Latin-1 conflicts, strip the BOM, and re-save files correctly for ecommerce imports."
+keywords: ["mojibake csv", "encoding error csv", "utf-8 csv", "latin-1 csv", "bom csv", "fix garbled characters", "csv encoding mismatch", "garbled text csv fix", "bom strip csv"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "What mojibake is and why it appears in CSV files"
+  - "How to identify UTF-8 vs Latin-1 (ISO-8859-1) encoding"
+  - "How to strip the UTF-8 BOM that breaks imports"
+  - "Step-by-step fixes in Excel, Google Sheets, and VS Code"
+  - "How to prevent re-encoding corruption on every save"
+bestFor: "Sellers and catalog managers dealing with garbled product titles, descriptions, or option names after exporting or downloading a CSV"
+timeToComplete: "10 minutes"
+---
+
+## What Is Mojibake?
+
+Mojibake is the visual garbage that appears when a file saved in one character encoding is opened or interpreted in a different one. The word comes from Japanese and roughly means "unintelligible characters."
+
+If your CSV contains sequences like these, you have an encoding problem:
+
+| What you see | What it should be |
+|---|---|
+| `â€™` | `'` (right single quotation mark) |
+| `â€"` | `—` (em dash) |
+| `â€œ` | `"` (left double quote) |
+| `Ã©` | `é` (e with accent) |
+| `ï»¿` at the start of a field | BOM (invisible marker) |
+
+---
+
+## Why Encoding Mismatches Happen
+
+Modern platforms — Shopify, WooCommerce, Amazon — expect **UTF-8** encoded files. But many tools produce files in other encodings:
+
+- **Microsoft Excel (Windows)** saves `.csv` in the system locale encoding (often Windows-1252 or Latin-1) unless you specifically choose UTF-8.
+- **Older export tools** may default to ISO-8859-1 / Latin-1.
+- **Copy-paste from websites** can smuggle in curly quotes and em dashes encoded as multi-byte UTF-8 characters that break when the file is treated as Latin-1.
+
+When a UTF-8 file is read as Latin-1, each multi-byte sequence gets split into individual Latin-1 characters, producing mojibake.
+
+---
+
+## Diagnosing the Problem
+
+### Check the encoding of your file
+
+**On Mac/Linux:**
+```
+file -I yourfile.csv
+# Example output: yourfile.csv: text/plain; charset=utf-8
+```
+
+**On Windows (PowerShell):**
+```powershell
+Get-Content yourfile.csv -Encoding Byte -TotalCount 3
+# If first 3 bytes are 239 187 191 (0xEF 0xBB 0xBF), the file has a UTF-8 BOM.
+```
+
+**Quick visual test:** Open the file in a text editor (not Excel) and look at the first character and any accented letters. If the first cell starts with `ï»¿` or descriptions contain `â€`, the encoding is wrong.
+
+### Identify which encoding to use
+
+- Most garbled files are **UTF-8 read as Latin-1** (or vice versa).
+- The fix is almost always: re-save as **UTF-8 without BOM**.
+
+---
+
+## What Is the BOM?
+
+The UTF-8 BOM (Byte Order Mark) is a three-byte sequence (`EF BB BF`) that some tools prepend to UTF-8 files. Windows Notepad and Excel sometimes add it automatically.
+
+**Why it matters:** Import tools — including Shopify's product CSV importer — may interpret the BOM as literal characters in the first column name, turning `Handle` into `ï»¿Handle`. That column is then not recognized and the entire import fails silently.
+
+---
+
+## Fix in Excel
+
+Excel is the most common cause of encoding problems. Follow these steps precisely.
+
+### Export from Excel as UTF-8
+
+1. Open your spreadsheet in Excel.
+2. Click **File → Save As**.
+3. In the "Save as type" dropdown, choose **CSV UTF-8 (Comma delimited) (.csv)**.
+   - This option is available in Excel 2016 and later on Windows and Mac.
+   - Do **not** choose plain "CSV (Comma delimited)" — that saves in the system locale encoding.
+4. Click **Save**.
+
+### Re-open a mojibake file in Excel
+
+If you already have a garbled file:
+
+1. Do **not** double-click the file to open it. That uses the system locale.
+2. Open a blank Excel workbook.
+3. Go to **Data → From Text/CSV**.
+4. Select your file.
+5. In the import wizard, set **File Origin** to **65001: Unicode (UTF-8)**.
+6. Complete the import, then save as CSV UTF-8.
+
+---
+
+## Fix in Google Sheets
+
+Google Sheets always works in UTF-8 internally. The risk is in downloading:
+
+1. **Import:** Go to **File → Import → Upload** and select your CSV. Sheets detects encoding automatically.
+2. **Export:** Go to **File → Download → Comma Separated Values (.csv)**. Google Sheets exports UTF-8 without BOM. This is safe.
+
+If you received a garbled file that Sheets is displaying incorrectly:
+
+1. Import it via **File → Import** rather than opening it directly.
+2. In the import dialog, check **Convert text to numbers, dates, and formulas** is unchecked if you have SKUs or barcodes.
+
+---
+
+## Fix with VS Code (Reliable for Any File)
+
+VS Code gives you full control over encoding and is free:
+
+1. Open VS Code and drag your CSV file into it.
+2. Look at the bottom-right status bar — it shows the detected encoding (e.g., `UTF-8`, `Windows 1252`).
+3. Click the encoding label.
+4. Choose **"Reopen with Encoding"** and select the encoding the file was actually saved in (often `Western (Windows 1252)` or `ISO 8859-1`).
+5. The garbled text should now display correctly.
+6. Click the encoding label again and choose **"Save with Encoding → UTF-8"**.
+
+This two-step process — reopen with the original encoding, save as UTF-8 — is the most reliable method for any tool.
+
+---
+
+## Fix with Windows Notepad
+
+For a quick fix on Windows (Windows 11 / 10 version 1903+):
+
+1. Open the garbled file in Notepad.
+2. Go to **File → Save As**.
+3. In the **Encoding** dropdown, select **UTF-8** (not "UTF-8 with BOM").
+4. Save.
+
+> **Note:** Older versions of Notepad only offered "UTF-8 with BOM" which adds the invisible BOM marker. If your Notepad does not have a "UTF-8" (without BOM) option, use VS Code instead.
+
+---
+
+## Preventing Re-encoding Corruption
+
+Once your file is clean, protect it going forward:
+
+- **Always use "CSV UTF-8" in Excel**, never plain CSV.
+- **Never re-open a UTF-8 CSV by double-clicking in Windows.** Windows associates `.csv` with Excel which may open it in the locale encoding. Use **File → Open** from within Excel and specify the encoding, or use **Data → From Text/CSV**.
+- **Validate encoding after every export** using a tool like StriveFormats or a command-line check before uploading.
+- If your import platform's export tool consistently produces Latin-1, convert the file immediately after downloading using VS Code or a script before editing.
+
+---
+
+## Quick Reference: Encoding Symptoms and Fixes
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `â€™` `â€"` in text | UTF-8 file opened/saved as Latin-1 | Reopen as Latin-1, save as UTF-8 |
+| `ï»¿` at start of first column | UTF-8 BOM | Strip BOM; use "UTF-8 without BOM" |
+| `Ã©` `Ã¨` `Ã ` | UTF-8 multi-byte split | Reopen as Latin-1, save as UTF-8 |
+| `?` replacing all special chars | Encoding lost on conversion | Original data may be lost; re-export from source |
+| Correct in Sheets but garbled when downloaded | Download encoding wrong | Use File → Download → CSV (Google uses UTF-8) |

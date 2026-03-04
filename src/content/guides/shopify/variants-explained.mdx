@@ -1,0 +1,145 @@
+---
+title: "Shopify Product Variants Explained: CSV Structure and Common Mistakes"
+description: "Learn how Shopify's CSV format represents product variants using Handle grouping, Option columns, and parent/child rows. Avoid the most common mistakes that cause split products, missing variants, and import errors."
+keywords: ["shopify variants csv", "shopify product variants import", "shopify handle variants", "shopify option1 option2", "shopify csv parent child", "shopify variant price csv", "shopify csv structure"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "How Shopify uses Handle to group a parent product and its variants"
+  - "Which columns are required for parent rows vs variant rows"
+  - "How Option1 Name, Option1 Value, and Variant columns work together"
+  - "The most common variant structure mistakes and how to fix them"
+  - "How to add new variants to an existing product without overwriting it"
+bestFor: "Shopify merchants and developers importing or updating products with size, color, material, or other variant options"
+timeToComplete: "12 minutes"
+---
+
+## How Shopify Represents Variants in CSV
+
+In Shopify's product CSV, a product with multiple variants is represented as **multiple rows sharing the same Handle**. The first row is the "parent" row — it contains the product-level data. Each subsequent row with the same Handle is a variant row.
+
+### Minimal example: T-shirt with two sizes
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+Key observations:
+- Both rows share the Handle `blue-shirt`.
+- The second row has a blank Title, blank Image Src, and a new Option1 Value.
+- Each row represents one purchasable variant (one combination of option values).
+
+---
+
+## The Parent Row
+
+The first row for a given Handle is the parent row. It sets product-level fields:
+
+| Column | Required in parent | Notes |
+|---|---|---|
+| Handle | Yes | Unique slug for this product; lowercase, hyphens only |
+| Title | Yes | The product name |
+| Body HTML | No | Product description; only needed in parent row |
+| Vendor | No | Brand name |
+| Type | No | Product type (for collections) |
+| Tags | No | Comma-separated tags |
+| Published | No | TRUE or FALSE |
+| Option1 Name | Yes (if using options) | Name of the first option dimension (e.g., "Size") |
+| Option1 Value | Yes (if using options) | Value for the first variant (e.g., "Small") |
+| Image Src | No | URL of the primary image |
+
+**A parent row must have Title.** If Title is blank, Shopify does not recognize it as a parent row and the import can produce incorrect results.
+
+---
+
+## Variant Rows
+
+Each row after the first with the same Handle is a variant row. Variant rows:
+- Share the same Handle as the parent.
+- Have a blank Title (or the same Title — Shopify ignores it for non-parent rows).
+- Have their own Option1 Value (and Option2 Value, Option3 Value if applicable).
+- Have their own Variant Price, Variant SKU, Variant Inventory Qty, etc.
+
+### Variant-specific columns
+
+| Column | Notes |
+|---|---|
+| Variant Price | Required per variant; decimal number (no currency symbol) |
+| Variant SKU | Optional but strongly recommended; must be unique across your store |
+| Variant Grams | Weight in grams |
+| Variant Inventory Qty | Initial stock count |
+| Variant Inventory Policy | `deny` or `continue` (continue = allow oversell) |
+| Variant Fulfillment Service | Usually `manual` |
+| Variant Requires Shipping | TRUE or FALSE |
+| Variant Taxable | TRUE or FALSE |
+| Variant Barcode | EAN, UPC, or other barcode |
+
+---
+
+## Multi-Dimensional Options (Size AND Color)
+
+Shopify supports up to three option dimensions using Option1, Option2, and Option3 columns.
+
+Example: T-shirt with Size and Color options
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name and Option2 Name only need to appear on the parent row (first row per Handle). Repeating them on variant rows is harmless.
+- Every combination of options needs its own row.
+- A product with 3 sizes and 4 colors requires 12 variant rows.
+
+---
+
+## Common Mistakes
+
+### Mistake 1: Different Handles for the same product
+
+**Symptom:** What should be one product with variants appears as multiple separate products after import.
+
+**Fix:** All rows belonging to one product must share exactly the same Handle value. A typo (`blue-shirt` vs `blue-shirt-`) causes Shopify to create a new product.
+
+### Mistake 2: Title on every row
+
+**Symptom:** Import succeeds but Shopify creates duplicate products, or variant rows are treated as standalone products.
+
+**Fix:** Only the first row per Handle should have a Title. Leave Title blank in all variant rows.
+
+### Mistake 3: Missing Option1 Name column
+
+**Symptom:** Import error "Option1 Name is required" or all variants appear as a single option called "Default Title."
+
+**Fix:** Always include `Option1 Name` in the header and a value on at least the parent row. If your product has no real options, set Option1 Name to `Title` and Option1 Value to `Default Title`.
+
+### Mistake 4: Option values don't match across rows
+
+**Symptom:** Shopify creates more variants than expected, or option names appear duplicated.
+
+**Fix:** Option1 Name must be the same string across all rows for a given Handle. If the parent row says `Size`, every variant row must also say `Size` (or leave it blank). Mixing `Size`, `size`, and `Sizes` creates inconsistent option data.
+
+### Mistake 5: Variant Price is blank
+
+**Symptom:** Import fails with "Variant Price is required" or variants are created with $0.00 price.
+
+**Fix:** Variant Price is required for every row. There is no inheritance — even if all variants share the same price, each row must specify it.
+
+### Mistake 6: Adding a new variant overwrites existing variants
+
+**Symptom:** After a partial import (adding one new variant), all other variants disappear.
+
+**Fix:** When updating a product via CSV import, you must include **all** existing variants in the file, not just the new one. Shopify's importer replaces the entire variant set for a Handle. If you omit existing variants, they are deleted.
+
+---
+
+## Tips for Large Catalogs
+
+- **Generate variant rows programmatically.** For products with many option combinations (3 sizes × 4 colors × 2 materials = 24 rows), use a spreadsheet formula or a script to expand the combinations, rather than entering them manually.
+- **Use consistent SKU patterns.** A SKU like `BASE-SIZE-COLOR` (e.g., `SHIRT-SM-BLU`) makes it easy to identify and sort variants.
+- **Test with one product first.** Import a single product (parent + all its variants) before uploading the full catalog. Confirm the variant structure in the Shopify admin before proceeding.
