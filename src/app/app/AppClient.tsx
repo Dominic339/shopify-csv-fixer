@@ -1047,26 +1047,39 @@ useEffect(() => {
                 {importConfidence != null ? (
                   <span
                     className={
-                      "rounded-full border px-4 py-1.5 text-[var(--text)] " +
-                      (validation.counts.blockingErrors
-                        ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.08)]"
-                        : importConfidence >= 90
-                          ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.10)]"
-                          : "border-[var(--border)] bg-[var(--surface)]")
+                      "rounded-full border px-4 py-1.5 font-semibold " +
+                      (simulateImport
+                        ? validation.counts.blockingErrors
+                          ? "border-[color:rgba(255,80,80,0.5)] bg-[color:rgba(255,80,80,0.12)] text-[color:rgb(220,50,50)]"
+                          : "border-[color:rgba(34,197,94,0.5)] bg-[color:rgba(34,197,94,0.12)] text-[color:rgb(22,160,60)]"
+                        : validation.counts.blockingErrors
+                          ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.08)] text-[var(--text)]"
+                          : importConfidence >= 90
+                            ? "border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.10)] text-[var(--text)]"
+                            : "border-[var(--border)] bg-[var(--surface)] text-[var(--text)]")
                     }
                     title={
                       "Import confidence estimates how safely this file will import.\n\nIt is stricter than the validation score and accounts for:\n- Blocking errors (import failures)\n- Duplicate/overwrite risk (platform-specific)\n- Blank lines (ignored rows)"
                     }
                   >
-                    {(() => {
-                      const blocked = Number((validation as any)?.counts?.blockingErrors ?? 0) > 0;
-                      return (
-                        <>
-                          Import confidence: <span className="font-semibold">{importConfidence}%</span>{" "}
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({blocked ? "blocked" : "no blocking errors"})</span>
-                        </>
-                      );
-                    })()}
+                    {simulateImport ? (
+                      <>
+                        Simulated import:{" "}
+                        <span className="font-bold">
+                          {Number((validation as any)?.counts?.blockingErrors ?? 0) > 0 ? "FAIL" : "PASS"}
+                        </span>
+                        <span className="ml-1.5 text-[color:rgba(var(--muted-rgb),0.8)] font-normal text-sm">
+                          ({importConfidence}% confidence)
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        Import confidence: <span className="font-semibold">{importConfidence}%</span>{" "}
+                        <span className="text-[color:rgba(var(--muted-rgb),1)] font-normal">
+                          ({Number((validation as any)?.counts?.blockingErrors ?? 0) > 0 ? "blocked" : "no blocking errors"})
+                        </span>
+                      </>
+                    )}
                   </span>
                 ) : null}
 
@@ -1074,14 +1087,14 @@ useEffect(() => {
                   type="button"
                   onClick={() => setSimulateImport((v) => !v)}
                   className={
-                    "rounded-full border px-4 py-1.5 font-semibold hover:opacity-90 " +
+                    "rounded-full border px-4 py-1.5 font-bold hover:opacity-90 transition-all " +
                     (simulateImport
-                      ? "border-[color:rgba(var(--accent-rgb),0.45)] bg-[color:rgba(var(--accent-rgb),0.14)] text-[var(--text)]"
+                      ? "border-[color:rgba(var(--accent-rgb),0.6)] bg-[color:rgba(var(--accent-rgb),0.18)] text-[var(--accent)] ring-2 ring-[color:rgba(var(--accent-rgb),0.25)]"
                       : "border-[var(--border)] bg-[var(--surface)] text-[color:rgba(var(--muted-rgb),1)]")
                   }
                   title={simulateImport ? "Simulation is ON. Click to turn off." : "Simulate how the target platform would treat this CSV on import."}
                 >
-                  Simulate Import{simulateImport ? ": ON" : ""}
+                  {simulateImport ? "Simulate Import: ON" : "Simulate Import"}
                 </button>
 
                 <span
@@ -1162,6 +1175,79 @@ useEffect(() => {
                   </button>
                 ) : null}
               </div>
+
+              {/* Simulation Results card — only visible when Simulate Import is ON */}
+              {simulateImport && rows.length > 0 ? (
+                <div
+                  data-testid="simulation-results-card"
+                  className={
+                    "mt-3 rounded-2xl border p-4 " +
+                    (Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                      ? "border-[color:rgba(255,80,80,0.4)] bg-[color:rgba(255,80,80,0.06)]"
+                      : "border-[color:rgba(34,197,94,0.4)] bg-[color:rgba(34,197,94,0.06)]")
+                  }
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={
+                          "rounded-lg px-3 py-1 text-lg font-extrabold tracking-wide " +
+                          (Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                            ? "bg-[color:rgba(255,80,80,0.15)] text-[color:rgb(210,40,40)]"
+                            : "bg-[color:rgba(34,197,94,0.15)] text-[color:rgb(18,140,50)]")
+                        }
+                      >
+                        {Number((validation as any)?.counts?.blockingErrors ?? 0) > 0 ? "FAIL" : "PASS"}
+                      </span>
+                      <div>
+                        <div className="font-semibold text-[var(--text)]">Simulation Results</div>
+                        <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                          {Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                            ? `${Number((validation as any)?.counts?.blockingErrors ?? 0)} blocking ${Number((validation as any)?.counts?.blockingErrors ?? 0) === 1 ? "issue" : "issues"} would prevent import.`
+                            : "No blocking issues — this file should import cleanly."}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSimulateImport(false)}
+                      className="text-sm text-[color:rgba(var(--muted-rgb),0.8)] underline hover:text-[var(--text)]"
+                    >
+                      Turn off simulation
+                    </button>
+                  </div>
+
+                  {Number((validation as any)?.counts?.blockingErrors ?? 0) > 0 && readiness.blockingGroups.length > 0 ? (
+                    <ul className="mt-3 space-y-1 pl-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                      {readiness.blockingGroups.slice(0, 3).map((g) => (
+                        <li key={g.code} className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[color:rgb(210,40,40)]" />
+                          <button
+                            type="button"
+                            className="font-semibold text-[var(--text)] hover:underline"
+                            onClick={() => issuesPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                          >
+                            {g.title}
+                          </button>
+                          <span className="text-[color:rgba(var(--muted-rgb),0.7)]">({g.count})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  {importSimulation ? (
+                    <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),0.7)]">
+                      {formatId === "shopify_products"
+                        ? `What changes in simulation: ${importSimulation.mergedVariants} duplicate variant${importSimulation.mergedVariants === 1 ? "" : "s"} merged, ${importSimulation.deletedRows} blank ${importSimulation.deletedRows === 1 ? "row" : "rows"} ignored, ${importSimulation.rejectedRows} ${importSimulation.rejectedRows === 1 ? "row" : "rows"} rejected.`
+                        : formatId?.startsWith("woocommerce")
+                          ? `What changes in simulation: ${Number(importSimulation.overwriteSkuRisk ?? 0)} SKU ${Number(importSimulation.overwriteSkuRisk ?? 0) === 1 ? "conflict" : "conflicts"}, ${Number(importSimulation.mergedVariants ?? 0)} variation ${Number(importSimulation.mergedVariants ?? 0) === 1 ? "merge" : "merges"}, ${Number(importSimulation.orphanedVariations ?? 0)} orphaned ${Number(importSimulation.orphanedVariations ?? 0) === 1 ? "variation" : "variations"} rejected.`
+                          : formatId === "etsy_listings"
+                            ? `What changes in simulation: ${importSimulation.rejectedRows} ${importSimulation.rejectedRows === 1 ? "listing" : "listings"} rejected, ${Number(importSimulation.overwriteListingIdRisk ?? 0)} duplicate listing ${Number(importSimulation.overwriteListingIdRisk ?? 0) === 1 ? "id" : "ids"} overwritten.`
+                            : `What changes in simulation: ${importSimulation.rejectedRows} ${importSimulation.rejectedRows === 1 ? "row" : "rows"} rejected.`}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
 
               {rows.length > 0 ? (
                 <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
@@ -1248,7 +1334,14 @@ useEffect(() => {
                     </div>
 
                     <div className="min-w-[300px] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                      <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">Score drivers</div>
+                      <div className="flex items-center gap-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                        Score drivers
+                        {simulateImport ? (
+                          <span className="rounded-full bg-[color:rgba(var(--accent-rgb),0.15)] px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
+                            Simulated
+                          </span>
+                        ) : null}
+                      </div>
                       <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                         {scoreNotes.map((n) => (
                           <div

@@ -29,6 +29,10 @@ export type ExpandedIssueContent = {
   striveNote: string;
   preventTips: string[];
   platformNote: string | null;
+  /** 1-2 sentences explaining how StriveFormats detects this issue. */
+  detectionNote: string;
+  /** Collapsible deep-dive: parsing internals, regex patterns, heuristics used. */
+  technicalDetail: string;
 };
 
 export type IssueInput = {
@@ -733,6 +737,80 @@ function getPlatformNote(type: IssueType, input: IssueInput): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// How StriveFormats detects this issue
+// ---------------------------------------------------------------------------
+
+function getDetectionNote(type: IssueType, input: IssueInput): string {
+  const pName = platformDisplayName(input.platform);
+  const col = extractColumnName(input.issueCode, input.title);
+  switch (type) {
+    case "boolean":
+      return `StriveFormats reads every cell in the ${col} column and checks it against ${pName}'s accepted boolean values. Any value that does not match exactly -- including mixed-case variants like "True" or "Yes" -- is flagged as an error.`;
+    case "required_header":
+      return `StriveFormats compares your file's header row (row 1) against the full set of required columns for the ${pName} format. Any column name from the required list that is absent triggers this issue.`;
+    case "required_field":
+      return `StriveFormats scans every row for blank or whitespace-only cells in the ${col} column. Rows where this field is empty are flagged because ${pName} requires a value on every row.`;
+    case "money":
+      return `StriveFormats validates the ${col} column by checking that each non-empty cell parses as a positive decimal number. Values containing currency symbols, commas, or non-numeric characters are flagged.`;
+    case "inventory":
+      return `StriveFormats validates the ${col} column by verifying that each cell is a non-negative whole number. Decimal values, negative numbers, text strings, and blank cells are all flagged.`;
+    case "url":
+    case "image":
+      return `StriveFormats checks the ${col} column by verifying that each non-empty value begins with http:// or https:// and does not contain spaces. Values that look like relative paths or local filenames are also flagged.`;
+    case "length_limit":
+      return `StriveFormats measures the character length of every cell in the ${col} column and compares it against ${pName}'s documented limit. Rows exceeding the limit are individually flagged with the actual character count.`;
+    case "enum":
+      return `StriveFormats checks the ${col} column against the exact list of accepted values for ${pName}. The comparison is case-sensitive -- any casing variation or typo is flagged as an invalid value.`;
+    case "duplicate":
+      return `StriveFormats builds a frequency map of all values in the ${col} column as it parses the file. Any value that appears more than once is flagged on every row where it occurs.`;
+    case "variant_structure":
+      return `StriveFormats groups rows by their parent identifier (Handle for ${pName}) and checks that the structure matches the platform's variant model. Orphaned variation rows, missing parent rows, and duplicate option combinations are each flagged separately.`;
+    case "seo":
+      return `StriveFormats checks SEO fields for common quality issues: blank values, excessive length, values that match the product title exactly (no differentiation), and placeholder text.`;
+    default:
+      return `StriveFormats parses every row of your CSV and applies ${pName}-specific validation rules to the ${col} field. Any row that violates the rule is flagged with the row number and the specific value that caused the issue.`;
+  }
+}
+
+function getTechnicalDetail(type: IssueType, input: IssueInput): string {
+  const col = extractColumnName(input.issueCode, input.title);
+  switch (type) {
+    case "boolean":
+      if (input.platform === "amazon")
+        return `The validator applies a case-sensitive equality check: accepted values are the strings "y" and "n" only. The empty string is also accepted for optional boolean fields. The raw cell value is trimmed of leading/trailing whitespace before comparison.`;
+      if (input.platform === "woocommerce")
+        return `WooCommerce's importer normalizes "yes"/"no", "1"/"0", "true"/"false" internally, but the StriveFormats validator flags all non-canonical forms so that the exported file is unambiguous and portable. The accepted canonical forms are "1" (true) and "0" (false).`;
+      return `The validator trims the cell value and applies a case-sensitive equality check against the set {"TRUE", "FALSE", ""}. Any value outside this set -- including "True", "true", "yes", "1" -- triggers the issue. The empty string is accepted only for fields where blank is documented as equivalent to FALSE.`;
+    case "required_header":
+      return `The header check runs before any row validation. The parser reads row 0 of the parsed CSV array, normalizes whitespace (trim only -- does not lowercase), and checks for set membership against the platform's required header list. Missing headers are reported as a single structured issue listing all absent column names.`;
+    case "money":
+      return `The price validator applies this logic in order: (1) trim whitespace, (2) strip a leading currency symbol if present and record it as a warning context, (3) attempt parseFloat(), (4) check isFinite() and value >= 0, (5) check that the string representation has at most 2 decimal places. Commas used as thousand separators are detected by the pattern /\\d,\\d{3}/ and flagged.`;
+    case "inventory":
+      return `The quantity validator trims whitespace, then checks: (1) the value is non-empty, (2) /^\\d+$/ matches (digits only, no decimal point), (3) the integer value is >= 0. Values like "10.0" fail step 2 even though they are numerically equivalent to 10.`;
+    case "url":
+    case "image":
+      return `URL validation applies a two-step check: (1) the value must match /^https?:\\/\\//i, (2) the value must not contain any ASCII space character (U+0020). No network request is made -- the validator checks the URL format only, not whether the resource is accessible.`;
+    case "length_limit": {
+      const m = input.explanation.match(/(\d+)\s*characters?/i);
+      const lim = m ? m[1] : "the documented limit";
+      return `The validator calls value.length on the trimmed cell string. JavaScript's String.length counts UTF-16 code units, which matches character count for all Basic Multilingual Plane characters. Surrogate pairs (emoji, some CJK extensions) count as 2. The limit for ${col} on this platform is ${lim} characters.`;
+    }
+    case "enum":
+      return `The validator builds a Set from the platform's allowed values and calls Set.has(trimmedValue). The check is case-sensitive and exact -- no fuzzy matching. The full allowed-values list is sourced from the platform's official importer specification and validated against a live import run.`;
+    case "duplicate":
+      return `The duplicate detector makes a single O(n) pass through the column values, inserting each into a Map<string, number[]> keyed by the normalized value (trimmed, lowercased for handle-type fields). After the pass, any map entry with more than one row index is flagged. For Shopify Handle, intentional multi-row grouping (variant rows) is detected by checking whether the rows share the same Handle AND have variant option signals.`;
+    case "variant_structure":
+      if (input.platform === "shopify")
+        return `The Shopify variant checker groups all rows by Handle value. Within each group it checks: (1) at least one row has a non-blank Title (the parent row), (2) if Option1 Name is blank on a row, Option2 Name and Option3 Name must also be blank, (3) no two rows in the group have the same combination of Option1 Value + Option2 Value + Option3 Value (duplicate variant combo).`;
+      if (input.platform === "woocommerce")
+        return `The WooCommerce variant checker looks for variation rows (Type = "variation") that have no corresponding parent row (Type = "variable") with a matching SKU in the Parent column. It also checks that variable rows have no Variant-level price set directly on the parent (which WooCommerce ignores but signals a structural mistake).`;
+      return `The variant structure validator checks the relationship between parent and child rows using the platform's grouping key and validates that required fields are present at the correct level of the hierarchy.`;
+    default:
+      return `The validator for the ${col} field reads each cell value, trims whitespace, and applies ${input.platform}-specific rules derived from the platform's official import specification. Each failing row is recorded with its 0-based row index and the actual cell value for precise error reporting.`;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main expand function
 // ---------------------------------------------------------------------------
 
@@ -749,5 +827,7 @@ export function expandIssueContent(input: IssueInput): ExpandedIssueContent {
     striveNote: getStriveNote(issueType, input),
     preventTips: getPreventTips(issueType, input),
     platformNote: getPlatformNote(issueType, input),
+    detectionNote: getDetectionNote(issueType, input),
+    technicalDetail: getTechnicalDetail(issueType, input),
   };
 }

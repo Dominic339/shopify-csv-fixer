@@ -192,7 +192,101 @@ Old Excel sometimes saves as ANSI (Windows-1252). Product names with accented ch
 
 ---
 
-## How Each Platform Differs
+## Delimiters: Commas, Tabs, and Semicolons
+
+The name "CSV" implies commas, but some files use tabs (TSV) or semicolons instead. Most ecommerce platforms expect true comma-delimited files. Uploading a semicolon-delimited file as if it were a CSV causes every row to appear as a single column.
+
+### How to Identify the Delimiter
+
+Open the file in a plain text editor. Look at the first row:
+
+- If column names are separated by `,` -- comma-delimited (standard CSV)
+- If they are separated by `;` -- semicolon-delimited (common in European Excel locales)
+- If there are no separators and each row is one long string -- the file may be tab-delimited and you opened it in a tool that replaced tabs with nothing
+
+### Converting a Semicolon File to Comma-Delimited
+
+**In Excel:** File > Save As > CSV (Comma delimited). If Excel still saves with semicolons (because your system locale uses semicolons as the list separator), change the list separator in your Windows Region settings, or use the Python method below.
+
+**In Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Spreadsheet Auto-Formatting Hazards
+
+Spreadsheet applications like Excel and Google Sheets silently alter certain values when you open or edit a CSV. These changes can corrupt your data before you even make edits.
+
+### Leading Zeros Stripped from SKUs and IDs
+
+Excel removes leading zeros from values it interprets as numbers. A SKU like `00123` becomes `123`. A postal code like `02110` becomes `2110`.
+
+**How to prevent it:**
+
+- In Excel: before importing the CSV, use the Text Import Wizard (Data > From Text/CSV) and set the column type to "Text" for any column that should preserve leading zeros.
+- In Google Sheets: after import, format the affected column as "Plain text" (Format > Number > Plain text) before editing.
+- With Python: always read SKU and ID columns with `dtype=str` if using pandas, or use the standard `csv` module which never coerces types.
+
+### Numbers Converted to Scientific Notation
+
+Long numeric strings (13-digit barcodes, EAN codes) may display as `1.23457E+12` in Excel. When saved as CSV, this notation is written literally, which breaks barcode validation on import.
+
+**Fix:** Select the affected column in Excel, format it as "Number" with 0 decimal places (not "Scientific"), then save. Alternatively, prefix the value with a single quote (forces text treatment) or format the column as text before pasting the values.
+
+### Dates Auto-Converted to Regional Format
+
+A field containing `2024-01-15` may be auto-converted to `15/01/2024` or `January 15, 2024` depending on your system locale. Platforms that expect ISO format (`YYYY-MM-DD`) will reject the reformatted value.
+
+**Fix:** After opening the file, select date columns and format them as text, or use the Python `csv` module to read/write without any type coercion.
+
+### Prices Formatted with Currency Symbols
+
+Excel sometimes saves a cell formatted as currency as `$19.99` instead of `19.99`. Most platforms expect plain decimal values without currency symbols.
+
+**Fix:** In Excel, format price columns as "Number" (not "Currency" or "Accounting") before saving as CSV. Use Find and Replace (Ctrl+H) to remove any `$`, `EUR`, or other symbols if they are already in the data.
+
+---
+
+## Blank Rows, Trailing Commas, and Invisible Problems
+
+### Extra Blank Rows at the End
+
+Many tools add a blank row after the last data row. Platforms typically skip blank rows, but some reject them as invalid records. Always delete blank rows at the bottom before exporting.
+
+In Excel: press Ctrl+End to jump to the last used cell. If it is blank (an empty row below your data), select those rows and delete them (right-click > Delete Rows).
+
+### Trailing Commas
+
+Some export tools write a trailing comma at the end of every row: `value1,value2,`. This creates an implicit empty extra column. Most parsers handle this gracefully, but strict validators may flag it as a structural issue.
+
+**Fix:** If trailing commas are present throughout the file, use a Python one-liner to strip them:
+
+```python
+with open("input.csv", encoding="utf-8") as f:
+    lines = f.readlines()
+with open("output.csv", "w", encoding="utf-8") as f:
+    for line in lines:
+        f.write(line.rstrip(",\r\n") + "\n")
+```
+
+### Invisible Characters
+
+Some tools insert zero-width spaces (U+200B) or non-breaking spaces (U+00A0) inside cell values. These are invisible in spreadsheet views but can cause header mismatches or value rejections on import.
+
+**Check:** Open the file in VS Code and use Find (Ctrl+F) with regex mode. Search for `\x{200B}` or `\x{00A0}` to find these characters.
+
+---
 
 Each platform adds specific requirements on top of the basic CSV standard:
 

@@ -33,6 +33,24 @@ test("guides hub renders with platform links and search input", async ({ page })
   await expect(page.getByRole("link", { name: /Shopify/i }).first()).toBeVisible();
 });
 
+test("simulate import toggle shows PASS/FAIL card and turns off cleanly", async ({ page }) => {
+  // Upload the clean Shopify fixture (no blocking issues → should show PASS)
+  await page.goto("/app?preset=shopify_products");
+  const csvPath = path.join(__dirname, "fixtures", "shopify_minimal.csv");
+  await page.locator('input[type="file"][accept=".csv,text/csv"]').setInputFiles(csvPath);
+  await expect(page.locator("table")).toBeVisible({ timeout: 10_000 });
+
+  // 1. Click "Simulate Import" toggle — card should appear with PASS
+  await page.getByRole("button", { name: /Simulate Import/i }).click();
+  const card = page.locator('[data-testid="simulation-results-card"]');
+  await expect(card).toBeVisible({ timeout: 5_000 });
+  await expect(card).toContainText("PASS");
+
+  // 2. Toggle OFF via "Turn off simulation" — card should disappear
+  await card.getByRole("button", { name: /Turn off simulation/i }).click();
+  await expect(card).not.toBeVisible();
+});
+
 test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, Examples)", async ({ page }) => {
   // Visit a well-known Shopify boolean issue guide
   await page.goto("/guides/shopify/invalid-boolean-published");

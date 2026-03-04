@@ -14,9 +14,9 @@ import {
   PLATFORM_PRESET_ID,
   PLATFORM_FIXER_HREF,
 } from "@/lib/guidesRegistry";
-import type { GuidePlatform } from "@/lib/guidesRegistry";
+import type { GuidePlatform, Guide } from "@/lib/guidesRegistry";
 import { readCuratedGuide } from "@/lib/guides/mdxLoader";
-import { expandIssueContent } from "@/lib/guides/issueGuideExpander";
+import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
 
 type Props = {
   params: Promise<{ platform: string; slug: string }>;
@@ -72,10 +72,56 @@ export default async function GuideDetailPage({ params }: Props) {
   const presetId = PLATFORM_PRESET_ID[p];
   const fixerHref = PLATFORM_FIXER_HREF[p];
 
-  // Related: same platform + same category, different slug, up to 5
+  // Related guides: scored by relevance — same issue type > same category > keyword overlap
+  const currentIssueType =
+    guide.kind === "issue" && guide.issueCode
+      ? classifyIssue({
+          issueCode: guide.issueCode,
+          title: guide.title,
+          explanation: guide.explanation ?? "",
+          whyPlatformCares: guide.whyPlatformCares ?? "",
+          howToFix: guide.howToFix ?? "",
+          category: guide.category,
+          autoFixable: guide.autoFixable ?? false,
+          blocking: guide.blocking ?? false,
+          platform: p,
+        })
+      : null;
+
+  const currentKeywords = new Set(guide.keywords.map((k) => k.toLowerCase()));
+  const guideCategory = guide.category;
+
+  function scoreRelated(g: Guide): number {
+    let score = 0;
+    // Same issue type (requires both guides to be issue type)
+    if (currentIssueType && g.kind === "issue" && g.issueCode) {
+      const gType = classifyIssue({
+        issueCode: g.issueCode,
+        title: g.title,
+        explanation: g.explanation ?? "",
+        whyPlatformCares: g.whyPlatformCares ?? "",
+        howToFix: g.howToFix ?? "",
+        category: g.category,
+        autoFixable: g.autoFixable ?? false,
+        blocking: g.blocking ?? false,
+        platform: p,
+      });
+      if (gType === currentIssueType) score += 30;
+    }
+    // Same category
+    if (g.category === guideCategory) score += 20;
+    // Keyword overlap
+    const overlap = g.keywords.filter((k) => currentKeywords.has(k.toLowerCase())).length;
+    score += overlap * 5;
+    return score;
+  }
+
   const related = getGuidesByPlatform(p)
-    .filter((g) => g.slug !== slug && g.category === guide.category)
-    .slice(0, 5);
+    .filter((g) => g.slug !== slug)
+    .map((g) => ({ guide: g, score: scoreRelated(g) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map((x) => x.guide);
 
   // Expand issue content if this is an issue guide
   const expanded =
@@ -348,6 +394,23 @@ export default async function GuideDetailPage({ params }: Props) {
                 </ul>
               </section>
             )}
+
+            {/* 9. How StriveFormats detects this */}
+            <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+              <h2 className="text-lg font-semibold text-[var(--text)]">How StriveFormats detects this</h2>
+              <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{expanded.detectionNote}</p>
+
+              {/* Collapsible technical detail */}
+              <details className="mt-4 group">
+                <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[var(--text)] hover:opacity-80">
+                  <span className="transition-transform group-open:rotate-90">&#9658;</span>
+                  Technical detail
+                </summary>
+                <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                  {expanded.technicalDetail}
+                </div>
+              </details>
+            </section>
           </div>
         ) : null}
       </article>

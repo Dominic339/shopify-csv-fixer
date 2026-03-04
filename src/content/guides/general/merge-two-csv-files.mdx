@@ -158,7 +158,122 @@ python merge.py
 
 ---
 
-## Common Problems and How to Fix Them
+## When NOT to Merge
+
+Merging is the right tool for stacking rows from files with the same structure. Do not merge when:
+
+- **The files have different schemas.** If file1 has 30 columns and file2 has 25 different columns, a naive merge will produce a file with misaligned data. Use the Python DictWriter method (Method 4 above) which fills missing columns with empty strings, or reconcile the schemas first.
+- **You want to join on a key (SQL-style JOIN).** Merging stacks rows; it does not match rows from two files based on a shared SKU, handle, or ID. For key-based joins, use Python's `csv.DictReader` with a dictionary lookup, or a tool like pandas.
+- **One file has totals, summaries, or pivot tables.** Export only the raw data rows before merging. Summary rows, SUM formulas, and average rows will appear as product data after the merge.
+- **The files are from different export templates.** A Shopify product export and a Shopify inventory export have different columns and cannot be merged by appending rows.
+
+---
+
+## Fixing Header Mismatches Before Merging
+
+If the two files have the same columns but different header names (for example, `Title` vs `Product Title`, or `Price` vs `Variant Price`), standardize them before merging.
+
+### Manual Fix in Excel or Google Sheets
+
+1. Open both files side by side.
+2. Compare row 1 (headers) in each file.
+3. Rename the non-standard headers in one file to match the other. Edit the cell directly (F2 key in Excel).
+4. Save both files as CSV before proceeding to the merge.
+
+### Automated Fix with Python
+
+```python
+import csv
+
+# Map non-standard names in file2 to the standard names used in file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Rename headers
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Reordering Columns to Match
+
+If the column names are identical but the order differs, the Python DictWriter approach (Method 4) handles this automatically because it maps by name. For Excel or Sheets, reorder manually:
+
+**In Excel:**
+1. Insert a blank row above row 1 in one file.
+2. Number the columns in the order you want them in the target file (1, 2, 3...).
+3. Sort the columns by the number row (Data > Sort > Sort Left to Right, sort by Row 1).
+4. Delete the helper number row.
+
+**In Google Sheets:**
+1. Insert a blank row at the top.
+2. Enter the desired column position numbers.
+3. Use the SORT formula on a helper sheet to reorder, or manually cut and paste columns into the correct order.
+4. Download > CSV.
+
+---
+
+## Removing Duplicate Header Rows from a Merged File
+
+If a merged file accidentally contains a duplicate header row in the middle (common when merging exports from the same tool multiple times), remove it with Python:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Keep only rows that are not identical to the header (except the first)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Encoding and Delimiter Mismatches Between Files
+
+If one file is UTF-8 and the other is Windows-1252 (ANSI), the merged file will have garbled characters wherever the Windows-1252 file had accented letters, smart quotes, or currency symbols.
+
+**Convert Windows-1252 to UTF-8 before merging:**
+
+On macOS or Linux:
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv -o file2_utf8.csv
+```
+
+With Python:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+If both files use the same encoding but different delimiters (commas vs semicolons), convert the delimiter in one file before merging -- see the Delimiters section of the CSV Basics guide.
+
+---
 
 | Problem | Cause | Fix |
 |---|---|---|
@@ -175,6 +290,20 @@ python merge.py
 - **Do not copy-paste between sheets by hand.** It is easy to skip a row, paste one column off, or accidentally repeat the header row. Use one of the automated methods above.
 - **Do not open both files in Excel and manually cut-paste rows.** Excel sometimes reformats dates, prices, and booleans when you paste them, silently corrupting the data.
 - **Do not merge files with different numbers of columns without fixing the headers first.** The result will have misaligned data.
+
+---
+
+## Post-Merge Checklist
+
+Before importing the merged file, verify these items:
+
+- [ ] The header row appears exactly once (at row 1, not repeated in the middle)
+- [ ] Row count is correct: (rows in file1 - 1 header) + (rows in file2 - 1 header) = total data rows
+- [ ] No extra blank row between the two files' data sections
+- [ ] No duplicate SKUs or handles that should not be duplicated (run through the CSV Fixer)
+- [ ] All columns present from both source files (if using DictWriter with mismatched schemas)
+- [ ] File saved as UTF-8 without BOM
+- [ ] File extension is .csv and content is comma-delimited plain text
 
 ---
 
