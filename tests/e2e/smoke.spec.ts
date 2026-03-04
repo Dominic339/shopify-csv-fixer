@@ -51,6 +51,22 @@ test("simulate import toggle shows PASS/FAIL card and turns off cleanly", async 
   await expect(card).not.toBeVisible();
 });
 
+test("general MDX guide renders TOC on desktop viewport", async ({ page }) => {
+  // Use a wide desktop viewport so the TOC sidebar is visible
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/guides/general/csv-basics-for-imports");
+
+  // Page heading
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+
+  // TOC nav should exist (data-testid on the MdxGuideToc component)
+  const toc = page.locator('[data-testid="guide-toc"]');
+  await expect(toc).toBeVisible({ timeout: 5_000 });
+
+  // At least one TOC link should be rendered
+  await expect(toc.locator("a").first()).toBeVisible();
+});
+
 test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, Examples)", async ({ page }) => {
   // Visit a well-known Shopify boolean issue guide
   await page.goto("/guides/shopify/invalid-boolean-published");

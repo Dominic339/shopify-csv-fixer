@@ -9,6 +9,10 @@ export type CuratedGuideFrontmatter = {
   keywords: string[];
   lastUpdated: string;
   kind: "curated";
+  // Optional summary enrichment (shown in the Guide Summary card)
+  whatYouLearn?: string[];
+  bestFor?: string;
+  timeToComplete?: string;
 };
 
 export type CuratedGuideEntry = CuratedGuideFrontmatter & {

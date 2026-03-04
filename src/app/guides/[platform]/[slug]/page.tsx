@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 import JsonLd from "@/components/JsonLd";
+import MdxGuideToc from "@/components/MdxGuideToc";
 import {
   getAllGuides,
   getGuide,
@@ -17,6 +18,80 @@ import {
 import type { GuidePlatform, Guide } from "@/lib/guidesRegistry";
 import { readCuratedGuide } from "@/lib/guides/mdxLoader";
 import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
+import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
+import { rehypeWrapSections } from "@/lib/guides/rehypeWrapSections";
+import { slugify } from "@/lib/guides/mdxHeadings";
+
+// ---------------------------------------------------------------------------
+// Custom MDX component map — gives each H2 section a card appearance
+// ---------------------------------------------------------------------------
+const mdxGuideComponents = {
+  // Each h2 section is wrapped in a <section> by the rehypeWrapSections plugin.
+  // This component maps that <section> to a card.
+  section: ({ children, ...props }: any) => (
+    <div {...props} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 space-y-4">
+      {children}
+    </div>
+  ),
+  h2: ({ children, id }: any) => (
+    <h2 id={id} className="text-xl font-semibold text-[var(--text)] scroll-mt-24">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }: any) => {
+    const text = typeof children === "string" ? children : "";
+    const id = slugify(text);
+    return (
+      <h3 id={id} className="text-base font-semibold text-[var(--text)] mt-4 scroll-mt-24">
+        {children}
+      </h3>
+    );
+  },
+  p: ({ children }: any) => (
+    <p className="text-base leading-relaxed text-[color:rgba(var(--muted-rgb),1)]">{children}</p>
+  ),
+  ul: ({ children }: any) => (
+    <ul className="list-disc space-y-1.5 pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">{children}</ul>
+  ),
+  ol: ({ children }: any) => (
+    <ol className="list-decimal space-y-1.5 pl-6 text-base text-[color:rgba(var(--muted-rgb),1)]">{children}</ol>
+  ),
+  li: ({ children }: any) => <li className="leading-relaxed">{children}</li>,
+  code: ({ children, className }: any) =>
+    className ? (
+      // Inside a fenced code block — minimal styling, pre handles the bg
+      <code className={`${className ?? ""} text-[color:rgba(220,220,220,0.95)] text-sm`}>{children}</code>
+    ) : (
+      // Inline code
+      <code className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-1.5 py-0.5 font-mono text-sm text-[var(--text)]">
+        {children}
+      </code>
+    ),
+  pre: ({ children }: any) => (
+    <pre className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[color:rgba(0,0,0,0.45)] p-4 font-mono text-sm leading-relaxed text-[color:rgba(220,220,220,0.95)]">
+      {children}
+    </pre>
+  ),
+  hr: () => <div className="my-1 border-t border-[color:rgba(var(--border-rgb),0.35)]" />,
+  a: ({ children, href }: any) => (
+    <a
+      href={href}
+      className="text-[var(--accent)] underline decoration-[color:rgba(var(--accent-rgb),0.4)] hover:opacity-80"
+      target={href?.startsWith("http") ? "_blank" : undefined}
+      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+    >
+      {children}
+    </a>
+  ),
+  strong: ({ children }: any) => (
+    <strong className="font-semibold text-[var(--text)]">{children}</strong>
+  ),
+  blockquote: ({ children }: any) => (
+    <blockquote className="border-l-4 border-[var(--border)] pl-4 italic text-[color:rgba(var(--muted-rgb),0.8)]">
+      {children}
+    </blockquote>
+  ),
+};
 
 type Props = {
   params: Promise<{ platform: string; slug: string }>;
@@ -176,6 +251,7 @@ export default async function GuideDetailPage({ params }: Props) {
         };
 
   const curatedData = guide.kind === "curated" ? readCuratedGuide(p, slug) : null;
+  const tocItems = curatedData ? extractTocFromMdx(curatedData.rawMdx) : [];
 
   return (
     <>
@@ -226,9 +302,86 @@ export default async function GuideDetailPage({ params }: Props) {
         {/* Curated MDX guide                                                 */}
         {/* ---------------------------------------------------------------- */}
         {guide.kind === "curated" && curatedData ? (
-          <div className="prose prose-neutral max-w-none dark:prose-invert">
-            <MDXRemote source={curatedData.rawMdx} />
-          </div>
+          <>
+            {/* Guide Summary card */}
+            {(curatedData.frontmatter.whatYouLearn ||
+              curatedData.frontmatter.bestFor ||
+              curatedData.frontmatter.timeToComplete) && (
+              <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5">
+                <div className="flex flex-wrap gap-5">
+                  {curatedData.frontmatter.whatYouLearn && (
+                    <div className="min-w-[180px] flex-1">
+                      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.7)]">
+                        What you&apos;ll learn
+                      </div>
+                      <ul className="space-y-1">
+                        {curatedData.frontmatter.whatYouLearn.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                            <span className="mt-0.5 shrink-0 text-green-600 dark:text-green-400">&#10003;</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-3 text-sm">
+                    {curatedData.frontmatter.bestFor && (
+                      <div>
+                        <span className="font-semibold text-[var(--text)]">Best for: </span>
+                        <span className="text-[color:rgba(var(--muted-rgb),1)]">{curatedData.frontmatter.bestFor}</span>
+                      </div>
+                    )}
+                    {curatedData.frontmatter.timeToComplete && (
+                      <div>
+                        <span className="font-semibold text-[var(--text)]">Time to complete: </span>
+                        <span className="text-[color:rgba(var(--muted-rgb),1)]">{curatedData.frontmatter.timeToComplete}</span>
+                      </div>
+                    )}
+                    {guide.lastUpdated && (
+                      <div>
+                        <span className="font-semibold text-[var(--text)]">Last updated: </span>
+                        <span className="text-[color:rgba(var(--muted-rgb),1)]">{guide.lastUpdated}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2-column layout: MDX content (left) + sticky TOC (right, desktop only) */}
+            <div className="flex items-start gap-8">
+              <div className="min-w-0 flex-1 space-y-4">
+                <MDXRemote
+                  source={curatedData.rawMdx}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  options={{ mdxOptions: { rehypePlugins: [rehypeWrapSections as any] } }}
+                  components={mdxGuideComponents}
+                />
+              </div>
+
+              {tocItems.length > 0 && (
+                <aside className="hidden lg:block w-56 shrink-0 sticky top-24">
+                  <MdxGuideToc items={tocItems} />
+                </aside>
+              )}
+            </div>
+
+            {/* CTA card */}
+            <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+              <div className="text-base font-semibold text-[var(--text)]">Need help fixing your file?</div>
+              <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                Upload your CSV to StriveFormats for instant validation, auto-fixes, and a clean export.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link className="rg-btn" href="/app">
+                  Open CSV Fixer
+                </Link>
+                <Link className="pill-btn" href="/presets">
+                  View Templates
+                </Link>
+              </div>
+            </div>
+          </>
         ) : expanded ? (
           /* -------------------------------------------------------------- */
           /* Rich issue guide                                                 */
