@@ -2,18 +2,13 @@
 // Rehype plugin: wraps h2-led sections into <section> elements so the
 // MDX component map can render each section as a card.
 
+import { slugifyHeading, dedupeSlug } from "./slug";
+
 function nodeTextContent(node: any): string {
   if (!node) return "";
   if (node.type === "text") return node.value ?? "";
   if (Array.isArray(node.children)) return node.children.map(nodeTextContent).join("");
   return "";
-}
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }
 
 export function rehypeWrapSections() {
@@ -22,16 +17,20 @@ export function rehypeWrapSections() {
     const output: any[] = [];
     let current: any = null;
 
+    // Shared dedup map — processed in document order, mirrors extractTocFromMdx.
+    const used = new Map<string, number>();
+
     for (const node of children) {
       const isH2 = node.type === "element" && node.tagName === "h2";
+      const isH3 = node.type === "element" && node.tagName === "h3";
 
       if (isH2) {
-        // Assign a stable slug-based id to the h2 for anchor linking + IntersectionObserver
+        // Assign a deduped, slug-based id to the h2 node.
         const text = nodeTextContent(node);
-        const id = slugify(text);
+        const id = dedupeSlug(slugifyHeading(text), used);
         node.properties = { ...(node.properties ?? {}), id };
 
-        // Close the previous section and start a new one
+        // Close the previous section and start a new one.
         if (current) output.push(current);
         current = {
           type: "element",
@@ -39,10 +38,16 @@ export function rehypeWrapSections() {
           properties: { "data-guide-section": "" },
           children: [node],
         };
+      } else if (isH3 && current) {
+        // Assign matching deduped id to h3 nodes that appear inside a section.
+        const text = nodeTextContent(node);
+        const id = dedupeSlug(slugifyHeading(text), used);
+        node.properties = { ...(node.properties ?? {}), id };
+        current.children.push(node);
       } else if (current) {
         current.children.push(node);
       } else {
-        // Content before the first h2 stays unwrapped
+        // Content before the first h2 stays unwrapped.
         output.push(node);
       }
     }

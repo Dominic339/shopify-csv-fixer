@@ -64,7 +64,15 @@ test("general MDX guide renders TOC on desktop viewport", async ({ page }) => {
   await expect(toc).toBeVisible({ timeout: 5_000 });
 
   // At least one TOC link should be rendered
-  await expect(toc.locator("a").first()).toBeVisible();
+  const firstLink = toc.locator("a").first();
+  await expect(firstLink).toBeVisible();
+
+  // The anchor target that the first TOC link points to must exist in the DOM.
+  // (Scroll-based assertions are flaky in headless; anchor existence is a reliable proxy.)
+  const href = await firstLink.getAttribute("href");
+  expect(href).toMatch(/^#/);
+  const anchorId = href!.slice(1); // strip leading "#"
+  expect(await page.locator(`#${CSS.escape(anchorId)}`).count()).toBeGreaterThan(0);
 });
 
 test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, Examples)", async ({ page }) => {

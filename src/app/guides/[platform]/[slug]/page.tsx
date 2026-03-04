@@ -20,7 +20,7 @@ import { readCuratedGuide } from "@/lib/guides/mdxLoader";
 import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
 import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
 import { rehypeWrapSections } from "@/lib/guides/rehypeWrapSections";
-import { slugify } from "@/lib/guides/mdxHeadings";
+import { slugifyHeading } from "@/lib/guides/slug";
 
 // ---------------------------------------------------------------------------
 // Custom MDX component map — gives each H2 section a card appearance
@@ -40,7 +40,7 @@ const mdxGuideComponents = {
   ),
   h3: ({ children }: any) => {
     const text = typeof children === "string" ? children : "";
-    const id = slugify(text);
+    const id = slugifyHeading(text);
     return (
       <h3 id={id} className="text-base font-semibold text-[var(--text)] mt-4 scroll-mt-24">
         {children}
