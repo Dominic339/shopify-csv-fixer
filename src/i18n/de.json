@@ -29,7 +29,7 @@
     "autoFix": "Auto-Korrektur",
     "importBlocker": "Import-Blocker",
     "importBlockerNote": "Ihre Datei kann nicht importiert werden, bis dies behoben ist.",
-    "autoFixable": "Auto-korrigierbar: Dieses Problem wird automatisch behoben, wenn Sie auf „Probleme beheben" klicken.",
+    "autoFixable": "Auto-korrigierbar: Dieses Problem wird automatisch behoben, wenn Sie auf \"Probleme beheben\" klicken.",
     "updated": "Aktualisiert"
   },
   "guides": {
