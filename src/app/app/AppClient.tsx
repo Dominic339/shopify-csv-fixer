@@ -265,8 +265,8 @@ export default function AppClient() {
 
     refreshCustomFormats();
     const onChanged = () => refreshCustomFormats();
-    window.addEventListener("csnest-formats-changed", onChanged);
-    return () => window.removeEventListener("csnest-formats-changed", onChanged);
+    window.addEventListener("striveformats-formats-changed", onChanged);
+    return () => window.removeEventListener("striveformats-formats-changed", onChanged);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canAccessCustomFormats]);
 
