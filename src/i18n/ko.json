@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "CSV 수정기",
+    "templates": "템플릿",
+    "guides": "가이드",
+    "customFormats": "사용자 지정 형식",
+    "darkMode": "다크 모드",
+    "lightMode": "라이트 모드",
+    "signIn": "로그인",
+    "signOut": "로그아웃",
+    "pricing": "요금제",
+    "home": "홈",
+    "profile": "프로필",
+    "upgrade": "업그레이드",
+    "notSignedIn": "로그인되지 않음",
+    "plan": "플랜",
+    "active": "활성"
+  },
+  "guide": {
+    "whatYouLearn": "배울 내용",
+    "bestFor": "이런 분께 적합",
+    "timeToComplete": "소요 시간",
+    "lastUpdated": "최종 업데이트",
+    "openCsvFixer": "CSV 수정기 열기",
+    "viewTemplates": "템플릿 보기",
+    "needHelp": "파일 수정에 도움이 필요하신가요?",
+    "uploadDescription": "CSV를 StriveFormats에 업로드하여 즉각적인 유효성 검사, 자동 수정 및 깔끔한 내보내기를 받으세요.",
+    "relatedGuides": "관련 가이드",
+    "autoFix": "자동 수정",
+    "importBlocker": "가져오기 차단",
+    "importBlockerNote": "이 문제가 해결될 때까지 파일을 가져올 수 없습니다.",
+    "autoFixable": "자동 수정 가능: '문제 수정'을 클릭하면 이 문제가 자동으로 수정됩니다.",
+    "updated": "업데이트됨"
+  },
+  "guides": {
+    "title": "CSV 가져오기 가이드",
+    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon의 CSV 가져오기 오류를 수정하기 위한 단계별 가이드.",
+    "browseByPlatform": "플랫폼별 탐색",
+    "featuredGuides": "추천 가이드",
+    "searchResults": "검색 결과",
+    "noResults": "검색과 일치하는 가이드가 없습니다.",
+    "results": "개 결과",
+    "result": "개 결과",
+    "guideLabel": "가이드",
+    "includesFixer": "수정기 및 오류 가이드 포함",
+    "guidesCount": "개 가이드",
+    "guideCount": "개 가이드",
+    "needHelp": "파일 수정에 도움이 필요하신가요?",
+    "needHelpDesc": "CSV를 업로드하고 수정기가 가져오기 전에 안전한 문제를 검증, 평가, 자동 수정하도록 하세요.",
+    "browseTemplates": "템플릿 탐색",
+    "searchPlaceholder": "가이드 검색…"
+  },
+  "common": {
+    "openWithPreset": "프리셋으로 열기",
+    "viewInformation": "정보 보기",
+    "downloadSample": "샘플 CSV 다운로드",
+    "browseAllGuides": "모든 CSV 가이드 보기",
+    "popularGuides": "인기 CSV 가이드",
+    "popularGuidesDesc": "가장 일반적인 CSV 가져오기 문제에 대한 단계별 가이드.",
+    "platformFixers": "플랫폼별 수정기",
+    "platformFixersDesc": "각 이커머스 플랫폼을 위한 전용 유효성 검사 가이드."
+  },
+  "home": {
+    "title": "StriveFormats | CSV 파일 정리, 표준화 및 검증",
+    "description": "Shopify 및 기타 도구를 위한 지저분한 CSV 파일을 수정하고 변환하세요. 업로드하고, 안전한 문제를 자동 수정하고, 몇 초 만에 깔끔한 파일을 내보내세요."
+  }
+}

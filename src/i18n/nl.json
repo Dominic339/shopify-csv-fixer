@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "CSV-hersteller",
+    "templates": "Sjablonen",
+    "guides": "Handleidingen",
+    "customFormats": "Aangepaste indelingen",
+    "darkMode": "Donkere modus",
+    "lightMode": "Lichte modus",
+    "signIn": "Aanmelden",
+    "signOut": "Afmelden",
+    "pricing": "Prijzen",
+    "home": "Startpagina",
+    "profile": "Profiel",
+    "upgrade": "Upgraden",
+    "notSignedIn": "Niet aangemeld",
+    "plan": "Abonnement",
+    "active": "actief"
+  },
+  "guide": {
+    "whatYouLearn": "Wat je leert",
+    "bestFor": "Geschikt voor",
+    "timeToComplete": "Geschatte tijd",
+    "lastUpdated": "Laatste update",
+    "openCsvFixer": "CSV-hersteller openen",
+    "viewTemplates": "Sjablonen bekijken",
+    "needHelp": "Hulp nodig bij uw bestand?",
+    "uploadDescription": "Upload uw CSV naar StriveFormats voor directe validatie, automatische correcties en een schone export.",
+    "relatedGuides": "Gerelateerde handleidingen",
+    "autoFix": "Automatische correctie",
+    "importBlocker": "Importblokkering",
+    "importBlockerNote": "uw bestand kan niet worden geïmporteerd totdat dit is opgelost.",
+    "autoFixable": "Automatisch corrigeerbaar: dit probleem wordt automatisch gecorrigeerd wanneer u op Problemen oplossen klikt.",
+    "updated": "Bijgewerkt"
+  },
+  "guides": {
+    "title": "CSV-importhanleidingen",
+    "description": "Stap-voor-stap handleidingen voor het oplossen van CSV-importfouten bij Shopify, WooCommerce, Etsy, eBay en Amazon.",
+    "browseByPlatform": "Bladeren per platform",
+    "featuredGuides": "Uitgelichte handleidingen",
+    "searchResults": "Zoekresultaten",
+    "noResults": "Geen handleidingen gevonden voor uw zoekopdracht.",
+    "results": "resultaten",
+    "result": "resultaat",
+    "guideLabel": "Handleiding",
+    "includesFixer": "Inclusief hersteller en fouthandleidingen",
+    "guidesCount": "handleidingen",
+    "guideCount": "handleiding",
+    "needHelp": "Hulp nodig bij uw bestand?",
+    "needHelpDesc": "Upload uw CSV en laat de hersteller veilige problemen valideren, scoren en automatisch oplossen vóór import.",
+    "browseTemplates": "Sjablonen bekijken",
+    "searchPlaceholder": "Handleidingen zoeken…"
+  },
+  "common": {
+    "openWithPreset": "Openen met sjabloon",
+    "viewInformation": "Informatie bekijken",
+    "downloadSample": "Voorbeeld-CSV downloaden",
+    "browseAllGuides": "Alle CSV-handleidingen bekijken",
+    "popularGuides": "Populaire CSV-handleidingen",
+    "popularGuidesDesc": "Stap-voor-stap handleidingen voor de meest voorkomende CSV-importproblemen.",
+    "platformFixers": "Platformspecifieke herstellers",
+    "platformFixersDesc": "Toegewijde validatiehandleidingen voor elk e-commerceplatform."
+  },
+  "home": {
+    "title": "StriveFormats | CSV-bestanden opschonen, standaardiseren en valideren",
+    "description": "Herstel en converteer rommelige CSV-bestanden voor Shopify en andere tools. Upload, herstel automatisch en exporteer schone bestanden in seconden."
+  }
+}

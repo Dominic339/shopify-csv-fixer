@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "Naprawiacz CSV",
+    "templates": "Szablony",
+    "guides": "Poradniki",
+    "customFormats": "Własne formaty",
+    "darkMode": "Tryb ciemny",
+    "lightMode": "Tryb jasny",
+    "signIn": "Zaloguj się",
+    "signOut": "Wyloguj się",
+    "pricing": "Cennik",
+    "home": "Strona główna",
+    "profile": "Profil",
+    "upgrade": "Uaktualnij",
+    "notSignedIn": "Niezalogowany",
+    "plan": "Plan",
+    "active": "aktywny"
+  },
+  "guide": {
+    "whatYouLearn": "Czego się nauczysz",
+    "bestFor": "Idealne dla",
+    "timeToComplete": "Szacowany czas",
+    "lastUpdated": "Ostatnia aktualizacja",
+    "openCsvFixer": "Otwórz naprawiacz CSV",
+    "viewTemplates": "Zobacz szablony",
+    "needHelp": "Potrzebujesz pomocy z plikiem?",
+    "uploadDescription": "Prześlij plik CSV do StriveFormats, aby natychmiast go zweryfikować, automatycznie naprawić błędy i wyeksportować czysty plik.",
+    "relatedGuides": "Powiązane poradniki",
+    "autoFix": "Automatyczna naprawa",
+    "importBlocker": "Blokuje import",
+    "importBlockerNote": "plik nie zostanie zaimportowany, dopóki problem nie zostanie rozwiązany.",
+    "autoFixable": "Automatycznie naprawialne: ten problem jest korygowany automatycznie po kliknięciu Napraw problemy.",
+    "updated": "Zaktualizowano"
+  },
+  "guides": {
+    "title": "Poradniki importu CSV",
+    "description": "Poradniki krok po kroku dotyczące naprawiania błędów importu CSV w Shopify, WooCommerce, Etsy, eBay i Amazon.",
+    "browseByPlatform": "Przeglądaj według platformy",
+    "featuredGuides": "Polecane poradniki",
+    "searchResults": "Wyniki wyszukiwania",
+    "noResults": "Brak poradników pasujących do wyszukiwania.",
+    "results": "wyników",
+    "result": "wynik",
+    "guideLabel": "Poradnik",
+    "includesFixer": "Zawiera naprawiacz i poradniki błędów",
+    "guidesCount": "poradniki",
+    "guideCount": "poradnik",
+    "needHelp": "Potrzebujesz pomocy z plikiem?",
+    "needHelpDesc": "Prześlij plik CSV i pozwól naprawiaczowi zweryfikować, ocenić i automatycznie naprawić bezpieczne problemy przed importem.",
+    "browseTemplates": "Przeglądaj szablony",
+    "searchPlaceholder": "Szukaj poradników…"
+  },
+  "common": {
+    "openWithPreset": "Otwórz z szablonem",
+    "viewInformation": "Zobacz informacje",
+    "downloadSample": "Pobierz przykładowy CSV",
+    "browseAllGuides": "Przeglądaj wszystkie poradniki CSV",
+    "popularGuides": "Popularne poradniki CSV",
+    "popularGuidesDesc": "Poradniki krok po kroku dotyczące najczęstszych problemów z importem CSV.",
+    "platformFixers": "Naprawiacze według platformy",
+    "platformFixersDesc": "Dedykowane poradniki walidacji dla każdej platformy e-commerce."
+  },
+  "home": {
+    "title": "StriveFormats | Czyszczenie, standaryzacja i walidacja plików CSV",
+    "description": "Naprawiaj i konwertuj nieuporządkowane pliki CSV dla Shopify i innych narzędzi. Prześlij, automatycznie napraw i wyeksportuj czyste pliki w kilka sekund."
+  }
+}

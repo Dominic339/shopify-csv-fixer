@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "CSV修复工具",
+    "templates": "模板",
+    "guides": "指南",
+    "customFormats": "自定义格式",
+    "darkMode": "深色模式",
+    "lightMode": "浅色模式",
+    "signIn": "登录",
+    "signOut": "退出登录",
+    "pricing": "定价",
+    "home": "首页",
+    "profile": "个人资料",
+    "upgrade": "升级",
+    "notSignedIn": "未登录",
+    "plan": "套餐",
+    "active": "已激活"
+  },
+  "guide": {
+    "whatYouLearn": "您将学到",
+    "bestFor": "适合人群",
+    "timeToComplete": "预计用时",
+    "lastUpdated": "最后更新",
+    "openCsvFixer": "打开CSV修复工具",
+    "viewTemplates": "查看模板",
+    "needHelp": "需要帮助修复您的文件？",
+    "uploadDescription": "将CSV上传到StriveFormats，即可进行即时验证、自动修复并导出整洁的文件。",
+    "relatedGuides": "相关指南",
+    "autoFix": "自动修复",
+    "importBlocker": "导入阻断",
+    "importBlockerNote": "在此问题解决之前，文件无法导入。",
+    "autoFixable": "可自动修复：点击"修复问题"后，此问题将自动得到纠正。",
+    "updated": "已更新"
+  },
+  "guides": {
+    "title": "CSV导入指南",
+    "description": "逐步指导解决Shopify、WooCommerce、Etsy、eBay和Amazon的CSV导入错误。",
+    "browseByPlatform": "按平台浏览",
+    "featuredGuides": "精选指南",
+    "searchResults": "搜索结果",
+    "noResults": "未找到与搜索匹配的指南。",
+    "results": "个结果",
+    "result": "个结果",
+    "guideLabel": "指南",
+    "includesFixer": "包含修复工具和错误指南",
+    "guidesCount": "篇指南",
+    "guideCount": "篇指南",
+    "needHelp": "需要帮助修复您的文件？",
+    "needHelpDesc": "上传您的CSV，让修复工具在导入前验证、评分并自动修复安全问题。",
+    "browseTemplates": "浏览模板",
+    "searchPlaceholder": "搜索指南…"
+  },
+  "common": {
+    "openWithPreset": "使用预设打开",
+    "viewInformation": "查看信息",
+    "downloadSample": "下载示例CSV",
+    "browseAllGuides": "浏览所有CSV指南",
+    "popularGuides": "热门CSV指南",
+    "popularGuidesDesc": "针对最常见CSV导入问题的逐步指南。",
+    "platformFixers": "各平台修复工具",
+    "platformFixersDesc": "专为每个电商平台设计的验证指南。"
+  },
+  "home": {
+    "title": "StriveFormats | 清理、标准化和验证CSV文件",
+    "description": "修复和转换杂乱的CSV文件，适用于Shopify及其他工具。上传、自动修复安全问题，几秒内导出整洁的文件。"
+  }
+}

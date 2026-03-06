@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "CSV修正ツール",
+    "templates": "テンプレート",
+    "guides": "ガイド",
+    "customFormats": "カスタムフォーマット",
+    "darkMode": "ダークモード",
+    "lightMode": "ライトモード",
+    "signIn": "サインイン",
+    "signOut": "サインアウト",
+    "pricing": "料金",
+    "home": "ホーム",
+    "profile": "プロフィール",
+    "upgrade": "アップグレード",
+    "notSignedIn": "未ログイン",
+    "plan": "プラン",
+    "active": "有効"
+  },
+  "guide": {
+    "whatYouLearn": "学べること",
+    "bestFor": "こんな方に最適",
+    "timeToComplete": "所要時間",
+    "lastUpdated": "最終更新",
+    "openCsvFixer": "CSV修正ツールを開く",
+    "viewTemplates": "テンプレートを見る",
+    "needHelp": "ファイルの修正にお困りですか？",
+    "uploadDescription": "CSVをStriveFormatsにアップロードして、即座に検証・自動修正・クリーンなエクスポートを行いましょう。",
+    "relatedGuides": "関連ガイド",
+    "autoFix": "自動修正",
+    "importBlocker": "インポートブロック",
+    "importBlockerNote": "この問題が解決されるまでファイルをインポートできません。",
+    "autoFixable": "自動修正可能：「問題を修正」をクリックすると自動的に修正されます。",
+    "updated": "更新"
+  },
+  "guides": {
+    "title": "CSVインポートガイド",
+    "description": "Shopify、WooCommerce、Etsy、eBay、AmazonのCSVインポートエラーを修正するためのステップバイステップガイド。",
+    "browseByPlatform": "プラットフォームで絞り込む",
+    "featuredGuides": "注目のガイド",
+    "searchResults": "検索結果",
+    "noResults": "検索に一致するガイドが見つかりませんでした。",
+    "results": "件の結果",
+    "result": "件の結果",
+    "guideLabel": "ガイド",
+    "includesFixer": "修正ツールとエラーガイドを含む",
+    "guidesCount": "件のガイド",
+    "guideCount": "件のガイド",
+    "needHelp": "ファイルの修正にお困りですか？",
+    "needHelpDesc": "CSVをアップロードして、修正ツールがインポート前に安全な問題を検証・採点・自動修正します。",
+    "browseTemplates": "テンプレートを見る",
+    "searchPlaceholder": "ガイドを検索…"
+  },
+  "common": {
+    "openWithPreset": "プリセットで開く",
+    "viewInformation": "詳細を見る",
+    "downloadSample": "サンプルCSVをダウンロード",
+    "browseAllGuides": "すべてのCSVガイドを見る",
+    "popularGuides": "人気のCSVガイド",
+    "popularGuidesDesc": "最も一般的なCSVインポート問題のステップバイステップガイド。",
+    "platformFixers": "プラットフォーム別修正ツール",
+    "platformFixersDesc": "各eコマースプラットフォーム向けの専用バリデーションガイド。"
+  },
+  "home": {
+    "title": "StriveFormats | CSVファイルのクリーニング・標準化・検証",
+    "description": "ShopifyやほかのツールのためにCSVファイルを修正・変換します。アップロードして、安全な問題を自動修正し、クリーンなファイルを数秒でエクスポート。"
+  }
+}

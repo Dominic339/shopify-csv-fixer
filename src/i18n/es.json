@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "Reparador CSV",
+    "templates": "Plantillas",
+    "guides": "Guías",
+    "customFormats": "Formatos personalizados",
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "pricing": "Precios",
+    "home": "Inicio",
+    "profile": "Perfil",
+    "upgrade": "Mejorar plan",
+    "notSignedIn": "No has iniciado sesión",
+    "plan": "Plan",
+    "active": "activo"
+  },
+  "guide": {
+    "whatYouLearn": "Lo que aprenderás",
+    "bestFor": "Ideal para",
+    "timeToComplete": "Tiempo estimado",
+    "lastUpdated": "Última actualización",
+    "openCsvFixer": "Abrir reparador CSV",
+    "viewTemplates": "Ver plantillas",
+    "needHelp": "¿Necesitas ayuda con tu archivo?",
+    "uploadDescription": "Sube tu CSV a StriveFormats para validarlo, corregir errores automáticamente y exportar un archivo limpio.",
+    "relatedGuides": "Guías relacionadas",
+    "autoFix": "Corrección automática",
+    "importBlocker": "Bloquea importación",
+    "importBlockerNote": "tu archivo no se importará hasta que se resuelva esto.",
+    "autoFixable": "Auto-corregible: este problema se corrige automáticamente al hacer clic en Corregir problemas.",
+    "updated": "Actualizado"
+  },
+  "guides": {
+    "title": "Guías de importación CSV",
+    "description": "Guías paso a paso para corregir errores de importación CSV en Shopify, WooCommerce, Etsy, eBay y Amazon.",
+    "browseByPlatform": "Explorar por plataforma",
+    "featuredGuides": "Guías destacadas",
+    "searchResults": "Resultados de búsqueda",
+    "noResults": "Ninguna guía coincide con tu búsqueda.",
+    "results": "resultados",
+    "result": "resultado",
+    "guideLabel": "Guía",
+    "includesFixer": "Incluye reparador y guías de errores",
+    "guidesCount": "guías",
+    "guideCount": "guía",
+    "needHelp": "¿Necesitas ayuda con tu archivo?",
+    "needHelpDesc": "Sube tu CSV y deja que el reparador valide, puntúe y corrija automáticamente los problemas seguros antes de importar.",
+    "browseTemplates": "Ver plantillas",
+    "searchPlaceholder": "Buscar guías…"
+  },
+  "common": {
+    "openWithPreset": "Abrir con plantilla",
+    "viewInformation": "Ver información",
+    "downloadSample": "Descargar CSV de muestra",
+    "browseAllGuides": "Ver todas las guías CSV",
+    "popularGuides": "Guías CSV populares",
+    "popularGuidesDesc": "Guías paso a paso para los problemas de importación CSV más comunes.",
+    "platformFixers": "Reparadores por plataforma",
+    "platformFixersDesc": "Guías de validación dedicadas para cada plataforma de e-commerce."
+  },
+  "home": {
+    "title": "StriveFormats | Limpia, estandariza y valida archivos CSV",
+    "description": "Corrige y convierte archivos CSV desordenados para Shopify y otras herramientas. Sube, corrige automáticamente y exporta archivos limpios en segundos."
+  }
+}

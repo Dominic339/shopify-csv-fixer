@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "CSV Düzelticisi",
+    "templates": "Şablonlar",
+    "guides": "Kılavuzlar",
+    "customFormats": "Özel formatlar",
+    "darkMode": "Karanlık mod",
+    "lightMode": "Aydınlık mod",
+    "signIn": "Giriş yap",
+    "signOut": "Çıkış yap",
+    "pricing": "Fiyatlandırma",
+    "home": "Ana sayfa",
+    "profile": "Profil",
+    "upgrade": "Yükselt",
+    "notSignedIn": "Giriş yapılmadı",
+    "plan": "Plan",
+    "active": "aktif"
+  },
+  "guide": {
+    "whatYouLearn": "Neler öğreneceksiniz",
+    "bestFor": "Şunlar için ideal",
+    "timeToComplete": "Tahmini süre",
+    "lastUpdated": "Son güncelleme",
+    "openCsvFixer": "CSV Düzelticisini aç",
+    "viewTemplates": "Şablonları görüntüle",
+    "needHelp": "Dosyanızla ilgili yardıma mı ihtiyacınız var?",
+    "uploadDescription": "Anında doğrulama, otomatik düzeltmeler ve temiz dışa aktarma için CSV'nizi StriveFormats'a yükleyin.",
+    "relatedGuides": "İlgili kılavuzlar",
+    "autoFix": "Otomatik düzeltme",
+    "importBlocker": "İçe aktarma engelleyici",
+    "importBlockerNote": "bu sorun çözülene kadar dosyanız içe aktarılamaz.",
+    "autoFixable": "Otomatik düzeltilebilir: Sorunları Düzelt'e tıkladığınızda bu sorun otomatik olarak düzeltilir.",
+    "updated": "Güncellendi"
+  },
+  "guides": {
+    "title": "CSV İçe Aktarma Kılavuzları",
+    "description": "Shopify, WooCommerce, Etsy, eBay ve Amazon'daki CSV içe aktarma hatalarını düzeltmek için adım adım kılavuzlar.",
+    "browseByPlatform": "Platforma göre gözat",
+    "featuredGuides": "Öne çıkan kılavuzlar",
+    "searchResults": "Arama sonuçları",
+    "noResults": "Aramanızla eşleşen kılavuz bulunamadı.",
+    "results": "sonuç",
+    "result": "sonuç",
+    "guideLabel": "Kılavuz",
+    "includesFixer": "Düzeltici ve hata kılavuzları içerir",
+    "guidesCount": "kılavuz",
+    "guideCount": "kılavuz",
+    "needHelp": "Dosyanızla ilgili yardıma mı ihtiyacınız var?",
+    "needHelpDesc": "CSV'nizi yükleyin, düzeltici içe aktarmadan önce güvenli sorunları doğrulasın, puanlasın ve otomatik olarak düzeltsin.",
+    "browseTemplates": "Şablonlara gözat",
+    "searchPlaceholder": "Kılavuz ara…"
+  },
+  "common": {
+    "openWithPreset": "Önayarla aç",
+    "viewInformation": "Bilgileri görüntüle",
+    "downloadSample": "Örnek CSV indir",
+    "browseAllGuides": "Tüm CSV kılavuzlarına gözat",
+    "popularGuides": "Popüler CSV Kılavuzları",
+    "popularGuidesDesc": "En yaygın CSV içe aktarma sorunları için adım adım kılavuzlar.",
+    "platformFixers": "Platforma özgü düzelticiler",
+    "platformFixersDesc": "Her e-ticaret platformu için özel doğrulama kılavuzları."
+  },
+  "home": {
+    "title": "StriveFormats | CSV Dosyalarını Temizle, Standartlaştır ve Doğrula",
+    "description": "Shopify ve diğer araçlar için dağınık CSV dosyalarını düzeltin ve dönüştürün. Yükleyin, güvenli sorunları otomatik olarak düzeltin ve saniyeler içinde temiz dosyaları dışa aktarın."
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "csvFixer": "CSV Fixer",
+    "templates": "Templates",
+    "guides": "Guides",
+    "customFormats": "Custom formats",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "pricing": "Pricing",
+    "home": "Home",
+    "profile": "Profile",
+    "upgrade": "Upgrade",
+    "notSignedIn": "Not signed in",
+    "plan": "Plan",
+    "active": "active"
+  },
+  "guide": {
+    "whatYouLearn": "What you'll learn",
+    "bestFor": "Best for",
+    "timeToComplete": "Time to complete",
+    "lastUpdated": "Last updated",
+    "openCsvFixer": "Open CSV Fixer",
+    "viewTemplates": "View Templates",
+    "needHelp": "Need help fixing your file?",
+    "uploadDescription": "Upload your CSV to StriveFormats for instant validation, auto-fixes, and a clean export.",
+    "relatedGuides": "Related guides",
+    "autoFix": "Auto-fix",
+    "importBlocker": "Import blocker",
+    "importBlockerNote": "your file will fail to import until this is resolved.",
+    "autoFixable": "Auto-fixable: this issue is corrected automatically when you click Fix Issues.",
+    "updated": "Updated"
+  },
+  "guides": {
+    "title": "CSV Import Guides",
+    "description": "Step-by-step guides for fixing Shopify, WooCommerce, Etsy, eBay, and Amazon CSV import errors. Learn header rules, encoding, quoting, and platform-specific requirements.",
+    "browseByPlatform": "Browse by platform",
+    "featuredGuides": "Featured guides",
+    "searchResults": "Search results",
+    "noResults": "No guides matched your search.",
+    "results": "results",
+    "result": "result",
+    "guideLabel": "Guide",
+    "includesFixer": "Includes fixer + issue guides",
+    "guidesCount": "guides",
+    "guideCount": "guide",
+    "needHelp": "Need help fixing your file?",
+    "needHelpDesc": "Upload your CSV and let the fixer validate, score, and auto-fix safe issues before you import.",
+    "browseTemplates": "Browse templates",
+    "searchPlaceholder": "Search guides…"
+  },
+  "common": {
+    "openWithPreset": "Open with preset",
+    "viewInformation": "View information",
+    "downloadSample": "Download sample CSV",
+    "browseAllGuides": "Browse all CSV guides",
+    "popularGuides": "Popular CSV Guides",
+    "popularGuidesDesc": "Step-by-step guides for the most common CSV import problems.",
+    "platformFixers": "Platform-specific fixers",
+    "platformFixersDesc": "Dedicated validation guides for each ecommerce platform."
+  },
+  "home": {
+    "title": "StriveFormats | Clean. Standardize. Validate.",
+    "description": "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds."
+  }
+}
