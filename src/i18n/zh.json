@@ -29,7 +29,7 @@
     "autoFix": "自动修复",
     "importBlocker": "导入阻断",
     "importBlockerNote": "在此问题解决之前，文件无法导入。",
-    "autoFixable": "可自动修复：点击"修复问题"后，此问题将自动得到纠正。",
+    "autoFixable": "可自动修复：点击\"修复问题\"后，此问题将自动得到纠正。",
     "updated": "已更新"
   },
   "guides": {
