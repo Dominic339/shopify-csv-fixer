@@ -1,0 +1,151 @@
+---
+title: "Fix CSV Column Mismatch Errors"
+description: "How to diagnose and fix column mismatch errors in CSV imports — wrong column names, case differences, extra spaces, and column order problems across ecommerce platforms."
+keywords: ["csv column mismatch", "csv wrong column name", "csv header mismatch", "csv import column error", "fix csv columns", "csv column mapping error", "csv header not recognized"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "What causes column mismatch errors in CSV imports"
+  - "How to compare your headers to the platform's expected columns"
+  - "How to fix case differences, extra spaces, and renamed columns"
+  - "How to handle extra or missing columns without breaking the import"
+  - "How to use the official platform template as your starting point"
+bestFor: "Sellers troubleshooting import failures where the platform reports unrecognized or missing columns"
+timeToComplete: "7 minutes"
+---
+
+## What Is a Column Mismatch?
+
+A column mismatch happens when the column names in your CSV header row don't match what the import platform expects. The platform uses column names to map your data to the correct product fields. If a column name is wrong — even by a single space or letter — the platform either ignores the column (your data is silently dropped) or rejects the import entirely.
+
+Column mismatches are one of the most common causes of "nothing imported" or "all fields blank" problems.
+
+---
+
+## Common Causes of Column Mismatches
+
+### 1. Renamed columns
+
+You renamed a required column to something that makes sense to you but not to the platform.
+
+| What you wrote | What the platform expects |
+|---|---|
+| `Product Title` | `Title` (Shopify) |
+| `product_name` | `Name` (WooCommerce) |
+| `Item Name` | `item_name` (Amazon) |
+| `Listing Title` | `title` (Etsy) |
+| `Listing Title` | `Title` (eBay) |
+
+**Fix:** Use the platform's exact column name. Do not add words or rename for clarity.
+
+### 2. Wrong case
+
+Most platforms are case-sensitive about column names.
+
+| Wrong | Correct |
+|---|---|
+| `handle` | `Handle` (Shopify) |
+| `TITLE` | `Title` (Shopify) |
+| `Variant price` | `Variant Price` (Shopify) |
+| `regular_price` | `Regular price` (WooCommerce) |
+
+**Fix:** Compare character-by-character. Even `Regular Price` vs `Regular price` (lowercase p) matters.
+
+### 3. Leading or trailing spaces
+
+Spreadsheet editors can silently add a space before or after a column name. The platform sees `" Title"` (with a leading space) as a completely different column from `"Title"`.
+
+**How to detect:** Open the CSV in a plain text editor (not a spreadsheet app). Look at the raw first line. Any space before or after a column name is visible there.
+
+**Fix in Excel:** Select the header row, use Find and Replace (`Ctrl+H`) to replace `" "` (a space) at the beginning or end of each cell. Or use the TRIM() formula on a copy of the header row.
+
+**Fix in Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    # Strip spaces from all column names
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. BOM marker corrupting the first column name
+
+If your file was saved as "UTF-8 with BOM", the first column name has 3 invisible bytes prepended. A header that looks like `Handle` in Excel actually reads as `﻿Handle` in the importer.
+
+**Fix:** Re-save the file without BOM. In VS Code: click the encoding indicator → "Save with Encoding" → select UTF-8 (without BOM).
+
+### 5. Column order issues
+
+Some platforms require columns in a specific order (eBay File Exchange, some Amazon flat file templates). Reordering columns in Excel can break these imports even if the column names are correct.
+
+**Fix:** Download a fresh template from the platform and paste your data into it rather than modifying your own file's column order.
+
+---
+
+## How to Compare Headers to the Platform Template
+
+1. Download the official template CSV from the platform
+2. Open both files in a text editor (not Excel)
+3. Copy both header rows (row 1) into a diff tool or compare manually
+4. Look for: different text, extra spaces, different case, extra or missing columns
+
+**Online diff tools:** paste both header rows and compare side by side.
+
+**Python comparison:**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# Strip BOM and spaces
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## Handling Extra Columns
+
+If your file has extra columns the platform doesn't recognize:
+
+- **Most platforms** (Shopify, WooCommerce): extra columns are silently ignored — not a problem
+- **Amazon flat files**: extra columns can cause row-level validation failures
+- **eBay File Exchange**: extra columns may trigger parse errors on the entire file
+
+**Fix for strict platforms:** Remove any column that isn't in the official template.
+
+---
+
+## Handling Missing Optional Columns
+
+If your file is missing optional columns:
+
+- The platform uses its default value for those fields
+- This is almost always acceptable for optional fields
+- For required fields, missing columns cause import failures — every row will fail
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your CSV and StriveFormats compares your headers to the selected platform's expected columns. It flags missing required columns, identifies extra columns, and detects BOM markers and case differences.
+
+[Open CSV Fixer](/app) | [View CSV Templates](/presets)

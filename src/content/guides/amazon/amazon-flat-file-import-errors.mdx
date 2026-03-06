@@ -1,0 +1,163 @@
+---
+title: "Amazon Flat File Import Errors: Causes and Fixes"
+description: "Fix the most common Amazon flat file CSV import errors — SKU problems, invalid condition codes, price formatting, fulfillment channel values, and template mismatch issues."
+keywords: ["amazon flat file import errors", "amazon csv import errors", "amazon flat file errors", "fix amazon csv", "amazon inventory loader errors", "amazon flat file validation", "amazon bulk upload errors"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "How Amazon validates flat file CSV uploads and what causes failures"
+  - "Required fields for the Inventory Loader and common flat file templates"
+  - "How to fix SKU, condition, price, fulfillment channel, and ASIN errors"
+  - "How to read Amazon's processing report to find exactly which rows failed"
+  - "How to match your file to the correct Amazon template for your product category"
+bestFor: "Amazon sellers using Seller Central flat file uploads and encountering processing errors or partial imports"
+timeToComplete: "12 minutes"
+---
+
+## How Amazon Flat File Validation Works
+
+Amazon flat files are tab-delimited or comma-delimited CSV files that follow strict column schemas defined per product category. When you upload a flat file, Amazon runs it through a validation pipeline:
+
+1. **Template match** — checks that your column headers match the expected template for the file type
+2. **Required field validation** — verifies all required columns have values
+3. **Data type validation** — checks numbers, booleans, and enum values
+4. **Business rules** — verifies ASINs, validates SKUs, checks condition codes and price ranges
+5. **Catalog check** — matches product IDs to Amazon's catalog
+
+After processing, Amazon generates a **Processing Report** (accessible in Seller Central under Inventory → Add Products via Upload). Always review the Processing Report — it lists every row that failed and the specific error.
+
+---
+
+## Error: Invalid or Missing seller_sku
+
+**Cause:** `seller_sku` is blank, exceeds 40 characters, contains invalid characters, or duplicates an existing SKU in your catalog.
+
+**Rules for seller_sku:**
+- Maximum 40 characters
+- No spaces (use hyphens or underscores)
+- Alphanumeric plus `-`, `_`, `.`
+- Must be unique across your entire Amazon seller account
+
+**Fix:** Ensure every row has a unique SKU. Use a formula like `=COUNTIF($A:$A, A2)` to find duplicates. Trim any SKUs over 40 characters.
+
+---
+
+## Error: Missing item_name / Title Too Long
+
+**Cause:** `item_name` is blank, or exceeds Amazon's title length limit (varies by category, but 200-500 characters is typical).
+
+**Fix:**
+- Fill in `item_name` for every product row
+- Use `=LEN(B2)` in Excel to find titles that exceed the limit for your category
+- Check your specific template for the exact character limit
+
+---
+
+## Error: Invalid condition_type
+
+**Cause:** The `condition_type` column contains a value not in Amazon's allowed list.
+
+**Accepted values:**
+
+| Value | Description |
+|---|---|
+| `New` | Brand new, factory sealed |
+| `UsedLikeNew` | Used — Like New |
+| `UsedVeryGood` | Used — Very Good |
+| `UsedGood` | Used — Good |
+| `UsedAcceptable` | Used — Acceptable |
+| `CollectibleLikeNew` | Collectible — Like New |
+| `CollectibleVeryGood` | Collectible — Very Good |
+| `CollectibleGood` | Collectible — Good |
+| `CollectibleAcceptable` | Collectible — Acceptable |
+| `Refurbished` | Seller refurbished |
+| `Club` | Club (media category) |
+
+**Fix:** Replace any non-standard condition values with one from the list above. `New` must be capitalized; `new` (lowercase) is rejected.
+
+---
+
+## Error: Invalid Price
+
+**Cause:** The `price` column contains a currency symbol (`$`), uses comma decimal notation, is zero, is negative, or is blank.
+
+**Amazon pricing rules:**
+- Plain decimal number: `19.99`
+- No currency symbols
+- Must be positive (greater than 0)
+- Period as decimal separator
+
+**Fix:** Remove currency symbols and replace comma decimal separators with periods. Format the price column as Number in Excel before saving.
+
+---
+
+## Error: Invalid fulfillment_center_id / Fulfillment Channel
+
+**Cause:** The fulfillment channel column contains an unrecognized value.
+
+**Accepted values:**
+
+| Value | Description |
+|---|---|
+| `DEFAULT` | Fulfilled by merchant (FBM) |
+| `AMAZON_NA` (or `AMAZON`) | Fulfilled by Amazon (FBA) |
+
+The exact column name and accepted values vary slightly by flat file template. Check your specific template.
+
+**Fix:** Use `DEFAULT` for FBM and `AMAZON_NA` or `AMAZON` for FBA. Do not use `FBA`, `FBM`, or other shorthand values.
+
+---
+
+## Error: product_id / ASIN Not Found
+
+**Cause:** The `product_id` (ASIN, UPC, EAN, or ISBN) doesn't match any product in Amazon's catalog, or `product_id_type` doesn't match the type of ID provided.
+
+**product_id_type values:**
+
+| Value | ID type |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Fix:**
+- Verify the product ID is correct and active in Amazon's catalog
+- Match `product_id_type` to the type of ID in `product_id`
+- For new products that don't have an ASIN yet, you may need to create a new listing rather than adding inventory to an existing listing
+
+---
+
+## Error: Wrong Template for Product Category
+
+**Cause:** You used a general Inventory Loader template for a category that requires a category-specific flat file (e.g., Clothing, Shoes, Jewelry).
+
+Amazon has category-specific templates with additional required fields. Using the wrong template causes all category-specific required fields to be missing.
+
+**Fix:**
+- In Seller Central, go to Inventory → Add Products via Upload → Download an inventory file
+- Select your product category to get the correct template
+- Download the category-specific flat file and migrate your data into it
+
+Common categories with their own templates: Clothing, Shoes, Jewelry, Electronics, Books, Music, Video, Sports & Outdoors.
+
+---
+
+## Reading the Processing Report
+
+After uploading, download the Processing Report from Seller Central (Inventory → Add Products via Upload → Monitor Upload Status → View Processing Report).
+
+The report has three tabs:
+- **Summary** — total rows, successes, and failures
+- **Results** — one row per record in your file, with status and error message
+- **Original** — your original uploaded data
+
+To find failed rows: filter the Results tab by the `status` column. `FAILURE` rows include an `error-code` and `error-message` that explain exactly what went wrong.
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your Amazon flat file to StriveFormats. The validator checks SKUs, condition codes, prices, fulfillment channel values, and required fields — then flags exact rows and cells with issues.
+
+[Open Amazon CSV Fixer](/app?preset=amazon_inventory_loader) | [View Amazon Template](/presets/amazon_inventory_loader)

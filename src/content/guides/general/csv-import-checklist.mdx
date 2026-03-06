@@ -1,0 +1,154 @@
+---
+title: "CSV Import Checklist for Ecommerce Platforms"
+description: "A complete pre-import checklist for Shopify, WooCommerce, Etsy, eBay, and Amazon CSV files — encoding, headers, data types, and platform-specific rules."
+keywords: ["csv import checklist", "csv upload checklist", "ecommerce csv checklist", "csv before import", "shopify csv checklist", "woocommerce csv checklist", "csv import preparation"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "A universal pre-import checklist that applies to all platforms"
+  - "Platform-specific checks for Shopify, WooCommerce, Etsy, eBay, and Amazon"
+  - "How to validate data types, required fields, and encoding before uploading"
+  - "How to test with a small batch before importing your full catalog"
+  - "What to do if the import still fails after completing the checklist"
+bestFor: "Any seller preparing a CSV import and wanting to avoid the most common failure modes before uploading"
+timeToComplete: "12 minutes"
+---
+
+## Universal Pre-Import Checklist
+
+Run through these checks on every CSV, regardless of platform.
+
+### File structure
+
+- [ ] The file has a `.csv` extension and is plain comma-separated text (not `.xlsx` renamed to `.csv` — open in a text editor to verify)
+- [ ] Row 1 contains column headers — no blank rows above it, no title row
+- [ ] No blank rows anywhere in the file (delete them in Excel with Ctrl+G > Special > Blanks)
+- [ ] No summary, total, or formula rows at the bottom
+- [ ] No merged cells (merged cells export as blanks in all cells except the first)
+- [ ] Column count is the same on every row (every row has the same number of commas)
+
+### Encoding
+
+- [ ] File is saved as **UTF-8 without BOM** (check in VS Code status bar)
+- [ ] No garbled characters (â€™, Ã©, Â£) visible in any field values
+- [ ] First column header has no invisible BOM prefix (check in a text editor)
+
+### Headers
+
+- [ ] Column names match the platform's exact spelling (case-sensitive)
+- [ ] No leading or trailing spaces in any column name
+- [ ] No duplicate column names
+- [ ] Required columns are present (see platform-specific checklists below)
+
+### Data types
+
+- [ ] Price columns contain only numbers (no `$`, `EUR`, or other symbols)
+- [ ] Boolean fields use the correct format for the platform (TRUE/FALSE, 1/0, y/n)
+- [ ] Required text fields are not blank on any row
+- [ ] SKU/identifier fields are unique across the file
+- [ ] Image URLs are absolute (start with `https://`) and publicly accessible
+
+---
+
+## Shopify-Specific Checklist
+
+- [ ] `Handle` is present and non-blank on every row
+- [ ] Variant rows share the same `Handle` as the parent product row
+- [ ] `Title` is present on the parent (first) row for each product; blank on variant rows is OK
+- [ ] `Variant Price` is a positive decimal number on every row
+- [ ] Boolean fields (`Published`, `Requires Shipping`, `Gift Card`) use `TRUE` or `FALSE`
+- [ ] `Option1 Name`, `Option1 Value` are present on all rows for variable products
+- [ ] No extra option columns without values (e.g., `Option3 Name` without `Option3 Value`)
+- [ ] Image URLs end in `.jpg`, `.jpeg`, `.png`, `.gif`, or `.webp`
+- [ ] `Tags` field uses commas to separate tags (wrapped in quotes if present)
+
+[Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)
+
+---
+
+## WooCommerce-Specific Checklist
+
+- [ ] `Type` column contains a valid value: `simple`, `variable`, `variation`, `grouped`, or `external`
+- [ ] `SKU` is non-blank and unique for simple products; variation rows inherit parent SKU if left blank
+- [ ] `Regular price` is a plain decimal number (no currency symbols)
+- [ ] Boolean fields (`In stock?`, `Backorders allowed?`) use `1` or `0`
+- [ ] Variation rows have a `Parent` value matching the parent product's `ID` or `SKU`
+- [ ] Attribute columns follow the `Attribute 1 name` / `Attribute 1 value(s)` naming pattern
+- [ ] `Tax status` is `taxable`, `shipping`, or `none`
+- [ ] Image URLs are absolute HTTPS URLs
+
+[Open WooCommerce CSV Fixer](/app?preset=woocommerce_products) | [View WooCommerce Template](/presets/woocommerce_products)
+
+---
+
+## Etsy-Specific Checklist
+
+- [ ] `title` is non-blank and under 140 characters
+- [ ] `price` is a positive decimal number
+- [ ] `quantity` is a whole positive integer
+- [ ] `when_made` uses an allowed value from Etsy's enum (e.g., `made_to_order`, `2020_2024`)
+- [ ] `who_made` is `i_did`, `someone_else`, or `collective`
+- [ ] `is_supply` is `true` or `false`
+- [ ] `tags` contains 13 or fewer comma-separated tags, each under 20 characters
+- [ ] `image1` URL is a publicly accessible HTTPS URL
+
+[Open Etsy CSV Fixer](/app?preset=etsy_listings) | [View Etsy Template](/presets/etsy_listings)
+
+---
+
+## eBay-Specific Checklist
+
+- [ ] `Action` column is present on every row: `Add`, `Revise`, `Relist`, `End`, or `Delete`
+- [ ] `Category` is a valid numeric eBay category ID
+- [ ] `Title` is 80 characters or fewer
+- [ ] `StartPrice` is a positive decimal number (no currency symbols)
+- [ ] `Condition` uses eBay's allowed condition IDs (e.g., `1000` for New, `3000` for Used)
+- [ ] `Duration` uses an allowed value: `Days_3`, `Days_5`, `Days_7`, `GTC`, etc.
+- [ ] `PicURL` contains a semicolon-separated list of HTTPS image URLs
+- [ ] `Quantity` is a whole positive integer
+
+[Open eBay CSV Fixer](/app?preset=ebay_listings) | [View eBay Template](/presets/ebay_listings)
+
+---
+
+## Amazon-Specific Checklist
+
+- [ ] `seller_sku` is non-blank, unique, and under 40 characters
+- [ ] `item_name` is non-blank and under 500 characters
+- [ ] `price` is a positive decimal number (no currency symbols)
+- [ ] `quantity` is a whole number (0 or positive)
+- [ ] `condition_type` uses an allowed value: `New`, `Used`, `Refurbished`, etc.
+- [ ] `fulfillment_center_id` is `AMAZON` (FBA) or `DEFAULT` (FBM)
+- [ ] The template matches the correct product type (clothing flat files differ from electronics)
+- [ ] `product_id` and `product_id_type` are present and consistent (ASIN, UPC, EAN, etc.)
+
+[Open Amazon CSV Fixer](/app?preset=amazon_inventory_loader) | [View Amazon Template](/presets/amazon_inventory_loader)
+
+---
+
+## Test With a Small Batch First
+
+Before uploading your entire catalog, test with 3-5 rows:
+
+1. Copy 3 data rows into a new file (keep the same header row)
+2. Upload the small test file
+3. Review the import result — check that all fields mapped correctly and the products look right
+4. If it passes, import the full file
+
+Testing with a small batch makes it much easier to identify problems before they affect hundreds of rows.
+
+---
+
+## What to Do If the Import Still Fails
+
+1. Read the error message carefully — platform error reports usually name the column or row that failed
+2. Search for the exact error message plus the platform name to find platform-specific documentation
+3. Upload the file to StriveFormats for automated validation — it catches issues the platform error messages don't explain clearly
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Run through this entire checklist automatically. StriveFormats validates all universal and platform-specific rules, flags exact cells with issues, and auto-fixes safe problems.
+
+[Open CSV Fixer](/app) | [View CSV Templates](/presets)

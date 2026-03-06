@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import JsonLd from "@/components/JsonLd";
+import FAQJsonLd from "@/components/FAQJsonLd";
 
 export const metadata = {
-  title: "Etsy CSV Fixer | StriveFormats",
+  title: "Etsy CSV Fixer | Fix Etsy Listing CSV Import Errors | StriveFormats",
   description:
     "Clean up Etsy listing CSV data for bulk edits and catalog review. StriveFormats validates titles, prices, quantity, tags, and image URLs—auto-fixing safe issues and flagging risky ones.",
   alternates: { canonical: "/etsy-csv-fixer" },
@@ -17,9 +18,28 @@ export default function EtsyCsvFixerPage() {
     description: metadata.description,
   };
 
+  const faqItems = [
+    {
+      question: "Can I use StriveFormats to create new Etsy listings in bulk?",
+      answer:
+        "StriveFormats validates and cleans your Etsy listing CSV for bulk edits. For creating brand-new listings, Etsy's Seller Dashboard bulk listing tool is the supported workflow.",
+    },
+    {
+      question: "What values are valid for the when_made field?",
+      answer:
+        "Etsy requires exact enum values such as made_to_order, 2020_2024, 2010_2019, 1990s, 1980s, and before_1950. Using any other format causes the row to fail.",
+    },
+    {
+      question: "How many tags can an Etsy listing have?",
+      answer:
+        "Etsy allows a maximum of 13 tags per listing. Each tag must be 20 characters or fewer. StriveFormats flags any listings that exceed these limits.",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd data={jsonLd} />
+      <FAQJsonLd items={faqItems} />
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

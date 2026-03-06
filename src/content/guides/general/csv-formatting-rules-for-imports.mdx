@@ -1,0 +1,189 @@
+---
+title: "CSV Formatting Rules for Ecommerce Imports"
+description: "The exact formatting rules your CSV must follow to pass ecommerce platform imports — delimiters, quoting, line endings, encoding, and header requirements."
+keywords: ["csv formatting rules", "csv format requirements", "csv import format", "csv file format ecommerce", "csv quoting rules", "csv delimiter rules", "how to format csv for import"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "The mandatory formatting rules every ecommerce CSV must follow"
+  - "How quoting rules work and when to apply them"
+  - "Delimiter, line ending, and encoding requirements"
+  - "How spreadsheet tools silently break CSV formatting"
+  - "A quick reference checklist for validating your file before upload"
+bestFor: "Sellers preparing their first import file and developers writing CSV export scripts"
+timeToComplete: "9 minutes"
+---
+
+## The CSV Standard Ecommerce Platforms Follow
+
+All major ecommerce platforms — Shopify, WooCommerce, Etsy, eBay, Amazon — expect files that follow **RFC 4180**, the common CSV standard. That standard defines exactly how rows, columns, quoting, and line endings must be structured.
+
+This guide covers every rule that affects import success. Violating any of these causes parsing errors, wrong column mapping, or silent data corruption.
+
+---
+
+## Rule 1: Commas Are the Delimiter
+
+Use commas to separate columns. Do not use semicolons (common in European Excel locales), tabs (TSV format), or pipes (`|`).
+
+**Correct:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Wrong (semicolons):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+If your Excel uses semicolons by default (because your system locale uses a comma as the decimal separator), change the system list separator to a comma or export via Google Sheets, which always produces comma-delimited output.
+
+---
+
+## Rule 2: The First Row Is Headers Only
+
+Row 1 must contain column names and nothing else. No blank rows above it, no title rows, no merged header cells.
+
+**Correct:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Wrong:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+The platform reads row 1 as headers. Any non-header content in row 1 is treated as column names, causing every header to be mismatched.
+
+---
+
+## Rule 3: Headers Are Exact
+
+Column names must match the platform's expected names exactly:
+
+- **Case-sensitive:** `Handle` is not the same as `handle` or `HANDLE` on Shopify
+- **No leading/trailing spaces:** ` Title` (space before) will not match `Title`
+- **No line breaks inside headers:** a header cell must be a single line
+- **No duplicate headers:** if two columns have the same name, most parsers use only the last
+
+---
+
+## Rule 4: Quoting Required for Commas, Quotes, and Newlines
+
+Whenever a cell value contains a comma, double-quote character, or newline, wrap the entire value in double-quote characters.
+
+**Correct:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Escaping quotes inside a quoted value** — double the inner quote character:
+
+```
+"She said ""great product"""
+```
+
+This represents: She said "great product"
+
+| Situation | Correct format |
+|---|---|
+| Value with comma | `"value, with comma"` |
+| Value with double quote | `"value ""with"" quotes"` |
+| Value with HTML | `"<p>Description here</p>"` |
+| Value with newline | `"Line one\nLine two"` (inside quotes) |
+| Plain number | `19.99` (no quotes needed) |
+
+---
+
+## Rule 5: UTF-8 Without BOM
+
+Save your file as **UTF-8 encoding, without a BOM** (Byte Order Mark).
+
+- UTF-8 is the only encoding all platforms accept
+- The BOM (added by Excel on Windows) corrupts the first column header name
+- ANSI, Latin-1, and Windows-1252 files produce garbled characters for accented letters, curly quotes, and currency symbols
+
+**Check:** Open the file in VS Code. The status bar shows the encoding. It should say `UTF-8` — not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
+
+---
+
+## Rule 6: Consistent Line Endings
+
+Use either CRLF (`\r\n`, Windows) or LF (`\n`, Unix/macOS) throughout the file. Never mix them.
+
+Mixed line endings cause some parsers to see blank rows between data rows, or to miscount columns in multi-line values.
+
+**Check in VS Code:** The status bar shows `CRLF` or `LF`. Click it to change the line ending, then save.
+
+---
+
+## Rule 7: One Row Per Record (Except Platforms With Multi-Row Products)
+
+Each row is one independent record. The exception: Shopify uses multiple rows sharing the same `Handle` to represent a product with variants.
+
+For all other platforms, a row = one product. Multi-row product structures only apply where the platform's official documentation explicitly describes them.
+
+---
+
+## Rule 8: No Blank Rows
+
+Blank rows between or after data rows cause parsers to:
+
+- Insert empty records into the import
+- Miscount the number of products
+- Stop processing at the first blank row (some platforms)
+
+Delete all blank rows before saving. In Excel, press `Ctrl+End` to jump to the last used cell — if it's beyond your data, blank rows exist and must be deleted.
+
+---
+
+## Rule 9: No Summary or Formula Rows
+
+Remove any rows that are not product data:
+
+- Total/subtotal rows at the bottom
+- SUM() formula rows
+- Filter header rows added by Excel's auto-filter
+- Section dividers
+
+These rows appear as product records in the import and cause type errors (text where numbers are expected, missing required fields, etc.).
+
+---
+
+## Rule 10: No Merged Cells
+
+Merged cells in Excel export as a value in the top-left cell and empty strings in all others. The importer sees missing required fields on every row after the first.
+
+**Fix:** Select all → Unmerge cells → Fill blank cells with appropriate values before saving as CSV.
+
+---
+
+## Quick Validation Checklist
+
+- [ ] Comma-delimited (not semicolons, tabs, or pipes)
+- [ ] Row 1 is column headers only — no blank rows above it
+- [ ] Headers match platform's expected column names exactly (case and spaces)
+- [ ] No duplicate column names
+- [ ] Values with commas or quotes are wrapped in double quotes
+- [ ] File encoding is UTF-8 without BOM
+- [ ] Line endings are consistent (all CRLF or all LF)
+- [ ] No blank rows anywhere in the file
+- [ ] No summary rows, formula rows, or merged cells
+- [ ] File has a `.csv` extension and is plain text (not `.xlsx` renamed to `.csv`)
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your CSV and StriveFormats checks every rule above automatically. It flags violations with exact row and column locations, auto-fixes safe issues, and exports a clean file.
+
+[Open CSV Fixer](/app) | [View CSV Templates](/presets)

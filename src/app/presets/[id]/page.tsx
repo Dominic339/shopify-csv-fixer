@@ -4,8 +4,20 @@ import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
 import { getPresetById } from "@/lib/presets";
 import { getFormatById } from "@/lib/formats";
+import { getPopularGuides } from "@/lib/guides/getPopularGuides";
+import type { GuidePlatform } from "@/lib/guidesRegistry";
 
 const SITE_URL = "https://striveformats.com";
+
+const PRESET_TO_PLATFORM: Record<string, GuidePlatform> = {
+  shopify_products: "shopify",
+  woocommerce_products: "woocommerce",
+  woocommerce_variable_products: "woocommerce",
+  etsy_listings: "etsy",
+  ebay_listings: "ebay",
+  ebay_variations: "ebay",
+  amazon_inventory_loader: "amazon",
+};
 
 const keywordMap: Record<string, string[]> = {
   shopify_products: [
@@ -158,6 +170,8 @@ export default async function PresetDetailPage({ params }: PageProps) {
   const sampleCsvHref = `/presets/${encodeURIComponent(preset.id)}/sample.csv`;
 
   const isShopify = preset.id === "shopify_products" || preset.formatId === "shopify_products";
+  const guidePlatform = PRESET_TO_PLATFORM[preset.id] ?? null;
+  const popularGuides = getPopularGuides(guidePlatform, 6);
   const pageUrl = `${SITE_URL}/presets/${encodeURIComponent(preset.id)}`;
 
   const breadcrumbLd = isShopify
@@ -393,6 +407,33 @@ export default async function PresetDetailPage({ params }: PageProps) {
           </section>
         ) : null}
       </div>
+
+      {popularGuides.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold text-[var(--text)]">Popular CSV Guides</h2>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+            Step-by-step guides for common CSV import problems.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {popularGuides.map((g) => (
+              <Link
+                key={`${g.platform}/${g.slug}`}
+                href={`/guides/${g.platform}/${g.slug}`}
+                className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 hover:border-[var(--ring)]"
+              >
+                <div className="text-xs text-[color:rgba(var(--muted-rgb),0.7)] capitalize">{g.platform}</div>
+                <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
+                <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)] line-clamp-2">{g.description}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-5">
+            <Link href="/guides" className="text-base text-[var(--accent)] hover:underline">
+              Browse all CSV guides &rarr;
+            </Link>
+          </div>
+        </section>
+      )}
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/presets" className="hover:underline">

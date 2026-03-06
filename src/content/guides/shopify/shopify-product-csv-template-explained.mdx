@@ -1,0 +1,201 @@
+---
+title: "Shopify Product CSV Template Explained"
+description: "A column-by-column explanation of every field in the official Shopify product CSV template — what each column does, what values it accepts, and which are required."
+keywords: ["shopify product csv template", "shopify csv columns explained", "shopify csv template guide", "shopify import template", "shopify csv fields", "shopify product import columns", "shopify csv reference"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "What every column in the Shopify product CSV template does"
+  - "Which columns are required and which are optional"
+  - "Accepted values and formats for each field type"
+  - "How product-level vs variant-level columns work"
+  - "How to fill in the template correctly for simple and variable products"
+bestFor: "Shopify merchants starting their first import or developers building a Shopify CSV export pipeline"
+timeToComplete: "15 minutes"
+---
+
+## Template Overview
+
+The official Shopify product CSV template has two categories of columns: **product-level** (set once per product, on the first/parent row) and **variant-level** (set on every row for that product). When a product has multiple variants, it occupies multiple rows in the file — all sharing the same Handle.
+
+Download the current template from your Shopify admin: Products → Import → Download sample CSV.
+
+---
+
+## Identity Columns
+
+### Handle (Required)
+
+The Handle is the product's unique URL-safe identifier. It must:
+- Be unique across all products in your store
+- Use only lowercase letters, numbers, and hyphens
+- Not change after first import (changing the Handle creates a new product URL)
+
+**Example:** `blue-leather-wallet`
+
+All rows for the same product must share the same Handle. Shopify uses this to group variant rows.
+
+### Title (Required on parent row)
+
+The product name as displayed in the store. Fill this in on the first row for a product; leave it blank on variant rows.
+
+**Example:** `Blue Leather Wallet`
+
+### Body (HTML)
+
+The product description. Can contain HTML markup. If the description contains commas or angle brackets, wrap the entire value in double quotes. Line breaks inside a description must also be inside a quoted value.
+
+### Vendor
+
+The brand or supplier name. Plain text.
+
+### Type
+
+Your custom product type (for organization). Not Shopify's product category — this is a freeform string used for filtering.
+
+### Tags
+
+A comma-separated list of tags. If a tag contains a comma, the entire Tags cell value must be quoted.
+
+**Example:** `"summer, sale, leather"`
+
+---
+
+## Publishing Columns
+
+### Published (Boolean)
+
+Whether the product is visible to customers. Accepts `TRUE` or `FALSE` (uppercase).
+
+- `TRUE` — product is active and visible
+- `FALSE` — product is a draft (hidden from the storefront)
+
+### Published Scope
+
+Where the product is published. Common values: `web` (online store), `global` (all channels).
+
+---
+
+## Option Columns
+
+These columns define the variant dimensions (Size, Color, Material, etc.).
+
+### Option1 Name / Option1 Value
+
+`Option1 Name` is the dimension label (e.g., `Size`, `Color`). `Option1 Value` is the specific value for each row (e.g., `Small`, `Medium`, `Blue`).
+
+Rules:
+- `Option1 Name` should be the same on every row for the same product
+- `Option1 Value` changes per variant row
+- If you have only one option, use Option1 only — don't include Option2 or Option3 columns unless you have a second or third option
+
+### Option2 Name / Option2 Value (Optional)
+
+A second dimension (e.g., Color). Required only if your product has two dimensions.
+
+### Option3 Name / Option3 Value (Optional)
+
+A third dimension. Shopify supports up to 3 option dimensions per product.
+
+---
+
+## Variant Columns
+
+These columns apply to every row (both parent and variant rows).
+
+### Variant SKU
+
+A unique identifier for this specific variant. Optional — but if you use inventory tracking, SKUs must be unique. Leave blank if you don't use SKU-based tracking.
+
+### Variant Price (Required)
+
+The selling price for this variant. Plain decimal number — no currency symbols, no thousands separators.
+
+**Example:** `19.99`
+
+### Variant Compare At Price
+
+The "was" price shown as a strikethrough. Leave blank if no sale price applies.
+
+### Variant Inventory Qty
+
+The number of units in stock. Integer. Use `0` if out of stock. Leave blank if inventory tracking is disabled for this variant.
+
+### Variant Inventory Policy
+
+What happens when stock reaches zero. Accepted values: `deny` (prevent purchase) or `continue` (allow purchase even when out of stock).
+
+### Variant Fulfillment Service
+
+How the variant is fulfilled. `manual` for standard fulfillment, or the API name of a third-party service.
+
+### Variant Requires Shipping (Boolean)
+
+`TRUE` for physical products that need shipping; `FALSE` for digital goods.
+
+### Variant Taxable (Boolean)
+
+`TRUE` if this variant is taxable; `FALSE` if tax-exempt.
+
+### Variant Barcode
+
+UPC, EAN, or ISBN barcode. Plain text. Not validated by Shopify — just stored.
+
+### Variant Weight / Variant Weight Unit
+
+The variant's weight and unit. Weight is a decimal number. Unit accepts `kg`, `g`, `lb`, or `oz`.
+
+---
+
+## Image Columns
+
+### Image Src
+
+The URL of the product image. Must be a publicly accessible HTTPS URL. Supported formats: JPG, JPEG, PNG, GIF, WEBP.
+
+- On the parent row: the main product image
+- On variant rows: the image specific to that variant's option combination (e.g., the blue color swatch)
+
+### Image Position
+
+The display order for this image. Integer starting from 1. The main image should be 1.
+
+### Image Alt Text
+
+The alt text for this image, used for accessibility and SEO.
+
+---
+
+## SEO Columns
+
+### SEO Title
+
+The page title tag (shown in browser tabs and search results). Defaults to the product Title if blank. Under 70 characters recommended.
+
+### SEO Description
+
+The meta description for the product page. Under 160 characters recommended.
+
+---
+
+## Gift Card Column
+
+### Gift Card (Boolean)
+
+`TRUE` only if this product is a gift card. Most products should be `FALSE` or blank.
+
+---
+
+## Simple Product vs. Variable Product
+
+**Simple product (one variant):** One row per product. Fill in all required columns. Option columns are optional.
+
+**Variable product (multiple variants):** Multiple rows per product, all sharing the same Handle. The first row is the parent row (has Title, Image Src, Body HTML, etc.). Subsequent rows are variant rows (Title blank; they inherit product-level data from the Handle grouping).
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your Shopify template to StriveFormats for column-by-column validation. It checks required fields, boolean formats, variant structure, and image URLs — then exports a clean, import-ready file.
+
+[Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)

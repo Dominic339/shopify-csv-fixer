@@ -1,0 +1,139 @@
+---
+title: "Fix Blank Rows in a CSV File"
+description: "How to find and delete blank rows in a CSV file before importing to Shopify, WooCommerce, Etsy, eBay, or Amazon — in Excel, Google Sheets, and Python."
+keywords: ["fix blank rows csv", "remove blank rows csv", "csv blank row error", "delete empty rows csv", "csv import blank row", "blank lines csv", "excel csv blank rows"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Why blank rows appear in CSV files and how they break imports"
+  - "How to find and delete blank rows in Excel, Google Sheets, and Python"
+  - "How to handle the common trailing blank row at the end of a file"
+  - "How to spot blank rows that aren't really blank (whitespace-only rows)"
+  - "How to prevent blank rows from reappearing in your exports"
+bestFor: "Sellers seeing import errors or unexpected empty products caused by blank rows in their CSV file"
+timeToComplete: "6 minutes"
+---
+
+## Why Blank Rows Cause Import Problems
+
+A blank row in a CSV file is a row where all fields are empty (or just commas with no values). When an ecommerce platform parses your file and encounters a blank row, it either:
+
+- **Creates an empty product record** (Title blank, Price blank — fails required field validation)
+- **Stops importing** at the blank row, silently ignoring everything after it
+- **Reports a validation error** for each required field that's missing on the blank row
+
+The most common places blank rows appear:
+
+- At the **end of the file** (spreadsheet editors often add one automatically)
+- **Between products** (you deleted a row but left a blank line)
+- **Between sections** if you organized your spreadsheet with visual gaps
+- **After filtering** — hidden rows in Excel sometimes export as blank rows
+
+---
+
+## Find Blank Rows
+
+### In a text editor
+
+Open the file in VS Code or Notepad. Blank rows are easy to spot — they're lines with only commas or completely empty lines:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← blank row (just commas or empty)
+red-shirt,Red T-Shirt,21.99
+```
+
+### In Excel
+
+Press `Ctrl+End` to jump to the last cell in the used range. If the last row is beyond your data (an empty row), Excel has included blank rows in the used range.
+
+To find all blank rows: select a column that should always have a value (like `Handle` or `Title`), go to Home → Find & Select → Go To Special → Blanks. This selects all blank cells in that column — these rows are your blank rows.
+
+---
+
+## Delete Blank Rows in Excel
+
+**Method 1 — Delete trailing blank rows:**
+
+1. Press `Ctrl+End` to see where Excel thinks the data ends
+2. If it's beyond your last data row, select the extra rows below your data
+3. Right-click → Delete Rows
+4. Press `Ctrl+End` again to confirm the used range is now correct
+
+**Method 2 — Delete all blank rows via Go To Special:**
+
+1. Select column A (or any column that's always filled for valid rows)
+2. Home → Find & Select → Go To Special → Blanks
+3. Right-click any selected cell → Delete → Entire Row
+4. This removes every row where column A was blank
+
+---
+
+## Delete Blank Rows in Google Sheets
+
+Google Sheets doesn't have Go To Special, but you can filter:
+
+1. Add a filter (Data → Create a Filter)
+2. Click the filter dropdown on the `Title` (or Handle) column
+3. Uncheck "Blanks"
+4. Select all visible rows with data, then disable the filter
+5. You'll now see only the blank rows — delete them (right-click → Delete rows)
+
+Alternatively, sort by the key column: blank rows sort to the bottom, making them easy to select and delete.
+
+---
+
+## Delete Blank Rows in Python
+
+For large files, Python is the fastest approach:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Keep the row if any field has a non-empty, non-whitespace value
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+This handles whitespace-only rows too (rows that appear blank but contain spaces or tabs).
+
+---
+
+## Whitespace-Only Rows
+
+Some rows look blank in a spreadsheet but actually contain spaces or tab characters in one or more cells. These rows won't be caught by simple "is the row empty?" checks.
+
+**Detect them in Python:**
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+The fix from the previous section (using `cell.strip()`) handles these automatically.
+
+---
+
+## Prevent Blank Rows in Future Exports
+
+- **In Excel:** Before saving as CSV, press `Ctrl+End` and verify the last row with data is the actual last used row. Delete any rows below it.
+- **In Google Sheets:** CSV download includes all rows down to the last non-empty cell — keep your data compact.
+- **After deleting rows:** In Excel, right-click the row numbers → Delete (not just pressing Delete on the cell contents, which leaves a blank row).
+- **After filtering:** Always clear filters before exporting, or confirm that the exported file doesn't include hidden rows.
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your CSV to StriveFormats. The validator detects blank rows, whitespace-only rows, and rows where all required fields are empty. It shows their exact locations so you can remove them before importing.
+
+[Open CSV Fixer](/app) | [View CSV Templates](/presets)

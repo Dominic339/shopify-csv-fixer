@@ -1,0 +1,144 @@
+---
+title: "WooCommerce Product CSV Import Errors: Causes and Fixes"
+description: "Fix the most common WooCommerce product CSV import errors — missing SKUs, invalid types, variation row problems, price formatting, and attribute column issues."
+keywords: ["woocommerce csv import errors", "woocommerce product import failed", "woocommerce csv errors", "fix woocommerce csv", "woocommerce import troubleshooting", "woocommerce csv validation", "woocommerce product upload error"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "The most common WooCommerce CSV import errors and what each means"
+  - "How WooCommerce's Type column controls import behavior"
+  - "How to fix variation parent/child relationship errors"
+  - "How to format prices, booleans, and attributes correctly"
+  - "How to use WooCommerce's built-in importer error report"
+bestFor: "WooCommerce store owners and developers troubleshooting failed or partial product CSV imports"
+timeToComplete: "12 minutes"
+---
+
+## How WooCommerce Validates CSV Imports
+
+WooCommerce's built-in product importer reads your CSV file and maps columns by name. It validates each row against WooCommerce's product data model. When validation fails, WooCommerce skips the row and logs an error. After the import, you see a summary showing how many rows were imported, skipped, and why.
+
+Understanding the validation rules prevents most import failures before they happen.
+
+---
+
+## Error: Invalid or Missing Product Type
+
+**Cause:** The `Type` column contains an unrecognized value, or the column is missing.
+
+**Accepted values:**
+
+| Type | Description |
+|---|---|
+| `simple` | A single product with no variations |
+| `variable` | A product with variations (parent row) |
+| `variation` | A specific variation of a variable product (child row) |
+| `grouped` | A group of related products |
+| `external` | A product that links to an external site |
+
+**Fix:**
+- Add a `Type` column if it's missing
+- Replace any custom or misspelled values with one of the above
+- `Variable` (capital V) is not the same as `variable` — use lowercase
+
+---
+
+## Error: Missing or Duplicate SKU
+
+**Cause:** `SKU` is blank on a simple or variable product row, or the same SKU appears on two different rows.
+
+WooCommerce uses SKU as the unique identifier for matching imported rows to existing products. If SKU is blank, WooCommerce creates a new product on every import instead of updating the existing one.
+
+**Fix:**
+- Add a unique SKU to every product row (simple products and variable parent rows)
+- Variation rows can inherit the parent SKU or have their own — but must not duplicate another product's SKU
+- Check for duplicate SKUs using Excel's `COUNTIF`: `=COUNTIF($A:$A, A2)` — any value above 1 is a duplicate
+
+---
+
+## Error: Invalid Regular Price
+
+**Cause:** `Regular price` contains a currency symbol (`€`, `$`), uses a comma as the decimal separator (`19,99`), or is blank on a simple or variable product.
+
+**Fix:**
+- Remove currency symbols: use Find & Replace to remove `$`, `€`, `£`
+- Convert comma decimal separators to periods: `19,99` → `19.99`
+- Ensure every simple and variable product has a price; variation rows may inherit from the parent
+
+---
+
+## Error: Invalid Boolean Field
+
+**Cause:** WooCommerce's boolean columns (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) accept `1` (true) or `0` (false). Values like `yes`, `TRUE`, or `Y` cause validation errors.
+
+**Fix:** Replace all boolean values:
+
+| Replace | With |
+|---|---|
+| `yes`, `Yes`, `TRUE`, `true` | `1` |
+| `no`, `No`, `FALSE`, `false` | `0` |
+
+Use Find & Replace with "Match entire cell contents" enabled.
+
+---
+
+## Error: Variation Parent Not Found
+
+**Cause:** A row with `Type: variation` references a parent product that doesn't exist in the import file or in the database.
+
+WooCommerce variation rows need a parent. The parent is linked via the `Parent` column (which should contain the parent product's ID from the database) or by having the parent product in the same import file.
+
+**Fix:**
+- Include the parent product row in the same CSV file
+- Set the `Parent` column on variation rows to the parent product's WooCommerce product ID (the number in the WordPress admin)
+- Ensure the parent row uses `Type: variable`, not `Type: simple`
+
+---
+
+## Error: Attribute Columns Not Recognized
+
+**Cause:** Attribute column names don't follow WooCommerce's exact naming pattern.
+
+**WooCommerce attribute column format:**
+
+- `Attribute 1 name` — the name of the first attribute (e.g., `Color`)
+- `Attribute 1 value(s)` — the value(s) for this row (e.g., `Blue` or `Blue | Red` for multiple)
+- `Attribute 1 visible` — `1` if shown on product page, `0` if hidden
+- `Attribute 1 global` — `1` if using a global attribute taxonomy, `0` for local
+
+**Fix:**
+- Use the exact format with spaces: `Attribute 1 name`, not `attribute_1_name` or `Attribute1Name`
+- Number attributes sequentially starting from 1
+- Do not leave gaps (don't use Attribute 3 if you haven't used Attribute 2)
+
+---
+
+## Error: Image URL Not Accessible
+
+**Cause:** The image URL in the `Images` column is not a publicly accessible HTTPS URL, is behind authentication, or uses a protocol other than HTTPS.
+
+WooCommerce sideloads images during import — it downloads them from the URL and stores them in your media library.
+
+**Fix:**
+- Test each image URL in a browser — it should load the image directly without login
+- Use HTTPS URLs (not HTTP)
+- For images in Google Drive or Dropbox, use direct download links (not sharing links)
+- If images are on localhost or a staging server, move them to a publicly accessible location first
+
+---
+
+## Reading WooCommerce's Import Error Report
+
+After an import, WooCommerce shows a summary page with:
+- "X products imported" — successfully created or updated
+- "X products failed" — click "View import log" to see which rows failed and why
+
+The import log shows the row number and the specific error. Use the row number to find the row in your CSV (remember: header is row 1, so data starts at row 2).
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your WooCommerce CSV to StriveFormats. The validator checks product types, SKUs, prices, booleans, attribute columns, and variation parent/child relationships — then auto-fixes safe issues.
+
+[Open WooCommerce CSV Fixer](/app?preset=woocommerce_products) | [View WooCommerce Template](/presets/woocommerce_products)

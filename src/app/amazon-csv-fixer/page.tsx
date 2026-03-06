@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import JsonLd from "@/components/JsonLd";
+import FAQJsonLd from "@/components/FAQJsonLd";
 
 export const metadata = {
-  title: "Amazon CSV Fixer | StriveFormats",
+  title: "Amazon CSV Fixer | Fix Amazon Flat File Import Errors | StriveFormats",
   description:
     "Fix Amazon inventory loader CSV files before upload. StriveFormats validates flat-file fields—SKU length, condition codes, price formatting, fulfillment channel, and boolean fields—and auto-fixes safe issues.",
   alternates: { canonical: "/amazon-csv-fixer" },
@@ -17,9 +18,28 @@ export default function AmazonCsvFixerPage() {
     description: metadata.description,
   };
 
+  const faqItems = [
+    {
+      question: "What is an Amazon inventory loader flat-file?",
+      answer:
+        "Amazon Seller Central supports uploading product listings and inventory in bulk via tab-delimited or comma-delimited flat files. This fixer targets the inventory loader format, validating fields like SKU, price, quantity, condition, and fulfillment channel.",
+    },
+    {
+      question: "What fulfillment-channel values are valid?",
+      answer:
+        "Use DEFAULT for Merchant Fulfilled (you ship the orders) or AMAZON_NA for Fulfillment by Amazon (FBA). Other regional FBA values include AMAZON_EU and AMAZON_FE.",
+    },
+    {
+      question: "What are valid item-condition codes?",
+      answer:
+        "Amazon uses numeric codes: 11=New, 10=Refurbished, 1=Used Like New, 2=Used Very Good, 3=Used Good, 4=Used Acceptable. The fixer flags any unrecognized condition codes.",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd data={jsonLd} />
+      <FAQJsonLd items={faqItems} />
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
