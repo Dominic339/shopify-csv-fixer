@@ -25,8 +25,10 @@ export default function TopBar() {
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [session, setSession] = useState<SupabaseSession | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const toolsRef = useRef<HTMLDivElement | null>(null);
 
   const logoSrc = useMemo(() => {
     // ThemeProvider uses "light"/"dark"
@@ -84,14 +86,14 @@ export default function TopBar() {
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (!menuOpen) return;
       const target = e.target as Node | null;
       if (!target) return;
-      if (menuRef.current && !menuRef.current.contains(target)) setMenuOpen(false);
+      if (menuOpen && menuRef.current && !menuRef.current.contains(target)) setMenuOpen(false);
+      if (toolsOpen && toolsRef.current && !toolsRef.current.contains(target)) setToolsOpen(false);
     }
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-  }, [menuOpen]);
+  }, [menuOpen, toolsOpen]);
 
   async function signOut() {
     try {
@@ -160,6 +162,45 @@ export default function TopBar() {
           <Link className="rgb-btn" href="/guides">
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Guides</span>
           </Link>
+
+          {/* Tools dropdown */}
+          <div className="relative" ref={toolsRef}>
+            <button
+              type="button"
+              className="rgb-btn"
+              onClick={() => setToolsOpen((v) => !v)}
+              aria-label="Tools menu"
+            >
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Tools</span>
+            </button>
+            {toolsOpen && (
+              <div className="popover-surface absolute left-0 mt-2 w-52 overflow-hidden rounded-2xl shadow-xl z-50">
+                <div className="p-2">
+                  <Link
+                    href="/convert"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    Format Converter
+                  </Link>
+                  <Link
+                    href="/merge"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    CSV Merger
+                  </Link>
+                  <Link
+                    href="/csv-inspector"
+                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    CSV Inspector
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
 
           {canAccessCustomFormats ? (
             <Link className="rgb-btn" href="/formats" title="Open Custom Formats builder">

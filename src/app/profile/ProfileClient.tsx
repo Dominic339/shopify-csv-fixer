@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 
 type SubStatus = {
   signedIn: boolean;
@@ -31,6 +32,19 @@ export default function ProfileClient() {
   const [msg, setMsg] = useState("");
   const [stripeEnabled, setStripeEnabled] = useState<boolean | null>(null);
 
+  // Language selector state
+  const [currentLocale, setCurrentLocale] = useState<Locale>(DEFAULT_LOCALE);
+  const [localeBusy, setLocaleBusy] = useState(false);
+
+  useEffect(() => {
+    // Read current locale from cookie
+    const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
+    const cookieVal = match?.[1];
+    if (cookieVal && (LOCALES as readonly string[]).includes(cookieVal)) {
+      setCurrentLocale(cookieVal as Locale);
+    }
+  }, []);
+
   const upgradeIntent = useMemo(() => {
     const u = (sp.get("upgrade") ?? "").toLowerCase();
     return u === "basic" || u === "advanced" ? (u as "basic" | "advanced") : null;
@@ -50,6 +64,20 @@ export default function ProfileClient() {
   }, []);
 
   const billingUnavailable = stripeEnabled === false;
+
+  function handleLocaleChange(locale: Locale) {
+    if (localeBusy) return;
+    setLocaleBusy(true);
+    // Set the NEXT_LOCALE cookie (1 year)
+    document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
+    setCurrentLocale(locale);
+    // Redirect: English → root, others → /<locale>/
+    if (locale === DEFAULT_LOCALE) {
+      window.location.href = "/";
+    } else {
+      window.location.href = `/${locale}/`;
+    }
+  }
 
   async function openPortal() {
     if (billingUnavailable) return;
@@ -235,6 +263,31 @@ export default function ProfileClient() {
         ) : (
           <div className="text-sm text-[var(--muted)]">Loading…</div>
         )}
+      </div>
+      {/* Language selector */}
+      <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <h2 className="text-sm font-semibold">Language</h2>
+        <p className="mt-1 text-xs text-[var(--muted)]">
+          Choose your preferred display language. This overrides browser detection.
+        </p>
+        <div className="mt-4">
+          <select
+            className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+            value={currentLocale}
+            disabled={localeBusy}
+            onChange={(e) => handleLocaleChange(e.target.value as Locale)}
+            aria-label="Select language"
+          >
+            {LOCALES.map((locale) => (
+              <option key={locale} value={locale}>
+                {LOCALE_NAMES[locale]}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-xs text-[var(--muted)]">
+            Current: <span className="font-semibold">{LOCALE_NAMES[currentLocale]}</span>
+          </p>
+        </div>
       </div>
     </main>
   );

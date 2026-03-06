@@ -55,6 +55,14 @@ type UiIssue = {
   details?: Record<string, unknown>;
 };
 
+// Workspace types (multi-file mode)
+type WorkspaceDoc = {
+  id: string;
+  name: string;
+  text: string;
+};
+type DocStatus = "pending" | "clean" | "warnings" | "errors";
+
 function downloadText(filename: string, text: string) {
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -116,6 +124,11 @@ export default function AppClient() {
   const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
+
+  // Workspace state (multi-file mode, paid plans only)
+  const [workspaceDocs, setWorkspaceDocs] = useState<WorkspaceDoc[]>([]);
+  const [activeWorkspaceDocId, setActiveWorkspaceDocId] = useState<string | null>(null);
+  const [docStatuses, setDocStatuses] = useState<Map<string, DocStatus>>(new Map());
 
   // Initialize the selected format from the URL query param if present.
   // This prevents the "keep valid" fallback from snapping to the first format
@@ -278,6 +291,26 @@ export default function AppClient() {
     if (planLimits?.unlimited) return true;
     return false;
   }, [subStatus, quota, planLimits]);
+
+  // Workspace file limit based on plan
+  const workspaceFileLimit = useMemo(() => {
+    const status = (subStatus?.status ?? "").toLowerCase();
+    const plan = subStatus?.plan ?? "free";
+    if (plan === "advanced" && status === "active") return 20;
+    if (plan === "basic" && status === "active") return 5;
+    return 1;
+  }, [subStatus]);
+  const workspaceEnabled = workspaceFileLimit > 1;
+
+  // Track doc status based on current issues when active doc changes
+  useEffect(() => {
+    if (!activeWorkspaceDocId) return;
+    const hasErrors = (issues as any[]).some((i) => (i?.severity ?? i?.level) === "error");
+    const hasWarnings = (issues as any[]).some((i) => (i?.severity ?? i?.level) === "warning");
+    const status: DocStatus = hasErrors ? "errors" : hasWarnings ? "warnings" : issues.length ? "warnings" : "clean";
+    setDocStatuses((prev) => new Map(prev).set(activeWorkspaceDocId, status));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWorkspaceDocId, issues]);
 
   // ✅ FIXED: preserve Issue.details without @ts-expect-error
   const issuesForTable: CsvIssue[] = useMemo(() => {
@@ -918,6 +951,38 @@ useEffect(() => {
     }
   }
 
+  // Workspace: add a file as a workspace document and switch to it
+  async function handleWorkspaceFile(file: File) {
+    if (!workspaceEnabled) {
+      return handleFile(file);
+    }
+    const id = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const text = await file.text();
+    const doc: WorkspaceDoc = { id, name: file.name, text };
+
+    setWorkspaceDocs((prev) => {
+      const capped = prev.length >= workspaceFileLimit ? prev.slice(0, workspaceFileLimit - 1) : prev;
+      return [...capped, doc];
+    });
+    setActiveWorkspaceDocId(id);
+    setFileName(file.name);
+    setLastUploadedText(text);
+    if (activeFormat) {
+      await runFormatOnText(activeFormat, text, file.name);
+    }
+  }
+
+  // Workspace: switch to an existing workspace document
+  async function switchWorkspaceDoc(doc: WorkspaceDoc) {
+    if (doc.id === activeWorkspaceDocId) return;
+    setActiveWorkspaceDocId(doc.id);
+    setFileName(doc.name);
+    setLastUploadedText(doc.text);
+    if (activeFormat) {
+      await runFormatOnText(activeFormat, doc.text, doc.name);
+    }
+  }
+
   // Re-run when format changes
   useEffect(() => {
     setIssues([]);
@@ -1031,6 +1096,56 @@ useEffect(() => {
           </button>
         </div>
       ) : null}
+
+      {/* Workspace panel — paid plans only */}
+      {workspaceEnabled && workspaceDocs.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)] pr-2">Workspace</span>
+            {workspaceDocs.map((doc) => {
+              const status = docStatuses.get(doc.id) ?? "pending";
+              const dot =
+                status === "errors" ? "bg-red-500" :
+                status === "warnings" ? "bg-yellow-400" :
+                status === "clean" ? "bg-green-500" : "bg-[var(--border)]";
+              return (
+                <button
+                  key={doc.id}
+                  type="button"
+                  className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm border transition-colors ${
+                    doc.id === activeWorkspaceDocId
+                      ? "border-[color:rgba(var(--accent-rgb),0.5)] bg-[color:rgba(var(--accent-rgb),0.1)] font-semibold text-[var(--text)]"
+                      : "border-[var(--border)] bg-[var(--surface-2)] text-[color:rgba(var(--muted-rgb),1)] hover:bg-[var(--surface)]"
+                  }`}
+                  onClick={() => switchWorkspaceDoc(doc)}
+                  title={doc.name}
+                >
+                  <span className={`h-2 w-2 rounded-full ${dot} shrink-0`} />
+                  <span className="max-w-[160px] truncate">{doc.name}</span>
+                </button>
+              );
+            })}
+            {workspaceDocs.length < workspaceFileLimit && (
+              <label className="flex cursor-pointer items-center gap-1 rounded-xl border border-dashed border-[var(--border)] px-3 py-1.5 text-xs text-[color:rgba(var(--muted-rgb),1)] hover:bg-[var(--surface-2)]">
+                <span>+ Add file</span>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (f) await handleWorkspaceFile(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
+            <span className="ml-auto text-xs text-[color:rgba(var(--muted-rgb),1)]">
+              {workspaceDocs.length}/{workspaceFileLimit} files
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="mb-8 flex items-start justify-between gap-6">
         <div>
@@ -1656,7 +1771,27 @@ useEffect(() => {
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/presets" className="hover:underline">Preset Formats</Link>
         <Link href="/#pricing" className="hover:underline">Pricing</Link>
+        <Link href="/convert" className="hover:underline">Format Converter</Link>
+        <Link href="/merge" className="hover:underline">CSV Merger</Link>
+        <Link href="/csv-inspector" className="hover:underline">CSV Inspector</Link>
       </div>
+      {workspaceEnabled && workspaceDocs.length === 0 && fileName && (
+        <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+          <button
+            type="button"
+            className="underline hover:no-underline"
+            onClick={async () => {
+              if (!lastUploadedText || !fileName) return;
+              const id = `doc_${Date.now()}`;
+              setWorkspaceDocs([{ id, name: fileName, text: lastUploadedText }]);
+              setActiveWorkspaceDocId(id);
+            }}
+          >
+            Add current file to workspace
+          </button>
+          {" "}to work with multiple files (up to {workspaceFileLimit}).
+        </div>
+      )}
     </div>
   );
 }
