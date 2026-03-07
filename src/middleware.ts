@@ -1,7 +1,11 @@
 // src/middleware.ts
 // 1. Applies rate limiting to all /api/* routes.
-// 2. Refreshes Supabase auth session so server-side getUser() reads valid cookies.
-// 3. Handles locale detection and redirects for page routes.
+// 2. Auth routes (/auth/*) pass through untouched — the callback handler must
+//    run exchangeCodeForSession() without any redirect interference.
+// 3. Refreshes Supabase auth session so server-side getUser() reads valid cookies.
+// 4. Handles locale detection and redirects for public page routes.
+//    - Auth-sensitive routes (login, profile, account, checkout) are exempt from
+//      locale redirects — they only get the session refresh and then pass through.
 //    - /en/* → redirects to /* (canonical English at root)
 //    - First-time visitors: detects Accept-Language and redirects to /<locale>/
 //    - Locale preference persisted via NEXT_LOCALE cookie
@@ -14,6 +18,13 @@ import type { Locale } from "./lib/i18n/locales";
 
 // Exempt paths — verified by other mechanisms (signature, etc.)
 const RATE_LIMIT_EXEMPT = new Set(["/api/stripe/webhook"]);
+
+// Auth-sensitive page route prefixes that must NOT receive locale redirects.
+// These routes either establish the session (callback) or require the real
+// session to be present (profile, login) — a locale redirect would lose the
+// auth code parameter or break the cookie exchange flow.
+const AUTH_PASSTHROUGH_PREFIX = "/auth/"; // full passthrough — no session refresh either
+const LOCALE_EXEMPT_PREFIXES = ["/login", "/profile", "/account", "/checkout"];
 
 // ---------------------------------------------------------------------------
 // Locale detection helpers
@@ -43,6 +54,16 @@ function detectLocale(acceptLanguage: string | null): Locale {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // -------------------------------------------------------------------------
+  // 0. Auth callback routes — full passthrough, no interference whatsoever.
+  //    exchangeCodeForSession() in /auth/callback/route.ts must receive the
+  //    request exactly as-is; any redirect here would drop the `code` param
+  //    and prevent the server-side session cookie from being set.
+  // -------------------------------------------------------------------------
+  if (pathname.startsWith(AUTH_PASSTHROUGH_PREFIX)) {
+    return NextResponse.next();
+  }
 
   // -------------------------------------------------------------------------
   // 1. API routes — rate limiting only
@@ -118,6 +139,15 @@ export async function middleware(req: NextRequest) {
       response.cookies.set(name, value);
     });
     return response;
+  }
+
+  // -------------------------------------------------------------------------
+  // Auth-adjacent routes — session refresh already done above; skip locale
+  // redirects entirely so login, profile, account, and checkout always render
+  // their English handlers without being bounced to /<locale>/* first.
+  // -------------------------------------------------------------------------
+  if (LOCALE_EXEMPT_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return supabaseRes;
   }
 
   // /en/* → redirect to /* (English is canonical at root, no /en/ prefix)

@@ -116,6 +116,73 @@ describe("CONVERT_FORMAT_OPTIONS", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Middleware locale bypass logic
+// ---------------------------------------------------------------------------
+
+describe("middleware locale bypass", () => {
+  // Mirror the constants/logic from src/middleware.ts
+  const AUTH_PASSTHROUGH_PREFIX = "/auth/";
+  const LOCALE_EXEMPT_PREFIXES = ["/login", "/profile", "/account", "/checkout"];
+
+  function isAuthPassthrough(pathname: string): boolean {
+    return pathname.startsWith(AUTH_PASSTHROUGH_PREFIX);
+  }
+
+  function isLocaleExempt(pathname: string): boolean {
+    return LOCALE_EXEMPT_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(p + "/")
+    );
+  }
+
+  it("/auth/callback is auth passthrough", () => {
+    expect(isAuthPassthrough("/auth/callback")).toBe(true);
+  });
+
+  it("/auth/confirm is auth passthrough", () => {
+    expect(isAuthPassthrough("/auth/confirm")).toBe(true);
+  });
+
+  it("/api/* is not auth passthrough (handled separately)", () => {
+    expect(isAuthPassthrough("/api/subscription/status")).toBe(false);
+  });
+
+  it("/profile is locale exempt", () => {
+    expect(isLocaleExempt("/profile")).toBe(true);
+  });
+
+  it("/login is locale exempt", () => {
+    expect(isLocaleExempt("/login")).toBe(true);
+  });
+
+  it("/account is locale exempt", () => {
+    expect(isLocaleExempt("/account")).toBe(true);
+  });
+
+  it("/checkout is locale exempt", () => {
+    expect(isLocaleExempt("/checkout")).toBe(true);
+  });
+
+  it("/checkout/success is locale exempt (sub-path)", () => {
+    expect(isLocaleExempt("/checkout/success")).toBe(true);
+  });
+
+  it("public content pages are NOT locale exempt", () => {
+    expect(isLocaleExempt("/guides/shopify")).toBe(false);
+    expect(isLocaleExempt("/")).toBe(false);
+    expect(isLocaleExempt("/ecommerce-csv-fixer")).toBe(false);
+  });
+
+  it("auth passthrough takes priority over locale — /auth/* short-circuits everything", () => {
+    // If auth passthrough matches, locale-exempt check is irrelevant
+    const path = "/auth/callback";
+    expect(isAuthPassthrough(path)).toBe(true);
+    // Even though it starts with /auth, it is NOT in LOCALE_EXEMPT_PREFIXES —
+    // which is correct: /auth/* uses the full passthrough, not just locale-skip.
+    expect(isLocaleExempt(path)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Target format collision avoidance
 // ---------------------------------------------------------------------------
 
