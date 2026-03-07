@@ -296,6 +296,27 @@ export default function MergeClient() {
           </button>
         </div>
 
+        {/* Schema compatibility warning — shown before merge and in results */}
+        {fileA && fileB && (() => {
+          const setA = new Set(fileA.headers);
+          const setB = new Set(fileB.headers);
+          const shared = fileA.headers.filter((h) => setB.has(h)).length;
+          const total = new Set([...fileA.headers, ...fileB.headers]).size;
+          const pct = total > 0 ? shared / total : 1;
+          // Wildly incompatible: less than 25% overlap
+          if (pct < 0.25 && total > 2) {
+            return (
+              <div className="rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-800 dark:text-red-300">
+                <span className="font-semibold">Schema mismatch warning:</span> these files share only{" "}
+                {shared} of {total} unique columns ({Math.round(pct * 100)}%). Merging will produce many
+                empty cells. Consider using the{" "}
+                <a href="/convert" className="underline">Format Converter</a> to align schemas first.
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         {/* Result */}
         {result && (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
@@ -324,6 +345,9 @@ export default function MergeClient() {
 
             {result.warnings.length > 0 && (
               <div className="mt-4 space-y-2">
+                <p className="text-xs font-semibold text-[var(--muted)]">
+                  Merge completed with warnings — missing columns are blank-filled:
+                </p>
                 {result.warnings.map((w, i) => (
                   <div
                     key={i}

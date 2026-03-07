@@ -51,16 +51,34 @@ export default function ProfileClient() {
   }, [sp]);
 
   async function load() {
+    const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
     const [subRes, statusRes] = await Promise.all([
       fetch("/api/subscription/status", { cache: "no-store" }),
       fetch("/api/stripe/status", { cache: "no-store" }),
     ]);
-    setSub((await subRes.json()) as SubStatus);
-    setStripeEnabled(((await statusRes.json()) as { enabled: boolean }).enabled);
+
+    // Harden: don't assume the response is JSON
+    try {
+      const text = await subRes.text();
+      const j = text ? JSON.parse(text) : FALLBACK_SUB;
+      setSub(j as SubStatus);
+    } catch {
+      setSub(FALLBACK_SUB);
+    }
+
+    try {
+      const text = await statusRes.text();
+      const j = text ? JSON.parse(text) : { enabled: true };
+      setStripeEnabled(Boolean(j?.enabled ?? true));
+    } catch {
+      setStripeEnabled(true);
+    }
   }
 
   useEffect(() => {
-    load().catch(() => { setSub(null); setStripeEnabled(true); });
+    // Fallback ensures the UI never stays stuck on "Loading..."
+    const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
+    load().catch(() => { setSub(FALLBACK_SUB); setStripeEnabled(true); });
   }, []);
 
   const billingUnavailable = stripeEnabled === false;

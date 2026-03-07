@@ -53,7 +53,7 @@ export default function ConvertClient() {
       setError("Please upload a CSV file first.");
       return;
     }
-    if (sourceFormatId === targetFormatId) {
+    if (sourceFormatId === safeTargetFormatId) {
       setError("Source and target formats must be different.");
       return;
     }
@@ -61,7 +61,7 @@ export default function ConvertClient() {
     setError(null);
     try {
       const { headers, rows } = parseCsv(csvText);
-      const out = convertCsv(headers, rows, sourceFormatId, targetFormatId, plan);
+      const out = convertCsv(headers, rows, sourceFormatId, safeTargetFormatId, plan);
       setResult(out);
     } catch (e: any) {
       setError(e?.message ?? "Conversion failed.");
@@ -78,6 +78,11 @@ export default function ConvertClient() {
   }
 
   const targetOptions = CONVERT_FORMAT_OPTIONS.filter((o) => o.id !== sourceFormatId);
+
+  // If targetFormatId collides with the selected source, derive a safe fallback so
+  // the controlled <select> always has a matching option and doesn't render blank.
+  const safeTargetFormatId =
+    targetFormatId !== sourceFormatId ? targetFormatId : (targetOptions[0]?.id ?? targetFormatId);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -135,7 +140,13 @@ export default function ConvertClient() {
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
                 value={sourceFormatId}
                 onChange={(e) => {
-                  setSourceFormatId(e.target.value);
+                  const newSource = e.target.value;
+                  setSourceFormatId(newSource);
+                  // If current target would now match source, auto-select first valid target
+                  if (targetFormatId === newSource) {
+                    const first = CONVERT_FORMAT_OPTIONS.find((o) => o.id !== newSource);
+                    if (first) setTargetFormatId(first.id);
+                  }
                   setResult(null);
                 }}
               >
@@ -152,7 +163,7 @@ export default function ConvertClient() {
               </label>
               <select
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
-                value={targetFormatId}
+                value={safeTargetFormatId}
                 onChange={(e) => {
                   setTargetFormatId(e.target.value);
                   setResult(null);
@@ -211,8 +222,19 @@ export default function ConvertClient() {
               </div>
             </div>
 
+            {/* Conversion quality indicator */}
+            {result.warnings.length === 0 && result.unmappedSourceFields.length === 0 ? (
+              <div className="mt-4 rounded-xl border border-green-400/40 bg-green-400/10 px-3 py-2 text-sm text-green-800 dark:text-green-300">
+                All source fields mapped successfully. Output should be import-ready.
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300 font-medium">
+                Converted with warnings — review dropped columns before importing.
+              </div>
+            )}
+
             {result.warnings.length > 0 && (
-              <div className="mt-4 space-y-2">
+              <div className="mt-3 space-y-2">
                 {result.warnings.map((w, i) => (
                   <div
                     key={i}
@@ -225,8 +247,8 @@ export default function ConvertClient() {
             )}
 
             {result.unmappedSourceFields.length > 0 && (
-              <div className="mt-3 text-xs text-[var(--muted)]">
-                Dropped columns:{" "}
+              <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--muted)]">
+                <span className="font-semibold">Dropped columns</span> (no equivalent in target format):{" "}
                 <span className="font-mono">{result.unmappedSourceFields.join(", ")}</span>
               </div>
             )}

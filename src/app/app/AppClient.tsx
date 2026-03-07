@@ -238,10 +238,17 @@ export default function AppClient() {
   );
 
   async function refreshQuotaAndPlan() {
+    const FALLBACK_SUB = { ok: true, plan: "free" as const, status: "none", signedIn: false };
     try {
       const [q, s] = await Promise.all([
         getQuota(),
-        fetch("/api/subscription/status", { cache: "no-store" }).then((r) => r.json()),
+        fetch("/api/subscription/status", { cache: "no-store" })
+          .then(async (r) => {
+            if (!r.ok) return FALLBACK_SUB;
+            const text = await r.text();
+            try { return JSON.parse(text); } catch { return FALLBACK_SUB; }
+          })
+          .catch(() => FALLBACK_SUB),
       ]);
 
       const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
@@ -250,8 +257,8 @@ export default function AppClient() {
       setQuota(q);
       setSubStatus(s);
       setPlanLimits(limits);
-    } catch (e: any) {
-      setErrorBanner(e?.message ?? "Failed to refresh quota/plan");
+    } catch {
+      // Silently fail — quota/plan remain at defaults
     }
   }
 

@@ -128,6 +128,86 @@ test("convert: upload WooCommerce file and convert to Shopify shows summary", as
 });
 
 // ---------------------------------------------------------------------------
+// Regression: /app must not show JSON parse error banner
+// ---------------------------------------------------------------------------
+
+test("app: no JSON parse error banner on load", async ({ page }) => {
+  await page.goto("/app");
+
+  // Wait for the page to fully hydrate (heading must be visible)
+  await expect(page.getByRole("heading", { name: "CSV Fixer" })).toBeVisible({ timeout: 10_000 });
+
+  // The error banner should NOT contain a JSON parse error
+  // We allow a brief moment for any async error to surface
+  await page.waitForTimeout(1500);
+
+  const banners = page.locator("text=/Unexpected token|is not valid JSON|JSON parse/i");
+  await expect(banners).toHaveCount(0);
+});
+
+// ---------------------------------------------------------------------------
+// Regression: /profile must not stay stuck on "Loading..."
+// ---------------------------------------------------------------------------
+
+test("profile: does not stay stuck on Loading", async ({ page }) => {
+  await page.goto("/profile");
+
+  // Give the page time to load
+  await page.waitForTimeout(2000);
+
+  // "Loading..." text must be gone — the content must have resolved
+  const loadingText = page.locator("text=Loading…");
+  await expect(loadingText).toHaveCount(0, { timeout: 5_000 });
+
+  // The profile heading must be present
+  await expect(page.getByRole("heading", { name: /Profile/i })).toBeVisible();
+});
+
+// ---------------------------------------------------------------------------
+// Regression: /convert source dropdown must show multiple options
+// ---------------------------------------------------------------------------
+
+test("convert: source format dropdown shows multiple options", async ({ page }) => {
+  await page.goto("/convert");
+
+  await expect(page.getByRole("heading", { name: /CSV Format Converter/i })).toBeVisible();
+
+  const selects = page.locator("select");
+  const sourceSelect = selects.first();
+  await expect(sourceSelect).toBeVisible();
+
+  // Count options in the source dropdown — must be > 1
+  const optionCount = await sourceSelect.locator("option").count();
+  expect(optionCount).toBeGreaterThan(3); // at least 4 platforms (Shopify, WooCommerce, Etsy, eBay, Amazon + legacy)
+
+  // Verify key options are present
+  const optionValues = await sourceSelect.locator("option").allInnerTexts();
+  const hasWoo = optionValues.some((t) => t.toLowerCase().includes("woocommerce"));
+  const hasEtsy = optionValues.some((t) => t.toLowerCase().includes("etsy"));
+  expect(hasWoo).toBe(true);
+  expect(hasEtsy).toBe(true);
+});
+
+// ---------------------------------------------------------------------------
+// Regression: changing source format keeps target dropdown populated
+// ---------------------------------------------------------------------------
+
+test("convert: changing source format keeps target dropdown valid", async ({ page }) => {
+  await page.goto("/convert");
+
+  await expect(page.getByRole("heading", { name: /CSV Format Converter/i })).toBeVisible();
+  const selects = page.locator("select");
+
+  // Change source to WooCommerce (initial target is also WooCommerce — this should auto-fix)
+  await selects.first().selectOption("woocommerce_products");
+
+  // Target dropdown must still have selected options (not blank)
+  const targetValue = await selects.nth(1).inputValue();
+  expect(targetValue).toBeTruthy();
+  expect(targetValue).not.toBe("woocommerce_products"); // must differ from source
+});
+
+// ---------------------------------------------------------------------------
 // Profile — language selector
 // ---------------------------------------------------------------------------
 
