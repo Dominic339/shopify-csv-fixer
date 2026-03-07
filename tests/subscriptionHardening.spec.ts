@@ -1,12 +1,13 @@
 /**
  * Regression tests for subscription/profile loading hardening.
  *
- * These are unit-level tests that verify the safe-JSON parsing helpers
- * introduced to fix "Unexpected token … is not valid JSON" errors and
- * the stuck-Loading state on /profile.
+ * ProfileClient now reads auth directly via the browser Supabase client
+ * (same mechanism as TopBar) instead of fetching /api/subscription/status.
+ * This avoids the server-side getUser() failure caused by expired JWTs
+ * when no middleware session refresh is in place.
  *
- * We test the helpers extracted from the fix rather than the React
- * components directly (which require a DOM environment).
+ * These tests verify: safe-JSON helpers for the Stripe status fetch, the
+ * CONVERT_FORMAT_OPTIONS shape, and the target-select collision logic.
  */
 import { describe, it, expect } from "vitest";
 import { CONVERT_FORMAT_OPTIONS } from "@/lib/convertCsv";
@@ -112,6 +113,78 @@ describe("CONVERT_FORMAT_OPTIONS", () => {
       const filtered = CONVERT_FORMAT_OPTIONS.filter((o) => o.id !== opt.id);
       expect(filtered.length).toBeGreaterThanOrEqual(3);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Profile subscription derivation logic
+// Mirrors the logic in ProfileClient.load() that builds SubStatus from the
+// user_subscriptions row returned by the browser Supabase client.
+// ---------------------------------------------------------------------------
+
+type SubStatus = {
+  signedIn: boolean;
+  plan: "free" | "basic" | "advanced";
+  status: string;
+  current_period_end: string | null;
+};
+
+function deriveSubStatus(
+  session: { user: { id: string } } | null,
+  row: { plan: string; status: string; current_period_end: string | null } | null
+): SubStatus {
+  if (!session?.user) {
+    return { signedIn: false, plan: "free", status: "none", current_period_end: null };
+  }
+  const activePlan = row?.status === "active" ? row.plan : "free";
+  return {
+    signedIn: true,
+    plan: (activePlan ?? "free") as SubStatus["plan"],
+    status: row?.status ?? "none",
+    current_period_end: row?.current_period_end ?? null,
+  };
+}
+
+describe("profile subscription derivation (browser-client path)", () => {
+  it("shows signedIn:false when no session", () => {
+    const result = deriveSubStatus(null, null);
+    expect(result.signedIn).toBe(false);
+    expect(result.plan).toBe("free");
+    expect(result.status).toBe("none");
+  });
+
+  it("shows signedIn:true with advanced/active when session + matching row", () => {
+    const session = { user: { id: "user-123" } };
+    const row = { plan: "advanced", status: "active", current_period_end: "2026-12-31" };
+    const result = deriveSubStatus(session, row);
+    expect(result.signedIn).toBe(true);
+    expect(result.plan).toBe("advanced");
+    expect(result.status).toBe("active");
+    expect(result.current_period_end).toBe("2026-12-31");
+  });
+
+  it("falls back to free when subscription row is null (no subscription)", () => {
+    const session = { user: { id: "user-123" } };
+    const result = deriveSubStatus(session, null);
+    expect(result.signedIn).toBe(true);
+    expect(result.plan).toBe("free");
+    expect(result.status).toBe("none");
+  });
+
+  it("falls back to free plan when status is not active (e.g. canceled)", () => {
+    const session = { user: { id: "user-123" } };
+    const row = { plan: "basic", status: "canceled", current_period_end: null };
+    const result = deriveSubStatus(session, row);
+    expect(result.signedIn).toBe(true);
+    expect(result.plan).toBe("free"); // downgraded to free because not active
+    expect(result.status).toBe("canceled");
+  });
+
+  it("shows basic plan when status is active and plan is basic", () => {
+    const session = { user: { id: "user-456" } };
+    const row = { plan: "basic", status: "active", current_period_end: null };
+    const result = deriveSubStatus(session, row);
+    expect(result.plan).toBe("basic");
   });
 });
 

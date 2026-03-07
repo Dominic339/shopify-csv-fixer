@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/browser";
 import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 
 type SubStatus = {
@@ -52,21 +53,36 @@ export default function ProfileClient() {
 
   async function load() {
     const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
-    const [subRes, statusRes] = await Promise.all([
-      fetch("/api/subscription/status", { cache: "no-store" }),
-      fetch("/api/stripe/status", { cache: "no-store" }),
-    ]);
 
-    // Harden: don't assume the response is JSON
-    try {
-      const text = await subRes.text();
-      const j = text ? JSON.parse(text) : FALLBACK_SUB;
-      setSub(j as SubStatus);
-    } catch {
+    // Use the browser Supabase client — same auth source as the top-right menu.
+    // getSession() reads from cookies/storage without a network round-trip, so it
+    // works regardless of whether the server-side access token is still valid.
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.user) {
       setSub(FALLBACK_SUB);
+    } else {
+      // Query user_subscriptions directly (browser client uses session JWT; RLS
+      // allows the authenticated user to read their own row).
+      const { data } = await supabase
+        .from("user_subscriptions")
+        .select("plan,status,current_period_end")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      const activePlan = data?.status === "active" ? data.plan : "free";
+      setSub({
+        signedIn: true,
+        plan: (activePlan ?? "free") as SubStatus["plan"],
+        status: data?.status ?? "none",
+        current_period_end: data?.current_period_end ?? null,
+      });
     }
 
+    // Stripe availability check (separate concern — keep as API call)
     try {
+      const statusRes = await fetch("/api/stripe/status", { cache: "no-store" });
       const text = await statusRes.text();
       const j = text ? JSON.parse(text) : { enabled: true };
       setStripeEnabled(Boolean(j?.enabled ?? true));
