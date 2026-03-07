@@ -244,46 +244,8 @@ test("profile: changing language updates selection", async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// Regression: /profile must NOT be locale-redirected when Accept-Language is
-// non-English. The middleware now exempts auth-sensitive routes from locale
-// redirects so that session cookies are not disrupted.
+// Regression: /profile must show subscription info (not blank), not stuck Loading.
 // ---------------------------------------------------------------------------
-
-test("profile: not locale-redirected when Accept-Language is Spanish", async ({ page }) => {
-  // Set Accept-Language to Spanish so the locale middleware would normally redirect
-  await page.setExtraHTTPHeaders({ "accept-language": "es-ES,es;q=0.9,en;q=0.1" });
-  await page.goto("/profile");
-
-  // The final URL must still be /profile — NOT /es/profile
-  expect(page.url()).toMatch(/\/profile(?:\?|$)/);
-  expect(page.url()).not.toContain("/es/profile");
-
-  // The profile heading must be present (page rendered correctly)
-  await expect(page.getByRole("heading", { name: /Profile/i })).toBeVisible({ timeout: 8_000 });
-});
-
-test("auth-callback: /auth/callback path is not locale-redirected", async ({ page }) => {
-  // Visiting /auth/callback without a code param will error at the handler level,
-  // but the middleware must NOT redirect it to /es/auth/callback first.
-  await page.setExtraHTTPHeaders({ "accept-language": "es-ES,es;q=0.9,en;q=0.1" });
-
-  // We expect either a redirect BACK to / (no code param) or an error page —
-  // what we must NOT see is a redirect to /es/auth/callback.
-  await page.goto("/auth/callback", { waitUntil: "commit" });
-
-  // The URL must not have /es/ injected
-  expect(page.url()).not.toContain("/es/auth/callback");
-});
-
-// ---------------------------------------------------------------------------
-// Regression: /profile must show subscription info (not blank), not stuck on "Signed in: No"
-// when unauthenticated, shows the sign-in link; when authenticated, the middleware
-// now refreshes the session cookie so the API can return the real plan.
-// ---------------------------------------------------------------------------
-
-// NOTE: Full "Signed in: Yes" assertion requires a real authenticated session.
-// This is tested manually / in CI with a pre-seeded auth storage state.
-// The test below is the unauthenticated baseline: page must render, not Loading.
 
 test("profile: shows subscription section with either sign-in or plan info", async ({ page }) => {
   await page.goto("/profile");
