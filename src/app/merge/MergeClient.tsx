@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import { parseCsv, toCsv } from "@/lib/csv";
 import {
   mergeCsvFilesAdvanced,
@@ -32,6 +33,7 @@ type FileData = {
 };
 
 export default function MergeClient() {
+  const { theme } = useTheme();
   const fileARef = useRef<HTMLInputElement>(null);
   const fileBRef = useRef<HTMLInputElement>(null);
   const [plan, setPlan] = useState<Plan>("free");
@@ -225,7 +227,8 @@ export default function MergeClient() {
                     Dedupe key column
                   </label>
                   <select
-                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+                    style={{ colorScheme: theme }}
                     value={dedupeKey}
                     onChange={(e) => setDedupeKey(e.target.value)}
                   >

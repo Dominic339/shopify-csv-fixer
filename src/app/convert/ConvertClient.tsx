@@ -6,6 +6,7 @@ import { parseCsv, toCsv } from "@/lib/csv";
 import { convertCsv, CONVERT_FORMAT_OPTIONS, getConvertRowLimit } from "@/lib/convertCsv";
 import { getQuota } from "@/lib/quota";
 import type { Plan } from "@/lib/quota";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -20,6 +21,7 @@ function downloadCsv(filename: string, content: string) {
 }
 
 export default function ConvertClient() {
+  const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [plan, setPlan] = useState<Plan>("free");
   const [sourceFormatId, setSourceFormatId] = useState("shopify_products");
@@ -137,7 +139,8 @@ export default function ConvertClient() {
                 Source format
               </label>
               <select
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+                style={{ colorScheme: theme }}
                 value={sourceFormatId}
                 onChange={(e) => {
                   const newSource = e.target.value;
@@ -162,7 +165,8 @@ export default function ConvertClient() {
                 Target format
               </label>
               <select
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+                style={{ colorScheme: theme }}
                 value={safeTargetFormatId}
                 onChange={(e) => {
                   setTargetFormatId(e.target.value);

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 type SubStatus = {
   signedIn: boolean;
@@ -25,6 +26,7 @@ async function safeReadJson(res: Response) {
 }
 
 export default function ProfileClient() {
+  const { theme } = useTheme();
   const sp = useSearchParams();
   const router = useRouter();
 
@@ -306,7 +308,8 @@ export default function ProfileClient() {
         </p>
         <div className="mt-4">
           <select
-            className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
+            className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+            style={{ colorScheme: theme }}
             value={currentLocale}
             disabled={localeBusy}
             onChange={(e) => handleLocaleChange(e.target.value as Locale)}

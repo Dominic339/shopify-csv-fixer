@@ -3,11 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
+import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 
 type SubStatus = {
   signedIn: boolean;
@@ -21,6 +23,13 @@ type SupabaseSession = { user?: SupabaseUser };
 
 export default function TopBar() {
   const { theme, toggle } = useTheme();
+  const pathname = usePathname();
+
+  // Derive the active locale from the URL path (e.g. /es/guides/... → "es")
+  const currentLocale: Locale = useMemo(() => {
+    const segment = pathname?.split("/")?.[1] ?? "";
+    return isValidLocale(segment) ? segment : DEFAULT_LOCALE;
+  }, [pathname]);
 
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [session, setSession] = useState<SupabaseSession | null>(null);
@@ -168,7 +177,7 @@ export default function TopBar() {
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
           </Link>
 
-          <Link className="rgb-btn" href="/guides">
+          <Link className="rgb-btn" href={localeHref(currentLocale, "/guides")}>
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Guides</span>
           </Link>
 
