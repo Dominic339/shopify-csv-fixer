@@ -1,11 +1,13 @@
 // src/middleware.ts
 // 1. Applies rate limiting to all /api/* routes.
-// 2. Handles locale detection and redirects for page routes.
+// 2. Refreshes Supabase auth session so server-side getUser() reads valid cookies.
+// 3. Handles locale detection and redirects for page routes.
 //    - /en/* → redirects to /* (canonical English at root)
 //    - First-time visitors: detects Accept-Language and redirects to /<locale>/
 //    - Locale preference persisted via NEXT_LOCALE cookie
 
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { rateLimit } from "./lib/rateLimit";
 import { LOCALES, DEFAULT_LOCALE, isValidLocale } from "./lib/i18n/locales";
 import type { Locale } from "./lib/i18n/locales";
@@ -79,15 +81,51 @@ export async function middleware(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 2. Page routes — locale handling
+  // 2. Page routes — Supabase session refresh + locale handling
   // -------------------------------------------------------------------------
+
+  // Refresh the Supabase auth session so that server-side supabase.auth.getUser()
+  // in API routes and Server Components can read a valid session from cookies.
+  // Per @supabase/ssr docs, this must run in middleware on every page request.
+  let supabaseRes = NextResponse.next({ request: req });
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (supabaseUrl && supabaseKey) {
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
+      cookies: {
+        getAll() {
+          return req.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          // Apply refreshed cookies to both the request and the response.
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          supabaseRes = NextResponse.next({ request: req });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseRes.cookies.set(name, value, options)
+          );
+        },
+      },
+    });
+    // This call refreshes the session token if it has expired.
+    await supabase.auth.getUser();
+  }
+
+  // Helper: copy Supabase session cookies onto redirect/other responses.
+  // Per @supabase/ssr docs, any response we return must carry the refreshed cookies.
+  function withSessionCookies(response: NextResponse): NextResponse {
+    supabaseRes.cookies.getAll().forEach(({ name, value }) => {
+      response.cookies.set(name, value);
+    });
+    return response;
+  }
 
   // /en/* → redirect to /* (English is canonical at root, no /en/ prefix)
   if (pathname === "/en" || pathname.startsWith("/en/")) {
     const rest = pathname.slice(3); // strip "/en"
     const url = req.nextUrl.clone();
     url.pathname = rest || "/";
-    return NextResponse.redirect(url, { status: 308 });
+    return withSessionCookies(NextResponse.redirect(url, { status: 308 }));
   }
 
   // Check if path starts with a known non-English locale segment
@@ -95,13 +133,12 @@ export async function middleware(req: NextRequest) {
   const firstSegment = pathname.split("/")[1];
   if (firstSegment && isValidLocale(firstSegment) && firstSegment !== DEFAULT_LOCALE) {
     // Already on a localized route — just pass through, setting the cookie
-    const res = NextResponse.next();
-    res.cookies.set("NEXT_LOCALE", firstSegment, {
+    supabaseRes.cookies.set("NEXT_LOCALE", firstSegment, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",
     });
-    return res;
+    return supabaseRes;
   }
 
   // Root-level English page — check if this is a first-time visitor who
@@ -112,7 +149,7 @@ export async function middleware(req: NextRequest) {
     // User has previously chosen a non-English locale → redirect
     const url = req.nextUrl.clone();
     url.pathname = `/${cookieLocale}${pathname === "/" ? "" : pathname}`;
-    return NextResponse.redirect(url, { status: 307 });
+    return withSessionCookies(NextResponse.redirect(url, { status: 307 }));
   }
 
   // No cookie: detect from Accept-Language
@@ -121,7 +158,7 @@ export async function middleware(req: NextRequest) {
     if (detected !== DEFAULT_LOCALE) {
       const url = req.nextUrl.clone();
       url.pathname = `/${detected}${pathname === "/" ? "" : pathname}`;
-      const redirectRes = NextResponse.redirect(url, { status: 307 });
+      const redirectRes = withSessionCookies(NextResponse.redirect(url, { status: 307 }));
       redirectRes.cookies.set("NEXT_LOCALE", detected, {
         path: "/",
         maxAge: 60 * 60 * 24 * 365,
@@ -130,16 +167,15 @@ export async function middleware(req: NextRequest) {
       return redirectRes;
     }
     // Detected English — set cookie so we don't check again
-    const res = NextResponse.next();
-    res.cookies.set("NEXT_LOCALE", DEFAULT_LOCALE, {
+    supabaseRes.cookies.set("NEXT_LOCALE", DEFAULT_LOCALE, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",
     });
-    return res;
+    return supabaseRes;
   }
 
-  return NextResponse.next();
+  return supabaseRes;
 }
 
 export const config = {

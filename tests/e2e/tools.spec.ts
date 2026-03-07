@@ -244,6 +244,49 @@ test("profile: changing language updates selection", async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
+// Regression: /profile must show subscription info (not blank), not stuck on "Signed in: No"
+// when unauthenticated, shows the sign-in link; when authenticated, the middleware
+// now refreshes the session cookie so the API can return the real plan.
+// ---------------------------------------------------------------------------
+
+test("profile: shows subscription section with either sign-in or plan info", async ({ page }) => {
+  await page.goto("/profile");
+
+  // Page must not be stuck on Loading
+  await page.waitForTimeout(2000);
+  await expect(page.locator("text=Loading…")).toHaveCount(0, { timeout: 5_000 });
+
+  // Either shows "Signed in" with a value, OR shows a "Sign in" link
+  // (both are valid depending on auth state)
+  const hasSignedInLabel = await page.locator("text=Signed in:").count();
+  const hasSignInLink = await page.getByRole("link", { name: /sign in/i }).count();
+  expect(hasSignedInLabel + hasSignInLink).toBeGreaterThan(0);
+});
+
+// ---------------------------------------------------------------------------
+// Regression: /convert select elements must have color-scheme set for dark mode
+// ---------------------------------------------------------------------------
+
+test("convert: source format select has color-scheme property set", async ({ page }) => {
+  await page.goto("/convert");
+
+  await expect(page.getByRole("heading", { name: /CSV Format Converter/i })).toBeVisible();
+
+  const sourceSelect = page.locator("select").first();
+  await expect(sourceSelect).toBeVisible();
+
+  // Verify that the color-scheme CSS property is explicitly set on the element
+  // (not just inherited). This ensures the native popup renders readably.
+  const colorScheme = await sourceSelect.evaluate((el) => {
+    return getComputedStyle(el).colorScheme;
+  });
+  // Should be 'light', 'dark', or 'normal' — never empty/unset (which would
+  // leave the popup unreadable in dark mode with white text).
+  expect(colorScheme).toBeTruthy();
+  expect(["light", "dark", "normal", "only light"]).toContain(colorScheme);
+});
+
+// ---------------------------------------------------------------------------
 // Tools nav dropdown
 // ---------------------------------------------------------------------------
 

@@ -225,7 +225,7 @@ export default function MergeClient() {
                     Dedupe key column
                   </label>
                   <select
-                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
                     value={dedupeKey}
                     onChange={(e) => setDedupeKey(e.target.value)}
                   >

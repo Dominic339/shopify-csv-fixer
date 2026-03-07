@@ -290,7 +290,7 @@ export default function ProfileClient() {
         </p>
         <div className="mt-4">
           <select
-            className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+            className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
             value={currentLocale}
             disabled={localeBusy}
             onChange={(e) => handleLocaleChange(e.target.value as Locale)}

@@ -137,7 +137,7 @@ export default function ConvertClient() {
                 Source format
               </label>
               <select
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
                 value={sourceFormatId}
                 onChange={(e) => {
                   const newSource = e.target.value;
@@ -162,7 +162,7 @@ export default function ConvertClient() {
                 Target format
               </label>
               <select
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] [color-scheme:light] dark:[color-scheme:dark]"
                 value={safeTargetFormatId}
                 onChange={(e) => {
                   setTargetFormatId(e.target.value);
