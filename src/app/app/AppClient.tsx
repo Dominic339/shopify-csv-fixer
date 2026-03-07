@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
+import { createClient } from "@/lib/supabase/browser";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
 import { getShopifyVariantSignature, resolveShopifyVariantColumns } from "@/lib/shopifyVariantSignature";
@@ -240,16 +241,28 @@ export default function AppClient() {
   async function refreshQuotaAndPlan() {
     const FALLBACK_SUB = { ok: true, plan: "free" as const, status: "none", signedIn: false };
     try {
-      const [q, s] = await Promise.all([
+      const supabase = createClient();
+      // Run quota fetch and session lookup in parallel; subscription query depends on session.
+      const [q, { data: { session } }] = await Promise.all([
         getQuota(),
-        fetch("/api/subscription/status", { cache: "no-store" })
-          .then(async (r) => {
-            if (!r.ok) return FALLBACK_SUB;
-            const text = await r.text();
-            try { return JSON.parse(text); } catch { return FALLBACK_SUB; }
-          })
-          .catch(() => FALLBACK_SUB),
+        supabase.auth.getSession(),
       ]);
+
+      let s: SubStatus = FALLBACK_SUB;
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("plan,status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        const activePlan = data?.status === "active" ? data.plan : "free";
+        s = {
+          ok: true,
+          plan: (activePlan ?? "free") as "free" | "basic" | "advanced",
+          status: data?.status ?? "none",
+          signedIn: true,
+        };
+      }
 
       const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
       const limits = getPlanLimits(plan) as PlanLimits;

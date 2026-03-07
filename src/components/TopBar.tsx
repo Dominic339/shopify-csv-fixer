@@ -66,22 +66,31 @@ export default function TopBar() {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch("/api/subscription/status", { cache: "no-store" });
-        const json = await res.json();
+        const supabase = createClient();
+        const { data: { session: s } } = await supabase.auth.getSession();
         if (!alive) return;
+        if (!s?.user) {
+          setSub({ signedIn: false, plan: "free", status: "none" });
+          return;
+        }
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("plan,status")
+          .eq("user_id", s.user.id)
+          .maybeSingle();
+        if (!alive) return;
+        const activePlan = data?.status === "active" ? data.plan : "free";
         setSub({
-          signedIn: Boolean(json?.signedIn),
-          plan: (json?.plan ?? "free") as any,
-          status: (json?.status ?? "none") as any,
+          signedIn: true,
+          plan: (activePlan ?? "free") as SubStatus["plan"],
+          status: data?.status ?? "none",
         });
       } catch {
         if (!alive) return;
         setSub({ signedIn: Boolean(session?.user?.email), plan: "free", status: "none" });
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [session?.user?.email]);
 
   useEffect(() => {
