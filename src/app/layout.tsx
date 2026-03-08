@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import TopBar from "@/components/TopBar";
@@ -10,6 +11,8 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { getTranslations } from "@/lib/i18n/getTranslations";
+import { isValidLocale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://striveformats.com"),
@@ -54,12 +57,17 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  const locale = localeCookie && isValidLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;
+  const t = await getTranslations(locale);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <TopBar />
+          <TopBar navT={t.nav} />
           {children}
           <Footer />
         </ThemeProvider>

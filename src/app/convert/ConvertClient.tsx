@@ -4,9 +4,10 @@
 import React, { useRef, useState, useEffect } from "react";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { convertCsv, CONVERT_FORMAT_OPTIONS, getConvertRowLimit } from "@/lib/convertCsv";
-import { getQuota } from "@/lib/quota";
 import type { Plan } from "@/lib/quota";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { createClient } from "@/lib/supabase/browser";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -20,7 +21,11 @@ function downloadCsv(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export default function ConvertClient() {
+type Props = {
+  t?: Translations["convert"];
+};
+
+export default function ConvertClient({ t }: Props) {
   const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [plan, setPlan] = useState<Plan>("free");
@@ -33,9 +38,28 @@ export default function ConvertClient() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    getQuota()
-      .then((q) => setPlan(q.plan ?? "free"))
-      .catch(() => {});
+    // Query Supabase directly for reliable plan detection (same as TopBar/AppClient)
+    let alive = true;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!alive) return;
+        if (!session?.user) { setPlan("free"); return; }
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("plan,status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        if (!alive) return;
+        const activePlan = data?.status === "active" ? (data.plan as Plan) : "free";
+        setPlan(activePlan ?? "free");
+      } catch {
+        if (!alive) return;
+        setPlan("free");
+      }
+    })();
+    return () => { alive = false; };
   }, []);
 
   const rowLimit = getConvertRowLimit(plan);
@@ -88,10 +112,9 @@ export default function ConvertClient() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">CSV Format Converter</h1>
+      <h1 className="text-2xl font-semibold">{t?.title ?? "CSV Format Converter"}</h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Convert between Shopify, WooCommerce, Etsy, eBay, and Amazon CSV formats. Fields that
-        cannot map perfectly are flagged as warnings.
+        {t?.description ?? "Convert between Shopify, WooCommerce, Etsy, eBay, and Amazon CSV formats. Fields that cannot map perfectly are flagged as warnings."}
       </p>
 
       {rowLimit !== null && (
@@ -100,7 +123,7 @@ export default function ConvertClient() {
           <span className="font-semibold">{rowLimit.toLocaleString()} rows</span> per conversion.{" "}
           {plan === "free" && (
             <a href="/profile?upgrade=basic" className="underline hover:no-underline">
-              Upgrade for larger files.
+              {t?.upgradeForLarger ?? "Upgrade for larger files."}
             </a>
           )}
         </div>
@@ -109,17 +132,17 @@ export default function ConvertClient() {
       <div className="mt-8 space-y-6">
         {/* Upload */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-sm font-semibold">1. Upload CSV</h2>
-          <p className="mt-1 text-xs text-[var(--muted)]">Upload the file you want to convert.</p>
+          <h2 className="text-sm font-semibold">1. {t?.uploadStep ?? "Upload CSV"}</h2>
+          <p className="mt-1 text-xs text-[var(--muted)]">{t?.uploadDesc ?? "Upload the file you want to convert."}</p>
           <div className="mt-3 flex items-center gap-3">
             <button
               type="button"
               className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
               onClick={() => fileInputRef.current?.click()}
             >
-              Choose file
+              {t?.chooseFile ?? "Choose file"}
             </button>
-            <span className="text-sm text-[var(--muted)]">{fileName ?? "No file chosen"}</span>
+            <span className="text-sm text-[var(--muted)]">{fileName ?? (t?.noFileChosen ?? "No file chosen")}</span>
           </div>
           <input
             ref={fileInputRef}
@@ -132,11 +155,11 @@ export default function ConvertClient() {
 
         {/* Format selection */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-sm font-semibold">2. Select formats</h2>
+          <h2 className="text-sm font-semibold">2. {t?.selectFormats ?? "Select formats"}</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-[var(--muted)] mb-1">
-                Source format
+                {t?.sourceFormat ?? "Source format"}
               </label>
               <select
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -162,7 +185,7 @@ export default function ConvertClient() {
             </div>
             <div>
               <label className="block text-xs font-medium text-[var(--muted)] mb-1">
-                Target format
+                {t?.targetFormat ?? "Target format"}
               </label>
               <select
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -196,30 +219,30 @@ export default function ConvertClient() {
             onClick={handleConvert}
             disabled={busy || !csvText}
           >
-            {busy ? "Converting…" : "Convert"}
+            {busy ? (t?.converting ?? "Converting…") : (t?.convert ?? "Convert")}
           </button>
         </div>
 
         {/* Result */}
         {result && (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-            <h2 className="text-sm font-semibold">Conversion summary</h2>
+            <h2 className="text-sm font-semibold">{t?.conversionSummary ?? "Conversion summary"}</h2>
 
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">Rows processed</div>
+                <div className="text-[var(--muted)] text-xs">{t?.rowsProcessed ?? "Rows processed"}</div>
                 <div className="font-semibold">{result.rowsProcessed.toLocaleString()}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">Total rows</div>
+                <div className="text-[var(--muted)] text-xs">{t?.totalRows ?? "Total rows"}</div>
                 <div className="font-semibold">{result.rowsTotal.toLocaleString()}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">Output columns</div>
+                <div className="text-[var(--muted)] text-xs">{t?.outputColumns ?? "Output columns"}</div>
                 <div className="font-semibold">{result.headers.length}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">Warnings</div>
+                <div className="text-[var(--muted)] text-xs">{t?.warnings ?? "Warnings"}</div>
                 <div className={`font-semibold ${result.warnings.length > 0 ? "text-amber-600 dark:text-amber-400" : ""}`}>
                   {result.warnings.length}
                 </div>
@@ -229,11 +252,11 @@ export default function ConvertClient() {
             {/* Conversion quality indicator */}
             {result.warnings.length === 0 && result.unmappedSourceFields.length === 0 ? (
               <div className="mt-4 rounded-xl border border-green-400/40 bg-green-400/10 px-3 py-2 text-sm text-green-800 dark:text-green-300">
-                All source fields mapped successfully. Output should be import-ready.
+                {t?.allMapped ?? "All source fields mapped successfully. Output should be import-ready."}
               </div>
             ) : (
               <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300 font-medium">
-                Converted with warnings — review dropped columns before importing.
+                {t?.convertedWithWarnings ?? "Converted with warnings — review dropped columns before importing."}
               </div>
             )}
 
@@ -252,7 +275,7 @@ export default function ConvertClient() {
 
             {result.unmappedSourceFields.length > 0 && (
               <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--muted)]">
-                <span className="font-semibold">Dropped columns</span> (no equivalent in target format):{" "}
+                <span className="font-semibold">{t?.droppedColumns ?? "Dropped columns"}</span> (no equivalent in target format):{" "}
                 <span className="font-mono">{result.unmappedSourceFields.join(", ")}</span>
               </div>
             )}
@@ -263,7 +286,7 @@ export default function ConvertClient() {
                 className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
                 onClick={handleDownload}
               >
-                Download converted CSV
+                {t?.downloadConverted ?? "Download converted CSV"}
               </button>
             </div>
           </div>

@@ -10,6 +10,7 @@ import { useTheme } from "@/components/theme/ThemeProvider";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
 type SubStatus = {
   signedIn: boolean;
@@ -21,7 +22,11 @@ type SubStatus = {
 type SupabaseUser = { email?: string | null };
 type SupabaseSession = { user?: SupabaseUser };
 
-export default function TopBar() {
+type Props = {
+  navT?: Translations["nav"];
+};
+
+export default function TopBar({ navT }: Props) {
   const { theme, toggle } = useTheme();
   const pathname = usePathname();
 
@@ -166,19 +171,19 @@ export default function TopBar() {
             onClick={() => toggle()}
             title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
           >
-            {theme === "light" ? "Dark mode" : "Light mode"}
+            {theme === "light" ? (navT?.darkMode ?? "Dark mode") : (navT?.lightMode ?? "Light mode")}
           </button>
 
           <Link className="rgb-btn" href="/app">
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">CSV Fixer</span>
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.csvFixer ?? "CSV Fixer"}</span>
           </Link>
 
           <Link className="rgb-btn" href="/presets">
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Templates</span>
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.templates ?? "Templates"}</span>
           </Link>
 
           <Link className="rgb-btn" href={localeHref(currentLocale, "/guides")}>
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Guides</span>
+            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.guides ?? "Guides"}</span>
           </Link>
 
           {/* Tools dropdown */}
@@ -222,7 +227,7 @@ export default function TopBar() {
 
           {canAccessCustomFormats ? (
             <Link className="rgb-btn" href="/formats" title="Open Custom Formats builder">
-              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.customFormats ?? "Custom formats"}</span>
             </Link>
           ) : (
             <button
@@ -234,7 +239,7 @@ export default function TopBar() {
               }}
               title="Advanced plan required"
             >
-              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Custom formats</span>
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.customFormats ?? "Custom formats"}</span>
             </button>
           )}
 
@@ -256,16 +261,16 @@ export default function TopBar() {
                     <div>
                       <div className="font-semibold text-[var(--text)]">{session?.user?.email}</div>
                       <div className="mt-1">
-                        Plan: <span className="font-semibold text-[var(--text)]">{plan}</span>{" "}
+                        {navT?.plan ?? "Plan"}: <span className="font-semibold text-[var(--text)]">{plan}</span>{" "}
                         {isActive ? (
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">(active)</span>
+                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({navT?.active ?? "active"})</span>
                         ) : (
                           <span className="text-[color:rgba(var(--muted-rgb),1)]">({status})</span>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="font-semibold text-[var(--text)]">Not signed in</div>
+                    <div className="font-semibold text-[var(--text)]">{navT?.notSignedIn ?? "Not signed in"}</div>
                   )}
                 </div>
 
@@ -277,7 +282,7 @@ export default function TopBar() {
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Pricing
+                    {navT?.pricing ?? "Pricing"}
                   </Link>
 
                   <Link
@@ -285,7 +290,7 @@ export default function TopBar() {
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Home
+                    {navT?.home ?? "Home"}
                   </Link>
 
                   <Link
@@ -293,7 +298,7 @@ export default function TopBar() {
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Profile
+                    {navT?.profile ?? "Profile"}
                   </Link>
 
                   <Link
@@ -301,7 +306,7 @@ export default function TopBar() {
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
-                    CSV Fixer
+                    {navT?.csvFixer ?? "CSV Fixer"}
                   </Link>
 
                   <Link
@@ -309,7 +314,7 @@ export default function TopBar() {
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Custom Formats
+                    {navT?.customFormats ?? "Custom Formats"}
                   </Link>
 
                   <button
@@ -331,7 +336,7 @@ export default function TopBar() {
                       className="mt-2 w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                       onClick={signOut}
                     >
-                      Sign out
+                      {navT?.signOut ?? "Sign out"}
                     </button>
                   ) : (
                     <Link
@@ -339,7 +344,7 @@ export default function TopBar() {
                       className="mt-2 block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                       onClick={() => setMenuOpen(false)}
                     >
-                      Sign in
+                      {navT?.signIn ?? "Sign in"}
                     </Link>
                   )}
                 </div>

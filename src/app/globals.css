@@ -290,3 +290,16 @@ a {
 summary::-webkit-details-marker {
   display: none;
 }
+
+/* ===== Native select dark mode fix ===== */
+/* Browsers that don't fully honour color-scheme on the dropdown popup
+   still need explicit background/color on <option> elements. */
+[data-theme="dark"] select {
+  background-color: #12121e;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+[data-theme="dark"] select option {
+  background-color: #12121e;
+  color: rgba(255, 255, 255, 0.92);
+}

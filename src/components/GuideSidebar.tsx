@@ -6,6 +6,7 @@ import { useCallback } from "react";
 
 import { GUIDE_PLATFORMS, PLATFORM_LABEL } from "@/lib/guidesConstants";
 import type { GuidePlatform } from "@/lib/guidesConstants";
+import { isValidLocale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 
 export default function GuideSidebar() {
   const router = useRouter();
@@ -13,21 +14,30 @@ export default function GuideSidebar() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
 
-  // Derive active platform from pathname: /guides/shopify/... → "shopify"
+  // Detect locale prefix: /fr/guides/shopify → locale="fr", /guides/shopify → locale=null
   const parts = pathname.split("/").filter(Boolean);
-  const maybePlatform = parts.length >= 2 ? parts[1] : undefined;
+  const firstSegment = parts[0] ?? "";
+  const hasLocale = isValidLocale(firstSegment) && firstSegment !== DEFAULT_LOCALE;
+  const locale = hasLocale ? firstSegment : null;
+
+  // Base path for all guide links (locale-prefixed when needed)
+  const guidesBase = locale ? `/${locale}/guides` : "/guides";
+
+  // Find "guides" index in path, then derive active platform from the next segment
+  const guidesIdx = parts.indexOf("guides");
+  const platformCandidate = guidesIdx >= 0 ? parts[guidesIdx + 1] : undefined;
   const activePlatform: GuidePlatform | undefined =
-    maybePlatform && (GUIDE_PLATFORMS as string[]).includes(maybePlatform)
-      ? (maybePlatform as GuidePlatform)
+    platformCandidate && (GUIDE_PLATFORMS as string[]).includes(platformCandidate)
+      ? (platformCandidate as GuidePlatform)
       : undefined;
 
   const handleSearch = useCallback(
     (value: string) => {
       const params = new URLSearchParams();
       if (value) params.set("q", value);
-      router.push(`/guides?${params.toString()}`);
+      router.push(`${guidesBase}?${params.toString()}`);
     },
-    [router],
+    [router, guidesBase],
   );
 
   return (
@@ -47,7 +57,7 @@ export default function GuideSidebar() {
           <ul className="space-y-0.5">
             <li>
               <Link
-                href="/guides"
+                href={guidesBase}
                 className={`block rounded-lg px-3 py-1.5 text-sm ${
                   !activePlatform
                     ? "bg-[var(--surface)] font-semibold text-[var(--text)]"
@@ -60,7 +70,7 @@ export default function GuideSidebar() {
             {GUIDE_PLATFORMS.map((p) => (
               <li key={p}>
                 <Link
-                  href={`/guides/${p}`}
+                  href={`${guidesBase}/${p}`}
                   className={`block rounded-lg px-3 py-1.5 text-sm ${
                     activePlatform === p
                       ? "bg-[var(--surface)] font-semibold text-[var(--text)]"
