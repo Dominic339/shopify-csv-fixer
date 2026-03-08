@@ -117,17 +117,20 @@ export default function ConvertClient({ t }: Props) {
         {t?.description ?? "Convert between Shopify, WooCommerce, Etsy, eBay, and Amazon CSV formats. Fields that cannot map perfectly are flagged as warnings."}
       </p>
 
-      {rowLimit !== null && (
-        <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
-          Your plan: <span className="font-semibold capitalize">{plan}</span> — up to{" "}
-          <span className="font-semibold">{rowLimit.toLocaleString()} rows</span> per conversion.{" "}
-          {plan === "free" && (
-            <a href="/profile?upgrade=basic" className="underline hover:no-underline">
-              {t?.upgradeForLarger ?? "Upgrade for larger files."}
-            </a>
-          )}
-        </div>
-      )}
+      <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
+        {t?.yourPlan ?? "Your plan"}: <span className="font-semibold capitalize">{plan}</span>
+        {rowLimit !== null ? (
+          <> — {t?.upTo ?? "up to"}{" "}
+          <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t?.rowsPerConversion ?? "rows per conversion"}</>
+        ) : (
+          <> — <span className="font-semibold">{t?.planUnlimited ?? "Unlimited"}</span></>
+        )}
+        {plan === "free" && (
+          <>{" "}<a href="/profile?upgrade=basic" className="underline hover:no-underline">
+            {t?.upgradeForLarger ?? "Upgrade for larger files."}
+          </a></>
+        )}
+      </div>
 
       <div className="mt-8 space-y-6">
         {/* Upload */}

@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Convertido con advertencias — revisa las columnas eliminadas antes de importar.",
     "droppedColumns": "Columnas eliminadas (sin equivalente en el formato de destino)",
     "downloadConverted": "Descargar CSV convertido",
-    "upgradeForLarger": "Actualiza para archivos más grandes."
+    "upgradeForLarger": "Actualiza para archivos más grandes.",
+    "yourPlan": "Tu plan",
+    "upTo": "hasta",
+    "rowsPerConversion": "filas por conversión",
+    "planUnlimited": "Ilimitado"
   },
   "merge": {
     "title": "Fusionador y deduplicador de CSV",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Duplicados encontrados",
     "outputRows": "Filas de salida",
     "downloadMerged": "Descargar CSV fusionado",
-    "upgradeForLarger": "Actualiza para archivos más grandes."
+    "upgradeForLarger": "Actualiza para archivos más grandes.",
+    "yourPlan": "Tu plan",
+    "upTo": "hasta",
+    "combinedRows": "filas combinadas",
+    "planUnlimited": "Ilimitado"
+  },
+  "app": {
+    "monthlyExports": "Exportaciones mensuales",
+    "unlimited": "Ilimitado",
+    "used": "usadas",
+    "left": "restantes"
+  },
+  "profile": {
+    "verifySubscription": "Verifica tu suscripción y gestiona la facturación.",
+    "billingUnavailable": "La facturación no está disponible temporalmente. Por favor, inténtalo más tarde.",
+    "subscription": "Suscripción",
+    "signedIn": "Sesión iniciada",
+    "yes": "Sí",
+    "no": "No",
+    "status": "Estado",
+    "periodEnd": "Fin del período",
+    "opening": "Abriendo…",
+    "manageStripe": "Gestionar en Stripe (actualizar/cancelar)",
+    "backToEcommerce": "Volver a Ecommerce",
+    "upgradeToBasic": "Actualizar a Basic",
+    "upgradeToAdvanced": "Actualizar a Advanced",
+    "youreSignedIn": "Has iniciado sesión. Elige un plan arriba para actualizar.",
+    "loading": "Cargando…",
+    "language": "Idioma",
+    "languageDesc": "Elige tu idioma de visualización preferido. Esto anula la detección del navegador.",
+    "current": "Actual"
+  },
+  "inspector": {
+    "title": "Inspector CSV",
+    "description": "Sube un archivo CSV para obtener un análisis instantáneo de su estructura, encabezados y posibles problemas.",
+    "chooseFile": "Elegir archivo",
+    "noFileChosen": "Ningún archivo elegido",
+    "inspecting": "Inspeccionando…",
+    "summary": "Resumen de inspección",
+    "rows": "Filas",
+    "columns": "Columnas",
+    "blankRows": "Filas en blanco",
+    "duplicateHeaders": "Encabezados duplicados",
+    "emptyColumns": "Columnas vacías",
+    "inconsistentColumns": "Recuentos de columnas inconsistentes",
+    "encoding": "Codificación",
+    "delimiter": "Delimitador",
+    "issues": "Problemas",
+    "noIssues": "No se encontraron problemas.",
+    "downloadReport": "Descargar informe"
   }
 }

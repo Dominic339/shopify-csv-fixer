@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Mit Warnungen konvertiert — überprüfen Sie verworfene Spalten vor dem Import.",
     "droppedColumns": "Verworfene Spalten (kein Äquivalent im Zielformat)",
     "downloadConverted": "Konvertierte CSV herunterladen",
-    "upgradeForLarger": "Upgrade für größere Dateien."
+    "upgradeForLarger": "Upgrade für größere Dateien.",
+    "yourPlan": "Ihr Tarif",
+    "upTo": "bis zu",
+    "rowsPerConversion": "Zeilen pro Konvertierung",
+    "planUnlimited": "Unbegrenzt"
   },
   "merge": {
     "title": "CSV-Zusammenführer & Deduplizierer",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Duplikate gefunden",
     "outputRows": "Ausgabezeilen",
     "downloadMerged": "Zusammengeführte CSV herunterladen",
-    "upgradeForLarger": "Upgrade für größere Dateien."
+    "upgradeForLarger": "Upgrade für größere Dateien.",
+    "yourPlan": "Ihr Tarif",
+    "upTo": "bis zu",
+    "combinedRows": "kombinierte Zeilen",
+    "planUnlimited": "Unbegrenzt"
+  },
+  "app": {
+    "monthlyExports": "Monatliche Exporte",
+    "unlimited": "Unbegrenzt",
+    "used": "verwendet",
+    "left": "übrig"
+  },
+  "profile": {
+    "verifySubscription": "Ihr Abonnement prüfen und Abrechnung verwalten.",
+    "billingUnavailable": "Abrechnung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
+    "subscription": "Abonnement",
+    "signedIn": "Angemeldet",
+    "yes": "Ja",
+    "no": "Nein",
+    "status": "Status",
+    "periodEnd": "Zeitraumende",
+    "opening": "Öffnen…",
+    "manageStripe": "In Stripe verwalten (upgraden/kündigen)",
+    "backToEcommerce": "Zurück zu Ecommerce",
+    "upgradeToBasic": "Auf Basic upgraden",
+    "upgradeToAdvanced": "Auf Advanced upgraden",
+    "youreSignedIn": "Sie sind angemeldet. Wählen Sie oben einen Tarif, um zu upgraden.",
+    "loading": "Laden…",
+    "language": "Sprache",
+    "languageDesc": "Wählen Sie Ihre bevorzugte Anzeigesprache. Dies überschreibt die Browsererkennung.",
+    "current": "Aktuell"
+  },
+  "inspector": {
+    "title": "CSV-Inspektor",
+    "description": "Laden Sie eine CSV-Datei hoch für eine sofortige Analyse ihrer Struktur, Überschriften und potenziellen Probleme.",
+    "chooseFile": "Datei auswählen",
+    "noFileChosen": "Keine Datei ausgewählt",
+    "inspecting": "Wird analysiert…",
+    "summary": "Analysezusammenfassung",
+    "rows": "Zeilen",
+    "columns": "Spalten",
+    "blankRows": "Leerzeilen",
+    "duplicateHeaders": "Doppelte Überschriften",
+    "emptyColumns": "Leere Spalten",
+    "inconsistentColumns": "Inkonsistente Spaltenanzahl",
+    "encoding": "Kodierung",
+    "delimiter": "Trennzeichen",
+    "issues": "Probleme",
+    "noIssues": "Keine Probleme gefunden.",
+    "downloadReport": "Bericht herunterladen"
   }
 }

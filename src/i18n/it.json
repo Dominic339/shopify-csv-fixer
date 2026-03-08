@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Convertito con avvisi — controlla le colonne eliminate prima di importare.",
     "droppedColumns": "Colonne eliminate (nessun equivalente nel formato di destinazione)",
     "downloadConverted": "Scarica CSV convertito",
-    "upgradeForLarger": "Aggiorna per file più grandi."
+    "upgradeForLarger": "Aggiorna per file più grandi.",
+    "yourPlan": "Il tuo piano",
+    "upTo": "fino a",
+    "rowsPerConversion": "righe per conversione",
+    "planUnlimited": "Illimitato"
   },
   "merge": {
     "title": "Unificatore e deduplicatore CSV",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Duplicati trovati",
     "outputRows": "Righe di output",
     "downloadMerged": "Scarica CSV unito",
-    "upgradeForLarger": "Aggiorna per file più grandi."
+    "upgradeForLarger": "Aggiorna per file più grandi.",
+    "yourPlan": "Il tuo piano",
+    "upTo": "fino a",
+    "combinedRows": "righe combinate",
+    "planUnlimited": "Illimitato"
+  },
+  "app": {
+    "monthlyExports": "Esportazioni mensili",
+    "unlimited": "Illimitato",
+    "used": "utilizzate",
+    "left": "rimanenti"
+  },
+  "profile": {
+    "verifySubscription": "Verifica il tuo abbonamento e gestisci la fatturazione.",
+    "billingUnavailable": "La fatturazione è temporaneamente non disponibile. Riprova più tardi.",
+    "subscription": "Abbonamento",
+    "signedIn": "Accesso effettuato",
+    "yes": "Sì",
+    "no": "No",
+    "status": "Stato",
+    "periodEnd": "Fine del periodo",
+    "opening": "Apertura…",
+    "manageStripe": "Gestisci in Stripe (aggiorna/annulla)",
+    "backToEcommerce": "Torna a Ecommerce",
+    "upgradeToBasic": "Aggiorna a Basic",
+    "upgradeToAdvanced": "Aggiorna ad Advanced",
+    "youreSignedIn": "Hai effettuato l'accesso. Scegli un piano sopra per aggiornare.",
+    "loading": "Caricamento…",
+    "language": "Lingua",
+    "languageDesc": "Scegli la tua lingua di visualizzazione preferita. Questo sostituisce il rilevamento del browser.",
+    "current": "Attuale"
+  },
+  "inspector": {
+    "title": "Ispettore CSV",
+    "description": "Carica un file CSV per ottenere un'analisi istantanea della sua struttura, intestazioni e potenziali problemi.",
+    "chooseFile": "Scegli file",
+    "noFileChosen": "Nessun file scelto",
+    "inspecting": "Ispezione…",
+    "summary": "Riepilogo ispezione",
+    "rows": "Righe",
+    "columns": "Colonne",
+    "blankRows": "Righe vuote",
+    "duplicateHeaders": "Intestazioni duplicate",
+    "emptyColumns": "Colonne vuote",
+    "inconsistentColumns": "Conteggi di colonne incoerenti",
+    "encoding": "Codifica",
+    "delimiter": "Delimitatore",
+    "issues": "Problemi",
+    "noIssues": "Nessun problema trovato.",
+    "downloadReport": "Scarica report"
   }
 }

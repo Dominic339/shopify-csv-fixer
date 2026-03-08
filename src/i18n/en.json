@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Converted with warnings — review dropped columns before importing.",
     "droppedColumns": "Dropped columns (no equivalent in target format)",
     "downloadConverted": "Download converted CSV",
-    "upgradeForLarger": "Upgrade for larger files."
+    "upgradeForLarger": "Upgrade for larger files.",
+    "yourPlan": "Your plan",
+    "upTo": "up to",
+    "rowsPerConversion": "rows per conversion",
+    "planUnlimited": "Unlimited"
   },
   "merge": {
     "title": "CSV Merger & Deduplicator",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Duplicates found",
     "outputRows": "Output rows",
     "downloadMerged": "Download merged CSV",
-    "upgradeForLarger": "Upgrade for larger files."
+    "upgradeForLarger": "Upgrade for larger files.",
+    "yourPlan": "Your plan",
+    "upTo": "up to",
+    "combinedRows": "combined rows",
+    "planUnlimited": "Unlimited"
+  },
+  "app": {
+    "monthlyExports": "Monthly exports",
+    "unlimited": "Unlimited",
+    "used": "used",
+    "left": "left"
+  },
+  "profile": {
+    "verifySubscription": "Verify your subscription and manage billing.",
+    "billingUnavailable": "Billing is temporarily unavailable. Please try again later.",
+    "subscription": "Subscription",
+    "signedIn": "Signed in",
+    "yes": "Yes",
+    "no": "No",
+    "status": "Status",
+    "periodEnd": "Period end",
+    "opening": "Opening…",
+    "manageStripe": "Manage in Stripe (upgrade/cancel)",
+    "backToEcommerce": "Back to Ecommerce",
+    "upgradeToBasic": "Upgrade to Basic",
+    "upgradeToAdvanced": "Upgrade to Advanced",
+    "youreSignedIn": "You're signed in. Choose a plan above to upgrade.",
+    "loading": "Loading…",
+    "language": "Language",
+    "languageDesc": "Choose your preferred display language. This overrides browser detection.",
+    "current": "Current"
+  },
+  "inspector": {
+    "title": "CSV Inspector",
+    "description": "Upload a CSV file to get an instant analysis of its structure, headers, and potential issues.",
+    "chooseFile": "Choose file",
+    "noFileChosen": "No file chosen",
+    "inspecting": "Inspecting…",
+    "summary": "Inspection summary",
+    "rows": "Rows",
+    "columns": "Columns",
+    "blankRows": "Blank rows",
+    "duplicateHeaders": "Duplicate headers",
+    "emptyColumns": "Empty columns",
+    "inconsistentColumns": "Inconsistent column counts",
+    "encoding": "Encoding",
+    "delimiter": "Delimiter",
+    "issues": "Issues",
+    "noIssues": "No issues found.",
+    "downloadReport": "Download report"
   }
 }

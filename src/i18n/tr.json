@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Uyarılarla dönüştürüldü — içe aktarmadan önce kaldırılan sütunları inceleyin.",
     "droppedColumns": "Kaldırılan sütunlar (hedef formatta karşılığı yok)",
     "downloadConverted": "Dönüştürülmüş CSV'yi indir",
-    "upgradeForLarger": "Daha büyük dosyalar için yükseltin."
+    "upgradeForLarger": "Daha büyük dosyalar için yükseltin.",
+    "yourPlan": "Planınız",
+    "upTo": "en fazla",
+    "rowsPerConversion": "dönüşüm başına satır",
+    "planUnlimited": "Sınırsız"
   },
   "merge": {
     "title": "CSV birleştirici ve tekilleştirici",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Bulunan kopyalar",
     "outputRows": "Çıktı satırları",
     "downloadMerged": "Birleştirilmiş CSV'yi indir",
-    "upgradeForLarger": "Daha büyük dosyalar için yükseltin."
+    "upgradeForLarger": "Daha büyük dosyalar için yükseltin.",
+    "yourPlan": "Planınız",
+    "upTo": "en fazla",
+    "combinedRows": "birleşik satır",
+    "planUnlimited": "Sınırsız"
+  },
+  "app": {
+    "monthlyExports": "Aylık dışa aktarmalar",
+    "unlimited": "Sınırsız",
+    "used": "kullanıldı",
+    "left": "kaldı"
+  },
+  "profile": {
+    "verifySubscription": "Aboneliğinizi doğrulayın ve faturalandırmayı yönetin.",
+    "billingUnavailable": "Faturalandırma geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+    "subscription": "Abonelik",
+    "signedIn": "Giriş yapıldı",
+    "yes": "Evet",
+    "no": "Hayır",
+    "status": "Durum",
+    "periodEnd": "Dönem sonu",
+    "opening": "Açılıyor…",
+    "manageStripe": "Stripe'ta yönet (yükselt/iptal et)",
+    "backToEcommerce": "Ecommerce'e geri dön",
+    "upgradeToBasic": "Basic'e yükselt",
+    "upgradeToAdvanced": "Advanced'a yükselt",
+    "youreSignedIn": "Giriş yaptınız. Yükseltmek için yukarıdan bir plan seçin.",
+    "loading": "Yükleniyor…",
+    "language": "Dil",
+    "languageDesc": "Tercih ettiğiniz görüntüleme dilini seçin. Bu, tarayıcı algılamasını geçersiz kılar.",
+    "current": "Mevcut"
+  },
+  "inspector": {
+    "title": "CSV Denetçisi",
+    "description": "Yapısı, başlıkları ve potansiyel sorunlarının anında analizi için bir CSV dosyası yükleyin.",
+    "chooseFile": "Dosya seç",
+    "noFileChosen": "Dosya seçilmedi",
+    "inspecting": "Denetleniyor…",
+    "summary": "Denetleme özeti",
+    "rows": "Satırlar",
+    "columns": "Sütunlar",
+    "blankRows": "Boş satırlar",
+    "duplicateHeaders": "Yinelenen başlıklar",
+    "emptyColumns": "Boş sütunlar",
+    "inconsistentColumns": "Tutarsız sütun sayıları",
+    "encoding": "Kodlama",
+    "delimiter": "Sınırlayıcı",
+    "issues": "Sorunlar",
+    "noIssues": "Sorun bulunamadı.",
+    "downloadReport": "Raporu indir"
   }
 }

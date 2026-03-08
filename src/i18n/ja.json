@@ -98,7 +98,11 @@
     "convertedWithWarnings": "警告付きで変換されました — インポート前に削除された列を確認してください。",
     "droppedColumns": "削除された列（ターゲット形式に相当するものなし）",
     "downloadConverted": "変換されたCSVをダウンロード",
-    "upgradeForLarger": "より大きなファイルにはアップグレードしてください。"
+    "upgradeForLarger": "より大きなファイルにはアップグレードしてください。",
+    "yourPlan": "プラン",
+    "upTo": "最大",
+    "rowsPerConversion": "行/変換",
+    "planUnlimited": "無制限"
   },
   "merge": {
     "title": "CSVマージャー＆重複排除ツール",
@@ -126,6 +130,55 @@
     "duplicatesFound": "重複が見つかりました",
     "outputRows": "出力行数",
     "downloadMerged": "マージされたCSVをダウンロード",
-    "upgradeForLarger": "より大きなファイルにはアップグレードしてください。"
+    "upgradeForLarger": "より大きなファイルにはアップグレードしてください。",
+    "yourPlan": "プラン",
+    "upTo": "最大",
+    "combinedRows": "結合行",
+    "planUnlimited": "無制限"
+  },
+  "app": {
+    "monthlyExports": "月間エクスポート",
+    "unlimited": "無制限",
+    "used": "使用済み",
+    "left": "残り"
+  },
+  "profile": {
+    "verifySubscription": "サブスクリプションを確認し、請求を管理します。",
+    "billingUnavailable": "請求は一時的に利用できません。後でもう一度お試しください。",
+    "subscription": "サブスクリプション",
+    "signedIn": "ログイン済み",
+    "yes": "はい",
+    "no": "いいえ",
+    "status": "ステータス",
+    "periodEnd": "期間終了日",
+    "opening": "開いています…",
+    "manageStripe": "Stripeで管理（アップグレード/キャンセル）",
+    "backToEcommerce": "Ecommerceに戻る",
+    "upgradeToBasic": "Basicにアップグレード",
+    "upgradeToAdvanced": "Advancedにアップグレード",
+    "youreSignedIn": "ログインしています。アップグレードするには上のプランを選択してください。",
+    "loading": "読み込み中…",
+    "language": "言語",
+    "languageDesc": "表示言語を選択してください。ブラウザの検出より優先されます。",
+    "current": "現在"
+  },
+  "inspector": {
+    "title": "CSVインスペクター",
+    "description": "CSVファイルをアップロードして、構造、ヘッダー、潜在的な問題を即座に分析します。",
+    "chooseFile": "ファイルを選択",
+    "noFileChosen": "ファイルが選択されていません",
+    "inspecting": "検査中…",
+    "summary": "検査の概要",
+    "rows": "行",
+    "columns": "列",
+    "blankRows": "空白行",
+    "duplicateHeaders": "重複するヘッダー",
+    "emptyColumns": "空の列",
+    "inconsistentColumns": "列数の不一致",
+    "encoding": "エンコーディング",
+    "delimiter": "区切り文字",
+    "issues": "問題",
+    "noIssues": "問題は見つかりません。",
+    "downloadReport": "レポートをダウンロード"
   }
 }

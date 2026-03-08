@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Geconverteerd met waarschuwingen — controleer verwijderde kolommen voor het importeren.",
     "droppedColumns": "Verwijderde kolommen (geen equivalent in doelformaat)",
     "downloadConverted": "Geconverteerde CSV downloaden",
-    "upgradeForLarger": "Upgrade voor grotere bestanden."
+    "upgradeForLarger": "Upgrade voor grotere bestanden.",
+    "yourPlan": "Uw plan",
+    "upTo": "tot",
+    "rowsPerConversion": "rijen per conversie",
+    "planUnlimited": "Onbeperkt"
   },
   "merge": {
     "title": "CSV-samenvoeger en deduplicator",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Duplicaten gevonden",
     "outputRows": "Uitvoerrijen",
     "downloadMerged": "Samengevoegde CSV downloaden",
-    "upgradeForLarger": "Upgrade voor grotere bestanden."
+    "upgradeForLarger": "Upgrade voor grotere bestanden.",
+    "yourPlan": "Uw plan",
+    "upTo": "tot",
+    "combinedRows": "gecombineerde rijen",
+    "planUnlimited": "Onbeperkt"
+  },
+  "app": {
+    "monthlyExports": "Maandelijkse exports",
+    "unlimited": "Onbeperkt",
+    "used": "gebruikt",
+    "left": "resterend"
+  },
+  "profile": {
+    "verifySubscription": "Verifieer uw abonnement en beheer facturering.",
+    "billingUnavailable": "Facturering is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+    "subscription": "Abonnement",
+    "signedIn": "Ingelogd",
+    "yes": "Ja",
+    "no": "Nee",
+    "status": "Status",
+    "periodEnd": "Periode einde",
+    "opening": "Openen…",
+    "manageStripe": "Beheren in Stripe (upgraden/annuleren)",
+    "backToEcommerce": "Terug naar Ecommerce",
+    "upgradeToBasic": "Upgraden naar Basic",
+    "upgradeToAdvanced": "Upgraden naar Advanced",
+    "youreSignedIn": "U bent ingelogd. Kies een plan hierboven om te upgraden.",
+    "loading": "Laden…",
+    "language": "Taal",
+    "languageDesc": "Kies uw gewenste weergavetaal. Dit overschrijft browserdetectie.",
+    "current": "Huidig"
+  },
+  "inspector": {
+    "title": "CSV-inspector",
+    "description": "Upload een CSV-bestand voor een directe analyse van de structuur, kopteksten en mogelijke problemen.",
+    "chooseFile": "Bestand kiezen",
+    "noFileChosen": "Geen bestand gekozen",
+    "inspecting": "Inspecteren…",
+    "summary": "Inspectiesamenvatting",
+    "rows": "Rijen",
+    "columns": "Kolommen",
+    "blankRows": "Lege rijen",
+    "duplicateHeaders": "Dubbele kopteksten",
+    "emptyColumns": "Lege kolommen",
+    "inconsistentColumns": "Inconsistente kolomaantallen",
+    "encoding": "Codering",
+    "delimiter": "Scheidingsteken",
+    "issues": "Problemen",
+    "noIssues": "Geen problemen gevonden.",
+    "downloadReport": "Rapport downloaden"
   }
 }

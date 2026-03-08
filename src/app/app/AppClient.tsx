@@ -6,6 +6,7 @@ import Link from "next/link";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { createClient } from "@/lib/supabase/browser";
+import type { Translations } from "@/lib/i18n/getTranslations";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
 import { getShopifyVariantSignature, resolveShopifyVariantColumns } from "@/lib/shopifyVariantSignature";
@@ -81,7 +82,11 @@ function safeBaseName(name: string | null) {
   return base.replace(/[^\w\d._-]+/g, "_");
 }
 
-export default function AppClient() {
+type AppClientProps = {
+  tApp?: Translations["app"];
+};
+
+export default function AppClient({ tApp }: AppClientProps) {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
@@ -1561,8 +1566,8 @@ useEffect(() => {
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-base text-[var(--text)]">
-          <div className="font-medium">Monthly exports</div>
-          {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
+          <div className="font-medium">{tApp?.monthlyExports ?? "Monthly exports"}</div>
+          {isUnlimited ? <div>{tApp?.unlimited ?? "Unlimited"}</div> : <div>{used}/{limit} {tApp?.used ?? "used"} • {left} {tApp?.left ?? "left"}</div>}
           <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>

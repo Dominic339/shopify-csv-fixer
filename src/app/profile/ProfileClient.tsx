@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
 type SubStatus = {
   signedIn: boolean;
@@ -25,7 +26,12 @@ async function safeReadJson(res: Response) {
   }
 }
 
-export default function ProfileClient() {
+type Props = {
+  tProfile?: Translations["profile"];
+  navT?: Translations["nav"];
+};
+
+export default function ProfileClient({ tProfile, navT }: Props) {
   const { theme } = useTheme();
   const sp = useSearchParams();
   const router = useRouter();
@@ -107,12 +113,8 @@ export default function ProfileClient() {
     // Set the NEXT_LOCALE cookie (1 year)
     document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
     setCurrentLocale(locale);
-    // Redirect: English → root, others → /<locale>/
-    if (locale === DEFAULT_LOCALE) {
-      window.location.href = "/";
-    } else {
-      window.location.href = `/${locale}/`;
-    }
+    // Always redirect to the main page — the cookie carries the locale preference
+    window.location.href = "/";
   }
 
   async function openPortal() {
@@ -192,31 +194,31 @@ export default function ProfileClient() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">Profile</h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">Verify your subscription and manage billing.</p>
+      <h1 className="text-2xl font-semibold">{navT?.profile ?? "Profile"}</h1>
+      <p className="mt-2 text-sm text-[var(--muted)]">{tProfile?.verifySubscription ?? "Verify your subscription and manage billing."}</p>
 
       {billingUnavailable ? (
         <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-          Billing is temporarily unavailable. Please try again later.
+          {tProfile?.billingUnavailable ?? "Billing is temporarily unavailable. Please try again later."}
         </div>
       ) : null}
 
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         {sub ? (
           <>
-            <div className="text-sm text-[var(--muted)]">Subscription</div>
+            <div className="text-sm text-[var(--muted)]">{tProfile?.subscription ?? "Subscription"}</div>
             <div className="mt-2 space-y-2 text-sm">
               <div>
-                Signed in: <span className="font-semibold">{sub.signedIn ? "Yes" : "No"}</span>
+                {tProfile?.signedIn ?? "Signed in"}: <span className="font-semibold">{sub.signedIn ? (tProfile?.yes ?? "Yes") : (tProfile?.no ?? "No")}</span>
               </div>
               <div>
-                Plan: <span className="font-semibold">{sub.plan}</span>
+                {navT?.plan ?? "Plan"}: <span className="font-semibold">{sub.plan}</span>
               </div>
               <div>
-                Status: <span className="font-semibold">{sub.status}</span>
+                {tProfile?.status ?? "Status"}: <span className="font-semibold">{sub.status}</span>
               </div>
               <div>
-                Period end: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>
+                {tProfile?.periodEnd ?? "Period end"}: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>
               </div>
             </div>
 
@@ -228,7 +230,7 @@ export default function ProfileClient() {
                   disabled={busy || billingUnavailable}
                   type="button"
                 >
-                  {busy ? "Opening…" : "Manage in Stripe (upgrade/cancel)"}
+                  {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.manageStripe ?? "Manage in Stripe (upgrade/cancel)")}
                 </button>
               ) : null}
 
@@ -240,7 +242,7 @@ export default function ProfileClient() {
                     disabled={busy || billingUnavailable}
                     type="button"
                   >
-                    Upgrade to Basic
+                    {tProfile?.upgradeToBasic ?? "Upgrade to Basic"}
                   </button>
 
                   <button
@@ -249,7 +251,7 @@ export default function ProfileClient() {
                     disabled={busy || billingUnavailable}
                     type="button"
                   >
-                    Upgrade to Advanced
+                    {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
                   </button>
                 </div>
               ) : null}
@@ -261,7 +263,7 @@ export default function ProfileClient() {
                   disabled={busy || billingUnavailable}
                   type="button"
                 >
-                  Upgrade to Advanced
+                  {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
                 </button>
               ) : null}
 
@@ -276,7 +278,7 @@ export default function ProfileClient() {
                   }
                   className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
                 >
-                  Sign in
+                  {navT?.signIn ?? "Sign in"}
                 </Link>
               ) : null}
 
@@ -284,27 +286,27 @@ export default function ProfileClient() {
                 href="/ecommerce-csv-fixer"
                 className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
               >
-                Back to Ecommerce
+                {tProfile?.backToEcommerce ?? "Back to Ecommerce"}
               </Link>
             </div>
 
             {upgradeIntent ? (
               <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm">
-                You’re signed in. Choose a plan above to upgrade.
+                {tProfile?.youreSignedIn ?? "You’re signed in. Choose a plan above to upgrade."}
               </div>
             ) : null}
 
             {msg ? <div className="mt-3 text-sm text-[var(--muted)]">{msg}</div> : null}
           </>
         ) : (
-          <div className="text-sm text-[var(--muted)]">Loading…</div>
+          <div className="text-sm text-[var(--muted)]">{tProfile?.loading ?? "Loading…"}</div>
         )}
       </div>
       {/* Language selector */}
       <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        <h2 className="text-sm font-semibold">Language</h2>
+        <h2 className="text-sm font-semibold">{tProfile?.language ?? "Language"}</h2>
         <p className="mt-1 text-xs text-[var(--muted)]">
-          Choose your preferred display language. This overrides browser detection.
+          {tProfile?.languageDesc ?? "Choose your preferred display language. This overrides browser detection."}
         </p>
         <div className="mt-4">
           <select
@@ -322,7 +324,7 @@ export default function ProfileClient() {
             ))}
           </select>
           <p className="mt-2 text-xs text-[var(--muted)]">
-            Current: <span className="font-semibold">{LOCALE_NAMES[currentLocale]}</span>
+            {tProfile?.current ?? "Current"}: <span className="font-semibold">{LOCALE_NAMES[currentLocale]}</span>
           </p>
         </div>
       </div>

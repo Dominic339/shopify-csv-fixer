@@ -3,6 +3,7 @@
 
 import React, { useRef, useState } from "react";
 import { inspectCsv, type InspectorResult } from "@/lib/csvInspector";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
 const DELIMITER_LABELS: Record<string, string> = {
   ",": "Comma (,)",
@@ -11,7 +12,11 @@ const DELIMITER_LABELS: Record<string, string> = {
   "|": "Pipe (|)",
 };
 
-export default function InspectorClient() {
+type Props = {
+  t?: Translations["inspector"];
+};
+
+export default function InspectorClient({ t }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [result, setResult] = useState<InspectorResult | null>(null);
@@ -36,9 +41,9 @@ export default function InspectorClient() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">CSV Inspector</h1>
+      <h1 className="text-2xl font-semibold">{t?.title ?? "CSV Inspector"}</h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Free for everyone. Upload any CSV file to get an instant analysis — no account required.
+        {t?.description ?? "Upload a CSV file to get an instant analysis of its structure, headers, and potential issues."}
       </p>
 
       <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
@@ -52,9 +57,9 @@ export default function InspectorClient() {
             className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
             onClick={() => fileInputRef.current?.click()}
           >
-            Choose file
+            {t?.chooseFile ?? "Choose file"}
           </button>
-          <span className="text-sm text-[var(--muted)]">{fileName ?? "No file chosen"}</span>
+          <span className="text-sm text-[var(--muted)]">{fileName ?? (t?.noFileChosen ?? "No file chosen")}</span>
         </div>
         <input
           ref={fileInputRef}
@@ -79,14 +84,14 @@ export default function InspectorClient() {
         >
           {/* Summary stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Rows" value={result.rowCount.toLocaleString()} />
-            <Stat label="Columns" value={result.columnCount.toLocaleString()} />
+            <Stat label={t?.rows ?? "Rows"} value={result.rowCount.toLocaleString()} />
+            <Stat label={t?.columns ?? "Columns"} value={result.columnCount.toLocaleString()} />
             <Stat
-              label="Delimiter"
+              label={t?.delimiter ?? "Delimiter"}
               value={DELIMITER_LABELS[result.delimiterGuess] ?? result.delimiterGuess}
             />
             <Stat
-              label="Issues"
+              label={t?.issues ?? "Issues"}
               value={result.warnings.length.toString()}
               highlight={result.warnings.length > 0}
             />
@@ -94,7 +99,7 @@ export default function InspectorClient() {
 
           {/* Warnings */}
           {result.warnings.length > 0 && (
-            <Section title="Issues detected">
+            <Section title={t?.issues ?? "Issues detected"}>
               <ul className="space-y-2">
                 {result.warnings.map((w, i) => (
                   <li
@@ -110,7 +115,7 @@ export default function InspectorClient() {
 
           {/* Encoding hints */}
           {result.suspiciousEncodingHints.length > 0 && (
-            <Section title="Encoding hints">
+            <Section title={t?.encoding ?? "Encoding hints"}>
               <ul className="space-y-2">
                 {result.suspiciousEncodingHints.map((h, i) => (
                   <li
@@ -126,7 +131,7 @@ export default function InspectorClient() {
 
           {/* Duplicate headers */}
           {result.duplicateHeaders.length > 0 && (
-            <Section title={`Duplicate headers (${result.duplicateHeaders.length})`}>
+            <Section title={`${t?.duplicateHeaders ?? "Duplicate headers"} (${result.duplicateHeaders.length})`}>
               <div className="flex flex-wrap gap-2">
                 {result.duplicateHeaders.map((h) => (
                   <span
@@ -142,7 +147,7 @@ export default function InspectorClient() {
 
           {/* Empty columns */}
           {result.emptyColumns.length > 0 && (
-            <Section title={`Completely empty columns (${result.emptyColumns.length})`}>
+            <Section title={`${t?.emptyColumns ?? "Completely empty columns"} (${result.emptyColumns.length})`}>
               <div className="flex flex-wrap gap-2">
                 {result.emptyColumns.map((h) => (
                   <span
@@ -158,7 +163,7 @@ export default function InspectorClient() {
 
           {/* Blank rows */}
           {result.blankRows.length > 0 && (
-            <Section title={`Blank rows (${result.blankRows.length}${result.blankRows.length === 50 ? "+" : ""})`}>
+            <Section title={`${t?.blankRows ?? "Blank rows"} (${result.blankRows.length}${result.blankRows.length === 50 ? "+" : ""})`}>
               <p className="text-xs text-[var(--muted)]">
                 Row numbers:{" "}
                 {result.blankRows.join(", ")}
@@ -170,7 +175,7 @@ export default function InspectorClient() {
           {/* Inconsistent column counts */}
           {result.inconsistentColumnCounts.length > 0 && (
             <Section
-              title={`Inconsistent column counts (${result.inconsistentColumnCounts.length} rows)`}
+              title={`${t?.inconsistentColumns ?? "Inconsistent column counts"} (${result.inconsistentColumnCounts.length} rows)`}
             >
               <div className="max-h-40 overflow-auto rounded-xl border border-[var(--border)]">
                 <table className="w-full text-xs">
@@ -205,7 +210,7 @@ export default function InspectorClient() {
             result.emptyColumns.length === 0 &&
             result.inconsistentColumnCounts.length === 0 && (
               <div className="rounded-2xl border border-green-400/40 bg-green-400/10 px-4 py-3 text-sm text-green-800 dark:text-green-300">
-                No issues detected. Your CSV looks clean.
+                {t?.noIssues ?? "No issues detected. Your CSV looks clean."}
               </div>
             )}
         </div>

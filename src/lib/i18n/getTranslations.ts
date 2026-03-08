@@ -106,6 +106,10 @@ export type Translations = {
     droppedColumns: string;
     downloadConverted: string;
     upgradeForLarger: string;
+    yourPlan: string;
+    upTo: string;
+    rowsPerConversion: string;
+    planUnlimited: string;
   };
   merge: {
     title: string;
@@ -134,6 +138,55 @@ export type Translations = {
     outputRows: string;
     downloadMerged: string;
     upgradeForLarger: string;
+    yourPlan: string;
+    upTo: string;
+    combinedRows: string;
+    planUnlimited: string;
+  };
+  app: {
+    monthlyExports: string;
+    unlimited: string;
+    used: string;
+    left: string;
+  };
+  profile: {
+    verifySubscription: string;
+    billingUnavailable: string;
+    subscription: string;
+    signedIn: string;
+    yes: string;
+    no: string;
+    status: string;
+    periodEnd: string;
+    opening: string;
+    manageStripe: string;
+    backToEcommerce: string;
+    upgradeToBasic: string;
+    upgradeToAdvanced: string;
+    youreSignedIn: string;
+    loading: string;
+    language: string;
+    languageDesc: string;
+    current: string;
+  };
+  inspector: {
+    title: string;
+    description: string;
+    chooseFile: string;
+    noFileChosen: string;
+    inspecting: string;
+    summary: string;
+    rows: string;
+    columns: string;
+    blankRows: string;
+    duplicateHeaders: string;
+    emptyColumns: string;
+    inconsistentColumns: string;
+    encoding: string;
+    delimiter: string;
+    issues: string;
+    noIssues: string;
+    downloadReport: string;
   };
 };
 

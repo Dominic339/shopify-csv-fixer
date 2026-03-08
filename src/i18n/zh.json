@@ -98,7 +98,11 @@
     "convertedWithWarnings": "已带警告转换 — 导入前请检查已删除的列。",
     "droppedColumns": "已删除列（目标格式中无对应项）",
     "downloadConverted": "下载转换后的CSV",
-    "upgradeForLarger": "升级以处理更大的文件。"
+    "upgradeForLarger": "升级以处理更大的文件。",
+    "yourPlan": "您的方案",
+    "upTo": "最多",
+    "rowsPerConversion": "行/次转换",
+    "planUnlimited": "无限制"
   },
   "merge": {
     "title": "CSV合并与去重工具",
@@ -126,6 +130,55 @@
     "duplicatesFound": "发现重复项",
     "outputRows": "输出行数",
     "downloadMerged": "下载合并后的CSV",
-    "upgradeForLarger": "升级以处理更大的文件。"
+    "upgradeForLarger": "升级以处理更大的文件。",
+    "yourPlan": "您的方案",
+    "upTo": "最多",
+    "combinedRows": "合并行数",
+    "planUnlimited": "无限制"
+  },
+  "app": {
+    "monthlyExports": "每月导出",
+    "unlimited": "无限制",
+    "used": "已使用",
+    "left": "剩余"
+  },
+  "profile": {
+    "verifySubscription": "验证您的订阅并管理账单。",
+    "billingUnavailable": "账单暂时不可用。请稍后再试。",
+    "subscription": "订阅",
+    "signedIn": "已登录",
+    "yes": "是",
+    "no": "否",
+    "status": "状态",
+    "periodEnd": "期间结束",
+    "opening": "打开中…",
+    "manageStripe": "在Stripe中管理（升级/取消）",
+    "backToEcommerce": "返回电商平台",
+    "upgradeToBasic": "升级到Basic",
+    "upgradeToAdvanced": "升级到Advanced",
+    "youreSignedIn": "您已登录。请在上方选择一个方案进行升级。",
+    "loading": "加载中…",
+    "language": "语言",
+    "languageDesc": "选择您偏好的显示语言。这将覆盖浏览器检测。",
+    "current": "当前"
+  },
+  "inspector": {
+    "title": "CSV检查器",
+    "description": "上传CSV文件以立即分析其结构、标题和潜在问题。",
+    "chooseFile": "选择文件",
+    "noFileChosen": "未选择文件",
+    "inspecting": "检查中…",
+    "summary": "检查摘要",
+    "rows": "行",
+    "columns": "列",
+    "blankRows": "空行",
+    "duplicateHeaders": "重复标题",
+    "emptyColumns": "空列",
+    "inconsistentColumns": "不一致的列数",
+    "encoding": "编码",
+    "delimiter": "分隔符",
+    "issues": "问题",
+    "noIssues": "未发现问题。",
+    "downloadReport": "下载报告"
   }
 }

@@ -98,7 +98,11 @@
     "convertedWithWarnings": "Przekonwertowano z ostrzeżeniami — sprawdź usunięte kolumny przed importem.",
     "droppedColumns": "Usunięte kolumny (brak odpowiednika w formacie docelowym)",
     "downloadConverted": "Pobierz przekonwertowany CSV",
-    "upgradeForLarger": "Ulepsz dla większych plików."
+    "upgradeForLarger": "Ulepsz dla większych plików.",
+    "yourPlan": "Twój plan",
+    "upTo": "do",
+    "rowsPerConversion": "wierszy na konwersję",
+    "planUnlimited": "Nieograniczony"
   },
   "merge": {
     "title": "Scalacz i deduplikator CSV",
@@ -126,6 +130,55 @@
     "duplicatesFound": "Znalezione duplikaty",
     "outputRows": "Wiersze wyjściowe",
     "downloadMerged": "Pobierz scalony CSV",
-    "upgradeForLarger": "Ulepsz dla większych plików."
+    "upgradeForLarger": "Ulepsz dla większych plików.",
+    "yourPlan": "Twój plan",
+    "upTo": "do",
+    "combinedRows": "połączonych wierszy",
+    "planUnlimited": "Nieograniczony"
+  },
+  "app": {
+    "monthlyExports": "Miesięczne eksporty",
+    "unlimited": "Nieograniczony",
+    "used": "użyto",
+    "left": "pozostało"
+  },
+  "profile": {
+    "verifySubscription": "Sprawdź swoją subskrypcję i zarządzaj rozliczeniami.",
+    "billingUnavailable": "Rozliczenia są tymczasowo niedostępne. Spróbuj ponownie później.",
+    "subscription": "Subskrypcja",
+    "signedIn": "Zalogowany",
+    "yes": "Tak",
+    "no": "Nie",
+    "status": "Status",
+    "periodEnd": "Koniec okresu",
+    "opening": "Otwieranie…",
+    "manageStripe": "Zarządzaj w Stripe (uaktualnij/anuluj)",
+    "backToEcommerce": "Powrót do Ecommerce",
+    "upgradeToBasic": "Ulepsz do Basic",
+    "upgradeToAdvanced": "Ulepsz do Advanced",
+    "youreSignedIn": "Jesteś zalogowany. Wybierz plan powyżej, aby ulepszyć.",
+    "loading": "Ładowanie…",
+    "language": "Język",
+    "languageDesc": "Wybierz preferowany język wyświetlania. To zastępuje wykrywanie przeglądarki.",
+    "current": "Bieżący"
+  },
+  "inspector": {
+    "title": "Inspektor CSV",
+    "description": "Prześlij plik CSV, aby uzyskać natychmiastową analizę jego struktury, nagłówków i potencjalnych problemów.",
+    "chooseFile": "Wybierz plik",
+    "noFileChosen": "Nie wybrano pliku",
+    "inspecting": "Inspekcja…",
+    "summary": "Podsumowanie inspekcji",
+    "rows": "Wiersze",
+    "columns": "Kolumny",
+    "blankRows": "Puste wiersze",
+    "duplicateHeaders": "Zduplikowane nagłówki",
+    "emptyColumns": "Puste kolumny",
+    "inconsistentColumns": "Niespójne liczby kolumn",
+    "encoding": "Kodowanie",
+    "delimiter": "Separator",
+    "issues": "Problemy",
+    "noIssues": "Nie znaleziono problemów.",
+    "downloadReport": "Pobierz raport"
   }
 }

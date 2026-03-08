@@ -1,7 +1,10 @@
 // src/app/csv-inspector/page.tsx
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import InspectorClient from "./InspectorClient";
+import { getTranslations } from "@/lib/i18n/getTranslations";
+import { isValidLocale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 
 export const metadata: Metadata = {
   title: "Free CSV Inspector",
@@ -17,10 +20,15 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function CsvInspectorPage() {
+export default async function CsvInspectorPage() {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  const locale = localeCookie && isValidLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;
+  const t = await getTranslations(locale);
+
   return (
     <Suspense fallback={<div className="mx-auto max-w-3xl px-6 py-10">Loading…</div>}>
-      <InspectorClient />
+      <InspectorClient t={t.inspector} />
     </Suspense>
   );
 }
