@@ -16,9 +16,10 @@ type SubStatus = {
 
 type Props = {
   tHome?: Translations["home"];
+  tPricing?: Translations["pricing"];
 };
 
-export default function HomeClient({ tHome }: Props) {
+export default function HomeClient({ tHome, tPricing }: Props) {
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -98,7 +99,7 @@ export default function HomeClient({ tHome }: Props) {
       </section>
 
       <section className="mt-16" id="pricing">
-        <PricingCards />
+        <PricingCards sub={sub} tPricing={tPricing} />
       </section>
 
       <section className="mt-16">
@@ -197,6 +198,10 @@ export default function HomeClient({ tHome }: Props) {
         signedIn={Boolean(sub?.signedIn)}
         upgradePlan="advanced"
         onClose={() => setUpgradeOpen(false)}
+        labelClose={tPricing?.close}
+        labelViewPricing={tPricing?.viewPricing}
+        labelGoToAccount={tPricing?.goToAccount}
+        labelSignInToUpgrade={tPricing?.signInToUpgrade}
       />
     </main>
   );

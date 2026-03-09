@@ -48,5 +48,5 @@ export default async function LocaleHomePage({ params }: Props) {
 
   const t = await getTranslations(locale as Locale);
 
-  return <HomeClient tHome={t.home} />;
+  return <HomeClient tHome={t.home} tPricing={t.pricing} />;
 }

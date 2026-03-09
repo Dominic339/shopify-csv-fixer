@@ -74,6 +74,40 @@ export type Translations = {
   toc: {
     onThisPage: string;
   };
+  pricing: {
+    free: string;
+    basic: string;
+    advanced: string;
+    perMonth: string;
+    yourPlan: string;
+    startFree: string;
+    subscribe: string;
+    signInToSubscribe: string;
+    upgradeToAdvanced: string;
+    manageBilling: string;
+    openFixer: string;
+    yourMembership: string;
+    subscribedDesc: string;
+    stripeNote: string;
+    billingUnavailable: string;
+    starting: string;
+    freeBullet1: string;
+    freeBullet2: string;
+    freeBullet3: string;
+    freeBullet4: string;
+    basicBullet1: string;
+    basicBullet2: string;
+    basicBullet3: string;
+    basicBullet4: string;
+    advancedBullet1: string;
+    advancedBullet2: string;
+    advancedBullet3: string;
+    advancedBullet4: string;
+    viewPricing: string;
+    goToAccount: string;
+    signInToUpgrade: string;
+    close: string;
+  };
   home: {
     title: string;
     description: string;

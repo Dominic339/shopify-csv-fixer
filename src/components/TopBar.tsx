@@ -281,7 +281,7 @@ export default function TopBar({ navT }: Props) {
 
                 <div className="p-2">
                   <Link
-                    href="/#pricing"
+                    href={`${localeHref(currentLocale, "/")}#pricing`}
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
