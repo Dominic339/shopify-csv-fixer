@@ -194,31 +194,34 @@ export default function TopBar({ navT }: Props) {
               onClick={() => setToolsOpen((v) => !v)}
               aria-label="Tools menu"
             >
-              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">Tools</span>
+              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.tools ?? "Tools"}</span>
             </button>
             {toolsOpen && (
-              <div className="popover-surface absolute left-0 mt-2 w-52 overflow-hidden rounded-2xl shadow-xl z-50">
+              <div className="popover-surface absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl shadow-xl z-50">
                 <div className="p-2">
                   <Link
                     href="/convert"
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setToolsOpen(false)}
                   >
-                    Format Converter
+                    {navT?.formatConverter ?? "Format Converter"}
+                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
                   </Link>
                   <Link
                     href="/merge"
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setToolsOpen(false)}
                   >
-                    CSV Merger
+                    {navT?.csvMerger ?? "CSV Merger"}
+                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
                   </Link>
                   <Link
                     href="/csv-inspector"
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setToolsOpen(false)}
                   >
-                    CSV Inspector
+                    {navT?.csvInspector ?? "CSV Inspector"}
+                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
                   </Link>
                 </div>
               </div>

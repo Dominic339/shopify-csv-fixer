@@ -14,7 +14,11 @@
     "upgrade": "Améliorer",
     "notSignedIn": "Non connecté",
     "plan": "Forfait",
-    "active": "actif"
+    "active": "actif",
+    "tools": "Outils",
+    "formatConverter": "Convertisseur de format",
+    "csvMerger": "Fusionneur CSV",
+    "csvInspector": "Inspecteur CSV"
   },
   "guide": {
     "whatYouLearn": "Ce que vous allez apprendre",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | Nettoyer, standardiser et valider vos fichiers CSV",
-    "description": "Corrigez et convertissez des fichiers CSV désordonnés pour Shopify et autres outils. Téléversez, corrigez automatiquement et exportez des fichiers propres en quelques secondes."
+    "description": "Corrigez et convertissez des fichiers CSV désordonnés pour Shopify et autres outils. Téléversez, corrigez automatiquement et exportez des fichiers propres en quelques secondes.",
+    "headline": "Nettoyer. Standardiser. Valider.",
+    "heroSubtitle": "Réparez rapidement vos CSV e-commerce défectueux. Corrigez automatiquement ce qui est sûr, signalez ce qui est risqué et exportez un fichier propre.",
+    "openEcommerceFixer": "Ouvrir le réparateur CSV",
+    "browseTemplates": "Parcourir les modèles",
+    "customFormatsAdvanced": "Formats personnalisés (Advanced)",
+    "openCustomFormats": "Ouvrir les formats personnalisés",
+    "filesLocally": "Fichiers traités localement",
+    "noSignup": "Aucune inscription obligatoire",
+    "cancelAnytime": "Annulez à tout moment",
+    "whatItDoes": "Ce que ça fait",
+    "whatItDoesBullet1": "Corriger les problèmes CSV courants qui bloquent les importations e-commerce",
+    "whatItDoesBullet2": "Normaliser la mise en forme comme les espaces, la casse et les champs numériques",
+    "whatItDoesBullet3": "Modifier manuellement les cellules problématiques et exporter un CSV propre",
+    "csvFixerLabel": "Réparateur CSV",
+    "fixInSeconds": "Réparez vos CSV e-commerce en quelques secondes",
+    "fixInSecondsDesc": "Choisissez une plateforme, téléchargez votre CSV et laissez l'outil corriger automatiquement les problèmes sans risque. Vérifiez ce qui est risqué puis exportez un fichier propre.",
+    "customFormatsLabel": "Formats personnalisés",
+    "saveReuse": "Enregistrez et réutilisez vos règles",
+    "saveReuseDesc": "Créez des formats réutilisables avec des modèles de colonnes et des règles. Parfait pour les tâches répétitives comme les exports Shopify.",
+    "upgradeToAdvanced": "Passer à Advanced",
+    "advancedRequired": "Plan Advanced requis.",
+    "faqLabel": "FAQ",
+    "faqTitle": "Réponses rapides",
+    "faq1Q": "Téléchargez-vous mon CSV sur un serveur ?",
+    "faq1A": "Le réparateur fonctionne dans votre navigateur pour l'analyse et les modifications. Lors de l'export, votre CSV nettoyé est généré localement.",
+    "faq2Q": "Quels types de problèmes peut-il corriger automatiquement ?",
+    "faq2A": "Les corrections sûres comprennent la suppression des espaces superflus, la normalisation des cellules vides et l'application d'une mise en forme cohérente. Tout ce qui pourrait changer le sens est signalé pour révision avant l'export.",
+    "faq3Q": "Que sont les formats personnalisés ?",
+    "faq3A": "Les formats personnalisés vous permettent d'enregistrer des modèles de colonnes réutilisables et des règles de nettoyage pour que les tâches répétitives prennent des secondes. Le plan Advanced est requis pour créer et gérer des formats.",
+    "faq4Q": "Puis-je annuler ou changer de plan plus tard ?",
+    "faq4A": "Oui. Vous pouvez mettre à niveau, rétrograder ou annuler depuis votre profil à tout moment.",
+    "upgradeModalTitle": "Advanced uniquement",
+    "upgradeModalMessage": "Les formats personnalisés sont disponibles avec le plan Advanced. Mettez à niveau pour créer et gérer des formats CSV réutilisables."
   },
   "presets": {
     "title": "Formats prédéfinis",
@@ -180,5 +217,8 @@
     "issues": "Problèmes",
     "noIssues": "Aucun problème trouvé.",
     "downloadReport": "Télécharger le rapport"
+  },
+  "toc": {
+    "onThisPage": "Sur cette page"
   }
 }

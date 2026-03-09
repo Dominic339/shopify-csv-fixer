@@ -14,7 +14,11 @@
     "upgrade": "Upgrade",
     "notSignedIn": "Nicht angemeldet",
     "plan": "Tarif",
-    "active": "aktiv"
+    "active": "aktiv",
+    "tools": "Tools",
+    "formatConverter": "Format-Konverter",
+    "csvMerger": "CSV-Zusammenführung",
+    "csvInspector": "CSV-Inspektor"
   },
   "guide": {
     "whatYouLearn": "Was Sie lernen werden",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | CSV-Dateien bereinigen, standardisieren und validieren",
-    "description": "Korrigieren und konvertieren Sie unordentliche CSV-Dateien für Shopify und andere Tools. Hochladen, automatisch korrigieren und saubere Dateien in Sekunden exportieren."
+    "description": "Korrigieren und konvertieren Sie unordentliche CSV-Dateien für Shopify und andere Tools. Hochladen, automatisch korrigieren und saubere Dateien in Sekunden exportieren.",
+    "headline": "Bereinigen. Standardisieren. Validieren.",
+    "heroSubtitle": "Repariere fehlerhafte E-Commerce-CSVs schnell. Behebe sichere Probleme automatisch, markiere riskante und exportiere eine saubere Datei.",
+    "openEcommerceFixer": "E-Commerce-CSV-Reparatur öffnen",
+    "browseTemplates": "Vorlagen durchsuchen",
+    "customFormatsAdvanced": "Benutzerdefinierte Formate (Advanced)",
+    "openCustomFormats": "Benutzerdefinierte Formate öffnen",
+    "filesLocally": "Dateien lokal verarbeitet",
+    "noSignup": "Keine Anmeldepflicht",
+    "cancelAnytime": "Jederzeit kündbar",
+    "whatItDoes": "Was es macht",
+    "whatItDoesBullet1": "Häufige CSV-Probleme beheben, die E-Commerce-Importe unterbrechen",
+    "whatItDoesBullet2": "Formatierung normalisieren wie Abstände, Groß-/Kleinschreibung und numerische Felder",
+    "whatItDoesBullet3": "Problemzellen manuell bearbeiten und eine saubere CSV exportieren",
+    "csvFixerLabel": "CSV-Reparatur",
+    "fixInSeconds": "E-Commerce-CSV-Dateien in Sekunden reparieren",
+    "fixInSecondsDesc": "Wähle eine Plattform, lade deine CSV hoch und lass das Tool sichere Probleme automatisch beheben. Überprüfe riskante Fälle und exportiere eine saubere Datei.",
+    "customFormatsLabel": "Benutzerdefinierte Formate",
+    "saveReuse": "Regeln speichern und wiederverwenden",
+    "saveReuseDesc": "Erstelle wiederverwendbare Formate mit Spaltenvorlagen und Regeln. Ideal für wiederkehrende Aufgaben wie Shopify-Exporte.",
+    "upgradeToAdvanced": "Auf Advanced upgraden",
+    "advancedRequired": "Advanced-Plan erforderlich.",
+    "faqLabel": "FAQ",
+    "faqTitle": "Schnelle Antworten",
+    "faq1Q": "Werden meine CSV-Dateien auf einen Server hochgeladen?",
+    "faq1A": "Der Reparateur läuft in deinem Browser für das Parsen und die Bearbeitungen. Beim Export wird die bereinigte CSV lokal erstellt.",
+    "faq2Q": "Welche Probleme können automatisch behoben werden?",
+    "faq2A": "Sichere Korrekturen umfassen das Entfernen zusätzlicher Leerzeichen, die Normalisierung leerer Zellen und konsistente Formatierung. Alles, was die Bedeutung ändern könnte, wird vor dem Export zur Überprüfung markiert.",
+    "faq3Q": "Was sind benutzerdefinierte Formate?",
+    "faq3A": "Benutzerdefinierte Formate ermöglichen es dir, wiederverwendbare Spaltenvorlagen und Bereinigungsregeln zu speichern, sodass wiederkehrende Aufgaben nur Sekunden dauern. Für die Erstellung und Verwaltung von Formaten ist der Advanced-Plan erforderlich.",
+    "faq4Q": "Kann ich später kündigen oder den Plan wechseln?",
+    "faq4A": "Ja. Du kannst jederzeit über dein Profil upgraden, downgraden oder kündigen.",
+    "upgradeModalTitle": "Nur Advanced",
+    "upgradeModalMessage": "Benutzerdefinierte Formate sind im Advanced-Plan verfügbar. Upgrade, um wiederverwendbare CSV-Formate zu erstellen und zu verwalten."
   },
   "presets": {
     "title": "Vorlagenformate",
@@ -180,5 +217,8 @@
     "issues": "Probleme",
     "noIssues": "Keine Probleme gefunden.",
     "downloadReport": "Bericht herunterladen"
+  },
+  "toc": {
+    "onThisPage": "Auf dieser Seite"
   }
 }

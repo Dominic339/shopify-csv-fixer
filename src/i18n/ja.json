@@ -14,7 +14,11 @@
     "upgrade": "アップグレード",
     "notSignedIn": "未ログイン",
     "plan": "プラン",
-    "active": "有効"
+    "active": "有効",
+    "tools": "ツール",
+    "formatConverter": "フォーマット変換",
+    "csvMerger": "CSV結合",
+    "csvInspector": "CSVインスペクター"
   },
   "guide": {
     "whatYouLearn": "学べること",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | CSVファイルのクリーニング・標準化・検証",
-    "description": "ShopifyやほかのツールのためにCSVファイルを修正・変換します。アップロードして、安全な問題を自動修正し、クリーンなファイルを数秒でエクスポート。"
+    "description": "ShopifyやほかのツールのためにCSVファイルを修正・変換します。アップロードして、安全な問題を自動修正し、クリーンなファイルを数秒でエクスポート。",
+    "headline": "クリーン。標準化。検証。",
+    "heroSubtitle": "壊れたEコマースCSVをすばやく修正します。安全な問題は自動修正し、リスクのある問題はフラグを立て、クリーンなファイルをエクスポートします。",
+    "openEcommerceFixer": "EコマースCSVフィクサーを開く",
+    "browseTemplates": "テンプレートを閲覧",
+    "customFormatsAdvanced": "カスタムフォーマット（Advanced）",
+    "openCustomFormats": "カスタムフォーマットを開く",
+    "filesLocally": "ファイルはローカルで処理",
+    "noSignup": "強制サインアップなし",
+    "cancelAnytime": "いつでもキャンセル可能",
+    "whatItDoes": "機能",
+    "whatItDoesBullet1": "Eコマースインポートを妨げる一般的なCSVの問題を修正",
+    "whatItDoesBullet2": "スペース、大文字/小文字、数値フィールドなどの書式を正規化",
+    "whatItDoesBullet3": "問題のあるセルを手動で編集してクリーンなCSVをエクスポート",
+    "csvFixerLabel": "CSVフィクサー",
+    "fixInSeconds": "数秒でEコマースCSVを修正",
+    "fixInSecondsDesc": "プラットフォームを選択し、CSVをアップロードして、ツールに安全な問題を自動修正させます。リスクのある問題を確認してから、クリーンなファイルをエクスポートします。",
+    "customFormatsLabel": "カスタムフォーマット",
+    "saveReuse": "ルールを保存して再利用",
+    "saveReuseDesc": "列テンプレートとルールで再利用可能なフォーマットを作成します。Shopifyエクスポートなどの繰り返しタスクに最適です。",
+    "upgradeToAdvanced": "Advancedにアップグレード",
+    "advancedRequired": "Advancedプランが必要です。",
+    "faqLabel": "よくある質問",
+    "faqTitle": "簡単な回答",
+    "faq1Q": "CSVをサーバーにアップロードしますか？",
+    "faq1A": "フィクサーはコアの解析と編集をブラウザ内で実行します。エクスポート時、クリーンなCSVはローカルで生成されます。",
+    "faq2Q": "どのような問題を自動修正できますか？",
+    "faq2A": "安全な修正には、余分なスペースのトリミング、空セルの正規化、一貫した書式の適用が含まれます。意味を変える可能性があるものはエクスポート前に確認のためフラグが立てられます。",
+    "faq3Q": "カスタムフォーマットとは何ですか？",
+    "faq3A": "カスタムフォーマットを使用すると、繰り返しのタスクが数秒で完了するよう、再利用可能な列テンプレートとクリーンアップルールを保存できます。フォーマットの作成と管理にはAdvancedプランが必要です。",
+    "faq4Q": "後でキャンセルやプラン変更はできますか？",
+    "faq4A": "はい。プロフィールからいつでもアップグレード、ダウングレード、またはキャンセルできます。",
+    "upgradeModalTitle": "Advancedのみ",
+    "upgradeModalMessage": "カスタムフォーマットはAdvancedプランでご利用いただけます。再利用可能なCSVフォーマットを作成・管理するためにアップグレードしてください。"
   },
   "presets": {
     "title": "プリセット形式",
@@ -180,5 +217,8 @@
     "issues": "問題",
     "noIssues": "問題は見つかりません。",
     "downloadReport": "レポートをダウンロード"
+  },
+  "toc": {
+    "onThisPage": "このページの内容"
   }
 }

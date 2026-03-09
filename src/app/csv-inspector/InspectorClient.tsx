@@ -41,7 +41,10 @@ export default function InspectorClient({ t }: Props) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">{t?.title ?? "CSV Inspector"}</h1>
+      <h1 className="flex items-center gap-3 text-2xl font-semibold">
+        {t?.title ?? "CSV Inspector"}
+        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
+      </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
         {t?.description ?? "Upload a CSV file to get an instant analysis of its structure, headers, and potential issues."}
       </p>

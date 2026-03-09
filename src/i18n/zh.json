@@ -14,7 +14,11 @@
     "upgrade": "升级",
     "notSignedIn": "未登录",
     "plan": "套餐",
-    "active": "已激活"
+    "active": "已激活",
+    "tools": "工具",
+    "formatConverter": "格式转换器",
+    "csvMerger": "CSV合并器",
+    "csvInspector": "CSV检查器"
   },
   "guide": {
     "whatYouLearn": "您将学到",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | 清理、标准化和验证CSV文件",
-    "description": "修复和转换杂乱的CSV文件，适用于Shopify及其他工具。上传、自动修复安全问题，几秒内导出整洁的文件。"
+    "description": "修复和转换杂乱的CSV文件，适用于Shopify及其他工具。上传、自动修复安全问题，几秒内导出整洁的文件。",
+    "headline": "清理。标准化。验证。",
+    "heroSubtitle": "快速修复损坏的电商CSV文件。自动修复安全问题，标记风险问题，导出干净的文件。",
+    "openEcommerceFixer": "打开电商CSV修复工具",
+    "browseTemplates": "浏览模板",
+    "customFormatsAdvanced": "自定义格式（Advanced）",
+    "openCustomFormats": "打开自定义格式",
+    "filesLocally": "文件在本地处理",
+    "noSignup": "无需强制注册",
+    "cancelAnytime": "随时取消",
+    "whatItDoes": "功能介绍",
+    "whatItDoesBullet1": "修复破坏电商导入的常见CSV问题",
+    "whatItDoesBullet2": "标准化格式，如空格、大小写和数字字段",
+    "whatItDoesBullet3": "手动编辑问题单元格并导出干净的CSV",
+    "csvFixerLabel": "CSV修复工具",
+    "fixInSeconds": "数秒内修复电商CSV文件",
+    "fixInSecondsDesc": "选择平台，上传CSV，让工具自动修复安全问题。检查风险项，然后导出干净的文件。",
+    "customFormatsLabel": "自定义格式",
+    "saveReuse": "保存并重用规则",
+    "saveReuseDesc": "使用列模板和规则创建可重用的格式。非常适合Shopify导出等重复性任务。",
+    "upgradeToAdvanced": "升级到Advanced",
+    "advancedRequired": "需要Advanced计划。",
+    "faqLabel": "常见问题",
+    "faqTitle": "快速解答",
+    "faq1Q": "您会将我的CSV上传到服务器吗？",
+    "faq1A": "修复工具在浏览器中运行核心解析和编辑。导出时，清理后的CSV在本地生成。",
+    "faq2Q": "可以自动修复哪些类型的问题？",
+    "faq2A": "安全修复包括去除多余空格、规范化空单元格和应用一致的格式。任何可能改变含义的内容都会在导出前标记以供审查。",
+    "faq3Q": "什么是自定义格式？",
+    "faq3A": "自定义格式让您可以保存可重用的列模板和清理规则，使重复任务只需几秒。创建和管理格式需要Advanced计划。",
+    "faq4Q": "以后可以取消或更改计划吗？",
+    "faq4A": "可以。您可以随时在个人资料中升级、降级或取消。",
+    "upgradeModalTitle": "仅限Advanced",
+    "upgradeModalMessage": "自定义格式在Advanced计划中可用。升级以创建和管理可重用的CSV格式。"
   },
   "presets": {
     "title": "预设格式",
@@ -180,5 +217,8 @@
     "issues": "问题",
     "noIssues": "未发现问题。",
     "downloadReport": "下载报告"
+  },
+  "toc": {
+    "onThisPage": "本页内容"
   }
 }

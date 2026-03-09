@@ -338,7 +338,7 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
               </div>
               {tocItems.length > 0 && (
                 <aside className="hidden lg:block w-56 shrink-0 sticky top-24">
-                  <MdxGuideToc items={tocItems} />
+                  <MdxGuideToc items={tocItems} onThisPage={t.toc.onThisPage} />
                 </aside>
               )}
             </div>

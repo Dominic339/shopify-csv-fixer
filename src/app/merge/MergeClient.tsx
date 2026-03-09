@@ -136,7 +136,10 @@ export default function MergeClient({ t }: Props) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">{t?.title ?? "CSV Merger & Deduplicator"}</h1>
+      <h1 className="flex items-center gap-3 text-2xl font-semibold">
+        {t?.title ?? "CSV Merger & Deduplicator"}
+        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
+      </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
         {t?.description ?? "Combine two CSV files and optionally remove duplicates based on a shared column."}
       </p>

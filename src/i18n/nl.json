@@ -14,7 +14,11 @@
     "upgrade": "Upgraden",
     "notSignedIn": "Niet aangemeld",
     "plan": "Abonnement",
-    "active": "actief"
+    "active": "actief",
+    "tools": "Tools",
+    "formatConverter": "Formaatconverter",
+    "csvMerger": "CSV-samenvoeger",
+    "csvInspector": "CSV-inspecteur"
   },
   "guide": {
     "whatYouLearn": "Wat je leert",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | CSV-bestanden opschonen, standaardiseren en valideren",
-    "description": "Herstel en converteer rommelige CSV-bestanden voor Shopify en andere tools. Upload, herstel automatisch en exporteer schone bestanden in seconden."
+    "description": "Herstel en converteer rommelige CSV-bestanden voor Shopify en andere tools. Upload, herstel automatisch en exporteer schone bestanden in seconden.",
+    "headline": "Opschonen. Standaardiseren. Valideren.",
+    "heroSubtitle": "Repareer beschadigde e-commerce CSV's snel. Los veilige problemen automatisch op, markeer risicovolle en exporteer een schoon bestand.",
+    "openEcommerceFixer": "E-commerce CSV-reparateur openen",
+    "browseTemplates": "Sjablonen bekijken",
+    "customFormatsAdvanced": "Aangepaste formaten (Advanced)",
+    "openCustomFormats": "Aangepaste formaten openen",
+    "filesLocally": "Bestanden lokaal verwerkt",
+    "noSignup": "Geen verplichte aanmelding",
+    "cancelAnytime": "Altijd opzegbaar",
+    "whatItDoes": "Wat het doet",
+    "whatItDoesBullet1": "Veelvoorkomende CSV-problemen oplossen die e-commerce-imports breken",
+    "whatItDoesBullet2": "Opmaak normaliseren zoals spaties, hoofdlettergebruik en numerieke velden",
+    "whatItDoesBullet3": "Probleemcellen handmatig bewerken en een schoon CSV exporteren",
+    "csvFixerLabel": "CSV-reparateur",
+    "fixInSeconds": "E-commerce CSV-bestanden in seconden repareren",
+    "fixInSecondsDesc": "Kies een platform, upload je CSV en laat de tool veilige problemen automatisch oplossen. Controleer risicovolle zaken en exporteer daarna een schoon bestand.",
+    "customFormatsLabel": "Aangepaste formaten",
+    "saveReuse": "Sla je regels op en hergebruik ze",
+    "saveReuseDesc": "Maak herbruikbare formaten met kolomsjablonen en regels. Perfect voor herhalende taken zoals Shopify-exports.",
+    "upgradeToAdvanced": "Upgraden naar Advanced",
+    "advancedRequired": "Advanced-abonnement vereist.",
+    "faqLabel": "FAQ",
+    "faqTitle": "Snelle antwoorden",
+    "faq1Q": "Upload je mijn CSV naar een server?",
+    "faq1A": "De reparateur draait in je browser voor het parsen en bewerken. Bij het exporteren wordt je schone CSV lokaal gegenereerd.",
+    "faq2Q": "Welke soorten problemen kan het automatisch oplossen?",
+    "faq2A": "Veilige fixes zijn onder meer het verwijderen van extra spaties, het normaliseren van lege cellen en het toepassen van consistente opmaak. Alles wat de betekenis kan veranderen, wordt gemarkeerd voor controle voor de export.",
+    "faq3Q": "Wat zijn aangepaste formaten?",
+    "faq3A": "Aangepaste formaten laten je herbruikbare kolomsjablonen en opschoningsregels opslaan zodat herhalende taken seconden duren. Advanced-abonnement is vereist voor het maken en beheren van formaten.",
+    "faq4Q": "Kan ik later opzeggen of van abonnement wisselen?",
+    "faq4A": "Ja. Je kunt upgraden, downgraden of opzeggen via je Profiel op elk gewenst moment.",
+    "upgradeModalTitle": "Alleen Advanced",
+    "upgradeModalMessage": "Aangepaste formaten zijn beschikbaar in het Advanced-abonnement. Upgrade om herbruikbare CSV-formaten te maken en te beheren."
   },
   "presets": {
     "title": "Vooringestelde formaten",
@@ -180,5 +217,8 @@
     "issues": "Problemen",
     "noIssues": "Geen problemen gevonden.",
     "downloadReport": "Rapport downloaden"
+  },
+  "toc": {
+    "onThisPage": "Op deze pagina"
   }
 }

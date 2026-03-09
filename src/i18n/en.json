@@ -14,7 +14,11 @@
     "upgrade": "Upgrade",
     "notSignedIn": "Not signed in",
     "plan": "Plan",
-    "active": "active"
+    "active": "active",
+    "tools": "Tools",
+    "formatConverter": "Format Converter",
+    "csvMerger": "CSV Merger",
+    "csvInspector": "CSV Inspector"
   },
   "guide": {
     "whatYouLearn": "What you'll learn",
@@ -60,9 +64,45 @@
     "platformFixers": "Platform-specific fixers",
     "platformFixersDesc": "Dedicated validation guides for each ecommerce platform."
   },
+  "toc": {
+    "onThisPage": "On this page"
+  },
   "home": {
     "title": "StriveFormats | Clean. Standardize. Validate.",
-    "description": "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds."
+    "description": "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
+    "headline": "Clean. Standardize. Validate.",
+    "heroSubtitle": "Fix broken ecommerce CSVs fast. Auto-fix what is safe, flag what is risky, and export a clean file you can trust.",
+    "openEcommerceFixer": "Open Ecommerce CSV Fixer",
+    "browseTemplates": "Browse templates",
+    "customFormatsAdvanced": "Custom Formats (Advanced)",
+    "openCustomFormats": "Open Custom Formats",
+    "filesLocally": "Files processed locally",
+    "noSignup": "No forced signup",
+    "cancelAnytime": "Cancel anytime",
+    "whatItDoes": "What it does",
+    "whatItDoesBullet1": "Fix common CSV issues that break ecommerce imports",
+    "whatItDoesBullet2": "Normalize formatting such as spacing, casing, and numeric fields",
+    "whatItDoesBullet3": "Manually edit problem cells and export a clean CSV",
+    "csvFixerLabel": "CSV Fixer",
+    "fixInSeconds": "Fix ecommerce CSV files in seconds",
+    "fixInSecondsDesc": "Choose a platform, upload your CSV, and let the tool auto-fix safe issues. Review anything risky, then export a clean file.",
+    "customFormatsLabel": "Custom Formats",
+    "saveReuse": "Save and reuse your rules",
+    "saveReuseDesc": "Create reusable formats with column templates and rules. Perfect for repeat tasks like Shopify exports.",
+    "upgradeToAdvanced": "Upgrade to Advanced",
+    "advancedRequired": "Advanced plan required.",
+    "faqLabel": "FAQ",
+    "faqTitle": "Quick answers",
+    "faq1Q": "Do you upload my CSV to a server?",
+    "faq1A": "The fixer runs in your browser for the core parsing and edits. When you export, your cleaned CSV is generated locally.",
+    "faq2Q": "What kinds of problems can it fix automatically?",
+    "faq2A": "Safe fixes include trimming extra spaces, normalizing empty cells, and applying consistent formatting. Anything that could change meaning is flagged so you can review it before export.",
+    "faq3Q": "What are Custom Formats?",
+    "faq3A": "Custom Formats let you save reusable column templates and cleanup rules so repeat jobs take seconds. Advanced plan is required for creating and managing formats.",
+    "faq4Q": "Can I cancel or change plans later?",
+    "faq4A": "Yes. You can upgrade, downgrade, or cancel from your Profile at any time.",
+    "upgradeModalTitle": "Advanced only",
+    "upgradeModalMessage": "Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
   },
   "presets": {
     "title": "Preset Formats",

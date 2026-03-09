@@ -14,7 +14,11 @@
     "upgrade": "Uaktualnij",
     "notSignedIn": "Niezalogowany",
     "plan": "Plan",
-    "active": "aktywny"
+    "active": "aktywny",
+    "tools": "Narzędzia",
+    "formatConverter": "Konwerter formatów",
+    "csvMerger": "Łącznik CSV",
+    "csvInspector": "Inspektor CSV"
   },
   "guide": {
     "whatYouLearn": "Czego się nauczysz",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | Czyszczenie, standaryzacja i walidacja plików CSV",
-    "description": "Naprawiaj i konwertuj nieuporządkowane pliki CSV dla Shopify i innych narzędzi. Prześlij, automatycznie napraw i wyeksportuj czyste pliki w kilka sekund."
+    "description": "Naprawiaj i konwertuj nieuporządkowane pliki CSV dla Shopify i innych narzędzi. Prześlij, automatycznie napraw i wyeksportuj czyste pliki w kilka sekund.",
+    "headline": "Wyczyść. Ustandaryzuj. Zweryfikuj.",
+    "heroSubtitle": "Szybko naprawiaj uszkodzone pliki CSV e-commerce. Automatycznie naprawiaj to, co bezpieczne, oznaczaj ryzykowne i eksportuj czysty plik.",
+    "openEcommerceFixer": "Otwórz naprawiacz CSV",
+    "browseTemplates": "Przeglądaj szablony",
+    "customFormatsAdvanced": "Niestandardowe formaty (Advanced)",
+    "openCustomFormats": "Otwórz niestandardowe formaty",
+    "filesLocally": "Pliki przetwarzane lokalnie",
+    "noSignup": "Bez obowiązkowej rejestracji",
+    "cancelAnytime": "Anuluj w dowolnym momencie",
+    "whatItDoes": "Co robi",
+    "whatItDoesBullet1": "Naprawianie typowych problemów CSV, które uniemożliwiają importy e-commerce",
+    "whatItDoesBullet2": "Normalizowanie formatowania, np. odstępów, wielkości liter i pól numerycznych",
+    "whatItDoesBullet3": "Ręczne edytowanie problematycznych komórek i eksportowanie czystego CSV",
+    "csvFixerLabel": "Naprawiacz CSV",
+    "fixInSeconds": "Naprawiaj pliki CSV w kilka sekund",
+    "fixInSecondsDesc": "Wybierz platformę, prześlij plik CSV i pozwól narzędziu automatycznie naprawić bezpieczne problemy. Sprawdź ryzykowne elementy, a następnie wyeksportuj czysty plik.",
+    "customFormatsLabel": "Niestandardowe formaty",
+    "saveReuse": "Zapisuj i ponownie używaj swoich reguł",
+    "saveReuseDesc": "Twórz wielokrotnego użytku formaty z szablonami kolumn i regułami. Idealne do powtarzających się zadań, takich jak eksporty Shopify.",
+    "upgradeToAdvanced": "Przejdź na Advanced",
+    "advancedRequired": "Wymagany plan Advanced.",
+    "faqLabel": "FAQ",
+    "faqTitle": "Szybkie odpowiedzi",
+    "faq1Q": "Czy przesyłasz mój CSV na serwer?",
+    "faq1A": "Naprawiacz działa w przeglądarce do parsowania i edycji. Podczas eksportu czysty CSV jest generowany lokalnie.",
+    "faq2Q": "Jakie problemy może naprawiać automatycznie?",
+    "faq2A": "Bezpieczne naprawy obejmują usuwanie zbędnych spacji, normalizację pustych komórek i stosowanie spójnego formatowania. Wszystko, co mogłoby zmienić znaczenie, jest oznaczane do sprawdzenia przed eksportem.",
+    "faq3Q": "Czym są niestandardowe formaty?",
+    "faq3A": "Niestandardowe formaty pozwalają zapisywać szablony kolumn i reguły czyszczenia wielokrotnego użytku, dzięki czemu powtarzające się zadania trwają kilka sekund. Plan Advanced jest wymagany do tworzenia formatów i zarządzania nimi.",
+    "faq4Q": "Czy mogę później anulować lub zmienić plan?",
+    "faq4A": "Tak. Możesz zaktualizować, obniżyć wersję lub anulować z Profilu w dowolnym momencie.",
+    "upgradeModalTitle": "Tylko Advanced",
+    "upgradeModalMessage": "Niestandardowe formaty są dostępne w planie Advanced. Przejdź na wyższy plan, aby tworzyć wielokrotnego użytku formaty CSV i nimi zarządzać."
   },
   "presets": {
     "title": "Predefiniowane formaty",
@@ -180,5 +217,8 @@
     "issues": "Problemy",
     "noIssues": "Nie znaleziono problemów.",
     "downloadReport": "Pobierz raport"
+  },
+  "toc": {
+    "onThisPage": "Na tej stronie"
   }
 }

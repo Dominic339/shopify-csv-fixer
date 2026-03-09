@@ -46,5 +46,7 @@ export default async function LocaleHomePage({ params }: Props) {
   const { locale } = await params;
   if (!isValidLocale(locale) || locale === DEFAULT_LOCALE) notFound();
 
-  return <HomeClient />;
+  const t = await getTranslations(locale as Locale);
+
+  return <HomeClient tHome={t.home} />;
 }

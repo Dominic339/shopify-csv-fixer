@@ -22,6 +22,10 @@ export type Translations = {
     notSignedIn: string;
     plan: string;
     active: string;
+    tools: string;
+    formatConverter: string;
+    csvMerger: string;
+    csvInspector: string;
   };
   guide: {
     whatYouLearn: string;
@@ -67,9 +71,45 @@ export type Translations = {
     platformFixers: string;
     platformFixersDesc: string;
   };
+  toc: {
+    onThisPage: string;
+  };
   home: {
     title: string;
     description: string;
+    headline: string;
+    heroSubtitle: string;
+    openEcommerceFixer: string;
+    browseTemplates: string;
+    customFormatsAdvanced: string;
+    openCustomFormats: string;
+    filesLocally: string;
+    noSignup: string;
+    cancelAnytime: string;
+    whatItDoes: string;
+    whatItDoesBullet1: string;
+    whatItDoesBullet2: string;
+    whatItDoesBullet3: string;
+    csvFixerLabel: string;
+    fixInSeconds: string;
+    fixInSecondsDesc: string;
+    customFormatsLabel: string;
+    saveReuse: string;
+    saveReuseDesc: string;
+    upgradeToAdvanced: string;
+    advancedRequired: string;
+    faqLabel: string;
+    faqTitle: string;
+    faq1Q: string;
+    faq1A: string;
+    faq2Q: string;
+    faq2A: string;
+    faq3Q: string;
+    faq3A: string;
+    faq4Q: string;
+    faq4A: string;
+    upgradeModalTitle: string;
+    upgradeModalMessage: string;
   };
   presets: {
     title: string;

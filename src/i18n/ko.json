@@ -14,7 +14,11 @@
     "upgrade": "업그레이드",
     "notSignedIn": "로그인되지 않음",
     "plan": "플랜",
-    "active": "활성"
+    "active": "활성",
+    "tools": "도구",
+    "formatConverter": "형식 변환기",
+    "csvMerger": "CSV 병합기",
+    "csvInspector": "CSV 검사기"
   },
   "guide": {
     "whatYouLearn": "배울 내용",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | CSV 파일 정리, 표준화 및 검증",
-    "description": "Shopify 및 기타 도구를 위한 지저분한 CSV 파일을 수정하고 변환하세요. 업로드하고, 안전한 문제를 자동 수정하고, 몇 초 만에 깔끔한 파일을 내보내세요."
+    "description": "Shopify 및 기타 도구를 위한 지저분한 CSV 파일을 수정하고 변환하세요. 업로드하고, 안전한 문제를 자동 수정하고, 몇 초 만에 깔끔한 파일을 내보내세요.",
+    "headline": "정리. 표준화. 검증.",
+    "heroSubtitle": "손상된 전자상거래 CSV를 빠르게 수정하세요. 안전한 문제는 자동으로 수정하고, 위험한 문제는 표시하여 깨끗한 파일을 내보내세요.",
+    "openEcommerceFixer": "전자상거래 CSV 수정기 열기",
+    "browseTemplates": "템플릿 탐색",
+    "customFormatsAdvanced": "사용자 정의 형식 (Advanced)",
+    "openCustomFormats": "사용자 정의 형식 열기",
+    "filesLocally": "로컬에서 파일 처리",
+    "noSignup": "강제 회원가입 없음",
+    "cancelAnytime": "언제든지 취소 가능",
+    "whatItDoes": "기능",
+    "whatItDoesBullet1": "전자상거래 가져오기를 방해하는 일반적인 CSV 문제 수정",
+    "whatItDoesBullet2": "공백, 대소문자, 숫자 필드 등의 서식 정규화",
+    "whatItDoesBullet3": "문제 셀을 수동으로 편집하고 깨끗한 CSV 내보내기",
+    "csvFixerLabel": "CSV 수정기",
+    "fixInSeconds": "몇 초 만에 전자상거래 CSV 파일 수정",
+    "fixInSecondsDesc": "플랫폼을 선택하고 CSV를 업로드한 후 도구가 안전한 문제를 자동으로 수정하도록 하세요. 위험한 항목을 검토한 다음 깨끗한 파일을 내보내세요.",
+    "customFormatsLabel": "사용자 정의 형식",
+    "saveReuse": "규칙 저장 및 재사용",
+    "saveReuseDesc": "열 템플릿과 규칙으로 재사용 가능한 형식을 만드세요. Shopify 내보내기와 같은 반복 작업에 적합합니다.",
+    "upgradeToAdvanced": "Advanced로 업그레이드",
+    "advancedRequired": "Advanced 플랜이 필요합니다.",
+    "faqLabel": "자주 묻는 질문",
+    "faqTitle": "빠른 답변",
+    "faq1Q": "내 CSV를 서버에 업로드하나요?",
+    "faq1A": "수정기는 핵심 파싱과 편집을 브라우저에서 실행합니다. 내보낼 때 깨끗한 CSV는 로컬에서 생성됩니다.",
+    "faq2Q": "어떤 종류의 문제를 자동으로 수정할 수 있나요?",
+    "faq2A": "안전한 수정에는 여분의 공백 제거, 빈 셀 정규화, 일관된 서식 적용이 포함됩니다. 의미를 변경할 수 있는 것은 내보내기 전에 검토를 위해 표시됩니다.",
+    "faq3Q": "사용자 정의 형식이란 무엇인가요?",
+    "faq3A": "사용자 정의 형식을 사용하면 재사용 가능한 열 템플릿과 정리 규칙을 저장하여 반복 작업이 몇 초 만에 완료됩니다. 형식 생성 및 관리에는 Advanced 플랜이 필요합니다.",
+    "faq4Q": "나중에 취소하거나 플랜을 변경할 수 있나요?",
+    "faq4A": "네. 프로필에서 언제든지 업그레이드, 다운그레이드 또는 취소할 수 있습니다.",
+    "upgradeModalTitle": "Advanced 전용",
+    "upgradeModalMessage": "사용자 정의 형식은 Advanced 플랜에서 사용할 수 있습니다. 재사용 가능한 CSV 형식을 만들고 관리하려면 업그레이드하세요."
   },
   "presets": {
     "title": "사전 설정 형식",
@@ -180,5 +217,8 @@
     "issues": "문제",
     "noIssues": "문제를 찾을 수 없습니다.",
     "downloadReport": "보고서 다운로드"
+  },
+  "toc": {
+    "onThisPage": "이 페이지에서"
   }
 }

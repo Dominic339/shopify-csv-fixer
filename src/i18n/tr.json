@@ -14,7 +14,11 @@
     "upgrade": "Yükselt",
     "notSignedIn": "Giriş yapılmadı",
     "plan": "Plan",
-    "active": "aktif"
+    "active": "aktif",
+    "tools": "Araçlar",
+    "formatConverter": "Format Dönüştürücü",
+    "csvMerger": "CSV Birleştirici",
+    "csvInspector": "CSV Denetçisi"
   },
   "guide": {
     "whatYouLearn": "Neler öğreneceksiniz",
@@ -62,7 +66,40 @@
   },
   "home": {
     "title": "StriveFormats | CSV Dosyalarını Temizle, Standartlaştır ve Doğrula",
-    "description": "Shopify ve diğer araçlar için dağınık CSV dosyalarını düzeltin ve dönüştürün. Yükleyin, güvenli sorunları otomatik olarak düzeltin ve saniyeler içinde temiz dosyaları dışa aktarın."
+    "description": "Shopify ve diğer araçlar için dağınık CSV dosyalarını düzeltin ve dönüştürün. Yükleyin, güvenli sorunları otomatik olarak düzeltin ve saniyeler içinde temiz dosyaları dışa aktarın.",
+    "headline": "Temizle. Standartlaştır. Doğrula.",
+    "heroSubtitle": "Bozuk e-ticaret CSV dosyalarını hızla düzeltin. Güvenli olanları otomatik düzeltin, riskli olanları işaretleyin ve temiz bir dosya dışa aktarın.",
+    "openEcommerceFixer": "E-Ticaret CSV Düzelticiyi Aç",
+    "browseTemplates": "Şablonlara Göz At",
+    "customFormatsAdvanced": "Özel Biçimler (Advanced)",
+    "openCustomFormats": "Özel Biçimleri Aç",
+    "filesLocally": "Dosyalar yerel olarak işlenir",
+    "noSignup": "Zorunlu kayıt yok",
+    "cancelAnytime": "İstediğiniz zaman iptal edin",
+    "whatItDoes": "Ne yapar",
+    "whatItDoesBullet1": "E-ticaret içe aktarmalarını bozan yaygın CSV sorunlarını düzeltin",
+    "whatItDoesBullet2": "Boşluk, büyük/küçük harf ve sayısal alanlar gibi biçimlendirmeyi normalleştirin",
+    "whatItDoesBullet3": "Sorunlu hücreleri manuel olarak düzenleyin ve temiz bir CSV dışa aktarın",
+    "csvFixerLabel": "CSV Düzeltici",
+    "fixInSeconds": "E-ticaret CSV dosyalarını saniyeler içinde düzeltin",
+    "fixInSecondsDesc": "Bir platform seçin, CSV'nizi yükleyin ve araçın güvenli sorunları otomatik düzeltmesine izin verin. Riskli olanları gözden geçirin, ardından temiz bir dosya dışa aktarın.",
+    "customFormatsLabel": "Özel Biçimler",
+    "saveReuse": "Kurallarınızı kaydedin ve yeniden kullanın",
+    "saveReuseDesc": "Sütun şablonları ve kurallarla yeniden kullanılabilir biçimler oluşturun. Shopify dışa aktarmaları gibi tekrarlayan görevler için mükemmel.",
+    "upgradeToAdvanced": "Advanced'a Yükselt",
+    "advancedRequired": "Advanced planı gerekli.",
+    "faqLabel": "SSS",
+    "faqTitle": "Hızlı yanıtlar",
+    "faq1Q": "CSV'mi bir sunucuya yüklüyor musunuz?",
+    "faq1A": "Düzeltici, temel ayrıştırma ve düzenlemeler için tarayıcınızda çalışır. Dışa aktardığınızda, temizlenen CSV'niz yerel olarak oluşturulur.",
+    "faq2Q": "Hangi tür sorunları otomatik olarak düzeltebilir?",
+    "faq2A": "Güvenli düzeltmeler arasında fazla boşlukları kırpma, boş hücreleri normalleştirme ve tutarlı biçimlendirme uygulama yer alır. Anlamı değiştirebilecek her şey, dışa aktarmadan önce incelemeniz için işaretlenir.",
+    "faq3Q": "Özel Biçimler nedir?",
+    "faq3A": "Özel Biçimler, tekrar eden işlerin saniyeler sürmesi için yeniden kullanılabilir sütun şablonlarını ve temizleme kurallarını kaydetmenize olanak tanır. Biçimleri oluşturmak ve yönetmek için Advanced planı gereklidir.",
+    "faq4Q": "Daha sonra iptal edebilir veya planımı değiştirebilir miyim?",
+    "faq4A": "Evet. Profilinizden istediğiniz zaman yükseltebilir, düşürebilir veya iptal edebilirsiniz.",
+    "upgradeModalTitle": "Yalnızca Advanced",
+    "upgradeModalMessage": "Özel Biçimler, Advanced planında mevcuttur. Yeniden kullanılabilir CSV biçimleri oluşturmak ve yönetmek için yükselin."
   },
   "presets": {
     "title": "Ön ayarlı formatlar",
@@ -180,5 +217,8 @@
     "issues": "Sorunlar",
     "noIssues": "Sorun bulunamadı.",
     "downloadReport": "Raporu indir"
+  },
+  "toc": {
+    "onThisPage": "Bu sayfada"
   }
 }
