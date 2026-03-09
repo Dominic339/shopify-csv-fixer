@@ -184,7 +184,7 @@ export default async function LocaleGuidesPage({ params, searchParams }: Props) 
               <Link className="rg-btn" href="/app">
                 {t.guide.openCsvFixer}
               </Link>
-              <Link className="pill-btn" href="/presets">
+              <Link className="pill-btn" href={localeHref(loc, "/presets")}>
                 {t.guides.browseTemplates}
               </Link>
             </div>
