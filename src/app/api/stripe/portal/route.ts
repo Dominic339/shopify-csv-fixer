@@ -1,7 +1,8 @@
 // src/app/api/stripe/portal/route.ts
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { getStripeSecretKey } from "@/lib/stripeEnv";
 
 export const runtime = "nodejs";
@@ -11,25 +12,52 @@ function getStripe(): Stripe | null {
   return key ? new Stripe(key) : null;
 }
 
-export async function POST() {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+/** Resolve the authenticated user from cookies OR a Bearer token in Authorization header. */
+async function resolveUser(req: Request) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  // 1. Try Bearer token from Authorization header (works on preview URLs where cookies may differ)
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (token) {
+      const client = createClient(url, anonKey);
+      const { data: { user } } = await client.auth.getUser(token);
+      if (user) return { user, client };
     }
+  }
 
-    // Check Stripe key first to give a clear error
+  // 2. Fall back to cookie-based session
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const { createServerClient: makeSC } = await import("@supabase/ssr");
+  const supabase = makeSC(url, anonKey, {
+    cookies: {
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet: any[]) {
+        try { for (const { name, value, options } of cookiesToSet) cookieStore.set(name, value, options); }
+        catch { /* Server Component */ }
+      },
+    },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
+  return { user, client: supabase };
+}
+
+export async function POST(req: Request) {
+  try {
     const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
     }
 
-    // Look up stripe_customer_id using the server client (avoids needing service role key)
-    const { data: sub, error: subErr } = await supabase
+    const { user, client } = await resolveUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const { data: sub, error: subErr } = await client
       .from("user_subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", user.id)

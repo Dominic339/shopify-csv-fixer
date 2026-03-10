@@ -2,8 +2,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { createClient } from "@/lib/supabase/browser";
 
 type SubStatus = {
   signedIn: boolean;
@@ -17,10 +18,12 @@ type Props = {
   onBillingUnavailable?: () => void;
 };
 
-async function postJson(url: string, body?: unknown) {
+async function postJson(url: string, body?: unknown, token?: string | null) {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const r = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   const j = await r.json().catch(() => ({}));
@@ -32,6 +35,14 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string>("");
   const [stripeEnabled, setStripeEnabled] = useState<boolean>(true);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAccessToken(session?.access_token ?? null);
+    });
+  }, []);
 
   const billingUnavailable = stripeEnabled === false;
 
@@ -47,7 +58,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
       return;
     }
     setBusy(plan);
-    const { ok, json } = await postJson("/api/stripe/checkout", { plan });
+    const { ok, json } = await postJson("/api/stripe/checkout", { plan }, accessToken);
     setBusy(null);
     if (!ok) {
       if (json?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
@@ -61,7 +72,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
     if (billingUnavailable) return;
     setMsg("");
     setBusy("portal");
-    const { ok, json } = await postJson("/api/stripe/portal");
+    const { ok, json } = await postJson("/api/stripe/portal", undefined, accessToken);
     setBusy(null);
     if (!ok) {
       if (json?.error === "stripe_not_configured") { setStripeEnabled(false); return; }

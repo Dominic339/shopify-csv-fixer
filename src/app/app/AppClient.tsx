@@ -1152,7 +1152,7 @@ useEffect(() => {
             })}
             {workspaceDocs.length < workspaceFileLimit && (
               <label className="flex cursor-pointer items-center gap-1 rounded-xl border border-dashed border-[var(--border)] px-3 py-1.5 text-xs text-[color:rgba(var(--muted-rgb),1)] hover:bg-[var(--surface-2)]">
-                <span>+ Add file</span>
+                <span>{tApp?.addFile ?? "+ Add file"}</span>
                 <input
                   type="file"
                   accept=".csv,text/csv"
@@ -1174,14 +1174,14 @@ useEffect(() => {
 
       <div className="mb-8 flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
+          <h1 className="text-3xl font-semibold text-[var(--text)]">{tApp?.title ?? "CSV Fixer"}</h1>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">{tApp?.subtitle ?? "Pick a format → upload → auto-fix safe issues → export."}</p>
 
           {rows.length > 0 ? (
             <div className="mt-4 space-y-3 text-base">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-[var(--text)]">
-                  Validation score: <span className="font-semibold">{validation.score}</span>/100
+                  {tApp?.validationScore ?? "Validation score"}: <span className="font-semibold">{validation.score}</span>/100
                 </span>
 
                 {importConfidence != null ? (
@@ -1214,7 +1214,7 @@ useEffect(() => {
                       </>
                     ) : (
                       <>
-                        Import confidence: <span className="font-semibold">{importConfidence}%</span>{" "}
+                        {tApp?.importConfidence ?? "Import confidence"}: <span className="font-semibold">{importConfidence}%</span>{" "}
                         <span className="text-[color:rgba(var(--muted-rgb),1)] font-normal">
                           ({Number((validation as any)?.counts?.blockingErrors ?? 0) > 0 ? "blocked" : "no blocking errors"})
                         </span>
@@ -1234,7 +1234,7 @@ useEffect(() => {
                   }
                   title={simulateImport ? "Simulation is ON. Click to turn off." : "Simulate how the target platform would treat this CSV on import."}
                 >
-                  {simulateImport ? "Simulate Import: ON" : "Simulate Import"}
+                  {simulateImport ? (tApp?.simulateImportOn ?? "Simulate Import: ON") : (tApp?.simulateImport ?? "Simulate Import")}
                 </button>
 
                 <span
@@ -1310,7 +1310,7 @@ useEffect(() => {
                         : "Strict mode requires an Advanced plan."
                     }
                   >
-                    {strictShopify ? "Strict mode: ON" : "Strict mode: OFF"}
+                    {strictShopify ? (tApp?.strictModeOn ?? "Strict mode: ON") : (tApp?.strictModeOff ?? "Strict mode: OFF")}
                     {!isAdvancedActive ? " (Advanced)" : ""}
                   </button>
                 ) : null}
@@ -1575,7 +1575,7 @@ useEffect(() => {
       </div>
 
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-        <div className="text-base font-semibold text-[var(--text)]">Format</div>
+        <div className="text-base font-semibold text-[var(--text)]">{tApp?.selectFormat ?? "Format"}</div>
         <div className="mt-4 flex flex-wrap gap-2">
           {allFormats.map((f) => {
             const active = f.id === formatId;
@@ -1601,12 +1601,12 @@ useEffect(() => {
 
       <div className="mt-7 grid gap-7 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-          <h2 className="text-xl font-semibold text-[var(--text)]">Upload CSV</h2>
+          <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.uploadCsv ?? "Upload CSV"}</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.</p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
-              Choose file
+              {tApp?.chooseFile ?? "Choose file"}
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -1633,9 +1633,9 @@ useEffect(() => {
               disabled={busy || rows.length === 0 || quotaExceeded}
               title={
                 quotaExceeded
-                  ? "Monthly export limit reached. Upgrade to continue."
+                  ? (tApp?.limitReached ?? "Monthly export limit reached. Upgrade to continue.")
                   : rows.length === 0
-                    ? "Upload a CSV first"
+                    ? (tApp?.uploadFirst ?? "Upload a CSV first")
                     : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
                       ? `${Number((validation as any)?.counts?.blockingErrors ?? 0)} blocking issue(s) — export will prompt for confirmation`
                       : "Export your fixed CSV"
@@ -1643,10 +1643,10 @@ useEffect(() => {
               type="button"
             >
               {busy
-                ? "Working..."
+                ? (tApp?.working ?? "Working...")
                 : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
-                  ? "Export anyway…"
-                  : "Export fixed CSV"}
+                  ? (tApp?.exportAnyway ?? "Export anyway…")
+                  : (tApp?.exportFixed ?? "Export fixed CSV")}
             </button>
           </div>
 
@@ -1665,7 +1665,7 @@ useEffect(() => {
         </div>
 
         <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-          <h2 className="text-xl font-semibold text-[var(--text)]">Issues</h2>
+          <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.issues ?? "Issues"}</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Click a cell in the table to edit it. Red and yellow highlight errors and warnings.</p>
 
           <div className="mt-7">

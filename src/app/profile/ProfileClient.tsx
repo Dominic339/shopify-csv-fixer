@@ -123,7 +123,13 @@ export default function ProfileClient({ tProfile, navT }: Props) {
     setMsg("");
 
     try {
-      const r = await fetch("/api/stripe/portal", { method: "POST" });
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const r = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
       const j = await safeReadJson(r);
 
@@ -165,9 +171,15 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         return;
       }
 
+      const supabase = createClient();
+      const { data: { session: sess } } = await supabase.auth.getSession();
+      const token = sess?.access_token;
       const r = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ plan }),
       });
 

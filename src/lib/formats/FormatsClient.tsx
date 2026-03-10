@@ -6,6 +6,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import type { RuleType, UserFormatColumn, UserFormatRule, UserFormatV1 } from "@/lib/formats/customUser";
 import { USER_FORMATS_STORAGE_KEY } from "@/lib/formats/customUser";
+import { createClient } from "@/lib/supabase/browser";
 
 type SubStatus = {
   signedIn: boolean;
@@ -94,16 +95,30 @@ export default function FormatsClient() {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetch("/api/subscription/status", { cache: "no-store" });
-        const j = (await r.json()) as SubStatus;
-        if (!cancelled) setSub(j);
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (!session?.user) {
+          setSub({ signedIn: false, plan: "free", status: "none" });
+          return;
+        }
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("plan,status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        const activePlan = data?.status === "active" ? data.plan : "free";
+        setSub({
+          signedIn: true,
+          plan: (activePlan ?? "free") as SubStatus["plan"],
+          status: data?.status ?? "none",
+        });
       } catch {
-        if (!cancelled) setSub(null);
+        if (!cancelled) setSub({ signedIn: false, plan: "free", status: "none" });
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const isAdvanced = useMemo(() => {

@@ -9,6 +9,7 @@ import SEOJsonLd from "@/components/SEOJsonLd";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { localeHref, DEFAULT_LOCALE, isValidLocale, type Locale } from "@/lib/i18n/locales";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/browser";
 
 type SubStatus = {
   signedIn: boolean;
@@ -34,16 +35,30 @@ export default function HomeClient({ tHome, tPricing }: Props) {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetch("/api/subscription/status", { cache: "no-store" });
-        const j = (await r.json()) as SubStatus;
-        if (!cancelled) setSub(j);
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (!session?.user) {
+          setSub({ signedIn: false, plan: "free", status: "none" });
+          return;
+        }
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("plan,status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        const activePlan = data?.status === "active" ? data.plan : "free";
+        setSub({
+          signedIn: true,
+          plan: (activePlan ?? "free") as SubStatus["plan"],
+          status: data?.status ?? "none",
+        });
       } catch {
-        if (!cancelled) setSub(null);
+        if (!cancelled) setSub({ signedIn: false, plan: "free", status: "none" });
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const isAdvanced = useMemo(() => {
