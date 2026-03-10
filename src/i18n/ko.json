@@ -52,7 +52,9 @@
     "needHelp": "파일 수정에 도움이 필요하신가요?",
     "needHelpDesc": "CSV를 업로드하고 수정기가 가져오기 전에 안전한 문제를 검증, 평가, 자동 수정하도록 하세요.",
     "browseTemplates": "템플릿 탐색",
-    "searchPlaceholder": "가이드 검색…"
+    "searchPlaceholder": "가이드 검색…",
+    "allGuides": "모든 가이드",
+    "platformsLabel": "플랫폼"
   },
   "common": {
     "openWithPreset": "프리셋으로 열기",

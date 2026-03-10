@@ -52,7 +52,9 @@
     "needHelp": "Besoin d'aide pour votre fichier ?",
     "needHelpDesc": "Téléversez votre CSV et laissez le correcteur valider, noter et corriger automatiquement les problèmes sans risque avant l'import.",
     "browseTemplates": "Parcourir les modèles",
-    "searchPlaceholder": "Rechercher des guides…"
+    "searchPlaceholder": "Rechercher des guides…",
+    "allGuides": "Tous les guides",
+    "platformsLabel": "Plateformes"
   },
   "common": {
     "openWithPreset": "Ouvrir avec le modèle",

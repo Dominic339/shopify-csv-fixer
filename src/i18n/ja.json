@@ -52,7 +52,9 @@
     "needHelp": "ファイルの修正にお困りですか？",
     "needHelpDesc": "CSVをアップロードして、修正ツールがインポート前に安全な問題を検証・採点・自動修正します。",
     "browseTemplates": "テンプレートを見る",
-    "searchPlaceholder": "ガイドを検索…"
+    "searchPlaceholder": "ガイドを検索…",
+    "allGuides": "すべてのガイド",
+    "platformsLabel": "プラットフォーム"
   },
   "common": {
     "openWithPreset": "プリセットで開く",

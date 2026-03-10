@@ -52,7 +52,9 @@
     "needHelp": "需要帮助修复您的文件？",
     "needHelpDesc": "上传您的CSV，让修复工具在导入前验证、评分并自动修复安全问题。",
     "browseTemplates": "浏览模板",
-    "searchPlaceholder": "搜索指南…"
+    "searchPlaceholder": "搜索指南…",
+    "allGuides": "所有指南",
+    "platformsLabel": "平台"
   },
   "common": {
     "openWithPreset": "使用预设打开",

@@ -52,7 +52,9 @@
     "needHelp": "Dosyanızla ilgili yardıma mı ihtiyacınız var?",
     "needHelpDesc": "CSV'nizi yükleyin, düzeltici içe aktarmadan önce güvenli sorunları doğrulasın, puanlasın ve otomatik olarak düzeltsin.",
     "browseTemplates": "Şablonlara gözat",
-    "searchPlaceholder": "Kılavuz ara…"
+    "searchPlaceholder": "Kılavuz ara…",
+    "allGuides": "Tüm rehberler",
+    "platformsLabel": "Platformlar"
   },
   "common": {
     "openWithPreset": "Önayarla aç",

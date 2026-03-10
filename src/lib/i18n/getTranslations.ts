@@ -60,6 +60,8 @@ export type Translations = {
     needHelpDesc: string;
     browseTemplates: string;
     searchPlaceholder: string;
+    allGuides: string;
+    platformsLabel: string;
   };
   common: {
     openWithPreset: string;

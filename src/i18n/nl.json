@@ -52,7 +52,9 @@
     "needHelp": "Hulp nodig bij uw bestand?",
     "needHelpDesc": "Upload uw CSV en laat de hersteller veilige problemen valideren, scoren en automatisch oplossen vóór import.",
     "browseTemplates": "Sjablonen bekijken",
-    "searchPlaceholder": "Handleidingen zoeken…"
+    "searchPlaceholder": "Handleidingen zoeken…",
+    "allGuides": "Alle gidsen",
+    "platformsLabel": "Platforms"
   },
   "common": {
     "openWithPreset": "Openen met sjabloon",

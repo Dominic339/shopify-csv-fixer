@@ -52,7 +52,9 @@
     "needHelp": "Brauchen Sie Hilfe bei Ihrer Datei?",
     "needHelpDesc": "Laden Sie Ihre CSV hoch und lassen Sie den Reparateur Probleme prüfen, bewerten und sicher automatisch beheben.",
     "browseTemplates": "Vorlagen durchsuchen",
-    "searchPlaceholder": "Anleitungen suchen…"
+    "searchPlaceholder": "Anleitungen suchen…",
+    "allGuides": "Alle Leitfäden",
+    "platformsLabel": "Plattformen"
   },
   "common": {
     "openWithPreset": "Mit Vorlage öffnen",

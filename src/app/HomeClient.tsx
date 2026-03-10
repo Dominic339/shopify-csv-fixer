@@ -7,6 +7,8 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import SEOJsonLd from "@/components/SEOJsonLd";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { localeHref, DEFAULT_LOCALE, isValidLocale, type Locale } from "@/lib/i18n/locales";
+import { usePathname } from "next/navigation";
 
 type SubStatus = {
   signedIn: boolean;
@@ -20,6 +22,11 @@ type Props = {
 };
 
 export default function HomeClient({ tHome, tPricing }: Props) {
+  const pathname = usePathname();
+  const currentLocale: Locale = (() => {
+    const segment = pathname?.split("/")?.[1] ?? "";
+    return isValidLocale(segment) ? segment : DEFAULT_LOCALE;
+  })();
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -66,7 +73,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
               <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">{tHome?.openEcommerceFixer ?? "Open Ecommerce CSV Fixer"}</span>
             </Link>
 
-            <Link href="/presets" className="rgb-btn">
+            <Link href={localeHref(currentLocale, "/presets")} className="rgb-btn">
               <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">{tHome?.browseTemplates ?? "Browse templates"}</span>
             </Link>
 

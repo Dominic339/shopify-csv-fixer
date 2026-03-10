@@ -178,7 +178,7 @@ export default function TopBar({ navT }: Props) {
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.csvFixer ?? "CSV Fixer"}</span>
           </Link>
 
-          <Link className="rgb-btn" href="/presets">
+          <Link className="rgb-btn" href={localeHref(currentLocale, "/presets")}>
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.templates ?? "Templates"}</span>
           </Link>
 

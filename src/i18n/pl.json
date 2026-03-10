@@ -52,7 +52,9 @@
     "needHelp": "Potrzebujesz pomocy z plikiem?",
     "needHelpDesc": "Prześlij plik CSV i pozwól naprawiaczowi zweryfikować, ocenić i automatycznie naprawić bezpieczne problemy przed importem.",
     "browseTemplates": "Przeglądaj szablony",
-    "searchPlaceholder": "Szukaj poradników…"
+    "searchPlaceholder": "Szukaj poradników…",
+    "allGuides": "Wszystkie przewodniki",
+    "platformsLabel": "Platformy"
   },
   "common": {
     "openWithPreset": "Otwórz z szablonem",

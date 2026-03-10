@@ -52,7 +52,9 @@
     "needHelp": "Need help fixing your file?",
     "needHelpDesc": "Upload your CSV and let the fixer validate, score, and auto-fix safe issues before you import.",
     "browseTemplates": "Browse templates",
-    "searchPlaceholder": "Search guides…"
+    "searchPlaceholder": "Search guides…",
+    "allGuides": "All guides",
+    "platformsLabel": "Platforms"
   },
   "common": {
     "openWithPreset": "Open with preset",

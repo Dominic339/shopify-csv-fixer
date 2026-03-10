@@ -68,7 +68,7 @@ export default async function LocalePresetsPage({ params }: Props) {
               <Link className="rg-btn" href={`/app?preset=${encodeURIComponent(p.formatId)}`}>
                 {t.common.openWithPreset}
               </Link>
-              <Link className="rg-btn" href={localeHref(loc, `/presets/${encodeURIComponent(p.id)}`)}>
+              <Link className="rg-btn" href={`/presets/${encodeURIComponent(p.id)}`}>
                 {t.common.viewInformation}
               </Link>
             </div>
