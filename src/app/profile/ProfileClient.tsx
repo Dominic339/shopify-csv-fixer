@@ -3,9 +3,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
-import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
+import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, isValidLocale, localeHref, type Locale } from "@/lib/i18n/locales";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import type { Translations } from "@/lib/i18n/getTranslations";
 
@@ -35,6 +35,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
   const { theme } = useTheme();
   const sp = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [busy, setBusy] = useState(false);
@@ -113,8 +114,13 @@ export default function ProfileClient({ tProfile, navT }: Props) {
     // Set the NEXT_LOCALE cookie (1 year)
     document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
     setCurrentLocale(locale);
-    // Always redirect to the main page — the cookie carries the locale preference
-    window.location.href = "/";
+    // Preserve the current route path — strip any existing locale prefix first.
+    const segments = (pathname ?? "/").split("/").filter(Boolean);
+    const firstSegment = segments[0] ?? "";
+    const routePath = isValidLocale(firstSegment)
+      ? "/" + segments.slice(1).join("/") || "/"
+      : pathname ?? "/";
+    window.location.href = localeHref(locale, routePath);
   }
 
   async function openPortal() {

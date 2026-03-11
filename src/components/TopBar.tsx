@@ -174,7 +174,7 @@ export default function TopBar({ navT }: Props) {
             {theme === "light" ? (navT?.darkMode ?? "Dark mode") : (navT?.lightMode ?? "Light mode")}
           </button>
 
-          <Link className="rgb-btn" href="/app">
+          <Link className="rgb-btn" href={localeHref(currentLocale, "/app")}>
             <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.csvFixer ?? "CSV Fixer"}</span>
           </Link>
 
@@ -200,7 +200,7 @@ export default function TopBar({ navT }: Props) {
               <div className="popover-surface absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl shadow-xl z-50">
                 <div className="p-2">
                   <Link
-                    href="/convert"
+                    href={localeHref(currentLocale, "/convert")}
                     className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setToolsOpen(false)}
                   >
@@ -208,7 +208,7 @@ export default function TopBar({ navT }: Props) {
                     <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
                   </Link>
                   <Link
-                    href="/merge"
+                    href={localeHref(currentLocale, "/merge")}
                     className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setToolsOpen(false)}
                   >
@@ -216,7 +216,7 @@ export default function TopBar({ navT }: Props) {
                     <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
                   </Link>
                   <Link
-                    href="/csv-inspector"
+                    href={localeHref(currentLocale, "/csv-inspector")}
                     className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setToolsOpen(false)}
                   >
@@ -289,7 +289,7 @@ export default function TopBar({ navT }: Props) {
                   </Link>
 
                   <Link
-                    href="/"
+                    href={localeHref(currentLocale, "/")}
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -297,7 +297,7 @@ export default function TopBar({ navT }: Props) {
                   </Link>
 
                   <Link
-                    href="/profile"
+                    href={localeHref(currentLocale, "/profile")}
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -305,7 +305,7 @@ export default function TopBar({ navT }: Props) {
                   </Link>
 
                   <Link
-                    href="/app"
+                    href={localeHref(currentLocale, "/app")}
                     className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                     onClick={() => setMenuOpen(false)}
                   >

@@ -3,14 +3,15 @@
 // Verifies:
 //  - API routes are never blocked by locale-redirect logic
 //  - Rate limiting fails open when Upstash env is absent
-//  - Locale redirect fires for / and /guides/* when NEXT_LOCALE cookie is set
+//  - Locale redirect fires for / and localisable pages when NEXT_LOCALE cookie is set
 //  - Locale redirect does NOT fire for /api/* routes
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import type { NextRequest } from "next/server";
 
-// ── Minimal NextRequest/NextResponse stubs ───────────────────────────────────
+// ── Minimal NextRequest stub ──────────────────────────────────────────────────
 
-function makeReq(pathname: string, cookies: Record<string, string> = {}): unknown {
+function makeReq(pathname: string, cookies: Record<string, string> = {}): NextRequest {
   const url = `https://example.com${pathname}`;
   const cookieHeader = Object.entries(cookies)
     .map(([k, v]) => `${k}=${v}`)
@@ -30,7 +31,18 @@ function makeReq(pathname: string, cookies: Record<string, string> = {}): unknow
     },
     headers,
     url,
-  };
+  } as unknown as NextRequest;
+}
+
+// ── isLocalisable helper (mirrors middleware logic) ───────────────────────────
+
+const LOCALISABLE_PREFIXES = ["/guides", "/app", "/convert", "/merge", "/csv-inspector", "/profile", "/presets"];
+
+function isLocalisable(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return LOCALISABLE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/"),
+  );
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -86,32 +98,46 @@ describe("middleware — API routes", () => {
 
 describe("middleware — locale redirect", () => {
   it("recognises / as a localisable path", () => {
-    const pathname = "/";
-    const isLocalisable = pathname === "/" || pathname.startsWith("/guides");
-    expect(isLocalisable).toBe(true);
+    expect(isLocalisable("/")).toBe(true);
   });
 
   it("recognises /guides/shopify as a localisable path", () => {
-    const pathname = "/guides/shopify";
-    const isLocalisable = pathname === "/" || pathname.startsWith("/guides");
-    expect(isLocalisable).toBe(true);
+    expect(isLocalisable("/guides/shopify")).toBe(true);
+  });
+
+  it("recognises /app as a localisable path", () => {
+    expect(isLocalisable("/app")).toBe(true);
+  });
+
+  it("recognises /convert as a localisable path", () => {
+    expect(isLocalisable("/convert")).toBe(true);
+  });
+
+  it("recognises /merge as a localisable path", () => {
+    expect(isLocalisable("/merge")).toBe(true);
+  });
+
+  it("recognises /csv-inspector as a localisable path", () => {
+    expect(isLocalisable("/csv-inspector")).toBe(true);
+  });
+
+  it("recognises /profile as a localisable path", () => {
+    expect(isLocalisable("/profile")).toBe(true);
+  });
+
+  it("recognises /presets as a localisable path", () => {
+    expect(isLocalisable("/presets")).toBe(true);
   });
 
   it("does NOT treat /api/health as a localisable path", () => {
-    const pathname = "/api/health";
-    const isLocalisable = pathname === "/" || pathname.startsWith("/guides");
-    expect(isLocalisable).toBe(false);
+    expect(isLocalisable("/api/health")).toBe(false);
   });
 
-  it("does NOT treat /app as a localisable path", () => {
-    const pathname = "/app";
-    const isLocalisable = pathname === "/" || pathname.startsWith("/guides");
-    expect(isLocalisable).toBe(false);
+  it("does NOT treat /login as a localisable path", () => {
+    expect(isLocalisable("/login")).toBe(false);
   });
 
-  it("does NOT treat /profile as a localisable path", () => {
-    const pathname = "/profile";
-    const isLocalisable = pathname === "/" || pathname.startsWith("/guides");
-    expect(isLocalisable).toBe(false);
+  it("does NOT treat /auth/callback as a localisable path", () => {
+    expect(isLocalisable("/auth/callback")).toBe(false);
   });
 });

@@ -145,3 +145,49 @@ test("/api/health returns a JSON response (middleware does not block API routes)
   expect(typeof body.ok).toBe("boolean");
   expect(typeof body.env).toBe("object");
 });
+
+test("locale-prefixed /es/app page renders CSV Fixer heading", async ({ page }) => {
+  await page.goto("/es/app");
+  // The Spanish locale page should render a visible h1 heading.
+  // The Spanish translation for "CSV Fixer" is also "CSV Fixer" — if the key is missing
+  // the component falls back to English, so we check for any heading on the page.
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+});
+
+test("locale-prefixed /es/convert page renders Format Converter heading", async ({ page }) => {
+  await page.goto("/es/convert");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+});
+
+test("locale-prefixed /es/guides renders guides hub with search input", async ({ page }) => {
+  await page.goto("/es/guides");
+  // Heading (Spanish translation of "CSV Import Guides")
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+  // Search input must still be present
+  await expect(page.locator('input[type="search"]')).toBeVisible();
+});
+
+test("TopBar CSV Fixer link includes locale prefix when locale cookie is set", async ({ page, context }) => {
+  // Set the NEXT_LOCALE cookie to Spanish before loading any page
+  await context.addCookies([{
+    name: "NEXT_LOCALE",
+    value: "es",
+    domain: "localhost",
+    path: "/",
+  }]);
+  await page.goto("/es/");
+  // The CSV Fixer nav link should point to /es/app, not /app
+  const csvFixerLink = page.getByRole("link", { name: /CSV Fixer/i }).first();
+  await expect(csvFixerLink).toBeVisible({ timeout: 10_000 });
+  const href = await csvFixerLink.getAttribute("href");
+  expect(href).toBe("/es/app");
+});
+
+test("/checkout?status=canceled renders cancellation message (no redirect)", async ({ page }) => {
+  await page.goto("/checkout?status=canceled");
+  // Should show cancellation text, not silently hang
+  await expect(page.getByText(/cancelled|canceled/i)).toBeVisible({ timeout: 10_000 });
+  // Should NOT redirect away since no success
+  await page.waitForTimeout(2_000);
+  expect(page.url()).toContain("/checkout");
+});

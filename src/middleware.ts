@@ -1,6 +1,6 @@
 // src/middleware.ts
 // 1. Rate-limits all /api/* routes (fail-open if Upstash not configured).
-// 2. Locale redirect for home (/) and guides (/guides/*) only.
+// 2. Locale redirect for home (/) and all localised page groups.
 //
 // NOTE: Supabase auth token refresh was intentionally removed from middleware.
 // Edge-runtime middleware cannot reliably call @supabase/ssr createServerClient
@@ -57,10 +57,13 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  // ── Locale redirect: home and guides only ───────────────────────────────
+  // ── Locale redirect: all pages with [locale] route variants ─────────────
   // Only redirect if the user has a non-English locale cookie AND the current
   // path is one of the pages that actually has a translated version.
-  const isLocalisable = pathname === "/" || pathname.startsWith("/guides");
+  const LOCALISABLE_PREFIXES = ["/guides", "/app", "/convert", "/merge", "/csv-inspector", "/profile", "/presets"];
+  const isLocalisable =
+    pathname === "/" ||
+    LOCALISABLE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + "/"));
   if (isLocalisable) {
     try {
       const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value;
@@ -78,7 +81,18 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Narrow matcher: API routes + the two page groups needing locale redirect.
-  // Everything else (app, profile, auth, convert, merge, …) is untouched.
-  matcher: ["/api/:path*", "/", "/guides/:path*"],
+  // Matcher: API routes + all page groups that have [locale] route variants.
+  matcher: [
+    "/api/:path*",
+    "/",
+    "/app",
+    "/app/:path*",
+    "/convert",
+    "/merge",
+    "/csv-inspector",
+    "/profile",
+    "/presets",
+    "/presets/:path*",
+    "/guides/:path*",
+  ],
 };
