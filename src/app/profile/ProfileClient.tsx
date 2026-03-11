@@ -64,17 +64,12 @@ export default function ProfileClient({ tProfile, navT }: Props) {
   async function load() {
     const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
 
-    // Use the browser Supabase client — same auth source as the top-right menu.
-    // getSession() reads from cookies/storage without a network round-trip, so it
-    // works regardless of whether the server-side access token is still valid.
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
       setSub(FALLBACK_SUB);
     } else {
-      // Query user_subscriptions directly (browser client uses session JWT; RLS
-      // allows the authenticated user to read their own row).
       const { data } = await supabase
         .from("user_subscriptions")
         .select("plan,status,current_period_end,stripe_customer_id")
@@ -91,7 +86,6 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       });
     }
 
-    // Stripe availability check (separate concern — keep as API call)
     try {
       const statusRes = await fetch("/api/stripe/status", { cache: "no-store" });
       const text = await statusRes.text();
@@ -103,7 +97,6 @@ export default function ProfileClient({ tProfile, navT }: Props) {
   }
 
   useEffect(() => {
-    // Fallback ensures the UI never stays stuck on "Loading..."
     const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
     load().catch(() => { setSub(FALLBACK_SUB); setStripeEnabled(true); });
   }, []);
@@ -113,15 +106,16 @@ export default function ProfileClient({ tProfile, navT }: Props) {
   function handleLocaleChange(locale: Locale) {
     if (localeBusy) return;
     setLocaleBusy(true);
-    // Set the NEXT_LOCALE cookie (1 year)
+
     document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
     setCurrentLocale(locale);
-    // Preserve the current route path — strip any existing locale prefix first.
+
     const segments = (pathname ?? "/").split("/").filter(Boolean);
     const firstSegment = segments[0] ?? "";
     const routePath = isValidLocale(firstSegment)
       ? "/" + segments.slice(1).join("/") || "/"
       : pathname ?? "/";
+
     window.location.href = localeHref(locale, routePath);
   }
 
@@ -134,6 +128,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
+
       const r = await fetch("/api/stripe/portal", {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -143,9 +138,11 @@ export default function ProfileClient({ tProfile, navT }: Props) {
 
       if (!r.ok) {
         if (j?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
+
         const errMsg =
           j?.error ||
           `Billing portal failed (${r.status}). Check STRIPE_SECRET_KEY + NEXT_PUBLIC_SITE_URL env vars.`;
+
         const details = j?.details ? ` ${j.details}` : "";
         setMsg(errMsg + details);
         return;
@@ -182,6 +179,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       const supabase = createClient();
       const { data: { session: sess } } = await supabase.auth.getSession();
       const token = sess?.access_token;
+
       const r = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
@@ -223,117 +221,19 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         </div>
       ) : null}
 
-      <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        {sub ? (
-          <>
-            <div className="text-sm text-[var(--muted)]">{tProfile?.subscription ?? "Subscription"}</div>
-            <div className="mt-2 space-y-2 text-sm">
-              <div>
-                {tProfile?.signedIn ?? "Signed in"}: <span className="font-semibold">{sub.signedIn ? (tProfile?.yes ?? "Yes") : (tProfile?.no ?? "No")}</span>
-              </div>
-              <div>
-                {navT?.plan ?? "Plan"}: <span className="font-semibold">{sub.plan}</span>
-              </div>
-              <div>
-                {tProfile?.status ?? "Status"}: <span className="font-semibold">{sub.status}</span>
-              </div>
-              <div>
-                {tProfile?.periodEnd ?? "Period end"}: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              {sub.signedIn && sub.status === "active" ? (
-                sub.stripeCustomerId ? (
-                  <button
-                    className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                    onClick={openPortal}
-                    disabled={busy || billingUnavailable}
-                    type="button"
-                  >
-                    {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.manageStripe ?? "Manage in Stripe (upgrade/cancel)")}
-                  </button>
-                ) : (
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--muted)]">
-                    Billing portal syncing… please check back in a moment.
-                  </div>
-                )
-              ) : null}
-
-              {sub.signedIn && sub.status !== "active" ? (
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
-                    onClick={() => startCheckout("basic")}
-                    disabled={busy || billingUnavailable}
-                    type="button"
-                  >
-                    {tProfile?.upgradeToBasic ?? "Upgrade to Basic"}
-                  </button>
-
-                  <button
-                    className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
-                    onClick={() => startCheckout("advanced")}
-                    disabled={busy || billingUnavailable}
-                    type="button"
-                  >
-                    {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
-                  </button>
-                </div>
-              ) : null}
-
-              {sub.signedIn && sub.status === "active" && sub.plan === "basic" ? (
-                <button
-                  className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
-                  onClick={() => startCheckout("advanced")}
-                  disabled={busy || billingUnavailable}
-                  type="button"
-                >
-                  {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
-                </button>
-              ) : null}
-
-              {!sub.signedIn ? (
-                <Link
-                  href={
-                    upgradeIntent
-                      ? `/login?redirect=${encodeURIComponent(
-                          `/profile?upgrade=${upgradeIntent}`
-                        )}&msg=${encodeURIComponent("Sign in to upgrade your plan.")}`
-                      : "/login?redirect=%2Fprofile"
-                  }
-                  className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
-                >
-                  {navT?.signIn ?? "Sign in"}
-                </Link>
-              ) : null}
-
-              <Link
-                href="/ecommerce-csv-fixer"
-                className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
-              >
-                {tProfile?.backToEcommerce ?? "Back to Ecommerce"}
-              </Link>
-            </div>
-
-            {upgradeIntent ? (
-              <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm">
-                {tProfile?.youreSignedIn ?? "You’re signed in. Choose a plan above to upgrade."}
-              </div>
-            ) : null}
-
-            {msg ? <div className="mt-3 text-sm text-[var(--muted)]">{msg}</div> : null}
-          </>
-        ) : (
-          <div className="text-sm text-[var(--muted)]">{tProfile?.loading ?? "Loading…"}</div>
-        )}
-      </div>
-      {/* Language selector */}
+      {/* LANGUAGE SECTION */}
       <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="text-sm font-semibold">{tProfile?.language ?? "Language"}</h2>
+
         <p className="mt-1 text-xs text-[var(--muted)]">
           {tProfile?.languageDesc ?? "Choose your preferred display language. This overrides browser detection."}
         </p>
+
+        {/* BETA NOTE */}
+        <p className="mt-2 text-xs text-amber-300">
+          Language support is currently in beta. Some pages and tool content may still appear in English while localization is being completed.
+        </p>
+
         <div className="mt-4">
           <select
             className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -341,7 +241,6 @@ export default function ProfileClient({ tProfile, navT }: Props) {
             value={currentLocale}
             disabled={localeBusy}
             onChange={(e) => handleLocaleChange(e.target.value as Locale)}
-            aria-label="Select language"
           >
             {LOCALES.map((locale) => (
               <option key={locale} value={locale}>
@@ -349,6 +248,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
               </option>
             ))}
           </select>
+
           <p className="mt-2 text-xs text-[var(--muted)]">
             {tProfile?.current ?? "Current"}: <span className="font-semibold">{LOCALE_NAMES[currentLocale]}</span>
           </p>
