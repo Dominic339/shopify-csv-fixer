@@ -130,3 +130,18 @@ test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sh
   // Prevent it next time section
   await expect(page.getByRole("heading", { name: /Prevent it next time/i })).toBeVisible();
 });
+
+test("/api/health returns a JSON response (middleware does not block API routes)", async ({ request }) => {
+  const res = await request.get("/api/health");
+  // The health route may return 200 or 500 depending on env configuration,
+  // but it must NOT fail with MIDDLEWARE_INVOCATION_FAILED (502/503 from middleware crash).
+  // Any successful JSON response proves middleware is not blocking the route.
+  expect(res.status()).not.toBe(502);
+  expect(res.status()).not.toBe(503);
+  const contentType = res.headers()["content-type"] ?? "";
+  expect(contentType).toContain("application/json");
+  const body = await res.json();
+  // Body must have the expected shape from the health route handler.
+  expect(typeof body.ok).toBe("boolean");
+  expect(typeof body.env).toBe("object");
+});
