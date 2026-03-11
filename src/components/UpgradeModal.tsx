@@ -11,8 +11,13 @@ export function UpgradeModal(props: {
   // Which plan the CTA should focus on.
   upgradePlan?: "basic" | "advanced";
   onClose: () => void;
+  // Optional translated labels
+  labelClose?: string;
+  labelViewPricing?: string;
+  labelGoToAccount?: string;
+  labelSignInToUpgrade?: string;
 }) {
-  const { open, onClose, title, message, signedIn, upgradePlan } = props;
+  const { open, onClose, title, message, signedIn, upgradePlan, labelClose, labelViewPricing, labelGoToAccount, labelSignInToUpgrade } = props;
 
   useEffect(() => {
     if (!open) return;
@@ -58,7 +63,7 @@ export function UpgradeModal(props: {
             onClick={onClose}
             aria-label="Close"
           >
-            Close
+            {labelClose ?? "Close"}
           </button>
         </div>
 
@@ -73,11 +78,11 @@ export function UpgradeModal(props: {
             }}
             className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
           >
-            View pricing
+            {labelViewPricing ?? "View pricing"}
           </a>
 
           <a href={signedIn ? redirect : loginHref} className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]">
-            {signedIn ? "Go to account to upgrade" : "Sign in to upgrade"}
+            {signedIn ? (labelGoToAccount ?? "Go to account to upgrade") : (labelSignInToUpgrade ?? "Sign in to upgrade")}
           </a>
         </div>
       </div>

@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import JsonLd from "@/components/JsonLd";
+import FAQJsonLd from "@/components/FAQJsonLd";
 
 export const metadata = {
-  title: "Shopify CSV Fixer | StriveFormats",
+  title: "Shopify CSV Fixer | Fix Shopify CSV Import Errors | StriveFormats",
   description:
     "Fix Shopify product CSV import errors before they happen. StriveFormats validates the official Shopify products template, auto-fixes safe issues, and highlights blockers for manual edits.",
   alternates: { canonical: "/shopify-csv-fixer" },
@@ -17,9 +18,27 @@ export default function ShopifyCsvFixerPage() {
     description: metadata.description,
   };
 
+  const faqItems = [
+    {
+      question: "Does StriveFormats guarantee a perfect import?",
+      answer:
+        "It can't guarantee your business data is correct, but it does aggressively surface Shopify's structural blockers and applies safe auto-fixes. If you clear the remaining blockers, imports are dramatically more reliable.",
+    },
+    {
+      question: "Will it delete rows?",
+      answer: "No. It keeps your rows and focuses on normalizing values and highlighting issues.",
+    },
+    {
+      question: "Why do I see so many issues on big files?",
+      answer:
+        "A single structural problem (like missing option columns for variants) can apply to many rows. Fix the root blocker and the issue count drops quickly.",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd data={jsonLd} />
+      <FAQJsonLd items={faqItems} />
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

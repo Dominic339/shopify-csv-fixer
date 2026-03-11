@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import JsonLd from "@/components/JsonLd";
+import FAQJsonLd from "@/components/FAQJsonLd";
 
 export const metadata = {
-  title: "eBay CSV Fixer | StriveFormats",
+  title: "eBay CSV Fixer | Fix eBay File Exchange CSV Errors | StriveFormats",
   description:
     "Fix eBay listing CSV files before bulk upload. StriveFormats validates eBay File Exchange fields—title length, condition codes, price formatting, duration values, image URLs—and auto-fixes safe issues.",
   alternates: { canonical: "/ebay-csv-fixer" },
@@ -17,9 +18,28 @@ export default function EbayCsvFixerPage() {
     description: metadata.description,
   };
 
+  const faqItems = [
+    {
+      question: "What is eBay File Exchange?",
+      answer:
+        "eBay File Exchange is eBay's bulk listing management tool. It accepts CSV files with specific column names and values to create, revise, or end listings in bulk. This fixer validates your CSV against those requirements before you upload.",
+    },
+    {
+      question: "What ConditionIDs are valid?",
+      answer:
+        "Common codes: 1000 (New), 2500 (Like New), 3000 (Good), 4000 (Acceptable), 5000 (For parts or not working). The fixer flags unrecognized IDs so you can correct them before upload.",
+    },
+    {
+      question: "Will it fix my titles automatically?",
+      answer:
+        "No. Shortening a title might remove important keywords, so the fixer flags over-limit titles for you to edit manually rather than truncating them automatically.",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd data={jsonLd} />
+      <FAQJsonLd items={faqItems} />
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

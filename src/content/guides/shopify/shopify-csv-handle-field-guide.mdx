@@ -1,0 +1,138 @@
+---
+title: "Shopify CSV Handle Field Guide"
+description: "Everything you need to know about the Handle field in Shopify's product CSV — what it does, the rules for valid handles, how it groups variants, and how to fix handle errors."
+keywords: ["shopify csv handle field", "shopify handle", "shopify handle csv", "shopify product handle", "shopify handle variants", "shopify handle rules", "shopify csv handle errors"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "What the Shopify Handle field does and why it's the most important column"
+  - "The exact rules for a valid Shopify handle"
+  - "How the Handle groups variant rows into one product"
+  - "How to fix invalid handles and handle conflicts"
+  - "How changing a handle affects your existing product URLs"
+bestFor: "Shopify merchants dealing with variant grouping errors, duplicate products, or handle-related import failures"
+timeToComplete: "10 minutes"
+---
+
+## What Is the Shopify Handle?
+
+The Handle is the product's unique identifier in Shopify's product CSV. It serves two purposes:
+
+1. **Groups variant rows** — all rows for the same product must share the same Handle. Shopify reads the Handle column to know which rows belong together.
+2. **Sets the product URL** — the Handle becomes the URL slug: `yourstore.com/products/<handle>`
+
+The Handle is the most important column in the Shopify CSV. Handle errors cause more import failures than any other field.
+
+---
+
+## Rules for a Valid Handle
+
+A valid Shopify handle must:
+
+- Be **unique** across all products in your store (including existing products)
+- Contain only **lowercase letters, numbers, and hyphens**
+- Have **no spaces** (use hyphens instead)
+- Have **no special characters**: no `&`, `%`, `?`, `/`, `@`, or Unicode characters
+- Be **non-empty** on every row — blank handles are not allowed
+
+| Valid | Invalid | Reason |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | Uppercase and spaces |
+| `product-123` | `product/123` | Contains slash |
+| `mens-running-shoes` | `men's-running-shoes` | Contains apostrophe |
+| `widget-v2` | `widget_v2` | Contains underscore (technically allowed but not recommended) |
+| `shirt-sm` | `` | Blank (not allowed) |
+
+---
+
+## How the Handle Groups Variants
+
+In Shopify's CSV format, a product with multiple variants occupies multiple rows. All rows for the same product must share the same Handle:
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+When Shopify reads this file:
+- It sees 3 rows with Handle `blue-wallet`
+- It creates one product called "Blue Wallet"
+- It creates 3 variants: Small ($29.99), Medium ($31.99), Large ($31.99)
+- Title, Body HTML, Vendor, and other product-level fields are taken from the first row
+
+**First row (parent row):** contains product-level data (Title, Body HTML, Image Src, Vendor, etc.)
+**Subsequent rows (variant rows):** have the same Handle, blank Title, and only variant-specific data
+
+---
+
+## Common Handle Errors
+
+### Two products with the same Handle
+
+**Symptom:** One product's data overwrites another product during import, or variants from different products merge into one product.
+
+**Cause:** Two different products share the same Handle in your CSV.
+
+**Fix:** Make every product's Handle unique. If you have products with similar names, add a differentiator:
+
+- `blue-wallet` and `red-wallet` (instead of both being `wallet`)
+- `mens-shirt-v1` and `mens-shirt-v2`
+
+### Handle doesn't match an existing product (unintentional update)
+
+**Symptom:** Import creates a new duplicate product instead of updating an existing one.
+
+**Cause:** The Handle in your CSV doesn't exactly match the Handle of the existing Shopify product (different case, different spelling, added/removed hyphen).
+
+**Fix:** Export the current products from Shopify first. The export file contains the exact current Handles. Use those Handles in your import file.
+
+### Spaces or uppercase in Handle
+
+**Symptom:** Import fails with a handle validation error, or Shopify auto-converts the handle (creating an unexpected URL).
+
+**Fix:** Shopify auto-lowercases handles and replaces spaces with hyphens in some contexts, but for CSV imports it's best to pre-format handles yourself to avoid unpredictable conversions.
+
+**Python — normalize handles:**
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### Variant rows with different Handles
+
+**Symptom:** Shopify imports each variant row as a separate product (each with 0 or 1 variants).
+
+**Cause:** The Handle value is different on rows that should belong to the same product — often a typo or extra space.
+
+**Fix:** Sort your CSV by Handle and scan for rows that should share a Handle but don't. A trailing space (`blue-wallet ` vs `blue-wallet`) is the most common culprit.
+
+---
+
+## Handle and SEO: Why Changing a Handle Matters
+
+The Handle becomes the product URL: `yourstore.com/products/<handle>`. Changing a Handle after products are live has SEO consequences:
+
+- The old URL returns a 404 (unless you set up a redirect)
+- Any links or bookmarks to the old URL break
+- Search engines that indexed the old URL lose the ranking signal
+
+**Best practice:** Set your Handles correctly the first time. If you must change a Handle on an existing product, set up a URL redirect in Shopify (Online Store → Navigation → URL Redirects) immediately after importing.
+
+---
+
+## Fix This Automatically with StriveFormats
+
+StriveFormats validates every Handle in your file — checking for blank values, invalid characters, and duplicate Handles within the file. It flags rows where the Handle grouping doesn't follow Shopify's variant structure rules.
+
+[Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)

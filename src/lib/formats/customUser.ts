@@ -2,6 +2,7 @@
 import type { CsvFormat, CsvFixResult, CsvIssue, CsvRow } from "./types";
 
 export const USER_FORMATS_STORAGE_KEY = "striveformats_user_formats_v1";
+const _LEGACY_FORMATS_KEY = "csnest_user_formats_v1";
 
 export type RuleType =
   | "trim"
@@ -164,6 +165,14 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
 export function loadUserFormatsFromStorage(): UserFormatV1[] {
   if (typeof window === "undefined") return [];
   try {
+    // Migrate data from the legacy key (CSNest → StriveFormats rename) if new key is empty.
+    if (!window.localStorage.getItem(USER_FORMATS_STORAGE_KEY)) {
+      const legacy = window.localStorage.getItem(_LEGACY_FORMATS_KEY);
+      if (legacy) {
+        window.localStorage.setItem(USER_FORMATS_STORAGE_KEY, legacy);
+        window.localStorage.removeItem(_LEGACY_FORMATS_KEY);
+      }
+    }
     const raw = window.localStorage.getItem(USER_FORMATS_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);

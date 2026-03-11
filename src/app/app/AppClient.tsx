@@ -3,8 +3,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
+import { createClient } from "@/lib/supabase/browser";
+import type { Translations } from "@/lib/i18n/getTranslations";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
 
 import { getShopifyVariantSignature, resolveShopifyVariantColumns } from "@/lib/shopifyVariantSignature";
@@ -55,6 +59,14 @@ type UiIssue = {
   details?: Record<string, unknown>;
 };
 
+// Workspace types (multi-file mode)
+type WorkspaceDoc = {
+  id: string;
+  name: string;
+  text: string;
+};
+type DocStatus = "pending" | "clean" | "warnings" | "errors";
+
 function downloadText(filename: string, text: string) {
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -72,7 +84,17 @@ function safeBaseName(name: string | null) {
   return base.replace(/[^\w\d._-]+/g, "_");
 }
 
-export default function AppClient() {
+type AppClientProps = {
+  tApp?: Translations["app"];
+};
+
+export default function AppClient({ tApp }: AppClientProps) {
+  const pathname = usePathname();
+  const currentLocale: Locale = useMemo(() => {
+    const seg = pathname?.split("/")?.[1] ?? "";
+    return isValidLocale(seg) ? seg : DEFAULT_LOCALE;
+  }, [pathname]);
+
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
@@ -116,6 +138,11 @@ export default function AppClient() {
   const [editing, setEditing] = useState<{ rowIndex: number; col: string; value: string } | null>(null);
 
   const [lastUploadedText, setLastUploadedText] = useState<string | null>(null);
+
+  // Workspace state (multi-file mode, paid plans only)
+  const [workspaceDocs, setWorkspaceDocs] = useState<WorkspaceDoc[]>([]);
+  const [activeWorkspaceDocId, setActiveWorkspaceDocId] = useState<string | null>(null);
+  const [docStatuses, setDocStatuses] = useState<Map<string, DocStatus>>(new Map());
 
   // Initialize the selected format from the URL query param if present.
   // This prevents the "keep valid" fallback from snapping to the first format
@@ -225,11 +252,30 @@ export default function AppClient() {
   );
 
   async function refreshQuotaAndPlan() {
+    const FALLBACK_SUB = { ok: true, plan: "free" as const, status: "none", signedIn: false };
     try {
-      const [q, s] = await Promise.all([
+      const supabase = createClient();
+      // Run quota fetch and session lookup in parallel; subscription query depends on session.
+      const [q, { data: { session } }] = await Promise.all([
         getQuota(),
-        fetch("/api/subscription/status", { cache: "no-store" }).then((r) => r.json()),
+        supabase.auth.getSession(),
       ]);
+
+      let s: SubStatus = FALLBACK_SUB;
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("plan,status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        const activePlan = data?.status === "active" ? data.plan : "free";
+        s = {
+          ok: true,
+          plan: (activePlan ?? "free") as "free" | "basic" | "advanced",
+          status: data?.status ?? "none",
+          signedIn: true,
+        };
+      }
 
       const plan = ((s?.plan ?? q?.plan ?? "free") as "free" | "basic" | "advanced") ?? "free";
       const limits = getPlanLimits(plan) as PlanLimits;
@@ -237,8 +283,8 @@ export default function AppClient() {
       setQuota(q);
       setSubStatus(s);
       setPlanLimits(limits);
-    } catch (e: any) {
-      setErrorBanner(e?.message ?? "Failed to refresh quota/plan");
+    } catch {
+      // Silently fail — quota/plan remain at defaults
     }
   }
 
@@ -278,6 +324,26 @@ export default function AppClient() {
     if (planLimits?.unlimited) return true;
     return false;
   }, [subStatus, quota, planLimits]);
+
+  // Workspace file limit based on plan
+  const workspaceFileLimit = useMemo(() => {
+    const status = (subStatus?.status ?? "").toLowerCase();
+    const plan = subStatus?.plan ?? "free";
+    if (plan === "advanced" && status === "active") return 20;
+    if (plan === "basic" && status === "active") return 5;
+    return 1;
+  }, [subStatus]);
+  const workspaceEnabled = workspaceFileLimit > 1;
+
+  // Track doc status based on current issues when active doc changes
+  useEffect(() => {
+    if (!activeWorkspaceDocId) return;
+    const hasErrors = (issues as any[]).some((i) => (i?.severity ?? i?.level) === "error");
+    const hasWarnings = (issues as any[]).some((i) => (i?.severity ?? i?.level) === "warning");
+    const status: DocStatus = hasErrors ? "errors" : hasWarnings ? "warnings" : issues.length ? "warnings" : "clean";
+    setDocStatuses((prev) => new Map(prev).set(activeWorkspaceDocId, status));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWorkspaceDocId, issues]);
 
   // ✅ FIXED: preserve Issue.details without @ts-expect-error
   const issuesForTable: CsvIssue[] = useMemo(() => {
@@ -918,6 +984,38 @@ useEffect(() => {
     }
   }
 
+  // Workspace: add a file as a workspace document and switch to it
+  async function handleWorkspaceFile(file: File) {
+    if (!workspaceEnabled) {
+      return handleFile(file);
+    }
+    const id = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const text = await file.text();
+    const doc: WorkspaceDoc = { id, name: file.name, text };
+
+    setWorkspaceDocs((prev) => {
+      const capped = prev.length >= workspaceFileLimit ? prev.slice(0, workspaceFileLimit - 1) : prev;
+      return [...capped, doc];
+    });
+    setActiveWorkspaceDocId(id);
+    setFileName(file.name);
+    setLastUploadedText(text);
+    if (activeFormat) {
+      await runFormatOnText(activeFormat, text, file.name);
+    }
+  }
+
+  // Workspace: switch to an existing workspace document
+  async function switchWorkspaceDoc(doc: WorkspaceDoc) {
+    if (doc.id === activeWorkspaceDocId) return;
+    setActiveWorkspaceDocId(doc.id);
+    setFileName(doc.name);
+    setLastUploadedText(doc.text);
+    if (activeFormat) {
+      await runFormatOnText(activeFormat, doc.text, doc.name);
+    }
+  }
+
   // Re-run when format changes
   useEffect(() => {
     setIssues([]);
@@ -1032,16 +1130,66 @@ useEffect(() => {
         </div>
       ) : null}
 
+      {/* Workspace panel — paid plans only */}
+      {workspaceEnabled && workspaceDocs.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)] pr-2">Workspace</span>
+            {workspaceDocs.map((doc) => {
+              const status = docStatuses.get(doc.id) ?? "pending";
+              const dot =
+                status === "errors" ? "bg-red-500" :
+                status === "warnings" ? "bg-yellow-400" :
+                status === "clean" ? "bg-green-500" : "bg-[var(--border)]";
+              return (
+                <button
+                  key={doc.id}
+                  type="button"
+                  className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm border transition-colors ${
+                    doc.id === activeWorkspaceDocId
+                      ? "border-[color:rgba(var(--accent-rgb),0.5)] bg-[color:rgba(var(--accent-rgb),0.1)] font-semibold text-[var(--text)]"
+                      : "border-[var(--border)] bg-[var(--surface-2)] text-[color:rgba(var(--muted-rgb),1)] hover:bg-[var(--surface)]"
+                  }`}
+                  onClick={() => switchWorkspaceDoc(doc)}
+                  title={doc.name}
+                >
+                  <span className={`h-2 w-2 rounded-full ${dot} shrink-0`} />
+                  <span className="max-w-[160px] truncate">{doc.name}</span>
+                </button>
+              );
+            })}
+            {workspaceDocs.length < workspaceFileLimit && (
+              <label className="flex cursor-pointer items-center gap-1 rounded-xl border border-dashed border-[var(--border)] px-3 py-1.5 text-xs text-[color:rgba(var(--muted-rgb),1)] hover:bg-[var(--surface-2)]">
+                <span>{tApp?.addFile ?? "+ Add file"}</span>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (f) await handleWorkspaceFile(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
+            <span className="ml-auto text-xs text-[color:rgba(var(--muted-rgb),1)]">
+              {workspaceDocs.length}/{workspaceFileLimit} files
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8 flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-semibold text-[var(--text)]">CSV Fixer</h1>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Pick a format → upload → auto-fix safe issues → export.</p>
+          <h1 className="text-3xl font-semibold text-[var(--text)]">{tApp?.title ?? "CSV Fixer"}</h1>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">{tApp?.subtitle ?? "Pick a format → upload → auto-fix safe issues → export."}</p>
 
           {rows.length > 0 ? (
             <div className="mt-4 space-y-3 text-base">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-[var(--text)]">
-                  Validation score: <span className="font-semibold">{validation.score}</span>/100
+                  {tApp?.validationScore ?? "Validation score"}: <span className="font-semibold">{validation.score}</span>/100
                 </span>
 
                 {importConfidence != null ? (
@@ -1074,7 +1222,7 @@ useEffect(() => {
                       </>
                     ) : (
                       <>
-                        Import confidence: <span className="font-semibold">{importConfidence}%</span>{" "}
+                        {tApp?.importConfidence ?? "Import confidence"}: <span className="font-semibold">{importConfidence}%</span>{" "}
                         <span className="text-[color:rgba(var(--muted-rgb),1)] font-normal">
                           ({Number((validation as any)?.counts?.blockingErrors ?? 0) > 0 ? "blocked" : "no blocking errors"})
                         </span>
@@ -1094,7 +1242,7 @@ useEffect(() => {
                   }
                   title={simulateImport ? "Simulation is ON. Click to turn off." : "Simulate how the target platform would treat this CSV on import."}
                 >
-                  {simulateImport ? "Simulate Import: ON" : "Simulate Import"}
+                  {simulateImport ? (tApp?.simulateImportOn ?? "Simulate Import: ON") : (tApp?.simulateImport ?? "Simulate Import")}
                 </button>
 
                 <span
@@ -1170,7 +1318,7 @@ useEffect(() => {
                         : "Strict mode requires an Advanced plan."
                     }
                   >
-                    {strictShopify ? "Strict mode: ON" : "Strict mode: OFF"}
+                    {strictShopify ? (tApp?.strictModeOn ?? "Strict mode: ON") : (tApp?.strictModeOff ?? "Strict mode: OFF")}
                     {!isAdvancedActive ? " (Advanced)" : ""}
                   </button>
                 ) : null}
@@ -1426,8 +1574,8 @@ useEffect(() => {
         </div>
 
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-base text-[var(--text)]">
-          <div className="font-medium">Monthly exports</div>
-          {isUnlimited ? <div>Unlimited</div> : <div>{used}/{limit} used • {left} left</div>}
+          <div className="font-medium">{tApp?.monthlyExports ?? "Monthly exports"}</div>
+          {isUnlimited ? <div>{tApp?.unlimited ?? "Unlimited"}</div> : <div>{used}/{limit} {tApp?.used ?? "used"} • {left} {tApp?.left ?? "left"}</div>}
           <div className="mt-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
             Plan: {subStatus?.plan ?? "free"} ({subStatus?.status ?? "unknown"})
           </div>
@@ -1435,7 +1583,7 @@ useEffect(() => {
       </div>
 
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-        <div className="text-base font-semibold text-[var(--text)]">Format</div>
+        <div className="text-base font-semibold text-[var(--text)]">{tApp?.selectFormat ?? "Format"}</div>
         <div className="mt-4 flex flex-wrap gap-2">
           {allFormats.map((f) => {
             const active = f.id === formatId;
@@ -1461,12 +1609,12 @@ useEffect(() => {
 
       <div className="mt-7 grid gap-7 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-          <h2 className="text-xl font-semibold text-[var(--text)]">Upload CSV</h2>
+          <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.uploadCsv ?? "Upload CSV"}</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.</p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
-              Choose file
+              {tApp?.chooseFile ?? "Choose file"}
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -1493,9 +1641,9 @@ useEffect(() => {
               disabled={busy || rows.length === 0 || quotaExceeded}
               title={
                 quotaExceeded
-                  ? "Monthly export limit reached. Upgrade to continue."
+                  ? (tApp?.limitReached ?? "Monthly export limit reached. Upgrade to continue.")
                   : rows.length === 0
-                    ? "Upload a CSV first"
+                    ? (tApp?.uploadFirst ?? "Upload a CSV first")
                     : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
                       ? `${Number((validation as any)?.counts?.blockingErrors ?? 0)} blocking issue(s) — export will prompt for confirmation`
                       : "Export your fixed CSV"
@@ -1503,10 +1651,10 @@ useEffect(() => {
               type="button"
             >
               {busy
-                ? "Working..."
+                ? (tApp?.working ?? "Working...")
                 : Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
-                  ? "Export anyway…"
-                  : "Export fixed CSV"}
+                  ? (tApp?.exportAnyway ?? "Export anyway…")
+                  : (tApp?.exportFixed ?? "Export fixed CSV")}
             </button>
           </div>
 
@@ -1525,7 +1673,7 @@ useEffect(() => {
         </div>
 
         <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-          <h2 className="text-xl font-semibold text-[var(--text)]">Issues</h2>
+          <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.issues ?? "Issues"}</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Click a cell in the table to edit it. Red and yellow highlight errors and warnings.</p>
 
           <div className="mt-7">
@@ -1654,9 +1802,29 @@ useEffect(() => {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-        <Link href="/presets" className="hover:underline">Preset Formats</Link>
-        <Link href="/#pricing" className="hover:underline">Pricing</Link>
+        <Link href={localeHref(currentLocale, "/presets")} className="hover:underline">{tApp?.presetFormats ?? "Preset Formats"}</Link>
+        <Link href={`${localeHref(currentLocale, "/")}#pricing`} className="hover:underline">{tApp?.pricing ?? "Pricing"}</Link>
+        <Link href={localeHref(currentLocale, "/convert")} className="hover:underline">{tApp?.formatConverter ?? "Format Converter"}</Link>
+        <Link href={localeHref(currentLocale, "/merge")} className="hover:underline">{tApp?.csvMerger ?? "CSV Merger"}</Link>
+        <Link href={localeHref(currentLocale, "/csv-inspector")} className="hover:underline">{tApp?.csvInspector ?? "CSV Inspector"}</Link>
       </div>
+      {workspaceEnabled && workspaceDocs.length === 0 && fileName && (
+        <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+          <button
+            type="button"
+            className="underline hover:no-underline"
+            onClick={async () => {
+              if (!lastUploadedText || !fileName) return;
+              const id = `doc_${Date.now()}`;
+              setWorkspaceDocs([{ id, name: fileName, text: lastUploadedText }]);
+              setActiveWorkspaceDocId(id);
+            }}
+          >
+            Add current file to workspace
+          </button>
+          {" "}to work with multiple files (up to {workspaceFileLimit}).
+        </div>
+      )}
     </div>
   );
 }

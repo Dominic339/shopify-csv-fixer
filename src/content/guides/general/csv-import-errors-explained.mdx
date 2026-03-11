@@ -1,0 +1,149 @@
+---
+title: "CSV Import Errors Explained"
+description: "A plain-English breakdown of the most common CSV import error messages across Shopify, WooCommerce, Etsy, eBay, and Amazon — and how to fix each one."
+keywords: ["csv import errors explained", "csv import error messages", "csv import failed", "csv upload error", "ecommerce csv errors", "fix csv import", "csv import troubleshooting"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "What each common CSV import error message actually means"
+  - "The difference between blocking errors and warnings"
+  - "How to read platform error reports to find the root cause"
+  - "Which errors auto-fix and which require manual edits"
+  - "How to prevent the same errors from recurring"
+bestFor: "Anyone who received a CSV import error and wants to understand what went wrong before re-uploading"
+timeToComplete: "10 minutes"
+---
+
+## Why CSV Imports Fail
+
+Every ecommerce platform runs your CSV through a validation pipeline before accepting it. The pipeline checks structure (headers, column count), data types (numbers, booleans, required fields), business rules (valid category codes, price ranges), and encoding. When any check fails, the import either stops completely or imports a subset of rows while skipping the rest.
+
+Understanding error messages is the fastest path to a clean import. This guide explains the most common ones.
+
+---
+
+## Structural Errors
+
+These errors mean the shape of the file is wrong — before the platform even looks at your data.
+
+### "Missing required column" / "Column not found"
+
+The platform expected a column name that isn't in your header row. Common causes:
+
+- You renamed a required column (e.g., `product_title` instead of `Title`)
+- There is a leading or trailing space in the header (` Title` instead of `Title`)
+- The file has a BOM marker that prepends hidden bytes to the first column name
+- You are using a different platform's template
+
+**Fix:** Compare your header row to the official template for that platform. The comparison must be exact — case, spelling, and spaces.
+
+### "Column count mismatch" / "Wrong number of columns"
+
+A data row has more or fewer commas than the header row. Common causes:
+
+- A value contains an unquoted comma: `Wallet, Brown` should be `"Wallet, Brown"`
+- An HTML description contains a `<div>` attribute with commas
+- A stray comma at the end of some rows (trailing comma creates a phantom column)
+
+**Fix:** Open the file in a text editor and look at the problematic row. Count the commas. Every value that contains a comma must be wrapped in double quotes.
+
+### "Unexpected header" / "Unrecognized column"
+
+Your file contains a column the platform doesn't recognize. This is usually a warning, not a blocker — the platform ignores extra columns. But on strict importers (Amazon flat files, eBay File Exchange), unknown columns can cause the entire row to fail.
+
+**Fix:** Remove columns not in the official template, or check whether the column name needs to be spelled differently.
+
+---
+
+## Required Field Errors
+
+### "Required field is blank" / "Field cannot be empty"
+
+A required column exists in the header but has an empty value on one or more rows. Common required fields that go blank:
+
+- **Shopify:** Title, Handle, Variant Price
+- **WooCommerce:** SKU, Regular price, Name (for simple products)
+- **Etsy:** title, price, quantity, when_made, who_made, is_supply
+- **eBay:** Action, Title, Category, StartPrice, Condition
+- **Amazon:** seller_sku, item_name, price, quantity
+
+**Fix:** Filter or sort the file to find rows with blank values in the required columns. Fill in the missing data. If the blank is intentional (a variant row inheriting a parent value), check the platform's rules — Shopify variant rows, for example, legitimately leave Title blank.
+
+### "SKU is required"
+
+Every product row must have a unique identifier. If you export products without SKUs and try to reimport, this error appears.
+
+**Fix:** Add a SKU to every row. Use a consistent format: alphanumeric, no spaces, under the platform's character limit (usually 40-50 characters).
+
+---
+
+## Data Type and Format Errors
+
+### "Invalid price" / "Price must be a number"
+
+The price field contains a non-numeric value. Common causes:
+
+- Currency symbol in the value: `$19.99` instead of `19.99`
+- Comma as decimal separator: `19,99` instead of `19.99` (common in European locales)
+- Empty string or dash where a number is expected
+- Excel formatted the cell as currency and exported the symbol
+
+**Fix:** Remove currency symbols and convert commas to periods for decimal separation. Format the column as "Number" in Excel before saving.
+
+### "Invalid boolean" / "Must be TRUE or FALSE"
+
+A yes/no field contains an unexpected value. Platforms are strict about boolean formats:
+
+- **Shopify:** expects `TRUE` or `FALSE` (case-sensitive on some fields)
+- **WooCommerce:** uses `1` / `0` or `yes` / `no`
+- **Amazon:** uses `y` / `n`
+
+**Fix:** Replace all variants (Yes, yes, Y, 1, true) with the format each platform expects. Use Find and Replace in your spreadsheet tool.
+
+### "Invalid date format"
+
+A date field uses the wrong format. Most platforms expect `YYYY-MM-DD`. Excel often auto-formats dates to regional formats like `MM/DD/YYYY` or `15 Jan 2024`.
+
+**Fix:** Format date columns as text in Excel before editing, or use the Python `csv` module which doesn't coerce types. Convert dates to `YYYY-MM-DD` before saving.
+
+---
+
+## Business Logic Errors
+
+### "Duplicate SKU" / "Handle already exists"
+
+A unique identifier appears more than once in the file. In Shopify, duplicate Handles are used intentionally for variants — but if the Handle appears in two unrelated product groups, that's an error. In WooCommerce and Amazon, duplicate SKUs always indicate a problem.
+
+**Fix:** Sort the file by the identifier column and visually scan for unintended duplicates. Use a formula (`COUNTIF`) to find exact duplicates automatically.
+
+### "Invalid category ID" / "Category not recognized"
+
+The category code you used doesn't exist in the platform's taxonomy.
+
+- **eBay:** Category IDs are numeric and must be from eBay's live category tree
+- **Amazon:** Browse nodes and product types must match the current Seller Central taxonomy
+- **Etsy:** Category paths must match Etsy's taxonomy exactly
+
+**Fix:** Look up the correct category ID from the platform's official category browser or taxonomy download. Do not use IDs from old templates — they change.
+
+---
+
+## Import Result Warnings vs. Blockers
+
+Most platforms distinguish between **blocking errors** (the row or file is rejected) and **warnings** (the row is imported but flagged). Understanding the difference helps you prioritize fixes:
+
+| Severity | Meaning | Example |
+|---|---|---|
+| Blocker | Row or file skipped | Missing required field, wrong column count |
+| Warning | Imported with flag | Unrecognized optional field, long description |
+| Info | Informational only | Field defaulted to platform's value |
+
+Fix all blockers before re-uploading. Warnings can often be addressed in a second pass.
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your CSV to StriveFormats for automated validation. It identifies all blockers and warnings, shows the exact cell location of each issue, and auto-fixes safe problems with one click.
+
+[Open CSV Fixer](/app) | [View CSV Templates](/presets)

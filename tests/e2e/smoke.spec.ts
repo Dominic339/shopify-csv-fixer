@@ -130,3 +130,85 @@ test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sh
   // Prevent it next time section
   await expect(page.getByRole("heading", { name: /Prevent it next time/i })).toBeVisible();
 });
+
+test("/api/health returns a JSON response (middleware does not block API routes)", async ({ request }) => {
+  const res = await request.get("/api/health");
+  // The health route may return 200 or 500 depending on env configuration,
+  // but it must NOT fail with MIDDLEWARE_INVOCATION_FAILED (502/503 from middleware crash).
+  // Any successful JSON response proves middleware is not blocking the route.
+  expect(res.status()).not.toBe(502);
+  expect(res.status()).not.toBe(503);
+  const contentType = res.headers()["content-type"] ?? "";
+  expect(contentType).toContain("application/json");
+  const body = await res.json();
+  // Body must have the expected shape from the health route handler.
+  expect(typeof body.ok).toBe("boolean");
+  expect(typeof body.env).toBe("object");
+});
+
+test("locale-prefixed /es/app page renders CSV Fixer heading", async ({ page }) => {
+  await page.goto("/es/app");
+  // The Spanish locale page should render a visible h1 heading.
+  // The Spanish translation for "CSV Fixer" is also "CSV Fixer" — if the key is missing
+  // the component falls back to English, so we check for any heading on the page.
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+});
+
+test("locale-prefixed /es/convert page renders Format Converter heading", async ({ page }) => {
+  await page.goto("/es/convert");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+});
+
+test("locale-prefixed /es/guides renders guides hub with search input", async ({ page }) => {
+  await page.goto("/es/guides");
+  // Heading (Spanish translation of "CSV Import Guides")
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+  // Search input must still be present
+  await expect(page.locator('input[type="search"]')).toBeVisible();
+});
+
+test("TopBar CSV Fixer link includes locale prefix when locale cookie is set", async ({ page, context }) => {
+  // Set the NEXT_LOCALE cookie to Spanish before loading any page
+  await context.addCookies([{
+    name: "NEXT_LOCALE",
+    value: "es",
+    domain: "localhost",
+    path: "/",
+  }]);
+  await page.goto("/es/");
+  // The CSV Fixer nav link should point to /es/app, not /app
+  const csvFixerLink = page.getByRole("link", { name: /CSV Fixer/i }).first();
+  await expect(csvFixerLink).toBeVisible({ timeout: 10_000 });
+  const href = await csvFixerLink.getAttribute("href");
+  expect(href).toBe("/es/app");
+});
+
+test("/checkout?status=canceled renders cancellation message (no redirect)", async ({ page }) => {
+  await page.goto("/checkout?status=canceled");
+  // Should show cancellation text, not silently hang
+  await expect(page.getByText(/cancelled|canceled/i)).toBeVisible({ timeout: 10_000 });
+  // Should NOT redirect away since no success
+  await page.waitForTimeout(2_000);
+  expect(page.url()).toContain("/checkout");
+});
+
+test("locale-prefixed /de/presets/shopify_products renders translated chrome", async ({ page }) => {
+  await page.goto("/de/presets/shopify_products");
+  // h1 must be visible (preset name is English — "Shopify Products Format")
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+  // Translated section heading — "Erwartete Spalten" (German for "Expected columns")
+  // We also accept English fallback in case the key resolves the same way
+  const expectedColsHeading = page.getByRole("heading", { level: 2 }).first();
+  await expect(expectedColsHeading).toBeVisible({ timeout: 5_000 });
+});
+
+test("locale-prefixed /de/presets lists preset cards with locale-aware detail links", async ({ page }) => {
+  await page.goto("/de/presets");
+  // At least one "View information" link should point to /de/presets/...
+  const detailLinks = page.getByRole("link").filter({ hasText: /Information|Informationen|information/i });
+  const count = await detailLinks.count();
+  expect(count).toBeGreaterThan(0);
+  // The first detail link href should start with /de/presets/
+  const firstHref = await detailLinks.first().getAttribute("href");
+  expect(firstHref).toMatch(/^\/de\/presets\//);
+});

@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import JsonLd from "@/components/JsonLd";
+import FAQJsonLd from "@/components/FAQJsonLd";
 
 export const metadata = {
-  title: "WooCommerce CSV Fixer | StriveFormats",
+  title: "WooCommerce CSV Fixer | Clean WooCommerce Product CSV Files | StriveFormats",
   description:
     "Fix WooCommerce product CSV import issues before you import. StriveFormats validates WooCommerce’s core Product CSV columns, auto-fixes safe issues, and flags blockers (including variations).",
   alternates: { canonical: "/woocommerce-csv-fixer" },
@@ -17,9 +18,28 @@ export default function WooCommerceCsvFixerPage() {
     description: metadata.description,
   };
 
+  const faqItems = [
+    {
+      question: "Does StriveFormats fix WooCommerce variation rows automatically?",
+      answer:
+        "It detects variation structure problems like missing Parent references or mismatched attribute values, and flags them for manual review. Safe formatting fixes (boolean normalization, price cleanup) are applied automatically.",
+    },
+    {
+      question: "Can I import custom plugin columns?",
+      answer:
+        "Yes. StriveFormats validates the core WooCommerce columns and passes through any extra columns from plugins without removing them.",
+    },
+    {
+      question: "What Type values does WooCommerce accept?",
+      answer:
+        "WooCommerce accepts: simple, variable, variation, grouped, and external. Using any other value causes the row to fail validation.",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd data={jsonLd} />
+      <FAQJsonLd items={faqItems} />
 
       <section className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

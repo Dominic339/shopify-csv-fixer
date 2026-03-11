@@ -1,0 +1,179 @@
+---
+title: "eBay File Exchange CSV Errors: Causes and Fixes"
+description: "Fix common eBay File Exchange CSV errors — invalid Action values, category ID problems, title length violations, condition codes, price formatting, and image URL issues."
+keywords: ["ebay file exchange csv errors", "ebay csv import errors", "ebay file exchange errors", "fix ebay csv", "ebay csv upload error", "ebay listing csv errors", "ebay bulk upload errors"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "How eBay File Exchange validates CSV files and what causes failures"
+  - "The exact required columns and allowed values for Action, Condition, and Duration"
+  - "How to fix title length, category, price, and image URL errors"
+  - "How to read eBay's error report to find the specific rows that failed"
+  - "How to test a small batch before uploading your full inventory"
+bestFor: "eBay sellers using File Exchange for bulk listing uploads and facing CSV validation failures"
+timeToComplete: "12 minutes"
+---
+
+## How eBay File Exchange Validates CSV Files
+
+eBay File Exchange is a bulk listing tool that accepts CSV (and flat text) files. When you upload a file, eBay runs it through a validation pipeline that checks:
+
+1. **Required columns** — certain columns must exist in every file
+2. **Action column** — every row must specify what to do with the listing
+3. **Data type validation** — prices as numbers, quantities as integers, URLs as valid URLs
+4. **Business rules** — valid category IDs, allowed condition codes, valid duration values
+5. **Content rules** — title length limits, prohibited content
+
+After upload, eBay emails you an error report (or shows it in the File Exchange dashboard) listing which rows failed and why. Always check this report — eBay often imports some rows successfully while silently skipping others.
+
+---
+
+## Error: Missing or Invalid Action Value
+
+**The `Action` column is required on every row.**
+
+Accepted values:
+
+| Value | Meaning |
+|---|---|
+| `Add` | Create a new listing |
+| `Revise` | Update fields on an existing active listing |
+| `Relist` | Relist an ended listing |
+| `End` | End an active listing |
+| `Delete` | Remove the file record (not the live listing) |
+| `AddOrRevise` | Add if new, revise if existing (matched by ItemID or custom label) |
+
+**Fix:** Add an `Action` column. Every row must have one of the above values. `add` (lowercase) is not accepted — use `Add`.
+
+---
+
+## Error: Invalid Category
+
+**Cause:** The `Category` (or `Category ID`) value is not a valid numeric eBay category ID, or the category has been retired.
+
+eBay category IDs are numeric (e.g., `15273` for Men's Shoes). They change periodically as eBay restructures its taxonomy.
+
+**Fix:**
+- Look up the correct category ID in eBay's category tree (accessible via the eBay category lookup tool)
+- Do not copy category IDs from old templates — verify they're still active
+- Some categories require additional required fields — check eBay's field requirements for the category
+
+---
+
+## Error: Title Too Long
+
+**Cause:** The `Title` value exceeds 80 characters. eBay enforces a hard 80-character limit on listing titles.
+
+**Fix:**
+
+In Excel, add a helper column: `=LEN(B2)` (replace B2 with your Title column cell). Filter to rows where the length is over 80. Edit those titles to fit within 80 characters.
+
+In Python:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Error: Invalid Condition Code
+
+**Cause:** The `ConditionID` value is not a valid eBay condition code for the item's category.
+
+Common eBay condition codes:
+
+| Code | Condition | Notes |
+|---|---|---|
+| `1000` | New | Factory sealed, brand new |
+| `1500` | New other | New, no original packaging |
+| `2000` | Manufacturer refurbished | Refurbished by manufacturer |
+| `2500` | Seller refurbished | Refurbished by seller |
+| `3000` | Used | Pre-owned, fully functional |
+| `4000` | Very Good | Minor wear |
+| `5000` | Good | Noticeable wear |
+| `6000` | Acceptable | Significant wear |
+| `7000` | For parts or not working | Not functional |
+
+Note: Available condition codes vary by category. Electronics and clothing have different allowed codes.
+
+**Fix:** Replace any non-numeric or unrecognized condition values with the correct numeric code.
+
+---
+
+## Error: Invalid StartPrice
+
+**Cause:** The `StartPrice` field contains a currency symbol (`$9.99`), uses a comma decimal separator (`9,99`), is negative, or is blank.
+
+**Fix:**
+- Remove currency symbols with Find & Replace
+- Replace comma decimal separators with periods
+- Ensure all prices are positive decimal numbers
+- Format the column as Number in Excel before saving
+
+---
+
+## Error: Invalid Duration
+
+**Cause:** The `Duration` field contains a value not in eBay's allowed list.
+
+**Accepted values:**
+
+`Days_3`, `Days_5`, `Days_7`, `Days_10`, `Days_30`, `GTC`
+
+`GTC` = Good Till Cancelled (the most common choice for fixed-price listings).
+
+**Fix:** Replace any non-standard duration values with one of the above.
+
+---
+
+## Error: Image URL Not Accessible
+
+**Cause:** The `PicURL` field contains a URL that eBay can't download — the image is behind authentication, on localhost, uses HTTP (not HTTPS), or is a redirect URL.
+
+eBay accepts up to 12 images per listing separated by a pipe character `|`.
+
+**Fix:**
+- Test each URL in a browser — it should load the image directly, no login required
+- Use HTTPS URLs
+- Avoid URL shorteners or redirect services
+- Image format must be JPG, PNG, GIF, TIFF, or BMP; minimum 500x500 pixels recommended
+
+---
+
+## Error: Invalid Quantity
+
+**Cause:** `Quantity` is blank, contains a decimal (e.g., `1.5`), is zero, or is negative.
+
+**Fix:** Use whole positive integers. `0` is not valid for Add operations (it creates a listing with no stock). Use `0` only in `End` operations.
+
+---
+
+## Reading eBay's Error Report
+
+eBay sends an error report (TSV or text file) after processing your upload. The report includes:
+- The row number (1-indexed, including the header row)
+- The error code and message
+- The item identifier (if applicable)
+
+Common error codes:
+- `21916585` — Invalid category or category ID
+- `21916288` — Title too long
+- `21919067` — Invalid condition for category
+- `21916790` — Invalid price
+
+Search for the error code in eBay's File Exchange documentation for the exact fix.
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your eBay CSV to StriveFormats. The validator checks all required columns, Action values, price formats, title lengths, condition codes, and image URLs — then flags exact rows and cells with issues.
+
+[Open eBay CSV Fixer](/app?preset=ebay_listings) | [View eBay Template](/presets/ebay_listings)

@@ -1,0 +1,151 @@
+---
+title: "Shopify CSV Import Errors: Common Causes and Fixes"
+description: "A complete guide to the most common Shopify CSV import errors — missing columns, invalid booleans, variant structure problems, price errors, and handle conflicts."
+keywords: ["shopify csv import errors", "shopify import failed", "shopify csv errors", "shopify product import error", "fix shopify csv import", "shopify csv validation", "shopify upload error"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "The most common Shopify CSV import errors and what causes each one"
+  - "How Shopify validates products, variants, handles, and required fields"
+  - "How to fix missing column, invalid boolean, and price errors"
+  - "How to diagnose variant structure problems that cause split or missing products"
+  - "How to use the official Shopify template to prevent import failures"
+bestFor: "Shopify merchants and developers troubleshooting failed or partial product CSV imports"
+timeToComplete: "12 minutes"
+---
+
+## How Shopify Validates CSV Imports
+
+When you import a product CSV, Shopify runs every row through a multi-step validation pipeline:
+
+1. **Header check** — verifies required columns are present
+2. **Handle grouping** — groups rows with the same Handle into one product
+3. **Field validation** — checks data types, required values, and allowed values
+4. **Conflict detection** — checks for handle/SKU conflicts with existing products
+
+Errors at any stage cause rows to fail. Shopify often imports the valid rows and skips the failed ones, so you may end up with partial imports if you don't fix all errors first.
+
+---
+
+## Error: Missing Required Column
+
+**Message:** "Your CSV file is missing the following columns: Handle, Title..."
+
+**Cause:** One or more required columns are absent from the header row, misspelled, or have incorrect case.
+
+**Required Shopify columns:**
+
+| Column | Notes |
+|---|---|
+| `Handle` | URL-safe slug; groups variants |
+| `Title` | Product name |
+| `Variant Price` | Price for every variant row |
+
+**Fix:**
+- Compare your header row to the [official Shopify product CSV template](https://help.shopify.com/en/manual/products/import-export/using-csv)
+- Check case: `Handle` not `handle`, `Variant Price` not `Variant price`
+- Check for leading/trailing spaces in column names (open in a text editor, not Excel)
+- If the first column shows as `﻿Handle` (with a BOM prefix), re-save the file as UTF-8 without BOM
+
+---
+
+## Error: Invalid Boolean Value
+
+**Message:** Rows are imported but Published, Gift Card, or Requires Shipping shows the wrong value
+
+**Cause:** Shopify's boolean columns expect `TRUE` or `FALSE` (uppercase). Values like `Yes`, `yes`, `1`, `true`, or `True` are not accepted on all fields.
+
+**Affected columns:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**Fix:** Find and Replace all variants:
+
+| Replace this | With this |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+In Excel: `Ctrl+H` (Find & Replace), check "Match entire cell contents" to avoid replacing text inside longer values.
+
+---
+
+## Error: Blank or Invalid Variant Price
+
+**Message:** "Variant Price can't be blank" or price imported as 0.00
+
+**Cause:** `Variant Price` is empty, contains a currency symbol (`$19.99`), uses a comma decimal separator (`19,99`), or is a text value.
+
+**Fix:**
+- Fill in `Variant Price` for every row (both parent and variant rows)
+- Remove currency symbols: use Find & Replace to remove `$`
+- Replace comma decimal separators with periods: `19,99` → `19.99`
+- Format the column as Number in Excel before saving (prevents re-adding symbols)
+
+---
+
+## Error: Variant Structure / Missing Option Columns
+
+**Message:** Products import without variants, or variants appear as separate products
+
+**Cause:** The Handle is used correctly (same value for all rows in a product group) but the option columns are wrong:
+
+- `Option1 Name` or `Option1 Value` is missing or blank on some rows
+- Option column names aren't consistent across rows in the same group
+- The handle is different on rows that should be the same product
+
+**Rules for variant rows:**
+- All rows for the same product must share the exact same `Handle`
+- Every row must have `Option1 Name` and `Option1 Value`
+- If you have 3 options, all rows must have `Option1`, `Option2`, and `Option3` columns
+- `Option1 Name` (e.g., `Size`) should be the same across all rows in the group; only `Option1 Value` changes
+
+**Example of correct variant structure:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## Error: Duplicate Handle
+
+**Message:** Products overwrite each other or variant grouping breaks
+
+**Cause:** Two unrelated products share the same Handle. Shopify groups all rows with the same Handle into one product, so a duplicate Handle merges unrelated products.
+
+**Fix:** Make every product's Handle unique. Handles must be URL-safe: lowercase letters, numbers, and hyphens only. No spaces or special characters.
+
+If you're updating an existing product and the Handle already exists in Shopify, that's intentional — the import will update that product. But if a new product accidentally shares a Handle with an existing one, the existing product's data will be overwritten.
+
+---
+
+## Error: SKU Conflicts
+
+**Message:** Products import but inventory is wrong, or SKUs are reported as duplicates
+
+**Cause:** The same SKU appears on two different rows (or two different products). Shopify uses SKUs for inventory tracking — duplicate SKUs cause inventory to merge incorrectly.
+
+**Fix:** Ensure every variant row has a unique SKU. You can leave SKU blank if you don't use SKU-based inventory tracking, but it must not be duplicated across rows.
+
+---
+
+## Error: Image Not Imported
+
+**Message:** Products import but images are missing
+
+**Cause:**
+- `Image Src` URL is not a publicly accessible HTTPS URL
+- URL contains spaces or special characters that need URL encoding
+- Image file is not in a supported format (Shopify accepts JPG, JPEG, PNG, GIF, WEBP)
+
+**Fix:** Test each image URL in a browser — it should load the image directly. For images in Google Drive, Dropbox, or localhost, they must be moved to a public hosting URL before import.
+
+---
+
+## Fix This Automatically with StriveFormats
+
+Upload your Shopify CSV to StriveFormats. The validator checks all required columns, boolean formats, variant structure, price fields, and handle uniqueness — then auto-fixes safe issues with one click.
+
+[Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)

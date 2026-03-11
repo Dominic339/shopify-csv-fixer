@@ -2,15 +2,17 @@ import Link from "next/link";
 
 import JsonLd from "@/components/JsonLd";
 import { getPresetFormats } from "@/lib/presets";
+import { getPopularGuides } from "@/lib/guides/getPopularGuides";
 
 export const metadata = {
-  title: "Preset Formats | StriveFormats",
+  title: "CSV Import Templates | Fix CSV Import Errors | StriveFormats",
   description:
     "Browse ecommerce CSV templates for Shopify, WooCommerce, Etsy, Amazon, and eBay. Preview columns, download samples, and open the fixer with a preset selected.",
 };
 
 export default function PresetsPage() {
   const presets = getPresetFormats();
+  const popularGuides = getPopularGuides(null, 6);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -70,6 +72,33 @@ export default function PresetsPage() {
           ))}
         </div>
       </section>
+
+      {popularGuides.length > 0 && (
+        <section className="mt-14">
+          <h2 className="text-xl font-semibold text-[var(--text)]">Popular CSV Guides</h2>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
+            Step-by-step guides for the most common CSV import problems.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {popularGuides.map((g) => (
+              <Link
+                key={`${g.platform}/${g.slug}`}
+                href={`/guides/${g.platform}/${g.slug}`}
+                className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 hover:border-[var(--ring)]"
+              >
+                <div className="text-xs text-[color:rgba(var(--muted-rgb),0.7)] capitalize">{g.platform}</div>
+                <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
+                <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)] line-clamp-2">{g.description}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-5">
+            <Link href="/guides" className="text-base text-[var(--accent)] hover:underline">
+              Browse all CSV guides &rarr;
+            </Link>
+          </div>
+        </section>
+      )}
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
         <Link href="/app?preset=shopify_products" className="hover:underline">

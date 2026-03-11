@@ -6,6 +6,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 
 import JsonLd from "@/components/JsonLd";
 import MdxGuideToc from "@/components/MdxGuideToc";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import {
   getAllGuides,
   getGuide,
@@ -257,18 +258,14 @@ export default async function GuideDetailPage({ params }: Props) {
     <>
       <JsonLd data={jsonLd} />
 
-      {/* Breadcrumb */}
-      <div className="mb-6 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-        <Link href="/guides" className="hover:underline">
-          Guides
-        </Link>
-        {" / "}
-        <Link href={`/guides/${platform}`} className="hover:underline">
-          {label}
-        </Link>
-        {" / "}
-        <span className="text-[var(--text)]">{guide.title}</span>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Guides", href: "/guides" },
+          { label: label, href: `/guides/${platform}` },
+          { label: guide.title },
+        ]}
+      />
 
       <article>
         {/* Header */}

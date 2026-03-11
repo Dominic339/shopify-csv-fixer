@@ -4,9 +4,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { TocItem } from "@/lib/guides/mdxHeadings";
 
-type Props = { items: TocItem[] };
+type Props = { items: TocItem[]; onThisPage?: string };
 
-export default function MdxGuideToc({ items }: Props) {
+export default function MdxGuideToc({ items, onThisPage }: Props) {
   const [activeId, setActiveId] = useState<string>(items[0]?.id ?? "");
   // Track which ids are currently intersecting
   const intersectingRef = useRef<Set<string>>(new Set());
@@ -44,7 +44,7 @@ export default function MdxGuideToc({ items }: Props) {
   return (
     <nav aria-label="On this page" data-testid="guide-toc">
       <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.7)]">
-        On this page
+        {onThisPage ?? "On this page"}
       </div>
       <ul className="space-y-1">
         {items.map((item) => {

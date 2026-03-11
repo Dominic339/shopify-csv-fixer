@@ -1,52 +1,58 @@
 // src/components/ui/PricingCards.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import type { Translations } from "@/lib/i18n/getTranslations";
+import { createClient } from "@/lib/supabase/browser";
 
 type SubStatus = {
   signedIn: boolean;
   plan: "free" | "basic" | "advanced";
   status: string;
+  stripeCustomerId?: string | null;
 };
 
-async function postJson(url: string, body?: unknown) {
+type Props = {
+  sub?: SubStatus | null;
+  tPricing?: Translations["pricing"];
+  onBillingUnavailable?: () => void;
+};
+
+async function postJson(url: string, body?: unknown, token?: string | null) {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const r = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   const j = await r.json().catch(() => ({}));
   return { ok: r.ok, json: j as any };
 }
 
-export function PricingCards() {
+export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) {
   const router = useRouter();
-  const [sub, setSub] = useState<SubStatus | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string>("");
-  const [stripeEnabled, setStripeEnabled] = useState<boolean | null>(null);
-
-  async function refresh() {
-    setMsg("");
-    try {
-      const [subRes, statusRes] = await Promise.all([
-        fetch("/api/subscription/status", { cache: "no-store" }),
-        fetch("/api/stripe/status", { cache: "no-store" }),
-      ]);
-      setSub((await subRes.json()) as SubStatus);
-      setStripeEnabled(((await statusRes.json()) as { enabled: boolean }).enabled);
-    } catch {
-      setSub(null);
-      setStripeEnabled(true); // fail open
-    }
-  }
+  const [stripeEnabled, setStripeEnabled] = useState<boolean>(true);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    refresh();
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAccessToken(session?.access_token ?? null);
+    });
   }, []);
 
   const billingUnavailable = stripeEnabled === false;
+
+  // Subscription state helpers
+  const isActive = !!(sub?.signedIn && sub.status === "active");
+  const activePlan = isActive ? sub!.plan : null; // "basic" | "advanced" | null
+  // Only offer billing portal when stripe_customer_id is confirmed present.
+  // After checkout the webhook may take a few seconds; until then show "Syncing…".
+  const hasStripeCustomer = !!(sub?.stripeCustomerId);
 
   async function startCheckout(plan: "basic" | "advanced") {
     if (billingUnavailable) return;
@@ -55,20 +61,14 @@ export function PricingCards() {
       router.push("/login");
       return;
     }
-
     setBusy(plan);
-    const { ok, json } = await postJson("/api/stripe/checkout", { plan });
+    const { ok, json } = await postJson("/api/stripe/checkout", { plan }, accessToken);
     setBusy(null);
-
     if (!ok) {
-      if (json?.error === "stripe_not_configured") {
-        setStripeEnabled(false);
-        return;
-      }
+      if (json?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
       setMsg(json?.error ?? "Could not start checkout.");
       return;
     }
-
     if (json?.url) window.location.href = json.url;
   }
 
@@ -76,155 +76,164 @@ export function PricingCards() {
     if (billingUnavailable) return;
     setMsg("");
     setBusy("portal");
-    const { ok, json } = await postJson("/api/stripe/portal");
+    const { ok, json } = await postJson("/api/stripe/portal", undefined, accessToken);
     setBusy(null);
-
     if (!ok) {
-      if (json?.error === "stripe_not_configured") {
-        setStripeEnabled(false);
-        return;
-      }
+      if (json?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
       setMsg(json?.error ?? "Could not open billing portal.");
       return;
     }
-
     if (json?.url) window.location.href = json.url;
   }
 
-  // If subscribed, hide the pricing grid and show the plan panel
-  if (sub?.signedIn && sub.status === "active") {
-    const planLabel = sub.plan === "advanced" ? "Advanced" : "Basic";
-    const canUpgrade = sub.plan === "basic";
-
-    return (
-      <div className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        {billingUnavailable ? (
-          <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-            Billing is temporarily unavailable. Please try again later.
-          </div>
-        ) : null}
-
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="text-sm text-[var(--muted)]">Your membership</div>
-            <div className="mt-1 text-2xl font-semibold text-[var(--text)]">{planLabel}</div>
-            <div className="mt-2 text-sm text-[var(--muted)]">
-              You are subscribed. You can manage billing, cancel, or upgrade any time.
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            {canUpgrade ? (
-              <button
-                className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-                onClick={() => startCheckout("advanced")}
-                disabled={busy !== null || billingUnavailable}
-                type="button"
-              >
-                {busy === "advanced" ? "Starting..." : "Upgrade to Advanced"}
-              </button>
-            ) : null}
-
-            <button
-              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-              onClick={openPortal}
-              disabled={busy !== null || billingUnavailable}
-              type="button"
-            >
-              {busy === "portal" ? "Opening..." : "Manage billing in Profile"}
-            </button>
-
-            <button
-              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold text-[var(--text)]"
-              onClick={() => router.push("/app")}
-              type="button"
-            >
-              Open CSV Fixer
-            </button>
-          </div>
-        </div>
-
-        {msg ? <div className="mt-4 text-sm text-red-400">{msg}</div> : null}
-      </div>
-    );
-  }
+  // Which tiers to show:
+  // Free: show only when not on a paid plan
+  // Basic: show when not on Advanced
+  // Advanced: always show
+  const showFree = !activePlan;
+  const showBasic = activePlan !== "advanced";
 
   return (
     <div className="mt-10">
-      {billingUnavailable ? (
+      {billingUnavailable && (
         <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-          Billing is temporarily unavailable. Please try again later.
+          {t?.billingUnavailable ?? "Billing is temporarily unavailable. Please try again later."}
         </div>
-      ) : null}
-
-      {msg ? <div className="mb-4 text-sm text-red-400">{msg}</div> : null}
+      )}
+      {msg && <div className="mb-4 text-sm text-red-400">{msg}</div>}
 
       <div className="grid gap-6 md:grid-cols-3" id="pricing">
         {/* Free */}
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-          <div className="text-sm text-[var(--muted)]">Free</div>
-          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$0</div>
-          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Fix and export CSV files</li>
-            <li>3 exports per month per device</li>
-            <li>Access to all built-in formats</li>
-            <li>No account required</li>
-          </ul>
-
-          <button
-            className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)]"
-            onClick={() => router.push("/app")}
-            type="button"
-          >
-            Start free
-          </button>
-        </div>
+        {showFree && (
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+            <div className="text-sm text-[var(--muted)]">{t?.free ?? "Free"}</div>
+            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$0</div>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
+              <li>{t?.freeBullet1 ?? "Fix and export CSV files"}</li>
+              <li>{t?.freeBullet2 ?? "3 exports per month per device"}</li>
+              <li>{t?.freeBullet3 ?? "Access to all built-in formats"}</li>
+              <li>{t?.freeBullet4 ?? "No account required"}</li>
+            </ul>
+            <button
+              className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)]"
+              onClick={() => router.push("/app")}
+              type="button"
+            >
+              {t?.startFree ?? "Start free"}
+            </button>
+          </div>
+        )}
 
         {/* Basic */}
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-          <div className="text-sm text-[var(--muted)]">Basic</div>
-          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$3 / month</div>
-          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>100 exports per month</li>
-            <li>Access to all built-in formats</li>
-            <li>Account required</li>
-            <li>Manage billing in Profile</li>
-          </ul>
-
-          <button
-            className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-            onClick={() => startCheckout("basic")}
-            disabled={busy !== null || billingUnavailable}
-            type="button"
-          >
-            {busy === "basic" ? "Starting..." : sub?.signedIn ? "Subscribe" : "Sign in to subscribe"}
-          </button>
-        </div>
+        {showBasic && (
+          <div className={`rounded-3xl border p-6 shadow-sm ${activePlan === "basic" ? "border-[var(--accent)] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface)]"}`}>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-[var(--muted)]">{t?.basic ?? "Basic"}</div>
+              {activePlan === "basic" && (
+                <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  {t?.yourPlan ?? "Your plan"}
+                </span>
+              )}
+            </div>
+            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$3 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
+              <li>{t?.basicBullet1 ?? "100 exports per month"}</li>
+              <li>{t?.basicBullet2 ?? "Access to all built-in formats"}</li>
+              <li>{t?.basicBullet3 ?? "Account required"}</li>
+              <li>{t?.basicBullet4 ?? "Manage billing in Profile"}</li>
+            </ul>
+            {activePlan === "basic" ? (
+              hasStripeCustomer ? (
+                <button
+                  className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+                  onClick={openPortal}
+                  disabled={busy !== null || billingUnavailable}
+                  type="button"
+                >
+                  {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
+                </button>
+              ) : (
+                <button
+                  className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] opacity-60 cursor-wait"
+                  disabled
+                  type="button"
+                >
+                  Syncing billing info…
+                </button>
+              )
+            ) : (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+                onClick={() => startCheckout("basic")}
+                disabled={busy !== null || billingUnavailable}
+                type="button"
+              >
+                {busy === "basic" ? (t?.starting ?? "Starting…") : sub?.signedIn ? (t?.subscribe ?? "Subscribe") : (t?.signInToSubscribe ?? "Sign in to subscribe")}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Advanced */}
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-          <div className="text-sm text-[var(--muted)]">Advanced</div>
-          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$10 / month</div>
+        <div className={`rounded-3xl border p-6 shadow-sm ${activePlan === "advanced" ? "border-[var(--accent)] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface)]"}`}>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-[var(--muted)]">{t?.advanced ?? "Advanced"}</div>
+            {activePlan === "advanced" && (
+              <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                {t?.yourPlan ?? "Your plan"}
+              </span>
+            )}
+          </div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$10 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>Unlimited exports</li>
-            <li>Access to all built-in formats</li>
-            <li>Custom Format Builder</li>
-            <li>Save, reuse, import, and export formats</li>
+            <li>{t?.advancedBullet1 ?? "Unlimited exports"}</li>
+            <li>{t?.advancedBullet2 ?? "Access to all built-in formats"}</li>
+            <li>{t?.advancedBullet3 ?? "Custom Format Builder"}</li>
+            <li>{t?.advancedBullet4 ?? "Save, reuse, import, and export formats"}</li>
           </ul>
-
-          <button
-            className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-            onClick={() => startCheckout("advanced")}
-            disabled={busy !== null || billingUnavailable}
-            type="button"
-          >
-            {busy === "advanced" ? "Starting..." : sub?.signedIn ? "Subscribe" : "Sign in to subscribe"}
-          </button>
+          {activePlan === "advanced" ? (
+            hasStripeCustomer ? (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+                onClick={openPortal}
+                disabled={busy !== null || billingUnavailable}
+                type="button"
+              >
+                {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
+              </button>
+            ) : (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] opacity-60 cursor-wait"
+                disabled
+                type="button"
+              >
+                Syncing billing info…
+              </button>
+            )
+          ) : activePlan === "basic" ? (
+            <button
+              className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+              onClick={() => startCheckout("advanced")}
+              disabled={busy !== null || billingUnavailable}
+              type="button"
+            >
+              {busy === "advanced" ? (t?.starting ?? "Starting…") : (t?.upgradeToAdvanced ?? "Upgrade to Advanced")}
+            </button>
+          ) : (
+            <button
+              className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+              onClick={() => startCheckout("advanced")}
+              disabled={busy !== null || billingUnavailable}
+              type="button"
+            >
+              {busy === "advanced" ? (t?.starting ?? "Starting…") : sub?.signedIn ? (t?.subscribe ?? "Subscribe") : (t?.signInToSubscribe ?? "Sign in to subscribe")}
+            </button>
+          )}
         </div>
       </div>
 
       <div className="mt-4 text-xs text-[var(--muted)]">
-        Subscriptions are handled securely by Stripe. Cancel any time from your billing portal.
+        {t?.stripeNote ?? "Subscriptions are handled securely by Stripe. Cancel any time from your billing portal."}
       </div>
     </div>
   );
