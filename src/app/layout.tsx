@@ -43,8 +43,8 @@ export const metadata: Metadata = {
     images: ["/opengraph-image"],
   },
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
   keywords: [
     "fix csv file",

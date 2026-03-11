@@ -216,6 +216,12 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         </div>
       ) : null}
 
+      {billingUnavailable ? (
+        <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+          Billing is temporarily unavailable. Please try again later.
+        </div>
+      ) : null}
+
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         {sub ? (
           <>
