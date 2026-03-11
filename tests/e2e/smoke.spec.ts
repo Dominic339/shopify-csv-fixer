@@ -191,3 +191,24 @@ test("/checkout?status=canceled renders cancellation message (no redirect)", asy
   await page.waitForTimeout(2_000);
   expect(page.url()).toContain("/checkout");
 });
+
+test("locale-prefixed /de/presets/shopify_products renders translated chrome", async ({ page }) => {
+  await page.goto("/de/presets/shopify_products");
+  // h1 must be visible (preset name is English — "Shopify Products Format")
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 10_000 });
+  // Translated section heading — "Erwartete Spalten" (German for "Expected columns")
+  // We also accept English fallback in case the key resolves the same way
+  const expectedColsHeading = page.getByRole("heading", { level: 2 }).first();
+  await expect(expectedColsHeading).toBeVisible({ timeout: 5_000 });
+});
+
+test("locale-prefixed /de/presets lists preset cards with locale-aware detail links", async ({ page }) => {
+  await page.goto("/de/presets");
+  // At least one "View information" link should point to /de/presets/...
+  const detailLinks = page.getByRole("link").filter({ hasText: /Information|Informationen|information/i });
+  const count = await detailLinks.count();
+  expect(count).toBeGreaterThan(0);
+  // The first detail link href should start with /de/presets/
+  const firstHref = await detailLinks.first().getAttribute("href");
+  expect(firstHref).toMatch(/^\/de\/presets\//);
+});

@@ -209,7 +209,12 @@
     "issues": "Sorunlar",
     "autoFixes": "Otomatik düzeltmeler uygulandı",
     "noIssues": "Sorun bulunamadı",
-    "signInToExport": "Dışa aktarmaları izlemek için giriş yapın"
+    "signInToExport": "Dışa aktarmaları izlemek için giriş yapın",
+    "presetFormats": "Ön ayarlı formatlar",
+    "pricing": "Fiyatlandırma",
+    "formatConverter": "Format Dönüştürücü",
+    "csvMerger": "CSV Birleştirici",
+    "csvInspector": "CSV Denetçisi"
   },
   "profile": {
     "verifySubscription": "Aboneliğinizi doğrulayın ve faturalandırmayı yönetin.",

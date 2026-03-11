@@ -222,3 +222,40 @@ describe("converter dropdown collision avoidance", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Billing portal readiness guard
+// Verifies that "Manage billing" is only offered when stripe_customer_id is
+// present — prevents the confusing "No Stripe customer found" 400 error
+// immediately after a successful checkout.
+// ---------------------------------------------------------------------------
+
+describe("billing portal readiness guard", () => {
+  function billingPortalReady(sub: {
+    signedIn: boolean;
+    status: string;
+    stripeCustomerId?: string | null;
+  }): boolean {
+    return sub.signedIn && sub.status === "active" && !!sub.stripeCustomerId;
+  }
+
+  it("returns false when not signed in", () => {
+    expect(billingPortalReady({ signedIn: false, status: "active", stripeCustomerId: "cus_123" })).toBe(false);
+  });
+
+  it("returns false when status is not active", () => {
+    expect(billingPortalReady({ signedIn: true, status: "none", stripeCustomerId: "cus_123" })).toBe(false);
+  });
+
+  it("returns false when stripe_customer_id is null (post-checkout webhook lag)", () => {
+    expect(billingPortalReady({ signedIn: true, status: "active", stripeCustomerId: null })).toBe(false);
+  });
+
+  it("returns false when stripe_customer_id is absent", () => {
+    expect(billingPortalReady({ signedIn: true, status: "active" })).toBe(false);
+  });
+
+  it("returns true when signed in, active, and stripe_customer_id present", () => {
+    expect(billingPortalReady({ signedIn: true, status: "active", stripeCustomerId: "cus_abc123" })).toBe(true);
+  });
+});

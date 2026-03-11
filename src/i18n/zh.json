@@ -209,7 +209,12 @@
     "issues": "问题",
     "autoFixes": "已应用自动修复",
     "noIssues": "未发现问题",
-    "signInToExport": "登录以跟踪导出"
+    "signInToExport": "登录以跟踪导出",
+    "presetFormats": "预设格式",
+    "pricing": "定价",
+    "formatConverter": "格式转换器",
+    "csvMerger": "CSV合并器",
+    "csvInspector": "CSV检查器"
   },
   "profile": {
     "verifySubscription": "验证您的订阅并管理账单。",

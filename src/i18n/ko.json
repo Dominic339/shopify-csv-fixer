@@ -209,7 +209,12 @@
     "issues": "문제",
     "autoFixes": "자동 수정 적용됨",
     "noIssues": "문제가 발견되지 않았습니다",
-    "signInToExport": "내보내기를 추적하려면 로그인하세요"
+    "signInToExport": "내보내기를 추적하려면 로그인하세요",
+    "presetFormats": "사전 설정 형식",
+    "pricing": "요금제",
+    "formatConverter": "형식 변환기",
+    "csvMerger": "CSV 병합기",
+    "csvInspector": "CSV 검사기"
   },
   "profile": {
     "verifySubscription": "구독을 확인하고 결제를 관리합니다.",

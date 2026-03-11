@@ -212,7 +212,12 @@
     "issues": "Issues",
     "autoFixes": "Auto-fixes applied",
     "noIssues": "No issues found",
-    "signInToExport": "Sign in to track exports"
+    "signInToExport": "Sign in to track exports",
+    "presetFormats": "Preset Formats",
+    "pricing": "Pricing",
+    "formatConverter": "Format Converter",
+    "csvMerger": "CSV Merger",
+    "csvInspector": "CSV Inspector"
   },
   "profile": {
     "verifySubscription": "Verify your subscription and manage billing.",

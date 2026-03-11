@@ -209,7 +209,12 @@
     "issues": "Problemen",
     "autoFixes": "Automatische correcties toegepast",
     "noIssues": "Geen problemen gevonden",
-    "signInToExport": "Aanmelden om exports te volgen"
+    "signInToExport": "Aanmelden om exports te volgen",
+    "presetFormats": "Vooringestelde formaten",
+    "pricing": "Prijzen",
+    "formatConverter": "Formaatconverter",
+    "csvMerger": "CSV-samenvoeger",
+    "csvInspector": "CSV-inspecteur"
   },
   "profile": {
     "verifySubscription": "Verifieer uw abonnement en beheer facturering.",

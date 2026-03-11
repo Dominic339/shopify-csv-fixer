@@ -209,7 +209,12 @@
     "issues": "Problemas",
     "autoFixes": "Correcciones automáticas aplicadas",
     "noIssues": "No se encontraron problemas",
-    "signInToExport": "Iniciar sesión para rastrear exportaciones"
+    "signInToExport": "Iniciar sesión para rastrear exportaciones",
+    "presetFormats": "Formatos preestablecidos",
+    "pricing": "Precios",
+    "formatConverter": "Convertidor de formato",
+    "csvMerger": "Fusionador de CSV",
+    "csvInspector": "Inspector de CSV"
   },
   "profile": {
     "verifySubscription": "Verifica tu suscripción y gestiona la facturación.",

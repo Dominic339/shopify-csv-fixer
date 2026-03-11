@@ -209,7 +209,12 @@
     "issues": "問題",
     "autoFixes": "自動修正が適用されました",
     "noIssues": "問題は見つかりませんでした",
-    "signInToExport": "エクスポートを追跡するにはサインインしてください"
+    "signInToExport": "エクスポートを追跡するにはサインインしてください",
+    "presetFormats": "プリセット形式",
+    "pricing": "料金",
+    "formatConverter": "フォーマット変換",
+    "csvMerger": "CSV結合",
+    "csvInspector": "CSVインスペクター"
   },
   "profile": {
     "verifySubscription": "サブスクリプションを確認し、請求を管理します。",

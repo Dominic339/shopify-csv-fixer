@@ -209,7 +209,12 @@
     "issues": "Problemi",
     "autoFixes": "Correzioni automatiche applicate",
     "noIssues": "Nessun problema trovato",
-    "signInToExport": "Accedi per tracciare le esportazioni"
+    "signInToExport": "Accedi per tracciare le esportazioni",
+    "presetFormats": "Formati preimpostati",
+    "pricing": "Prezzi",
+    "formatConverter": "Convertitore di formato",
+    "csvMerger": "Unificatore CSV",
+    "csvInspector": "Ispettore CSV"
   },
   "profile": {
     "verifySubscription": "Verifica il tuo abbonamento e gestisci la fatturazione.",

@@ -254,6 +254,11 @@ export type Translations = {
     autoFixes: string;
     noIssues: string;
     signInToExport: string;
+    presetFormats: string;
+    pricing: string;
+    formatConverter: string;
+    csvMerger: string;
+    csvInspector: string;
   };
   profile: {
     verifySubscription: string;

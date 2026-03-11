@@ -3,6 +3,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { parseCsv, toCsv } from "@/lib/csv";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { createClient } from "@/lib/supabase/browser";
@@ -87,6 +89,12 @@ type AppClientProps = {
 };
 
 export default function AppClient({ tApp }: AppClientProps) {
+  const pathname = usePathname();
+  const currentLocale: Locale = useMemo(() => {
+    const seg = pathname?.split("/")?.[1] ?? "";
+    return isValidLocale(seg) ? seg : DEFAULT_LOCALE;
+  }, [pathname]);
+
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
@@ -1794,11 +1802,11 @@ useEffect(() => {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-        <Link href="/presets" className="hover:underline">Preset Formats</Link>
-        <Link href="/#pricing" className="hover:underline">Pricing</Link>
-        <Link href="/convert" className="hover:underline">Format Converter</Link>
-        <Link href="/merge" className="hover:underline">CSV Merger</Link>
-        <Link href="/csv-inspector" className="hover:underline">CSV Inspector</Link>
+        <Link href={localeHref(currentLocale, "/presets")} className="hover:underline">{tApp?.presetFormats ?? "Preset Formats"}</Link>
+        <Link href={`${localeHref(currentLocale, "/")}#pricing`} className="hover:underline">{tApp?.pricing ?? "Pricing"}</Link>
+        <Link href={localeHref(currentLocale, "/convert")} className="hover:underline">{tApp?.formatConverter ?? "Format Converter"}</Link>
+        <Link href={localeHref(currentLocale, "/merge")} className="hover:underline">{tApp?.csvMerger ?? "CSV Merger"}</Link>
+        <Link href={localeHref(currentLocale, "/csv-inspector")} className="hover:underline">{tApp?.csvInspector ?? "CSV Inspector"}</Link>
       </div>
       {workspaceEnabled && workspaceDocs.length === 0 && fileName && (
         <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">

@@ -10,6 +10,7 @@ type SubStatus = {
   signedIn: boolean;
   plan: "free" | "basic" | "advanced";
   status: string;
+  stripeCustomerId?: string | null;
 };
 
 type Props = {
@@ -49,6 +50,9 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
   // Subscription state helpers
   const isActive = !!(sub?.signedIn && sub.status === "active");
   const activePlan = isActive ? sub!.plan : null; // "basic" | "advanced" | null
+  // Only offer billing portal when stripe_customer_id is confirmed present.
+  // After checkout the webhook may take a few seconds; until then show "Syncing…".
+  const hasStripeCustomer = !!(sub?.stripeCustomerId);
 
   async function startCheckout(plan: "basic" | "advanced") {
     if (billingUnavailable) return;
@@ -139,14 +143,24 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
               <li>{t?.basicBullet4 ?? "Manage billing in Profile"}</li>
             </ul>
             {activePlan === "basic" ? (
-              <button
-                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-                onClick={openPortal}
-                disabled={busy !== null || billingUnavailable}
-                type="button"
-              >
-                {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
-              </button>
+              hasStripeCustomer ? (
+                <button
+                  className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+                  onClick={openPortal}
+                  disabled={busy !== null || billingUnavailable}
+                  type="button"
+                >
+                  {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
+                </button>
+              ) : (
+                <button
+                  className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] opacity-60 cursor-wait"
+                  disabled
+                  type="button"
+                >
+                  Syncing billing info…
+                </button>
+              )
             ) : (
               <button
                 className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
@@ -178,14 +192,24 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
             <li>{t?.advancedBullet4 ?? "Save, reuse, import, and export formats"}</li>
           </ul>
           {activePlan === "advanced" ? (
-            <button
-              className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-              onClick={openPortal}
-              disabled={busy !== null || billingUnavailable}
-              type="button"
-            >
-              {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
-            </button>
+            hasStripeCustomer ? (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+                onClick={openPortal}
+                disabled={busy !== null || billingUnavailable}
+                type="button"
+              >
+                {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
+              </button>
+            ) : (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] opacity-60 cursor-wait"
+                disabled
+                type="button"
+              >
+                Syncing billing info…
+              </button>
+            )
           ) : activePlan === "basic" ? (
             <button
               className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"

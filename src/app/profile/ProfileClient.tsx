@@ -14,6 +14,7 @@ type SubStatus = {
   plan: "free" | "basic" | "advanced";
   status: string;
   current_period_end: string | null;
+  stripeCustomerId?: string | null;
 };
 
 async function safeReadJson(res: Response) {
@@ -76,7 +77,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       // allows the authenticated user to read their own row).
       const { data } = await supabase
         .from("user_subscriptions")
-        .select("plan,status,current_period_end")
+        .select("plan,status,current_period_end,stripe_customer_id")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
@@ -86,6 +87,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         plan: (activePlan ?? "free") as SubStatus["plan"],
         status: data?.status ?? "none",
         current_period_end: data?.current_period_end ?? null,
+        stripeCustomerId: (data as any)?.stripe_customer_id ?? null,
       });
     }
 
@@ -242,14 +244,20 @@ export default function ProfileClient({ tProfile, navT }: Props) {
 
             <div className="mt-6 flex flex-wrap gap-3">
               {sub.signedIn && sub.status === "active" ? (
-                <button
-                  className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                  onClick={openPortal}
-                  disabled={busy || billingUnavailable}
-                  type="button"
-                >
-                  {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.manageStripe ?? "Manage in Stripe (upgrade/cancel)")}
-                </button>
+                sub.stripeCustomerId ? (
+                  <button
+                    className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                    onClick={openPortal}
+                    disabled={busy || billingUnavailable}
+                    type="button"
+                  >
+                    {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.manageStripe ?? "Manage in Stripe (upgrade/cancel)")}
+                  </button>
+                ) : (
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--muted)]">
+                    Billing portal syncing… please check back in a moment.
+                  </div>
+                )
               ) : null}
 
               {sub.signedIn && sub.status !== "active" ? (

@@ -15,6 +15,7 @@ type SubStatus = {
   signedIn: boolean;
   plan: "free" | "basic" | "advanced";
   status: string;
+  stripeCustomerId?: string | null;
 };
 
 type Props = {
@@ -44,7 +45,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
         }
         const { data } = await supabase
           .from("user_subscriptions")
-          .select("plan,status")
+          .select("plan,status,stripe_customer_id")
           .eq("user_id", session.user.id)
           .maybeSingle();
         if (cancelled) return;
@@ -53,6 +54,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
           signedIn: true,
           plan: (activePlan ?? "free") as SubStatus["plan"],
           status: data?.status ?? "none",
+          stripeCustomerId: (data as any)?.stripe_customer_id ?? null,
         });
       } catch {
         if (!cancelled) setSub({ signedIn: false, plan: "free", status: "none" });

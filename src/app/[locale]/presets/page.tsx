@@ -65,10 +65,10 @@ export default async function LocalePresetsPage({ params }: Props) {
             <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{p.description}</p>
 
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link className="rg-btn" href={`/app?preset=${encodeURIComponent(p.formatId)}`}>
+              <Link className="rg-btn" href={localeHref(loc, `/app?preset=${encodeURIComponent(p.formatId)}`)}>
                 {t.common.openWithPreset}
               </Link>
-              <Link className="rg-btn" href={`/presets/${encodeURIComponent(p.id)}`}>
+              <Link className="rg-btn" href={localeHref(loc, `/presets/${encodeURIComponent(p.id)}`)}>
                 {t.common.viewInformation}
               </Link>
             </div>
@@ -126,10 +126,10 @@ export default async function LocalePresetsPage({ params }: Props) {
       )}
 
       <div className="mt-10 flex flex-wrap gap-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-        <Link href="/app" className="hover:underline">
+        <Link href={localeHref(loc, "/app")} className="hover:underline">
           {t.nav.csvFixer}
         </Link>
-        <Link href="/#pricing" className="hover:underline">
+        <Link href={`${localeHref(loc, "/")}#pricing`} className="hover:underline">
           {t.nav.pricing}
         </Link>
       </div>
