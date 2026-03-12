@@ -42,6 +42,24 @@ export type Translations = {
     importBlockerNote: string;
     autoFixable: string;
     updated: string;
+    // Issue guide section headings
+    whatIsThisIssue: string;
+    affectedField: string;
+    whyRejects: string;
+    platformSpecificNote: string;
+    validValues: string;
+    examples: string;
+    badValue: string;
+    goodValue: string;
+    noteCol: string;
+    fixInStrive: string;
+    wooVariablePreset: string;
+    fixerGuide: string;
+    fixInExcel: string;
+    fixInSheets: string;
+    preventNextTime: string;
+    howDetects: string;
+    technicalDetail: string;
   };
   guides: {
     title: string;
