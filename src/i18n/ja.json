@@ -54,7 +54,11 @@
     "browseTemplates": "テンプレートを見る",
     "searchPlaceholder": "ガイドを検索…",
     "allGuides": "すべてのガイド",
-    "platformsLabel": "プラットフォーム"
+    "platformsLabel": "プラットフォーム",
+    "csvImportGuides": "CSVインポートガイド",
+    "generalGuidesDesc": "エンコード、ヘッダー、引用符、改行、一般的なインポートエラーに関する一般的なCSVガイド。",
+    "platformGuidesDesc": "CSVインポートのすべての検証問題をカバーするガイド。",
+    "csvFixerBtn": "CSV修正ツール"
   },
   "common": {
     "openWithPreset": "プリセットで開く",
@@ -214,7 +218,22 @@
     "pricing": "料金",
     "formatConverter": "フォーマット変換",
     "csvMerger": "CSV結合",
-    "csvInspector": "CSVインスペクター"
+    "csvInspector": "CSVインスペクター",
+    "autoFixHelp": "安全な問題は自動修正します。リスクのある変更は手動編集のためテーブルに残ります。",
+    "editHelp": "表のセルをクリックして編集します。赤と黄色はエラーと警告を示します。",
+    "builtInFormats": "組み込みフォーマットはすべての方が利用できます。",
+    "customFormatsHere": "カスタムフォーマットは保存またはインポートするとここに表示されます。",
+    "customFormatsAdvancedOnly": "カスタムフォーマットはAdvancedプランのみご利用いただけます。",
+    "filterAll": "すべて",
+    "filterErrors": "エラー",
+    "filterWarnings": "警告",
+    "filterInfo": "情報",
+    "showingIssues": "表示中",
+    "pinCol": "固定",
+    "rowCol": "行",
+    "pinRow": "固定",
+    "unpinRow": "固定解除",
+    "noAutoFixes": "このアップロードに自動修正は適用されませんでした。"
   },
   "profile": {
     "verifySubscription": "サブスクリプションを確認し、請求を管理します。",

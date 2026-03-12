@@ -54,7 +54,11 @@
     "browseTemplates": "Sfoglia modelli",
     "searchPlaceholder": "Cerca guide…",
     "allGuides": "Tutte le guide",
-    "platformsLabel": "Piattaforme"
+    "platformsLabel": "Piattaforme",
+    "csvImportGuides": "Guide importazione CSV",
+    "generalGuidesDesc": "Guide CSV generali per codifica, intestazioni, virgolette, fine riga ed errori di importazione comuni.",
+    "platformGuidesDesc": "guide che coprono ogni problema di validazione per le importazioni CSV.",
+    "csvFixerBtn": "Riparatore CSV"
   },
   "common": {
     "openWithPreset": "Apri con modello",
@@ -214,7 +218,22 @@
     "pricing": "Prezzi",
     "formatConverter": "Convertitore di formato",
     "csvMerger": "Unificatore CSV",
-    "csvInspector": "Ispettore CSV"
+    "csvInspector": "Ispettore CSV",
+    "autoFixHelp": "Correggeremo automaticamente i problemi sicuri. Quelli rischiosi rimangono nella tabella per la modifica manuale.",
+    "editHelp": "Clicca su una cella della tabella per modificarla. Il rosso e il giallo evidenziano errori e avvertimenti.",
+    "builtInFormats": "I formati integrati sono disponibili per tutti.",
+    "customFormatsHere": "I formati personalizzati appaiono qui quando li salvi o importi.",
+    "customFormatsAdvancedOnly": "I formati personalizzati sono disponibili solo per il piano Advanced.",
+    "filterAll": "Tutti",
+    "filterErrors": "Errori",
+    "filterWarnings": "Avvertimenti",
+    "filterInfo": "Info",
+    "showingIssues": "Visualizzazione di",
+    "pinCol": "Fissa",
+    "rowCol": "Riga",
+    "pinRow": "Fissa",
+    "unpinRow": "Sblocca",
+    "noAutoFixes": "Nessuna correzione automatica è stata applicata per questo caricamento."
   },
   "profile": {
     "verifySubscription": "Verifica il tuo abbonamento e gestisci la fatturazione.",

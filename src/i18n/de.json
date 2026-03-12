@@ -54,7 +54,11 @@
     "browseTemplates": "Vorlagen durchsuchen",
     "searchPlaceholder": "Anleitungen suchen…",
     "allGuides": "Alle Leitfäden",
-    "platformsLabel": "Plattformen"
+    "platformsLabel": "Plattformen",
+    "csvImportGuides": "CSV-Import-Anleitungen",
+    "generalGuidesDesc": "Allgemeine CSV-Anleitungen für Kodierung, Überschriften, Anführungszeichen, Zeilenenden und häufige Importfehler.",
+    "platformGuidesDesc": "Anleitungen zu allen Validierungsproblemen für CSV-Importe.",
+    "csvFixerBtn": "CSV-Reparateur"
   },
   "common": {
     "openWithPreset": "Mit Vorlage öffnen",
@@ -114,7 +118,21 @@
     "howItWorks": "So funktioniert es",
     "examplesOfFixes": "Beispiele für Korrekturen",
     "faq": "FAQ",
-    "presetFormats": "Vorlagenformate"
+    "presetFormats": "Vorlagenformate",
+    "name_shopify_products": "Shopify-Import-Optimierer",
+    "desc_shopify_products": "Shopify-Produkt-CSVs validieren und automatisch reparieren. Fokus auf Import-Blocker, Variantenstruktur, Preise, Inventar und konsistente Formatierung.",
+    "name_woocommerce_products": "WooCommerce-Produkte",
+    "desc_woocommerce_products": "WooCommerce-Produktvorlagen bereinigen: Pflichtfelder, Preisformate, SKUs, Kategorien und häufige Importfehler.",
+    "name_woocommerce_variable_products": "WooCommerce variable Produkte",
+    "desc_woocommerce_variable_products": "WooCommerce variable Produkte + Variationen (erstellt fehlende Elternzeilen automatisch und validiert die Variationsstruktur).",
+    "name_etsy_listings": "Etsy-Angebote",
+    "desc_etsy_listings": "Etsy-Angebots-CSVs mit sauberer Struktur, Pflichtfeldern und sicherer Formatierung für Uploads vorbereiten.",
+    "name_amazon_inventory_loader": "Amazon Inventory Loader",
+    "desc_amazon_inventory_loader": "Amazon Inventory Loader-Vorlagen normalisieren durch Validierung wesentlicher Felder wie SKU, Artikelname, Menge und Preis.",
+    "name_ebay_listings": "eBay-Angebote",
+    "desc_ebay_listings": "Häufige eBay-Angebots-CSV-Probleme beheben: fehlende IDs, ungültige Werte, fehlerhafte URLs und inkonsistente Preis- oder Mengenfelder.",
+    "name_ebay_variations": "eBay-Variationen",
+    "desc_ebay_variations": "eBay-Variations-Listing-CSVs validieren: Variations-Spezifikationen, doppelte Variationskombinationen, Preis- und Mengenfelder."
   },
   "convert": {
     "title": "CSV-Format-Konverter",
@@ -214,7 +232,22 @@
     "pricing": "Preise",
     "formatConverter": "Format-Konverter",
     "csvMerger": "CSV-Zusammenführung",
-    "csvInspector": "CSV-Inspektor"
+    "csvInspector": "CSV-Inspektor",
+    "autoFixHelp": "Wir beheben sichere Probleme automatisch. Riskante Änderungen bleiben zur manuellen Bearbeitung in der Tabelle.",
+    "editHelp": "Klicken Sie auf eine Zelle in der Tabelle, um sie zu bearbeiten. Rot und gelb markieren Fehler und Warnungen.",
+    "builtInFormats": "Integrierte Formate stehen allen zur Verfügung.",
+    "customFormatsHere": "Eigene Formate erscheinen hier, wenn Sie sie speichern oder importieren.",
+    "customFormatsAdvancedOnly": "Eigene Formate sind nur für den Advanced-Tarif.",
+    "filterAll": "Alle",
+    "filterErrors": "Fehler",
+    "filterWarnings": "Warnungen",
+    "filterInfo": "Info",
+    "showingIssues": "Zeige",
+    "pinCol": "Heften",
+    "rowCol": "Zeile",
+    "pinRow": "Anheften",
+    "unpinRow": "Lösen",
+    "noAutoFixes": "Für diesen Upload wurden keine automatischen Korrekturen angewendet."
   },
   "profile": {
     "verifySubscription": "Ihr Abonnement prüfen und Abrechnung verwalten.",

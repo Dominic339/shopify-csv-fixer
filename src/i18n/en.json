@@ -54,7 +54,11 @@
     "browseTemplates": "Browse templates",
     "searchPlaceholder": "Search guides…",
     "allGuides": "All guides",
-    "platformsLabel": "Platforms"
+    "platformsLabel": "Platforms",
+    "csvImportGuides": "CSV Import Guides",
+    "generalGuidesDesc": "General CSV guides for encoding, headers, quoting, line endings, and common import mistakes.",
+    "platformGuidesDesc": "guides covering every validation issue for CSV imports.",
+    "csvFixerBtn": "CSV Fixer"
   },
   "common": {
     "openWithPreset": "Open with preset",
@@ -117,7 +121,21 @@
     "howItWorks": "How it works",
     "examplesOfFixes": "Examples of fixes",
     "faq": "FAQ",
-    "presetFormats": "Preset Formats"
+    "presetFormats": "Preset Formats",
+    "name_shopify_products": "Shopify Import Optimizer",
+    "desc_shopify_products": "Validate and auto-fix Shopify product CSVs. Focused on import blockers, variant structure, pricing, inventory, and consistent formatting.",
+    "name_woocommerce_products": "WooCommerce Products",
+    "desc_woocommerce_products": "Clean WooCommerce product templates: required fields, pricing formats, SKUs, categories, and common import mistakes.",
+    "name_woocommerce_variable_products": "WooCommerce Variable Products",
+    "desc_woocommerce_variable_products": "WooCommerce variable products + variations (auto-creates missing parent rows and validates variation structure).",
+    "name_etsy_listings": "Etsy Listings",
+    "desc_etsy_listings": "Prepare Etsy listing CSVs with cleaner structure, required fields, and safer formatting for uploads.",
+    "name_amazon_inventory_loader": "Amazon Inventory Loader",
+    "desc_amazon_inventory_loader": "Normalize Amazon inventory loader style templates by validating essentials like SKU, item name, quantity, and price.",
+    "name_ebay_listings": "eBay Listings",
+    "desc_ebay_listings": "Fix common eBay listing CSV issues: missing IDs, invalid values, broken URLs, and inconsistent pricing or quantity fields.",
+    "name_ebay_variations": "eBay Variations",
+    "desc_ebay_variations": "Validate eBay variation listing CSVs: variation specifics pairing, duplicate variation combos, price and quantity fields."
   },
   "convert": {
     "title": "CSV Format Converter",
@@ -217,7 +235,22 @@
     "pricing": "Pricing",
     "formatConverter": "Format Converter",
     "csvMerger": "CSV Merger",
-    "csvInspector": "CSV Inspector"
+    "csvInspector": "CSV Inspector",
+    "autoFixHelp": "We'll auto-fix safe issues. Anything risky stays in the table for manual edits.",
+    "editHelp": "Click a cell in the table to edit it. Red and yellow highlight errors and warnings.",
+    "builtInFormats": "Built-in formats are available to everyone.",
+    "customFormatsHere": "Custom formats appear here when you save or import them.",
+    "customFormatsAdvancedOnly": "Custom formats are Advanced only.",
+    "filterAll": "All",
+    "filterErrors": "Errors",
+    "filterWarnings": "Warnings",
+    "filterInfo": "Info",
+    "showingIssues": "Showing",
+    "pinCol": "Pin",
+    "rowCol": "Row",
+    "pinRow": "Pin",
+    "unpinRow": "Unpin",
+    "noAutoFixes": "No auto fixes were applied for this upload."
   },
   "profile": {
     "verifySubscription": "Verify your subscription and manage billing.",

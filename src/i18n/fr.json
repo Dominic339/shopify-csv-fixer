@@ -54,7 +54,11 @@
     "browseTemplates": "Parcourir les modèles",
     "searchPlaceholder": "Rechercher des guides…",
     "allGuides": "Tous les guides",
-    "platformsLabel": "Plateformes"
+    "platformsLabel": "Plateformes",
+    "csvImportGuides": "Guides d'importation CSV",
+    "generalGuidesDesc": "Guides généraux CSV pour l'encodage, les en-têtes, les guillemets, les fins de ligne et les erreurs d'importation courantes.",
+    "platformGuidesDesc": "guides couvrant chaque problème de validation pour les importations CSV.",
+    "csvFixerBtn": "Réparateur CSV"
   },
   "common": {
     "openWithPreset": "Ouvrir avec le modèle",
@@ -114,7 +118,21 @@
     "howItWorks": "Comment ça fonctionne",
     "examplesOfFixes": "Exemples de corrections",
     "faq": "FAQ",
-    "presetFormats": "Formats prédéfinis"
+    "presetFormats": "Formats prédéfinis",
+    "name_shopify_products": "Optimiseur d'importation Shopify",
+    "desc_shopify_products": "Valide et corrige automatiquement les CSV de produits Shopify. Axé sur les blocages d'importation, la structure des variantes, les prix, l'inventaire et la mise en forme cohérente.",
+    "name_woocommerce_products": "Produits WooCommerce",
+    "desc_woocommerce_products": "Nettoie les modèles de produits WooCommerce : champs obligatoires, formats de prix, SKU, catégories et erreurs d'importation courantes.",
+    "name_woocommerce_variable_products": "Produits variables WooCommerce",
+    "desc_woocommerce_variable_products": "Produits variables WooCommerce + variations (crée automatiquement les lignes parentes manquantes et valide la structure des variations).",
+    "name_etsy_listings": "Annonces Etsy",
+    "desc_etsy_listings": "Préparez les CSV d'annonces Etsy avec une structure plus claire, les champs obligatoires et une mise en forme plus sûre pour les téléchargements.",
+    "name_amazon_inventory_loader": "Chargeur d'inventaire Amazon",
+    "desc_amazon_inventory_loader": "Normalise les modèles Amazon Inventory Loader en validant les éléments essentiels comme le SKU, le nom de l'article, la quantité et le prix.",
+    "name_ebay_listings": "Annonces eBay",
+    "desc_ebay_listings": "Corrige les problèmes CSV courants des annonces eBay : ID manquants, valeurs invalides, URL incorrectes et champs de prix ou de quantité incohérents.",
+    "name_ebay_variations": "Variations eBay",
+    "desc_ebay_variations": "Valide les CSV de variantes eBay : appairage des spécifiques, combos de variations dupliquées, champs prix et quantité."
   },
   "convert": {
     "title": "Convertisseur de format CSV",
@@ -214,7 +232,22 @@
     "pricing": "Tarifs",
     "formatConverter": "Convertisseur de format",
     "csvMerger": "Fusionneur CSV",
-    "csvInspector": "Inspecteur CSV"
+    "csvInspector": "Inspecteur CSV",
+    "autoFixHelp": "Nous corrigerons automatiquement les problèmes sûrs. Tout ce qui est risqué reste dans le tableau pour des modifications manuelles.",
+    "editHelp": "Cliquez sur une cellule du tableau pour la modifier. Le rouge et le jaune mettent en évidence les erreurs et avertissements.",
+    "builtInFormats": "Les formats intégrés sont disponibles pour tous.",
+    "customFormatsHere": "Les formats personnalisés apparaissent ici quand vous les enregistrez ou importez.",
+    "customFormatsAdvancedOnly": "Les formats personnalisés sont réservés au plan Advanced.",
+    "filterAll": "Tout",
+    "filterErrors": "Erreurs",
+    "filterWarnings": "Avertissements",
+    "filterInfo": "Info",
+    "showingIssues": "Affichage de",
+    "pinCol": "Épingler",
+    "rowCol": "Ligne",
+    "pinRow": "Épingler",
+    "unpinRow": "Désépingler",
+    "noAutoFixes": "Aucune correction automatique n'a été appliquée pour ce téléchargement."
   },
   "profile": {
     "verifySubscription": "Vérifiez votre abonnement et gérez la facturation.",

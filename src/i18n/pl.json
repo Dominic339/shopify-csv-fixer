@@ -54,7 +54,11 @@
     "browseTemplates": "Przeglądaj szablony",
     "searchPlaceholder": "Szukaj poradników…",
     "allGuides": "Wszystkie przewodniki",
-    "platformsLabel": "Platformy"
+    "platformsLabel": "Platformy",
+    "csvImportGuides": "Przewodniki importu CSV",
+    "generalGuidesDesc": "Ogólne przewodniki CSV dotyczące kodowania, nagłówków, cudzysłowów, końców wierszy i typowych błędów importu.",
+    "platformGuidesDesc": "przewodniki obejmujące każdy problem walidacji dla importów CSV.",
+    "csvFixerBtn": "Naprawiacz CSV"
   },
   "common": {
     "openWithPreset": "Otwórz z szablonem",
@@ -214,7 +218,22 @@
     "pricing": "Cennik",
     "formatConverter": "Konwerter formatów",
     "csvMerger": "Łącznik CSV",
-    "csvInspector": "Inspektor CSV"
+    "csvInspector": "Inspektor CSV",
+    "autoFixHelp": "Automatycznie naprawiamy bezpieczne problemy. Ryzykowne zmiany pozostają w tabeli do ręcznej edycji.",
+    "editHelp": "Kliknij komórkę w tabeli, aby ją edytować. Czerwony i żółty oznaczają błędy i ostrzeżenia.",
+    "builtInFormats": "Wbudowane formaty są dostępne dla wszystkich.",
+    "customFormatsHere": "Niestandardowe formaty pojawiają się tutaj po ich zapisaniu lub zaimportowaniu.",
+    "customFormatsAdvancedOnly": "Niestandardowe formaty są dostępne tylko w planie Advanced.",
+    "filterAll": "Wszystkie",
+    "filterErrors": "Błędy",
+    "filterWarnings": "Ostrzeżenia",
+    "filterInfo": "Info",
+    "showingIssues": "Wyświetlanie",
+    "pinCol": "Przypnij",
+    "rowCol": "Wiersz",
+    "pinRow": "Przypnij",
+    "unpinRow": "Odepnij",
+    "noAutoFixes": "Żadne automatyczne poprawki nie zostały zastosowane dla tego przesłania."
   },
   "profile": {
     "verifySubscription": "Sprawdź swoją subskrypcję i zarządzaj rozliczeniami.",

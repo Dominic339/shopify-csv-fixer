@@ -54,7 +54,11 @@
     "browseTemplates": "Sjablonen bekijken",
     "searchPlaceholder": "Handleidingen zoeken…",
     "allGuides": "Alle gidsen",
-    "platformsLabel": "Platforms"
+    "platformsLabel": "Platforms",
+    "csvImportGuides": "CSV-importgidsen",
+    "generalGuidesDesc": "Algemene CSV-gidsen voor codering, headers, aanhalingstekens, regeleindes en veelvoorkomende importfouten.",
+    "platformGuidesDesc": "gidsen over elk validatieprobleem voor CSV-imports.",
+    "csvFixerBtn": "CSV-reparateur"
   },
   "common": {
     "openWithPreset": "Openen met sjabloon",
@@ -214,7 +218,22 @@
     "pricing": "Prijzen",
     "formatConverter": "Formaatconverter",
     "csvMerger": "CSV-samenvoeger",
-    "csvInspector": "CSV-inspecteur"
+    "csvInspector": "CSV-inspecteur",
+    "autoFixHelp": "We lossen veilige problemen automatisch op. Risicovolle wijzigingen blijven in de tabel voor handmatige bewerking.",
+    "editHelp": "Klik op een cel in de tabel om deze te bewerken. Rood en geel markeren fouten en waarschuwingen.",
+    "builtInFormats": "Ingebouwde formaten zijn beschikbaar voor iedereen.",
+    "customFormatsHere": "Aangepaste formaten verschijnen hier wanneer je ze opslaat of importeert.",
+    "customFormatsAdvancedOnly": "Aangepaste formaten zijn alleen voor het Advanced abonnement.",
+    "filterAll": "Alle",
+    "filterErrors": "Fouten",
+    "filterWarnings": "Waarschuwingen",
+    "filterInfo": "Info",
+    "showingIssues": "Weergave van",
+    "pinCol": "Vastzetten",
+    "rowCol": "Rij",
+    "pinRow": "Vastmaken",
+    "unpinRow": "Losmaken",
+    "noAutoFixes": "Er zijn geen automatische correcties toegepast voor dit bestand."
   },
   "profile": {
     "verifySubscription": "Verifieer uw abonnement en beheer facturering.",

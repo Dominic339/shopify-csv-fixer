@@ -62,6 +62,11 @@ export type Translations = {
     searchPlaceholder: string;
     allGuides: string;
     platformsLabel: string;
+    // Platform guide category page strings
+    csvImportGuides: string;
+    generalGuidesDesc: string;
+    platformGuidesDesc: string;
+    csvFixerBtn: string;
   };
   common: {
     openWithPreset: string;
@@ -159,6 +164,21 @@ export type Translations = {
     examplesOfFixes: string;
     faq: string;
     presetFormats: string;
+    // Optional per-preset localized names and descriptions
+    name_shopify_products?: string;
+    desc_shopify_products?: string;
+    name_woocommerce_products?: string;
+    desc_woocommerce_products?: string;
+    name_woocommerce_variable_products?: string;
+    desc_woocommerce_variable_products?: string;
+    name_etsy_listings?: string;
+    desc_etsy_listings?: string;
+    name_amazon_inventory_loader?: string;
+    desc_amazon_inventory_loader?: string;
+    name_ebay_listings?: string;
+    desc_ebay_listings?: string;
+    name_ebay_variations?: string;
+    desc_ebay_variations?: string;
   };
   convert: {
     title: string;
@@ -259,6 +279,25 @@ export type Translations = {
     formatConverter: string;
     csvMerger: string;
     csvInspector: string;
+    // Upload + edit helper text
+    autoFixHelp: string;
+    editHelp: string;
+    // Format selector notes
+    builtInFormats: string;
+    customFormatsHere: string;
+    customFormatsAdvancedOnly: string;
+    // Issue filter buttons
+    filterAll: string;
+    filterErrors: string;
+    filterWarnings: string;
+    filterInfo: string;
+    // Table & count labels
+    showingIssues: string;
+    pinCol: string;
+    rowCol: string;
+    pinRow: string;
+    unpinRow: string;
+    noAutoFixes: string;
   };
   profile: {
     verifySubscription: string;

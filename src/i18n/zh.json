@@ -54,7 +54,11 @@
     "browseTemplates": "浏览模板",
     "searchPlaceholder": "搜索指南…",
     "allGuides": "所有指南",
-    "platformsLabel": "平台"
+    "platformsLabel": "平台",
+    "csvImportGuides": "CSV 导入指南",
+    "generalGuidesDesc": "关于编码、标题、引号、行尾和常见导入错误的通用 CSV 指南。",
+    "platformGuidesDesc": "涵盖 CSV 导入所有验证问题的指南。",
+    "csvFixerBtn": "CSV 修复工具"
   },
   "common": {
     "openWithPreset": "使用预设打开",
@@ -214,7 +218,22 @@
     "pricing": "定价",
     "formatConverter": "格式转换器",
     "csvMerger": "CSV合并器",
-    "csvInspector": "CSV检查器"
+    "csvInspector": "CSV检查器",
+    "autoFixHelp": "我们将自动修复安全问题。有风险的更改将留在表格中供手动编辑。",
+    "editHelp": "点击表格中的单元格进行编辑。红色和黄色分别标记错误和警告。",
+    "builtInFormats": "内置格式对所有人开放。",
+    "customFormatsHere": "保存或导入后，自定义格式将在此处显示。",
+    "customFormatsAdvancedOnly": "自定义格式仅适用于 Advanced 计划。",
+    "filterAll": "全部",
+    "filterErrors": "错误",
+    "filterWarnings": "警告",
+    "filterInfo": "信息",
+    "showingIssues": "显示",
+    "pinCol": "固定",
+    "rowCol": "行",
+    "pinRow": "固定",
+    "unpinRow": "取消固定",
+    "noAutoFixes": "此次上传未应用自动修复。"
   },
   "profile": {
     "verifySubscription": "验证您的订阅并管理账单。",

@@ -54,7 +54,11 @@
     "browseTemplates": "Şablonlara gözat",
     "searchPlaceholder": "Kılavuz ara…",
     "allGuides": "Tüm rehberler",
-    "platformsLabel": "Platformlar"
+    "platformsLabel": "Platformlar",
+    "csvImportGuides": "CSV İçe Aktarma Kılavuzları",
+    "generalGuidesDesc": "Kodlama, başlıklar, tırnaklar, satır sonları ve yaygın içe aktarma hataları için genel CSV kılavuzları.",
+    "platformGuidesDesc": "CSV içe aktarmalarında her doğrulama sorununu kapsayan kılavuzlar.",
+    "csvFixerBtn": "CSV Düzeltici"
   },
   "common": {
     "openWithPreset": "Önayarla aç",
@@ -214,7 +218,22 @@
     "pricing": "Fiyatlandırma",
     "formatConverter": "Format Dönüştürücü",
     "csvMerger": "CSV Birleştirici",
-    "csvInspector": "CSV Denetçisi"
+    "csvInspector": "CSV Denetçisi",
+    "autoFixHelp": "Güvenli sorunları otomatik olarak düzelteceğiz. Riskli değişiklikler manuel düzenleme için tabloda kalır.",
+    "editHelp": "Düzenlemek için tablodaki bir hücreye tıklayın. Kırmızı ve sarı hataları ve uyarıları vurgular.",
+    "builtInFormats": "Yerleşik formatlar herkese açıktır.",
+    "customFormatsHere": "Özel formatlar kaydedildiğinde veya içe aktarıldığında burada görünür.",
+    "customFormatsAdvancedOnly": "Özel formatlar yalnızca Advanced planında kullanılabilir.",
+    "filterAll": "Tümü",
+    "filterErrors": "Hatalar",
+    "filterWarnings": "Uyarılar",
+    "filterInfo": "Bilgi",
+    "showingIssues": "Gösterilen",
+    "pinCol": "Sabitle",
+    "rowCol": "Satır",
+    "pinRow": "Sabitle",
+    "unpinRow": "Sabitlemeyi kaldır",
+    "noAutoFixes": "Bu yükleme için otomatik düzeltme uygulanmadı."
   },
   "profile": {
     "verifySubscription": "Aboneliğinizi doğrulayın ve faturalandırmayı yönetin.",
