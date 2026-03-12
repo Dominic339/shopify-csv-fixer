@@ -253,7 +253,8 @@
     "loading": "Yükleniyor…",
     "language": "Dil",
     "languageDesc": "Tercih ettiğiniz görüntüleme dilini seçin. Bu, tarayıcı algılamasını geçersiz kılar.",
-    "current": "Mevcut"
+    "current": "Mevcut",
+    "billingSyncing": "Fatura portalı senkronize ediliyor… lütfen bir süre sonra tekrar kontrol edin."
   },
   "inspector": {
     "title": "CSV Denetçisi",

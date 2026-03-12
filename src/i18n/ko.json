@@ -253,7 +253,8 @@
     "loading": "로딩 중…",
     "language": "언어",
     "languageDesc": "선호하는 표시 언어를 선택하세요. 브라우저 감지보다 우선합니다.",
-    "current": "현재"
+    "current": "현재",
+    "billingSyncing": "청구 포털 동기화 중… 잠시 후 다시 확인하세요."
   },
   "inspector": {
     "title": "CSV 검사기",

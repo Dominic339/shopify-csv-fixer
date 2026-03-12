@@ -248,7 +248,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                   </button>
                 ) : (
                   <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--muted)]">
-                    Billing portal syncing… please check back in a moment.
+                    {tProfile?.billingSyncing ?? "Billing portal syncing… please check back in a moment."}
                   </div>
                 )
               ) : null}

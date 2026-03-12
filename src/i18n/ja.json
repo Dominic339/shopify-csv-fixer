@@ -253,7 +253,8 @@
     "loading": "読み込み中…",
     "language": "言語",
     "languageDesc": "表示言語を選択してください。ブラウザの検出より優先されます。",
-    "current": "現在"
+    "current": "現在",
+    "billingSyncing": "請求ポータルを同期中です… しばらくしてから再度お試しください。"
   },
   "inspector": {
     "title": "CSVインスペクター",

@@ -270,7 +270,8 @@
     "loading": "Loading…",
     "language": "Language",
     "languageDesc": "Choose your preferred display language. This overrides browser detection.",
-    "current": "Current"
+    "current": "Current",
+    "billingSyncing": "Billing portal syncing… please check back in a moment."
   },
   "pricing": {
     "free": "Free",

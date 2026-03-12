@@ -253,7 +253,8 @@
     "loading": "Laden…",
     "language": "Taal",
     "languageDesc": "Kies uw gewenste weergavetaal. Dit overschrijft browserdetectie.",
-    "current": "Huidig"
+    "current": "Huidig",
+    "billingSyncing": "Factureringsportaal wordt gesynchroniseerd… probeer het over een ogenblik."
   },
   "inspector": {
     "title": "CSV-inspector",

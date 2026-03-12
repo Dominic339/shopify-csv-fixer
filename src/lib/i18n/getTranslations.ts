@@ -318,6 +318,7 @@ export type Translations = {
     language: string;
     languageDesc: string;
     current: string;
+    billingSyncing: string;
   };
   inspector: {
     title: string;

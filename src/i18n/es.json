@@ -267,7 +267,8 @@
     "loading": "Cargando…",
     "language": "Idioma",
     "languageDesc": "Elige tu idioma de visualización preferido. Esto anula la detección del navegador.",
-    "current": "Actual"
+    "current": "Actual",
+    "billingSyncing": "Portal de facturación sincronizando… por favor vuelva en un momento."
   },
   "inspector": {
     "title": "Inspector CSV",

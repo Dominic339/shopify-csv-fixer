@@ -253,7 +253,8 @@
     "loading": "加载中…",
     "language": "语言",
     "languageDesc": "选择您偏好的显示语言。这将覆盖浏览器检测。",
-    "current": "当前"
+    "current": "当前",
+    "billingSyncing": "计费门户同步中… 请稍后再试。"
   },
   "inspector": {
     "title": "CSV检查器",

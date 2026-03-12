@@ -267,7 +267,8 @@
     "loading": "Laden…",
     "language": "Sprache",
     "languageDesc": "Wählen Sie Ihre bevorzugte Anzeigesprache. Dies überschreibt die Browsererkennung.",
-    "current": "Aktuell"
+    "current": "Aktuell",
+    "billingSyncing": "Abrechnungsportal wird synchronisiert… Bitte versuchen Sie es in Kürze erneut."
   },
   "inspector": {
     "title": "CSV-Inspektor",
