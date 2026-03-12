@@ -341,6 +341,7 @@
     "viewPricing": "Voir les tarifs",
     "goToAccount": "Aller au compte pour mettre à niveau",
     "signInToUpgrade": "Se connecter pour mettre à niveau",
-    "close": "Fermer"
+    "close": "Fermer",
+    "syncingBilling": "Synchronisation des informations de facturation…"
   }
 }

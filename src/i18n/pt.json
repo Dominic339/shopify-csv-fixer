@@ -327,6 +327,7 @@
     "viewPricing": "Ver preços",
     "goToAccount": "Ir para a conta para atualizar",
     "signInToUpgrade": "Entrar para atualizar",
-    "close": "Fechar"
+    "close": "Fechar",
+    "syncingBilling": "Sincronizando informações de cobrança…"
   }
 }

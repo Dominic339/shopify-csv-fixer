@@ -341,6 +341,7 @@
     "viewPricing": "Preise ansehen",
     "goToAccount": "Zum Konto zum Upgraden",
     "signInToUpgrade": "Anmelden und upgraden",
-    "close": "Schließen"
+    "close": "Schließen",
+    "syncingBilling": "Abrechnungsdaten werden synchronisiert…"
   }
 }

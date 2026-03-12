@@ -327,6 +327,7 @@
     "viewPricing": "查看定价",
     "goToAccount": "前往账户升级",
     "signInToUpgrade": "登录以升级",
-    "close": "关闭"
+    "close": "关闭",
+    "syncingBilling": "正在同步结算信息…"
   }
 }

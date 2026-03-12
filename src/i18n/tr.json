@@ -327,6 +327,7 @@
     "viewPricing": "Fiyatları görüntüle",
     "goToAccount": "Yükseltmek için hesaba git",
     "signInToUpgrade": "Yükseltmek için giriş yapın",
-    "close": "Kapat"
+    "close": "Kapat",
+    "syncingBilling": "Fatura bilgileri senkronize ediliyor…"
   }
 }

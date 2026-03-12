@@ -327,6 +327,7 @@
     "viewPricing": "Prijzen bekijken",
     "goToAccount": "Naar account voor upgrade",
     "signInToUpgrade": "Inloggen om te upgraden",
-    "close": "Sluiten"
+    "close": "Sluiten",
+    "syncingBilling": "Factureringsgegevens synchroniseren…"
   }
 }

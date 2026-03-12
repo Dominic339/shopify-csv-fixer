@@ -322,7 +322,8 @@
     "viewPricing": "View pricing",
     "goToAccount": "Go to account to upgrade",
     "signInToUpgrade": "Sign in to upgrade",
-    "close": "Close"
+    "close": "Close",
+    "syncingBilling": "Syncing billing info…"
   },
   "inspector": {
     "title": "CSV Inspector",

@@ -327,6 +327,7 @@
     "viewPricing": "料金を見る",
     "goToAccount": "アップグレードのためにアカウントへ",
     "signInToUpgrade": "アップグレードのためにサインイン",
-    "close": "閉じる"
+    "close": "閉じる",
+    "syncingBilling": "請求情報を同期中…"
   }
 }

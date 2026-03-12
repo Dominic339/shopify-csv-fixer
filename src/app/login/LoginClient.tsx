@@ -121,6 +121,14 @@ export default function LoginClient() {
             Back home
           </a>
         </div>
+
+        {mode === "login" && (
+          <div className="mt-3 text-center text-sm">
+            <a href="/reset-password" className="text-[var(--muted)] hover:underline">
+              Forgot password?
+            </a>
+          </div>
+        )}
       </div>
     </main>
   );

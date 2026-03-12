@@ -275,14 +275,14 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                 </div>
               ) : null}
 
-              {sub.signedIn && sub.status === "active" && sub.plan === "basic" ? (
+              {sub.signedIn && sub.status === "active" && sub.plan === "basic" && sub.stripeCustomerId ? (
                 <button
                   className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
-                  onClick={() => startCheckout("advanced")}
+                  onClick={openPortal}
                   disabled={busy || billingUnavailable}
                   type="button"
                 >
-                  {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
+                  {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced")}
                 </button>
               ) : null}
 

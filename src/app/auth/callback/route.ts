@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  const redirectTo = url.searchParams.get("redirect") ?? "/app";
 
   // If no code, just go back to login
   if (!code) {
@@ -19,6 +20,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, url.origin));
   }
 
-  // Send them into the app after successful login
-  return NextResponse.redirect(new URL("/app", url.origin));
+  // Redirect to the specified page (default: /app)
+  return NextResponse.redirect(new URL(redirectTo, url.origin));
 }

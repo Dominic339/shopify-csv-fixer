@@ -327,6 +327,7 @@
     "viewPricing": "Vedi prezzi",
     "goToAccount": "Vai all'account per l'upgrade",
     "signInToUpgrade": "Accedi per aggiornare",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "syncingBilling": "Sincronizzazione delle informazioni di fatturazione…"
   }
 }

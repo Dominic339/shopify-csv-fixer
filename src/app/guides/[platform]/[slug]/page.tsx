@@ -123,6 +123,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     guide.category,
     "csv import",
     "csv fix",
+    "csv validator",
+    "csv file fixer",
+    "csv formatting errors",
+    "csv import errors",
     label,
     ...guide.keywords,
   ];
@@ -131,8 +135,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     keywords,
-    alternates: { canonical: `/guides/${platform}/${slug}` },
-    openGraph: { title, description },
+    alternates: { canonical: `https://striveformats.com/guides/${platform}/${slug}` },
+    openGraph: { title, description, url: `https://striveformats.com/guides/${platform}/${slug}` },
     twitter: { card: "summary", title, description },
   };
 }
@@ -219,37 +223,44 @@ export default async function GuideDetailPage({ params }: Props) {
   const showWooVariableLink =
     p === "woocommerce" && expanded?.issueType === "variant_structure";
 
-  const jsonLd =
-    guide.kind === "curated"
+  const guideUrl = `https://striveformats.com/guides/${platform}/${slug}`;
+  const breadcrumbLd = {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Guides", item: "https://striveformats.com/guides" },
+      { "@type": "ListItem", position: 2, name: label, item: `https://striveformats.com/guides/${platform}` },
+      { "@type": "ListItem", position: 3, name: guide.title, item: guideUrl },
+    ],
+  };
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: guide.title,
+    description: guide.description,
+    dateModified: guide.lastUpdated ?? undefined,
+    url: guideUrl,
+    publisher: { "@type": "Organization", name: "StriveFormats" },
+    breadcrumb: breadcrumbLd,
+  };
+  const faqLd =
+    guide.kind === "issue" && guide.explanation && guide.howToFix
       ? {
           "@context": "https://schema.org",
-          "@type": "Article",
-          headline: guide.title,
-          description: guide.description,
-          dateModified: guide.lastUpdated,
-          url: `https://striveformats.com/guides/${platform}/${slug}`,
-          publisher: { "@type": "Organization", name: "StriveFormats" },
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: `What is the "${guide.title}" error?`,
+              acceptedAnswer: { "@type": "Answer", text: guide.explanation },
+            },
+            {
+              "@type": "Question",
+              name: `How do I fix "${guide.title}"?`,
+              acceptedAnswer: { "@type": "Answer", text: guide.howToFix },
+            },
+          ],
         }
-      : {
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: guide.title,
-          description: guide.description,
-          url: `https://striveformats.com/guides/${platform}/${slug}`,
-          breadcrumb: {
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Guides", item: "https://striveformats.com/guides" },
-              { "@type": "ListItem", position: 2, name: label, item: `https://striveformats.com/guides/${platform}` },
-              {
-                "@type": "ListItem",
-                position: 3,
-                name: guide.title,
-                item: `https://striveformats.com/guides/${platform}/${slug}`,
-              },
-            ],
-          },
-        };
+      : null;
 
   const curatedData = guide.kind === "curated" ? readCuratedGuide(p, slug) : null;
   const tocItems = curatedData ? extractTocFromMdx(curatedData.rawMdx) : [];
@@ -257,6 +268,7 @@ export default async function GuideDetailPage({ params }: Props) {
   return (
     <>
       <JsonLd data={jsonLd} />
+      {faqLd && <JsonLd data={faqLd} />}
 
       <Breadcrumbs
         items={[
@@ -367,7 +379,7 @@ export default async function GuideDetailPage({ params }: Props) {
             <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
               <div className="text-base font-semibold text-[var(--text)]">Need help fixing your file?</div>
               <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                Upload your CSV to StriveFormats for instant validation, auto-fixes, and a clean export.
+                Upload your CSV to StriveFormats for instant validation, auto-fixes, and a clean export. Our CSV validator checks for formatting errors, missing headers, and platform-specific requirements.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link className="rg-btn" href="/app">
@@ -376,6 +388,11 @@ export default async function GuideDetailPage({ params }: Props) {
                 <Link className="pill-btn" href="/presets">
                   View Templates
                 </Link>
+                {p !== "general" && (
+                  <Link className="pill-btn" href={`/ecommerce/${p}`}>
+                    {label} platform guide
+                  </Link>
+                )}
               </div>
             </div>
           </>
@@ -491,6 +508,11 @@ export default async function GuideDetailPage({ params }: Props) {
                 {fixerHref && (
                   <Link className="pill-btn" href={fixerHref}>
                     {label} Fixer guide
+                  </Link>
+                )}
+                {p !== "general" && (
+                  <Link className="pill-btn" href={`/ecommerce/${p}`}>
+                    {label} ecommerce guide
                   </Link>
                 )}
               </div>

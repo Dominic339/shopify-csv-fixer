@@ -327,6 +327,7 @@
     "viewPricing": "Zobacz ceny",
     "goToAccount": "Przejdź do konta, aby uaktualnić",
     "signInToUpgrade": "Zaloguj się, aby uaktualnić",
-    "close": "Zamknij"
+    "close": "Zamknij",
+    "syncingBilling": "Synchronizowanie informacji rozliczeniowych…"
   }
 }

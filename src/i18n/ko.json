@@ -327,6 +327,7 @@
     "viewPricing": "요금 보기",
     "goToAccount": "업그레이드를 위해 계정으로",
     "signInToUpgrade": "업그레이드를 위해 로그인",
-    "close": "닫기"
+    "close": "닫기",
+    "syncingBilling": "결제 정보 동기화 중…"
   }
 }

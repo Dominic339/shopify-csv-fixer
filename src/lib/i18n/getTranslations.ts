@@ -132,6 +132,7 @@ export type Translations = {
     goToAccount: string;
     signInToUpgrade: string;
     close: string;
+    syncingBilling: string;
   };
   home: {
     title: string;
