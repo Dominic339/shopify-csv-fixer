@@ -61,8 +61,12 @@ export default async function LocalePresetsPage({ params }: Props) {
         {presets.map((p) => (
           <div key={p.id} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
             <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">{p.category}</div>
-            <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">{p.name}</h2>
-            <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{p.description}</p>
+            <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">
+              {(t.presets as any)[`name_${p.id}`] ?? p.name}
+            </h2>
+            <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
+              {(t.presets as any)[`desc_${p.id}`] ?? p.description}
+            </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Link className="rg-btn" href={localeHref(loc, `/app?preset=${encodeURIComponent(p.formatId)}`)}>

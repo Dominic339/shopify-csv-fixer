@@ -349,10 +349,10 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
                 {t.guide.uploadDescription}
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
-                <Link className="rg-btn" href="/app">
+                <Link className="rg-btn" href={localeHref(loc, "/app")}>
                   {t.guide.openCsvFixer}
                 </Link>
-                <Link className="pill-btn" href="/presets">
+                <Link className="pill-btn" href={localeHref(loc, "/presets")}>
                   {t.guide.viewTemplates}
                 </Link>
               </div>
@@ -361,10 +361,10 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
         ) : expanded ? (
           <div className="space-y-6">
             <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-              <h2 className="text-lg font-semibold text-[var(--text)]">What is this issue?</h2>
+              <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.whatIsThisIssue}</h2>
               <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{guide.explanation}</p>
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-                <span className="font-semibold text-[var(--text)]">Affected field:</span>
+                <span className="font-semibold text-[var(--text)]">{t.guide.affectedField}:</span>
                 <code className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-xs">
                   {expanded.whereItAppears}
                 </code>
@@ -377,11 +377,11 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
             </section>
 
             <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-              <h2 className="text-lg font-semibold text-[var(--text)]">Why {label} rejects this</h2>
+              <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.whyRejects.replace("{platform}", label)}</h2>
               <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{guide.whyPlatformCares}</p>
               {expanded.platformNote && (
                 <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
-                  <p className="text-sm font-semibold text-[var(--text)]">{label}-specific note</p>
+                  <p className="text-sm font-semibold text-[var(--text)]">{t.guide.platformSpecificNote.replace("{platform}", label)}</p>
                   <p className="mt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">{expanded.platformNote}</p>
                 </div>
               )}
@@ -389,7 +389,7 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
 
             {expanded.validValues && expanded.validValues.length > 0 && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <h2 className="text-lg font-semibold text-[var(--text)]">Valid values / expected format</h2>
+                <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.validValues}</h2>
                 <ul className="mt-3 space-y-2">
                   {expanded.validValues.map((v, i) => (
                     <li key={i} className="flex items-start gap-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
@@ -403,14 +403,14 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
 
             {expanded.examples.length > 0 && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <h2 className="text-lg font-semibold text-[var(--text)]">Examples</h2>
+                <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.examples}</h2>
                 <div className="mt-3 overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-[var(--border)]">
-                        <th className="pb-2 pr-4 text-left font-semibold text-red-700 dark:text-red-400">Bad value</th>
-                        <th className="pb-2 pr-4 text-left font-semibold text-green-700 dark:text-green-400">Good value</th>
-                        <th className="pb-2 text-left font-medium text-[color:rgba(var(--muted-rgb),1)]">Note</th>
+                        <th className="pb-2 pr-4 text-left font-semibold text-red-700 dark:text-red-400">{t.guide.badValue}</th>
+                        <th className="pb-2 pr-4 text-left font-semibold text-green-700 dark:text-green-400">{t.guide.goodValue}</th>
+                        <th className="pb-2 text-left font-medium text-[color:rgba(var(--muted-rgb),1)]">{t.guide.noteCol}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -436,7 +436,7 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
             )}
 
             <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-              <h2 className="text-lg font-semibold text-[var(--text)]">Fix in StriveFormats</h2>
+              <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.fixInStrive}</h2>
               <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{expanded.striveNote}</p>
               {guide.autoFixable && (
                 <div className="mt-3 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-300">
@@ -444,22 +444,22 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
                 </div>
               )}
               <div className="mt-4 flex flex-wrap gap-3">
-                <Link className="rg-btn" href={presetId ? `/app?preset=${presetId}` : "/app"}>
+                <Link className="rg-btn" href={localeHref(loc, presetId ? `/app?preset=${presetId}` : "/app")}>
                   {t.guide.openCsvFixer}
                 </Link>
                 {presetId && (
-                  <Link className="pill-btn" href={`/presets/${presetId}`}>
+                  <Link className="pill-btn" href={localeHref(loc, `/presets/${presetId}`)}>
                     {t.common.viewInformation}
                   </Link>
                 )}
                 {showWooVariableLink && (
-                  <Link className="pill-btn" href="/app?preset=woocommerce_variable_products">
-                    WooCommerce Variable preset
+                  <Link className="pill-btn" href={localeHref(loc, "/app?preset=woocommerce_variable_products")}>
+                    {t.guide.wooVariablePreset}
                   </Link>
                 )}
                 {fixerHref && (
                   <Link className="pill-btn" href={fixerHref}>
-                    {label} Fixer guide
+                    {t.guide.fixerGuide.replace("{platform}", label)}
                   </Link>
                 )}
               </div>
@@ -467,7 +467,7 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
 
             {expanded.excelSteps.length > 0 && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <h2 className="text-lg font-semibold text-[var(--text)]">Fix in Excel</h2>
+                <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.fixInExcel}</h2>
                 <ol className="mt-3 space-y-2">
                   {expanded.excelSteps.map((step, i) => (
                     <li key={i} className="flex gap-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
@@ -483,7 +483,7 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
 
             {expanded.sheetsSteps.length > 0 && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <h2 className="text-lg font-semibold text-[var(--text)]">Fix in Google Sheets</h2>
+                <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.fixInSheets}</h2>
                 <ol className="mt-3 space-y-2">
                   {expanded.sheetsSteps.map((step, i) => (
                     <li key={i} className="flex gap-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
@@ -499,7 +499,7 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
 
             {expanded.preventTips.length > 0 && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <h2 className="text-lg font-semibold text-[var(--text)]">Prevent it next time</h2>
+                <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.preventNextTime}</h2>
                 <ul className="mt-3 space-y-2">
                   {expanded.preventTips.map((tip, i) => (
                     <li key={i} className="flex items-start gap-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
@@ -512,12 +512,12 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
             )}
 
             <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-              <h2 className="text-lg font-semibold text-[var(--text)]">How StriveFormats detects this</h2>
+              <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.howDetects}</h2>
               <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{expanded.detectionNote}</p>
               <details className="mt-4 group">
                 <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[var(--text)] hover:opacity-80">
                   <span className="transition-transform group-open:rotate-90">&#9658;</span>
-                  Technical detail
+                  {t.guide.technicalDetail}
                 </summary>
                 <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">
                   {expanded.technicalDetail}

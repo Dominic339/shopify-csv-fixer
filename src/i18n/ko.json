@@ -34,7 +34,24 @@
     "importBlocker": "가져오기 차단",
     "importBlockerNote": "이 문제가 해결될 때까지 파일을 가져올 수 없습니다.",
     "autoFixable": "자동 수정 가능: '문제 수정'을 클릭하면 이 문제가 자동으로 수정됩니다.",
-    "updated": "업데이트됨"
+    "updated": "업데이트됨",
+    "whatIsThisIssue": "What is this issue?",
+    "affectedField": "Affected field",
+    "whyRejects": "Why {platform} rejects this",
+    "platformSpecificNote": "{platform}-specific note",
+    "validValues": "Valid values / expected format",
+    "examples": "Examples",
+    "badValue": "Bad value",
+    "goodValue": "Good value",
+    "noteCol": "Note",
+    "fixInStrive": "Fix in StriveFormats",
+    "wooVariablePreset": "WooCommerce Variable preset",
+    "fixerGuide": "{platform} Fixer guide",
+    "fixInExcel": "Fix in Excel",
+    "fixInSheets": "Fix in Google Sheets",
+    "preventNextTime": "Prevent it next time",
+    "howDetects": "How StriveFormats detects this",
+    "technicalDetail": "Technical detail"
   },
   "guides": {
     "title": "CSV 가져오기 가이드",
@@ -54,7 +71,11 @@
     "browseTemplates": "템플릿 탐색",
     "searchPlaceholder": "가이드 검색…",
     "allGuides": "모든 가이드",
-    "platformsLabel": "플랫폼"
+    "platformsLabel": "플랫폼",
+    "csvImportGuides": "CSV 가져오기 가이드",
+    "generalGuidesDesc": "인코딩, 헤더, 인용, 줄 끝 및 일반적인 가져오기 실수에 대한 일반 CSV 가이드.",
+    "platformGuidesDesc": "CSV 가져오기의 모든 유효성 검사 문제를 다루는 가이드.",
+    "csvFixerBtn": "CSV 수정 도구"
   },
   "common": {
     "openWithPreset": "프리셋으로 열기",
@@ -214,7 +235,22 @@
     "pricing": "요금제",
     "formatConverter": "형식 변환기",
     "csvMerger": "CSV 병합기",
-    "csvInspector": "CSV 검사기"
+    "csvInspector": "CSV 검사기",
+    "autoFixHelp": "안전한 문제를 자동으로 수정합니다. 위험한 항목은 수동 편집을 위해 표에 남겨둡니다.",
+    "editHelp": "표의 셀을 클릭하여 편집하세요. 빨간색과 노란색은 오류와 경고를 강조합니다.",
+    "builtInFormats": "내장 형식은 모든 사람이 이용할 수 있습니다.",
+    "customFormatsHere": "사용자 정의 형식을 저장하거나 가져오면 여기에 표시됩니다.",
+    "customFormatsAdvancedOnly": "사용자 정의 형식은 Advanced 플랜 전용입니다.",
+    "filterAll": "전체",
+    "filterErrors": "오류",
+    "filterWarnings": "경고",
+    "filterInfo": "정보",
+    "showingIssues": "표시 중",
+    "pinCol": "고정",
+    "rowCol": "행",
+    "pinRow": "고정",
+    "unpinRow": "고정 해제",
+    "noAutoFixes": "이 업로드에 자동 수정이 적용되지 않았습니다."
   },
   "profile": {
     "verifySubscription": "구독을 확인하고 결제를 관리합니다.",
@@ -234,7 +270,8 @@
     "loading": "로딩 중…",
     "language": "언어",
     "languageDesc": "선호하는 표시 언어를 선택하세요. 브라우저 감지보다 우선합니다.",
-    "current": "현재"
+    "current": "현재",
+    "billingSyncing": "청구 포털 동기화 중… 잠시 후 다시 확인하세요."
   },
   "inspector": {
     "title": "CSV 검사기",
@@ -290,6 +327,7 @@
     "viewPricing": "요금 보기",
     "goToAccount": "업그레이드를 위해 계정으로",
     "signInToUpgrade": "업그레이드를 위해 로그인",
-    "close": "닫기"
+    "close": "닫기",
+    "syncingBilling": "결제 정보 동기화 중…"
   }
 }

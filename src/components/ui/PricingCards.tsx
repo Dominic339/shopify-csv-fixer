@@ -207,18 +207,28 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 disabled
                 type="button"
               >
-                Syncing billing info…
+                {t?.syncingBilling ?? "Syncing billing info…"}
               </button>
             )
           ) : activePlan === "basic" ? (
-            <button
-              className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-              onClick={() => startCheckout("advanced")}
-              disabled={busy !== null || billingUnavailable}
-              type="button"
-            >
-              {busy === "advanced" ? (t?.starting ?? "Starting…") : (t?.upgradeToAdvanced ?? "Upgrade to Advanced")}
-            </button>
+            hasStripeCustomer ? (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+                onClick={openPortal}
+                disabled={busy !== null || billingUnavailable}
+                type="button"
+              >
+                {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.upgradeToAdvanced ?? "Upgrade to Advanced")}
+              </button>
+            ) : (
+              <button
+                className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] opacity-60 cursor-wait"
+                disabled
+                type="button"
+              >
+                {t?.syncingBilling ?? "Syncing billing info…"}
+              </button>
+            )
           ) : (
             <button
               className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"

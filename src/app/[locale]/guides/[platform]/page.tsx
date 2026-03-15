@@ -88,21 +88,21 @@ export default async function LocalePlatformGuidesPage({ params }: Props) {
           </Link>{" "}
           / {label}
         </div>
-        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">{label} CSV Import Guides</h1>
+        <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">{label} {t.guides.csvImportGuides}</h1>
         <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
           {p === "general"
-            ? "General CSV guides for encoding, headers, quoting, line endings, and common import mistakes."
-            : `${guides.length} guides covering every validation issue for ${label} CSV imports.`}
+            ? t.guides.generalGuidesDesc
+            : `${guides.length} ${t.guides.platformGuidesDesc}`}
         </p>
         {(fixerHref || presetId) && (
           <div className="mt-4 flex flex-wrap gap-3">
             {fixerHref && (
               <Link className="rg-btn" href={fixerHref}>
-                {label} CSV Fixer
+                {label} {t.guides.csvFixerBtn}
               </Link>
             )}
             {presetId && (
-              <Link className="pill-btn" href={`/app?preset=${presetId}`}>
+              <Link className="pill-btn" href={localeHref(loc, `/app?preset=${presetId}`)}>
                 {t.common.openWithPreset}
               </Link>
             )}
@@ -151,7 +151,7 @@ export default async function LocalePlatformGuidesPage({ params }: Props) {
           {t.guides.needHelpDesc}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link className="rg-btn" href={presetId ? `/app?preset=${presetId}` : "/app"}>
+          <Link className="rg-btn" href={localeHref(loc, presetId ? `/app?preset=${presetId}` : "/app")}>
             {t.guide.openCsvFixer}
           </Link>
           {presetId && (

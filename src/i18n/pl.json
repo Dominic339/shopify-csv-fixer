@@ -34,7 +34,24 @@
     "importBlocker": "Blokuje import",
     "importBlockerNote": "plik nie zostanie zaimportowany, dopóki problem nie zostanie rozwiązany.",
     "autoFixable": "Automatycznie naprawialne: ten problem jest korygowany automatycznie po kliknięciu Napraw problemy.",
-    "updated": "Zaktualizowano"
+    "updated": "Zaktualizowano",
+    "whatIsThisIssue": "What is this issue?",
+    "affectedField": "Affected field",
+    "whyRejects": "Why {platform} rejects this",
+    "platformSpecificNote": "{platform}-specific note",
+    "validValues": "Valid values / expected format",
+    "examples": "Examples",
+    "badValue": "Bad value",
+    "goodValue": "Good value",
+    "noteCol": "Note",
+    "fixInStrive": "Fix in StriveFormats",
+    "wooVariablePreset": "WooCommerce Variable preset",
+    "fixerGuide": "{platform} Fixer guide",
+    "fixInExcel": "Fix in Excel",
+    "fixInSheets": "Fix in Google Sheets",
+    "preventNextTime": "Prevent it next time",
+    "howDetects": "How StriveFormats detects this",
+    "technicalDetail": "Technical detail"
   },
   "guides": {
     "title": "Poradniki importu CSV",
@@ -54,7 +71,11 @@
     "browseTemplates": "Przeglądaj szablony",
     "searchPlaceholder": "Szukaj poradników…",
     "allGuides": "Wszystkie przewodniki",
-    "platformsLabel": "Platformy"
+    "platformsLabel": "Platformy",
+    "csvImportGuides": "Przewodniki importu CSV",
+    "generalGuidesDesc": "Ogólne przewodniki CSV dotyczące kodowania, nagłówków, cudzysłowów, końców wierszy i typowych błędów importu.",
+    "platformGuidesDesc": "przewodniki obejmujące każdy problem walidacji dla importów CSV.",
+    "csvFixerBtn": "Naprawiacz CSV"
   },
   "common": {
     "openWithPreset": "Otwórz z szablonem",
@@ -214,7 +235,22 @@
     "pricing": "Cennik",
     "formatConverter": "Konwerter formatów",
     "csvMerger": "Łącznik CSV",
-    "csvInspector": "Inspektor CSV"
+    "csvInspector": "Inspektor CSV",
+    "autoFixHelp": "Automatycznie naprawiamy bezpieczne problemy. Ryzykowne zmiany pozostają w tabeli do ręcznej edycji.",
+    "editHelp": "Kliknij komórkę w tabeli, aby ją edytować. Czerwony i żółty oznaczają błędy i ostrzeżenia.",
+    "builtInFormats": "Wbudowane formaty są dostępne dla wszystkich.",
+    "customFormatsHere": "Niestandardowe formaty pojawiają się tutaj po ich zapisaniu lub zaimportowaniu.",
+    "customFormatsAdvancedOnly": "Niestandardowe formaty są dostępne tylko w planie Advanced.",
+    "filterAll": "Wszystkie",
+    "filterErrors": "Błędy",
+    "filterWarnings": "Ostrzeżenia",
+    "filterInfo": "Info",
+    "showingIssues": "Wyświetlanie",
+    "pinCol": "Przypnij",
+    "rowCol": "Wiersz",
+    "pinRow": "Przypnij",
+    "unpinRow": "Odepnij",
+    "noAutoFixes": "Żadne automatyczne poprawki nie zostały zastosowane dla tego przesłania."
   },
   "profile": {
     "verifySubscription": "Sprawdź swoją subskrypcję i zarządzaj rozliczeniami.",
@@ -234,7 +270,8 @@
     "loading": "Ładowanie…",
     "language": "Język",
     "languageDesc": "Wybierz preferowany język wyświetlania. To zastępuje wykrywanie przeglądarki.",
-    "current": "Bieżący"
+    "current": "Bieżący",
+    "billingSyncing": "Portal rozliczeń jest synchronizowany… sprawdź ponownie za chwilę."
   },
   "inspector": {
     "title": "Inspektor CSV",
@@ -290,6 +327,7 @@
     "viewPricing": "Zobacz ceny",
     "goToAccount": "Przejdź do konta, aby uaktualnić",
     "signInToUpgrade": "Zaloguj się, aby uaktualnić",
-    "close": "Zamknij"
+    "close": "Zamknij",
+    "syncingBilling": "Synchronizowanie informacji rozliczeniowych…"
   }
 }

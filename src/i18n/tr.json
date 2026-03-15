@@ -34,7 +34,24 @@
     "importBlocker": "İçe aktarma engelleyici",
     "importBlockerNote": "bu sorun çözülene kadar dosyanız içe aktarılamaz.",
     "autoFixable": "Otomatik düzeltilebilir: Sorunları Düzelt'e tıkladığınızda bu sorun otomatik olarak düzeltilir.",
-    "updated": "Güncellendi"
+    "updated": "Güncellendi",
+    "whatIsThisIssue": "What is this issue?",
+    "affectedField": "Affected field",
+    "whyRejects": "Why {platform} rejects this",
+    "platformSpecificNote": "{platform}-specific note",
+    "validValues": "Valid values / expected format",
+    "examples": "Examples",
+    "badValue": "Bad value",
+    "goodValue": "Good value",
+    "noteCol": "Note",
+    "fixInStrive": "Fix in StriveFormats",
+    "wooVariablePreset": "WooCommerce Variable preset",
+    "fixerGuide": "{platform} Fixer guide",
+    "fixInExcel": "Fix in Excel",
+    "fixInSheets": "Fix in Google Sheets",
+    "preventNextTime": "Prevent it next time",
+    "howDetects": "How StriveFormats detects this",
+    "technicalDetail": "Technical detail"
   },
   "guides": {
     "title": "CSV İçe Aktarma Kılavuzları",
@@ -54,7 +71,11 @@
     "browseTemplates": "Şablonlara gözat",
     "searchPlaceholder": "Kılavuz ara…",
     "allGuides": "Tüm rehberler",
-    "platformsLabel": "Platformlar"
+    "platformsLabel": "Platformlar",
+    "csvImportGuides": "CSV İçe Aktarma Kılavuzları",
+    "generalGuidesDesc": "Kodlama, başlıklar, tırnaklar, satır sonları ve yaygın içe aktarma hataları için genel CSV kılavuzları.",
+    "platformGuidesDesc": "CSV içe aktarmalarında her doğrulama sorununu kapsayan kılavuzlar.",
+    "csvFixerBtn": "CSV Düzeltici"
   },
   "common": {
     "openWithPreset": "Önayarla aç",
@@ -214,7 +235,22 @@
     "pricing": "Fiyatlandırma",
     "formatConverter": "Format Dönüştürücü",
     "csvMerger": "CSV Birleştirici",
-    "csvInspector": "CSV Denetçisi"
+    "csvInspector": "CSV Denetçisi",
+    "autoFixHelp": "Güvenli sorunları otomatik olarak düzelteceğiz. Riskli değişiklikler manuel düzenleme için tabloda kalır.",
+    "editHelp": "Düzenlemek için tablodaki bir hücreye tıklayın. Kırmızı ve sarı hataları ve uyarıları vurgular.",
+    "builtInFormats": "Yerleşik formatlar herkese açıktır.",
+    "customFormatsHere": "Özel formatlar kaydedildiğinde veya içe aktarıldığında burada görünür.",
+    "customFormatsAdvancedOnly": "Özel formatlar yalnızca Advanced planında kullanılabilir.",
+    "filterAll": "Tümü",
+    "filterErrors": "Hatalar",
+    "filterWarnings": "Uyarılar",
+    "filterInfo": "Bilgi",
+    "showingIssues": "Gösterilen",
+    "pinCol": "Sabitle",
+    "rowCol": "Satır",
+    "pinRow": "Sabitle",
+    "unpinRow": "Sabitlemeyi kaldır",
+    "noAutoFixes": "Bu yükleme için otomatik düzeltme uygulanmadı."
   },
   "profile": {
     "verifySubscription": "Aboneliğinizi doğrulayın ve faturalandırmayı yönetin.",
@@ -234,7 +270,8 @@
     "loading": "Yükleniyor…",
     "language": "Dil",
     "languageDesc": "Tercih ettiğiniz görüntüleme dilini seçin. Bu, tarayıcı algılamasını geçersiz kılar.",
-    "current": "Mevcut"
+    "current": "Mevcut",
+    "billingSyncing": "Fatura portalı senkronize ediliyor… lütfen bir süre sonra tekrar kontrol edin."
   },
   "inspector": {
     "title": "CSV Denetçisi",
@@ -290,6 +327,7 @@
     "viewPricing": "Fiyatları görüntüle",
     "goToAccount": "Yükseltmek için hesaba git",
     "signInToUpgrade": "Yükseltmek için giriş yapın",
-    "close": "Kapat"
+    "close": "Kapat",
+    "syncingBilling": "Fatura bilgileri senkronize ediliyor…"
   }
 }

@@ -1596,12 +1596,13 @@ useEffect(() => {
         </div>
 
         <div className="mt-4 text-sm text-[var(--muted)]">
-          Built-in formats are available to everyone.{" "}
+          {tApp?.builtInFormats ?? "Built-in formats are available to everyone."}{" "}
           {canAccessCustomFormats ? (
-            <>Custom formats appear here when you save or import them.</>
+            <>{tApp?.customFormatsHere ?? "Custom formats appear here when you save or import them."}</>
           ) : (
             <>
-              Custom formats are Advanced only. <Link className="underline" href="/checkout">Upgrade to Advanced</Link> to create and use saved formats.
+              {tApp?.customFormatsAdvancedOnly ?? "Custom formats are Advanced only."}{" "}
+              <Link className="underline" href={localeHref(currentLocale, "/checkout")}>Upgrade to Advanced</Link>
             </>
           )}
         </div>
@@ -1610,7 +1611,7 @@ useEffect(() => {
       <div className="mt-7 grid gap-7 md:grid-cols-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.uploadCsv ?? "Upload CSV"}</h2>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">We’ll auto-fix safe issues. Anything risky stays in the table for manual edits.</p>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">{tApp?.autoFixHelp ?? "We’ll auto-fix safe issues. Anything risky stays in the table for manual edits."}</p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
@@ -1668,13 +1669,13 @@ useEffect(() => {
           ) : null}
 
           {rows.length > 0 && autoFixes.length === 0 ? (
-            <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">No auto fixes were applied for this upload.</div>
+            <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">{tApp?.noAutoFixes ?? "No auto fixes were applied for this upload."}</div>
           ) : null}
         </div>
 
         <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.issues ?? "Issues"}</h2>
-          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">Click a cell in the table to edit it. Red and yellow highlight errors and warnings.</p>
+          <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">{tApp?.editHelp ?? "Click a cell in the table to edit it. Red and yellow highlight errors and warnings."}</p>
 
           <div className="mt-7">
             {/* Severity filters */}
@@ -1684,32 +1685,39 @@ useEffect(() => {
                 className={`pill-btn ${issueSeverityFilter === "all" ? "is-active" : ""}`}
                 onClick={() => setIssueSeverityFilter("all")}
               >
-                All
+                {tApp?.filterAll ?? "All"}
               </button>
               <button
                 type="button"
                 className={`pill-btn ${issueSeverityFilter === "error" ? "is-active" : ""}`}
                 onClick={() => setIssueSeverityFilter("error")}
               >
-                Errors
+                {tApp?.filterErrors ?? "Errors"}
               </button>
               <button
                 type="button"
                 className={`pill-btn ${issueSeverityFilter === "warning" ? "is-active" : ""}`}
                 onClick={() => setIssueSeverityFilter("warning")}
               >
-                Warnings
+                {tApp?.filterWarnings ?? "Warnings"}
               </button>
               <button
                 type="button"
                 className={`pill-btn ${issueSeverityFilter === "info" ? "is-active" : ""}`}
                 onClick={() => setIssueSeverityFilter("info")}
               >
-                Info
+                {tApp?.filterInfo ?? "Info"}
               </button>
 
               <div className="ml-auto text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                Showing {issuesForDisplay.length} {issueSeverityFilter === "all" ? "issues" : `${issueSeverityFilter} issues`}
+                {tApp?.showingIssues ?? "Showing"} {issuesForDisplay.length}{" "}
+                {issueSeverityFilter === "all"
+                  ? (tApp?.issues ?? "issues")
+                  : issueSeverityFilter === "error"
+                    ? (tApp?.filterErrors ?? "errors")
+                    : issueSeverityFilter === "warning"
+                      ? (tApp?.filterWarnings ?? "warnings")
+                      : (tApp?.filterInfo ?? "info")}
               </div>
             </div>
 
@@ -1719,8 +1727,8 @@ useEffect(() => {
                 <table className="min-w-[720px] w-full text-left text-sm">
                   <thead className="border-b border-[var(--border)]">
                     <tr>
-                      <th className="px-3 py-2">Pin</th>
-                      <th className="px-3 py-2">Row</th>
+                      <th className="px-3 py-2">{tApp?.pinCol ?? "Pin"}</th>
+                      <th className="px-3 py-2">{tApp?.rowCol ?? "Row"}</th>
                       {tableHeaders.map((h) => (
                         <th key={h} className="px-3 py-2 whitespace-nowrap">{h}</th>
                       ))}
@@ -1747,7 +1755,7 @@ useEffect(() => {
                               onClick={() => (isPinned ? unpinRow(rowIndex) : pinRow(rowIndex))}
                               title={isPinned ? "Unpin from Manual fixes" : "Pin to Manual fixes"}
                             >
-                              {isPinned ? "Unpin" : "Pin"}
+                              {isPinned ? (tApp?.unpinRow ?? "Unpin") : (tApp?.pinRow ?? "Pin")}
                             </button>
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-[color:rgba(var(--muted-rgb),1)]">{rowIndex + 1}</td>

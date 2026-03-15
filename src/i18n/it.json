@@ -34,7 +34,24 @@
     "importBlocker": "Blocco importazione",
     "importBlockerNote": "il tuo file non potrà essere importato finché questo non viene risolto.",
     "autoFixable": "Auto-correggibile: questo problema viene corretto automaticamente quando fai clic su Correggi problemi.",
-    "updated": "Aggiornato"
+    "updated": "Aggiornato",
+    "whatIsThisIssue": "What is this issue?",
+    "affectedField": "Affected field",
+    "whyRejects": "Why {platform} rejects this",
+    "platformSpecificNote": "{platform}-specific note",
+    "validValues": "Valid values / expected format",
+    "examples": "Examples",
+    "badValue": "Bad value",
+    "goodValue": "Good value",
+    "noteCol": "Note",
+    "fixInStrive": "Fix in StriveFormats",
+    "wooVariablePreset": "WooCommerce Variable preset",
+    "fixerGuide": "{platform} Fixer guide",
+    "fixInExcel": "Fix in Excel",
+    "fixInSheets": "Fix in Google Sheets",
+    "preventNextTime": "Prevent it next time",
+    "howDetects": "How StriveFormats detects this",
+    "technicalDetail": "Technical detail"
   },
   "guides": {
     "title": "Guide all'importazione CSV",
@@ -54,7 +71,11 @@
     "browseTemplates": "Sfoglia modelli",
     "searchPlaceholder": "Cerca guide…",
     "allGuides": "Tutte le guide",
-    "platformsLabel": "Piattaforme"
+    "platformsLabel": "Piattaforme",
+    "csvImportGuides": "Guide importazione CSV",
+    "generalGuidesDesc": "Guide CSV generali per codifica, intestazioni, virgolette, fine riga ed errori di importazione comuni.",
+    "platformGuidesDesc": "guide che coprono ogni problema di validazione per le importazioni CSV.",
+    "csvFixerBtn": "Riparatore CSV"
   },
   "common": {
     "openWithPreset": "Apri con modello",
@@ -214,7 +235,22 @@
     "pricing": "Prezzi",
     "formatConverter": "Convertitore di formato",
     "csvMerger": "Unificatore CSV",
-    "csvInspector": "Ispettore CSV"
+    "csvInspector": "Ispettore CSV",
+    "autoFixHelp": "Correggeremo automaticamente i problemi sicuri. Quelli rischiosi rimangono nella tabella per la modifica manuale.",
+    "editHelp": "Clicca su una cella della tabella per modificarla. Il rosso e il giallo evidenziano errori e avvertimenti.",
+    "builtInFormats": "I formati integrati sono disponibili per tutti.",
+    "customFormatsHere": "I formati personalizzati appaiono qui quando li salvi o importi.",
+    "customFormatsAdvancedOnly": "I formati personalizzati sono disponibili solo per il piano Advanced.",
+    "filterAll": "Tutti",
+    "filterErrors": "Errori",
+    "filterWarnings": "Avvertimenti",
+    "filterInfo": "Info",
+    "showingIssues": "Visualizzazione di",
+    "pinCol": "Fissa",
+    "rowCol": "Riga",
+    "pinRow": "Fissa",
+    "unpinRow": "Sblocca",
+    "noAutoFixes": "Nessuna correzione automatica è stata applicata per questo caricamento."
   },
   "profile": {
     "verifySubscription": "Verifica il tuo abbonamento e gestisci la fatturazione.",
@@ -234,7 +270,8 @@
     "loading": "Caricamento…",
     "language": "Lingua",
     "languageDesc": "Scegli la tua lingua di visualizzazione preferita. Questo sostituisce il rilevamento del browser.",
-    "current": "Attuale"
+    "current": "Attuale",
+    "billingSyncing": "Portale di fatturazione in sincronizzazione… riprovare tra un momento."
   },
   "inspector": {
     "title": "Ispettore CSV",
@@ -290,6 +327,7 @@
     "viewPricing": "Vedi prezzi",
     "goToAccount": "Vai all'account per l'upgrade",
     "signInToUpgrade": "Accedi per aggiornare",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "syncingBilling": "Sincronizzazione delle informazioni di fatturazione…"
   }
 }

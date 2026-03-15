@@ -34,7 +34,24 @@
     "importBlocker": "Importblokkering",
     "importBlockerNote": "uw bestand kan niet worden geïmporteerd totdat dit is opgelost.",
     "autoFixable": "Automatisch corrigeerbaar: dit probleem wordt automatisch gecorrigeerd wanneer u op Problemen oplossen klikt.",
-    "updated": "Bijgewerkt"
+    "updated": "Bijgewerkt",
+    "whatIsThisIssue": "What is this issue?",
+    "affectedField": "Affected field",
+    "whyRejects": "Why {platform} rejects this",
+    "platformSpecificNote": "{platform}-specific note",
+    "validValues": "Valid values / expected format",
+    "examples": "Examples",
+    "badValue": "Bad value",
+    "goodValue": "Good value",
+    "noteCol": "Note",
+    "fixInStrive": "Fix in StriveFormats",
+    "wooVariablePreset": "WooCommerce Variable preset",
+    "fixerGuide": "{platform} Fixer guide",
+    "fixInExcel": "Fix in Excel",
+    "fixInSheets": "Fix in Google Sheets",
+    "preventNextTime": "Prevent it next time",
+    "howDetects": "How StriveFormats detects this",
+    "technicalDetail": "Technical detail"
   },
   "guides": {
     "title": "CSV-importhanleidingen",
@@ -54,7 +71,11 @@
     "browseTemplates": "Sjablonen bekijken",
     "searchPlaceholder": "Handleidingen zoeken…",
     "allGuides": "Alle gidsen",
-    "platformsLabel": "Platforms"
+    "platformsLabel": "Platforms",
+    "csvImportGuides": "CSV-importgidsen",
+    "generalGuidesDesc": "Algemene CSV-gidsen voor codering, headers, aanhalingstekens, regeleindes en veelvoorkomende importfouten.",
+    "platformGuidesDesc": "gidsen over elk validatieprobleem voor CSV-imports.",
+    "csvFixerBtn": "CSV-reparateur"
   },
   "common": {
     "openWithPreset": "Openen met sjabloon",
@@ -214,7 +235,22 @@
     "pricing": "Prijzen",
     "formatConverter": "Formaatconverter",
     "csvMerger": "CSV-samenvoeger",
-    "csvInspector": "CSV-inspecteur"
+    "csvInspector": "CSV-inspecteur",
+    "autoFixHelp": "We lossen veilige problemen automatisch op. Risicovolle wijzigingen blijven in de tabel voor handmatige bewerking.",
+    "editHelp": "Klik op een cel in de tabel om deze te bewerken. Rood en geel markeren fouten en waarschuwingen.",
+    "builtInFormats": "Ingebouwde formaten zijn beschikbaar voor iedereen.",
+    "customFormatsHere": "Aangepaste formaten verschijnen hier wanneer je ze opslaat of importeert.",
+    "customFormatsAdvancedOnly": "Aangepaste formaten zijn alleen voor het Advanced abonnement.",
+    "filterAll": "Alle",
+    "filterErrors": "Fouten",
+    "filterWarnings": "Waarschuwingen",
+    "filterInfo": "Info",
+    "showingIssues": "Weergave van",
+    "pinCol": "Vastzetten",
+    "rowCol": "Rij",
+    "pinRow": "Vastmaken",
+    "unpinRow": "Losmaken",
+    "noAutoFixes": "Er zijn geen automatische correcties toegepast voor dit bestand."
   },
   "profile": {
     "verifySubscription": "Verifieer uw abonnement en beheer facturering.",
@@ -234,7 +270,8 @@
     "loading": "Laden…",
     "language": "Taal",
     "languageDesc": "Kies uw gewenste weergavetaal. Dit overschrijft browserdetectie.",
-    "current": "Huidig"
+    "current": "Huidig",
+    "billingSyncing": "Factureringsportaal wordt gesynchroniseerd… probeer het over een ogenblik."
   },
   "inspector": {
     "title": "CSV-inspector",
@@ -290,6 +327,7 @@
     "viewPricing": "Prijzen bekijken",
     "goToAccount": "Naar account voor upgrade",
     "signInToUpgrade": "Inloggen om te upgraden",
-    "close": "Sluiten"
+    "close": "Sluiten",
+    "syncingBilling": "Factureringsgegevens synchroniseren…"
   }
 }

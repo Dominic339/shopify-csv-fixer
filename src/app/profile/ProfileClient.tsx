@@ -216,12 +216,6 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         </div>
       ) : null}
 
-      {billingUnavailable ? (
-        <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-          Billing is temporarily unavailable. Please try again later.
-        </div>
-      ) : null}
-
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         {sub ? (
           <>
@@ -254,7 +248,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                   </button>
                 ) : (
                   <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--muted)]">
-                    Billing portal syncing… please check back in a moment.
+                    {tProfile?.billingSyncing ?? "Billing portal syncing… please check back in a moment."}
                   </div>
                 )
               ) : null}
@@ -281,14 +275,14 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                 </div>
               ) : null}
 
-              {sub.signedIn && sub.status === "active" && sub.plan === "basic" ? (
+              {sub.signedIn && sub.status === "active" && sub.plan === "basic" && sub.stripeCustomerId ? (
                 <button
                   className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-60"
-                  onClick={() => startCheckout("advanced")}
+                  onClick={openPortal}
                   disabled={busy || billingUnavailable}
                   type="button"
                 >
-                  {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
+                  {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced")}
                 </button>
               ) : null}
 

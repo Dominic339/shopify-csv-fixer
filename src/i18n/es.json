@@ -34,7 +34,24 @@
     "importBlocker": "Bloquea importación",
     "importBlockerNote": "tu archivo no se importará hasta que se resuelva esto.",
     "autoFixable": "Auto-corregible: este problema se corrige automáticamente al hacer clic en Corregir problemas.",
-    "updated": "Actualizado"
+    "updated": "Actualizado",
+    "whatIsThisIssue": "¿Qué es este problema?",
+    "affectedField": "Campo afectado",
+    "whyRejects": "Por qué {platform} rechaza esto",
+    "platformSpecificNote": "Nota específica de {platform}",
+    "validValues": "Valores válidos / formato esperado",
+    "examples": "Ejemplos",
+    "badValue": "Valor incorrecto",
+    "goodValue": "Valor correcto",
+    "noteCol": "Nota",
+    "fixInStrive": "Corregir en StriveFormats",
+    "wooVariablePreset": "Plantilla WooCommerce Variable",
+    "fixerGuide": "Guía Fixer de {platform}",
+    "fixInExcel": "Corregir en Excel",
+    "fixInSheets": "Corregir en Google Sheets",
+    "preventNextTime": "Evitarlo la próxima vez",
+    "howDetects": "Cómo StriveFormats detecta esto",
+    "technicalDetail": "Detalle técnico"
   },
   "guides": {
     "title": "Guías de importación CSV",
@@ -54,7 +71,11 @@
     "browseTemplates": "Ver plantillas",
     "searchPlaceholder": "Buscar guías…",
     "allGuides": "Todas las guías",
-    "platformsLabel": "Plataformas"
+    "platformsLabel": "Plataformas",
+    "csvImportGuides": "Guías de importación CSV",
+    "generalGuidesDesc": "Guías generales de CSV para codificación, encabezados, comillas, finales de línea y errores comunes de importación.",
+    "platformGuidesDesc": "guías que cubren cada problema de validación para importaciones CSV.",
+    "csvFixerBtn": "Reparador de CSV"
   },
   "common": {
     "openWithPreset": "Abrir con plantilla",
@@ -114,7 +135,21 @@
     "howItWorks": "Cómo funciona",
     "examplesOfFixes": "Ejemplos de correcciones",
     "faq": "Preguntas frecuentes",
-    "presetFormats": "Formatos preestablecidos"
+    "presetFormats": "Formatos preestablecidos",
+    "name_shopify_products": "Optimizador de importación de Shopify",
+    "desc_shopify_products": "Valida y corrige automáticamente CSVs de productos Shopify. Enfocado en bloqueadores de importación, estructura de variantes, precios, inventario y formato coherente.",
+    "name_woocommerce_products": "Productos WooCommerce",
+    "desc_woocommerce_products": "Limpia plantillas de productos WooCommerce: campos requeridos, formatos de precios, SKUs, categorías y errores comunes de importación.",
+    "name_woocommerce_variable_products": "Productos variables WooCommerce",
+    "desc_woocommerce_variable_products": "Productos variables WooCommerce + variaciones (crea automáticamente filas padre faltantes y valida la estructura de variaciones).",
+    "name_etsy_listings": "Listados de Etsy",
+    "desc_etsy_listings": "Prepara CSVs de listados de Etsy con estructura más limpia, campos requeridos y formato más seguro para cargas.",
+    "name_amazon_inventory_loader": "Cargador de inventario de Amazon",
+    "desc_amazon_inventory_loader": "Normaliza plantillas de Amazon Inventory Loader validando elementos esenciales como SKU, nombre del artículo, cantidad y precio.",
+    "name_ebay_listings": "Listados de eBay",
+    "desc_ebay_listings": "Corrige problemas comunes en CSV de listados eBay: IDs faltantes, valores inválidos, URLs rotas y campos de precio o cantidad inconsistentes.",
+    "name_ebay_variations": "Variaciones de eBay",
+    "desc_ebay_variations": "Valida CSVs de listados de variaciones eBay: especificaciones de variaciones, combinaciones duplicadas, campos de precio y cantidad."
   },
   "convert": {
     "title": "Conversor de formato CSV",
@@ -214,7 +249,22 @@
     "pricing": "Precios",
     "formatConverter": "Convertidor de formato",
     "csvMerger": "Fusionador de CSV",
-    "csvInspector": "Inspector de CSV"
+    "csvInspector": "Inspector de CSV",
+    "autoFixHelp": "Corregiremos automáticamente los problemas seguros. Los riesgosos quedan en la tabla para edición manual.",
+    "editHelp": "Haga clic en una celda de la tabla para editarla. El rojo y el amarillo resaltan errores y advertencias.",
+    "builtInFormats": "Los formatos integrados están disponibles para todos.",
+    "customFormatsHere": "Los formatos personalizados aparecen aquí cuando los guardas o importas.",
+    "customFormatsAdvancedOnly": "Los formatos personalizados son solo para el plan Advanced.",
+    "filterAll": "Todos",
+    "filterErrors": "Errores",
+    "filterWarnings": "Advertencias",
+    "filterInfo": "Info",
+    "showingIssues": "Mostrando",
+    "pinCol": "Fijar",
+    "rowCol": "Fila",
+    "pinRow": "Fijar",
+    "unpinRow": "Desfijar",
+    "noAutoFixes": "No se aplicaron correcciones automáticas para esta carga."
   },
   "profile": {
     "verifySubscription": "Verifica tu suscripción y gestiona la facturación.",
@@ -234,7 +284,8 @@
     "loading": "Cargando…",
     "language": "Idioma",
     "languageDesc": "Elige tu idioma de visualización preferido. Esto anula la detección del navegador.",
-    "current": "Actual"
+    "current": "Actual",
+    "billingSyncing": "Portal de facturación sincronizando… por favor vuelva en un momento."
   },
   "inspector": {
     "title": "Inspector CSV",
@@ -290,6 +341,7 @@
     "viewPricing": "Ver precios",
     "goToAccount": "Ir a la cuenta para actualizar",
     "signInToUpgrade": "Iniciar sesión para actualizar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "syncingBilling": "Sincronizando información de facturación…"
   }
 }

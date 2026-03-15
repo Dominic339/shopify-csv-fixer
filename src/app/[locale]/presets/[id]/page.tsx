@@ -104,8 +104,12 @@ export default async function LocalePresetDetailPage({ params }: Props) {
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="max-w-3xl">
             <div className="text-sm text-[color:rgba(var(--muted-rgb),1)]">{preset.category}</div>
-            <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">{preset.name}</h1>
-            <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">{preset.description}</p>
+            <h1 className="mt-2 text-3xl font-semibold text-[var(--text)]">
+              {(t.presets as any)[`name_${preset.id}`] ?? preset.name}
+            </h1>
+            <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
+              {(t.presets as any)[`desc_${preset.id}`] ?? preset.description}
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link className="rg-btn" href={openFixerHref}>
