@@ -103,9 +103,9 @@ export default function HomeClient({ tHome, tPricing }: Props) {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+            <Link href="/app?preset=shopify_products" className="rgb-btn">
               <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                {tHome?.openEcommerceFixer ?? "Open Ecommerce CSV Fixer"}
+                Try the CSV Fixer
               </span>
             </Link>
 
@@ -113,10 +113,6 @@ export default function HomeClient({ tHome, tPricing }: Props) {
               <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
                 {tHome?.browseTemplates ?? "Browse templates"}
               </span>
-            </Link>
-
-            <Link href="#pricing" className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-[var(--surface-2)]">
-              View pricing
             </Link>
           </div>
 
@@ -220,9 +216,9 @@ export default function HomeClient({ tHome, tPricing }: Props) {
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/ecommerce-csv-fixer" className="rgb-btn">
+                <Link href="/app?preset=shopify_products" className="rgb-btn">
                   <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                    {tHome?.openEcommerceFixer ?? "Open Ecommerce CSV Fixer"}
+                    Try the CSV Fixer
                   </span>
                 </Link>
               </div>
