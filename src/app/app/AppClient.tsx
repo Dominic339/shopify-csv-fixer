@@ -18,6 +18,7 @@ import { applyFormatToParsedCsv } from "@/lib/formats/engine";
 import type { CsvFormat, CsvIssue } from "@/lib/formats/types";
 import { loadUserFormatsFromStorage, userFormatToCsvFormat } from "@/lib/formats/customUser";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
+import { trackToolEvent } from "@/lib/analytics";
 import { computeValidationBreakdown } from "@/lib/validation/scoring";
 import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 
@@ -945,6 +946,17 @@ useEffect(() => {
       setAutoPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
 
+      trackToolEvent(
+        "validation_complete",
+        {
+          format: format.id,
+          rows: res.fixedRows?.length ?? 0,
+          issues: (res.issues?.length ?? 0) + nextParseIssues.length,
+          auto_fixes: res.fixesApplied?.length ?? 0,
+        },
+        subStatus?.plan,
+      );
+
       await refreshQuotaAndPlan();
     } catch (e: any) {
       setErrorBanner(e?.message ?? "Failed to process CSV");
@@ -959,6 +971,7 @@ useEffect(() => {
     setErrorBanner(null);
     setFileName(file.name);
     setUploadRunId((v) => v + 1);
+    trackToolEvent("file_uploaded", { format: activeFormat?.id ?? null }, subStatus?.plan);
 
     try {
       const text = await file.text();
@@ -1055,6 +1068,7 @@ useEffect(() => {
   async function exportFixedCsv() {
     setBusy(true);
     setErrorBanner(null);
+    trackToolEvent("export_attempted", { format: activeFormat?.id ?? null }, subStatus?.plan);
     try {
       await consumeExport();
 
@@ -1076,6 +1090,16 @@ useEffect(() => {
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
+      const isLimitError =
+        (e?.message ?? "").toLowerCase().includes("limit") ||
+        (e?.message ?? "").toLowerCase().includes("quota");
+      if (isLimitError) {
+        trackToolEvent(
+          "export_limit_hit",
+          { format: activeFormat?.id ?? null, signed_in: subStatus?.signedIn ?? false },
+          subStatus?.plan,
+        );
+      }
       setErrorBanner(e?.message ?? "Export failed");
       try {
         await refreshQuotaAndPlan();
@@ -1660,11 +1684,23 @@ useEffect(() => {
           </div>
 
           {quotaExceeded ? (
-            <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-              Monthly exports used up.{" "}
-              <Link href="/checkout" className="underline">
-                Upgrade to continue.
-              </Link>
+            <div className="mt-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+              {subStatus?.signedIn ? (
+                <>
+                  {tApp?.limitReached ?? "Monthly export limit reached."}{" "}
+                  <Link href="/pricing" className="font-semibold underline">
+                    Upgrade to continue.
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Free limit reached (3 exports/month per device).{" "}
+                  <Link href="/login" className="font-semibold underline">
+                    Sign up free
+                  </Link>{" "}
+                  to get more exports.
+                </>
+              )}
             </div>
           ) : null}
 
