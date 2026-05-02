@@ -34,9 +34,9 @@ import { getTranslations } from "@/lib/i18n/getTranslations";
 // ---------------------------------------------------------------------------
 const mdxGuideComponents = {
   section: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
-    <div {...props} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 space-y-4">
+    <section {...props} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 space-y-4">
       {children}
-    </div>
+    </section>
   ),
   h2: ({ children, id }: { children: React.ReactNode; id?: string }) => (
     <h2 id={id} className="text-xl font-semibold text-[var(--text)] scroll-mt-24">

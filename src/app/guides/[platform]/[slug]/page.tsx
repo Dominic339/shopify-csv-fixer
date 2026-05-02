@@ -30,9 +30,9 @@ const mdxGuideComponents = {
   // Each h2 section is wrapped in a <section> by the rehypeWrapSections plugin.
   // This component maps that <section> to a card.
   section: ({ children, ...props }: any) => (
-    <div {...props} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 space-y-4">
+    <section {...props} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 space-y-4">
       {children}
-    </div>
+    </section>
   ),
   h2: ({ children, id }: any) => (
     <h2 id={id} className="text-xl font-semibold text-[var(--text)] scroll-mt-24">
