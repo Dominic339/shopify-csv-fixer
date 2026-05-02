@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "shopify:regression": "tsx scripts/shopifyRegression.ts",
     "test": "vitest run",
     "test:watch": "vitest",
