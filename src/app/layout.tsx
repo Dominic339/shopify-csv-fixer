@@ -23,9 +23,21 @@ export const metadata: Metadata = {
   description:
     "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
   applicationName: "StriveFormats",
+
+  // ✅ ADD THIS SECTION
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: ["/apple-icon.png"],
+  },
+
   alternates: {
     canonical: "/",
   },
+
   openGraph: {
     type: "website",
     url: "https://striveformats.com",
@@ -35,6 +47,7 @@ export const metadata: Metadata = {
     siteName: "StriveFormats",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "StriveFormats" }],
   },
+
   twitter: {
     card: "summary_large_image",
     title: "StriveFormats | Clean. Standardize. Validate.",
@@ -42,10 +55,12 @@ export const metadata: Metadata = {
       "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
     images: ["/opengraph-image"],
   },
+
   robots: {
     index: true,
     follow: true,
   },
+
   keywords: [
     "fix csv file",
     "clean csv online",
