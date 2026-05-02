@@ -10,6 +10,8 @@ import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { createClient } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { EditableIssuesTable } from "@/components/EditableIssuesTable";
+import { FileDropZone } from "@/components/FileDropZone";
+import { QuotaWallCapture } from "@/components/QuotaWallCapture";
 
 import { getShopifyVariantSignature, resolveShopifyVariantColumns } from "@/lib/shopifyVariantSignature";
 
@@ -128,6 +130,7 @@ export default function AppClient({ tApp }: AppClientProps) {
   const [quota, setQuota] = useState<any>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>({ ok: true, plan: "free" });
   const [planLimits, setPlanLimits] = useState<PlanLimits>({ exportsPerMonth: 3 });
+  const [showQuotaModal, setShowQuotaModal] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
@@ -1138,6 +1141,7 @@ useEffect(() => {
   const fixLogBase = safeBaseName(exportBaseName ?? fileName ?? "csv");
 
   return (
+    <>
     <div className="mx-auto max-w-7xl px-8 py-12">
       {errorBanner ? (
         <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[var(--text)] text-base">
@@ -1633,9 +1637,40 @@ useEffect(() => {
       </div>
 
       <div className="mt-7 grid gap-7 md:grid-cols-2">
+        <FileDropZone onFile={(f) => void handleFile(f)}>
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.uploadCsv ?? "Upload CSV"}</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">{tApp?.autoFixHelp ?? "We’ll auto-fix safe issues. Anything risky stays in the table for manual edits."}</p>
+
+          {rows.length > 0 && (
+            <div className={`mt-4 flex items-center gap-3 rounded-xl border px-4 py-2.5 text-sm ${
+              Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                ? "border-red-300 bg-red-50 dark:border-red-900/50 dark:bg-red-900/10"
+                : Number(validation.score) >= 90
+                  ? "border-green-300 bg-green-50 dark:border-green-900/50 dark:bg-green-900/10"
+                  : "border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10"
+            }`}>
+              <span className={`text-2xl font-bold ${
+                Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                  ? "text-red-600 dark:text-red-400"
+                  : Number(validation.score) >= 90
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-amber-600 dark:text-amber-400"
+              }`}>
+                {validation.score}<span className="text-base font-normal opacity-60">/100</span>
+              </span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-[var(--text)]">{tApp?.validationScore ?? "Validation score"}</span>
+                <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">
+                  {Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
+                    ? `${Number((validation as any)?.counts?.blockingErrors)} blocking issue(s) — fix before exporting`
+                    : Number((validation as any)?.counts?.warnings ?? 0) > 0
+                      ? `${Number((validation as any)?.counts?.warnings)} warning(s) — safe to export`
+                      : "No issues found — ready to export"}
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <label className="rg-btn cursor-pointer">
@@ -1654,6 +1689,10 @@ useEffect(() => {
             <button
               className="rg-btn"
               onClick={() => {
+                if (quotaExceeded && !subStatus?.signedIn) {
+                  setShowQuotaModal(true);
+                  return;
+                }
                 const blockingCount = Number((validation as any)?.counts?.blockingErrors ?? 0);
                 if (blockingCount > 0) {
                   const confirmed = window.confirm(
@@ -1663,7 +1702,7 @@ useEffect(() => {
                 }
                 void exportFixedCsv();
               }}
-              disabled={busy || rows.length === 0 || quotaExceeded}
+              disabled={busy || rows.length === 0 || (quotaExceeded && subStatus?.signedIn)}
               title={
                 quotaExceeded
                   ? (tApp?.limitReached ?? "Monthly export limit reached. Upgrade to continue.")
@@ -1708,6 +1747,7 @@ useEffect(() => {
             <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">{tApp?.noAutoFixes ?? "No auto fixes were applied for this upload."}</div>
           ) : null}
         </div>
+        </FileDropZone>
 
         <div ref={issuesPanelRef} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
           <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.issues ?? "Issues"}</h2>
@@ -1870,5 +1910,9 @@ useEffect(() => {
         </div>
       )}
     </div>
+    {showQuotaModal && (
+      <QuotaWallCapture onDismiss={() => setShowQuotaModal(false)} />
+    )}
+    </>
   );
 }

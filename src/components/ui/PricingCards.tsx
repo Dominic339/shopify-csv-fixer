@@ -135,7 +135,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 </span>
               )}
             </div>
-            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$3 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
+            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$5 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
             <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
               <li>{t?.basicBullet1 ?? "100 exports per month"}</li>
               <li>{t?.basicBullet2 ?? "Access to all built-in formats"}</li>

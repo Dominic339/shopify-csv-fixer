@@ -327,6 +327,16 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
               </div>
             )}
 
+            {/* Quick CTA */}
+            <div className="mb-4 flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+              <p className="text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                Ready to fix your CSV? Upload it now for instant validation and auto-fixes.
+              </p>
+              <Link className="rg-btn ml-4 shrink-0 text-sm" href={localeHref(loc, "/app")}>
+                {t.guide.openCsvFixer}
+              </Link>
+            </div>
+
             <div className="flex items-start gap-8">
               <div className="min-w-0 flex-1 space-y-4">
                 <MDXRemote
@@ -375,6 +385,18 @@ export default async function LocaleGuideDetailPage({ params }: Props) {
                 </div>
               )}
             </section>
+
+            {/* Quick CTA */}
+            <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+              <p className="text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                {guide.autoFixable
+                  ? "This issue is auto-fixable — upload your CSV to fix it instantly."
+                  : "Upload your CSV to check for this issue and export a clean file."}
+              </p>
+              <Link className="rg-btn ml-4 shrink-0 text-sm" href={localeHref(loc, presetId ? `/app?preset=${presetId}` : "/app")}>
+                {t.guide.openCsvFixer}
+              </Link>
+            </div>
 
             <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
               <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.whyRejects.replace("{platform}", label)}</h2>
