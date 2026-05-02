@@ -4,6 +4,7 @@
 import React, { useRef, useState } from "react";
 import { inspectCsv, type InspectorResult } from "@/lib/csvInspector";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { FileDropZone } from "@/components/FileDropZone";
 
 const DELIMITER_LABELS: Record<string, string> = {
   ",": "Comma (,)",
@@ -25,6 +26,11 @@ export default function InspectorClient({ t }: Props) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    await loadFile(file);
+    e.target.value = "";
+  }
+
+  async function loadFile(file: File) {
     setFileName(file.name);
     setError(null);
     try {
@@ -35,8 +41,6 @@ export default function InspectorClient({ t }: Props) {
       setError(err?.message ?? "Failed to inspect file.");
       setResult(null);
     }
-    // Reset input so same file can be re-selected
-    e.target.value = "";
   }
 
   return (
@@ -49,6 +53,7 @@ export default function InspectorClient({ t }: Props) {
         {t?.description ?? "Upload a CSV file to get an instant analysis of its structure, headers, and potential issues."}
       </p>
 
+      <FileDropZone onFile={(f) => void loadFile(f)}>
       <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="text-sm font-semibold">Upload a CSV file</h2>
         <p className="mt-1 text-xs text-[var(--muted)]">
@@ -73,6 +78,7 @@ export default function InspectorClient({ t }: Props) {
           onChange={handleFileChange}
         />
       </div>
+      </FileDropZone>
 
       {error && (
         <div className="mt-4 rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-2 text-sm text-red-700 dark:text-red-300">

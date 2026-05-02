@@ -13,6 +13,7 @@ import {
 } from "@/lib/mergeCsv";
 import type { Plan } from "@/lib/quota";
 import { createClient } from "@/lib/supabase/browser";
+import { FileDropZone } from "@/components/FileDropZone";
 import type { Translations } from "@/lib/i18n/getTranslations";
 
 function downloadCsv(filename: string, content: string) {
@@ -84,6 +85,10 @@ export default function MergeClient({ t }: Props) {
   ) {
     const file = e.target.files?.[0];
     if (!file) return;
+    await loadFileData(file, setter);
+  }
+
+  async function loadFileData(file: File, setter: (d: FileData) => void) {
     const text = await file.text();
     const { headers, rows } = parseCsv(text);
     setter({ name: file.name, headers, rows });
@@ -162,6 +167,7 @@ export default function MergeClient({ t }: Props) {
       <div className="mt-8 space-y-6">
         {/* File uploads */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FileDropZone onFile={(f) => void loadFileData(f, setFileA)}>
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
             <h2 className="text-sm font-semibold">{t?.fileA ?? "File A"}</h2>
             <div className="mt-3 flex items-center gap-2">
@@ -189,7 +195,9 @@ export default function MergeClient({ t }: Props) {
               onChange={(e) => handleFileLoad(e, setFileA)}
             />
           </div>
+          </FileDropZone>
 
+          <FileDropZone onFile={(f) => void loadFileData(f, setFileB)}>
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
             <h2 className="text-sm font-semibold">{t?.fileB ?? "File B"}</h2>
             <div className="mt-3 flex items-center gap-2">
@@ -217,6 +225,7 @@ export default function MergeClient({ t }: Props) {
               onChange={(e) => handleFileLoad(e, setFileB)}
             />
           </div>
+          </FileDropZone>
         </div>
 
         {/* Options */}

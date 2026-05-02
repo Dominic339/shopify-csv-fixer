@@ -8,6 +8,7 @@ import type { Plan } from "@/lib/quota";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { createClient } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { FileDropZone } from "@/components/FileDropZone";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -67,6 +68,10 @@ export default function ConvertClient({ t }: Props) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    await loadFile(file);
+  }
+
+  async function loadFile(file: File) {
     setFileName(file.name);
     const text = await file.text();
     setCsvText(text);
@@ -137,6 +142,7 @@ export default function ConvertClient({ t }: Props) {
 
       <div className="mt-8 space-y-6">
         {/* Upload */}
+        <FileDropZone onFile={(f) => void loadFile(f)}>
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
           <h2 className="text-sm font-semibold">1. {t?.uploadStep ?? "Upload CSV"}</h2>
           <p className="mt-1 text-xs text-[var(--muted)]">{t?.uploadDesc ?? "Upload the file you want to convert."}</p>
@@ -158,6 +164,7 @@ export default function ConvertClient({ t }: Props) {
             onChange={handleFileChange}
           />
         </div>
+        </FileDropZone>
 
         {/* Format selection */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">

@@ -76,3 +76,21 @@ create policy "insert for all" on public.tool_events
   as permissive for insert
   to anon, authenticated
   with check (true);
+
+-- ── 5. Create lead_emails table for quota wall email capture ──
+create table if not exists public.lead_emails (
+  id         bigserial primary key,
+  email      text        not null unique,
+  source     text        default 'quota_wall',
+  created_at timestamptz default now()
+);
+
+create index if not exists lead_emails_email_idx on public.lead_emails(email);
+
+alter table public.lead_emails enable row level security;
+
+create policy "service role full access" on public.lead_emails
+  as permissive for all
+  to service_role
+  using (true)
+  with check (true);
