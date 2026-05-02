@@ -72,7 +72,9 @@ test("general MDX guide renders TOC on desktop viewport", async ({ page }) => {
   const href = await firstLink.getAttribute("href");
   expect(href).toMatch(/^#/);
   const anchorId = href!.slice(1); // strip leading "#"
-  expect(await page.locator(`#${CSS.escape(anchorId)}`).count()).toBeGreaterThan(0);
+  // CSS.escape is a browser API; use page.evaluate to call it in browser context
+  const escaped = await page.evaluate((id: string) => CSS.escape(id), anchorId);
+  expect(await page.locator(`#${escaped}`).count()).toBeGreaterThan(0);
 });
 
 test("/api/stripe/status returns JSON with enabled boolean", async ({ request }) => {
@@ -175,12 +177,11 @@ test("TopBar CSV Fixer link includes locale prefix when locale cookie is set", a
     domain: "localhost",
     path: "/",
   }]);
-  await page.goto("/es/");
-  // The CSV Fixer nav link should point to /es/app, not /app
-  const csvFixerLink = page.getByRole("link", { name: /CSV Fixer/i }).first();
+  await page.goto("/es");
+  // The CSV Fixer nav link should point to /es/app, not /app.
+  // Look by href since the link text is translated (e.g. "Reparador CSV" in Spanish).
+  const csvFixerLink = page.locator('a[href="/es/app"]').first();
   await expect(csvFixerLink).toBeVisible({ timeout: 10_000 });
-  const href = await csvFixerLink.getAttribute("href");
-  expect(href).toBe("/es/app");
 });
 
 test("/checkout?status=canceled renders cancellation message (no redirect)", async ({ page }) => {

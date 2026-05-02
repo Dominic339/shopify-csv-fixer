@@ -15,15 +15,15 @@ export default function UpdatePasswordClient() {
   useEffect(() => {
     // Check if a session is present (set by the auth callback after the reset link)
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSessionReady(!!session);
+    supabase.auth.getSession().then((result) => {
+      setSessionReady(!!result.data?.session);
     });
 
     // Also listen for the PASSWORD_RECOVERY event emitted when a recovery link is clicked
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const authListener = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") setSessionReady(true);
     });
-    return () => subscription.unsubscribe();
+    return () => authListener.data.subscription.unsubscribe();
   }, []);
 
   async function onSubmit(e: React.FormEvent) {
