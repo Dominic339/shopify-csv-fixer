@@ -132,6 +132,12 @@ export default function AppClient({ tApp }: AppClientProps) {
   const [planLimits, setPlanLimits] = useState<PlanLimits>({ exportsPerMonth: 3 });
   const [showQuotaModal, setShowQuotaModal] = useState(false);
 
+  const [uploadTab, setUploadTab] = useState<"file" | "paste">("file");
+  const [pasteText, setPasteText] = useState("");
+  const [lastExportStats, setLastExportStats] = useState<{ rows: number; fixes: number; score: number; fileName: string } | null>(null);
+  const [upsellDismissed, setUpsellDismissed] = useState(false);
+  const [shareLabel, setShareLabel] = useState<"Share" | "Copied!">("Share");
+
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [infoBanner, setInfoBanner] = useState<string | null>(null);
@@ -985,6 +991,7 @@ useEffect(() => {
       setAutoFixes([]);
       setEditing(null);
       setLastFixAll(null);
+      setLastExportStats(null);
       // Reset pin state for a new run
       setManualPinnedRows(new Set());
       setSuppressedAutoPins(new Set());
@@ -1090,6 +1097,14 @@ useEffect(() => {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+
+      setLastExportStats({
+        rows: rows.length,
+        fixes: autoFixes.length,
+        score: Number(validation.score),
+        fileName: `${base}_fixed.csv`,
+      });
+      setUpsellDismissed(false);
 
       await refreshQuotaAndPlan();
     } catch (e: any) {
@@ -1642,6 +1657,7 @@ useEffect(() => {
           <h2 className="text-xl font-semibold text-[var(--text)]">{tApp?.uploadCsv ?? "Upload CSV"}</h2>
           <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">{tApp?.autoFixHelp ?? "We’ll auto-fix safe issues. Anything risky stays in the table for manual edits."}</p>
 
+          {/* Validation score bar — shown once a file is loaded */}
           {rows.length > 0 && (
             <div className={`mt-4 flex items-center gap-3 rounded-xl border px-4 py-2.5 text-sm ${
               Number((validation as any)?.counts?.blockingErrors ?? 0) > 0
@@ -1672,20 +1688,70 @@ useEffect(() => {
             </div>
           )}
 
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <label className="rg-btn cursor-pointer">
-              {tApp?.chooseFile ?? "Choose file"}
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void handleFile(f);
-                }}
-              />
-            </label>
+          {/* Upload tabs: File | Paste */}
+          <div className="mt-5">
+            <div className="flex gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-1 w-fit">
+              <button
+                type="button"
+                className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${uploadTab === "file" ? "bg-[var(--surface)] shadow-sm text-[var(--text)]" : "text-[color:rgba(var(--muted-rgb),1)] hover:text-[var(--text)]"}`}
+                onClick={() => setUploadTab("file")}
+              >
+                Choose file
+              </button>
+              <button
+                type="button"
+                className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${uploadTab === "paste" ? "bg-[var(--surface)] shadow-sm text-[var(--text)]" : "text-[color:rgba(var(--muted-rgb),1)] hover:text-[var(--text)]"}`}
+                onClick={() => setUploadTab("paste")}
+              >
+                Paste text
+              </button>
+            </div>
 
+            {uploadTab === "file" ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <label className="rg-btn cursor-pointer">
+                  {tApp?.chooseFile ?? "Choose file"}
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void handleFile(f);
+                    }}
+                  />
+                </label>
+                {fileName && <span className="text-sm text-[color:rgba(var(--muted-rgb),1)] truncate max-w-[160px]">{fileName}</span>}
+              </div>
+            ) : (
+              <div className="mt-3">
+                <textarea
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 font-mono text-xs text-[var(--text)] placeholder:text-[color:rgba(var(--muted-rgb),0.5)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
+                  rows={5}
+                  placeholder={"Paste CSV content here…\n\nHandle,Title,Vendor\nexample-product,My Product,ACME"}
+                  value={pasteText}
+                  onChange={(e) => setPasteText(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="rg-btn mt-2"
+                  disabled={!pasteText.trim()}
+                  onClick={() => {
+                    if (!pasteText.trim()) return;
+                    const blob = new Blob([pasteText], { type: "text/csv" });
+                    const file = new File([blob], "pasted.csv", { type: "text/csv" });
+                    void handleFile(file);
+                    setUploadTab("file");
+                  }}
+                >
+                  Process CSV
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Export + Share row */}
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               className="rg-btn"
               onClick={() => {
@@ -1720,6 +1786,28 @@ useEffect(() => {
                   ? (tApp?.exportAnyway ?? "Export anyway…")
                   : (tApp?.exportFixed ?? "Export fixed CSV")}
             </button>
+
+            {/* Share button — visible after a successful export */}
+            {lastExportStats && (
+              <button
+                type="button"
+                className="pill-btn"
+                onClick={() => {
+                  const text = `Fixed ${lastExportStats.fixes} issue${lastExportStats.fixes === 1 ? "" : "s"} in ${lastExportStats.rows} rows (score ${lastExportStats.score}/100) using StriveFormats — striveformats.com`;
+                  const canShare = typeof navigator.share === "function";
+                  if (canShare) {
+                    void navigator.share({ text });
+                  } else {
+                    void navigator.clipboard.writeText(text).then(() => {
+                      setShareLabel("Copied!");
+                      setTimeout(() => setShareLabel("Share"), 2000);
+                    });
+                  }
+                }}
+              >
+                {shareLabel}
+              </button>
+            )}
           </div>
 
           {quotaExceeded ? (
@@ -1743,7 +1831,48 @@ useEffect(() => {
             </div>
           ) : null}
 
-          {rows.length > 0 && autoFixes.length === 0 ? (
+          {/* Post-export upsell card — free plan only, dismissible */}
+          {lastExportStats && !upsellDismissed && !isUnlimited && subStatus?.plan === "free" && (
+            <div className="mt-4 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 px-4 py-3 text-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-[var(--text)]">Get 100 exports/month for $5</p>
+                  <p className="mt-0.5 text-[color:rgba(var(--muted-rgb),1)]">
+                    You&apos;re on the free plan (3/month). Upgrade to Basic for 100 exports and no device limits.
+                  </p>
+                  <Link href="/pricing" className="mt-2 inline-block font-semibold underline text-[var(--text)] hover:opacity-80">
+                    View plans →
+                  </Link>
+                </div>
+                <button
+                  type="button"
+                  className="shrink-0 text-lg leading-none text-[color:rgba(var(--muted-rgb),0.5)] hover:opacity-80"
+                  onClick={() => setUpsellDismissed(true)}
+                  aria-label="Dismiss"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Auto-fix diff summary */}
+          {collapsedAutoFixes.length > 0 ? (
+            <details className="mt-4 group">
+              <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[var(--text)] hover:opacity-80">
+                <span className="transition-transform group-open:rotate-90">&#9658;</span>
+                {collapsedAutoFixes.length} auto-fix{collapsedAutoFixes.length === 1 ? "" : "es"} applied
+              </summary>
+              <ul className="mt-2 space-y-1 pl-4">
+                {collapsedAutoFixes.map((msg, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+                    <span className="mt-0.5 shrink-0 text-green-600 dark:text-green-400">&#10003;</span>
+                    <span>{msg}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : rows.length > 0 ? (
             <div className="mt-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">{tApp?.noAutoFixes ?? "No auto fixes were applied for this upload."}</div>
           ) : null}
         </div>
