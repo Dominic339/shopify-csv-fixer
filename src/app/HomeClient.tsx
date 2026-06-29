@@ -88,27 +88,33 @@ export default function HomeClient({ tHome, tPricing }: Props) {
     <main className="mx-auto max-w-6xl px-6 py-16">
       <SEOJsonLd />
 
-      <section className="grid gap-10 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-        <div>
-          <p className="text-sm font-medium text-[var(--muted)]">StriveFormats</p>
+      {/* ── Hero ── */}
+      <section className="relative grid gap-12 md:grid-cols-2 md:items-center">
+        {/* ambient glows */}
+        <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-green-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
 
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text)] md:text-5xl">
-            Fix Shopify and ecommerce CSV errors before they break your import
+        <div className="relative z-10">
+          <p className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-300">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
+            StriveFormats
+          </p>
+
+          <h1 className="mt-5 text-5xl font-black leading-tight tracking-tight md:text-6xl">
+            Fix Shopify CSV errors{" "}
+            <span className="gradient-text">before they break</span>{" "}
+            your import
           </h1>
 
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+          <p className="mt-5 max-w-lg text-base leading-7 text-[var(--muted)]">
             Upload a messy CSV, auto-fix safe issues, review anything risky, and export a cleaner
-            file in minutes. Built for sellers who want fewer import errors, fewer manual edits,
-            and more confidence before upload.
+            file in minutes.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/app?preset=shopify_products" className="rgb-btn">
-              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                Try the CSV Fixer
-              </span>
+            <Link href="/app?preset=shopify_products" className="btn-primary">
+              Try the CSV Fixer
             </Link>
-
             <Link href={localeHref(currentLocale, "/presets")} className="rgb-btn">
               <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
                 {tHome?.browseTemplates ?? "Browse templates"}
@@ -116,245 +122,419 @@ export default function HomeClient({ tHome, tPricing }: Props) {
             </Link>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--muted)]">
-            <span>Files processed locally</span>
-            <span>No forced signup to explore</span>
-            <span>Review edits before export</span>
+          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs text-[var(--muted)]">
+            {["Files processed locally", "No forced signup to explore", "Review edits before export"].map((t) => (
+              <span key={t} className="flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-green-400" />
+                {t}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-          <div className="text-sm font-semibold text-[var(--text)]">Why people would use this</div>
-
-          <div className="mt-5 grid gap-4">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-              <div className="text-sm font-semibold text-[var(--text)]">Catch import blockers earlier</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Find common issues before uploading to Shopify or other ecommerce platforms.
-              </p>
+        {/* CSV mock visual */}
+        <div className="relative hidden md:block">
+          <div className="pointer-events-none absolute inset-0 -m-6 rounded-3xl bg-gradient-to-br from-green-500/10 via-cyan-500/8 to-blue-500/5 blur-2xl" />
+          <div className="relative rounded-2xl border border-cyan-500/25 bg-[rgba(4,10,22,0.85)] p-5 font-mono text-xs shadow-2xl backdrop-blur-sm">
+            {/* window chrome */}
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
+                <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
+                <div className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
+              </div>
+              <span className="text-[10px] text-cyan-400/50">products.csv</span>
+              <span className="rounded-full border border-red-500/35 bg-red-500/15 px-2 py-0.5 text-[10px] text-red-300">
+                4 issues found
+              </span>
             </div>
-
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-              <div className="text-sm font-semibold text-[var(--text)]">Auto-fix safe formatting issues</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Clean spacing, normalize formatting, and make repetitive corrections faster.
-              </p>
+            {/* header row */}
+            <div className="mb-1 grid grid-cols-4 gap-2 border-b border-cyan-500/15 pb-2 text-[10px] font-semibold text-cyan-400/60">
+              <span>Handle</span>
+              <span>Title</span>
+              <span>Price</span>
+              <span>Vendor</span>
             </div>
-
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-              <div className="text-sm font-semibold text-[var(--text)]">Keep control over risky changes</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Anything that could change meaning is flagged so you can review it manually.
-              </p>
+            {/* data rows */}
+            <div className="space-y-1 pt-1">
+              <div className="grid grid-cols-4 gap-2 rounded py-1.5">
+                <span className="text-green-300/75">blue-shirt</span>
+                <span className="rounded bg-yellow-500/20 px-1 text-yellow-200">Blue Shirt </span>
+                <span className="text-green-300/75">24.00</span>
+                <span className="text-green-300/75">Acme Co</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 rounded py-1.5">
+                <span className="text-green-300/75">red-hoodie</span>
+                <span className="text-green-300/75">Red Hoodie</span>
+                <span className="rounded bg-red-500/20 px-1 text-red-200">$ 45</span>
+                <span className="rounded bg-red-500/20 px-1 text-red-200/60">&nbsp;</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 rounded py-1.5">
+                <span className="text-green-300/75">black-cap</span>
+                <span className="rounded bg-yellow-500/20 px-1 text-yellow-200">  black cap</span>
+                <span className="text-green-300/75">18.00</span>
+                <span className="text-green-300/75">Acme Co</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 py-1 opacity-30">
+                <span className="text-cyan-400">···</span>
+              </div>
+            </div>
+            {/* fix notice */}
+            <div className="mt-3 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-[10px]">
+              <span className="font-bold text-green-300">Auto-fix ready:</span>
+              <span className="ml-1 text-green-300/70">2 safe fixes · 2 need review</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-16">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div>
-              <div className="text-sm font-semibold text-[var(--text)]">1. Upload your CSV</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+      {/* ── Divider ── */}
+      <div className="section-divider mt-20" />
+
+      {/* ── How it works — staggered ── */}
+      <section className="mt-20">
+        <div className="mb-14">
+          <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">How it works</p>
+          <h2 className="mt-3 text-4xl font-black tracking-tight">
+            Three steps to a <span className="gradient-text">cleaner file</span>
+          </h2>
+        </div>
+
+        <div className="space-y-10">
+          {/* Step 1 */}
+          <div className="group flex items-start gap-8">
+            <div className="w-20 shrink-0 select-none text-7xl font-black leading-none text-green-500/20 transition-colors group-hover:text-green-500/35">
+              01
+            </div>
+            <div className="pt-2 max-w-lg">
+              <div className="text-xl font-bold text-[var(--text)]">Upload your CSV</div>
+              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
                 Start with a Shopify or ecommerce file that needs cleanup, validation, or conversion.
+                Any platform, any mess.
               </p>
             </div>
+          </div>
 
-            <div>
-              <div className="text-sm font-semibold text-[var(--text)]">2. Review detected issues</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                See what can be fixed safely, what needs review, and where the risky cells are.
+          {/* Step 2 — indented */}
+          <div className="group flex items-start gap-8 md:ml-20">
+            <div className="w-20 shrink-0 select-none text-7xl font-black leading-none text-cyan-500/20 transition-colors group-hover:text-cyan-500/35">
+              02
+            </div>
+            <div className="pt-2 max-w-lg">
+              <div className="text-xl font-bold text-[var(--text)]">Review detected issues</div>
+              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+                See what can be fixed safely, what needs your eyes, and exactly which cells are
+                flagged — nothing changed without you knowing.
               </p>
             </div>
+          </div>
 
-            <div>
-              <div className="text-sm font-semibold text-[var(--text)]">3. Export a cleaner file</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Download a more standardized CSV that is easier to trust before your final import.
+          {/* Step 3 */}
+          <div className="group flex items-start gap-8">
+            <div className="w-20 shrink-0 select-none text-7xl font-black leading-none text-blue-500/20 transition-colors group-hover:text-blue-500/35">
+              03
+            </div>
+            <div className="pt-2 max-w-lg">
+              <div className="text-xl font-bold text-[var(--text)]">Export a cleaner file</div>
+              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+                Download a standardized CSV you can trust before your final import. No surprises.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-16 grid gap-6 md:grid-cols-2">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <div className="text-sm font-semibold text-[var(--text)]">Before</div>
-          <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5 text-sm text-[var(--muted)]">
-            <div>• Extra spaces and inconsistent formatting</div>
-            <div className="mt-2">• Empty cells in important places</div>
-            <div className="mt-2">• Repetitive cleanup work by hand</div>
-            <div className="mt-2">• Unclear which issues are safe to auto-fix</div>
-          </div>
-        </div>
+      {/* ── Divider ── */}
+      <div className="section-divider mt-20" />
 
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <div className="text-sm font-semibold text-[var(--text)]">After</div>
-          <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5 text-sm text-[var(--muted)]">
-            <div>• Cleaner formatting and normalized values</div>
-            <div className="mt-2">• Issues grouped for faster review</div>
-            <div className="mt-2">• Safer automatic cleanup where appropriate</div>
-            <div className="mt-2">• More confidence before upload and export</div>
+      {/* ── Before / After ── */}
+      <section className="mt-20">
+        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-cyan-400">The difference</p>
+        <div className="overflow-hidden rounded-3xl border border-[var(--border)]">
+          <div className="grid md:grid-cols-2">
+            {/* Before */}
+            <div className="border-b border-red-500/15 bg-red-950/25 p-8 md:border-b-0 md:border-r">
+              <div className="mb-6 flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-red-400" />
+                <span className="text-xs font-bold uppercase tracking-widest text-red-400">Before</span>
+              </div>
+              <div className="space-y-4">
+                {[
+                  "Extra spaces and inconsistent formatting",
+                  "Empty cells in important columns",
+                  "Repetitive cleanup work by hand",
+                  "No clear signal on what's safe to change",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3 text-sm text-red-200/65">
+                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* After */}
+            <div className="bg-green-950/20 p-8">
+              <div className="mb-6 flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-400" />
+                <span className="text-xs font-bold uppercase tracking-widest text-green-400">After</span>
+              </div>
+              <div className="space-y-4">
+                {[
+                  "Cleaner formatting and normalized values",
+                  "Issues grouped and prioritized for faster review",
+                  "Safe auto-cleanup where it's appropriate",
+                  "More confidence before you upload and export",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3 text-sm text-green-200/75">
+                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-16">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <div className="grid gap-10 md:grid-cols-2 md:items-start">
+      {/* ── Divider ── */}
+      <div className="section-divider mt-20" />
+
+      {/* ── Feature rows ── */}
+      <section className="mt-20 space-y-6">
+        {/* CSV Fixer */}
+        <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
+          <div className="grid gap-10 p-8 md:grid-cols-2 md:items-center">
             <div>
-              <div className="text-sm font-semibold text-[var(--text)]">
+              <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">
                 {tHome?.csvFixerLabel ?? "CSV Fixer"}
-              </div>
-              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">
-                Fix ecommerce CSV files faster
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                Choose a platform, upload your CSV, and let the tool clean safe issues automatically.
-                Review anything risky, manually adjust what matters, and export a cleaner file.
               </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/app?preset=shopify_products" className="rgb-btn">
-                  <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                    Try the CSV Fixer
-                  </span>
+              <h3 className="mt-3 text-3xl font-black tracking-tight">
+                Fix ecommerce CSV files <span className="gradient-text">faster</span>
+              </h3>
+              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
+                Choose a platform, upload your CSV, and let the tool clean safe issues automatically.
+                Review anything risky, adjust what matters, and export a cleaner file.
+              </p>
+              <div className="mt-6">
+                <Link href="/app?preset=shopify_products" className="btn-primary">
+                  Try the CSV Fixer
                 </Link>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
-              <div className="text-sm font-semibold text-[var(--text)]">
-                {tHome?.customFormatsLabel ?? "Custom Formats"}
-              </div>
-              <div className="mt-2 text-2xl font-semibold text-[var(--text)]">
-                Save reusable cleanup rules
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                Create reusable templates and rules for repeat jobs so future cleanup takes less time.
-                Useful for teams, recurring imports, and workflows you do more than once.
-              </p>
+            {/* mini feature list */}
+            <div className="grid gap-3">
+              {[
+                { icon: "⚡", label: "Auto-fix safe issues", desc: "Trim spaces, normalize empties, fix consistent patterns." },
+                { icon: "🔍", label: "Flag anything risky", desc: "Changes that could alter meaning are surfaced for review." },
+                { icon: "📦", label: "Multi-platform support", desc: "Shopify, WooCommerce, eBay, Etsy, Amazon and more." },
+              ].map(({ icon, label, desc }) => (
+                <div key={label} className="flex gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                  <span className="text-xl leading-none">{icon}</span>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text)]">{label}</div>
+                    <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+        {/* Custom Formats */}
+        <div className="overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/8 to-[var(--bg)]">
+          <div className="grid gap-10 p-8 md:grid-cols-2 md:items-center">
+            {/* feature list — left this time */}
+            <div className="grid gap-3 md:order-first">
+              {[
+                { icon: "💾", label: "Save reusable rules", desc: "Define column templates and cleanup logic once, reuse forever." },
+                { icon: "🔁", label: "Built for repeat imports", desc: "Recurring jobs get faster over time, not slower." },
+                { icon: "👥", label: "Useful for teams", desc: "Share consistent formats across everyone touching the data." },
+              ].map(({ icon, label, desc }) => (
+                <div key={label} className="flex gap-4 rounded-2xl border border-cyan-500/18 bg-[rgba(6,182,212,0.07)] p-4">
+                  <span className="text-xl leading-none">{icon}</span>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text)]">{label}</div>
+                    <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+                {tHome?.customFormatsLabel ?? "Custom Formats"}
+              </p>
+              <h3 className="mt-3 text-3xl font-black tracking-tight">
+                Save reusable <span className="gradient-text">cleanup rules</span>
+              </h3>
+              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
+                Create reusable templates for repeat jobs so future cleanup takes seconds.
+                Useful for teams, recurring imports, and workflows you run more than once.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 {canAccessCustomFormats ? (
-                  <Link href="/formats" className="rgb-btn">
-                    <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                      {tHome?.openCustomFormats ?? "Open Custom Formats"}
-                    </span>
+                  <Link href="/formats" className="btn-primary">
+                    {tHome?.openCustomFormats ?? "Open Custom Formats"}
                   </Link>
                 ) : (
-                  <button type="button" className="rgb-btn" onClick={() => setUpgradeOpen(true)}>
-                    <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                      {tHome?.upgradeToAdvanced ?? "Upgrade to Advanced"}
-                    </span>
+                  <button type="button" className="btn-primary" onClick={() => setUpgradeOpen(true)}>
+                    {tHome?.upgradeToAdvanced ?? "Upgrade to Advanced"}
                   </button>
                 )}
+                {!canAccessCustomFormats && (
+                  <span className="text-xs text-[var(--muted)]">
+                    {tHome?.advancedRequired ?? "Advanced plan required."}
+                  </span>
+                )}
               </div>
-
-              {!canAccessCustomFormats ? (
-                <div className="mt-3 text-xs text-[var(--muted)]">
-                  {tHome?.advancedRequired ?? "Advanced plan required."}
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-16">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <div className="text-sm font-semibold text-[var(--text)]">Why this feels safer</div>
+      {/* ── Divider ── */}
+      <div className="section-divider mt-20" />
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <div className="text-sm font-semibold text-[var(--text)]">Local-first workflow</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Core parsing, editing, and export behavior are designed around running in the browser.
-              </p>
-            </div>
+      {/* ── Why it's safer ── */}
+      <section className="mt-20">
+        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-cyan-400">Why this feels safer</p>
+        <h2 className="mb-10 text-4xl font-black tracking-tight">
+          Control stays <span className="gradient-text">with you</span>
+        </h2>
 
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <div className="text-sm font-semibold text-[var(--text)]">Manual review where needed</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Potentially risky changes are separated so you stay in control of important data.
-              </p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            {
+              color: "green" as const,
+              icon: (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              ),
+              title: "Local-first workflow",
+              desc: "Core parsing, editing, and export run entirely in your browser. Your data doesn't leave unless you choose.",
+            },
+            {
+              color: "cyan" as const,
+              icon: (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              ),
+              title: "Manual review where needed",
+              desc: "Potentially risky changes are separated so you stay in full control of the data that matters most.",
+            },
+            {
+              color: "blue" as const,
+              icon: (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ),
+              title: "Built for repeat use",
+              desc: "Great for sellers and operators who regularly clean files for imports and product updates.",
+            },
+          ].map(({ color, icon, title, desc }) => (
+            <div
+              key={title}
+              className={`rounded-2xl border p-5 ${
+                color === "green"
+                  ? "border-green-500/20 bg-green-500/8"
+                  : color === "cyan"
+                  ? "border-cyan-500/20 bg-cyan-500/8"
+                  : "border-blue-500/20 bg-blue-500/8"
+              }`}
+            >
+              <div
+                className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${
+                  color === "green"
+                    ? "bg-green-500/20 text-green-400"
+                    : color === "cyan"
+                    ? "bg-cyan-500/20 text-cyan-400"
+                    : "bg-blue-500/20 text-blue-400"
+                }`}
+              >
+                {icon}
+              </div>
+              <div className="text-sm font-bold text-[var(--text)]">{title}</div>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{desc}</p>
             </div>
-
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <div className="text-sm font-semibold text-[var(--text)]">Built for repeat use</div>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Great for sellers and operators who regularly clean files for imports and product updates.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
+      {/* ── Divider ── */}
+      <div className="section-divider mt-20" />
+
+      {/* ── Pricing ── */}
       <section className="mt-20" id="pricing">
-        <div className="mb-6">
-          <div className="text-sm font-semibold text-[var(--text)]">Pricing</div>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--text)]">
-            Start using the tool first, then upgrade when you need more
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            The pricing options are here when you are ready, but the page now leads with product value
-            instead of asking for money first.
-          </p>
-        </div>
-
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">Pricing</p>
+        <h2 className="mt-3 mb-2 text-4xl font-black tracking-tight">
+          Start free. <span className="gradient-text">Upgrade when ready.</span>
+        </h2>
+        <p className="mb-8 max-w-xl text-sm leading-6 text-[var(--muted)]">
+          Try the tool first, no card required. Upgrade when you need higher limits or custom formats.
+        </p>
         <PricingCards sub={sub} tPricing={tPricing} />
       </section>
 
-      <section className="mt-16" id="faq">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <div className="text-sm font-semibold text-[var(--text)]">
-            {tHome?.faqLabel ?? "FAQ"}
-          </div>
-          <div className="mt-2 text-2xl font-semibold text-[var(--text)]">
-            {tHome?.faqTitle ?? "Quick answers"}
-          </div>
+      {/* ── Divider ── */}
+      <div className="section-divider mt-20" />
 
-          <div className="mt-6 grid gap-4">
-            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-                {tHome?.faq1Q ?? "Do you upload my CSV to a server?"}
-              </summary>
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                {tHome?.faq1A ??
-                  "The fixer runs in your browser for the core parsing and edits. When you export, your cleaned CSV is generated locally."}
-              </p>
-            </details>
+      {/* ── FAQ ── */}
+      <section className="mt-20" id="faq">
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+          {tHome?.faqLabel ?? "FAQ"}
+        </p>
+        <h2 className="mt-3 mb-8 text-4xl font-black tracking-tight">
+          {tHome?.faqTitle ?? "Quick answers"}
+        </h2>
 
-            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-                {tHome?.faq2Q ?? "What kinds of problems can it fix automatically?"}
+        <div className="grid gap-3">
+          {[
+            {
+              q: tHome?.faq1Q ?? "Do you upload my CSV to a server?",
+              a: tHome?.faq1A ?? "The fixer runs in your browser for the core parsing and edits. When you export, your cleaned CSV is generated locally.",
+            },
+            {
+              q: tHome?.faq2Q ?? "What kinds of problems can it fix automatically?",
+              a: tHome?.faq2A ?? "Safe fixes include trimming extra spaces, normalizing empty cells, and applying consistent formatting. Anything that could change meaning is flagged so you can review it before export.",
+            },
+            {
+              q: tHome?.faq3Q ?? "What are Custom Formats?",
+              a: tHome?.faq3A ?? "Custom Formats let you save reusable column templates and cleanup rules so repeat jobs take seconds. Advanced plan is required for creating and managing formats.",
+            },
+            {
+              q: tHome?.faq4Q ?? "Can I cancel or change plans later?",
+              a: tHome?.faq4A ?? "Yes. You can upgrade, downgrade, or cancel from your Profile at any time.",
+            },
+          ].map(({ q, a }) => (
+            <details
+              key={q}
+              className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-bold text-[var(--text)]">
+                {q}
+                <svg
+                  className="ml-4 h-4 w-4 shrink-0 text-cyan-400 transition-transform group-open:rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </summary>
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                {tHome?.faq2A ??
-                  "Safe fixes include trimming extra spaces, normalizing empty cells, and applying consistent formatting. Anything that could change meaning is flagged so you can review it before export."}
-              </p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{a}</p>
             </details>
-
-            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-                {tHome?.faq3Q ?? "What are Custom Formats?"}
-              </summary>
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                {tHome?.faq3A ??
-                  "Custom Formats let you save reusable column templates and cleanup rules so repeat jobs take seconds. Advanced plan is required for creating and managing formats."}
-              </p>
-            </details>
-
-            <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--text)]">
-                {tHome?.faq4Q ?? "Can I cancel or change plans later?"}
-              </summary>
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                {tHome?.faq4A ?? "Yes. You can upgrade, downgrade, or cancel from your Profile at any time."}
-              </p>
-            </details>
-          </div>
+          ))}
         </div>
       </section>
 

@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
-/* ===== Theme tokens ===== */
+/* ===== Brand Theme — single identity, green/cyan on deep dark ===== */
 :root,
-[data-theme="light"] {
-  --bg: #f6f7fb;
-  --surface: rgba(255, 255, 255, 0.85);
-  --surface-2: rgba(255, 255, 255, 0.72);
-  --border: rgba(10, 10, 20, 0.12);
+[data-theme="light"],
+[data-theme="dark"] {
+  --bg: #04080f;
+  --surface: rgba(6, 182, 212, 0.07);
+  --surface-2: rgba(6, 182, 212, 0.11);
+  --border: rgba(6, 182, 212, 0.18);
 
-  --text: rgba(10, 10, 20, 0.92);
-  --muted: rgba(10, 10, 20, 0.62);
-  --muted-rgb: 10, 10, 20;
+  --text: rgba(224, 242, 254, 0.94);
+  --muted: rgba(148, 210, 230, 0.62);
+  --muted-rgb: 148, 210, 230;
 
-  --primary: #2563eb;
+  --primary: #22c55e;
+  --primary-2: #06b6d4;
 
   --accent-1: #22c55e;
   --accent-2: #06b6d4;
@@ -20,26 +22,8 @@
   --accent-4: #a855f7;
   --accent-5: #f97316;
 
-  --popover: rgba(255, 255, 255, 0.96);
-  --popover-border: rgba(10, 10, 20, 0.14);
-
-  color-scheme: light;
-}
-
-[data-theme="dark"] {
-  --bg: #07070a;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.10);
-  --border: rgba(255, 255, 255, 0.12);
-
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.68);
-  --muted-rgb: 255, 255, 255;
-
-  --primary: #60a5fa;
-
-  --popover: rgba(18, 22, 32, 0.96);
-  --popover-border: rgba(255, 255, 255, 0.14);
+  --popover: rgba(4, 10, 22, 0.97);
+  --popover-border: rgba(6, 182, 212, 0.24);
 
   color-scheme: dark;
 }
@@ -52,14 +36,13 @@ body {
 
 body {
   background:
-    radial-gradient(1200px 600px at 10% 0%, rgba(34, 197, 94, 0.10), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(168, 85, 247, 0.10), transparent 55%),
-    var(--bg);
+    radial-gradient(ellipse 1100px 700px at 15% -5%, rgba(34, 197, 94, 0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 900px 600px at 88% 6%, rgba(6, 182, 212, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 700px 500px at 50% 95%, rgba(59, 130, 246, 0.12) 0%, transparent 48%),
+    #04080f;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* FIX: prevent the background from repeating on tall pages */
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
@@ -71,7 +54,28 @@ a {
 }
 
 ::selection {
-  background: rgba(34, 197, 94, 0.22);
+  background: rgba(34, 197, 94, 0.28);
+}
+
+/* ===== Gradient text utility ===== */
+.gradient-text {
+  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 55%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== Section divider ===== */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.25) 30%,
+    rgba(34, 197, 94, 0.25) 70%,
+    transparent 100%
+  );
+  margin: 0;
 }
 
 /* ===== Utility helpers ===== */
@@ -79,11 +83,50 @@ a {
   background: var(--popover);
   border: 1px solid var(--popover-border);
   color: var(--text);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-/* Peacock RGB outline button (OLD LOOK) */
+/* ===== Primary CTA button — solid green→cyan gradient fill ===== */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  color: #04080f;
+  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
+  box-shadow: 0 0 28px rgba(34, 197, 94, 0.38), 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: filter 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.50), 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.30), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid rgba(34, 197, 94, 0.45);
+  outline-offset: 3px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.50;
+  cursor: not-allowed;
+}
+
+/* ===== Brand outline button — green/cyan border ===== */
 .rgb-btn,
 .rg-btn {
   position: relative;
@@ -91,18 +134,13 @@ a {
   align-items: center;
   justify-content: center;
   gap: 8px;
-
   border-radius: 14px;
-  padding: 12px 18px;
   font-weight: 700;
-
   cursor: pointer;
   user-select: none;
-
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
   transform: translateZ(0);
-
   color: var(--text);
 }
 
@@ -112,15 +150,8 @@ a {
   position: absolute;
   inset: -2px;
   border-radius: 16px;
-  background: linear-gradient(
-    90deg,
-    var(--accent-1),
-    var(--accent-2),
-    var(--accent-3),
-    var(--accent-4),
-    var(--accent-5)
-  );
-  opacity: 0.95;
+  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 60%, #3b82f6 100%);
+  opacity: 0.85;
   z-index: -2;
 }
 
@@ -130,34 +161,54 @@ a {
   position: absolute;
   inset: 0;
   border-radius: 14px;
-  background: var(--surface);
+  background: var(--bg);
   z-index: -1;
 }
 
 .rgb-btn:hover,
 .rg-btn:hover {
-  filter: brightness(1.02);
+  filter: brightness(1.06);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.20), 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .rgb-btn:active,
 .rg-btn:active {
   transform: translateY(2px) scale(0.99);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .rgb-btn:focus-visible,
 .rg-btn:focus-visible {
-  outline: 3px solid rgba(59, 130, 246, 0.35);
+  outline: 3px solid rgba(6, 182, 212, 0.40);
   outline-offset: 3px;
 }
 
 .rgb-btn:disabled,
 .rg-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.50;
   cursor: not-allowed;
 }
 
-/* Colored filter pills */
+/* ===== Nav link — plain text style ===== */
+.nav-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(148, 210, 230, 0.72);
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: color 120ms ease, background 120ms ease;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-link:hover {
+  color: rgba(224, 242, 254, 0.95);
+  background: rgba(6, 182, 212, 0.10);
+}
+
+/* ===== Pill filter buttons ===== */
 .pill-btn {
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -170,7 +221,7 @@ a {
 }
 
 .pill-btn:hover {
-  filter: brightness(1.02);
+  filter: brightness(1.06);
 }
 
 .pill-btn:active {
@@ -196,7 +247,7 @@ a {
   border-color: rgba(59, 130, 246, 0.30);
 }
 
-/* Red / Yellow highlighted issue boxes */
+/* ===== Issue boxes ===== */
 .issue-box {
   border-radius: 14px;
   border: 1px solid var(--border);
@@ -218,7 +269,7 @@ a {
   border-color: rgba(59, 130, 246, 0.22);
 }
 
-/* NEW: Per-field highlights (what you asked for) */
+/* ===== Per-field highlights ===== */
 .input-error {
   border-color: rgba(239, 68, 68, 0.38) !important;
   background: rgba(239, 68, 68, 0.12) !important;
@@ -229,7 +280,7 @@ a {
   background: rgba(234, 179, 8, 0.12) !important;
 }
 
-/* ===== Data table (restored) ===== */
+/* ===== Data table ===== */
 .data-table-wrap {
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -269,7 +320,7 @@ a {
 }
 
 .data-table tr:hover td {
-  background: rgba(59, 130, 246, 0.06);
+  background: rgba(6, 182, 212, 0.06);
 }
 
 .cell-error {
@@ -283,7 +334,7 @@ a {
 }
 
 .cell-editing {
-  outline: 2px solid rgba(59, 130, 246, 0.35);
+  outline: 2px solid rgba(6, 182, 212, 0.40);
   outline-offset: -2px;
 }
 
@@ -291,15 +342,13 @@ summary::-webkit-details-marker {
   display: none;
 }
 
-/* ===== Native select dark mode fix ===== */
-/* Browsers that don't fully honour color-scheme on the dropdown popup
-   still need explicit background/color on <option> elements. */
-[data-theme="dark"] select {
-  background-color: #12121e;
-  color: rgba(255, 255, 255, 0.92);
+/* ===== Native select dark mode ===== */
+select {
+  background-color: #0a1020;
+  color: rgba(224, 242, 254, 0.92);
 }
 
-[data-theme="dark"] select option {
-  background-color: #12121e;
-  color: rgba(255, 255, 255, 0.92);
+select option {
+  background-color: #0a1020;
+  color: rgba(224, 242, 254, 0.92);
 }
