@@ -165,10 +165,6 @@ export default function TopBar({ navT }: Props) {
         </Link>
 
         <nav className="flex items-center gap-1">
-          <Link className="nav-link" href={localeHref(currentLocale, "/app")}>
-            {navT?.csvFixer ?? "CSV Fixer"}
-          </Link>
-
           <Link className="nav-link" href={localeHref(currentLocale, "/presets")}>
             {navT?.templates ?? "Templates"}
           </Link>

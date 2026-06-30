@@ -111,7 +111,6 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
             <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
               <li>{t?.freeBullet1 ?? "Fix and export CSV files"}</li>
               <li>{t?.freeBullet2 ?? "3 exports per month per device"}</li>
-              <li>{t?.freeBullet3 ?? "Access to all built-in formats"}</li>
               <li>{t?.freeBullet4 ?? "No account required"}</li>
             </ul>
             <button
@@ -138,7 +137,6 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
             <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$5 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
             <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
               <li>{t?.basicBullet1 ?? "100 exports per month"}</li>
-              <li>{t?.basicBullet2 ?? "Access to all built-in formats"}</li>
               <li>{t?.basicBullet3 ?? "Account required"}</li>
               <li>{t?.basicBullet4 ?? "Manage billing in Profile"}</li>
             </ul>
@@ -187,7 +185,6 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
           <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$10 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
             <li>{t?.advancedBullet1 ?? "Unlimited exports"}</li>
-            <li>{t?.advancedBullet2 ?? "Access to all built-in formats"}</li>
             <li>{t?.advancedBullet3 ?? "Custom Format Builder"}</li>
             <li>{t?.advancedBullet4 ?? "Save, reuse, import, and export formats"}</li>
           </ul>
@@ -242,8 +239,9 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
         </div>
       </div>
 
-      <div className="mt-4 text-xs text-[var(--muted)]">
-        {t?.stripeNote ?? "Subscriptions are handled securely by Stripe. Cancel any time from your billing portal."}
+      <div className="mt-4 space-y-1 text-xs text-[var(--muted)]">
+        <div>All plans include access to all built-in formats.</div>
+        <div>{t?.stripeNote ?? "Subscriptions are handled securely by Stripe. Cancel any time from your billing portal."}</div>
       </div>
     </div>
   );

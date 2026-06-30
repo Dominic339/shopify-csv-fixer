@@ -100,9 +100,9 @@ export default function HomeClient({ tHome, tPricing }: Props) {
             StriveFormats
           </p>
 
-          <h1 className="mt-5 text-5xl font-black leading-tight tracking-tight md:text-6xl">
-            Fix Shopify CSV errors{" "}
-            <span className="gradient-text">before they break</span>{" "}
+          <h1 className="mt-4 text-5xl font-black leading-tight tracking-tight md:text-6xl">
+            Fix Shopify CSV errors<br />
+            <span className="gradient-text">before they break</span><br />
             your import
           </h1>
 
@@ -115,10 +115,8 @@ export default function HomeClient({ tHome, tPricing }: Props) {
             <Link href="/app?preset=shopify_products" className="btn-primary">
               Try the CSV Fixer
             </Link>
-            <Link href={localeHref(currentLocale, "/presets")} className="rgb-btn">
-              <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">
-                {tHome?.browseTemplates ?? "Browse templates"}
-              </span>
+            <Link href={localeHref(currentLocale, "/presets")} className="rgb-btn px-6 py-3 text-sm font-semibold text-[var(--text)]">
+              {tHome?.browseTemplates ?? "Browse templates"}
             </Link>
           </div>
 
@@ -322,7 +320,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
               </p>
               <div className="mt-6">
                 <Link href="/app?preset=shopify_products" className="btn-primary">
-                  Try the CSV Fixer
+                  Open the fixer
                 </Link>
               </div>
             </div>
@@ -480,7 +478,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
           Start free. <span className="gradient-text">Upgrade when ready.</span>
         </h2>
         <p className="mb-8 max-w-xl text-sm leading-6 text-[var(--muted)]">
-          Try the tool first, no card required. Upgrade when you need higher limits or custom formats.
+          No card required to get started. Higher limits and custom formats unlock on paid plans.
         </p>
         <PricingCards sub={sub} tPricing={tPricing} />
       </section>
