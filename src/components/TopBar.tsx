@@ -27,7 +27,7 @@ type Props = {
 };
 
 export default function TopBar({ navT }: Props) {
-  const { theme } = useTheme();
+  const { theme, toggle } = useTheme();
   const pathname = usePathname();
 
   // Derive the active locale from the URL path (e.g. /es/guides/... → "es")
@@ -165,6 +165,15 @@ export default function TopBar({ navT }: Props) {
         </Link>
 
         <nav className="flex items-center gap-1">
+          <button
+            type="button"
+            className="nav-link"
+            onClick={() => toggle()}
+            title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          >
+            {theme === "light" ? (navT?.darkMode ?? "Dark") : (navT?.lightMode ?? "Light")}
+          </button>
+
           <Link className="nav-link" href={localeHref(currentLocale, "/presets")}>
             {navT?.templates ?? "Templates"}
           </Link>
