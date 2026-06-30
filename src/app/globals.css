@@ -64,7 +64,7 @@ body {
     radial-gradient(ellipse 1100px 700px at 15% -5%, rgba(34, 197, 94, 0.20) 0%, transparent 55%),
     radial-gradient(ellipse 900px 600px at 88% 6%, rgba(6, 182, 212, 0.18) 0%, transparent 50%),
     radial-gradient(ellipse 700px 500px at 50% 95%, rgba(59, 130, 246, 0.12) 0%, transparent 48%),
-    #04080f;
+    var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
