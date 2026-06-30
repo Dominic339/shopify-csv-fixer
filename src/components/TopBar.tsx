@@ -27,7 +27,7 @@ type Props = {
 };
 
 export default function TopBar({ navT }: Props) {
-  const { theme, toggle } = useTheme();
+  const { theme } = useTheme();
   const pathname = usePathname();
 
   // Derive the active locale from the URL path (e.g. /es/guides/... → "es")
@@ -164,38 +164,24 @@ export default function TopBar({ navT }: Props) {
           />
         </Link>
 
-        <nav className="flex items-center gap-3">
-          <button
-            type="button"
-            className="pill-btn"
-            onClick={() => toggle()}
-            title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-          >
-            {theme === "light" ? (navT?.darkMode ?? "Dark mode") : (navT?.lightMode ?? "Light mode")}
-          </button>
-
-          <Link className="rgb-btn" href={localeHref(currentLocale, "/app")}>
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.csvFixer ?? "CSV Fixer"}</span>
+        <nav className="flex items-center gap-1">
+          <Link className="nav-link" href={localeHref(currentLocale, "/presets")}>
+            {navT?.templates ?? "Templates"}
           </Link>
 
-          <Link className="rgb-btn" href={localeHref(currentLocale, "/presets")}>
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.templates ?? "Templates"}</span>
-          </Link>
-
-          <Link className="rgb-btn" href={localeHref(currentLocale, "/guides")}>
-            <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.guides ?? "Guides"}</span>
+          <Link className="nav-link" href={localeHref(currentLocale, "/guides")}>
+            {navT?.guides ?? "Guides"}
           </Link>
 
           {/* Tools dropdown */}
           <div className="relative" ref={toolsRef}>
             <button
               type="button"
-              className="rgb-btn"
+              className="nav-link"
               onClick={() => setToolsOpen((v) => !v)}
               aria-label="Tools menu"
             >
-              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.tools ?? "Tools"}</span>
-            </button>
+              {navT?.tools ?? "Tools"}</button>
             {toolsOpen && (
               <div className="popover-surface absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl shadow-xl z-50">
                 <div className="p-2">
@@ -229,22 +215,26 @@ export default function TopBar({ navT }: Props) {
           </div>
 
           {canAccessCustomFormats ? (
-            <Link className="rgb-btn" href="/formats" title="Open Custom Formats builder">
-              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.customFormats ?? "Custom formats"}</span>
+            <Link className="nav-link" href="/formats" title="Open Custom Formats builder">
+              {navT?.customFormats ?? "Custom formats"}
             </Link>
           ) : (
             <button
               type="button"
-              className="rgb-btn"
+              className="nav-link"
               onClick={() => {
                 setMenuOpen(false);
                 setUpgradeOpen(true);
               }}
               title="Advanced plan required"
             >
-              <span className="px-5 py-2 text-sm font-semibold text-[var(--text)]">{navT?.customFormats ?? "Custom formats"}</span>
+              {navT?.customFormats ?? "Custom formats"}
             </button>
           )}
+
+          <Link href={localeHref(currentLocale, "/app")} className="btn-primary ml-2 hidden md:inline-flex">
+            {navT?.csvFixer ?? "CSV Fixer"}
+          </Link>
 
           <div className="relative" ref={menuRef}>
             <button
