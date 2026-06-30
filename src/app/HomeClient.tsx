@@ -95,7 +95,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
         <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative z-10">
-          <p className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-300">
+          <p className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-700 dark:text-green-300">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
             StriveFormats
           </p>
@@ -251,10 +251,10 @@ export default function HomeClient({ tHome, tPricing }: Props) {
         <div className="overflow-hidden rounded-3xl border border-[var(--border)]">
           <div className="grid md:grid-cols-2">
             {/* Before */}
-            <div className="border-b border-red-500/15 bg-red-950/25 p-8 md:border-b-0 md:border-r">
+            <div className="border-b border-red-200 bg-red-50 p-8 dark:border-red-500/15 dark:bg-red-950/25 md:border-b-0 md:border-r">
               <div className="mb-6 flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-red-400" />
-                <span className="text-xs font-bold uppercase tracking-widest text-red-400">Before</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400">Before</span>
               </div>
               <div className="space-y-4">
                 {[
@@ -263,7 +263,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
                   "Repetitive cleanup work by hand",
                   "No clear signal on what's safe to change",
                 ].map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm text-red-200/65">
+                  <div key={item} className="flex items-start gap-3 text-sm text-red-800 dark:text-red-200/65">
                     <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -274,10 +274,10 @@ export default function HomeClient({ tHome, tPricing }: Props) {
             </div>
 
             {/* After */}
-            <div className="bg-green-950/20 p-8">
+            <div className="bg-green-50 p-8 dark:bg-green-950/20">
               <div className="mb-6 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-400" />
-                <span className="text-xs font-bold uppercase tracking-widest text-green-400">After</span>
+                <div className="h-2 w-2 rounded-full bg-green-500 dark:bg-green-400" />
+                <span className="text-xs font-bold uppercase tracking-widest text-green-700 dark:text-green-400">After</span>
               </div>
               <div className="space-y-4">
                 {[
@@ -286,8 +286,8 @@ export default function HomeClient({ tHome, tPricing }: Props) {
                   "Safe auto-cleanup where it's appropriate",
                   "More confidence before you upload and export",
                 ].map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm text-green-200/75">
-                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div key={item} className="flex items-start gap-3 text-sm text-green-800 dark:text-green-200/75">
+                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
@@ -345,7 +345,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
         </div>
 
         {/* Custom Formats */}
-        <div className="overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/8 to-[var(--bg)]">
+        <div className="overflow-hidden rounded-3xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-white dark:border-cyan-500/20 dark:from-cyan-500/8 dark:to-[var(--bg)]">
           <div className="grid gap-10 p-8 md:grid-cols-2 md:items-center">
             {/* feature list — left this time */}
             <div className="grid gap-3 md:order-first">
@@ -354,7 +354,7 @@ export default function HomeClient({ tHome, tPricing }: Props) {
                 { icon: "🔁", label: "Built for repeat imports", desc: "Recurring jobs get faster over time, not slower." },
                 { icon: "👥", label: "Useful for teams", desc: "Share consistent formats across everyone touching the data." },
               ].map(({ icon, label, desc }) => (
-                <div key={label} className="flex gap-4 rounded-2xl border border-cyan-500/18 bg-[rgba(6,182,212,0.07)] p-4">
+                <div key={label} className="flex gap-4 rounded-2xl border border-cyan-200 bg-cyan-50/80 p-4 dark:border-cyan-500/18 dark:bg-[rgba(6,182,212,0.07)]">
                   <span className="text-xl leading-none">{icon}</span>
                   <div>
                     <div className="text-sm font-bold text-[var(--text)]">{label}</div>
@@ -444,19 +444,19 @@ export default function HomeClient({ tHome, tPricing }: Props) {
               key={title}
               className={`rounded-2xl border p-5 ${
                 color === "green"
-                  ? "border-green-500/20 bg-green-500/8"
+                  ? "border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-500/8"
                   : color === "cyan"
-                  ? "border-cyan-500/20 bg-cyan-500/8"
-                  : "border-blue-500/20 bg-blue-500/8"
+                  ? "border-cyan-200 bg-cyan-50 dark:border-cyan-500/20 dark:bg-cyan-500/8"
+                  : "border-blue-200 bg-blue-50 dark:border-blue-500/20 dark:bg-blue-500/8"
               }`}
             >
               <div
                 className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${
                   color === "green"
-                    ? "bg-green-500/20 text-green-400"
+                    ? "bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400"
                     : color === "cyan"
-                    ? "bg-cyan-500/20 text-cyan-400"
-                    : "bg-blue-500/20 text-blue-400"
+                    ? "bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400"
+                    : "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
                 }`}
               >
                 {icon}

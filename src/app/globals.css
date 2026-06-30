@@ -3,10 +3,10 @@
 /* ===== Light theme ===== */
 :root,
 [data-theme="light"] {
-  --bg: #f0fbf6;
-  --surface: rgba(255, 255, 255, 0.88);
-  --surface-2: rgba(255, 255, 255, 0.72);
-  --border: rgba(6, 182, 212, 0.22);
+  --bg: #edfaf4;
+  --surface: rgba(255, 255, 255, 0.95);
+  --surface-2: rgba(240, 253, 247, 0.90);
+  --border: rgba(6, 182, 212, 0.32);
 
   --text: rgba(5, 28, 18, 0.92);
   --muted: rgba(5, 28, 18, 0.54);
@@ -71,6 +71,22 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
+}
+
+[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse 1100px 700px at 15% -5%, rgba(34, 197, 94, 0.38) 0%, transparent 52%),
+    radial-gradient(ellipse 900px 600px at 88% 6%, rgba(6, 182, 212, 0.30) 0%, transparent 48%),
+    radial-gradient(ellipse 600px 400px at 50% 92%, rgba(59, 130, 246, 0.18) 0%, transparent 45%),
+    var(--bg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Card lift in light mode */
+[data-theme="light"] .rounded-3xl {
+  box-shadow: 0 1px 4px rgba(6, 182, 212, 0.10), 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 a {
