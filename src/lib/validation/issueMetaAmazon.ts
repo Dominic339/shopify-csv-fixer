@@ -10,7 +10,7 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "One or more required Amazon flat-file columns are missing from the header row.",
     whyPlatformCares: "Amazon's flat-file processor needs exact column names to map fields correctly. Missing columns cause the file to be rejected.",
-    howToFix: "Use an Amazon inventory loader template and ensure required columns (sku, item-name, price, quantity) are present.",
+    howToFix: "Use an Amazon Inventory Loader or category template; every file needs a sku column.",
   },
 
   "amazon/missing_sku": {
@@ -72,10 +72,10 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     code: "amazon/missing_price",
     title: "Missing price",
     category: "pricing",
-    blocking: true,
+    blocking: false,
     autoFixable: false,
-    explanation: "The price field is required for all Amazon inventory rows.",
-    whyPlatformCares: "Listings without a price cannot be activated on Amazon.",
+    explanation: "price is blank on a row that adds or updates an offer.",
+    whyPlatformCares: "Existing offers keep their current price, but a new offer without a price cannot go live.",
     howToFix: "Provide a valid price in decimal format (e.g., 29.99).",
   },
 
@@ -109,7 +109,7 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The product-id-type value is not a recognized Amazon identifier type.",
     whyPlatformCares: "Amazon uses product-id-type to interpret the product-id field (e.g., as an ASIN or UPC). An invalid type causes the product match to fail.",
-    howToFix: "Use one of: ASIN, UPC, EAN, ISBN, or JAN.",
+    howToFix: "Inventory Loader: 1 (ASIN), 2 (ISBN), 3 (UPC), 4 (EAN). Category templates: ASIN, UPC, EAN, ISBN, or GTIN.",
   },
 
   "amazon/invalid_item_condition": {
@@ -136,13 +136,13 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
 
   "amazon/invalid_fulfillment_channel": {
     code: "amazon/invalid_fulfillment_channel",
-    title: "Invalid fulfillment-channel",
+    title: "Invalid fulfillment-center-id",
     category: "compliance",
     blocking: false,
     autoFixable: false,
-    explanation: "The fulfillment-channel value is not a recognized Amazon fulfillment type.",
+    explanation: "The fulfillment-center-id value is not a recognized Amazon fulfillment type.",
     whyPlatformCares: "The fulfillment channel determines whether Amazon (FBA) or you (MFN) ship the order. An invalid value may default incorrectly.",
-    howToFix: "Use DEFAULT for Merchant Fulfilled (you ship) or AMAZON_NA for Fulfillment by Amazon (FBA).",
+    howToFix: "Use DEFAULT for merchant fulfilled (you ship), or AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN for FBA in that region.",
   },
 
   "amazon/invalid_image_url": {
@@ -187,5 +187,27 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     explanation: "A boolean shipping field (will-ship-internationally or expedited-shipping) contains a value other than 'y' or 'n'.",
     whyPlatformCares: "Amazon's flat-file processor expects these fields to be exactly 'y', 'n', or blank. Invalid values are silently ignored or cause the row to be rejected.",
     howToFix: "Use 'y' to enable or 'n' to disable the shipping option, or leave the field blank to use your account defaults.",
+  },
+
+  "amazon/product_id_scientific_notation": {
+    code: "amazon/product_id_scientific_notation",
+    title: "Barcode mangled by a spreadsheet",
+    category: "sku",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A product-id looks like 1.23457E+11: a spreadsheet converted the barcode to scientific notation.",
+    whyPlatformCares: "The digits after the first few are lost, so Amazon cannot match the product.",
+    howToFix: "Format the column as Text and re-enter the full barcode.",
+  },
+
+  "amazon/invalid_product_id": {
+    code: "amazon/invalid_product_id",
+    title: "Invalid product-id",
+    category: "sku",
+    blocking: true,
+    autoFixable: false,
+    explanation: "The product-id does not have the right length or characters for its type.",
+    whyPlatformCares: "Amazon matches offers to products by this ID; a wrong ID creates errors or attaches the offer to the wrong product.",
+    howToFix: "Check the barcode or ASIN; UPC is 12 digits, EAN 13, ISBN 10 or 13, ASIN 10 letters and digits.",
   },
 };

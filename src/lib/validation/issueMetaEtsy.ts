@@ -189,4 +189,26 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
     whyPlatformCares: "Unknown columns are ignored and can hide data issues.",
     howToFix: "Remove the column or rename it to a supported Etsy header.",
   },
+
+  "etsy/too_many_materials": {
+    code: "etsy/too_many_materials",
+    title: "Too many materials",
+    category: "attributes",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A listing has more than 13 materials.",
+    whyPlatformCares: "Etsy allows at most 13 materials per listing; extras are rejected when you bulk edit.",
+    howToFix: "Keep the 13 most important materials.",
+  },
+
+  "etsy/quantity_too_high": {
+    code: "etsy/quantity_too_high",
+    title: "Quantity above 999",
+    category: "inventory",
+    blocking: true,
+    autoFixable: false,
+    explanation: "Quantity is higher than 999.",
+    whyPlatformCares: "Etsy caps each listing's quantity at 999.",
+    howToFix: "Set Quantity to 999 or less.",
+  },
 };

@@ -49,9 +49,10 @@ function normalizeList(value: string) {
 }
 
 function parsePositiveIntSafe(v: string) {
-  if (!String(v ?? "").trim()) return { ok: true, value: "" };
-  const n = Number.parseInt(String(v).trim(), 10);
-  if (!Number.isFinite(n) || n < 0) return { ok: false, value: v };
+  const raw = String(v ?? "").trim();
+  if (!raw) return { ok: true, value: "" };
+  const n = parseShopifyMoney(raw);
+  if (n == null || !Number.isInteger(n) || n < 0) return { ok: false, value: v };
   return { ok: true, value: String(n) };
 }
 
@@ -169,6 +170,16 @@ export function validateAndFixEtsyListings(headers: string[], rows: CsvRow[]): C
       out["Quantity"] = qi.value;
       if (!isEmpty(qRaw)) fixesApplied.push(`Normalized Quantity to '${qi.value}' on row ${rowIndex + 1}`);
     }
+    if (qi.ok && Number(qi.value) > 999) {
+      issues.push({
+        rowIndex,
+        column: "Quantity",
+        severity: "error",
+        code: "etsy/quantity_too_high",
+        message: `Quantity ${qi.value} is above Etsy's maximum of 999 per listing.`,
+        suggestion: "Set Quantity to 999 or less.",
+      });
+    }
 
     // Currency (3-letter)
     if ("Currency" in out) {
@@ -225,13 +236,40 @@ export function validateAndFixEtsyListings(headers: string[], rows: CsvRow[]): C
       }
     }
 
-    // Materials
+    // Materials (Etsy allows 13)
     if ("Materials" in out) {
       const before = out["Materials"];
       const after = normalizeList(before);
+      const count = after ? after.split(",").length : 0;
+      if (count > 13) {
+        issues.push({
+          rowIndex,
+          column: "Materials",
+          severity: "warning",
+          code: "etsy/too_many_materials",
+          message: `Found ${count} materials. Etsy allows up to 13 per listing.`,
+          suggestion: "Keep the 13 most important materials.",
+        });
+      }
       if (after !== String(before ?? "").trim()) {
         out["Materials"] = after;
         if (!isEmpty(before)) fixesApplied.push(`Normalized Materials formatting on row ${rowIndex + 1}`);
+      }
+    }
+
+    // Etsy's export has one column per photo (IMAGE1 … IMAGE10)
+    for (const key of Object.keys(out)) {
+      if (!/^image\s*\d+$/i.test(key)) continue;
+      const url = String(out[key] ?? "").trim();
+      if (url && !isHttpUrl(url)) {
+        issues.push({
+          rowIndex,
+          column: key,
+          severity: "warning",
+          code: "etsy/invalid_image_url",
+          message: `${key} is not a valid URL: '${url}'.`,
+          suggestion: "Use a full https:// image URL.",
+        });
       }
     }
 
@@ -316,18 +354,16 @@ export function validateAndFixEtsyListings(headers: string[], rows: CsvRow[]): C
     }
   }
 
-  const extra = canonHeaders.filter((h) => !ETSY_EXPECTED_HEADERS.includes(h));
-  const fixedHeaders = [...ETSY_EXPECTED_HEADERS, ...extra];
-
+  // Output keeps the file's own column names and order (Etsy exports use TITLE, PRICE,
+  // CURRENCY_CODE, IMAGE1 …); tools that read them back expect the same names.
+  const fixedHeaders = [...headers];
   const finalRows = outRows.map((r) => {
     const out: CsvRow = {};
-    for (const h of fixedHeaders) out[h] = r?.[h] ?? "";
+    headers.forEach((h, i) => (out[h] = r?.[canonHeaders[i]] ?? ""));
     return out;
   });
-
-  if (fixedHeaders.join("||") !== canonHeaders.join("||")) {
-    fixesApplied.push("Etsy: enforced canonical header names + preferred order");
-  }
+  const originalOf = new Map(canonHeaders.map((c, i) => [c, headers[i]] as const));
+  for (const it of issues) it.column = originalOf.get(it.column) ?? it.column;
 
   return { fixedHeaders, fixedRows: finalRows, issues, fixesApplied };
 }
