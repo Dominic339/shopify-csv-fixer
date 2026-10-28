@@ -1,1 +1,860 @@
-{}
+{
+"shopify/missing_required_header": {
+"title": "필수 열이 없습니다",
+"explanation": "CSV에 Shopify 필수 열 헤더가 없습니다.",
+"whyPlatformCares": "Shopify는 가져오기 중에 열 헤더를 검사합니다. 필수 헤더가 없으면 상품을 만들거나 업데이트하지 못할 수 있습니다.",
+"howToFix": "빠진 필수 열 헤더를 추가하세요(값은 비어 있어도 됩니다)."
+},
+"shopify/blank_title": {
+"title": "Title 없음",
+"explanation": "Title이 비어 있는 행이 있습니다.",
+"whyPlatformCares": "Shopify에서 상품을 만들려면 Title이 필요합니다. Title이 없는 행은 가져오기에 실패하거나 불완전한 상품이 될 수 있습니다.",
+"howToFix": "각 상품 행의 Title에 상품명을 입력하세요."
+},
+"shopify/blank_handle": {
+"title": "URL handle 없음",
+"explanation": "URL handle이 비어 있는 행이 있습니다.",
+"whyPlatformCares": "Shopify는 URL handle로 변형과 이미지를 묶고 기존 상품을 업데이트합니다. handle이 없으면 묶기와 업데이트가 제대로 되지 않습니다.",
+"howToFix": "URL handle을 영문 소문자, 숫자, 하이픈으로 입력하세요(공백 불가)."
+},
+"shopify/invalid_handle": {
+"title": "잘못된 URL handle",
+"explanation": "URL handle에 Shopify가 거부할 수 있는 문자가 있습니다.",
+"whyPlatformCares": "잘못된 handle은 가져오기 오류와 깨진 상품 URL의 원인이 됩니다.",
+"howToFix": "영문 소문자, 숫자, 하이픈만 사용하세요."
+},
+"shopify/invalid_boolean_published": {
+"title": "잘못된 Published 값",
+"explanation": "Published on online store에 참/거짓이 아닌 값이 있습니다.",
+"whyPlatformCares": "Shopify는 TRUE/FALSE(또는 빈칸)를 기대합니다. 잘못된 값이 있으면 가져오기가 막힐 수 있습니다.",
+"howToFix": "TRUE, FALSE를 사용하거나 비워 두세요."
+},
+"shopify/invalid_status": {
+"title": "잘못된 Status 값",
+"explanation": "Status가 Active, Draft, Archived 중 하나가 아닙니다.",
+"whyPlatformCares": "예상하지 못한 상태 값이 있으면 Shopify가 해당 행을 무시하거나 잘못 해석할 수 있습니다.",
+"howToFix": "\"Active\", \"Draft\", \"Archived\" 중 하나를 사용하세요(또는 비워 두세요)."
+},
+"shopify/option_order_invalid": {
+"title": "옵션 열 순서가 잘못되었습니다",
+"explanation": "Option1이 비어 있는데 Option2/Option3에 값이 있습니다.",
+"whyPlatformCares": "Shopify는 옵션이 순서대로(Option1, Option2, Option3) 채워져 있기를 기대합니다.",
+"howToFix": "Option2보다 Option1을, Option3보다 Option2를 먼저 채우세요."
+},
+"shopify/variant_option_missing_value": {
+"title": "옵션 이름은 있지만 값이 없습니다",
+"explanation": "옵션 이름은 있지만 해당 옵션 값이 비어 있습니다.",
+"whyPlatformCares": "옵션 값이 없으면 잘못되었거나 헷갈리는 변형이 만들어질 수 있습니다.",
+"howToFix": "옵션 값을 입력하거나(예: Size = Small) 옵션 이름을 비우세요."
+},
+"shopify/option_name_inconsistent": {
+"title": "변형마다 옵션 이름이 다릅니다",
+"explanation": "같은 handle을 쓰는 행에서는 Option1/2/3 이름이 같아야 합니다.",
+"whyPlatformCares": "옵션 이름이 일치하지 않으면 변형이 잘못 가져와지거나 잘못 묶일 수 있습니다.",
+"howToFix": "같은 handle의 모든 변형 행에서 같은 Option1/Option2/Option3 이름을 사용하세요."
+},
+"shopify/options_not_unique": {
+"title": "변형 옵션이 고유하지 않습니다",
+"explanation": "같은 handle의 변형 두 개 이상이 같은 옵션 값을 가집니다.",
+"whyPlatformCares": "Shopify는 옵션 조합이 같은 변형을 하나로 합칩니다. 데이터가 손실되거나 변형이 덮어쓰일 수 있습니다.",
+"howToFix": "변형 옵션 조합을 각각 고유하게 만드세요(또는 중복을 삭제하세요)."
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "변형의 Option1 value 없음",
+"explanation": "이 행은 변형 데이터로 보이지만 Option1 value가 비어 있습니다.",
+"whyPlatformCares": "Shopify는 옵션 값으로 변형 조합을 만듭니다. 값이 없으면 행이 거부되거나 잘못 가져와질 수 있습니다.",
+"howToFix": "Option1 value를 입력하세요(또는 이 행에서 변형 전용 필드를 삭제하세요)."
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\"과 실제 옵션이 섞여 있습니다",
+"explanation": "한 handle에 \"Default Title\" 행과 옵션이 있는 변형 행이 함께 있습니다.",
+"whyPlatformCares": "보통 변형이 하나인 상품 구조와 여러 개인 상품 구조를 실수로 섞었다는 뜻입니다.",
+"howToFix": "\"Default Title\"은 상품의 변형이 하나뿐일 때만 사용하세요. 변형이 여러 개인 상품은 모든 변형 행에 실제 옵션 값을 입력하세요."
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "변형 정보가 같은 중복 행",
+"explanation": "같은 handle의 행들이 실제 변형이 아니라 중복된 것으로 보입니다.",
+"whyPlatformCares": "중복 행은 가져오기를 헷갈리게 만들고 예상치 못한 덮어쓰기를 일으킬 수 있습니다.",
+"howToFix": "변형이라면 행마다 옵션 값(또는 SKU)이 다른지 확인하세요. 추가 이미지라면 그 행에는 handle과 이미지 필드만 남기세요."
+},
+"shopify/handle_title_mismatch": {
+"title": "같은 handle에 다른 Title",
+"explanation": "같은 URL handle을 쓰는 행에 여러 Title이 사용되었습니다.",
+"whyPlatformCares": "Shopify는 handle로 행을 묶습니다. 제목이 서로 다르면 덮어쓰기나 헷갈리는 가져오기가 생길 수 있습니다.",
+"howToFix": "같은 handle의 모든 행에 하나의 일관된 Title을 사용하세요."
+},
+"shopify/product_missing_variant_row": {
+"title": "이미지는 있지만 변형 행이 없는 상품",
+"explanation": "handle에 이미지 행만 있는 것으로 보입니다.",
+"whyPlatformCares": "Shopify에서 상품을 만들려면 기본 상품/변형 행(Title과 변형 필드)이 최소 하나 필요합니다. 이미지 행만으로는 상품을 만들 수 없습니다.",
+"howToFix": "Title과 변형 필드(Price/SKU/Options)가 있는 기본 행을 handle에 추가하고, 추가 이미지 행은 그 뒤에 두세요."
+},
+"shopify/blank_price": {
+"title": "Price 없음",
+"explanation": "변형 행의 Price가 비어 있습니다.",
+"whyPlatformCares": "Shopify는 빈 가격을 0.00으로 가져오므로 변형이 무료로 판매됩니다.",
+"howToFix": "변형이 정말 무료가 아니라면 Price에 19.99 같은 숫자를 입력하세요."
+},
+"shopify/invalid_numeric_price": {
+"title": "잘못된 Price",
+"explanation": "Price가 올바른 숫자가 아닙니다.",
+"whyPlatformCares": "Shopify의 가격 필드에는 숫자 값이 필요합니다.",
+"howToFix": "19.99 같은 숫자를 사용하세요."
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "잘못된 Compare-at price",
+"explanation": "Compare-at price가 올바른 숫자가 아닙니다.",
+"whyPlatformCares": "Shopify의 가격 필드에는 숫자 값이 필요합니다.",
+"howToFix": "24.99 같은 숫자를 사용하거나 비워 두세요."
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price가 Price보다 낮습니다",
+"explanation": "Compare-at price가 Price보다 낮습니다.",
+"whyPlatformCares": "Compare-at price는 더 높은 원래 가격을 나타내는 값입니다.",
+"howToFix": "Compare-at price를 Price 이상으로 하거나 비워 두세요."
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "잘못된 재고 수량",
+"explanation": "Inventory quantity가 올바른 정수가 아닙니다.",
+"whyPlatformCares": "재고 수량은 정수여야 합니다.",
+"howToFix": "0, 5, 100 같은 정수를 사용하세요."
+},
+"shopify/negative_inventory": {
+"title": "음수 재고",
+"explanation": "Inventory quantity가 음수입니다.",
+"whyPlatformCares": "음수 재고는 대개 데이터 오류이며 주문 처리에 문제를 일으킬 수 있습니다.",
+"howToFix": "0 이상의 수량을 사용하세요."
+},
+"shopify/invalid_inventory_policy": {
+"title": "잘못된 재고 정책",
+"explanation": "Continue selling when out of stock이 DENY/CONTINUE가 아닙니다.",
+"whyPlatformCares": "재고 정책은 품절 시 판매 여부를 결정합니다.",
+"howToFix": "\"DENY\" 또는 \"CONTINUE\"를 사용하세요(또는 비워 두세요)."
+},
+"shopify/invalid_image_url": {
+"title": "잘못된 이미지 URL",
+"explanation": "상품 이미지 URL이 올바른 http(s) URL이 아닙니다.",
+"whyPlatformCares": "Shopify가 올바른 URL에서 이미지를 가져올 수 있어야 합니다.",
+"howToFix": "공개된 이미지를 가리키는 전체 http(s) URL을 사용하세요."
+},
+"shopify/invalid_image_position": {
+"title": "잘못된 이미지 순서",
+"explanation": "Image position이 올바른 정수가 아닙니다.",
+"whyPlatformCares": "Image position은 이미지 순서를 정합니다.",
+"howToFix": "1, 2, 3…을 사용하거나 비워 두세요."
+},
+"shopify/image_row_has_variant_fields": {
+"title": "이미지 행에 변형 필드가 있습니다",
+"explanation": "이미지 전용 행처럼 보이지만 SKU/Price/Options/Inventory 필드가 들어 있습니다.",
+"whyPlatformCares": "변형 묶음이 깨지고 가져오기가 헷갈릴 수 있습니다.",
+"howToFix": "추가 이미지 행에는 handle과 이미지 필드만 남기고, 변형 필드는 기본 행으로 옮기세요."
+},
+"shopify/duplicate_image_position": {
+"title": "이미지 순서 중복",
+"explanation": "같은 handle의 두 행이 같은 Image position을 가집니다.",
+"whyPlatformCares": "중복되면 이미지 순서를 예측할 수 없게 됩니다.",
+"howToFix": "handle마다 고유한 Image position 값(1, 2, 3…)을 사용하세요."
+},
+"shopify/image_alt_text_too_long": {
+"title": "대체 텍스트가 너무 깁니다",
+"explanation": "이미지 대체 텍스트가 Shopify 권장 한도를 넘습니다.",
+"whyPlatformCares": "대체 텍스트가 너무 길면 잘리거나 서식 문제가 생길 수 있습니다.",
+"howToFix": "대체 텍스트를 512자 이하로 줄이세요."
+},
+"shopify/duplicate_sku": {
+"title": "SKU 중복",
+"explanation": "같은 SKU가 여러 변형 행에 있습니다.",
+"whyPlatformCares": "많은 재고·배송 시스템은 변형마다 고유한 SKU를 전제로 합니다.",
+"howToFix": "SKU를 변형마다 고유하게 지정하세요(SKU를 사용하지 않는다면 비워 두세요)."
+},
+"shopify/duplicate_sku_across_products": {
+"title": "상품 간 SKU 중복",
+"explanation": "같은 SKU가 서로 다른 URL handle(다른 상품)에 있습니다.",
+"whyPlatformCares": "상품 간에 SKU를 재사용하면 재고 시스템, 배송 도구, 분석이 혼란스러워질 수 있습니다.",
+"howToFix": "카탈로그 전체에서 SKU를 고유하게 지정하거나(권장) 재사용이 의도된 것인지 확인하세요."
+},
+"shopify/seo_title_too_long": {
+"title": "SEO 제목이 너무 깁니다",
+"explanation": "SEO 제목이 권장 길이를 넘습니다.",
+"whyPlatformCares": "긴 제목은 검색 결과에서 잘릴 수 있습니다.",
+"howToFix": "SEO 제목을 70자 이하로 줄이세요."
+},
+"shopify/seo_description_too_long": {
+"title": "SEO 설명이 너무 깁니다",
+"explanation": "SEO 설명이 권장 길이를 넘습니다.",
+"whyPlatformCares": "긴 설명은 검색 결과 스니펫에서 잘릴 수 있습니다.",
+"howToFix": "SEO 설명을 320자 이하로 줄이세요."
+},
+"shopify/seo_title_missing": {
+"title": "SEO 제목 없음",
+"explanation": "SEO 제목이 비어 있습니다(Shopify가 대신 Title을 사용합니다).",
+"whyPlatformCares": "별도의 SEO 제목은 클릭률을 높일 수 있습니다.",
+"howToFix": "선택 사항: 별도의 SEO 제목을 입력하세요."
+},
+"shopify/seo_description_missing": {
+"title": "SEO 설명 없음",
+"explanation": "SEO 설명이 비어 있습니다(Shopify가 대신 Description을 사용합니다).",
+"whyPlatformCares": "별도의 설명은 검색 결과에서 클릭률과 이해도를 높일 수 있습니다.",
+"howToFix": "선택 사항: 별도의 SEO 설명을 입력하세요."
+},
+"shopify/vendor_missing": {
+"title": "Vendor 없음",
+"explanation": "기본 상품 행의 Vendor가 비어 있습니다.",
+"whyPlatformCares": "Vendor는 상품 정리에 도움이 되고 상점 필터링을 개선합니다.",
+"howToFix": "Vendor/브랜드 값을 추가하세요."
+},
+"shopify/product_category_missing": {
+"title": "상품 카테고리 없음",
+"explanation": "기본 상품 행의 Product category가 비어 있습니다.",
+"whyPlatformCares": "카테고리는 상품 검색과 보고서를 개선합니다.",
+"howToFix": "Product category를 추가하세요."
+},
+"shopify/tags_missing": {
+"title": "태그 없음",
+"explanation": "기본 상품 행의 Tags가 비어 있습니다.",
+"whyPlatformCares": "태그는 컬렉션 구성과 상점 내 검색에 도움이 됩니다.",
+"howToFix": "태그를 추가하세요(쉼표로 구분)."
+},
+"shopify/description_too_short": {
+"title": "설명이 매우 짧습니다",
+"explanation": "설명이 있지만 매우 짧습니다.",
+"whyPlatformCares": "더 충실한 설명은 전환율과 SEO를 높일 수 있습니다.",
+"howToFix": "설명을 보강하는 것을 고려하세요."
+},
+"shopify/status_unrecognized": {
+"title": "흔하지 않은 Status 값",
+"explanation": "Status에 Shopify의 일반적인 값이 아닌 값이 있습니다.",
+"whyPlatformCares": "예상하지 못한 값은 무시되거나 헷갈리는 결과를 낼 수 있습니다.",
+"howToFix": "\"Active\", \"Draft\", \"Archived\" 중 하나를 사용하세요(또는 비워 두세요)."
+},
+"shopify/missing_status_value": {
+"title": "Status 없음",
+"explanation": "Status 열은 있지만 상품 행에 값이 없습니다.",
+"whyPlatformCares": "이 열이 포함되어 있으면 Shopify는 모든 상품 행에 Status 값을 요구합니다.",
+"howToFix": "Status를 active, draft, archived 중 하나로 설정하세요."
+},
+"shopify/handle_generated_column": {
+"title": "URL handle 생성됨",
+"explanation": "파일에 URL handle 열이 없어 각 Title로 handle을 만들었습니다.",
+"whyPlatformCares": "Shopify는 URL handle로 기존 상품을 찾습니다. 실제 handle이 없으면 업데이트 대신 새 상품이 만들어집니다.",
+"howToFix": "상품을 업데이트한다면 기존 handle이 담긴 URL handle 열을 추가하세요."
+},
+"shopify/handle_rewritten": {
+"title": "URL handle 변경됨",
+"explanation": "URL handle에 Shopify에서 허용하지 않는 문자가 있어 다시 작성했습니다.",
+"whyPlatformCares": "Shopify는 URL handle로 기존 상품을 찾으므로, handle이 바뀌면 새 상품으로 가져옵니다.",
+"howToFix": "상품을 업데이트한다면 새 handle이 Shopify의 상품과 일치하는지 확인하세요."
+},
+"shopify/image_url_not_https": {
+"title": "이미지 URL이 http를 사용합니다",
+"explanation": "이미지 URL이 https:// 대신 http://로 시작합니다.",
+"whyPlatformCares": "Shopify는 공개된 https:// URL에서 이미지를 내려받습니다. 일반 http 링크는 실패할 수 있습니다.",
+"howToFix": "호스팅에서 지원한다면 이미지의 https:// 주소를 사용하세요."
+},
+"shopify/invalid_charge_tax": {
+"title": "잘못된 Charge tax",
+"explanation": "Charge tax가 true나 false가 아닙니다.",
+"whyPlatformCares": "Shopify의 Charge tax에는 true 또는 false만 사용할 수 있습니다.",
+"howToFix": "값을 true 또는 false로 변경하세요."
+},
+"shopify/invalid_requires_shipping": {
+"title": "잘못된 Requires shipping",
+"explanation": "Requires shipping이 true나 false가 아닙니다.",
+"whyPlatformCares": "Shopify의 Requires shipping에는 true 또는 false만 사용할 수 있습니다.",
+"howToFix": "값을 true 또는 false로 변경하세요."
+},
+"shopify/invalid_gift_card": {
+"title": "잘못된 Gift card",
+"explanation": "Gift card가 true나 false가 아닙니다.",
+"whyPlatformCares": "Shopify의 Gift card에는 true 또는 false만 사용할 수 있습니다.",
+"howToFix": "값을 true 또는 false로 변경하세요."
+},
+"shopify/gift_card_import": {
+"title": "CSV에 기프트 카드가 있습니다",
+"explanation": "기프트 카드로 표시된 행이 있습니다.",
+"whyPlatformCares": "Shopify는 CSV 가져오기로 기프트 카드 상품을 만들 수 없습니다.",
+"howToFix": "기프트 카드는 Shopify 관리자 페이지에서 만드세요."
+},
+"shopify/invalid_numeric_cost": {
+"title": "잘못된 Cost per item",
+"explanation": "Cost per item이 올바른 숫자가 아닙니다.",
+"whyPlatformCares": "Shopify의 원가에는 통화 기호 없는 일반 숫자가 필요합니다.",
+"howToFix": "7.50 같은 숫자를 사용하세요."
+},
+"shopify/invalid_weight": {
+"title": "잘못된 무게",
+"explanation": "Weight value (grams)가 그램 단위 정수가 아닙니다.",
+"whyPlatformCares": "Shopify는 무게를 소수점이나 단위 없이 그램으로 저장합니다.",
+"howToFix": "그램만 입력하세요(예: 1.5 kg = 1500)."
+},
+"shopify/invalid_weight_unit": {
+"title": "잘못된 무게 단위",
+"explanation": "Weight unit for display가 g, kg, lb, oz 중 하나가 아닙니다.",
+"whyPlatformCares": "Shopify의 표시 단위로는 g, kg, lb, oz만 사용할 수 있습니다.",
+"howToFix": "g, kg, lb, oz 중 하나를 사용하세요."
+},
+"shopify/invalid_inventory_tracker": {
+"title": "잘못된 재고 추적 설정",
+"explanation": "Inventory tracker에 Shopify가 인식하지 못하는 값이 있습니다.",
+"whyPlatformCares": "Shopify는 shopify, shipwire, amazon_marketplace_web 또는 재고를 추적하지 않을 때의 빈칸만 허용합니다.",
+"howToFix": "재고를 추적하려면 shopify를 사용하고, 그렇지 않으면 비워 두세요."
+},
+"shopify/invalid_fulfillment_service": {
+"title": "잘못된 주문 처리 서비스",
+"explanation": "Fulfillment service가 올바른 서비스 handle이 아닙니다.",
+"whyPlatformCares": "Shopify는 manual 또는 관리자 페이지에 설정된 주문 처리 서비스의 handle(영문 소문자, 하이픈)을 기대합니다.",
+"howToFix": "manual 또는 사용 중인 서비스의 handle을 사용하세요."
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category가 Google ID처럼 보입니다",
+"explanation": "Product category가 Google 상품 카테고리 ID처럼 숫자로만 되어 있습니다.",
+"whyPlatformCares": "Shopify의 Product category는 Shopify 자체 분류를 사용하며, Google 카테고리 ID는 별도 열에 넣습니다.",
+"howToFix": "Shopify 분류 경로나 ID를 사용하고, Google ID는 \"Google Shopping / Google product category\"로 옮기세요."
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "포장 치수가 불완전합니다",
+"explanation": "포장 길이, 너비, 높이, 단위 중 일부만 입력되어 있습니다.",
+"whyPlatformCares": "Shopify는 포장 치수가 일부만 설정된 행을 거부합니다.",
+"howToFix": "포장 필드 네 개를 모두 입력하거나 모두 비우세요."
+},
+"shopify/too_many_tags": {
+"title": "태그가 너무 많습니다",
+"explanation": "상품의 태그가 250개를 넘습니다.",
+"whyPlatformCares": "Shopify는 상품당 최대 250개의 태그를 허용합니다.",
+"howToFix": "태그가 250개 이하가 될 때까지 삭제하세요."
+},
+"woocommerce/missing_required_header": {
+"title": "필수 열이 없습니다",
+"explanation": "헤더 행에 WooCommerce 가져오기 필수 열이 하나 이상 없습니다.",
+"whyPlatformCares": "WooCommerce는 가져오기 중에 정해진 열 이름으로 필드를 연결합니다.",
+"howToFix": "WooCommerce에서 새 샘플 CSV를 내보내고, 필수 열이 모두 있고 철자가 정확한지 확인하세요."
+},
+"woocommerce/unknown_header": {
+"title": "알 수 없는 열",
+"explanation": "WooCommerce 가져오기 도구가 이 열을 인식하지 못합니다.",
+"whyPlatformCares": "알 수 없는 열은 무시되며 데이터 문제를 가릴 수 있습니다.",
+"howToFix": "열을 삭제하거나 WooCommerce 가져오기에서 지원하는 헤더로 이름을 바꾸세요."
+},
+"woocommerce/missing_type": {
+"title": "상품 유형 없음",
+"explanation": "Type 열은 필수이며 행을 어떻게 해석할지 결정합니다.",
+"whyPlatformCares": "WooCommerce는 Type으로 행이 상품인지, 변형인지, 상위 그룹인지 판단합니다.",
+"howToFix": "각 행의 Type을 simple, variable, variation, grouped, external 중 하나로 설정하세요."
+},
+"woocommerce/invalid_type": {
+"title": "잘못된 상품 유형",
+"explanation": "Type 값이 WooCommerce가 지원하는 유형이 아닙니다.",
+"whyPlatformCares": "잘못된 유형이 있으면 행이 잘못 가져와지거나 거부될 수 있습니다.",
+"howToFix": "simple, variable, variation, grouped, external 중 하나를 사용하세요."
+},
+"woocommerce/missing_name": {
+"title": "상품명 없음",
+"explanation": "변형이 아닌 상품 행에는 Name이 있어야 합니다.",
+"whyPlatformCares": "이름이 없는 상품은 상점에서 사용할 수 없습니다.",
+"howToFix": "변형이 아닌 모든 행에 Name을 입력하세요."
+},
+"woocommerce/variation_missing_parent": {
+"title": "변형이 상위 상품과 연결되지 않았습니다",
+"explanation": "변형 행은 Parent 필드로 상위 가변 상품과 연결되어야 합니다.",
+"whyPlatformCares": "상위 상품이 없는 변형은 제대로 가져올 수 없습니다.",
+"howToFix": "Parent를 상위 상품의 ID로 설정하세요(또는 가변 상품 가져오기 프리셋에서 상위 상품 자동 생성을 켜세요)."
+},
+"woocommerce/variation_missing_attributes": {
+"title": "변형에 속성이 없습니다",
+"explanation": "올바른 변형 조합을 만들려면 변형 행에 속성 이름/값 쌍이 필요합니다.",
+"whyPlatformCares": "속성이 없으면 WooCommerce가 별도의 변형을 만들 수 없습니다.",
+"howToFix": "각 변형 행에 Attribute 1 name(예: Size)과 Attribute 1 value(s)(예: M)를 입력하세요."
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "변형 조합 중복",
+"explanation": "같은 상위 상품의 변형 두 개 이상이 같은 속성 조합을 가집니다.",
+"whyPlatformCares": "조합이 중복되면 서로 덮어쓰거나 예상치 못하게 합쳐질 수 있습니다.",
+"howToFix": "상위 상품 안에서 각 변형의 속성 값 조합을 고유하게 만드세요."
+},
+"woocommerce/missing_sku": {
+"title": "SKU 없음",
+"explanation": "SKU가 없으면 업데이트의 신뢰성이 떨어지고 재고 추적이 깨질 수 있습니다.",
+"whyPlatformCares": "SKU는 상품 매칭, 업데이트, 연동에 사용됩니다.",
+"howToFix": "가능하면 상품/변형마다 고유한 SKU를 입력하세요."
+},
+"woocommerce/duplicate_sku": {
+"title": "SKU 중복 위험",
+"explanation": "두 개 이상의 행이 같은 SKU를 사용합니다.",
+"whyPlatformCares": "가져오기 중에 중복 SKU가 기존 상품을 덮어쓰거나 데이터를 엉뚱한 상품에 연결할 수 있습니다.",
+"howToFix": "SKU를 고유하게 만드세요. 의도적으로 중복이 필요하다면 카탈로그를 나누거나 상위/하위 구조를 일관되게 사용하세요."
+},
+"woocommerce/invalid_regular_price": {
+"title": "잘못된 정상가",
+"explanation": "Regular price는 올바른 숫자여야 합니다.",
+"whyPlatformCares": "잘못된 가격은 가져오기 실패나 상점의 잘못된 가격 표시로 이어집니다.",
+"howToFix": "19.99 같은 숫자 값을 사용하세요(통화 기호 없이)."
+},
+"woocommerce/invalid_sale_price": {
+"title": "잘못된 할인가",
+"explanation": "Sale price는 올바른 숫자여야 합니다.",
+"whyPlatformCares": "잘못된 할인가는 무시되거나 가격 문제를 일으킬 수 있습니다.",
+"howToFix": "14.99 같은 숫자 값을 사용하세요(통화 기호 없이)."
+},
+"woocommerce/missing_image": {
+"title": "이미지 없음",
+"explanation": "이 상품 행에는 이미지 URL이 없습니다.",
+"whyPlatformCares": "이미지 없이도 가져오기는 되지만, 상품 품질과 전환율이 떨어집니다.",
+"howToFix": "상품의 Images에 URL을 입력하세요(여러 개라면 쉼표로 구분)."
+},
+"woocommerce/invalid_bool": {
+"title": "잘못된 참/거짓 값",
+"explanation": "Published, In stock?, Is featured? 같은 참/거짓 필드에는 1/0 또는 true/false가 필요합니다.",
+"whyPlatformCares": "WooCommerce 가져오기 도구가 예상하지 못한 값을 잘못 해석해 상품이 숨겨지거나 잘못 설정될 수 있습니다.",
+"howToFix": "1(예/참) 또는 0(아니요/거짓)을 사용하세요. 흔한 표기(yes, no, true, false)는 자동으로 정규화할 수 있습니다."
+},
+"woocommerce/invalid_price": {
+"title": "잘못된 가격 값",
+"explanation": "가격 필드에 숫자가 아닌 값이 있습니다.",
+"whyPlatformCares": "WooCommerce는 일반 소수 가격을 기대합니다. 통화 기호나 문자가 있으면 가져오기가 실패하거나 가격이 0이 됩니다.",
+"howToFix": "19.99 같은 일반 소수를 사용하세요(통화 기호, 쉼표, 문자 없이)."
+},
+"woocommerce/invalid_int": {
+"title": "잘못된 정수 값",
+"explanation": "정수 필드(예: Stock)에 정수가 아닌 값이 있습니다.",
+"whyPlatformCares": "WooCommerce는 재고 수량에 정수를 기대합니다. 소수는 잘리거나 거부될 수 있습니다.",
+"howToFix": "0, 5, 12 같은 정수를 사용하세요."
+},
+"woocommerce/invalid_visibility": {
+"title": "잘못된 노출 값",
+"explanation": "Visibility in catalog는 허용되는 네 가지 값 중 하나여야 합니다.",
+"whyPlatformCares": "인식할 수 없는 노출 값은 상품을 기본적으로 노출하거나 가져오기를 실패하게 만들 수 있습니다.",
+"howToFix": "visible, catalog, search, hidden 중 하나를 사용하세요."
+},
+"woocommerce/invalid_image_url": {
+"title": "잘못된 이미지 URL",
+"explanation": "Images 열의 URL 중 올바른 http(s) URL이 아닌 것이 있습니다.",
+"whyPlatformCares": "WooCommerce는 가져오기 중에 입력된 URL에서 이미지를 가져옵니다. URL이 잘못되면 이미지 없는 상품이 됩니다.",
+"howToFix": "전체 https:// URL을 쉼표로 구분해 사용하고, 이미지가 공개되어 있는지 확인하세요."
+},
+"woocommerce/sale_price_not_lower": {
+"title": "할인가가 정상가보다 낮지 않습니다",
+"explanation": "할인이 의미가 있으려면 Sale price가 Regular price보다 낮아야 합니다.",
+"whyPlatformCares": "WooCommerce는 두 가격을 취소선 가격과 할인가로 함께 보여줄 수 있습니다. 할인가가 정상가와 같거나 높으면 가격 표시가 헷갈리거나 틀립니다.",
+"howToFix": "Sale price를 Regular price보다 낮은 값으로 설정하거나 Sale price 필드를 비우세요."
+},
+"woocommerce/invalid_value": {
+"title": "인식할 수 없는 값",
+"explanation": "상태 유형 열에 WooCommerce가 인식하지 못하는 값이 있습니다.",
+"whyPlatformCares": "WooCommerce는 Published, In stock?, Backorders allowed?, Tax status에 정해진 값만 허용하며, 나머지는 무시하거나 거부합니다.",
+"howToFix": "문제 설명에 나온 값 중 하나를 사용하세요."
+},
+"woocommerce/variation_multiple_values": {
+"title": "변형에 값이 여러 개 있습니다",
+"explanation": "변형 행에 한 속성의 값이 두 개 이상 있습니다.",
+"whyPlatformCares": "WooCommerce의 변형은 하나의 정해진 조합이므로 속성마다 값이 하나만 들어갑니다.",
+"howToFix": "모든 값은 상위 행에 두고, 각 변형 행에는 값을 하나만 적으세요."
+},
+"woocommerce/parent_not_in_file": {
+"title": "상위 상품이 파일에 없습니다",
+"explanation": "변형이 이 파일에 없는 상위 상품을 가리킵니다.",
+"whyPlatformCares": "WooCommerce는 변형을 기존 가변 상품에 연결합니다. 상위 상품이 아직 없으면 변형을 건너뜁니다.",
+"howToFix": "상위 상품을 먼저 가져오거나, 상위 상품 행을 이 파일에 포함하세요."
+},
+"etsy/missing_required_header": {
+"title": "필수 열이 없습니다",
+"explanation": "Etsy 대량 등록에 필요한 열이 하나 이상 없습니다.",
+"whyPlatformCares": "Etsy 가져오기 도구가 상품 필드를 올바르게 연결하려면 정확한 헤더가 필요합니다.",
+"howToFix": "Etsy에서 새 대량 등록 CSV를 내보내고, 필수 헤더가 그대로 있는지 확인하세요."
+},
+"etsy/invalid_price": {
+"title": "잘못된 가격",
+"explanation": "가격은 올바른 숫자여야 합니다.",
+"whyPlatformCares": "가격이 잘못되면 상품 등록이 거부될 수 있습니다.",
+"howToFix": "19.99 같은 숫자 값을 사용하세요(통화 기호 없이)."
+},
+"etsy/title_too_long": {
+"title": "제목이 너무 깁니다",
+"explanation": "Etsy 제목에는 최대 길이가 있습니다.",
+"whyPlatformCares": "너무 긴 제목은 가져오기 도구에 따라 잘리거나 거부될 수 있습니다.",
+"howToFix": "제목을 줄이세요(최대 길이까지 안전하게 잘라 드릴 수도 있습니다)."
+},
+"etsy/tags_too_many": {
+"title": "태그가 너무 많습니다",
+"explanation": "Etsy 상품에는 태그를 최대 13개까지 달 수 있습니다.",
+"whyPlatformCares": "한도를 넘는 태그는 무시되며 검색 최적화에 불리합니다.",
+"howToFix": "가장 좋은 태그 13개만 남기세요(자동으로 13개로 제한할 수도 있습니다)."
+},
+"etsy/too_many_tags": {
+"title": "태그가 너무 많습니다",
+"explanation": "Etsy 상품에는 태그를 최대 13개까지 달 수 있습니다.",
+"whyPlatformCares": "한도를 넘는 태그는 무시되며 검색 최적화에 불리합니다.",
+"howToFix": "가장 좋은 태그 13개만 남기세요(자동으로 13개로 제한할 수도 있습니다)."
+},
+"etsy/tag_too_long": {
+"title": "20자를 넘는 태그",
+"explanation": "Etsy는 태그 하나를 최대 20자로 제한합니다.",
+"whyPlatformCares": "20자를 넘는 태그는 Etsy에서 거부됩니다.",
+"howToFix": "해당 태그를 20자 이하로 줄이세요."
+},
+"etsy/missing_title": {
+"title": "상품 제목 없음",
+"explanation": "모든 Etsy 상품에는 제목이 필요합니다.",
+"whyPlatformCares": "제목이 없는 상품은 게시하거나 가져올 수 없습니다.",
+"howToFix": "내용을 알 수 있는 제목을 입력하세요(최대 140자)."
+},
+"etsy/missing_price": {
+"title": "가격 없음",
+"explanation": "모든 Etsy 상품에는 가격이 필요합니다.",
+"whyPlatformCares": "가격이 없는 상품은 게시할 수 없습니다.",
+"howToFix": "상품 가격을 일반 소수로 입력하세요(예: 19.99)."
+},
+"etsy/invalid_quantity": {
+"title": "잘못된 수량",
+"explanation": "수량은 0 이상의 정수여야 합니다.",
+"whyPlatformCares": "수량이 잘못되면 상품 가져오기나 게시에 실패합니다.",
+"howToFix": "0, 1, 10 같은 정수를 사용하세요."
+},
+"etsy/invalid_currency": {
+"title": "잘못된 통화 코드",
+"explanation": "통화는 올바른 3자리 ISO 4217 코드여야 합니다(예: USD, GBP, EUR).",
+"whyPlatformCares": "통화 코드가 잘못되면 가져오기에 실패하거나 가격이 잘못 표시될 수 있습니다.",
+"howToFix": "표준 3자리 통화 코드를 사용하세요(대문자로 자동 변환할 수 있습니다)."
+},
+"etsy/invalid_image_url": {
+"title": "잘못된 이미지 URL",
+"explanation": "올바른 http(s) URL이 아닌 이미지 URL이 있습니다.",
+"whyPlatformCares": "Etsy는 잘못된 URL에서 이미지를 가져올 수 없어 사진 없는 상품이 됩니다.",
+"howToFix": "공개된 이미지를 가리키는 전체 https:// URL을 쉼표로 구분해 사용하세요."
+},
+"etsy/duplicate_tags": {
+"title": "태그 중복",
+"explanation": "중복 태그는 한정된 태그 자리를 낭비합니다.",
+"whyPlatformCares": "태그가 중복되면 노출이 줄어듭니다.",
+"howToFix": "중복을 삭제하세요(순서를 유지하면서 자동으로 중복을 제거할 수 있습니다)."
+},
+"etsy/missing_shipping_profile": {
+"title": "배송 프로필 없음",
+"explanation": "게시하려면 배송 프로필(또는 동등한 배송 필드)이 필요합니다.",
+"whyPlatformCares": "배송 설정이 없는 상품은 게시할 수 없습니다.",
+"howToFix": "올바른 배송 프로필 ID/이름이나 내보내기에 필요한 배송 필드를 입력하세요."
+},
+"etsy/duplicate_listing_id": {
+"title": "Listing ID 중복 위험",
+"explanation": "두 개 이상의 행이 같은 Listing ID를 사용합니다.",
+"whyPlatformCares": "ID가 중복되면 새 상품을 만드는 대신 기존 상품을 덮어쓸 수 있습니다.",
+"howToFix": "새 상품을 만들 때는 Listing ID를 고유하게 하고, 기존 상품을 업데이트할 때는 의도적으로 설정하세요."
+},
+"etsy/duplicate_sku": {
+"title": "SKU 중복 위험",
+"explanation": "두 개 이상의 상품이 같은 SKU를 사용합니다.",
+"whyPlatformCares": "SKU가 중복되면 재고 관리와 연동에 혼란이 생길 수 있습니다.",
+"howToFix": "가능한 한 SKU를 고유하게 지정하세요."
+},
+"etsy/missing_required_field": {
+"title": "필수 필드 없음",
+"explanation": "Etsy 필수 필드가 비어 있습니다.",
+"whyPlatformCares": "필수 필드가 없으면 상품 등록이 거부됩니다.",
+"howToFix": "문제 세부 정보에 안내된 대로 빠진 필수 필드를 입력하세요."
+},
+"etsy/unknown_header": {
+"title": "알 수 없는 열",
+"explanation": "Etsy 가져오기 도구가 이 열을 인식하지 못합니다.",
+"whyPlatformCares": "알 수 없는 열은 무시되며 데이터 문제를 가릴 수 있습니다.",
+"howToFix": "열을 삭제하거나 Etsy에서 지원하는 헤더로 이름을 바꾸세요."
+},
+"etsy/too_many_materials": {
+"title": "소재가 너무 많습니다",
+"explanation": "상품의 소재가 13개를 넘습니다.",
+"whyPlatformCares": "Etsy는 상품당 최대 13개의 소재를 허용하며, 초과분은 대량 편집 시 거부됩니다.",
+"howToFix": "가장 중요한 소재 13개만 남기세요."
+},
+"etsy/quantity_too_high": {
+"title": "수량이 999를 넘습니다",
+"explanation": "수량이 999보다 큽니다.",
+"whyPlatformCares": "Etsy는 상품마다 수량을 최대 999로 제한합니다.",
+"howToFix": "Quantity를 999 이하로 설정하세요."
+},
+"ebay/missing_required_header": {
+"title": "필수 열이 없습니다",
+"explanation": "헤더 행에 eBay File Exchange 필수 열이 하나 이상 없습니다.",
+"whyPlatformCares": "eBay File Exchange가 업로드 중에 필드를 올바르게 연결하려면 정해진 열 이름이 필요합니다.",
+"howToFix": "eBay File Exchange 템플릿을 사용하고 필수 열(Title, StartPrice, Quantity)이 있는지 확인하세요."
+},
+"ebay/invalid_action": {
+"title": "잘못된 Action 값",
+"explanation": "Action 열의 값이 eBay에서 허용하는 작업이 아닙니다.",
+"whyPlatformCares": "eBay File Exchange는 Action으로 상품을 추가(Add), 수정(Revise), 삭제, 종료(End)할지 결정합니다. 값이 잘못되면 행 전체가 거부됩니다.",
+"howToFix": "Add, Revise, Relist, End, VerifyAdd, Status 중 하나를 사용하세요."
+},
+"ebay/missing_title": {
+"title": "상품 제목 없음",
+"explanation": "모든 eBay 상품에서 Title 필드는 필수입니다.",
+"whyPlatformCares": "제목이 없는 상품은 eBay에 게시할 수 없습니다.",
+"howToFix": "내용을 알 수 있는 80자 이하의 상품 제목을 입력하세요."
+},
+"ebay/title_too_long": {
+"title": "제목이 80자를 넘습니다",
+"explanation": "eBay는 상품 제목을 80자로 엄격하게 제한합니다.",
+"whyPlatformCares": "80자를 넘는 제목은 eBay File Exchange에서 거부되어 업로드할 수 없습니다.",
+"howToFix": "제목을 80자 이하로 줄이세요. 구매자가 검색하는 키워드에 집중하세요."
+},
+"ebay/missing_price": {
+"title": "StartPrice 없음",
+"explanation": "모든 eBay 상품에서 StartPrice는 필수입니다.",
+"whyPlatformCares": "가격이 없는 상품은 업로드 중에 거부됩니다.",
+"howToFix": "StartPrice를 소수로 입력하세요(예: 19.99)."
+},
+"ebay/invalid_price": {
+"title": "잘못된 StartPrice",
+"explanation": "StartPrice는 올바른 소수여야 합니다.",
+"whyPlatformCares": "가격이 잘못되면 해당 상품 행의 업로드에 실패합니다.",
+"howToFix": "통화 기호나 쉼표 없이 19.99 같은 일반 소수를 사용하세요."
+},
+"ebay/invalid_quantity": {
+"title": "잘못된 Quantity",
+"explanation": "Quantity는 0 이상의 정수여야 합니다.",
+"whyPlatformCares": "eBay는 모든 상품에 숫자 수량을 요구합니다. 값이 잘못되면 업로드에 실패합니다.",
+"howToFix": "0, 1, 10 같은 정수를 사용하세요."
+},
+"ebay/invalid_condition_id": {
+"title": "인식할 수 없는 ConditionID",
+"explanation": "ConditionID 값이 eBay 표준 상태 코드와 일치하지 않습니다.",
+"whyPlatformCares": "eBay는 ConditionID로 구매자에게 상품 상태를 보여줍니다. 인식할 수 없는 ID는 거부되거나 잘못된 상태로 표시될 수 있습니다.",
+"howToFix": "eBay 표준 ConditionID를 사용하세요. 예: 1000=새 상품, 1500=새 상품(기타), 2000=인증 리퍼비시, 2500=판매자 리퍼비시, 3000=중고, 7000=부품용 또는 작동 불가. 사용할 수 있는 ID는 카테고리마다 다릅니다."
+},
+"ebay/invalid_duration": {
+"title": "잘못된 Duration",
+"explanation": "Duration 값이 eBay에서 인식하는 상품 기간 형식과 일치하지 않습니다.",
+"whyPlatformCares": "인식할 수 없는 기간은 기본적으로 짧은 경매가 되거나 상품 등록이 거부될 수 있습니다.",
+"howToFix": "고정가 상품에는 GTC(Good 'Til Cancelled)를, 경매에는 Days_1, Days_3, Days_5, Days_7, Days_10 중 하나를 사용하세요."
+},
+"ebay/invalid_format": {
+"title": "잘못된 상품 Format",
+"explanation": "Format 값이 eBay에서 인식하는 상품 유형이 아닙니다.",
+"whyPlatformCares": "Format 필드는 eBay에 상품을 어떻게 보여줄지 알려줍니다. 값이 잘못되면 해당 행이 실패할 수 있습니다.",
+"howToFix": "즉시 구매 상품에는 FixedPrice, 경매 방식에는 Auction을 사용하세요."
+},
+"ebay/too_many_images": {
+"title": "이미지가 너무 많습니다",
+"explanation": "eBay는 상품당 사진을 최대 24장까지 허용합니다.",
+"whyPlatformCares": "eBay는 24장 한도를 넘는 사진을 거부하거나 버립니다.",
+"howToFix": "PictureURL 목록을 |로 구분한 24개 이하의 URL로 줄이세요."
+},
+"ebay/invalid_picture_url": {
+"title": "잘못된 사진 URL",
+"explanation": "올바른 http(s) URL이 아닌 사진 URL이 있습니다.",
+"whyPlatformCares": "eBay는 상품을 게시할 때 입력된 URL에서 이미지를 가져옵니다. URL이 잘못되면 상품에 이미지가 표시되지 않습니다.",
+"howToFix": "공개된 이미지를 가리키는 전체 https:// URL을 사용하고, 여러 URL은 세로 막대(|)로 구분하세요."
+},
+"ebay/invalid_dispatch_time": {
+"title": "잘못된 DispatchTimeMax",
+"explanation": "DispatchTimeMax는 처리 기간(일)을 나타내는 0 이상의 정수여야 합니다.",
+"whyPlatformCares": "eBay는 구매자에게 처리 기간을 보여줍니다. 값이 잘못되면 상품을 업로드하지 못할 수 있습니다.",
+"howToFix": "1, 2, 3 같은 정수를 사용하세요(발송까지 걸리는 일수)."
+},
+"ebay/duplicate_sku": {
+"title": "CustomLabel (SKU) 중복",
+"explanation": "두 개 이상의 행이 같은 CustomLabel 값을 사용합니다.",
+"whyPlatformCares": "Add 작업에서 CustomLabel이 중복되면 상품이 충돌할 수 있습니다. 기존 상품을 업데이트하려면 Revise 작업을 사용하세요.",
+"howToFix": "각 상품의 CustomLabel을 고유하게 지정하거나, 기존 상품을 업데이트할 때는 Action=Revise를 사용하세요."
+},
+"ebay/variation_specifics_mismatch": {
+"title": "변형 사양 불일치",
+"explanation": "VariationSpecificsName과 VariationSpecificsValue는 둘 다 입력하거나 둘 다 비워야 합니다.",
+"whyPlatformCares": "eBay가 변형 속성을 만들려면 서로 맞는 이름/값 쌍이 필요합니다. 일치하지 않으면 변형을 만들 수 없습니다.",
+"howToFix": "각 변형 행에 VariationSpecificsName(예: 'Color|Size')과 VariationSpecificsValue(예: 'Blue|Medium')를 모두 입력하세요."
+},
+"ebay/duplicate_variation_combo": {
+"title": "변형 조합 중복",
+"explanation": "같은 상품 안의 변형 행 두 개 이상이 같은 VariationSpecifics 조합을 가집니다.",
+"whyPlatformCares": "변형 조합이 중복되면 업로드 중에 서로 덮어써서 데이터가 손실됩니다.",
+"howToFix": "각 변형 행의 VariationSpecificsName과 VariationSpecificsValue 조합을 고유하게 만드세요."
+},
+"ebay/missing_category_id": {
+"title": "Category가 비어 있습니다",
+"explanation": "새 상품에 eBay 카테고리 번호가 없습니다.",
+"whyPlatformCares": "eBay는 모든 새 상품에 카테고리를 요구하며, 카테고리가 없는 행은 거부됩니다.",
+"howToFix": "eBay 카테고리 트리에서 숫자 카테고리 ID를 찾아 각 새 상품 행에 입력하세요."
+},
+"ebay/invalid_category_id": {
+"title": "잘못된 Category",
+"explanation": "Category 값이 숫자로 된 eBay 카테고리 ID가 아닙니다.",
+"whyPlatformCares": "eBay 카테고리 ID는 항상 숫자입니다. 카테고리 이름은 업로드 중에 거부됩니다.",
+"howToFix": "eBay 카테고리 트리의 숫자 ID를 사용하세요(예: 휴대폰 및 스마트폰은 9355)."
+},
+"ebay/missing_action_column": {
+"title": "Action 열 없음",
+"explanation": "파일에 Action 열이 없습니다.",
+"whyPlatformCares": "eBay 업로드는 첫 번째 열(헤더에 사이트와 통화가 들어간 Action 열)을 보고 각 행을 어떻게 처리할지 결정합니다.",
+"howToFix": "Seller Hub 업로드 템플릿에서 시작하고 첫 번째 열은 그대로 두세요."
+},
+"ebay/missing_action": {
+"title": "Action 없음",
+"explanation": "상품 행에 Action이 없습니다.",
+"whyPlatformCares": "Action은 변형 행만 비워 둘 수 있으며, 다른 행은 eBay가 건너뜁니다.",
+"howToFix": "Action을 Add, Revise, Relist, End 중 하나로 설정하세요."
+},
+"ebay/missing_item_id": {
+"title": "ItemID 없음",
+"explanation": "Revise, Relist, End 행에 ItemID가 없습니다.",
+"whyPlatformCares": "eBay가 변경할 상품을 찾으려면 상품 번호가 필요합니다.",
+"howToFix": "ItemID 열에 eBay 상품 번호를 추가하세요."
+},
+"ebay/missing_end_code": {
+"title": "EndCode 없음",
+"explanation": "End 행에 EndCode가 없습니다.",
+"whyPlatformCares": "eBay는 상품을 일찍 종료하는 이유를 묻습니다.",
+"howToFix": "NotAvailable, LostOrBroken, Incorrect, OtherListingError 중 하나를 사용하세요."
+},
+"ebay/missing_condition": {
+"title": "상품 상태 없음",
+"explanation": "새 상품에 ConditionID가 없습니다.",
+"whyPlatformCares": "대부분의 eBay 카테고리는 상품 상태가 필요합니다.",
+"howToFix": "1000(새 상품)이나 3000(중고) 같은 ConditionID를 지정하세요."
+},
+"ebay/fixed_price_not_gtc": {
+"title": "고정가가 GTC가 아닙니다",
+"explanation": "고정가 상품의 기간이 GTC가 아닙니다.",
+"whyPlatformCares": "eBay는 모든 고정가 상품을 Good 'Til Cancelled로 게시합니다.",
+"howToFix": "Duration을 GTC로 설정하세요."
+},
+"ebay/invalid_relationship_details": {
+"title": "잘못된 RelationshipDetails",
+"explanation": "RelationshipDetails가 eBay의 Name=Value 형식이 아닙니다.",
+"whyPlatformCares": "eBay는 RelationshipDetails로 변형 선택 항목을 만듭니다. 형식이 잘못되면 상품이 거부됩니다.",
+"howToFix": "상위 행: Color=Blue;Red|Size=M;L. 변형: Color=Blue|Size=M."
+},
+"ebay/variation_without_parent": {
+"title": "상위 행이 없는 변형",
+"explanation": "변형 행이 상위 상품 행 다음에 오지 않습니다.",
+"whyPlatformCares": "eBay는 Relationship=Variation 행을 바로 위의 상위 행에 연결합니다.",
+"howToFix": "변형 행을 상위 행 바로 아래로 옮기세요."
+},
+"ebay/variation_value_not_in_parent": {
+"title": "선언되지 않은 변형 값",
+"explanation": "변형이 상위 행에 없는 값을 사용합니다.",
+"whyPlatformCares": "eBay는 상위 행의 RelationshipDetails에 선언된 변형 값만 허용합니다.",
+"howToFix": "상위 행에 값을 추가하거나 변형을 수정하세요."
+},
+"amazon/missing_required_header": {
+"title": "필수 열이 없습니다",
+"explanation": "헤더 행에 Amazon 플랫 파일 필수 열이 하나 이상 없습니다.",
+"whyPlatformCares": "Amazon 플랫 파일 처리기가 필드를 올바르게 연결하려면 정확한 열 이름이 필요합니다. 열이 빠지면 파일이 거부됩니다.",
+"howToFix": "Amazon Inventory Loader 또는 카테고리 템플릿을 사용하세요. 모든 파일에 sku 열이 필요합니다."
+},
+"amazon/missing_sku": {
+"title": "SKU 없음",
+"explanation": "모든 Amazon 재고 행에는 sku 필드가 필요합니다.",
+"whyPlatformCares": "Amazon은 SKU로 판매 상품을 고유하게 식별합니다. SKU가 없는 행은 거부됩니다.",
+"howToFix": "각 상품 행에 고유한 SKU(최대 40자)를 입력하세요."
+},
+"amazon/sku_too_long": {
+"title": "SKU가 40자를 넘습니다",
+"explanation": "Amazon은 SKU를 최대 40자로 제한합니다.",
+"whyPlatformCares": "40자를 넘는 SKU는 플랫 파일 처리기에서 거부됩니다.",
+"howToFix": "고유성을 유지하면서 SKU를 40자 이하로 줄이세요."
+},
+"amazon/duplicate_sku": {
+"title": "SKU 중복",
+"explanation": "이 파일에서 두 개 이상의 행이 같은 SKU를 사용합니다.",
+"whyPlatformCares": "SKU가 중복되면 처리 중에 한 행이 다른 행을 덮어써서 재고나 가격 데이터가 지워질 수 있습니다.",
+"howToFix": "각 SKU가 파일에 한 번만 나오게 하세요. 판매 상품을 명시적으로 삭제하려면 add-delete='d'를 사용하세요."
+},
+"amazon/missing_item_name": {
+"title": "item-name 없음",
+"explanation": "Amazon 상품에는 item-name 필드(상품 제목)가 필요합니다.",
+"whyPlatformCares": "Amazon이 검색 결과와 상품 페이지에 상품을 표시하려면 상품 제목이 필요합니다.",
+"howToFix": "item-name 열에 내용을 알 수 있는 상품 제목을 입력하세요(최대 500자)."
+},
+"amazon/item_name_too_long": {
+"title": "item-name이 너무 깁니다",
+"explanation": "Amazon은 보통 item-name을 최대 500자까지 허용합니다.",
+"whyPlatformCares": "한도를 넘는 제목은 카테고리 템플릿에 따라 잘리거나 거부될 수 있습니다.",
+"howToFix": "item-name을 500자 이하로 줄이세요. 브랜드, 상품 유형, 핵심 속성에 집중하세요."
+},
+"amazon/missing_price": {
+"title": "가격 없음",
+"explanation": "판매 정보를 추가하거나 업데이트하는 행의 price가 비어 있습니다.",
+"whyPlatformCares": "기존 판매 정보는 현재 가격이 유지되지만, 가격이 없는 새 판매 정보는 게시할 수 없습니다.",
+"howToFix": "올바른 가격을 소수로 입력하세요(예: 29.99)."
+},
+"amazon/invalid_price": {
+"title": "잘못된 가격",
+"explanation": "price 값이 올바른 소수가 아닙니다.",
+"whyPlatformCares": "가격이 잘못되면 Amazon 플랫 파일 처리기가 해당 행을 거부합니다.",
+"howToFix": "29.99 같은 일반 소수를 사용하세요(달러 기호, 쉼표, 문자 없이)."
+},
+"amazon/invalid_quantity": {
+"title": "잘못된 수량",
+"explanation": "quantity 값은 0 이상의 정수여야 합니다.",
+"whyPlatformCares": "Amazon은 수량이 올바른 숫자가 아닌 행을 거부합니다. 음수 수량은 허용되지 않습니다.",
+"howToFix": "0, 5, 100 같은 정수를 사용하세요."
+},
+"amazon/invalid_product_id_type": {
+"title": "잘못된 product-id-type",
+"explanation": "product-id-type 값이 Amazon에서 인식하는 식별자 유형이 아닙니다.",
+"whyPlatformCares": "Amazon은 product-id-type으로 product-id 필드를 ASIN이나 UPC 등으로 해석합니다. 유형이 잘못되면 상품 매칭에 실패합니다.",
+"howToFix": "Inventory Loader: 1(ASIN), 2(ISBN), 3(UPC), 4(EAN). 카테고리 템플릿: ASIN, UPC, EAN, ISBN, GTIN."
+},
+"amazon/invalid_item_condition": {
+"title": "잘못된 item-condition",
+"explanation": "item-condition 코드가 Amazon에서 인식하는 상태 값이 아닙니다.",
+"whyPlatformCares": "Amazon은 구매자에게 상태를 보여주고 상품 분류에도 사용합니다. 인식할 수 없는 코드는 거부될 수 있습니다.",
+"howToFix": "Amazon 숫자 상태 코드를 사용하세요: 11=새 상품, 10=리퍼비시, 1=중고 - 새것 같음, 2=중고 - 매우 좋음, 3=중고 - 좋음, 4=중고 - 양호."
+},
+"amazon/min_above_max_price": {
+"title": "최저가가 최고가보다 높습니다",
+"explanation": "minimum-seller-allowed-price가 maximum-seller-allowed-price보다 높아 두 조건을 모두 만족하는 가격이 없습니다.",
+"whyPlatformCares": "Amazon은 이 가격 범위를 거부하고, 범위를 벗어난 판매 정보는 모두 비활성화합니다.",
+"howToFix": "두 값을 서로 바꾸거나 하나를 비우세요."
+},
+"amazon/price_outside_allowed_range": {
+"title": "가격이 허용 범위를 벗어났습니다",
+"explanation": "가격이 minimum-seller-allowed-price보다 낮거나 maximum-seller-allowed-price보다 높습니다.",
+"whyPlatformCares": "Amazon은 설정한 범위를 벗어난 가격의 판매 정보를 비활성화하므로 상품 판매가 중단됩니다.",
+"howToFix": "가격을 변경하거나 최저/최고 가격 범위를 넓히세요."
+},
+"amazon/invalid_add_delete": {
+"title": "잘못된 add-delete 값",
+"explanation": "add-delete 필드는 'a'(추가 또는 업데이트), 'd'(판매 정보 삭제), 'x'(판매 정보와 상품 데이터 삭제) 중 하나여야 합니다.",
+"whyPlatformCares": "add-delete 값이 잘못되면 Amazon 처리기가 해당 행을 건너뜁니다.",
+"howToFix": "판매 정보를 추가하거나 업데이트하려면 'a', 삭제하려면 'd', 상품 데이터까지 삭제하려면 'x'를 사용하세요."
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "잘못된 fulfillment-center-id",
+"explanation": "fulfillment-center-id 값이 Amazon에서 인식하는 주문 처리 유형이 아닙니다.",
+"whyPlatformCares": "주문 처리 채널에 따라 주문을 Amazon(FBA)이 보낼지 판매자(MFN)가 보낼지 정해집니다. 값이 잘못되면 잘못된 기본값이 적용될 수 있습니다.",
+"howToFix": "판매자 배송(직접 배송)은 DEFAULT를, 해당 지역의 FBA는 AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN을 사용하세요."
+},
+"amazon/invalid_image_url": {
+"title": "잘못된 이미지 URL",
+"explanation": "image-url이 올바른 http(s) URL이 아닙니다.",
+"whyPlatformCares": "Amazon은 입력된 URL에서 상품 이미지를 가져옵니다. URL이 잘못되면 이미지 없는 상품이 되어 전환율이 떨어집니다.",
+"howToFix": "공개된 상품 이미지를 가리키는 전체 https:// URL을 사용하세요(JPEG 또는 PNG, 최소 500×500 px 권장)."
+},
+"amazon/description_too_long": {
+"title": "item-description이 너무 깁니다",
+"explanation": "item-description이 Amazon의 일반적인 한도인 2000자를 넘습니다.",
+"whyPlatformCares": "한도를 넘는 설명은 카테고리 템플릿에 따라 잘리거나 거부될 수 있습니다.",
+"howToFix": "item-description을 2000자 이하로 줄이세요."
+},
+"amazon/brand_name_too_long": {
+"title": "brand-name이 너무 깁니다",
+"explanation": "brand-name이 Amazon의 50자 한도를 넘습니다.",
+"whyPlatformCares": "한도를 넘는 브랜드 이름은 잘리거나 거부될 수 있습니다.",
+"howToFix": "brand-name을 50자 이하로 줄이세요."
+},
+"amazon/invalid_boolean_field": {
+"title": "잘못된 참/거짓 필드 값",
+"explanation": "배송 관련 참/거짓 필드(will-ship-internationally 또는 expedited-shipping)에 'y'나 'n'이 아닌 값이 있습니다.",
+"whyPlatformCares": "Amazon 플랫 파일 처리기는 이 필드에 정확히 'y', 'n' 또는 빈칸을 기대합니다. 잘못된 값은 조용히 무시되거나 행이 거부됩니다.",
+"howToFix": "배송 옵션을 켜려면 'y', 끄려면 'n'을 사용하거나, 계정 기본값을 쓰려면 비워 두세요."
+},
+"amazon/product_id_scientific_notation": {
+"title": "스프레드시트가 바코드를 망가뜨렸습니다",
+"explanation": "product-id가 1.23457E+11처럼 보입니다. 스프레드시트가 바코드를 지수 표기로 바꿨습니다.",
+"whyPlatformCares": "앞의 몇 자리 이후 숫자가 사라지므로 Amazon이 상품을 찾을 수 없습니다.",
+"howToFix": "열 서식을 텍스트로 지정하고 바코드 전체를 다시 입력하세요."
+},
+"amazon/invalid_product_id": {
+"title": "잘못된 product-id",
+"explanation": "product-id의 길이나 문자가 해당 유형에 맞지 않습니다.",
+"whyPlatformCares": "Amazon은 이 ID로 판매 정보와 상품을 매칭합니다. ID가 틀리면 오류가 나거나 판매 정보가 엉뚱한 상품에 연결됩니다.",
+"howToFix": "바코드나 ASIN을 확인하세요. UPC는 12자리, EAN은 13자리, ISBN은 10자리 또는 13자리, ASIN은 영문자와 숫자 10자입니다."
+}
+}
