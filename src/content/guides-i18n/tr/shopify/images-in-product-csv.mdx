@@ -1,0 +1,169 @@
+---
+title: "CSV'de Shopify ürün görselleri: Image Src, alternatif metin ve sıralar"
+description: "Shopify ürün CSV'sinde görsel URL'lerini nasıl yapılandıracağınızı öğrenin: Image Src, Image Position ve Image Alt Text sütunları, ürün başına birden çok görsel ekleme ve en yaygın görsel içe aktarma hatalarından kaçınma."
+keywords: ["shopify görsel csv", "shopify image src", "shopify görsel alternatif metin", "shopify image position csv", "shopify ürün görselleri içe aktarma", "shopify csv birden fazla görsel", "shopify görsel url"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify ürün CSV'sinde hangi görsel sütunlarının bulunduğu"
+  - "Tek bir ürüne birden fazla görselin nasıl ekleneceği"
+  - "Image Position'ın görüntülenme sırasını nasıl belirlediği"
+  - "Görsel içe aktarmalarının neden başarısız olduğu ve URL sorunlarının nasıl düzeltileceği"
+  - "Erişilebilirlik ve SEO için alternatif metnin nasıl ekleneceği"
+bestFor: "Birden çok görseli olan ürünleri içe aktaran veya güncelleyen, görsel sırasını belirlemesi gereken ya da içe aktarmadan sonra eksik görselleri arayan Shopify satıcıları"
+timeToComplete: "10 dakika"
+---
+
+## Shopify CSV'sindeki görsel sütunları
+
+Shopify ürün CSV'si görsellerle ilgili üç sütunu destekler:
+
+| Sütun | Zorunlu | Not |
+|---|---|---|
+| Image Src | Hayır | Görsel dosyasının herkese açık HTTPS URL'si |
+| Image Position | Hayır | Görüntülenme sırasını belirleyen tam sayı (1, 2, 3...) |
+| Image Alt Text | Hayır | Görseli açıklayan metin |
+
+Bu sütunlar ürün veya varyant verileriyle aynı satırda yer alır. Her satırda bir görsel URL'si bulunabilir.
+
+---
+
+## Ürün başına tek görsel
+
+En basit durum: ürün başına bir görsel. URL'yi **ana satırın** (o Handle'ın ilk satırının) `Image Src` sütununa yazın:
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+Varyant satırlarında (aynı Handle'a sahip ikinci ve sonraki satırlarda) Image Src sütunu boştur.
+
+---
+
+## Ürün başına birden fazla görsel
+
+Bir ürüne birden fazla görsel eklemek için yalnızca görsel verisi içeren, **aynı Handle'a sahip ek satırlar** ekleyin. Bu satırlarda Title ve varyant alanları boştur; yalnızca ek görsel URL'lerini taşımak için vardır.
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+Temel kurallar:
+- Ürün başına en fazla **250 görsel** desteklenir.
+- Her görsel URL'si, aynı Handle ile kendi satırında yer alır.
+- Yalnızca görsel içeren satırlarda Variant Price, seçenek değerleri ve Title boştur.
+- Aynı satırı hem bir varyant hem de ek bir görsel için kullanmayın: bir satır, bir amaç.
+
+---
+
+## Image Position
+
+`Image Position`, görsellerin ürün galerisinde hangi sırayla görüneceğini belirler. 1'den başlayan bir tam sayıdır.
+
+- `1` = ana görsel (ilk gösterilir).
+- `2`, `3` vb. = bu sırayla ek görseller.
+
+Image Position'ı boş bırakırsanız Shopify sıraları görsellerin CSV'deki sırasına göre atar. Sıraları açıkça belirtirseniz satır sırası ne olursa olsun sizin sıralamanız geçerli olur.
+
+**Örnek:** önce bir yaşam tarzı fotoğrafı, sonra ürün fotoğrafı göstermek:
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## Görsel URL'si gereksinimleri
+
+Shopify, içe aktarma sırasında görselleri verdiğiniz URL'den indirir. URL şu gereksinimleri karşılamalıdır:
+
+- **HTTPS olmalıdır.** Düz HTTP URL'leri reddedilir veya karışık içerik uyarılarına yol açabilir.
+- **Herkese açık olmalıdır.** Giriş, Cloudflare doğrulaması veya IP kısıtlaması arkasındaki URL'ler çalışmaz.
+- **URL'de boşluk olmamalıdır.** Boşluklar `%20` olarak kodlanmalı veya URL yeniden düzenlenmelidir.
+- **Bir görsel dosyasını göstermelidir.** Shopify JPEG, PNG, GIF, WEBP ve SVG kabul eder. Sunucu doğru içerik türünü döndürüyorsa URL'nin bir uzantıyla bitmesi gerekmez, ancak çoğu içe aktarma süreci uzantılı URL'lerle daha güvenilir çalışır.
+- **Süresi dolan parametreler olmamalıdır.** Bir süre sonra geçersiz olan önceden imzalanmış URL'ler (S3, Cloudinary vb.) kullanıyorsanız, içe aktarma boyunca geçerli kaldıklarından emin olun.
+
+---
+
+## Yaygın görsel içe aktarma hataları
+
+### Görsel içe aktarmadan sonra görünmüyor
+
+**Olası nedenler:**
+1. URL 200 dışında bir HTTP durumu döndürdü (404, 403, 500). Shopify erişilemeyen görselleri uyarı vermeden atlar.
+2. URL HTTPS değil HTTP idi.
+3. URL'de isteği bozan bir boşluk vardı.
+
+**Nasıl teşhis edilir:** URL'yi doğrudan tarayıcıya yapıştırın. Görsel yükleniyorsa URL geçerlidir. Bir giriş sayfası, 403 veya 404 görüyorsanız görsel herkese açık değildir.
+
+### Ana görsel olarak yanlış görsel görünüyor
+
+**Neden:** Image Position belirtilmemiş ve görseller CSV'de yanlış sırada yer almış.
+
+**Çözüm:** Ana görselin URL'sinin bulunduğu satırda `Image Position` değerini açıkça `1` yapın.
+
+### Görseller yanlış üründe görünüyor
+
+**Neden:** Handle'da yazım hatası: görsel satırı, ürün satırından biraz farklı bir Handle kullanmış.
+
+**Çözüm:** Handle'ların tamamen aynı olduğundan emin olun. Tek bir fazladan boşluk veya farklı bir büyük harf bile yeni bir ürün oluşturur.
+
+### Eski görseller kaldırılmıyor
+
+**Davranış:** Yeniden içe aktarmada Shopify'ın CSV içe aktarıcısı ürüne görsel **ekler**. Mevcut görselleri kaldırmaz. Görselleri kaldırmanız gerekiyorsa bunu Shopify yönetim panelinden veya API üzerinden yapmalısınız.
+
+### Çok fazla görsel
+
+**Davranış:** Tek bir Handle için 250'den fazla görsel URL'si verirseniz Shopify yalnızca ilk 250'sini içe aktarır ve geri kalanını uyarı vermeden yok sayar.
+
+---
+
+## Alternatif metin için iyi uygulamalar
+
+Alternatif metin (`Image Alt Text` sütunu) iki amaca hizmet eder:
+1. **Erişilebilirlik:** Ekran okuyucular alternatif metni görme engelli kullanıcılara okur.
+2. **SEO:** Arama motorları alternatif metni dizine ekler ve görselin içeriğini anlamak için kullanır.
+
+**İyi bir alternatif metin:**
+- Görselde ne olduğunu anlatır: `"Mavi pamuklu tişört, önden görünüm, beyaz arka plan"`
+- Ürün adını ve önemli özelliklerini içerir
+- Her görsel için benzersizdir (ürünün tüm görsellerinde tekrarlanmaz)
+
+**Kaçının:**
+- Anahtar kelime doldurmaktan: `"mavi tişört satın al ucuz tişörtler pamuklu tişörtler"`
+- Genel metinlerden: `"image1"`, `"fotoğraf"`, `""` (boş)
+- Ürünün her görseli için aynı alternatif metni kullanmaktan
+
+---
+
+## Hızlı başvuru: görsel satırı kalıpları
+
+**Tek görsel, alternatif metin yok:**
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**Sıralı birden fazla görsel:**
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**Varyant görseli (belirli bir varyant satırıyla ilişkili görsel):**
+Image Src'yi varyantla aynı satıra yazın. Shopify o görseli o varyantla ilişkilendirir:
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

@@ -1,0 +1,169 @@
+---
+title: "Zdjęcia produktów Shopify w CSV: Image Src, tekst alternatywny i pozycje"
+description: "Dowiedz się, jak układać adresy zdjęć w CSV produktów Shopify: kolumny Image Src, Image Position i Image Alt Text, dodawanie wielu zdjęć do produktu i unikanie najczęstszych błędów importu zdjęć."
+keywords: ["zdjęcia shopify csv", "shopify image src", "tekst alternatywny zdjęcia shopify", "shopify image position csv", "import zdjęć produktów shopify", "shopify csv wiele zdjęć", "adres url zdjęcia shopify"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Jakie kolumny zdjęć są w CSV produktów Shopify"
+  - "Jak dodać wiele zdjęć do jednego produktu"
+  - "Jak Image Position ustala kolejność wyświetlania"
+  - "Dlaczego import zdjęć się nie udaje i jak naprawić problemy z adresami URL"
+  - "Jak dodać tekst alternatywny dla dostępności i SEO"
+bestFor: "Sprzedawcy Shopify, którzy importują lub aktualizują produkty z wieloma zdjęciami, chcą ustalić ich kolejność albo szukają zdjęć brakujących po imporcie"
+timeToComplete: "10 minut"
+---
+
+## Kolumny zdjęć w CSV Shopify
+
+CSV produktów Shopify obsługuje trzy kolumny dotyczące zdjęć:
+
+| Kolumna | Wymagana | Uwagi |
+|---|---|---|
+| Image Src | Nie | Publicznie dostępny adres HTTPS pliku ze zdjęciem |
+| Image Position | Nie | Liczba całkowita (1, 2, 3...) ustalająca kolejność |
+| Image Alt Text | Nie | Tekst opisujący zdjęcie |
+
+Te kolumny znajdują się w tym samym wierszu co dane produktu lub wariantu. Każdy wiersz może zawierać jeden adres zdjęcia.
+
+---
+
+## Jedno zdjęcie na produkt
+
+Najprostszy przypadek: jedno zdjęcie na produkt. Wpisz adres w kolumnie `Image Src` **wiersza nadrzędnego** (pierwszego wiersza danego Handle):
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+Wiersze wariantów (drugi i kolejne z tym samym Handle) mają pustą kolumnę Image Src.
+
+---
+
+## Wiele zdjęć na produkt
+
+Aby dodać do produktu więcej niż jedno zdjęcie, dodaj **dodatkowe wiersze z tym samym Handle**, zawierające tylko dane zdjęcia. Te wiersze mają puste Title i puste pola wariantu – służą wyłącznie do przekazania dodatkowych adresów zdjęć.
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+Najważniejsze zasady:
+- Jeden produkt może mieć do **250 zdjęć**.
+- Każdy adres zdjęcia jest w osobnym wierszu z tym samym Handle.
+- Wiersze tylko ze zdjęciem mają puste Variant Price, wartości opcji i Title.
+- Nie używaj tego samego wiersza dla wariantu i dodatkowego zdjęcia – jeden wiersz, jedno zadanie.
+
+---
+
+## Image Position
+
+`Image Position` ustala kolejność zdjęć w galerii produktu. To liczba całkowita zaczynająca się od 1.
+
+- `1` = zdjęcie główne (pokazywane jako pierwsze).
+- `2`, `3` itd. = kolejne zdjęcia w tej kolejności.
+
+Jeśli pominiesz Image Position, Shopify nada pozycje w kolejności, w jakiej zdjęcia występują w pliku CSV. Ustawiając pozycje jawnie, wymusisz własną kolejność niezależnie od kolejności wierszy.
+
+**Przykład:** najpierw zdjęcie aranżacyjne, potem zdjęcie produktu:
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## Wymagania dotyczące adresów zdjęć
+
+Shopify pobiera zdjęcia z podanego adresu w trakcie importu. Adres musi spełniać te wymagania:
+
+- **Musi używać HTTPS.** Zwykłe adresy HTTP są odrzucane albo mogą powodować ostrzeżenia o mieszanej zawartości.
+- **Musi być publicznie dostępny.** Adresy chronione logowaniem, weryfikacją Cloudflare lub ograniczeniem IP nie zadziałają.
+- **Bez spacji w adresie.** Spacje trzeba zakodować jako `%20` albo zmienić adres.
+- **Musi wskazywać plik ze zdjęciem.** Shopify akceptuje JPEG, PNG, GIF, WEBP i SVG. Adres nie musi kończyć się rozszerzeniem, jeśli serwer zwraca poprawny content-type, ale większość procesów importu działa pewniej z adresami z rozszerzeniem.
+- **Bez parametrów, które wygasają.** Jeśli używasz adresów z podpisem (z S3, Cloudinary itp.), które po czasie wygasają, upewnij się, że będą ważne przez cały import.
+
+---
+
+## Najczęstsze błędy importu zdjęć
+
+### Zdjęcie nie pojawia się po imporcie
+
+**Prawdopodobne przyczyny:**
+1. Adres zwrócił status HTTP inny niż 200 (404, 403, 500). Shopify bez komunikatu pomija niedostępne zdjęcia.
+2. Adres używał HTTP zamiast HTTPS.
+3. Adres zawierał spację, która zepsuła żądanie.
+
+**Jak to sprawdzić:** Wklej adres bezpośrednio w przeglądarce. Jeśli zdjęcie się wczyta, adres jest poprawny. Jeśli widzisz stronę logowania, błąd 403 lub 404, zdjęcie nie jest publicznie dostępne.
+
+### Jako główne wyświetla się złe zdjęcie
+
+**Przyczyna:** Nie podano Image Position, a zdjęcia były w pliku CSV w złej kolejności.
+
+**Rozwiązanie:** W wierszu z adresem zdjęcia głównego ustaw jawnie `Image Position` na `1`.
+
+### Zdjęcia trafiają do złego produktu
+
+**Przyczyna:** Literówka w Handle – wiersz zdjęcia miał nieco inny Handle niż wiersz produktu.
+
+**Rozwiązanie:** Upewnij się, że Handle są identyczne. Nawet jedna dodatkowa spacja lub inna wielkość litery tworzy nowy produkt.
+
+### Stare zdjęcia nie są usuwane
+
+**Zachowanie:** Przy ponownym imporcie import CSV Shopify **dodaje** zdjęcia do produktu. Nie usuwa istniejących. Jeśli chcesz usunąć zdjęcia, musisz to zrobić w panelu Shopify lub przez API.
+
+### Za dużo zdjęć
+
+**Zachowanie:** Jeśli podasz więcej niż 250 adresów zdjęć dla jednego Handle, Shopify zaimportuje tylko pierwsze 250, a resztę bez komunikatu pominie.
+
+---
+
+## Dobre praktyki dotyczące tekstu alternatywnego
+
+Tekst alternatywny (kolumna `Image Alt Text`) ma dwa zadania:
+1. **Dostępność:** czytniki ekranu odczytują tekst alternatywny osobom niewidomym i słabowidzącym.
+2. **SEO:** wyszukiwarki indeksują tekst alternatywny i na jego podstawie rozumieją, co jest na zdjęciu.
+
+**Dobry tekst alternatywny:**
+- Opisuje, co jest na zdjęciu: `"Niebieska bawełniana koszulka, widok z przodu, na białym tle"`
+- Zawiera nazwę produktu i jego najważniejsze cechy
+- Jest inny dla każdego zdjęcia (nie powtarza się na wszystkich zdjęciach produktu)
+
+**Unikaj:**
+- Upychania słów kluczowych: `"kup niebieską koszulkę tanie koszulki koszulki bawełniane"`
+- Ogólników: `"image1"`, `"zdjęcie"`, `""` (puste)
+- Tego samego tekstu alternatywnego dla każdego zdjęcia produktu
+
+---
+
+## Ściąga: wzory wierszy ze zdjęciami
+
+**Jedno zdjęcie, bez tekstu alternatywnego:**
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**Wiele zdjęć z pozycjami:**
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**Zdjęcie wariantu (zdjęcie przypisane do konkretnego wiersza wariantu):**
+Wpisz Image Src w tym samym wierszu co wariant. Shopify przypisze to zdjęcie do tego wariantu:
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

@@ -21,6 +21,21 @@ function shape(mdx: string) {
   };
 }
 
+/** Closing "**" that sit between CJK punctuation and a letter, so Markdown won't close the bold. */
+function badBoldClosers(mdx: string): string[] {
+  const bad: string[] = [];
+  for (const line of mdx.split("\n")) {
+    if (line.startsWith("```") || line.startsWith("|")) continue;
+    [...line.matchAll(/\*\*/g)].forEach((m, i) => {
+      if (i % 2 === 0) return; // an opener
+      const before = line[m.index - 1] ?? "";
+      const after = line[m.index + 2] ?? "";
+      if (/[：、。！？）」]/.test(before) && after && !/[\s\p{P}]/u.test(after)) bad.push(line);
+    });
+  }
+  return bad;
+}
+
 const translated = LOCALES.filter((l) => l !== "en").flatMap((loc) => {
   const dir = path.join(root, "guides-i18n", loc);
   if (!fs.existsSync(dir)) return [];
@@ -47,6 +62,6 @@ describe("translated guide articles", () => {
     expect(shape(tr.content)).toEqual(shape(en.content));
     // "**原因：**本文" doesn't render bold in Markdown (closing ** between punctuation and a
     // letter); write "**原因**：本文".
-    expect(tr.content.match(/[：、。！？）」]\*\*[^\s*]/g) ?? []).toEqual([]);
+    expect(badBoldClosers(tr.content)).toEqual([]);
   });
 });

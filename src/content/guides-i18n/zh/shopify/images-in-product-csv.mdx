@@ -1,0 +1,169 @@
+---
+title: "Shopify 商品 CSV 中的图片：Image Src、替代文本和位置"
+description: "了解如何在 Shopify 商品 CSV 中组织图片网址：Image Src、Image Position 和 Image Alt Text 列，如何为一个商品添加多张图片，以及如何避免最常见的图片导入失败。"
+keywords: ["shopify 图片 csv", "shopify image src", "shopify 图片替代文本", "shopify image position csv", "shopify 商品图片导入", "shopify csv 多张图片", "shopify 图片网址"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify 商品 CSV 中有哪些图片相关的列"
+  - "如何为一个商品添加多张图片"
+  - "Image Position 如何控制显示顺序"
+  - "图片导入失败的原因以及如何修复网址问题"
+  - "如何为无障碍访问和 SEO 添加替代文本"
+bestFor: "导入或更新带多张图片的商品、需要设置图片顺序，或在导入后查找缺失图片的 Shopify 商家"
+timeToComplete: "10 分钟"
+---
+
+## Shopify CSV 中的图片列
+
+Shopify 商品 CSV 支持三个与图片相关的列：
+
+| 列 | 是否必填 | 说明 |
+|---|---|---|
+| Image Src | 否 | 图片文件可公开访问的 HTTPS 网址 |
+| Image Position | 否 | 控制显示顺序的整数（1、2、3……） |
+| Image Alt Text | 否 | 描述图片的文字 |
+
+这些列与商品或变体数据位于同一行。每一行可以放一个图片网址。
+
+---
+
+## 每个商品一张图片
+
+最简单的情况：每个商品一张图片。把网址填在**父行**（该 Handle 的第一行）的 `Image Src` 列中：
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+变体行（Handle 相同的第二行及之后的行）的 Image Src 列留空。
+
+---
+
+## 每个商品多张图片
+
+要为一个商品添加不止一张图片，可以**添加 Handle 相同、只包含图片数据的额外行**。这些行的 Title 和变体字段都为空，只用于提供额外的图片网址。
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+关键规则：
+- 每个商品最多支持 **250 张**图片。
+- 每个图片网址单独占一行，并使用相同的 Handle。
+- 只含图片的行，其 Variant Price、选项值和 Title 都为空。
+- 不要让同一行既是变体又是附加图片：一行只做一件事。
+
+---
+
+## Image Position
+
+`Image Position` 控制图片在商品图库中的显示顺序，是从 1 开始的整数。
+
+- `1` = 主图（最先显示）。
+- `2`、`3` 等 = 按此顺序显示的附加图片。
+
+如果省略 Image Position，Shopify 会按图片在 CSV 中出现的顺序分配位置。明确设置位置后，无论行的顺序如何，都会按您指定的顺序显示。
+
+**示例**：先显示场景图，再显示商品图：
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## 图片网址的要求
+
+Shopify 会在导入时从您提供的网址下载图片。网址必须满足以下要求：
+
+- **必须是 HTTPS**。普通的 HTTP 网址会被拒绝，或可能出现混合内容警告。
+- **必须可公开访问**。需要登录、经过 Cloudflare 验证或有 IP 限制的网址都无法使用。
+- **网址中不能有空格**。空格必须编码为 `%20`，或者修改网址结构。
+- **必须指向图片文件**。Shopify 支持 JPEG、PNG、GIF、WEBP 和 SVG。如果服务器返回正确的 content-type，网址不一定要以扩展名结尾，但大多数导入流程对带扩展名的网址更稳定。
+- **不能带会过期的参数**。如果使用会过期的预签名网址（来自 S3、Cloudinary 等），请确保它们在整个导入过程中都有效。
+
+---
+
+## 常见的图片导入失败
+
+### 导入后图片没有显示
+
+**可能的原因**：
+1. 网址返回了 200 以外的 HTTP 状态（404、403、500）。Shopify 会悄悄跳过无法访问的图片。
+2. 网址是 HTTP，而不是 HTTPS。
+3. 网址中有空格，导致请求失败。
+
+**排查方法**：把网址直接粘贴到浏览器中。能加载出图片，说明网址有效；如果看到登录页、403 或 404，说明图片无法公开访问。
+
+### 主图不是想要的那张
+
+**原因**：没有指定 Image Position，而图片在 CSV 中的顺序不对。
+
+**解决方法**：在主图网址所在的行，把 `Image Position` 明确设为 `1`。
+
+### 图片出现在错误的商品上
+
+**原因**：Handle 有拼写错误，图片行使用的 Handle 与商品行略有不同。
+
+**解决方法**：确保 Handle 完全一致。哪怕多一个空格或大小写不同，都会创建一个新商品。
+
+### 旧图片没有被删除
+
+**行为**：重新导入时，Shopify 的 CSV 导入会向商品**添加**图片，而不会删除已有图片。如需删除图片，必须在 Shopify 后台或通过 API 操作。
+
+### 图片太多
+
+**行为**：如果为同一个 Handle 指定超过 250 个图片网址，Shopify 只会导入前 250 个，其余的会被悄悄忽略。
+
+---
+
+## 替代文本的最佳做法
+
+替代文本（`Image Alt Text` 列）有两个作用：
+1. **无障碍访问**：屏幕阅读器会为视障用户朗读替代文本。
+2. **SEO**：搜索引擎会索引替代文本，并借此理解图片内容。
+
+**好的替代文本**：
+- 描述图片中的内容：`"蓝色纯棉 T 恤，正面，白色背景"`
+- 包含商品名称和关键属性
+- 每张图片各不相同（不要在商品的所有图片中重复）
+
+**应避免**：
+- 堆砌关键词：`"买蓝色衬衫 便宜衬衫 纯棉衬衫"`
+- 笼统的文字：`"image1"`、`"照片"`、`""`（空）
+- 商品的每张图片都使用相同的替代文本
+
+---
+
+## 速查：图片行的写法
+
+**一张图片，无替代文本**：
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**带位置的多张图片**：
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**变体图片（与特定变体行关联的图片**）：
+把 Image Src 放在该变体所在的行。Shopify 会将这张图片与该变体关联：
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```
