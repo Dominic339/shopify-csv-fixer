@@ -1,0 +1,138 @@
+---
+title: "Przewodnik po polu Handle w CSV Shopify"
+description: "Wszystko o polu Handle w CSV produktów Shopify: do czego służy, jakie są zasady poprawnego handle, jak grupuje warianty i jak naprawiać błędy handle."
+keywords: ["pole handle csv shopify", "shopify handle", "handle shopify csv", "handle produktu shopify", "shopify handle warianty", "zasady handle shopify", "błędy handle csv shopify"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Do czego służy pole Handle w Shopify i dlaczego to najważniejsza kolumna"
+  - "Dokładne zasady poprawnego handle w Shopify"
+  - "Jak Handle grupuje wiersze wariantów w jeden produkt"
+  - "Jak naprawić nieprawidłowe handle i konflikty handle"
+  - "Jak zmiana handle wpływa na adresy URL istniejących produktów"
+bestFor: "Sprzedawcy Shopify zmagający się z błędnym grupowaniem wariantów, zduplikowanymi produktami lub błędami importu związanymi z handle"
+timeToComplete: "10 minut"
+---
+
+## Czym jest Handle w Shopify?
+
+Handle to unikalny identyfikator produktu w CSV produktów Shopify. Pełni dwie funkcje:
+
+1. **Grupuje wiersze wariantów** – wszystkie wiersze tego samego produktu muszą mieć ten sam Handle. Shopify czyta kolumnę Handle, żeby wiedzieć, które wiersze należą do siebie.
+2. **Ustala adres URL produktu** – Handle staje się ścieżką w adresie: `yourstore.com/products/<handle>`
+
+Handle to najważniejsza kolumna CSV Shopify. Błędy w Handle powodują więcej nieudanych importów niż jakiekolwiek inne pole.
+
+---
+
+## Zasady poprawnego Handle
+
+Poprawny handle w Shopify musi:
+
+- Być **unikalny** wśród wszystkich produktów w sklepie (także istniejących)
+- Zawierać tylko **małe litery, cyfry i myślniki**
+- **Nie zawierać spacji** (zamiast nich używaj myślników)
+- **Nie zawierać znaków specjalnych**: żadnych `&`, `%`, `?`, `/`, `@` ani znaków Unicode
+- **Być wypełniony** w każdym wierszu – puste handle są niedozwolone
+
+| Poprawny | Niepoprawny | Powód |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | Wielkie litery i spacje |
+| `product-123` | `product/123` | Zawiera ukośnik |
+| `mens-running-shoes` | `men's-running-shoes` | Zawiera apostrof |
+| `widget-v2` | `widget_v2` | Zawiera podkreślnik (technicznie dozwolony, ale niezalecany) |
+| `shirt-sm` | `` | Pusty (niedozwolony) |
+
+---
+
+## Jak Handle grupuje warianty
+
+W formacie CSV Shopify produkt z wieloma wariantami zajmuje kilka wierszy. Wszystkie wiersze tego samego produktu muszą mieć ten sam Handle:
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+Gdy Shopify czyta ten plik:
+- Widzi 3 wiersze z Handle `blue-wallet`
+- Tworzy jeden produkt o nazwie „Blue Wallet”
+- Tworzy 3 warianty: Small (29,99 USD), Medium (31,99 USD), Large (31,99 USD)
+- Bierze Title, Body HTML, Vendor i inne pola produktu z pierwszego wiersza
+
+**Pierwszy wiersz (nadrzędny):** zawiera dane produktu (Title, Body HTML, Image Src, Vendor itd.)
+**Kolejne wiersze (warianty):** mają ten sam Handle, puste Title i tylko dane wariantu
+
+---
+
+## Typowe błędy Handle
+
+### Dwa produkty z tym samym Handle
+
+**Objaw:** Podczas importu dane jednego produktu nadpisują inny albo warianty różnych produktów łączą się w jeden produkt.
+
+**Przyczyna:** Dwa różne produkty mają w pliku CSV ten sam Handle.
+
+**Rozwiązanie:** Nadaj każdemu produktowi unikalny Handle. Jeśli produkty mają podobne nazwy, dodaj coś, co je odróżnia:
+
+- `blue-wallet` i `red-wallet` (zamiast `wallet` dla obu)
+- `mens-shirt-v1` i `mens-shirt-v2`
+
+### Handle nie pasuje do istniejącego produktu (niezamierzona aktualizacja)
+
+**Objaw:** Import tworzy nowy, zduplikowany produkt zamiast zaktualizować istniejący.
+
+**Przyczyna:** Handle w pliku CSV nie jest identyczny z Handle istniejącego produktu w Shopify (inna wielkość liter, inna pisownia, myślnik więcej lub mniej).
+
+**Rozwiązanie:** Najpierw wyeksportuj aktualne produkty z Shopify. Plik eksportu zawiera dokładne aktualne Handle. Użyj właśnie ich w pliku importu.
+
+### Spacje lub wielkie litery w Handle
+
+**Objaw:** Import kończy się błędem walidacji handle albo Shopify automatycznie go przekształca (tworząc nieoczekiwany adres URL).
+
+**Rozwiązanie:** W niektórych sytuacjach Shopify sam zmienia handle na małe litery i zastępuje spacje myślnikami, ale przy imporcie CSV lepiej samodzielnie sformatować handle wcześniej, żeby uniknąć nieprzewidywalnych zmian.
+
+**Python – ujednolicanie handle:**
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### Wiersze wariantów z różnymi Handle
+
+**Objaw:** Shopify importuje każdy wiersz wariantu jako osobny produkt (każdy z 0 lub 1 wariantem).
+
+**Przyczyna:** Wartość Handle różni się w wierszach, które powinny należeć do tego samego produktu – często przez literówkę lub dodatkową spację.
+
+**Rozwiązanie:** Posortuj plik CSV według Handle i poszukaj wierszy, które powinny mieć ten sam Handle, a go nie mają. Spacja na końcu (`blue-wallet ` zamiast `blue-wallet`) to najczęstszy winowajca.
+
+---
+
+## Handle a SEO: dlaczego zmiana Handle ma znaczenie
+
+Handle staje się adresem URL produktu: `yourstore.com/products/<handle>`. Zmiana Handle, gdy produkty są już opublikowane, ma skutki dla SEO:
+
+- Stary adres zwraca błąd 404 (chyba że ustawisz przekierowanie)
+- Linki i zakładki prowadzące do starego adresu przestają działać
+- Wyszukiwarki, które zaindeksowały stary adres, tracą sygnał pozycjonowania
+
+**Dobra praktyka:** Ustaw Handle poprawnie od razu. Jeśli musisz zmienić Handle istniejącego produktu, zaraz po imporcie ustaw w Shopify przekierowanie adresu URL (Sklep internetowy → Nawigacja → Przekierowania URL).
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+StriveFormats sprawdza każdy Handle w pliku: puste wartości, niedozwolone znaki i zduplikowane Handle w obrębie pliku. Oznacza też wiersze, w których grupowanie po Handle nie spełnia zasad wariantów Shopify.
+
+[Otwórz Naprawiacz CSV dla Shopify](/app?preset=shopify_products) | [Zobacz szablon Shopify](/presets/shopify_products)

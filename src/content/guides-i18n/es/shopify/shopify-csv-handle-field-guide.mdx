@@ -1,0 +1,138 @@
+---
+title: "Guía del campo Handle en el CSV de Shopify"
+description: "Todo lo que necesitas saber sobre el campo Handle del CSV de productos de Shopify: para qué sirve, las reglas de un handle válido, cómo agrupa las variantes y cómo corregir los errores de handle."
+keywords: ["campo handle csv shopify", "shopify handle", "handle shopify csv", "handle de producto shopify", "shopify handle variantes", "reglas handle shopify", "errores handle csv shopify"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Para qué sirve el campo Handle de Shopify y por qué es la columna más importante"
+  - "Las reglas exactas de un handle válido en Shopify"
+  - "Cómo agrupa el Handle las filas de variante en un solo producto"
+  - "Cómo corregir handles no válidos y conflictos de handle"
+  - "Cómo afecta cambiar un handle a las URL de tus productos existentes"
+bestFor: "Comerciantes de Shopify con errores de agrupación de variantes, productos duplicados o importaciones fallidas por el handle"
+timeToComplete: "10 minutos"
+---
+
+## ¿Qué es el Handle de Shopify?
+
+El Handle es el identificador único del producto en el CSV de productos de Shopify. Cumple dos funciones:
+
+1. **Agrupa las filas de variante**: todas las filas del mismo producto deben compartir el mismo Handle. Shopify lee la columna Handle para saber qué filas van juntas.
+2. **Define la URL del producto**: el Handle se convierte en la ruta de la URL: `yourstore.com/products/<handle>`
+
+El Handle es la columna más importante del CSV de Shopify. Los errores de Handle provocan más importaciones fallidas que cualquier otro campo.
+
+---
+
+## Reglas de un Handle válido
+
+Un handle válido de Shopify debe:
+
+- Ser **único** entre todos los productos de tu tienda (incluidos los existentes)
+- Contener solo **letras minúsculas, números y guiones**
+- **No tener espacios** (usa guiones en su lugar)
+- **No tener caracteres especiales**: ni `&`, `%`, `?`, `/`, `@` ni caracteres Unicode
+- **No estar vacío** en ninguna fila: no se permiten handles en blanco
+
+| Válido | No válido | Motivo |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | Mayúsculas y espacios |
+| `product-123` | `product/123` | Contiene una barra |
+| `mens-running-shoes` | `men's-running-shoes` | Contiene un apóstrofo |
+| `widget-v2` | `widget_v2` | Contiene un guion bajo (técnicamente permitido, pero no recomendable) |
+| `shirt-sm` | `` | Vacío (no permitido) |
+
+---
+
+## Cómo agrupa el Handle las variantes
+
+En el formato CSV de Shopify, un producto con varias variantes ocupa varias filas. Todas las filas del mismo producto deben compartir el mismo Handle:
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+Cuando Shopify lee este archivo:
+- Ve 3 filas con el Handle `blue-wallet`
+- Crea un producto llamado «Blue Wallet»
+- Crea 3 variantes: Small (29,99 $), Medium (31,99 $), Large (31,99 $)
+- Toma de la primera fila el Title, el Body HTML, el Vendor y los demás campos del producto
+
+**Primera fila (fila principal):** contiene los datos del producto (Title, Body HTML, Image Src, Vendor, etc.)
+**Filas siguientes (filas de variante):** tienen el mismo Handle, el Title vacío y solo datos propios de la variante
+
+---
+
+## Errores de Handle comunes
+
+### Dos productos con el mismo Handle
+
+**Síntoma:** Durante la importación, los datos de un producto sobrescriben otro, o las variantes de productos distintos se fusionan en uno solo.
+
+**Causa:** Dos productos distintos comparten el mismo Handle en tu CSV.
+
+**Solución:** Haz que el Handle de cada producto sea único. Si tienes productos con nombres parecidos, añade algo que los diferencie:
+
+- `blue-wallet` y `red-wallet` (en lugar de `wallet` para ambos)
+- `mens-shirt-v1` y `mens-shirt-v2`
+
+### El Handle no coincide con un producto existente (actualización involuntaria)
+
+**Síntoma:** La importación crea un producto nuevo duplicado en lugar de actualizar uno existente.
+
+**Causa:** El Handle de tu CSV no coincide exactamente con el del producto existente en Shopify (otras mayúsculas, otra ortografía, un guion de más o de menos).
+
+**Solución:** Exporta primero los productos actuales de Shopify. El archivo exportado contiene los Handles exactos. Usa esos Handles en tu archivo de importación.
+
+### Espacios o mayúsculas en el Handle
+
+**Síntoma:** La importación falla con un error de validación del handle, o Shopify lo convierte automáticamente (y crea una URL inesperada).
+
+**Solución:** En algunos casos Shopify pasa los handles a minúsculas y cambia los espacios por guiones, pero en las importaciones CSV es mejor darles formato tú mismo antes para evitar conversiones imprevisibles.
+
+**Python: normalizar handles:**
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### Filas de variante con Handles distintos
+
+**Síntoma:** Shopify importa cada fila de variante como un producto independiente (cada uno con 0 o 1 variante).
+
+**Causa:** El valor del Handle es distinto en filas que deberían ser del mismo producto, a menudo por una errata o un espacio de más.
+
+**Solución:** Ordena tu CSV por Handle y busca filas que deberían compartir Handle pero no lo hacen. Un espacio al final (`blue-wallet ` frente a `blue-wallet`) es el culpable más habitual.
+
+---
+
+## Handle y SEO: por qué importa cambiar un Handle
+
+El Handle se convierte en la URL del producto: `yourstore.com/products/<handle>`. Cambiar un Handle cuando los productos ya están publicados tiene consecuencias para el SEO:
+
+- La URL antigua devuelve un error 404 (salvo que configures una redirección)
+- Se rompen los enlaces y marcadores a la URL antigua
+- Los buscadores que habían indexado la URL antigua pierden la señal de posicionamiento
+
+**Buena práctica:** Define bien los Handles desde el principio. Si tienes que cambiar el Handle de un producto existente, configura una redirección de URL en Shopify (Tienda online → Navegación → Redireccionamientos de URL) justo después de importar.
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+StriveFormats valida cada Handle de tu archivo: busca valores vacíos, caracteres no válidos y Handles duplicados dentro del archivo. También marca las filas cuya agrupación por Handle no sigue las reglas de variantes de Shopify.
+
+[Abrir el Reparador CSV de Shopify](/app?preset=shopify_products) | [Ver la plantilla de Shopify](/presets/shopify_products)

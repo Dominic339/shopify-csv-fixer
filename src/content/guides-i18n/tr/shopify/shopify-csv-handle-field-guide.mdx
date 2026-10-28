@@ -1,0 +1,138 @@
+---
+title: "Shopify CSV Handle alanı rehberi"
+description: "Shopify ürün CSV'sindeki Handle alanı hakkında bilmeniz gereken her şey: ne işe yaradığı, geçerli bir handle'ın kuralları, varyantları nasıl grupladığı ve handle hatalarını nasıl düzelteceğiniz."
+keywords: ["shopify csv handle alanı", "shopify handle", "shopify handle csv", "shopify ürün handle", "shopify handle varyant", "shopify handle kuralları", "shopify csv handle hataları"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Shopify Handle alanının ne işe yaradığı ve neden en önemli sütun olduğu"
+  - "Geçerli bir Shopify handle'ının kesin kuralları"
+  - "Handle'ın varyant satırlarını tek bir üründe nasıl grupladığı"
+  - "Geçersiz handle'ların ve handle çakışmalarının nasıl düzeltileceği"
+  - "Handle değiştirmenin mevcut ürün URL'lerinizi nasıl etkilediği"
+bestFor: "Varyant gruplama hataları, yinelenen ürünler veya handle kaynaklı içe aktarma hatalarıyla uğraşan Shopify satıcıları"
+timeToComplete: "10 dakika"
+---
+
+## Shopify Handle nedir?
+
+Handle, Shopify ürün CSV'sinde ürünün benzersiz tanımlayıcısıdır. İki görevi vardır:
+
+1. **Varyant satırlarını gruplar**: aynı ürüne ait tüm satırlar aynı Handle'ı paylaşmalıdır. Shopify hangi satırların birlikte olduğunu anlamak için Handle sütununu okur.
+2. **Ürün URL'sini belirler**: Handle, URL yolu olur: `yourstore.com/products/<handle>`
+
+Handle, Shopify CSV'sinin en önemli sütunudur. Handle hataları, diğer tüm alanlardan daha fazla içe aktarma hatasına yol açar.
+
+---
+
+## Geçerli bir Handle'ın kuralları
+
+Geçerli bir Shopify handle'ı:
+
+- Mağazanızdaki tüm ürünler arasında (mevcut ürünler dahil) **benzersiz** olmalıdır
+- Yalnızca **küçük harf, rakam ve tire** içermelidir
+- **Boşluk içermemelidir** (yerine tire kullanın)
+- **Özel karakter içermemelidir**: `&`, `%`, `?`, `/`, `@` veya Unicode karakterler olmamalıdır
+- Her satırda **dolu** olmalıdır: boş handle'lara izin verilmez
+
+| Geçerli | Geçersiz | Neden |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | Büyük harf ve boşluk |
+| `product-123` | `product/123` | Eğik çizgi içeriyor |
+| `mens-running-shoes` | `men's-running-shoes` | Kesme işareti içeriyor |
+| `widget-v2` | `widget_v2` | Alt çizgi içeriyor (teknik olarak izinli ama önerilmez) |
+| `shirt-sm` | `` | Boş (izin verilmez) |
+
+---
+
+## Handle varyantları nasıl gruplar
+
+Shopify'ın CSV biçiminde birden fazla varyantı olan bir ürün birden fazla satır kaplar. Aynı ürüne ait tüm satırlar aynı Handle'ı paylaşmalıdır:
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+Shopify bu dosyayı okuduğunda:
+- `blue-wallet` Handle'ına sahip 3 satır görür
+- "Blue Wallet" adlı tek bir ürün oluşturur
+- 3 varyant oluşturur: Small (29,99 $), Medium (31,99 $), Large (31,99 $)
+- Title, Body HTML, Vendor ve diğer ürün düzeyi alanları ilk satırdan alır
+
+**İlk satır (ana satır):** ürün düzeyindeki verileri içerir (Title, Body HTML, Image Src, Vendor vb.)
+**Sonraki satırlar (varyant satırları):** aynı Handle'a, boş bir Title'a ve yalnızca varyanta özgü verilere sahiptir
+
+---
+
+## Yaygın Handle hataları
+
+### Aynı Handle'a sahip iki ürün
+
+**Belirti:** İçe aktarma sırasında bir ürünün verileri başka bir ürünün üzerine yazılır veya farklı ürünlerin varyantları tek bir üründe birleşir.
+
+**Neden:** CSV'nizde iki farklı ürün aynı Handle'ı paylaşıyor.
+
+**Çözüm:** Her ürünün Handle'ını benzersiz yapın. Benzer adlı ürünleriniz varsa ayırt edici bir ek kullanın:
+
+- `blue-wallet` ve `red-wallet` (ikisi de `wallet` olmak yerine)
+- `mens-shirt-v1` ve `mens-shirt-v2`
+
+### Handle mevcut bir ürünle eşleşmiyor (istenmeyen güncelleme)
+
+**Belirti:** İçe aktarma, mevcut bir ürünü güncellemek yerine yeni ve yinelenen bir ürün oluşturur.
+
+**Neden:** CSV'nizdeki Handle, mevcut Shopify ürününün Handle'ıyla tam olarak eşleşmiyor (farklı büyük/küçük harf, farklı yazım, fazla ya da eksik tire).
+
+**Çözüm:** Önce mevcut ürünleri Shopify'dan dışa aktarın. Dışa aktarılan dosya güncel Handle'ların tam hâlini içerir. İçe aktarma dosyanızda bu Handle'ları kullanın.
+
+### Handle'da boşluk veya büyük harf
+
+**Belirti:** İçe aktarma bir handle doğrulama hatasıyla başarısız olur ya da Shopify handle'ı otomatik olarak dönüştürür (ve beklenmedik bir URL oluşur).
+
+**Çözüm:** Shopify bazı durumlarda handle'ları otomatik olarak küçük harfe çevirir ve boşlukları tireyle değiştirir, ancak CSV içe aktarmalarında öngörülemeyen dönüşümlerden kaçınmak için handle'ları önceden kendiniz biçimlendirmeniz en iyisidir.
+
+**Python ile handle'ları standartlaştırma:**
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### Farklı Handle'lara sahip varyant satırları
+
+**Belirti:** Shopify her varyant satırını ayrı bir ürün olarak içe aktarır (her birinde 0 veya 1 varyant olur).
+
+**Neden:** Aynı ürüne ait olması gereken satırlarda Handle değeri farklı; genellikle bir yazım hatası veya fazladan bir boşluk yüzünden.
+
+**Çözüm:** CSV'nizi Handle'a göre sıralayın ve aynı Handle'ı paylaşması gerektiği hâlde paylaşmayan satırları arayın. Sondaki bir boşluk (`blue-wallet` yerine `blue-wallet `) en yaygın suçludur.
+
+---
+
+## Handle ve SEO: Handle değiştirmek neden önemli
+
+Handle, ürün URL'si olur: `yourstore.com/products/<handle>`. Ürünler yayındayken Handle değiştirmenin SEO açısından sonuçları vardır:
+
+- Eski URL 404 hatası verir (yönlendirme kurmadıysanız)
+- Eski URL'ye giden bağlantılar ve yer imleri çalışmaz
+- Eski URL'yi dizine eklemiş arama motorları sıralama sinyalini kaybeder
+
+**En iyi uygulama:** Handle'larınızı ilk seferde doğru belirleyin. Mevcut bir ürünün Handle'ını değiştirmeniz gerekiyorsa içe aktarmanın hemen ardından Shopify'da bir URL yönlendirmesi kurun (Online Mağaza → Gezinme → URL yönlendirmeleri).
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+StriveFormats dosyanızdaki her Handle'ı doğrular: boş değerleri, geçersiz karakterleri ve dosya içindeki yinelenen Handle'ları kontrol eder. Handle gruplaması Shopify'ın varyant kurallarına uymayan satırları işaretler.
+
+[Shopify CSV Düzelticisini açın](/app?preset=shopify_products) | [Shopify şablonunu görüntüleyin](/presets/shopify_products)
