@@ -6,9 +6,11 @@ interface FileDropZoneProps {
   onFile: (file: File) => void;
   children: ReactNode;
   className?: string;
+  /** Overlay text while a file is dragged over the zone. */
+  dropLabel?: string;
 }
 
-export function FileDropZone({ onFile, children, className = "" }: FileDropZoneProps) {
+export function FileDropZone({ onFile, children, className = "", dropLabel = "Drop CSV here" }: FileDropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
 
@@ -37,7 +39,7 @@ export function FileDropZone({ onFile, children, className = "" }: FileDropZoneP
     setIsDragging(false);
     dragCounter.current = 0;
     const file = e.dataTransfer.files?.[0];
-    if (file && (file.type === "text/csv" || file.name.endsWith(".csv"))) {
+    if (file && (file.type === "text/csv" || /\.(csv|txt|tsv)$/i.test(file.name))) {
       onFile(file);
     }
   }
@@ -53,7 +55,7 @@ export function FileDropZone({ onFile, children, className = "" }: FileDropZoneP
       {children}
       {isDragging && (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[var(--accent)] bg-[var(--surface)]/90 text-sm font-semibold text-[var(--accent)]">
-          Drop CSV here
+          {dropLabel}
         </div>
       )}
     </div>

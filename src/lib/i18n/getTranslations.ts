@@ -50,7 +50,4 @@ export async function getTranslations(locale: Locale): Promise<Translations> {
   return t;
 }
 
-/** Fill a "{name}" template, e.g. fmt("Why {platform} rejects this", { platform: "Shopify" }). */
-export function fmt(template: string, values: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (m, k) => (k in values ? String(values[k]) : m));
-}
+export { fmt } from "./fmt";
