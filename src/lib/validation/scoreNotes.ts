@@ -16,26 +16,14 @@ export type ScoreNoteKey =
   | "tags"
   | "shipping";
 
+/** Score for one category, with the counts behind it; the UI turns it into (translated) text. */
 export type ScoreNote = {
   key: ScoreNoteKey;
-  label: string;
   score: number;
-  note: string;
-};
-
-const LABELS: Record<ScoreNoteKey, string> = {
-  structure: "Structure",
-  variant: "Variants",
-  pricing: "Pricing",
-  inventory: "Inventory",
-  seo: "SEO",
-  images: "Images",
-  sku: "SKU integrity",
-  attributes: "Attributes",
-  media: "Media",
-  compliance: "Listing compliance",
-  tags: "Tags",
-  shipping: "Shipping",
+  blocking: number;
+  errors: number;
+  warnings: number;
+  hint: ScoreHintId | null;
 };
 
 function keysForFormat(formatId?: string): ScoreNoteKey[] {
@@ -49,27 +37,17 @@ function keysForFormat(formatId?: string): ScoreNoteKey[] {
   return ["structure", "variant", "pricing", "inventory", "seo", "images"];
 }
 
-function contextualLowScoreHint(formatId: string | undefined, key: ScoreNoteKey): string {
-  if (formatId?.startsWith("shopify")) {
-    if (key === "variant") return "Variant issues often come from missing option values or duplicate option combinations.";
-    if (key === "seo") return "SEO issues usually won't block import, but they can reduce discoverability.";
-  }
+/** Why a low score in this category matters, for this platform. Text lives in the app translations as scoreHint_<id>. */
+export type ScoreHintId =
+  | "shopify_variant" | "shopify_seo"
+  | "woo_variant" | "woo_sku" | "woo_attributes" | "woo_media"
+  | "etsy_compliance" | "etsy_tags" | "etsy_shipping" | "etsy_seo";
 
-  if (formatId?.startsWith("woocommerce")) {
-    if (key === "variant") return "Variation issues often come from orphaned variations or missing attribute values.";
-    if (key === "sku") return "Duplicate or missing SKUs can overwrite products or break updates.";
-    if (key === "attributes") return "Attributes define variation combinations; missing data can collapse or misbuild variations.";
-    if (key === "media") return "Missing images can pass import but reduces conversion and listing quality.";
-  }
-
-  if (formatId === "etsy_listings") {
-    if (key === "compliance") return "Compliance issues can cause a full listing rejection.";
-    if (key === "tags") return "Etsy tags have hard limits; duplicates and over-limit tags reduce search reach.";
-    if (key === "shipping") return "Shipping profile and processing time fields are required for successful publishing.";
-    if (key === "seo") return "SEO fields won't always block publishing, but they affect search visibility.";
-  }
-
-  return "";
+function lowScoreHint(formatId: string | undefined, key: ScoreNoteKey): ScoreHintId | null {
+  const platform = formatId?.startsWith("shopify") ? "shopify" : formatId?.startsWith("woocommerce") ? "woo" : formatId === "etsy_listings" ? "etsy" : null;
+  const id = platform ? `${platform}_${key}` : "";
+  const known: ScoreHintId[] = ["shopify_variant", "shopify_seo", "woo_variant", "woo_sku", "woo_attributes", "woo_media", "etsy_compliance", "etsy_tags", "etsy_shipping", "etsy_seo"];
+  return (known as string[]).includes(id) ? (id as ScoreHintId) : null;
 }
 
 export function buildScoreNotes(validation: any, issues: CsvIssue[], formatId?: string): ScoreNote[] {
@@ -93,21 +71,11 @@ export function buildScoreNotes(validation: any, issues: CsvIssue[], formatId?: 
 
   return keys.map((k) => {
     const s = Number(validation?.categories?.[k] ?? 0);
+    const score = Number.isFinite(s) ? s : 100;
     const c = counts[k] ?? { blocking: 0, errors: 0, warnings: 0 };
-
-    const parts: string[] = [];
-    if (c.blocking) parts.push(`${c.blocking} blocking ${c.blocking === 1 ? "issue" : "issues"}`);
-    if (c.errors && !c.blocking) parts.push(`${c.errors} ${c.errors === 1 ? "error" : "errors"}`);
-    if (c.warnings) parts.push(`${c.warnings} ${c.warnings === 1 ? "warning" : "warnings"}`);
-
-    let note = parts.length ? parts.join(", ") : "No issues detected";
-
-    // Add a subtle hint for low scores so it reads as intentional.
-    if (Number.isFinite(s) && s < 70 && parts.length) {
-      const hint = contextualLowScoreHint(formatId, k);
-      if (hint) note += ` · ${hint}`;
-    }
-
-    return { key: k, label: LABELS[k], score: Number.isFinite(s) ? s : 100, note };
+    const hasIssues = c.blocking + c.errors + c.warnings > 0;
+    // Only explain a low score, so the hint reads as intentional.
+    const hint = score < 70 && hasIssues ? lowScoreHint(formatId, k) : null;
+    return { key: k, score, blocking: c.blocking, errors: c.blocking ? 0 : c.errors, warnings: c.warnings, hint };
   });
 }

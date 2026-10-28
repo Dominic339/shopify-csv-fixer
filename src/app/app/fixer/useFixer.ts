@@ -25,6 +25,7 @@ import { fixAllShopifyBlocking } from "@/lib/validation/fixAllShopify";
 // Phase helpers
 import { computeReadinessSummary } from "@/lib/validation/readiness";
 import { buildScoreNotes } from "@/lib/validation/scoreNotes";
+import { useValidationText } from "@/lib/i18n/useValidationText";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 // Phase 1: strict mode preference (Shopify)
@@ -91,6 +92,8 @@ export function useFixer(t: AppStrings) {
     const seg = pathname?.split("/")?.[1] ?? "";
     return isValidLocale(seg) ? seg : DEFAULT_LOCALE;
   }, [pathname]);
+  // Validator messages and issue text in the page's language.
+  const vt = useValidationText(currentLocale);
 
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -1107,6 +1110,7 @@ useEffect(() => {
 
   return {
     currentLocale,
+    vt,
     // file + data
     fileName,
     rows,

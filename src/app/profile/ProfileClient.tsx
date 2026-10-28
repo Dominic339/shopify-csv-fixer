@@ -33,6 +33,10 @@ type Props = {
 };
 
 export default function ProfileClient({ tProfile, navT }: Props) {
+  const statusLabel = (status: string) => {
+    const key = `status_${status}` as keyof typeof tProfile;
+    return key in tProfile ? tProfile[key] : status;
+  };
   const { theme } = useTheme();
   const sp = useSearchParams();
   const router = useRouter();
@@ -223,10 +227,10 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                 {tProfile.signedIn}: <span className="font-semibold">{sub.signedIn ? tProfile.yes : tProfile.no}</span>
               </div>
               <div>
-                {navT.plan}: <span className="font-semibold">{sub.plan}</span>
+                {navT.plan}: <span className="font-semibold">{tProfile[`plan_${sub.plan}`]}</span>
               </div>
               <div>
-                {tProfile.status}: <span className="font-semibold">{sub.status}</span>
+                {tProfile.status}: <span className="font-semibold">{statusLabel(sub.status)}</span>
               </div>
               <div>
                 {tProfile.periodEnd}: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>

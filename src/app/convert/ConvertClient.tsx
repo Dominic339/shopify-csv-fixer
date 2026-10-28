@@ -9,6 +9,11 @@ import { useTheme } from "@/components/theme/ThemeProvider";
 import { createClient } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { FileDropZone } from "@/components/FileDropZone";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { localeHref } from "@/lib/i18n/locales";
+import { splitLocale } from "@/lib/i18n/paths";
+import { useValidationText } from "@/lib/i18n/useValidationText";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -27,6 +32,9 @@ type Props = {
 };
 
 export default function ConvertClient({ t }: Props) {
+  const { locale } = splitLocale(usePathname() ?? "/");
+  const href = (p: string) => localeHref(locale, p);
+  const vt = useValidationText(locale);
   const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [plan, setPlan] = useState<Plan>("free");
@@ -120,14 +128,14 @@ export default function ConvertClient({ t }: Props) {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="flex items-center gap-3 text-2xl font-semibold">
         {t.title}
-        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
+        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">{t.beta}</span>
       </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
         {t.description}
       </p>
 
       <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
-        {t.yourPlan}: <span className="font-semibold capitalize">{plan}</span>
+        {t.yourPlan}: <span className="font-semibold">{t[`plan_${plan}`]}</span>
         {rowLimit !== null ? (
           <> — {t.upTo}{" "}
           <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t.rowsPerConversion}</>
@@ -192,7 +200,7 @@ export default function ConvertClient({ t }: Props) {
               >
                 {CONVERT_FORMAT_OPTIONS.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.label}
+                    {(t as Record<string, string>)[`fmt_${o.id}`] ?? o.label}
                   </option>
                 ))}
               </select>
@@ -212,7 +220,7 @@ export default function ConvertClient({ t }: Props) {
               >
                 {targetOptions.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.label}
+                    {(t as Record<string, string>)[`fmt_${o.id}`] ?? o.label}
                   </option>
                 ))}
               </select>
@@ -281,7 +289,7 @@ export default function ConvertClient({ t }: Props) {
                     key={i}
                     className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300"
                   >
-                    {w}
+                    {vt.msg(w)}
                   </div>
                 ))}
               </div>
@@ -289,7 +297,7 @@ export default function ConvertClient({ t }: Props) {
 
             {result.unmappedSourceFields.length > 0 && (
               <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--muted)]">
-                <span className="font-semibold">{t.droppedColumns}</span> (no equivalent in target format):{" "}
+                <span className="font-semibold">{t.droppedColumns}</span> {t.noEquivalent}{" "}
                 <span className="font-mono">{result.unmappedSourceFields.join(", ")}</span>
               </div>
             )}
@@ -308,10 +316,10 @@ export default function ConvertClient({ t }: Props) {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4 text-sm text-[var(--muted)]">
-        <a href="/app" className="hover:underline">CSV Fixer</a>
-        <a href="/merge" className="hover:underline">CSV Merger</a>
-        <a href="/csv-inspector" className="hover:underline">CSV Inspector</a>
-        <a href="/presets" className="hover:underline">Templates</a>
+        <Link href={href("/app")} className="hover:underline">{t.linkFixer}</Link>
+        <Link href={href("/merge")} className="hover:underline">{t.linkMerger}</Link>
+        <Link href={href("/csv-inspector")} className="hover:underline">{t.linkInspector}</Link>
+        <Link href={href("/presets")} className="hover:underline">{t.linkTemplates}</Link>
       </div>
     </main>
   );

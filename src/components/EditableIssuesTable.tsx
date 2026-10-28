@@ -3,6 +3,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
+import { ENGLISH_VALIDATION_TEXT, type ValidationText } from "@/lib/i18n/validationText";
 import { fmt, plural } from "@/lib/i18n/fmt";
 import type { Translations } from "@/lib/i18n/getTranslations";
 
@@ -53,8 +54,11 @@ export function EditableIssuesTable(props: {
   onRowEditEnd?: (rowIndex: number) => void;
 
   t: Strings;
+  /** Translates validator messages and issue text (English when omitted). */
+  vt?: ValidationText;
 }) {
   const { t } = props;
+  const vt = props.vt ?? ENGLISH_VALIDATION_TEXT;
   const { headers, issues, rows, onUpdateRow, resetKey, formatId, pinnedRows, onUnpinRow, cellSeverityMap } = props;
 
   // Expand state for pinned rows
@@ -228,7 +232,7 @@ export function EditableIssuesTable(props: {
                           const code = (it as any).code as string | undefined;
 
                           const meta = code ? getIssueMeta(formatId, code) : undefined;
-                          const why = meta?.whyPlatformCares;
+                          const why = vt.issue(code, "whyPlatformCares", meta?.whyPlatformCares);
                           const isBlocking = Boolean(meta?.blocking);
 
                           const whyKey = `${rowIndex}:${idx}:${code ?? title}`;
@@ -252,7 +256,7 @@ export function EditableIssuesTable(props: {
                                 <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{sev === "error" ? t.filterErrors : sev === "warning" ? t.filterWarnings : t.filterInfo}</div>
                               </div>
 
-                              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{it.message}</div>
+                              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{vt.msg(it.message)}</div>
 
                               {isBlocking && why ? (
                                 <div className="mt-2">
@@ -300,7 +304,7 @@ export function EditableIssuesTable(props: {
                                 <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
                                   {t.suggestion}{" "}
                                   <span className="font-semibold text-[var(--text)]">
-                                    {suggestion}
+                                    {vt.msg(suggestion)}
                                   </span>
                                 </div>
                               ) : null}

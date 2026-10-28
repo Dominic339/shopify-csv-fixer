@@ -87,7 +87,7 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The ConditionID value does not match a standard eBay condition code.",
     whyPlatformCares: "eBay uses ConditionID to display item condition to buyers. Unrecognized IDs may be rejected or cause incorrect condition display.",
-    howToFix: "Use a standard eBay ConditionID: 1000=New, 2000=Manufacturer Refurbished, 2500=Like New, 3000=Good, 4000=Acceptable, 5000=For parts or not working.",
+    howToFix: "Use a standard eBay ConditionID, for example 1000=New, 1500=New other, 2000=Certified refurbished, 2500=Seller refurbished, 3000=Used, 7000=For parts or not working. Allowed IDs vary by category.",
   },
 
   "ebay/invalid_duration": {
@@ -98,7 +98,7 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The Duration value does not match a recognized eBay listing duration format.",
     whyPlatformCares: "An unrecognized duration may default to a short auction window or cause the listing to be rejected.",
-    howToFix: "Use GTC (Good Till Cancelled) for fixed-price listings or Days_N (e.g., Days_7, Days_30) for auctions.",
+    howToFix: "Use GTC (Good 'Til Cancelled) for fixed-price listings, or Days_1, Days_3, Days_5, Days_7 or Days_10 for auctions.",
   },
 
   "ebay/invalid_format": {
@@ -119,8 +119,8 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     blocking: false,
     autoFixable: false,
     explanation: "eBay allows a maximum of 24 pictures per listing.",
-    whyPlatformCares: "Extra images beyond the 12-image limit are silently dropped by eBay.",
-    howToFix: "Reduce the PictureURL list to 12 or fewer pipe-separated URLs.",
+    whyPlatformCares: "eBay rejects or drops pictures beyond the 24-picture limit.",
+    howToFix: "Reduce the PictureURL list to 24 or fewer URLs separated by |.",
   },
 
   "ebay/invalid_picture_url": {

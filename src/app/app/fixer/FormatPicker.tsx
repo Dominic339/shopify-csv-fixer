@@ -6,7 +6,7 @@ import type { AppStrings, Fixer } from "./useFixer";
 import { card, muted, StepTitle } from "./ui";
 
 /** Step 1: chips on larger screens, a native select on phones. */
-export function FormatPicker({ f, t }: { f: Fixer; t: AppStrings }) {
+export function FormatPicker({ f, t, presetNames }: { f: Fixer; t: AppStrings; presetNames: Record<string, string> }) {
   return (
     <section className={`${card} p-5 sm:p-7`}>
       <StepTitle n={1}>{t.stepFormat}</StepTitle>
@@ -20,7 +20,7 @@ export function FormatPicker({ f, t }: { f: Fixer; t: AppStrings }) {
         >
           {f.allFormats.map((fmt) => (
             <option key={fmt.id} value={fmt.id}>
-              {fmt.name}
+              {presetNames[fmt.id] ?? fmt.name}
               {fmt.source === "user" ? ` (${t.customBadge})` : ""}
             </option>
           ))}
@@ -39,7 +39,7 @@ export function FormatPicker({ f, t }: { f: Fixer; t: AppStrings }) {
               className={`pill-btn ${active ? "is-active" : ""}`}
               onClick={() => f.setFormatId(fmt.id)}
             >
-              {fmt.name}
+              {presetNames[fmt.id] ?? fmt.name}
               {fmt.source === "user" ? <span className={`ml-1 text-xs ${muted}`}>({t.customBadge})</span> : null}
             </button>
           );

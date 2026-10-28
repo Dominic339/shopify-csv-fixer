@@ -11,6 +11,8 @@ import JsonLd from "@/components/JsonLd";
 import { getPresetById, getPresetFormats } from "@/lib/presets";
 import { getFormatById } from "@/lib/formats";
 import { getPopularGuides } from "@/lib/guides/getPopularGuides";
+import { guideLocalizer, loadContent } from "@/lib/guides/localizeGuide";
+import { loadValidationDicts, validationText } from "@/lib/i18n/validationText";
 import { issueCodeToSlug, PLATFORM_LABEL, type GuidePlatform } from "@/lib/guidesRegistry";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 import type { IssueMeta } from "@/lib/validation/issueMeta";
@@ -52,8 +54,9 @@ const FIXER_PAGES: Array<{ href: string; platform: string; variations?: boolean 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
 const card = "rounded-3xl border border-[var(--border)] bg-[var(--surface)]";
 
-function PopularGuides({ t, locale, platform }: { t: Translations; locale: Locale; platform: GuidePlatform | null }) {
-  const guides = getPopularGuides(platform, 6);
+async function PopularGuides({ t, locale, platform }: { t: Translations; locale: Locale; platform: GuidePlatform | null }) {
+  const L = await guideLocalizer(locale);
+  const guides = getPopularGuides(platform, 6).map(L);
   if (!guides.length) return null;
   return (
     <section className="mt-12">
@@ -164,8 +167,7 @@ export async function presetDetailMetadata(locale: Locale, rawId: string): Promi
     title: `${name} CSV Template`,
     description,
     keywords: KEYWORDS[preset.id],
-    // The write-up below the header is English, so localized copies defer to the English page.
-    alternates: pageAlternates(locale, path, false),
+    alternates: pageAlternates(locale, path),
     openGraph: { title: `${name} CSV Template`, description, url: `${SITE_URL}${localeHref(locale, path)}`, type: "website" },
   };
 }
@@ -212,7 +214,15 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
   const format = getFormatById(preset.formatId);
   const headers = format.expectedHeaders ?? [];
   const exampleRow = headers.length ? mergeExampleRow(headers, format.exampleRow) : null;
-  const seo = (format.seo ?? {}) as FormatSeo;
+  // The write-up in this language where translated, field by field, else English.
+  const english = (format.seo ?? {}) as FormatSeo;
+  const local = (await loadContent(locale)).presets[preset.formatId] ?? {};
+  const seo: FormatSeo = {
+    longDescription: local.longDescription?.length ? local.longDescription : english.longDescription,
+    howItWorks: local.howItWorks?.length ? local.howItWorks : english.howItWorks,
+    commonFixes: local.commonFixes?.length ? local.commonFixes : english.commonFixes,
+    faq: local.faq?.length ? local.faq : english.faq,
+  };
   const platform = PRESET_TO_PLATFORM[preset.id] ?? null;
 
   const name = presetText(t, preset.id, "name") ?? preset.name;
@@ -222,7 +232,10 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
   const pageUrl = `${SITE_URL}/presets/${encodeURIComponent(preset.id)}`;
 
   // What this preset actually checks, straight from the validator's issue metadata.
-  const checks = Object.values(ISSUE_META_REGISTRY[preset.formatId] ?? {}).filter((m) => m.checked !== false);
+  const vt = validationText(await loadValidationDicts(locale));
+  const checks = Object.values(ISSUE_META_REGISTRY[preset.formatId] ?? {})
+    .filter((m) => m.checked !== false)
+    .map((m) => vt.meta(m));
   const blocking = checks.filter((m) => m.blocking);
   const autoFixed = checks.filter((m) => !m.blocking && m.autoFixable);
   const review = checks.filter((m) => !m.blocking && !m.autoFixable);

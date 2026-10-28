@@ -50,8 +50,8 @@ export function IssuesPanel({ f, t, sectionRef }: { f: Fixer; t: AppStrings; sec
                 i.severity === "error" ? "border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.08)]" : "border-[var(--border)] bg-[var(--surface-2)]"
               }`}
             >
-              <span className="font-semibold text-[var(--text)]">{t.wholeFile}:</span> <span className={muted}>{i.message}</span>
-              {i.suggestion ? <div className={`mt-1 text-xs ${muted}`}>{i.suggestion}</div> : null}
+              <span className="font-semibold text-[var(--text)]">{t.wholeFile}:</span> <span className={muted}>{f.vt.msg(i.message)}</span>
+              {i.suggestion ? <div className={`mt-1 text-xs ${muted}`}>{f.vt.msg(i.suggestion)}</div> : null}
             </li>
           ))}
         </ul>
@@ -139,6 +139,7 @@ export function IssuesPanel({ f, t, sectionRef }: { f: Fixer; t: AppStrings; sec
           onRowEditStart={f.lockEditingRow}
           onRowEditEnd={f.unlockEditingRow}
           t={t}
+          vt={f.vt}
         />
       </div>
     </section>

@@ -23,6 +23,7 @@ import {
   type Guide,
   type GuidePlatform,
 } from "@/lib/guidesRegistry";
+import { guideLocalizer } from "@/lib/guides/localizeGuide";
 import { readCuratedGuide } from "@/lib/guides/mdxLoader";
 import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
 import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
@@ -88,7 +89,8 @@ function GuideLink({ g, locale, t }: { g: Guide; locale: Locale; t: Translations
 
 export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: string }) {
   const t = await getTranslations(locale);
-  const all = getAllGuides();
+  const L = await guideLocalizer(locale);
+  const all = getAllGuides().map(L);
   const needle = q.trim().toLowerCase();
   const filtered = needle
     ? all.filter(
@@ -202,7 +204,8 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
   if (!isPlatform(platform)) notFound();
   const t = await getTranslations(locale);
   const href = (path: string) => localeHref(locale, path);
-  const guides = getGuidesByPlatform(platform);
+  const L = await guideLocalizer(locale);
+  const guides = getGuidesByPlatform(platform).map(L);
   const label = PLATFORM_LABEL[platform];
   const presetId = PLATFORM_PRESET_ID[platform];
   const fixerHref = PLATFORM_FIXER_HREF[platform];
@@ -289,7 +292,7 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
 
 export async function guideMetadata(locale: Locale, platform: string, slug: string): Promise<Metadata> {
   if (!isPlatform(platform)) return {};
-  const guide = getGuide(platform, slug);
+  const guide = (await guideLocalizer(locale))(getGuide(platform, slug));
   if (!guide) return {};
   const label = PLATFORM_LABEL[guide.platform];
   const title = `${guide.title} | ${label} CSV Guide`;
@@ -361,7 +364,8 @@ function Steps({ title, items, numbered }: { title: string; items: string[]; num
 
 export async function GuideView({ locale, platform, slug }: { locale: Locale; platform: string; slug: string }) {
   if (!isPlatform(platform)) notFound();
-  const guide = getGuide(platform, slug);
+  const L = await guideLocalizer(locale);
+  const guide = L(getGuide(platform, slug));
   if (!guide) notFound();
 
   const t = await getTranslations(locale);
@@ -372,7 +376,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
   const fixerAppHref = presetId ? `${href("/app")}?preset=${presetId}` : href("/app");
   const checked = guide.checkedByFixer !== false;
 
-  const related = relatedGuides(guide, platform, slug);
+  const related = relatedGuides(guide, platform, slug).map(L);
   const expanded = guide.kind === "issue" && guide.issueCode ? expandIssueContent(issueInput(guide, platform)) : null;
   const showWooVariableLink = platform === "woocommerce" && expanded?.issueType === "variant_structure";
   const curated = guide.kind === "curated" ? readCuratedGuide(platform, slug) : null;
@@ -494,7 +498,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
               </div>
               {toc.length > 0 && (
                 <aside className="sticky top-24 hidden w-56 shrink-0 lg:block">
-                  <MdxGuideToc items={toc} />
+                  <MdxGuideToc items={toc} onThisPage={t.toc.onThisPage} />
                 </aside>
               )}
             </div>

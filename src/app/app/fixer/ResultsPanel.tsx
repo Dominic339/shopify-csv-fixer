@@ -5,7 +5,8 @@ import Link from "next/link";
 
 import { localeHref } from "@/lib/i18n/locales";
 import { fmt, plural } from "@/lib/i18n/fmt";
-import { groupFixesByType, generateFixesLogText } from "@/lib/validation/fixesLog";
+import { FIX_TYPE_LABELS, groupFixesByType, generateFixesLogText, type FixLogText, type FixTypeId } from "@/lib/validation/fixesLog";
+import type { ScoreNote } from "@/lib/validation/scoreNotes";
 import { downloadText, type AppStrings, type Fixer } from "./useFixer";
 import { card, muted, platformLabel, StepTitle } from "./ui";
 
@@ -28,6 +29,33 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
   const counts = f.validation.counts;
   const scrollToIssues = onJumpToIssues;
   const href = (p: string) => localeHref(f.currentLocale, p);
+
+  // "X on 5 rows" is built by the fixer from repeated "X on row N" lines.
+  const fixLine = (msg: string) => {
+    const m = msg.match(/^(.*) on (\d+) rows$/);
+    return m ? fmt(t.fixOnRows, { fix: f.vt.msg(m[1]), count: m[2] }) : f.vt.msg(msg);
+  };
+  const scoreNote = (n: ScoreNote) => {
+    const parts = [
+      n.blocking ? plural(n.blocking, t.scoreBlockingOne, t.scoreBlocking) : "",
+      n.errors ? plural(n.errors, t.errorCountOne, t.errorCount) : "",
+      n.warnings ? plural(n.warnings, t.warningCountOne, t.warningCount) : "",
+    ].filter(Boolean);
+    if (!parts.length) return t.scoreNoIssues;
+    return n.hint ? `${parts.join(", ")} · ${t[`scoreHint_${n.hint}`]}` : parts.join(", ");
+  };
+  const logText: FixLogText = {
+    title: t.logTitle,
+    date: t.logDate,
+    file: t.logFile,
+    format: t.logFormat,
+    actions: t.logActions,
+    summary: t.logSummary,
+    fullList: t.logFullList,
+    unknown: t.logUnknown,
+    labels: Object.fromEntries(Object.keys(FIX_TYPE_LABELS).map((k) => [k, t[`fixType_${k as FixTypeId}`]])) as Record<FixTypeId, string>,
+    line: f.vt.msg,
+  };
 
   function onExport() {
     if (f.quotaExceeded && !f.subStatus?.signedIn) {
@@ -72,7 +100,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
               <li key={g.code} className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
                 <button type="button" className="text-left font-medium text-[var(--text)] hover:underline" onClick={scrollToIssues}>
-                  {g.title}
+                  {f.vt.issue(g.code, "title") ?? f.vt.msg(g.title)}
                 </button>
                 <span className={muted}>({g.count})</span>
               </li>
@@ -108,7 +136,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
           <button
             type="button"
             className="pill-btn justify-center"
-            onClick={() => downloadText(`${f.fixLogBase}_fix_log.txt`, generateFixesLogText(f.autoFixes, { fileName: f.fileName ?? undefined, formatId: f.formatId }))}
+            onClick={() => downloadText(`${f.fixLogBase}_fix_log.txt`, generateFixesLogText(f.autoFixes, { fileName: f.fileName ?? undefined, formatId: f.formatId, text: logText }))}
           >
             {t.downloadFixLog}
           </button>
@@ -167,8 +195,8 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
           </summary>
           <div className="mt-3 flex flex-wrap gap-2">
             {groupFixesByType(f.autoFixes).map((g) => (
-              <span key={g.type} className={`rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs ${muted}`} title={g.sample}>
-                {g.count}× {g.type}
+              <span key={g.type} className={`rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs ${muted}`} title={f.vt.msg(g.sample)}>
+                {g.count}× {t[`fixType_${g.type}`]}
               </span>
             ))}
           </div>
@@ -176,7 +204,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
             {f.collapsedAutoFixes.slice(0, 50).map((msg, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="mt-0.5 shrink-0 text-green-600 dark:text-green-400">&#10003;</span>
-                <span className="min-w-0 break-words">{msg}</span>
+                <span className="min-w-0 break-words">{fixLine(msg)}</span>
               </li>
             ))}
           </ul>
@@ -249,9 +277,9 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
                 {f.scoreNotes.map((n) => (
                   <div key={n.key} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm">
                     <div className="font-semibold text-[var(--text)]">
-                      {n.label} <span className={muted}>{n.score}</span>
+                      {t[`score_${n.key}`]} <span className={muted}>{n.score}</span>
                     </div>
-                    <div className={`mt-1 ${muted}`}>{n.note}</div>
+                    <div className={`mt-1 ${muted}`}>{scoreNote(n)}</div>
                   </div>
                 ))}
               </div>

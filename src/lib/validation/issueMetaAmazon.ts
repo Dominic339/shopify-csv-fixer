@@ -152,9 +152,9 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     category: "structure",
     blocking: false,
     autoFixable: false,
-    explanation: "The add-delete field must be 'a' (add/update) or 'd' (delete).",
+    explanation: "The add-delete field must be 'a' (add or update), 'd' (delete the offer) or 'x' (delete the offer and its product data).",
     whyPlatformCares: "An invalid add-delete value causes Amazon's processor to skip the row.",
-    howToFix: "Use 'a' to add or update a listing, or 'd' to delete it.",
+    howToFix: "Use 'a' to add or update an offer, 'd' to delete the offer, or 'x' to delete it together with its product data.",
   },
 
   "amazon/invalid_fulfillment_channel": {

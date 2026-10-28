@@ -15,7 +15,7 @@ import { IssuesPanel } from "./fixer/IssuesPanel";
 import { WorkspaceBar } from "./fixer/WorkspaceBar";
 import { muted } from "./fixer/ui";
 
-export default function AppClient({ tApp }: { tApp: AppStrings }) {
+export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; presetNames: Record<string, string> }) {
   const t = tApp;
   const f = useFixer(t);
   const issuesRef = useRef<HTMLElement>(null);
@@ -34,7 +34,7 @@ export default function AppClient({ tApp }: { tApp: AppStrings }) {
             <span className="font-semibold text-[var(--text)]">
               {f.isUnlimited ? t.unlimitedExports : fmt(t.exportsLeft, { left: f.left ?? 0, limit: f.limit ?? 0 })}
             </span>
-            <span className={`ml-2 ${muted}`}>· {fmt(t.planLabel, { plan: f.subStatus?.plan ?? "free" })}</span>
+            <span className={`ml-2 ${muted}`}>· {fmt(t.planLabel, { plan: t[`plan_${f.subStatus?.plan ?? "free"}`] })}</span>
           </div>
         </header>
 
@@ -58,7 +58,7 @@ export default function AppClient({ tApp }: { tApp: AppStrings }) {
         <WorkspaceBar f={f} t={t} />
 
         <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
-          <FormatPicker f={f} t={t} />
+          <FormatPicker f={f} t={t} presetNames={presetNames} />
           <UploadPanel f={f} t={t} />
         </div>
 

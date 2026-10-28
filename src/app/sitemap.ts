@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/merge", "monthly", 0.8),
     ...translated("/presets", "weekly", 0.9),
     ...translated("/guides", "monthly", 0.8),
+    ...getPresetFormats().flatMap((preset) => translated(`/presets/${encodeURIComponent(preset.id)}`, "monthly", 0.7)),
 
     // Platform landing pages (English)
     english("/shopify-csv-fixer", "monthly", 0.85),
@@ -47,9 +48,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     english("/privacy", "yearly", 0.2),
     english("/terms", "yearly", 0.2),
 
-    // Preset write-ups and guide pages: the body is English in every language,
-    // so only the English URL is listed (localized copies point their canonical at it).
-    ...getPresetFormats().map((preset) => english(`/presets/${encodeURIComponent(preset.id)}`, "monthly", 0.7)),
+    // Guide pages: article bodies are English in every language, so only the English URL
+    // is listed (localized copies point their canonical at it).
     ...GUIDE_PLATFORMS.map((p) => english(`/guides/${p}`, "monthly", 0.75)),
     ...getAllGuides().map((g) => english(`/guides/${g.platform}/${g.slug}`, "monthly", 0.7)),
   ];

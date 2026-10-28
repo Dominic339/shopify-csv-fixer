@@ -11,9 +11,20 @@ import ConvertClient from "@/app/convert/ConvertClient";
 import MergeClient from "@/app/merge/MergeClient";
 import InspectorClient from "@/app/csv-inspector/InspectorClient";
 import ProfileClient from "@/app/profile/ProfileClient";
-import { getTranslations } from "@/lib/i18n/getTranslations";
+import { getTranslations, presetText, type Translations } from "@/lib/i18n/getTranslations";
+import { getAllFormats } from "@/lib/formats";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+
+/** Built-in format names in the page's language, for the fixer's format picker. */
+function presetNames(t: Translations): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const f of getAllFormats()) {
+    const name = presetText(t, f.id, "name");
+    if (name) out[f.id] = name;
+  }
+  return out;
+}
 
 export type ToolId = "home" | "app" | "convert" | "merge" | "inspector" | "profile";
 
@@ -60,7 +71,7 @@ export async function ToolView({ locale, tool }: { locale: Locale; tool: ToolId 
     case "app":
       return (
         <Suspense fallback={<div className="mx-auto max-w-6xl px-6 py-10" />}>
-          <AppClient tApp={t.app} />
+          <AppClient tApp={t.app} presetNames={presetNames(t)} />
         </Suspense>
       );
     case "convert":
