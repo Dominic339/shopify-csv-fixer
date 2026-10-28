@@ -37,9 +37,9 @@ export default function Footer({ navByLocale }: Props) {
     {
       title: "StriveFormats",
       links: [
-        { href: "/about", label: t.about },
-        { href: "/privacy", label: t.privacy },
-        { href: "/terms", label: t.terms },
+        { href: href("/about"), label: t.about },
+        { href: href("/privacy"), label: t.privacy },
+        { href: href("/terms"), label: t.terms },
       ],
     },
   ];

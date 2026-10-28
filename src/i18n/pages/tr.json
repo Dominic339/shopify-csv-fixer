@@ -1,0 +1,109 @@
+{
+  "about": {
+    "metaTitle": "StriveFormats Hakkında",
+    "metaDescription": "StriveFormats; Shopify, WooCommerce, Etsy, eBay ve Amazon ürün CSV'lerini tarayıcınızda kontrol eder ve düzeltir. Ne yaptığı, neyin nerede çalıştığı ve nasıl yapıldığı.",
+    "title": "StriveFormats Hakkında",
+    "intro": "StriveFormats, ürün CSV dosyalarını bir online mağazaya aktarmadan önce kontrol eder, güvenle düzeltilebilecek sorunları düzeltir ve geri kalan her şeyin tam satırını ve sütununu gösterir. Tarayıcınızda çalışır; kataloğunuz bilgisayarınızdan hiç çıkmaz.",
+    "whyTitle": "Neden var",
+    "why": [
+      "Mağaza içe aktarıcıları katıdır ve hata mesajları hangi satırın hatalı olduğunu nadiren söyler. Elektronik tabloda düzgün görünen bir dosya, \"45,00\" diye yazılmış bir fiyat, handle'ını kaybetmiş bir varyant satırı ya da mağazadaki verileri sessizce silecek boş bir hücre yüzünden başarısız olabilir.",
+      "StriveFormats her platformun kurallarını bilir, verinizin anlamını değiştiremeyecek düzeltmeleri uygular ve değiştirebilecek her kararı bir açıklama ve bir rehber bağlantısıyla size bırakır."
+    ],
+    "runTitle": "Nasıl çalışır",
+    "run": [
+      { "lead": "Kaydolmadan önce deneyin.", "text": "Tüm kontroller ve düzeltmeler hesap olmadan çalışır ve her cihazda ayda {count} ücretsiz dışa aktarma hakkınız olur." },
+      { "lead": "Hiçbir şey sessizce değişmez.", "text": "Her otomatik değişiklik, dosyayla birlikte indirebileceğiniz bir düzeltme günlüğünde listelenir." },
+      { "lead": "Küçük ve bağımsız.", "text": "Araç işini tarayıcınızda yapar; bu onu hızlı, gizli ve çalıştırması ucuz tutar, ücretsiz planın da ücretsiz kalmasını sağlar." }
+    ],
+    "whereTitle": "Ne nerede çalışır",
+    "dataFlow": [
+      { "what": "CSV dosyanız ve yaptığınız her düzenleme", "where": "Tarayıcınızda kalır. Asla yüklenmez." },
+      { "what": "Özel formatlar ve çalışma alanları", "where": "Tarayıcınızda kaydedilir. Taşımak için bir formatı dosya olarak dışa aktarın." },
+      { "what": "Ücretsiz dışa aktarma sayısı (oturum kapalı)", "where": "Bu cihaz için tarayıcınızda tutulur." },
+      { "what": "Dışa aktarma sayısı ve plan (oturum açık)", "where": "Her cihazda çalışması için hesabınızla birlikte saklanır." },
+      { "what": "Anonim kullanım olayları", "where": "Hangi araçların kullanıldığı; dosyalarınızın içeriği asla." },
+      { "what": "Ödemeler", "where": "Stripe tarafından yürütülür. Kart bilgilerinizi asla görmeyiz." }
+    ],
+    "detailsBefore": "Ayrıntılar için",
+    "detailsLink": "gizlilik politikası",
+    "detailsAfter": ".",
+    "platformsTitle": "Platformlar",
+    "toolsTitle": "Araçlar",
+    "tools": {
+      "app": { "name": "CSV Düzelticisi", "desc": "Bir platformun kurallarına göre doğrulayın, güvenli olanı otomatik düzeltin, gerisini bir tabloda düzenleyin." },
+      "inspector": { "name": "CSV Denetçisi", "desc": "Herhangi bir CSV'nin yapısını kontrol edin: ayırıcılar, tırnaklar, kodlama, boş ve yinelenen sütunlar." },
+      "convert": { "name": "Format Dönüştürücü", "desc": "Ürünleri Shopify, WooCommerce, Etsy, eBay ve Amazon düzenleri arasında taşıyın." },
+      "merge": { "name": "CSV Birleştirici", "desc": "İki dosyayı birleştirin ve ortak bir sütuna göre yinelenenleri kaldırın." },
+      "formats": { "name": "Özel formatlar", "desc": "Düzenli olarak kullandığınız her dosyanın sütunlarını ve kurallarını kaydedin (Advanced planı)." }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Gizlilik Politikası",
+    "metaDescription": "StriveFormats neyi, nerede ve neden saklar. CSV dosyalarınız tarayıcınızda işlenir ve asla yüklenmez.",
+    "title": "Gizlilik Politikası",
+    "intro": "StriveFormats, CSV dosyalarını tarayıcınızda işler. Bu sayfa, sitenin sakladığı her şeyi, nerede ve neden sakladığını listeler.",
+    "sections": [
+      {
+        "title": "CSV dosyalarınız",
+        "paras": [
+          "CSV Düzelticisi, Denetçi, Dönüştürücü veya Birleştirici'de açtığınız dosyalar tamamen tarayıcınızda okunur, kontrol edilir ve dışa aktarılır. İçerikleri asla sunucularımıza yüklenmez veya kimseyle paylaşılmaz.",
+          "Oluşturduğunuz özel formatlar ve çalışma alanları, o cihazdaki tarayıcınızın yerel depolama alanına kaydedilir."
+        ]
+      },
+      {
+        "title": "Hesap oluşturursanız",
+        "paras": [
+          "E-posta adresinizi (oturum açmak için), planınızı ve abonelik durumunuzu, bu ay kaç dışa aktarma kullandığınızı saklarız. Hesaplar Supabase tarafından sağlanır."
+        ]
+      },
+      {
+        "title": "Hesap olmadan",
+        "paras": ["Aylık ücretsiz dışa aktarma sayınız tarayıcınızın yerel depolama alanında tutulur. Bize gönderilmez."]
+      },
+      {
+        "title": "Kullanım bilgileri",
+        "paras": [
+          "Hangi aracın açıldığı veya bir dosyanın kontrol edildiği gibi anonim kullanım olaylarını, tarayıcınızda tutulan rastgele bir tanımlayıcıyla birlikte kaydederiz. Bu olaylar asla dosya içeriği barındırmaz.",
+          "Site, sayfa görüntülemelerini saymak için Google Analytics ve Vercel Analytics kullanabilir. Google Analytics çerez kullanır; Vercel Analytics kullanmaz."
+        ]
+      },
+      {
+        "title": "E-posta güncellemeleri",
+        "paras": [
+          "\"Yeni formatlar ve özellikler\" kutusuna e-posta adresinizi girerseniz, ara sıra ürün güncellemeleri göndermek için saklarız. İstediğiniz zaman silinmesini isteyebilirsiniz."
+        ]
+      },
+      {
+        "title": "Ödemeler",
+        "paras": ["Ödemeler Stripe tarafından yürütülür. Kart bilgilerinizi asla görmez veya saklamayız; Stripe'tan yalnızca abonelik durumunuzu alırız."]
+      },
+      {
+        "title": "Seçenekleriniz",
+        "paras": [
+          "Tarayıcınızda kayıtlı verileri tarayıcı ayarlarından istediğiniz zaman silebilirsiniz. Hesabınızın veya e-posta adresinizin silinmesi için site sahibiyle iletişime geçin."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "metaTitle": "Hizmet Koşulları",
+    "metaDescription": "StriveFormats hizmet koşulları.",
+    "title": "Hizmet Koşulları",
+    "intro": "StriveFormats olduğu gibi, herhangi bir garanti olmaksızın sunulur. Dışa aktardığınız dosyaları üçüncü taraf hizmetlere aktarmadan önce doğruluklarını kontrol etmek sizin sorumluluğunuzdadır.",
+    "sections": [
+      {
+        "title": "Kabul edilebilir kullanım",
+        "paras": ["StriveFormats'ı yasa dışı içerik yüklemek veya işlemek için kullanmayın. Hizmeti aksatmaya veya kullanım sınırlarını aşmaya çalışmayın."]
+      },
+      {
+        "title": "Abonelikler",
+        "paras": ["Abonelik faturalandırması Stripe üzerinden yürütülür. Aboneliğinizi faturalandırma portalından iptal edebilir veya yönetebilirsiniz."]
+      },
+      {
+        "title": "Sorumluluğun sınırlandırılması",
+        "paras": ["StriveFormats; veri içe aktarmaları, iş operasyonları veya üçüncü taraf platform sorunlarıyla ilgili kayıplardan sorumlu değildir."]
+      }
+    ]
+  },
+  "translationNote": "Bu çeviri kolaylık sağlamak için sunulmuştur. Farklılık olması hâlinde İngilizce sürüm geçerlidir:"
+}

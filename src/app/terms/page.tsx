@@ -1,34 +1,9 @@
-import type { Metadata } from "next";
+import { infoPageMetadata, PolicyView } from "@/views/infoPages";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | StriveFormats",
-  description: "Terms of service for StriveFormats.",
-};
+export function generateMetadata() {
+  return infoPageMetadata("terms");
+}
 
 export default function TermsPage() {
-  return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-3xl font-semibold">Terms of Service</h1>
-
-      <p className="mt-4 text-white/80">
-        StriveFormats is provided as-is without warranties. You are responsible for verifying the accuracy of your exports
-        before importing into third-party services.
-      </p>
-
-      <h2 className="mt-8 text-xl font-semibold">Acceptable use</h2>
-      <p className="mt-2 text-white/80">
-        Do not use StriveFormats to upload or process unlawful content. Do not attempt to disrupt the service or bypass usage limits.
-      </p>
-
-      <h2 className="mt-8 text-xl font-semibold">Subscriptions</h2>
-      <p className="mt-2 text-white/80">
-        Subscription billing is managed through Stripe. You can cancel or manage your subscription through the billing portal.
-      </p>
-
-      <h2 className="mt-8 text-xl font-semibold">Limitation of liability</h2>
-      <p className="mt-2 text-white/80">
-        StriveFormats is not liable for losses related to data imports, business operations, or third-party platform issues.
-      </p>
-    </main>
-  );
+  return <PolicyView page="terms" />;
 }

@@ -1,0 +1,109 @@
+{
+  "about": {
+    "metaTitle": "Over StriveFormats",
+    "metaDescription": "StriveFormats controleert en corrigeert product-CSV's voor Shopify, WooCommerce, Etsy, eBay en Amazon in je browser. Wat het doet, wat waar draait en hoe het is gebouwd.",
+    "title": "Over StriveFormats",
+    "intro": "StriveFormats controleert product-CSV-bestanden voordat je ze in een webwinkel importeert, lost de problemen op die veilig op te lossen zijn en wijst bij al het andere de precieze rij en kolom aan. Het draait in je browser, dus je catalogus verlaat nooit je computer.",
+    "whyTitle": "Waarom het bestaat",
+    "why": [
+      "Importtools van webwinkels zijn streng, en hun foutmeldingen zeggen zelden welke rij fout is. Een bestand dat er in een spreadsheet goed uitziet, kan mislukken door een prijs die als „45,00” is geschreven, een variantrij die zijn handle kwijt is of een lege cel die ongemerkt gegevens in de winkel zou wissen.",
+      "StriveFormats kent de regels van elk platform, past de correcties toe die de betekenis van je gegevens niet kunnen veranderen en laat elke beslissing waarbij dat wel kan aan jou over, met uitleg en een link naar een handleiding."
+    ],
+    "runTitle": "Hoe het werkt",
+    "run": [
+      { "lead": "Probeer het voordat je je aanmeldt.", "text": "Alle controles en correcties werken zonder account, en je krijgt {count} gratis exports per maand op elk apparaat." },
+      { "lead": "Niets verandert stilletjes.", "text": "Elke automatische wijziging staat in een correctielogboek dat je samen met het bestand kunt downloaden." },
+      { "lead": "Klein en onafhankelijk.", "text": "De tool doet zijn werk in je browser. Dat houdt hem snel, privé en goedkoop om te draaien, en houdt het gratis abonnement gratis." }
+    ],
+    "whereTitle": "Wat waar draait",
+    "dataFlow": [
+      { "what": "Je CSV-bestand en elke wijziging", "where": "Blijft in je browser. Het wordt nooit geüpload." },
+      { "what": "Aangepaste indelingen en werkruimtes", "where": "Opgeslagen in je browser. Exporteer een indeling als bestand om hem mee te nemen." },
+      { "what": "Teller voor gratis exports (afgemeld)", "where": "Bewaard in je browser voor dit apparaat." },
+      { "what": "Exportteller en abonnement (aangemeld)", "where": "Opgeslagen bij je account, zodat het op elk apparaat werkt." },
+      { "what": "Anonieme gebruiksgebeurtenissen", "where": "Welke tools worden gebruikt, nooit wat er in je bestanden staat." },
+      { "what": "Betalingen", "where": "Afgehandeld door Stripe. We zien je kaartgegevens nooit." }
+    ],
+    "detailsBefore": "Meer in het",
+    "detailsLink": "privacybeleid",
+    "detailsAfter": ".",
+    "platformsTitle": "Platforms",
+    "toolsTitle": "Tools",
+    "tools": {
+      "app": { "name": "CSV-hersteller", "desc": "Controleer aan de hand van de regels van een platform, corrigeer automatisch wat veilig is en bewerk de rest in een tabel." },
+      "inspector": { "name": "CSV-inspecteur", "desc": "Controleer de structuur van elke CSV: scheidingstekens, aanhalingstekens, codering, lege en dubbele kolommen." },
+      "convert": { "name": "Formaatconverter", "desc": "Zet producten om tussen de indelingen van Shopify, WooCommerce, Etsy, eBay en Amazon." },
+      "merge": { "name": "CSV-samenvoeger", "desc": "Voeg twee bestanden samen en verwijder dubbele rijen op basis van een gedeelde kolom." },
+      "formats": { "name": "Aangepaste indelingen", "desc": "Sla de kolommen en regels op van elk bestand waarmee je regelmatig werkt (Advanced-abonnement)." }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Privacybeleid",
+    "metaDescription": "Wat StriveFormats opslaat, waar en waarom. Je CSV-bestanden worden in je browser verwerkt en nooit geüpload.",
+    "title": "Privacybeleid",
+    "intro": "StriveFormats verwerkt CSV-bestanden in je browser. Deze pagina vermeldt alles wat de site opslaat, waar en waarom.",
+    "sections": [
+      {
+        "title": "Je CSV-bestanden",
+        "paras": [
+          "Bestanden die je opent in de CSV-hersteller, de inspecteur, de converter of de samenvoeger worden volledig in je browser gelezen, gecontroleerd en geëxporteerd. De inhoud wordt nooit naar onze servers geüpload of met iemand gedeeld.",
+          "Aangepaste indelingen en werkruimtes die je maakt, worden opgeslagen in de lokale opslag van je browser op dat apparaat."
+        ]
+      },
+      {
+        "title": "Als je een account aanmaakt",
+        "paras": [
+          "We bewaren je e-mailadres (om in te loggen), je abonnement en de status daarvan, en hoeveel exports je deze maand hebt gebruikt. Accounts worden geleverd door Supabase."
+        ]
+      },
+      {
+        "title": "Zonder account",
+        "paras": ["Je teller voor gratis exports van deze maand staat in de lokale opslag van je browser. Hij wordt niet naar ons gestuurd."]
+      },
+      {
+        "title": "Gebruiksgegevens",
+        "paras": [
+          "We registreren anonieme gebruiksgebeurtenissen, zoals welke tool is geopend of dat een bestand is gecontroleerd, samen met een willekeurige ID die in je browser wordt bewaard. Deze gebeurtenissen bevatten nooit de inhoud van bestanden.",
+          "De site kan Google Analytics en Vercel Analytics gebruiken om paginaweergaven te tellen. Google Analytics plaatst cookies, Vercel Analytics niet."
+        ]
+      },
+      {
+        "title": "Nieuws per e-mail",
+        "paras": [
+          "Als je je e-mailadres invult in het vak „nieuwe indelingen en functies”, bewaren we het om je af en toe productnieuws te sturen. Je kunt ons op elk moment vragen het te verwijderen."
+        ]
+      },
+      {
+        "title": "Betalingen",
+        "paras": ["Betalingen worden afgehandeld door Stripe. We zien of bewaren je kaartgegevens nooit; we ontvangen van Stripe alleen de status van je abonnement."]
+      },
+      {
+        "title": "Je keuzes",
+        "paras": [
+          "Je kunt de gegevens in je browser op elk moment wissen via de browserinstellingen. Wil je dat je account of e-mailadres wordt verwijderd, neem dan contact op met de beheerder van de site."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "metaTitle": "Gebruiksvoorwaarden",
+    "metaDescription": "Gebruiksvoorwaarden van StriveFormats.",
+    "title": "Gebruiksvoorwaarden",
+    "intro": "StriveFormats wordt geleverd zoals het is, zonder garanties. Je bent er zelf verantwoordelijk voor dat je exports kloppen voordat je ze in diensten van derden importeert.",
+    "sections": [
+      {
+        "title": "Toegestaan gebruik",
+        "paras": ["Gebruik StriveFormats niet om onrechtmatige inhoud te uploaden of te verwerken. Probeer de dienst niet te verstoren of gebruikslimieten te omzeilen."]
+      },
+      {
+        "title": "Abonnementen",
+        "paras": ["De facturering van abonnementen loopt via Stripe. Je kunt je abonnement opzeggen of beheren via het factureringsportaal."]
+      },
+      {
+        "title": "Beperking van aansprakelijkheid",
+        "paras": ["StriveFormats is niet aansprakelijk voor verliezen in verband met gegevensimports, bedrijfsvoering of problemen bij platforms van derden."]
+      }
+    ]
+  },
+  "translationNote": "Deze vertaling is bedoeld voor het gemak. Bij verschillen geldt de Engelse versie:"
+}

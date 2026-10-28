@@ -44,9 +44,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/ebay-variations-csv-fixer", "monthly", 0.75),
     ...translated("/amazon-csv-fixer", "monthly", 0.8),
     english("/formats", "monthly", 0.7),
-    english("/about", "monthly", 0.4),
-    english("/privacy", "yearly", 0.2),
-    english("/terms", "yearly", 0.2),
+    ...translated("/about", "monthly", 0.4),
+    ...translated("/privacy", "yearly", 0.2),
+    ...translated("/terms", "yearly", 0.2),
 
     // Guide pages: article bodies are English in every language, so only the English URL
     // is listed (localized copies point their canonical at it).

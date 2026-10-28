@@ -14,6 +14,7 @@ import { listCuratedGuides } from "@/lib/guides/mdxLoader";
 import { getAllFormats } from "@/lib/formats";
 import { PLATFORM_LANDINGS } from "@/lib/landing/platforms";
 import en from "@/i18n/en.json";
+import enPages from "@/i18n/pages/en.json";
 
 const root = process.cwd();
 const read = (dir: string, loc: string) => JSON.parse(fs.readFileSync(path.join(root, "src/i18n", dir, `${loc}.json`), "utf8"));
@@ -63,5 +64,24 @@ describe.each(LOCALES.filter((l) => l !== "en"))("%s dictionaries", (loc) => {
     const ui: Record<string, string> = JSON.parse(fs.readFileSync(path.join(root, "src/i18n", `${loc}.json`), "utf8")).landing ?? {};
     const bad = Object.entries(en.landing).filter(([k, v]) => !ui[k] || placeholders(ui[k]).join() !== placeholders(v).join());
     expect(bad.map(([k]) => k)).toEqual([]);
+  });
+
+  it("translate the about, privacy and terms pages with the same structure", () => {
+    // Same keys and list lengths as English, every string filled, same placeholders.
+    const diff: string[] = [];
+    const walk = (a: unknown, b: unknown, at: string) => {
+      if (typeof a === "string") {
+        if (typeof b !== "string" || (a && !b) || placeholders(a).join() !== placeholders(b).join()) diff.push(at);
+      } else if (Array.isArray(a)) {
+        if (!Array.isArray(b) || a.length !== b.length) diff.push(at);
+        else a.forEach((x, i) => walk(x, b[i], `${at}[${i}]`));
+      } else if (a && typeof a === "object") {
+        for (const k of Object.keys(a)) walk((a as Record<string, unknown>)[k], (b as Record<string, unknown> | undefined)?.[k], `${at}.${k}`);
+      }
+    };
+    const pages = read("pages", loc);
+    walk(enPages, pages, loc);
+    expect(diff).toEqual([]);
+    expect(pages.translationNote).toBeTruthy();
   });
 });

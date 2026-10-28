@@ -16,8 +16,9 @@ describe("locale paths", () => {
   it("maps the same page to another language, or that language's home", () => {
     expect(pathInLocale("/de/guides/shopify", "fr")).toBe("/fr/guides/shopify");
     expect(pathInLocale("/es/presets", "en")).toBe("/presets");
-    expect(pathInLocale("/about", "ja")).toBe("/ja");
-    expect(isLocalisedPath("/about")).toBe(false);
+    expect(pathInLocale("/about", "ja")).toBe("/ja/about");
+    expect(pathInLocale("/formats", "ja")).toBe("/ja");
+    expect(isLocalisedPath("/formats")).toBe(false);
   });
 });
 

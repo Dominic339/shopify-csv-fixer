@@ -19,6 +19,9 @@ export const LOCALISED_PREFIXES = [
   "/ebay-csv-fixer",
   "/ebay-variations-csv-fixer",
   "/amazon-csv-fixer",
+  "/about",
+  "/privacy",
+  "/terms",
 ];
 
 export const LOCALE_COOKIE = "NEXT_LOCALE";

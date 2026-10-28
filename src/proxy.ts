@@ -105,5 +105,8 @@ export const config = {
     "/ebay-csv-fixer",
     "/ebay-variations-csv-fixer",
     "/amazon-csv-fixer",
+    "/about",
+    "/privacy",
+    "/terms",
   ],
 };
