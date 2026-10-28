@@ -1,0 +1,163 @@
+---
+title: "Błędy importu plików płaskich Amazon: przyczyny i rozwiązania"
+description: "Napraw najczęstsze błędy importu plików płaskich CSV Amazon: problemy z SKU, nieprawidłowe kody stanu, format cen, wartości kanału realizacji i niezgodne szablony."
+keywords: ["błędy importu pliku płaskiego amazon", "błędy importu csv amazon", "błędy flat file amazon", "naprawa csv amazon", "błędy inventory loader amazon", "walidacja pliku płaskiego amazon", "błędy masowego przesyłania amazon"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Jak Amazon sprawdza przesyłane pliki płaskie CSV i co powoduje błędy"
+  - "Pola wymagane w Inventory Loader i popularnych szablonach plików płaskich"
+  - "Jak naprawić błędy SKU, stanu, ceny, kanału realizacji i ASIN"
+  - "Jak czytać raport przetwarzania Amazon, aby znaleźć dokładnie te wiersze, które nie przeszły"
+  - "Jak dopasować plik do właściwego szablonu Amazon dla kategorii produktu"
+bestFor: "Sprzedawcy Amazon przesyłający pliki płaskie w Seller Central, którzy napotykają błędy przetwarzania lub niepełne importy"
+timeToComplete: "12 minut"
+---
+
+## Jak Amazon sprawdza pliki płaskie
+
+Pliki płaskie Amazon to pliki CSV rozdzielane tabulatorami lub przecinkami, które muszą trzymać się ścisłych schematów kolumn określonych dla każdej kategorii produktów. Gdy przesyłasz plik płaski, Amazon przepuszcza go przez kilka etapów walidacji:
+
+1. **Zgodność z szablonem** — sprawdza, czy nagłówki kolumn odpowiadają szablonowi oczekiwanemu dla danego typu pliku
+2. **Pola wymagane** — sprawdza, czy wszystkie wymagane kolumny mają wartości
+3. **Typy danych** — sprawdza liczby, wartości logiczne i wartości z list wyboru
+4. **Reguły biznesowe** — sprawdza ASIN-y, SKU, kody stanu i zakresy cen
+5. **Kontrola katalogu** — dopasowuje identyfikatory produktów do katalogu Amazon
+
+Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekcji Magazyn → Dodaj produkty przez przesłanie pliku). Zawsze przeglądaj raport przetwarzania — zawiera każdy nieudany wiersz wraz z konkretnym błędem.
+
+---
+
+## Błąd: nieprawidłowy lub brakujący seller_sku
+
+**Przyczyna:** `seller_sku` jest pusty, ma ponad 40 znaków, zawiera niedozwolone znaki lub powiela SKU, które już jest w twoim katalogu.
+
+**Zasady dla seller_sku:**
+- Maksymalnie 40 znaków
+- Bez spacji (używaj łączników lub podkreśleń)
+- Litery i cyfry oraz `-`, `_`, `.`
+- Musi być unikalny w całym koncie sprzedawcy Amazon
+
+**Rozwiązanie:** upewnij się, że każdy wiersz ma unikalne SKU. Duplikaty znajdziesz formułą `=LICZ.JEŻELI($A:$A; A2)`. Skróć SKU dłuższe niż 40 znaków.
+
+---
+
+## Błąd: brak item_name / zbyt długi tytuł
+
+**Przyczyna:** `item_name` jest pusty albo przekracza limit długości tytułu Amazon (zależy od kategorii, zwykle 200–500 znaków).
+
+**Rozwiązanie:**
+- Wypełnij `item_name` w każdym wierszu produktu
+- Użyj w Excelu `=DŁ(B2)`, aby znaleźć tytuły przekraczające limit twojej kategorii
+- Sprawdź dokładny limit znaków w swoim szablonie
+
+---
+
+## Błąd: nieprawidłowy condition_type
+
+**Przyczyna:** kolumna `condition_type` zawiera wartość spoza listy dozwolonej przez Amazon.
+
+**Dozwolone wartości:**
+
+| Wartość | Opis |
+|---|---|
+| `New` | Fabrycznie nowy, zapakowany |
+| `UsedLikeNew` | Używany — jak nowy |
+| `UsedVeryGood` | Używany — bardzo dobry |
+| `UsedGood` | Używany — dobry |
+| `UsedAcceptable` | Używany — dopuszczalny |
+| `CollectibleLikeNew` | Kolekcjonerski — jak nowy |
+| `CollectibleVeryGood` | Kolekcjonerski — bardzo dobry |
+| `CollectibleGood` | Kolekcjonerski — dobry |
+| `CollectibleAcceptable` | Kolekcjonerski — dopuszczalny |
+| `Refurbished` | Odnowiony przez sprzedawcę |
+| `Club` | Club (kategoria multimediów) |
+
+**Rozwiązanie:** zastąp niestandardowe wartości stanu jedną z powyższej listy. `New` musi zaczynać się wielką literą; `new` (małymi literami) zostanie odrzucone.
+
+---
+
+## Błąd: nieprawidłowa cena
+
+**Przyczyna:** kolumna `price` zawiera symbol waluty (`$`), używa przecinka jako separatora dziesiętnego, ma wartość zero, ujemną lub jest pusta.
+
+**Zasady cen Amazon:**
+- Zwykła liczba dziesiętna: `19.99`
+- Bez symboli walut
+- Musi być dodatnia (większa od 0)
+- Kropka jako separator dziesiętny
+
+**Rozwiązanie:** usuń symbole walut i zamień przecinki dziesiętne na kropki. W polskim Excelu separatorem dziesiętnym jest przecinek, więc po zapisaniu sprawdź w edytorze tekstu, że ceny mają kropkę.
+
+---
+
+## Błąd: nieprawidłowy fulfillment_center_id / kanał realizacji
+
+**Przyczyna:** kolumna kanału realizacji zawiera nierozpoznaną wartość.
+
+**Dozwolone wartości:**
+
+| Wartość | Opis |
+|---|---|
+| `DEFAULT` | Realizacja przez sprzedawcę (FBM) |
+| `AMAZON_NA` (lub `AMAZON`) | Realizacja przez Amazon (FBA) |
+
+Dokładna nazwa kolumny i dozwolone wartości nieco się różnią w zależności od szablonu pliku płaskiego. Sprawdź swój szablon.
+
+**Rozwiązanie:** używaj `DEFAULT` dla FBM oraz `AMAZON_NA` lub `AMAZON` dla FBA. Nie używaj `FBA`, `FBM` ani innych skrótów.
+
+---
+
+## Błąd: nie znaleziono product_id / ASIN
+
+**Przyczyna:** `product_id` (ASIN, UPC, EAN lub ISBN) nie pasuje do żadnego produktu w katalogu Amazon albo `product_id_type` nie odpowiada typowi podanego identyfikatora.
+
+**Wartości product_id_type:**
+
+| Wartość | Typ identyfikatora |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Rozwiązanie:**
+- Sprawdź, czy identyfikator produktu jest poprawny i aktywny w katalogu Amazon
+- Dopasuj `product_id_type` do typu identyfikatora w `product_id`
+- Dla nowych produktów, które nie mają jeszcze ASIN, może być konieczne utworzenie nowej oferty zamiast dodawania stanu magazynowego do istniejącej
+
+---
+
+## Błąd: zły szablon dla kategorii produktu
+
+**Przyczyna:** użyto ogólnego szablonu Inventory Loader dla kategorii, która wymaga własnego pliku płaskiego (np. odzież, obuwie, biżuteria).
+
+Amazon ma szablony dla poszczególnych kategorii z dodatkowymi polami wymaganymi. Przy złym szablonie brakuje wszystkich pól wymaganych dla danej kategorii.
+
+**Rozwiązanie:**
+- W Seller Central przejdź do Magazyn → Dodaj produkty przez przesłanie pliku → Pobierz plik magazynowy
+- Wybierz kategorię produktu, aby otrzymać właściwy szablon
+- Pobierz plik płaski dla tej kategorii i przenieś do niego swoje dane
+
+Popularne kategorie z własnymi szablonami: odzież, obuwie, biżuteria, elektronika, książki, muzyka, wideo, sport i turystyka.
+
+---
+
+## Jak czytać raport przetwarzania
+
+Po przesłaniu pobierz raport przetwarzania z Seller Central (Magazyn → Dodaj produkty przez przesłanie pliku → Monitoruj stan przesyłania → Wyświetl raport przetwarzania).
+
+Raport ma trzy karty:
+- **Summary** — łączna liczba wierszy, sukcesów i błędów
+- **Results** — jeden wiersz na każdy rekord z pliku, ze statusem i komunikatem błędu
+- **Original** — twoje pierwotnie przesłane dane
+
+Aby znaleźć nieudane wiersze, odfiltruj kartę Results według kolumny `status`. Wiersze `FAILURE` zawierają `error-code` i `error-message`, które dokładnie wyjaśniają, co poszło nie tak.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik płaski Amazon do StriveFormats. Walidator sprawdza SKU, kody stanu, ceny, wartości kanału realizacji i pola wymagane, a następnie wskazuje dokładne wiersze i komórki z problemami.
+
+[Otwórz narzędzie do naprawy CSV Amazon](/app?preset=amazon_inventory_loader) | [Zobacz szablon Amazon](/presets/amazon_inventory_loader)

@@ -1,0 +1,163 @@
+---
+title: "Importfouten in Amazon-flatfiles: oorzaken en oplossingen"
+description: "Los de meest voorkomende importfouten in Amazon-flatfiles op: SKU-problemen, ongeldige staatcodes, prijsnotatie, waarden voor het fulfillmentkanaal en sjablonen die niet overeenkomen."
+keywords: ["amazon flatfile importfouten", "amazon csv importfouten", "amazon flatfile fouten", "amazon csv repareren", "amazon inventory loader fouten", "amazon flatfile validatie", "amazon bulkupload fouten"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Hoe Amazon flatfile-uploads valideert en waardoor ze mislukken"
+  - "Verplichte velden voor de Inventory Loader en veelgebruikte flatfile-sjablonen"
+  - "Hoe je fouten in SKU, staat, prijs, fulfillmentkanaal en ASIN oplost"
+  - "Hoe je het verwerkingsrapport van Amazon leest om precies te zien welke rijen mislukten"
+  - "Hoe je je bestand afstemt op het juiste Amazon-sjabloon voor je productcategorie"
+bestFor: "Amazon-verkopers die flatfiles uploaden via Seller Central en verwerkingsfouten of onvolledige imports krijgen"
+timeToComplete: "12 minuten"
+---
+
+## Hoe Amazon flatfiles valideert
+
+Amazon-flatfiles zijn tab- of kommagescheiden CSV-bestanden die strikte kolomschema's per productcategorie volgen. Als je een flatfile uploadt, gaat het bij Amazon door een reeks controles:
+
+1. **Sjablooncontrole**: controleert of je kolomkoppen overeenkomen met het verwachte sjabloon voor het bestandstype
+2. **Verplichte velden**: controleert of alle verplichte kolommen een waarde hebben
+3. **Gegevenstypen**: controleert getallen, booleaanse waarden en vaste keuzelijsten
+4. **Bedrijfsregels**: controleert ASIN's, SKU's, staatcodes en prijsbereiken
+5. **Cataloguscontrole**: koppelt product-ID's aan de catalogus van Amazon
+
+Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onder Voorraad → Producten toevoegen via upload). Bekijk het verwerkingsrapport altijd: het noemt elke mislukte rij met de specifieke fout.
+
+---
+
+## Fout: seller_sku ongeldig of ontbreekt
+
+**Oorzaak:** `seller_sku` is leeg, langer dan 40 tekens, bevat ongeldige tekens of is gelijk aan een SKU die al in je catalogus staat.
+
+**Regels voor seller_sku:**
+- Maximaal 40 tekens
+- Geen spaties (gebruik koppeltekens of underscores)
+- Letters en cijfers plus `-`, `_`, `.`
+- Moet uniek zijn binnen je hele Amazon-verkopersaccount
+
+**Oplossing:** zorg dat elke rij een unieke SKU heeft. Met een formule als `=AANTAL.ALS($A:$A; A2)` vind je duplicaten. Kort SKU's van meer dan 40 tekens in.
+
+---
+
+## Fout: item_name ontbreekt / titel te lang
+
+**Oorzaak:** `item_name` is leeg of langer dan de titellimiet van Amazon (verschilt per categorie, meestal 200–500 tekens).
+
+**Oplossing:**
+- Vul `item_name` in voor elke productrij
+- Gebruik `=LENGTE(B2)` in Excel om titels te vinden die de limiet van je categorie overschrijden
+- Controleer in je eigen sjabloon de exacte tekenlimiet
+
+---
+
+## Fout: condition_type ongeldig
+
+**Oorzaak:** de kolom `condition_type` bevat een waarde die niet in de toegestane lijst van Amazon staat.
+
+**Toegestane waarden:**
+
+| Waarde | Beschrijving |
+|---|---|
+| `New` | Gloednieuw, fabrieksverzegeld |
+| `UsedLikeNew` | Gebruikt – zo goed als nieuw |
+| `UsedVeryGood` | Gebruikt – zeer goed |
+| `UsedGood` | Gebruikt – goed |
+| `UsedAcceptable` | Gebruikt – acceptabel |
+| `CollectibleLikeNew` | Verzamelobject – zo goed als nieuw |
+| `CollectibleVeryGood` | Verzamelobject – zeer goed |
+| `CollectibleGood` | Verzamelobject – goed |
+| `CollectibleAcceptable` | Verzamelobject – acceptabel |
+| `Refurbished` | Door verkoper opgeknapt |
+| `Club` | Club (mediacategorie) |
+
+**Oplossing:** vervang afwijkende staatwaarden door een waarde uit de lijst hierboven. `New` moet met een hoofdletter; `new` (kleine letters) wordt geweigerd.
+
+---
+
+## Fout: ongeldige prijs
+
+**Oorzaak:** de kolom `price` bevat een valutateken (`$`), gebruikt een komma als decimaalteken, is nul, negatief of leeg.
+
+**Prijsregels van Amazon:**
+- Gewoon decimaal getal: `19.99`
+- Geen valutatekens
+- Moet positief zijn (groter dan 0)
+- Punt als decimaalteken
+
+**Oplossing:** verwijder valutatekens en vervang decimale komma's door punten. Let op: in een Nederlandstalige Excel is de komma het decimaalteken, dus controleer na het opslaan in een teksteditor dat de prijzen een punt gebruiken.
+
+---
+
+## Fout: fulfillment_center_id / fulfillmentkanaal ongeldig
+
+**Oorzaak:** de kolom voor het fulfillmentkanaal bevat een onbekende waarde.
+
+**Toegestane waarden:**
+
+| Waarde | Beschrijving |
+|---|---|
+| `DEFAULT` | Verzonden door de verkoper (FBM) |
+| `AMAZON_NA` (of `AMAZON`) | Verzonden door Amazon (FBA) |
+
+De exacte kolomnaam en toegestane waarden verschillen iets per flatfile-sjabloon. Controleer je eigen sjabloon.
+
+**Oplossing:** gebruik `DEFAULT` voor FBM en `AMAZON_NA` of `AMAZON` voor FBA. Gebruik geen `FBA`, `FBM` of andere afkortingen.
+
+---
+
+## Fout: product_id / ASIN niet gevonden
+
+**Oorzaak:** de `product_id` (ASIN, UPC, EAN of ISBN) komt met geen enkel product in de catalogus van Amazon overeen, of `product_id_type` past niet bij het type ID dat je opgeeft.
+
+**Waarden voor product_id_type:**
+
+| Waarde | Type ID |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Oplossing:**
+- Controleer of de product-ID klopt en actief is in de catalogus van Amazon
+- Laat `product_id_type` overeenkomen met het type ID in `product_id`
+- Voor nieuwe producten die nog geen ASIN hebben, moet je mogelijk een nieuwe aanbieding aanmaken in plaats van voorraad toe te voegen aan een bestaande aanbieding
+
+---
+
+## Fout: verkeerd sjabloon voor de productcategorie
+
+**Oorzaak:** je gebruikte een algemeen Inventory Loader-sjabloon voor een categorie die een eigen flatfile vereist (bijv. kleding, schoenen, sieraden).
+
+Amazon heeft categoriespecifieke sjablonen met extra verplichte velden. Met het verkeerde sjabloon ontbreken al die categoriespecifieke verplichte velden.
+
+**Oplossing:**
+- Ga in Seller Central naar Voorraad → Producten toevoegen via upload → Een voorraadbestand downloaden
+- Kies je productcategorie om het juiste sjabloon te krijgen
+- Download de categoriespecifieke flatfile en zet je gegevens daarin over
+
+Veelvoorkomende categorieën met een eigen sjabloon: kleding, schoenen, sieraden, elektronica, boeken, muziek, video, sport en buitenrecreatie.
+
+---
+
+## Het verwerkingsrapport lezen
+
+Download na het uploaden het verwerkingsrapport in Seller Central (Voorraad → Producten toevoegen via upload → Uploadstatus controleren → Verwerkingsrapport bekijken).
+
+Het rapport heeft drie tabbladen:
+- **Summary**: totaal aantal rijen, geslaagde en mislukte rijen
+- **Results**: één rij per record in je bestand, met status en foutmelding
+- **Original**: je oorspronkelijk geüploade gegevens
+
+Zo vind je mislukte rijen: filter het tabblad Results op de kolom `status`. Rijen met `FAILURE` bevatten een `error-code` en een `error-message` die precies uitleggen wat er misging.
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je Amazon-flatfile naar StriveFormats. De validator controleert SKU's, staatcodes, prijzen, waarden voor het fulfillmentkanaal en verplichte velden, en markeert de exacte rijen en cellen met problemen.
+
+[Open de Amazon CSV-fixer](/app?preset=amazon_inventory_loader) | [Bekijk het Amazon-sjabloon](/presets/amazon_inventory_loader)
