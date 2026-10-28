@@ -17,7 +17,7 @@ type Props = {
 
 export async function generateStaticParams() {
   // Pre-render all non-English locale segments at build time.
-  // /en/* is handled by a redirect in middleware → not needed here.
+  // /en/* is handled by a redirect in the proxy → not needed here.
   return LOCALES.filter((l) => l !== DEFAULT_LOCALE).map((locale) => ({ locale }));
 }
 

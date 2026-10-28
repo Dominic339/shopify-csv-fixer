@@ -1,11 +1,10 @@
-// src/middleware.ts
+// src/proxy.ts (Next.js 16 replacement for middleware.ts; runs on the Node.js runtime)
 // 1. Rate-limits all /api/* routes (fail-open if Upstash not configured).
 // 2. Locale redirect for home (/) and all localised page groups.
 //
-// NOTE: Supabase auth token refresh was intentionally removed from middleware.
-// Edge-runtime middleware cannot reliably call @supabase/ssr createServerClient
-// without risking MIDDLEWARE_INVOCATION_FAILED on API routes. Auth is handled
-// per-route: API routes use Bearer tokens; page components use browser client.
+// NOTE: Supabase auth token refresh is intentionally not done here. Auth is
+// handled per-route: API routes use Bearer tokens or cookies; page components
+// use the browser client.
 
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "./lib/rateLimit";
@@ -14,7 +13,7 @@ import { DEFAULT_LOCALE, isValidLocale } from "./lib/i18n/locales";
 // Exempt from rate limiting — verified by Stripe signature instead.
 const RATE_LIMIT_EXEMPT = new Set(["/api/stripe/webhook"]);
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // ── API routes: rate limiting only ──────────────────────────────────────
@@ -26,7 +25,7 @@ export async function middleware(req: NextRequest) {
     try {
       result = await rateLimit(req, { keyPrefix: "api" });
     } catch {
-      // rateLimit already fails open internally, but guard the middleware
+      // rateLimit already fails open internally, but guard the proxy
       // itself so a Redis/Upstash error never blocks a legitimate API call.
       return NextResponse.next();
     }

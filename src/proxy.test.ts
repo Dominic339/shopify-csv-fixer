@@ -1,5 +1,5 @@
-// src/middleware.test.ts
-// Unit tests for middleware behaviour on /api/* routes.
+// src/proxy.test.ts
+// Unit tests for proxy behaviour on /api/* routes.
 // Verifies:
 //  - API routes are never blocked by locale-redirect logic
 //  - Rate limiting fails open when Upstash env is absent
@@ -34,7 +34,7 @@ function makeReq(pathname: string, cookies: Record<string, string> = {}): NextRe
   } as unknown as NextRequest;
 }
 
-// ── isLocalisable helper (mirrors middleware logic) ───────────────────────────
+// ── isLocalisable helper (mirrors proxy logic) ───────────────────────────
 
 const LOCALISABLE_PREFIXES = ["/guides", "/app", "/convert", "/merge", "/csv-inspector", "/profile", "/presets"];
 
@@ -47,7 +47,7 @@ function isLocalisable(pathname: string): boolean {
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
-describe("middleware — API routes", () => {
+describe("proxy — API routes", () => {
   let savedUrl: string | undefined;
   let savedToken: string | undefined;
 
@@ -96,7 +96,7 @@ describe("middleware — API routes", () => {
   });
 });
 
-describe("middleware — locale redirect", () => {
+describe("proxy — locale redirect", () => {
   it("recognises / as a localisable path", () => {
     expect(isLocalisable("/")).toBe(true);
   });

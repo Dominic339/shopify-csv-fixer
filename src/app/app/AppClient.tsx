@@ -388,14 +388,6 @@ export default function AppClient({ tApp }: AppClientProps) {
       .filter(Boolean) as CsvIssue[];
   }, [issues]);
 
-  // ✅ ALWAYS expose debug data so your console never hits undefined
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    (window as any).__DEBUG_ISSUES__ = issuesForTable;
-    (window as any).__DEBUG_HEADERS__ = tableHeaders;
-    (window as any).__DEBUG_ROWS__ = rows;
-  }, [issuesForTable, rows]); // tableHeaders is derived and stable enough; rows change triggers refresh too
-
   const issuesForDisplay = useMemo(() => {
     if (issueSeverityFilter === "all") return issuesForTable;
     return issuesForTable.filter((i) => i.severity === issueSeverityFilter);
