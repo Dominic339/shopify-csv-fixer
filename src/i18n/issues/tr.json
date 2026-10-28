@@ -1,1 +1,860 @@
-{}
+{
+"shopify/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "CSV dosyanızda zorunlu bir Shopify sütun başlığı eksik.",
+"whyPlatformCares": "Shopify içe aktarma sırasında sütun başlıklarını doğrular. Zorunlu başlıklar eksikse Shopify ürünleri oluşturamayabilir veya güncelleyemeyebilir.",
+"howToFix": "Eksik zorunlu sütun başlığını ekleyin (değerler boş olsa bile)."
+},
+"shopify/blank_title": {
+"title": "Title eksik",
+"explanation": "En az bir satırda Title boş.",
+"whyPlatformCares": "Shopify ürün oluşturmak için bir Title ister. Title içermeyen satırlar içe aktarılamayabilir veya eksik ürünler oluşturabilir.",
+"howToFix": "Her ürün satırında Title alanına ürün adını girin."
+},
+"shopify/blank_handle": {
+"title": "URL handle eksik",
+"explanation": "En az bir satırda URL handle boş.",
+"whyPlatformCares": "Shopify varyantları ve görselleri URL handle'a göre gruplar ve mevcut ürünleri güncellemek için bunu kullanır. Handle eksikse gruplama ve güncellemeler bozulur.",
+"howToFix": "URL handle alanını küçük harf, rakam ve tirelerle doldurun (boşluk yok)."
+},
+"shopify/invalid_handle": {
+"title": "Geçersiz URL handle",
+"explanation": "URL handle, Shopify'ın reddedebileceği karakterler içeriyor.",
+"whyPlatformCares": "Geçersiz handle'lar içe aktarma hatalarına ve bozuk ürün URL'lerine yol açabilir.",
+"howToFix": "Yalnızca küçük harf, rakam ve tire kullanın."
+},
+"shopify/invalid_boolean_published": {
+"title": "Geçersiz Published değeri",
+"explanation": "Published on online store mantıksal olmayan bir değer içeriyor.",
+"whyPlatformCares": "Shopify TRUE/FALSE (veya boş) bekler. Geçersiz değerler içe aktarmayı engelleyebilir.",
+"howToFix": "TRUE, FALSE kullanın veya boş bırakın."
+},
+"shopify/invalid_status": {
+"title": "Geçersiz Status değeri",
+"explanation": "Status; Active, Draft veya Archived değil.",
+"whyPlatformCares": "Beklenmeyen durum değerleri Shopify'ın bir satırı yok saymasına veya yanlış yorumlamasına neden olabilir.",
+"howToFix": "\"Active\", \"Draft\" veya \"Archived\" kullanın (ya da boş bırakın)."
+},
+"shopify/option_order_invalid": {
+"title": "Seçenek sütunları sırasız",
+"explanation": "Option1 boşken Option2/Option3 değer içeriyor.",
+"whyPlatformCares": "Shopify seçeneklerin sırayla doldurulmasını bekler (önce Option1, sonra Option2, sonra Option3).",
+"howToFix": "Option2'den önce Option1'i, Option3'ten önce Option2'yi doldurun."
+},
+"shopify/variant_option_missing_value": {
+"title": "Seçenek adı var ama değeri yok",
+"explanation": "Bir seçenek adı mevcut, ancak karşılık gelen seçenek değeri boş.",
+"whyPlatformCares": "Eksik seçenek değerleri geçersiz veya kafa karıştırıcı varyantlar oluşturabilir.",
+"howToFix": "Seçenek değerini doldurun (ör. Size = Small) veya seçenek adını temizleyin."
+},
+"shopify/option_name_inconsistent": {
+"title": "Varyantlar arasında seçenek adları farklı",
+"explanation": "Aynı handle'ı paylaşan satırlarda Option1/2/3 adları aynı olmalıdır.",
+"whyPlatformCares": "Tutarsız seçenek adları varyantların yanlış içe aktarılmasına veya hatalı gruplanmasına neden olabilir.",
+"howToFix": "Aynı handle'a ait tüm varyant satırlarında aynı Option1/Option2/Option3 adlarını kullanın."
+},
+"shopify/options_not_unique": {
+"title": "Varyant seçenekleri benzersiz değil",
+"explanation": "Aynı handle altındaki iki veya daha fazla varyant aynı seçenek değerlerine sahip.",
+"whyPlatformCares": "Shopify aynı seçenek kombinasyonuna sahip varyantları birleştirir. Bu, veri kaybına veya varyantların üzerine yazılmasına yol açabilir.",
+"howToFix": "Her varyant seçenek kombinasyonunu benzersiz yapın (veya yinelenenleri kaldırın)."
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "Varyant için Option1 value eksik",
+"explanation": "Bu satır varyant verisine benziyor, ancak Option1 value boş.",
+"whyPlatformCares": "Shopify varyant kombinasyonlarını seçenek değerleriyle oluşturur. Seçenek değeri eksikse satır reddedilebilir veya yanlış içe aktarılabilir.",
+"howToFix": "Option1 value alanını doldurun (veya bu satırdan varyanta özgü alanları kaldırın)."
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\" gerçek seçeneklerle karışmış",
+"explanation": "Bir handle hem \"Default Title\" satırları hem de seçenekli varyant satırları içeriyor.",
+"whyPlatformCares": "Bu genellikle tek varyantlı ve çok varyantlı ürün yapılarının yanlışlıkla karıştırıldığını gösterir.",
+"howToFix": "\"Default Title\" değerini yalnızca ürünün tek varyantı varsa kullanın. Çok varyantlı ürünlerde her varyant satırında gerçek seçenek değerleri kullanın."
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "Aynı varyant bilgilerine sahip yinelenen satırlar",
+"explanation": "Satırlar aynı handle'ı paylaşıyor ve gerçek varyant olmadan yinelenmiş görünüyor.",
+"whyPlatformCares": "Yinelenen satırlar içe aktarmada karışıklığa ve beklenmedik üzerine yazmalara neden olabilir.",
+"howToFix": "Bunlar varyantsa seçenek değerlerinin (veya SKU'ların) her satırda farklı olduğundan emin olun. Ek görsellerse bu satırlarda yalnızca handle ve görsel alanlarını bırakın."
+},
+"shopify/handle_title_mismatch": {
+"title": "Aynı handle farklı Title'larla",
+"explanation": "Aynı URL handle'ı paylaşan satırlarda birden çok Title kullanılmış.",
+"whyPlatformCares": "Shopify satırları handle'a göre gruplar. Çelişen başlıklar üzerine yazmalara veya karışık içe aktarmalara neden olabilir.",
+"howToFix": "Aynı handle'a ait tüm satırlarda tek ve tutarlı bir Title kullanın."
+},
+"shopify/product_missing_variant_row": {
+"title": "Üründe görsel var ama varyant satırı yok",
+"explanation": "Bir handle yalnızca görsel satırları içeriyor gibi görünüyor.",
+"whyPlatformCares": "Shopify ürünü oluşturmak için en az bir ana ürün/varyant satırına (Title + varyant alanları) ihtiyaç duyar. Yalnızca görsel satırları ürün oluşturamaz.",
+"howToFix": "Handle için Title ve varyant alanlarını (Price/SKU/Options) içeren bir ana satır ekleyin. Ek görsel satırlarını ana satırın arkasına koyun."
+},
+"shopify/blank_price": {
+"title": "Price eksik",
+"explanation": "Bir varyant satırında Price boş.",
+"whyPlatformCares": "Shopify boş fiyatı 0.00 olarak içe aktarır; yani varyant ücretsiz satılır.",
+"howToFix": "Varyant gerçekten ücretsiz değilse Price alanına 19.99 gibi bir sayı girin."
+},
+"shopify/invalid_numeric_price": {
+"title": "Geçersiz Price",
+"explanation": "Price geçerli bir sayı değil.",
+"whyPlatformCares": "Shopify fiyat alanlarında sayısal değerler ister.",
+"howToFix": "19.99 gibi bir sayı kullanın."
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "Geçersiz Compare-at price",
+"explanation": "Compare-at price geçerli bir sayı değil.",
+"whyPlatformCares": "Shopify fiyat alanlarında sayısal değerler ister.",
+"howToFix": "24.99 gibi bir sayı kullanın veya boş bırakın."
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price, Price'tan düşük",
+"explanation": "Compare-at price, Price değerinden düşük.",
+"whyPlatformCares": "Compare-at price daha yüksek olan orijinal fiyatı göstermek içindir.",
+"howToFix": "Compare-at price değerinin ≥ Price olduğundan emin olun veya boş bırakın."
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "Geçersiz stok miktarı",
+"explanation": "Inventory quantity geçerli bir tam sayı değil.",
+"whyPlatformCares": "Stok miktarları tam sayı olmalıdır.",
+"howToFix": "0, 5, 100 gibi bir tam sayı kullanın."
+},
+"shopify/negative_inventory": {
+"title": "Negatif stok",
+"explanation": "Inventory quantity negatif.",
+"whyPlatformCares": "Negatif stok genellikle bir veri hatasıdır ve gönderimde sorun yaratabilir.",
+"howToFix": "0 veya pozitif bir miktar kullanın."
+},
+"shopify/invalid_inventory_policy": {
+"title": "Geçersiz stok politikası",
+"explanation": "Continue selling when out of stock, DENY/CONTINUE değil.",
+"whyPlatformCares": "Stok politikası, stok bittiğinde satışa devam edilip edilmeyeceğini belirler.",
+"howToFix": "\"DENY\" veya \"CONTINUE\" kullanın (ya da boş bırakın)."
+},
+"shopify/invalid_image_url": {
+"title": "Geçersiz görsel URL'si",
+"explanation": "Ürün görseli URL'si geçerli bir http(s) URL'si değil.",
+"whyPlatformCares": "Shopify görselleri geçerli bir URL üzerinden alabilmelidir.",
+"howToFix": "Herkese açık bir görsele giden tam bir http(s) URL'si kullanın."
+},
+"shopify/invalid_image_position": {
+"title": "Geçersiz görsel sırası",
+"explanation": "Image position geçerli bir tam sayı değil.",
+"whyPlatformCares": "Image position görsellerin sırasını belirler.",
+"howToFix": "1, 2, 3… kullanın veya boş bırakın."
+},
+"shopify/image_row_has_variant_fields": {
+"title": "Görsel satırında varyant alanları var",
+"explanation": "Bir satır yalnızca görsel satırına benziyor ama SKU/Price/Options/Inventory alanları içeriyor.",
+"whyPlatformCares": "Bu, varyant gruplamasını bozabilir ve içe aktarmayı karıştırabilir.",
+"howToFix": "Ek görsel satırlarında yalnızca handle ve görsel alanlarını bırakın. Varyant alanlarını ana satıra taşıyın."
+},
+"shopify/duplicate_image_position": {
+"title": "Yinelenen görsel sırası",
+"explanation": "Aynı handle için iki satır aynı Image position değerine sahip.",
+"whyPlatformCares": "Yinelenen değerler görsel sırasını öngörülemez hale getirebilir.",
+"howToFix": "Her handle için benzersiz Image position değerleri kullanın (1, 2, 3…)."
+},
+"shopify/image_alt_text_too_long": {
+"title": "Alternatif metin çok uzun",
+"explanation": "Görselin alternatif metni Shopify'ın önerdiği sınırı aşıyor.",
+"whyPlatformCares": "Çok uzun alternatif metin kısaltılabilir veya biçimlendirme sorunlarına yol açabilir.",
+"howToFix": "Alternatif metni 512 karakter veya daha kısa olacak şekilde kısaltın."
+},
+"shopify/duplicate_sku": {
+"title": "Yinelenen SKU",
+"explanation": "Aynı SKU birden çok varyant satırında geçiyor.",
+"whyPlatformCares": "Pek çok stok ve gönderim iş akışı her varyant için benzersiz SKU bekler.",
+"howToFix": "SKU'ları her varyantta benzersiz yapın (SKU kullanmıyorsanız boş bırakın)."
+},
+"shopify/duplicate_sku_across_products": {
+"title": "Ürünler arasında yinelenen SKU",
+"explanation": "Aynı SKU farklı URL handle'larda (farklı ürünlerde) geçiyor.",
+"whyPlatformCares": "SKU'ları ürünler arasında yeniden kullanmak stok sistemlerini, gönderim araçlarını ve analizleri karıştırabilir.",
+"howToFix": "SKU'ları tüm kataloğunuzda benzersiz yapın (önerilir) veya yeniden kullanımın bilinçli olduğunu doğrulayın."
+},
+"shopify/seo_title_too_long": {
+"title": "SEO başlığı çok uzun",
+"explanation": "SEO başlığı önerilen uzunluğu aşıyor.",
+"whyPlatformCares": "Uzun başlıklar arama sonuçlarında kesilebilir.",
+"howToFix": "SEO başlığını 70 karakter veya daha kısa olacak şekilde kısaltın."
+},
+"shopify/seo_description_too_long": {
+"title": "SEO açıklaması çok uzun",
+"explanation": "SEO açıklaması önerilen uzunluğu aşıyor.",
+"whyPlatformCares": "Uzun açıklamalar arama özetlerinde kesilebilir.",
+"howToFix": "SEO açıklamasını 320 karakter veya daha kısa olacak şekilde kısaltın."
+},
+"shopify/seo_title_missing": {
+"title": "SEO başlığı eksik",
+"explanation": "SEO başlığı boş (Shopify bunun yerine Title alanını kullanır).",
+"whyPlatformCares": "Özel SEO başlıkları tıklanma oranını artırabilir.",
+"howToFix": "İsteğe bağlı: özel bir SEO başlığı girin."
+},
+"shopify/seo_description_missing": {
+"title": "SEO açıklaması eksik",
+"explanation": "SEO açıklaması boş (Shopify bunun yerine Description alanını kullanır).",
+"whyPlatformCares": "Özel açıklamalar arama sonuçlarında tıklanma oranını ve anlaşılırlığı artırabilir.",
+"howToFix": "İsteğe bağlı: özel bir SEO açıklaması girin."
+},
+"shopify/vendor_missing": {
+"title": "Vendor eksik",
+"explanation": "Ana ürün satırında Vendor boş.",
+"whyPlatformCares": "Vendor ürünleri düzenlemeye yardımcı olur ve mağazada filtrelemeyi iyileştirir.",
+"howToFix": "Bir Vendor/marka değeri ekleyin."
+},
+"shopify/product_category_missing": {
+"title": "Ürün kategorisi eksik",
+"explanation": "Ana ürün satırında Product category boş.",
+"whyPlatformCares": "Kategoriler ürünlerin bulunmasını ve raporlamayı iyileştirir.",
+"howToFix": "Bir Product category ekleyin."
+},
+"shopify/tags_missing": {
+"title": "Etiketler eksik",
+"explanation": "Ana ürün satırında Tags boş.",
+"whyPlatformCares": "Etiketler koleksiyonları besleyebilir ve mağaza içi aramaya yardımcı olur.",
+"howToFix": "Etiket ekleyin (virgülle ayrılmış)."
+},
+"shopify/description_too_short": {
+"title": "Açıklama çok kısa",
+"explanation": "Açıklama var ancak son derece kısa.",
+"whyPlatformCares": "Daha zengin açıklamalar dönüşümü ve SEO'yu iyileştirebilir.",
+"howToFix": "Açıklamayı genişletmeyi düşünün."
+},
+"shopify/status_unrecognized": {
+"title": "Alışılmadık Status değeri",
+"explanation": "Status, Shopify'ın yaygın değerleri dışında bir değer içeriyor.",
+"whyPlatformCares": "Beklenmeyen değerler yok sayılabilir veya kafa karıştırıcı sonuçlar doğurabilir.",
+"howToFix": "\"Active\", \"Draft\" veya \"Archived\" kullanın (ya da boş bırakın)."
+},
+"shopify/missing_status_value": {
+"title": "Status eksik",
+"explanation": "Status sütunu var, ancak ürün satırında değer yok.",
+"whyPlatformCares": "Sütun dosyada olduğunda Shopify her ürün satırında bir Status değeri ister.",
+"howToFix": "Status değerini active, draft veya archived olarak ayarlayın."
+},
+"shopify/handle_generated_column": {
+"title": "URL handle'lar oluşturuldu",
+"explanation": "Dosyada URL handle sütunu yoktu; bu yüzden handle'lar her Title'dan oluşturuldu.",
+"whyPlatformCares": "Shopify mevcut ürünleri URL handle ile eşleştirir. Gerçek handle'lar olmadan güncelleme yeni ürünler oluşturur.",
+"howToFix": "Ürünleri güncelliyorsanız mevcut handle'larını içeren bir URL handle sütunu ekleyin."
+},
+"shopify/handle_rewritten": {
+"title": "URL handle değiştirildi",
+"explanation": "Bir URL handle, Shopify'ın izin vermediği karakterler içeriyordu ve yeniden yazıldı.",
+"whyPlatformCares": "Shopify mevcut ürünleri URL handle ile eşleştirir; değişen handle yeni ürün olarak içe aktarılır.",
+"howToFix": "Ürünü güncelliyorsanız yeni handle'ın Shopify'daki ürünle eşleştiğini kontrol edin."
+},
+"shopify/image_url_not_https": {
+"title": "Görsel URL'si http kullanıyor",
+"explanation": "Bir görsel URL'si https:// yerine http:// ile başlıyor.",
+"whyPlatformCares": "Shopify görselleri herkese açık https:// URL'lerinden indirir; düz http bağlantıları başarısız olabilir.",
+"howToFix": "Sunucunuz destekliyorsa görselin https:// adresini kullanın."
+},
+"shopify/invalid_charge_tax": {
+"title": "Geçersiz Charge tax",
+"explanation": "Charge tax true veya false değil.",
+"whyPlatformCares": "Shopify, Charge tax için yalnızca true veya false kabul eder.",
+"howToFix": "Değeri true veya false olarak değiştirin."
+},
+"shopify/invalid_requires_shipping": {
+"title": "Geçersiz Requires shipping",
+"explanation": "Requires shipping true veya false değil.",
+"whyPlatformCares": "Shopify, Requires shipping için yalnızca true veya false kabul eder.",
+"howToFix": "Değeri true veya false olarak değiştirin."
+},
+"shopify/invalid_gift_card": {
+"title": "Geçersiz Gift card",
+"explanation": "Gift card true veya false değil.",
+"whyPlatformCares": "Shopify, Gift card için yalnızca true veya false kabul eder.",
+"howToFix": "Değeri true veya false olarak değiştirin."
+},
+"shopify/gift_card_import": {
+"title": "CSV'de hediye kartı",
+"explanation": "Bir satır hediye kartı olarak işaretlenmiş.",
+"whyPlatformCares": "Shopify CSV içe aktarmayla hediye kartı ürünleri oluşturamaz.",
+"howToFix": "Hediye kartlarını bunun yerine Shopify yönetim panelinde oluşturun."
+},
+"shopify/invalid_numeric_cost": {
+"title": "Geçersiz Cost per item",
+"explanation": "Cost per item geçerli bir sayı değil.",
+"whyPlatformCares": "Shopify maliyet için düz bir sayı (para birimi simgesi olmadan) ister.",
+"howToFix": "7.50 gibi bir sayı kullanın."
+},
+"shopify/invalid_weight": {
+"title": "Geçersiz ağırlık",
+"explanation": "Weight value (grams) tam sayı olarak gram değil.",
+"whyPlatformCares": "Shopify ağırlığı ondalık veya birim olmadan gram olarak saklar.",
+"howToFix": "Yalnızca gram girin, ör. 1,5 kg = 1500."
+},
+"shopify/invalid_weight_unit": {
+"title": "Geçersiz ağırlık birimi",
+"explanation": "Weight unit for display g, kg, lb veya oz değil.",
+"whyPlatformCares": "Shopify görüntüleme birimi olarak yalnızca g, kg, lb veya oz kabul eder.",
+"howToFix": "g, kg, lb veya oz kullanın."
+},
+"shopify/invalid_inventory_tracker": {
+"title": "Geçersiz stok takibi",
+"explanation": "Inventory tracker, Shopify'ın tanımadığı bir değer içeriyor.",
+"whyPlatformCares": "Shopify; shopify, shipwire, amazon_marketplace_web veya takip edilmeyen stok için boş değeri kabul eder.",
+"howToFix": "Stoku takip etmek için shopify kullanın veya boş bırakın."
+},
+"shopify/invalid_fulfillment_service": {
+"title": "Geçersiz gönderim hizmeti",
+"explanation": "Fulfillment service geçerli bir hizmet handle'ı değil.",
+"whyPlatformCares": "Shopify, manual değerini veya yönetim panelinizde kurulu bir gönderim hizmetinin handle'ını (küçük harf, tire) bekler.",
+"howToFix": "manual veya özel hizmetinizin handle'ını kullanın."
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category bir Google kimliğine benziyor",
+"explanation": "Product category, Google ürün kategorisi kimliği gibi yalnızca rakamlardan oluşuyor.",
+"whyPlatformCares": "Shopify'ın Product category alanı Shopify'ın kendi sınıflandırmasını kullanır; Google kategori kimlikleri ayrı bir sütuna aittir.",
+"howToFix": "Bir Shopify sınıflandırma yolu veya kimliği kullanın ve Google kimliklerini \"Google Shopping / Google product category\" sütununa taşıyın."
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "Paket ölçüleri eksik",
+"explanation": "Paket uzunluğu, genişliği, yüksekliği ve biriminden yalnızca bazıları dolu.",
+"whyPlatformCares": "Shopify, paket ölçülerinin yalnızca bir kısmının girildiği satırı reddeder.",
+"howToFix": "Dört paket alanının hepsini doldurun veya dördünü de temizleyin."
+},
+"shopify/too_many_tags": {
+"title": "Çok fazla etiket",
+"explanation": "Bir ürünün 250'den fazla etiketi var.",
+"whyPlatformCares": "Shopify ürün başına en fazla 250 etikete izin verir.",
+"howToFix": "250 veya daha az kalana kadar etiket silin."
+},
+"woocommerce/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "Başlık satırında bir veya daha fazla zorunlu WooCommerce içe aktarma sütunu eksik.",
+"whyPlatformCares": "WooCommerce içe aktarma sırasında alanları eşlemek için belirli sütun adlarına dayanır.",
+"howToFix": "WooCommerce'ten yeni bir örnek CSV dışa aktarın ve tüm zorunlu sütunların mevcut ve tam olarak doğru yazılmış olduğundan emin olun."
+},
+"woocommerce/unknown_header": {
+"title": "Bilinmeyen sütun",
+"explanation": "Bu sütun WooCommerce içe aktarıcısı tarafından tanınmıyor.",
+"whyPlatformCares": "Bilinmeyen sütunlar yok sayılır ve veri sorunlarını gizleyebilir.",
+"howToFix": "Sütunu kaldırın veya desteklenen bir WooCommerce içe aktarma başlığıyla yeniden adlandırın."
+},
+"woocommerce/missing_type": {
+"title": "Ürün türü eksik",
+"explanation": "Type sütunu zorunludur ve satırın nasıl yorumlanacağını belirler.",
+"whyPlatformCares": "WooCommerce bir satırın ürün, varyasyon veya ana gruplama olduğunu Type ile belirler.",
+"howToFix": "Her satırda Type değerini simple, variable, variation, grouped veya external olarak ayarlayın."
+},
+"woocommerce/invalid_type": {
+"title": "Geçersiz ürün türü",
+"explanation": "Type değeri WooCommerce'in desteklediği türlerden biri değil.",
+"whyPlatformCares": "Geçersiz türler satırların yanlış içe aktarılmasına veya reddedilmesine yol açabilir.",
+"howToFix": "Şunlardan birini kullanın: simple, variable, variation, grouped, external."
+},
+"woocommerce/missing_name": {
+"title": "Ürün adı eksik",
+"explanation": "Varyasyon olmayan ürün satırlarında Name bulunmalıdır.",
+"whyPlatformCares": "Adı olmayan ürünler mağazada kullanılamaz.",
+"howToFix": "Varyasyon olmayan tüm satırlara bir Name girin."
+},
+"woocommerce/variation_missing_parent": {
+"title": "Varyasyonun ana ürün bağlantısı eksik",
+"explanation": "Varyasyon satırları Parent alanı ile bir değişken ana ürüne bağlanmalıdır.",
+"whyPlatformCares": "Sahipsiz varyasyonlar doğru şekilde içe aktarılamaz.",
+"howToFix": "Parent değerini ana ürünün kimliği olarak ayarlayın (veya değişken ürün içe aktarma ön ayarında ana ürünlerin otomatik oluşturulmasını etkinleştirin)."
+},
+"woocommerce/variation_missing_attributes": {
+"title": "Varyasyonun nitelikleri eksik",
+"explanation": "Varyasyon satırları geçerli bir varyasyon kombinasyonu için nitelik ad/değer çiftlerine ihtiyaç duyar.",
+"whyPlatformCares": "Nitelikler olmadan WooCommerce ayrı bir varyasyon oluşturamaz.",
+"howToFix": "Her varyasyon satırında Attribute 1 name (ör. Size) ve Attribute 1 value(s) (ör. M) alanlarını doldurun."
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "Yinelenen varyasyon kombinasyonu",
+"explanation": "Aynı ana ürün altındaki iki veya daha fazla varyasyon aynı nitelik kombinasyonuna sahip.",
+"whyPlatformCares": "Yinelenen kombinasyonlar birbirinin üzerine yazabilir veya beklenmedik birleşmelere neden olabilir.",
+"howToFix": "Her varyasyonun ana ürünü altında benzersiz bir nitelik değeri kombinasyonu olduğundan emin olun."
+},
+"woocommerce/missing_sku": {
+"title": "SKU eksik",
+"explanation": "Eksik SKU güncellemelerin güvenilirliğini azaltır ve stok takibini bozabilir.",
+"whyPlatformCares": "SKU'lar eşleştirme, güncelleme ve entegrasyonlar için kullanılır.",
+"howToFix": "Mümkün olduğunda her ürün/varyasyon için benzersiz bir SKU girin."
+},
+"woocommerce/duplicate_sku": {
+"title": "Yinelenen SKU riski",
+"explanation": "İki veya daha fazla satır aynı SKU'yu paylaşıyor.",
+"whyPlatformCares": "İçe aktarma sırasında yinelenen SKU'lar mevcut ürünlerin üzerine yazabilir veya verileri yanlış ürüne ekleyebilir.",
+"howToFix": "SKU'ları benzersiz yapın. Bilerek yineleme gerekiyorsa katalogları ayırın veya tutarlı bir ana/alt ürün yapısı kullanın."
+},
+"woocommerce/invalid_regular_price": {
+"title": "Geçersiz normal fiyat",
+"explanation": "Regular price geçerli bir sayı olmalıdır.",
+"whyPlatformCares": "Geçersiz fiyatlar içe aktarmanın başarısız olmasına veya mağazada yanlış fiyat gösterilmesine neden olur.",
+"howToFix": "19.99 gibi sayısal değerler kullanın (para birimi simgesi olmadan)."
+},
+"woocommerce/invalid_sale_price": {
+"title": "Geçersiz indirimli fiyat",
+"explanation": "Sale price geçerli bir sayı olmalıdır.",
+"whyPlatformCares": "Geçersiz indirimli fiyat yok sayılabilir veya fiyat sorunlarına yol açabilir.",
+"howToFix": "14.99 gibi sayısal değerler kullanın (para birimi simgesi olmadan)."
+},
+"woocommerce/missing_image": {
+"title": "Görsel eksik",
+"explanation": "Bu ürün satırında görsel URL'si yok.",
+"whyPlatformCares": "İçe aktarma görsel olmadan da başarılı olabilir, ancak eksik görseller ilan kalitesini ve dönüşümü düşürür.",
+"howToFix": "Ürünler için Images alanına bir URL (veya virgülle ayrılmış birden çok URL) girin."
+},
+"woocommerce/invalid_bool": {
+"title": "Geçersiz mantıksal değer",
+"explanation": "Published, In stock? ve Is featured? gibi mantıksal alanlar 1/0 veya true/false bekler.",
+"whyPlatformCares": "WooCommerce içe aktarıcısı beklenmeyen değerleri yanlış yorumlayabilir; bu da ürünlerin gizlenmesine veya yanlış yapılandırılmasına neden olur.",
+"howToFix": "1 (evet/doğru) veya 0 (hayır/yanlış) kullanın. Yaygın varyantları (yes, no, true, false) otomatik olarak normalleştirebiliriz."
+},
+"woocommerce/invalid_price": {
+"title": "Geçersiz fiyat değeri",
+"explanation": "Bir fiyat alanı sayısal olmayan bir değer içeriyor.",
+"whyPlatformCares": "WooCommerce düz ondalık fiyatlar bekler. Para birimi simgeleri veya metin içe aktarma hatalarına ya da sıfır fiyatlara yol açar.",
+"howToFix": "19.99 gibi düz ondalık sayılar kullanın (para birimi simgesi, virgül veya metin olmadan)."
+},
+"woocommerce/invalid_int": {
+"title": "Geçersiz tam sayı değeri",
+"explanation": "Bir tam sayı alanı (Stock gibi) tam sayı olmayan bir değer içeriyor.",
+"whyPlatformCares": "WooCommerce stok miktarları için tam sayı bekler. Ondalık değerler kesilebilir veya reddedilebilir.",
+"howToFix": "0, 5 veya 12 gibi bir tam sayı kullanın."
+},
+"woocommerce/invalid_visibility": {
+"title": "Geçersiz görünürlük değeri",
+"explanation": "Visibility in catalog, kabul edilen dört değerden biri olmalıdır.",
+"whyPlatformCares": "Tanınmayan bir görünürlük değeri ürünün varsayılan olarak görünür olmasına veya içe aktarmanın başarısız olmasına neden olabilir.",
+"howToFix": "Şunlardan birini kullanın: visible, catalog, search veya hidden."
+},
+"woocommerce/invalid_image_url": {
+"title": "Geçersiz görsel URL'si",
+"explanation": "Images sütunundaki bir veya daha fazla URL geçerli bir http(s) URL'si değil.",
+"whyPlatformCares": "WooCommerce içe aktarma sırasında görselleri verilen URL'lerden alır. Geçersiz URL'ler görselsiz ürünlerle sonuçlanır.",
+"howToFix": "Virgülle ayrılmış tam https:// URL'leri kullanın. Görsellerin herkese açık olduğundan emin olun."
+},
+"woocommerce/sale_price_not_lower": {
+"title": "İndirimli fiyat normal fiyattan düşük değil",
+"explanation": "İndirimin anlamlı olması için Sale price, Regular price değerinden düşük olmalıdır.",
+"whyPlatformCares": "WooCommerce iki fiyatı üstü çizili/indirimli çift olarak gösterebilir. İndirimli fiyat normal fiyata eşit veya ondan yüksekse fiyat gösterimi kafa karıştırıcı veya yanlış olur.",
+"howToFix": "Sale price değerini Regular price değerinden düşük olarak ayarlayın veya Sale price alanını temizleyin."
+},
+"woocommerce/invalid_value": {
+"title": "Tanınmayan değer",
+"explanation": "Durum türündeki bir sütun, WooCommerce'in tanımadığı bir değer içeriyor.",
+"whyPlatformCares": "WooCommerce; Published, In stock?, Backorders allowed? ve Tax status için yalnızca belirli değerleri kabul eder; diğerleri yok sayılır veya reddedilir.",
+"howToFix": "Sorunda listelenen değerlerden birini kullanın."
+},
+"woocommerce/variation_multiple_values": {
+"title": "Varyasyonda birden çok değer var",
+"explanation": "Bir varyasyon satırı bir nitelik için birden fazla değer listeliyor.",
+"whyPlatformCares": "Her WooCommerce varyasyonu belirli bir kombinasyondur; bu yüzden nitelik başına tek değer alır.",
+"howToFix": "Tüm değerleri ana satırda, her varyasyon satırında ise tek bir değer tutun."
+},
+"woocommerce/parent_not_in_file": {
+"title": "Ana ürün dosyada yok",
+"explanation": "Bir varyasyon bu dosyada olmayan bir ana ürüne işaret ediyor.",
+"whyPlatformCares": "WooCommerce varyasyonları mevcut bir değişken ürüne bağlar; ana ürün henüz yoksa varyasyon atlanır.",
+"howToFix": "Önce ana ürünü içe aktarın veya satırını bu dosyaya ekleyin."
+},
+"etsy/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "Etsy toplu ilan yüklemesinin bir veya daha fazla zorunlu sütunu eksik.",
+"whyPlatformCares": "Etsy içe aktarıcısı ilan alanlarını doğru eşlemek için tam başlıklara ihtiyaç duyar.",
+"howToFix": "Etsy'den yeni bir toplu ilan CSV'si dışa aktarın ve zorunlu başlıkların mevcut ve değiştirilmemiş olduğundan emin olun."
+},
+"etsy/invalid_price": {
+"title": "Geçersiz fiyat",
+"explanation": "Fiyat geçerli bir sayı olmalıdır.",
+"whyPlatformCares": "Geçersiz fiyatlar ilanın reddedilmesine neden olabilir.",
+"howToFix": "19.99 gibi sayısal değerler kullanın (para birimi simgesi olmadan)."
+},
+"etsy/title_too_long": {
+"title": "Başlık çok uzun",
+"explanation": "Etsy başlıklarının bir azami uzunluğu vardır.",
+"whyPlatformCares": "Fazla uzun başlıklar, içe aktarıcıya bağlı olarak kesilebilir veya reddedilebilir.",
+"howToFix": "Başlığı kısaltın (azami uzunluğa güvenle kırpabiliriz)."
+},
+"etsy/tags_too_many": {
+"title": "Çok fazla etiket",
+"explanation": "Etsy ilanları en fazla 13 etiketi destekler.",
+"whyPlatformCares": "Sınırı aşan etiketler yok sayılır ve arama optimizasyonunu zayıflatır.",
+"howToFix": "En iyi 13 etiketi tutun (otomatik olarak 13 ile sınırlayabiliriz)."
+},
+"etsy/too_many_tags": {
+"title": "Çok fazla etiket",
+"explanation": "Etsy ilanları en fazla 13 etiketi destekler.",
+"whyPlatformCares": "Sınırı aşan etiketler yok sayılır ve arama optimizasyonunu zayıflatır.",
+"howToFix": "En iyi 13 etiketi tutun (otomatik olarak 13 ile sınırlayabiliriz)."
+},
+"etsy/tag_too_long": {
+"title": "Etiket 20 karakteri aşıyor",
+"explanation": "Etsy her etiketi en fazla 20 karakterle sınırlar.",
+"whyPlatformCares": "20 karakteri aşan etiketler Etsy tarafından reddedilir.",
+"howToFix": "Sorunlu etiketleri 20 karakter veya daha kısa olacak şekilde kısaltın."
+},
+"etsy/missing_title": {
+"title": "İlan başlığı eksik",
+"explanation": "Tüm Etsy ilanları için başlık zorunludur.",
+"whyPlatformCares": "Başlığı olmayan ilanlar yayınlanamaz veya içe aktarılamaz.",
+"howToFix": "Açıklayıcı bir başlık girin (en fazla 140 karakter)."
+},
+"etsy/missing_price": {
+"title": "Fiyat eksik",
+"explanation": "Tüm Etsy ilanları için fiyat zorunludur.",
+"whyPlatformCares": "Fiyatı olmayan ilanlar yayınlanamaz.",
+"howToFix": "İlan fiyatını düz bir ondalık sayı olarak girin (ör. 19.99)."
+},
+"etsy/invalid_quantity": {
+"title": "Geçersiz miktar",
+"explanation": "Miktar negatif olmayan bir tam sayı olmalıdır.",
+"whyPlatformCares": "Geçersiz miktarlar ilanın içe aktarılmasını veya yayınlanmasını başarısız kılar.",
+"howToFix": "0, 1 veya 10 gibi bir tam sayı kullanın."
+},
+"etsy/invalid_currency": {
+"title": "Geçersiz para birimi kodu",
+"explanation": "Para birimi geçerli, 3 harfli bir ISO 4217 kodu olmalıdır (ör. USD, GBP, EUR).",
+"whyPlatformCares": "Geçersiz bir para birimi kodu içe aktarmanın başarısız olmasına veya fiyatların yanlış gösterilmesine neden olabilir.",
+"howToFix": "Standart 3 harfli bir para birimi kodu kullanın (değeri otomatik olarak büyük harfe çevirebiliriz)."
+},
+"etsy/invalid_image_url": {
+"title": "Geçersiz görsel URL'si",
+"explanation": "Bir veya daha fazla görsel URL'si geçerli bir http(s) URL'si değil.",
+"whyPlatformCares": "Etsy geçersiz URL'lerden görsel alamaz; bu da fotoğrafsız ilanlarla sonuçlanır.",
+"howToFix": "Herkese açık görsellere giden, virgülle ayrılmış tam https:// URL'leri kullanın."
+},
+"etsy/duplicate_tags": {
+"title": "Yinelenen etiketler",
+"explanation": "Yinelenen etiketler sınırlı etiket yerlerini boşa harcar.",
+"whyPlatformCares": "Etiket tekrarı bulunabilirliği azaltır.",
+"howToFix": "Yinelenenleri kaldırın (sırayı koruyarak otomatik olarak temizleyebiliriz)."
+},
+"etsy/missing_shipping_profile": {
+"title": "Kargo profili eksik",
+"explanation": "Yayınlamak için bir kargo profili (veya eşdeğer kargo alanları) gerekir.",
+"whyPlatformCares": "Kargo ayarları olmayan ilanlar yayınlanamaz.",
+"howToFix": "Geçerli bir kargo profili kimliği/adı veya dışa aktarımınızın gerektirdiği kargo alanlarını girin."
+},
+"etsy/duplicate_listing_id": {
+"title": "Yinelenen Listing ID riski",
+"explanation": "İki veya daha fazla satır aynı Listing ID'yi paylaşıyor.",
+"whyPlatformCares": "Yinelenen kimlikler yeni ilan oluşturmak yerine mevcut ilanların üzerine yazabilir.",
+"howToFix": "Yeni ilan oluştururken Listing ID'nin benzersiz olduğundan emin olun veya mevcut ilanları güncellerken bilerek ayarlayın."
+},
+"etsy/duplicate_sku": {
+"title": "Yinelenen SKU riski",
+"explanation": "İki veya daha fazla ilan aynı SKU'yu paylaşıyor.",
+"whyPlatformCares": "Yinelenen SKU'lar stok ve entegrasyonlarda karışıklığa yol açabilir.",
+"howToFix": "Mümkün olduğunca SKU'ları benzersiz yapın."
+},
+"etsy/missing_required_field": {
+"title": "Zorunlu alan eksik",
+"explanation": "Zorunlu bir Etsy alanı eksik.",
+"whyPlatformCares": "Eksik zorunlu alanlar ilanın reddedilmesine neden olur.",
+"howToFix": "Eksik zorunlu alanı sorun ayrıntılarında belirtildiği şekilde doldurun."
+},
+"etsy/unknown_header": {
+"title": "Bilinmeyen sütun",
+"explanation": "Bu sütun Etsy içe aktarıcısı tarafından tanınmıyor.",
+"whyPlatformCares": "Bilinmeyen sütunlar yok sayılır ve veri sorunlarını gizleyebilir.",
+"howToFix": "Sütunu kaldırın veya desteklenen bir Etsy başlığıyla yeniden adlandırın."
+},
+"etsy/too_many_materials": {
+"title": "Çok fazla malzeme",
+"explanation": "Bir ilanda 13'ten fazla malzeme var.",
+"whyPlatformCares": "Etsy ilan başına en fazla 13 malzemeye izin verir; fazlası toplu düzenlemede reddedilir.",
+"howToFix": "En önemli 13 malzemeyi tutun."
+},
+"etsy/quantity_too_high": {
+"title": "Miktar 999'un üzerinde",
+"explanation": "Miktar 999'dan fazla.",
+"whyPlatformCares": "Etsy her ilanın miktarını 999 ile sınırlar.",
+"howToFix": "Quantity değerini 999 veya daha az olarak ayarlayın."
+},
+"ebay/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "Başlık satırında bir veya daha fazla zorunlu eBay File Exchange sütunu eksik.",
+"whyPlatformCares": "eBay File Exchange yükleme sırasında alanları doğru eşlemek için belirli sütun adlarına ihtiyaç duyar.",
+"howToFix": "Bir eBay File Exchange şablonu kullanın ve zorunlu sütunların (Title, StartPrice, Quantity) mevcut olduğundan emin olun."
+},
+"ebay/invalid_action": {
+"title": "Geçersiz Action değeri",
+"explanation": "Action sütunundaki değer eBay'in kabul ettiği işlemlerden biri değil.",
+"whyPlatformCares": "eBay File Exchange bir ilanın eklenmesi (Add), düzeltilmesi (Revise), silinmesi veya sonlandırılması (End) gerektiğine Action ile karar verir. Geçersiz bir değer tüm satırın reddedilmesine neden olur.",
+"howToFix": "Şunlardan birini kullanın: Add, Revise, Relist, End, VerifyAdd veya Status."
+},
+"ebay/missing_title": {
+"title": "İlan başlığı eksik",
+"explanation": "Title alanı tüm eBay ilanları için zorunludur.",
+"whyPlatformCares": "Başlığı olmayan ilanlar eBay'de yayınlanamaz.",
+"howToFix": "En fazla 80 karakterlik açıklayıcı bir ilan başlığı girin."
+},
+"ebay/title_too_long": {
+"title": "Başlık 80 karakteri aşıyor",
+"explanation": "eBay ilan başlıklarında kesin bir 80 karakter sınırı uygular.",
+"whyPlatformCares": "80 karakteri aşan başlıklar eBay File Exchange tarafından reddedilir ve yüklenemez.",
+"howToFix": "Başlığı 80 karakter veya daha kısa olacak şekilde kısaltın. Alıcıların aradığı anahtar kelimelere odaklanın."
+},
+"ebay/missing_price": {
+"title": "StartPrice eksik",
+"explanation": "StartPrice tüm eBay ilanları için zorunludur.",
+"whyPlatformCares": "Fiyatı olmayan ilanlar yükleme sırasında reddedilir.",
+"howToFix": "Ondalık biçimde bir StartPrice girin (ör. 19.99)."
+},
+"ebay/invalid_price": {
+"title": "Geçersiz StartPrice",
+"explanation": "StartPrice geçerli bir ondalık sayı olmalıdır.",
+"whyPlatformCares": "Geçersiz fiyatlar ilan satırlarının yüklenmesini başarısız kılar.",
+"howToFix": "Para birimi simgesi veya virgül olmadan 19.99 gibi düz bir ondalık sayı kullanın."
+},
+"ebay/invalid_quantity": {
+"title": "Geçersiz Quantity",
+"explanation": "Quantity negatif olmayan bir tam sayı olmalıdır.",
+"whyPlatformCares": "eBay tüm ilanlar için sayısal bir miktar ister. Geçersiz değerler yükleme hatalarına neden olur.",
+"howToFix": "0, 1 veya 10 gibi bir tam sayı kullanın."
+},
+"ebay/invalid_condition_id": {
+"title": "Tanınmayan ConditionID",
+"explanation": "ConditionID değeri standart bir eBay durum koduyla eşleşmiyor.",
+"whyPlatformCares": "eBay ürün durumunu alıcılara göstermek için ConditionID kullanır. Tanınmayan kimlikler reddedilebilir veya yanlış durum gösterebilir.",
+"howToFix": "Standart bir eBay ConditionID kullanın, örneğin 1000=Yeni, 1500=Yeni (diğer), 2000=Sertifikalı yenilenmiş, 2500=Satıcı tarafından yenilenmiş, 3000=Kullanılmış, 7000=Parça için veya çalışmıyor. İzin verilen kimlikler kategoriye göre değişir."
+},
+"ebay/invalid_duration": {
+"title": "Geçersiz Duration",
+"explanation": "Duration değeri tanınan bir eBay ilan süresi biçimiyle eşleşmiyor.",
+"whyPlatformCares": "Tanınmayan bir süre varsayılan olarak kısa bir açık artırmaya veya ilanın reddedilmesine yol açabilir.",
+"howToFix": "Sabit fiyatlı ilanlar için GTC (Good 'Til Cancelled), açık artırmalar için Days_1, Days_3, Days_5, Days_7 veya Days_10 kullanın."
+},
+"ebay/invalid_format": {
+"title": "Geçersiz ilan Format değeri",
+"explanation": "Format değeri tanınan bir eBay ilan türü değil.",
+"whyPlatformCares": "Format alanı eBay'e ilanın nasıl sunulacağını söyler. Geçersiz bir değer satırın başarısız olmasına yol açabilir.",
+"howToFix": "Hemen Al ilanları için FixedPrice, açık artırmalar için Auction kullanın."
+},
+"ebay/too_many_images": {
+"title": "Çok fazla görsel",
+"explanation": "eBay ilan başına en fazla 24 fotoğrafa izin verir.",
+"whyPlatformCares": "eBay, 24 fotoğraf sınırını aşan fotoğrafları reddeder veya atar.",
+"howToFix": "PictureURL listesini | ile ayrılmış 24 veya daha az URL'ye düşürün."
+},
+"ebay/invalid_picture_url": {
+"title": "Geçersiz fotoğraf URL'si",
+"explanation": "Bir veya daha fazla fotoğraf URL'si geçerli bir http(s) URL'si değil.",
+"whyPlatformCares": "eBay ilan oluşturulurken görselleri verilen URL'lerden alır. Geçersiz URL'ler görselsiz ilanlarla sonuçlanır.",
+"howToFix": "Herkese açık görsellere giden tam https:// URL'leri kullanın. Birden çok URL'yi dikey çizgiyle (|) ayırın."
+},
+"ebay/invalid_dispatch_time": {
+"title": "Geçersiz DispatchTimeMax",
+"explanation": "DispatchTimeMax, hazırlık sürenizi gün olarak gösteren negatif olmayan bir tam sayı olmalıdır.",
+"whyPlatformCares": "eBay hazırlık süresini alıcılara gösterir. Geçersiz bir değer ilanın yüklenmesini engelleyebilir.",
+"howToFix": "1, 2 veya 3 gibi bir tam sayı kullanın (gönderime kadar geçen gün)."
+},
+"ebay/duplicate_sku": {
+"title": "Yinelenen CustomLabel (SKU)",
+"explanation": "İki veya daha fazla satır aynı CustomLabel değerini paylaşıyor.",
+"whyPlatformCares": "Bir Add işlemindeki yinelenen CustomLabel değerleri çelişen ilanlar oluşturabilir. Mevcut ilanları güncellemek için Revise işlemini kullanın.",
+"howToFix": "Her ilanın benzersiz bir CustomLabel değeri olduğundan emin olun veya mevcut ilanları güncellemek için Action=Revise kullanın."
+},
+"ebay/variation_specifics_mismatch": {
+"title": "Varyasyon özellikleri uyuşmuyor",
+"explanation": "VariationSpecificsName ve VariationSpecificsValue ya ikisi de dolu ya da ikisi de boş olmalıdır.",
+"whyPlatformCares": "eBay varyasyon niteliklerini oluşturmak için eşleşen ad/değer çiftlerine ihtiyaç duyar. Uyuşmazlık varyasyonun oluşturulmasını engeller.",
+"howToFix": "Her varyasyon satırında hem VariationSpecificsName (ör. 'Color|Size') hem de VariationSpecificsValue (ör. 'Blue|Medium') girin."
+},
+"ebay/duplicate_variation_combo": {
+"title": "Yinelenen varyasyon kombinasyonu",
+"explanation": "Aynı ilandaki iki veya daha fazla varyasyon satırı aynı VariationSpecifics kombinasyonunu paylaşıyor.",
+"whyPlatformCares": "Yinelenen varyasyon kombinasyonları yükleme sırasında birbirinin üzerine yazar ve veri kaybına neden olur.",
+"howToFix": "Her varyasyon satırının benzersiz bir VariationSpecificsName ve VariationSpecificsValue kombinasyonu olduğundan emin olun."
+},
+"ebay/missing_category_id": {
+"title": "Category boş",
+"explanation": "Yeni bir ilanın eBay kategori numarası yok.",
+"whyPlatformCares": "eBay her yeni ilan için bir kategori ister; kategorisi olmayan satırlar reddedilir.",
+"howToFix": "Sayısal kategori kimliğini eBay kategori ağacında bulun ve her yeni ilan satırına girin."
+},
+"ebay/invalid_category_id": {
+"title": "Geçersiz Category",
+"explanation": "Category değeri sayısal bir eBay kategori kimliği değil.",
+"whyPlatformCares": "eBay kategori kimlikleri her zaman sayısaldır. Kategori adı yükleme sırasında reddedilir.",
+"howToFix": "eBay kategori ağacındaki sayısal kimliği kullanın (ör. Cep Telefonları ve Akıllı Telefonlar için 9355)."
+},
+"ebay/missing_action_column": {
+"title": "Action sütunu yok",
+"explanation": "Dosyada Action sütunu yok.",
+"whyPlatformCares": "eBay yüklemeleri her satırla ne yapılacağına ilk sütuna (başlığında site ve para birimi bulunan Action) bakarak karar verir.",
+"howToFix": "Bir Seller Hub yükleme şablonuyla başlayın ve ilk sütununu koruyun."
+},
+"ebay/missing_action": {
+"title": "Action eksik",
+"explanation": "Bir ilan satırında Action yok.",
+"whyPlatformCares": "Action alanını yalnızca varyasyon satırları boş bırakabilir; diğer satırlar eBay tarafından atlanır.",
+"howToFix": "Action değerini Add, Revise, Relist veya End olarak ayarlayın."
+},
+"ebay/missing_item_id": {
+"title": "ItemID eksik",
+"explanation": "Bir Revise, Relist veya End satırında ItemID yok.",
+"whyPlatformCares": "eBay değiştirilecek ilanı bulmak için ürün numarasına ihtiyaç duyar.",
+"howToFix": "eBay ürün numarasını bir ItemID sütununa ekleyin."
+},
+"ebay/missing_end_code": {
+"title": "EndCode eksik",
+"explanation": "Bir End satırında EndCode yok.",
+"whyPlatformCares": "eBay bir ilanın neden erken sonlandırıldığını sorar.",
+"howToFix": "NotAvailable, LostOrBroken, Incorrect veya OtherListingError kullanın."
+},
+"ebay/missing_condition": {
+"title": "Durum eksik",
+"explanation": "Yeni bir ilanda ConditionID yok.",
+"whyPlatformCares": "Çoğu eBay kategorisi ürün durumunu zorunlu tutar.",
+"howToFix": "1000 (Yeni) veya 3000 (Kullanılmış) gibi bir ConditionID belirleyin."
+},
+"ebay/fixed_price_not_gtc": {
+"title": "Sabit fiyat GTC değil",
+"explanation": "Sabit fiyatlı bir ilanın süresi GTC dışında bir değer.",
+"whyPlatformCares": "eBay tüm sabit fiyatlı ilanları Good 'Til Cancelled olarak yayınlar.",
+"howToFix": "Duration değerini GTC olarak ayarlayın."
+},
+"ebay/invalid_relationship_details": {
+"title": "Geçersiz RelationshipDetails",
+"explanation": "RelationshipDetails, eBay'in Name=Value biçiminde değil.",
+"whyPlatformCares": "eBay varyasyon seçicisini RelationshipDetails'ten oluşturur; hatalı biçimli bir değer ilanın reddedilmesine yol açar.",
+"howToFix": "Ana satır: Color=Blue;Red|Size=M;L. Varyasyon: Color=Blue|Size=M."
+},
+"ebay/variation_without_parent": {
+"title": "Ana satırı olmayan varyasyon",
+"explanation": "Bir varyasyon satırı bir ana ilan satırının ardından gelmiyor.",
+"whyPlatformCares": "eBay, Relationship=Variation satırlarını hemen üstlerindeki ana satıra bağlar.",
+"howToFix": "Varyasyon satırlarını doğrudan ana satırlarının altına taşıyın."
+},
+"ebay/variation_value_not_in_parent": {
+"title": "Bildirilmemiş varyasyon değeri",
+"explanation": "Bir varyasyon, ana satırda listelenmeyen bir değer kullanıyor.",
+"whyPlatformCares": "eBay yalnızca ana satırın RelationshipDetails alanında bildirilen varyasyon değerlerini kabul eder.",
+"howToFix": "Değeri ana satıra ekleyin veya varyasyonu düzeltin."
+},
+"amazon/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "Başlık satırında bir veya daha fazla zorunlu Amazon düz dosya sütunu eksik.",
+"whyPlatformCares": "Amazon'un düz dosya işleyicisi alanları doğru eşlemek için tam sütun adlarına ihtiyaç duyar. Eksik sütunlar dosyanın reddedilmesine neden olur.",
+"howToFix": "Bir Amazon Inventory Loader veya kategori şablonu kullanın; her dosyada bir sku sütunu gerekir."
+},
+"amazon/missing_sku": {
+"title": "SKU eksik",
+"explanation": "sku alanı her Amazon stok satırında zorunludur.",
+"whyPlatformCares": "Amazon ilanlarınızı benzersiz şekilde tanımlamak için SKU kullanır. SKU'su olmayan satırlar reddedilir.",
+"howToFix": "Her ürün satırı için benzersiz bir SKU girin (en fazla 40 karakter)."
+},
+"amazon/sku_too_long": {
+"title": "SKU 40 karakteri aşıyor",
+"explanation": "Amazon SKU'ları en fazla 40 karakterle sınırlar.",
+"whyPlatformCares": "40 karakteri aşan SKU'lar düz dosya işleyicisi tarafından reddedilir.",
+"howToFix": "SKU'yu benzersiz kalacak şekilde 40 karakter veya daha kısa olacak biçimde kısaltın."
+},
+"amazon/duplicate_sku": {
+"title": "Yinelenen SKU",
+"explanation": "Bu dosyada iki veya daha fazla satır aynı SKU'yu paylaşıyor.",
+"whyPlatformCares": "Yinelenen SKU'lar işleme sırasında bir satırın diğerinin üzerine yazmasına neden olur ve stok veya fiyat verilerini silebilir.",
+"howToFix": "Her SKU'nun dosyada yalnızca bir kez geçtiğinden emin olun. Bir ilanı açıkça kaldırmak için add-delete='d' kullanın."
+},
+"amazon/missing_item_name": {
+"title": "item-name eksik",
+"explanation": "item-name alanı (ürün başlığı) Amazon ilanları için zorunludur.",
+"whyPlatformCares": "Amazon ilanları arama sonuçlarında ve ürün sayfalarında göstermek için bir ürün başlığına ihtiyaç duyar.",
+"howToFix": "item-name sütununa açıklayıcı bir ürün başlığı girin (en fazla 500 karakter)."
+},
+"amazon/item_name_too_long": {
+"title": "item-name çok uzun",
+"explanation": "Amazon item-name için genellikle en fazla 500 karaktere izin verir.",
+"whyPlatformCares": "Sınırı aşan başlıklar kategori şablonuna bağlı olarak kesilebilir veya reddedilebilir.",
+"howToFix": "item-name değerini 500 karakter veya daha kısa olacak şekilde kısaltın. Marka, ürün türü ve temel özelliklere odaklanın."
+},
+"amazon/missing_price": {
+"title": "Fiyat eksik",
+"explanation": "Bir teklif ekleyen veya güncelleyen satırda price boş.",
+"whyPlatformCares": "Mevcut teklifler mevcut fiyatlarını korur, ancak fiyatı olmayan yeni bir teklif yayına alınamaz.",
+"howToFix": "Ondalık biçimde geçerli bir fiyat girin (ör. 29.99)."
+},
+"amazon/invalid_price": {
+"title": "Geçersiz fiyat",
+"explanation": "price değeri geçerli bir ondalık sayı değil.",
+"whyPlatformCares": "Geçersiz fiyatlar satırın Amazon'un düz dosya işleyicisi tarafından reddedilmesine neden olur.",
+"howToFix": "29.99 gibi düz bir ondalık sayı kullanın (dolar işareti, virgül veya metin olmadan)."
+},
+"amazon/invalid_quantity": {
+"title": "Geçersiz miktar",
+"explanation": "quantity değeri negatif olmayan bir tam sayı olmalıdır.",
+"whyPlatformCares": "Amazon, miktarı geçerli bir sayı olmayan satırları reddeder. Negatif miktarlar kabul edilmez.",
+"howToFix": "0, 5 veya 100 gibi bir tam sayı kullanın."
+},
+"amazon/invalid_product_id_type": {
+"title": "Geçersiz product-id-type",
+"explanation": "product-id-type değeri tanınan bir Amazon kimlik türü değil.",
+"whyPlatformCares": "Amazon product-id alanını yorumlamak için product-id-type kullanır (ör. ASIN veya UPC olarak). Geçersiz tür ürün eşleşmesinin başarısız olmasına neden olur.",
+"howToFix": "Inventory Loader: 1 (ASIN), 2 (ISBN), 3 (UPC), 4 (EAN). Kategori şablonları: ASIN, UPC, EAN, ISBN veya GTIN."
+},
+"amazon/invalid_item_condition": {
+"title": "Geçersiz item-condition",
+"explanation": "item-condition kodu tanınan bir Amazon durum değeri değil.",
+"whyPlatformCares": "Amazon durumu alıcılara gösterir ve ilanları sınıflandırmak için kullanır. Tanınmayan bir kod reddedilebilir.",
+"howToFix": "Sayısal bir Amazon durum kodu kullanın: 11=Yeni, 10=Yenilenmiş, 1=Kullanılmış - Yeni gibi, 2=Kullanılmış - Çok iyi, 3=Kullanılmış - İyi, 4=Kullanılmış - Kabul edilebilir."
+},
+"amazon/min_above_max_price": {
+"title": "Asgari fiyat azami fiyatın üzerinde",
+"explanation": "minimum-seller-allowed-price, maximum-seller-allowed-price değerinden yüksek; bu yüzden hiçbir fiyat ikisini birden karşılayamaz.",
+"whyPlatformCares": "Amazon fiyat aralığını reddeder ve aralığın dışındaki tüm teklifler devre dışı bırakılır.",
+"howToFix": "İki değerin yerini değiştirin veya birini temizleyin."
+},
+"amazon/price_outside_allowed_range": {
+"title": "Fiyat izin verilen aralığın dışında",
+"explanation": "Fiyat minimum-seller-allowed-price değerinin altında veya maximum-seller-allowed-price değerinin üzerinde.",
+"whyPlatformCares": "Amazon, fiyatı belirlediğiniz aralığın dışında kalan teklifleri devre dışı bırakır; ürün satılmaz hale gelir.",
+"howToFix": "Fiyatı değiştirin veya asgari/azami aralığı genişletin."
+},
+"amazon/invalid_add_delete": {
+"title": "Geçersiz add-delete değeri",
+"explanation": "add-delete alanı 'a' (ekle veya güncelle), 'd' (teklifi sil) veya 'x' (teklifi ve ürün verilerini sil) olmalıdır.",
+"whyPlatformCares": "Geçersiz bir add-delete değeri Amazon işleyicisinin satırı atlamasına neden olur.",
+"howToFix": "Bir teklifi eklemek veya güncellemek için 'a', teklifi silmek için 'd', ürün verileriyle birlikte silmek için 'x' kullanın."
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "Geçersiz fulfillment-center-id",
+"explanation": "fulfillment-center-id değeri tanınan bir Amazon gönderim türü değil.",
+"whyPlatformCares": "Gönderim kanalı siparişi Amazon'un (FBA) mı yoksa sizin (MFN) mi göndereceğini belirler. Geçersiz bir değer yanlış bir varsayılana yol açabilir.",
+"howToFix": "Satıcı gönderimi için DEFAULT (siz gönderirsiniz), o bölgedeki FBA için AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN kullanın."
+},
+"amazon/invalid_image_url": {
+"title": "Geçersiz görsel URL'si",
+"explanation": "image-url geçerli bir http(s) URL'si değil.",
+"whyPlatformCares": "Amazon ürün görsellerini verilen URL'den alır. Geçersiz bir URL görselsiz bir ilanla sonuçlanır ve dönüşümü düşürür.",
+"howToFix": "Herkese açık bir ürün görseline giden tam bir https:// URL'si kullanın (JPEG veya PNG, en az 500×500 px önerilir)."
+},
+"amazon/description_too_long": {
+"title": "item-description çok uzun",
+"explanation": "item-description, Amazon'un genel 2000 karakter sınırını aşıyor.",
+"whyPlatformCares": "Sınırı aşan açıklamalar kategori şablonuna bağlı olarak kesilebilir veya reddedilebilir.",
+"howToFix": "item-description değerini 2000 karakter veya daha kısa olacak şekilde kısaltın."
+},
+"amazon/brand_name_too_long": {
+"title": "brand-name çok uzun",
+"explanation": "brand-name, Amazon'un 50 karakter sınırını aşıyor.",
+"whyPlatformCares": "Sınırı aşan marka adları kesilebilir veya reddedilebilir.",
+"howToFix": "brand-name değerini 50 karakter veya daha kısa olacak şekilde kısaltın."
+},
+"amazon/invalid_boolean_field": {
+"title": "Geçersiz mantıksal alan değeri",
+"explanation": "Mantıksal bir kargo alanı (will-ship-internationally veya expedited-shipping) 'y' veya 'n' dışında bir değer içeriyor.",
+"whyPlatformCares": "Amazon'un düz dosya işleyicisi bu alanların tam olarak 'y', 'n' veya boş olmasını bekler. Geçersiz değerler sessizce yok sayılır veya satırın reddedilmesine neden olur.",
+"howToFix": "Kargo seçeneğini etkinleştirmek için 'y', devre dışı bırakmak için 'n' kullanın ya da hesap varsayılanlarınızı kullanmak için alanı boş bırakın."
+},
+"amazon/product_id_scientific_notation": {
+"title": "Barkod bir elektronik tablo tarafından bozulmuş",
+"explanation": "Bir product-id 1.23457E+11 gibi görünüyor: bir elektronik tablo barkodu bilimsel gösterime çevirmiş.",
+"whyPlatformCares": "İlk birkaç haneden sonraki rakamlar kaybolur; bu yüzden Amazon ürünü eşleştiremez.",
+"howToFix": "Sütunu Metin olarak biçimlendirin ve tam barkodu yeniden girin."
+},
+"amazon/invalid_product_id": {
+"title": "Geçersiz product-id",
+"explanation": "product-id, türü için doğru uzunlukta veya doğru karakterlerde değil.",
+"whyPlatformCares": "Amazon teklifleri ürünlerle bu kimlik üzerinden eşleştirir; yanlış bir kimlik hatalara yol açar veya teklifi yanlış ürüne bağlar.",
+"howToFix": "Barkodu veya ASIN'i kontrol edin: UPC 12 hane, EAN 13, ISBN 10 veya 13, ASIN ise 10 harf ve rakamdır."
+}
+}

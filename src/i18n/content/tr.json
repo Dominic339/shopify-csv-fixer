@@ -1,1 +1,317 @@
-{ "guides": {}, "presets": {} }
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Amazon düz dosya içe aktarma hataları: nedenleri ve çözümleri",
+"description": "En yaygın Amazon düz dosya CSV içe aktarma hatalarını düzeltin: SKU sorunları, geçersiz durum kodları, fiyat biçimi, gönderim kanalı değerleri ve uyumsuz şablonlar."
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Amazon düz dosya mantıksal alanları: y/n, TRUE/FALSE ve yaygın tuzaklar",
+"description": "Seller Central düz dosyalarındaki hangi mantıksal alanların 'y' veya 'n' beklediğini (TRUE/FALSE veya 1/0 değil), geçersiz değerleri toplu olarak nasıl düzelteceğinizi ve bu sütunları bozan elektronik tablo otomatik biçimlendirmesinden nasıl kaçınacağınızı öğrenin."
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "eBay CategoryID ve File Exchange: nedir ve nasıl ayarlanır",
+"description": "eBay CategoryID alanının ne olduğunu, File Exchange yüklemelerinde neden zorunlu olduğunu, ürünleriniz için doğru kategori kimliğini nasıl bulacağınızı ve tüm kataloğunuzda toplu olarak nasıl dolduracağınızı öğrenin."
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "eBay File Exchange CSV hataları: nedenleri ve çözümleri",
+"description": "Yaygın eBay File Exchange CSV hatalarını düzeltin: geçersiz Action değerleri, kategori kimliği sorunları, başlık uzunluğu ihlalleri, durum kodları, fiyat biçimi ve görsel URL'leri."
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Etsy CSV şablonu rehberi: alanlar, biçimler ve yaygın hatalar",
+"description": "Etsy ilan CSV şablonu için eksiksiz bir rehber: her alanın açıklaması, açılır listelerde kabul edilen değerler, zorunlu ve isteğe bağlı sütunlar ve yaygın içe aktarma hatalarının çözümü."
+},
+"general/append-vs-merge-join-csv": {
+"title": "Ekleme, birleştirme ve eşleştirme: CSV dosyalarını doğru şekilde bir araya getirme",
+"description": "Satır eklemek, aynı yapıdaki dosyaları birleştirmek ve ilişkili verileri içeren dosyaları eşleştirmek arasındaki farkı anlayın. E-ticaret kataloğunuz için doğru yaklaşımı seçin."
+},
+"general/csv-basics-for-imports": {
+"title": "E-ticaret içe aktarmaları için CSV temelleri",
+"description": "İlk yüklemenizden önce başlıkları, UTF-8 kodlamayı, tırnak işaretlerini, satır sonlarını ve CSV içe aktarmalarını bozan en yaygın hataları öğrenin."
+},
+"general/csv-column-mismatch-fix": {
+"title": "CSV sütun uyuşmazlığı hatalarını düzeltme",
+"description": "CSV içe aktarmalarındaki sütun uyuşmazlığı hatalarını nasıl teşhis edip düzelteceğiniz: yanlış sütun adları, büyük/küçük harf farkları, fazla boşluklar ve platformlar arasındaki sütun sırası sorunları."
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "E-ticaret içe aktarmaları için CSV biçimlendirme kuralları",
+"description": "CSV dosyanızın e-ticaret platformlarının içe aktarmalarından geçmesi için uyması gereken kesin biçimlendirme kuralları: ayırıcılar, tırnaklar, satır sonları, kodlama ve başlıklar."
+},
+"general/csv-import-checklist": {
+"title": "E-ticaret platformları için CSV içe aktarma kontrol listesi",
+"description": "Shopify, WooCommerce, Etsy, eBay ve Amazon CSV dosyaları için eksiksiz bir içe aktarma öncesi kontrol listesi: kodlama, başlıklar, veri türleri ve platforma özgü kurallar."
+},
+"general/csv-import-errors-explained": {
+"title": "CSV içe aktarma hataları açıklandı",
+"description": "Shopify, WooCommerce, Etsy, eBay ve Amazon'daki en yaygın CSV içe aktarma hata mesajlarının sade bir açıklaması ve her birinin çözümü."
+},
+"general/fix-blank-rows-in-csv": {
+"title": "CSV dosyasındaki boş satırları silme",
+"description": "Shopify, WooCommerce, Etsy, eBay veya Amazon'a içe aktarmadan önce bir CSV dosyasındaki boş satırları Excel, Google E-Tablolar veya Python ile nasıl bulup sileceğiniz."
+},
+"general/fix-csv-encoding-errors": {
+"title": "CSV kodlama hatalarını düzeltme",
+"description": "CSV dosyalarındaki UTF-8 kodlama sorunlarını teşhis edip düzeltin: bozuk karakterler, BOM işaretleri, mojibake ve içe aktarmaları bozan ANSI dosyaları."
+},
+"general/fix-extra-columns-in-csv": {
+"title": "CSV dosyasındaki fazla sütunları kaldırma",
+"description": "Shopify, WooCommerce, Etsy, eBay veya Amazon'a içe aktarmadan önce bir CSV dosyasındaki fazla veya beklenmeyen sütunları nasıl bulup kaldıracağınız."
+},
+"general/fix-mojibake-encoding": {
+"title": "CSV dosyalarında mojibake ve kodlama hatalarını düzeltme",
+"description": "Kodlama uyuşmazlığından kaynaklanan bozuk metinleri düzeltin. UTF-8 ve Latin-1 çakışmalarını tespit etmeyi, BOM'u kaldırmayı ve dosyaları doğru şekilde yeniden kaydetmeyi öğrenin."
+},
+"general/merge-two-csv-files": {
+"title": "İki CSV dosyası nasıl birleştirilir",
+"description": "Excel Power Query, Google E-Tablolar veya basit bir komut satırıyla iki CSV dosyasını tek dosyada birleştirmek için adım adım rehber; programlama deneyimi gerekmez."
+},
+"general/prevent-excel-scientific-notation": {
+"title": "Excel'in SKU ve barkodları bilimsel gösterime çevirmesini önleme",
+"description": "Excel'in SKU, EAN ve UPC kodlarını 1.23456E+11 gibi bilimsel gösterime çevirmesini engelleyin. Yapıştırmadan önce sütunları metin olarak biçimlendirin, içe aktarma sihirbazını kullanın ve mevcut dosyaları onarın."
+},
+"general/remove-duplicate-header-rows": {
+"title": "CSV dosyalarındaki yinelenen başlık satırlarını kaldırma",
+"description": "CSV dışa aktarımlarının ortasında tekrar eden başlık satırlarını bulup silin. Yaygın nedenlerini öğrenin, Excel ve Google E-Tablolar filtreleriyle tespit edin ve sonraki dışa aktarımlarda önleyin."
+},
+"general/validate-csv-before-import": {
+"title": "CSV dosyanızı herhangi bir e-ticaret platformuna yüklemeden önce doğrulayın",
+"description": "İçe aktarma başarısız olmadan önce kodlama hatalarını, eksik başlıkları, satır uzunluğu uyuşmazlıklarını, tırnak sorunlarını ve diğer problemleri yakalamak için pratik bir kontrol listesi. Shopify, WooCommerce, eBay, Amazon ve Etsy'yi kapsar."
+},
+"shopify/images-in-product-csv": {
+"title": "CSV'de Shopify ürün görselleri: Image Src, alternatif metin ve sıralar",
+"description": "Shopify ürün CSV'sinde görsel URL'lerini nasıl yapılandıracağınızı öğrenin: Image Src, Image Position ve Image Alt Text sütunları, ürün başına birden çok görsel ekleme ve en yaygın görsel içe aktarma hatalarından kaçınma."
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Shopify CSV Handle alanı rehberi",
+"description": "Shopify ürün CSV'sindeki Handle alanı hakkında bilmeniz gereken her şey: ne işe yaradığı, geçerli bir handle'ın kuralları, varyantları nasıl grupladığı ve handle hatalarını nasıl düzelteceğiniz."
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Shopify CSV içe aktarma hataları: yaygın nedenler ve çözümler",
+"description": "En yaygın Shopify CSV içe aktarma hataları için eksiksiz rehber: eksik sütunlar, geçersiz mantıksal değerler, varyant yapısı sorunları, fiyat hataları ve handle çakışmaları."
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Shopify ürün CSV şablonu açıklandı",
+"description": "Resmi Shopify ürün CSV şablonundaki her alanın sütun sütun açıklaması: her sütunun ne yaptığı, hangi değerleri kabul ettiği ve hangilerinin zorunlu olduğu."
+},
+"shopify/variants-explained": {
+"title": "Shopify ürün varyantları açıklandı: CSV yapısı ve yaygın hatalar",
+"description": "Shopify'ın CSV biçiminin varyantları Handle gruplaması, Option sütunları ve ana/alt satırlarla nasıl gösterdiğini öğrenin. Ürünleri bölen, varyantları kaybettiren ve içe aktarmayı bozan en yaygın hatalardan kaçının."
+},
+"woocommerce/variable-products-parent-child": {
+"title": "CSV'de WooCommerce değişken ürünleri: ana ve varyasyon satırları",
+"description": "WooCommerce ürün içe aktarıcısının değişken ürünleri ana ve alt (varyasyon) satırlarla nasıl gösterdiğini anlayın: nitelik sütunları, satır türüne göre zorunlu alanlar ve en yaygın içe aktarma tuzakları."
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "CSV'de WooCommerce ürün nitelikleri: eksiksiz rehber",
+"description": "WooCommerce ürün niteliklerini bir CSV dosyasında doğru biçimlendirme: nitelik adlandırma, genel ve yerel nitelikler, varyasyon nitelikleri ve yaygın hatalar."
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "WooCommerce ürün CSV içe aktarma hataları: nedenleri ve çözümleri",
+"description": "En yaygın WooCommerce ürün CSV içe aktarma hatalarını düzeltin: eksik SKU'lar, geçersiz türler, varyasyon satırı sorunları, fiyat biçimi ve nitelik sütunları."
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Shopify ürün içe aktarmaları titizdir: tek bir hatalı biçimlendirilmiş fiyat, eksik bir seçenek değeri veya yanlış yerdeki bir görsel satırı tüm içe aktarmanın başarısız olmasına yol açabilir.",
+"Bu ön ayar CSV dosyanızı Shopify'ın resmi şablonuna göre doğrular ve güvenli otomatik düzeltmeler uygular; böylece gönül rahatlığıyla yükleyebilirsiniz. Verileriniz tamamen sizin kontrolünüzde kalır: her düzeltme kaydedilir ve dışa aktarılan CSV Shopify içe aktarmasına hazır kalır."
+],
+"howItWorks": [
+"Shopify CSV dışa aktarımınızı veya resmi şablonu yükleyin.",
+"Başlıkları ve yaygın biçimleri (mantıksal değerler, tutarlar, stok değerleri) normalleştirir, zorunlu alanları doğrularız.",
+"Güvenli sorunları otomatik olarak düzeltir (boşlukları kırpma, TRUE/FALSE'u standartlaştırma, fiyat alanlarını normalleştirme gibi), riskli sorunları incelemeniz için işaretleriz.",
+"Shopify'ın beklediği şemaya uyan temiz bir CSV dışa aktarın."
+],
+"commonFixes": [
+"Mantıksal değerleri (TRUE/FALSE) ve durum değerlerini (active/draft/archived) standartlaştırma.",
+"Tutar alanlarını (Price, Compare-at price, Cost per item) normalleştirme ve fazladan para birimi simgelerini kaldırma.",
+"İçe aktarmayı bozan yinelenen SKU'ları ve varyant çakışmalarını tespit etme.",
+"Seçenek yapısını (Option1/2/3 adı/değeri) doğrulama ve eksik varyant satırlarını işaretleme.",
+"Görsel satırlarını (Product image URL, Image position) doğrulama ve eksik/geçersiz URL'leri işaretleme.",
+"Tutarlılık için boşlukları, etiketleri ve handle biçimini kırpma ve normalleştirme."
+],
+"faq": [
+{
+"q": "Bu ürün verilerimi değiştirir mi?",
+"a": "Yalnızca güvenli ve geri alınabilir biçim düzeltmeleri otomatik olarak uygulanır (örneğin boşlukları kırpma veya TRUE/FALSE'u normalleştirme). Riskli öğeler, dışa aktarmadan önce karar verebilmeniz için işaretlenir."
+},
+{
+"q": "Diğer uygulamalardan alınan dışa aktarımlarla çalışır mı?",
+"a": "Evet. Pek çok Shopify uygulaması fazladan sütun ekler. StriveFormats bilinmeyen sütunları korur ve Shopify'ın zorunlu alanlarını içe aktarmaya hazır hale getirmeye odaklanır."
+},
+{
+"q": "Resmi Shopify şablonunu kullanabilir miyim?",
+"a": "Evet. Resmi şablon örneğini bu sayfadan indirip doğrudan düzelticiye yükleyebilirsiniz."
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"WooCommerce'in yerleşik ürün CSV içe aktarıcısı sütun adları, veri türleri ve varyasyon yapısı konusunda katıdır. Bu ön ayar dosyanızı içe aktarıcının standart alanlarına göre doğrular ve içe aktarmanın sorunsuz geçmesi için güvenli normalleştirmeler uygular.",
+"Bunu taşımalarda, toplu fiyat güncellemelerinde, kategori/etiket eklemede ve varyasyonlu değişken ürünleri içe aktarmada kullanın. Riskli olan her şey elle incelemeniz için sorun listesinde kalır."
+],
+"howItWorks": [
+"WooCommerce ürün CSV'nizi yükleyin (dışa aktarım veya içe aktarma şablonu).",
+"Başlıkları ve yaygın değerleri normalleştirir, eksik zorunlu alanları işaretleriz.",
+"Güvenli düzeltmeler otomatik olarak uygulanır (mantıksal değerler, fiyatlar, URL temizliği).",
+"Kalan sorunları inceleyin, ardından içe aktarmaya hazır bir CSV dışa aktarın."
+],
+"commonFixes": [
+"Published / In stock? / Backorders allowed? / Sold individually? alanlarını normalleştirme",
+"Regular price / Sale price değerlerini düz ondalık sayılara çevirme (para birimi simgesi olmadan)",
+"Her yerde boşlukları kırpma ve kategori/etiket ayırıcılarını normalleştirme",
+"Görsel URL'lerini doğrulama ve boş girişleri kaldırma",
+"Aynı ana ürün altındaki yinelenen varyasyon nitelik kombinasyonlarını tespit etme"
+],
+"faq": [
+{
+"q": "WooCommerce'in yerleşik içe aktarıcısıyla çalışır mı?",
+"a": "Evet. Bu ön ayar WooCommerce'in temel ürün CSV içe aktarıcısının alanları ve içe aktarma ekranında eşlediğiniz yaygın dışa aktarma başlıkları üzerine kuruludur."
+},
+{
+"q": "Varyasyonları destekliyor mu?",
+"a": "Varyasyon yapısını (Parent + nitelikler) doğrular ve yinelenen varyasyon kombinasyonlarını tespit eder. Güvenli düzeltmeler otomatik olarak uygulanır; yapısal hatalar engelleyici olarak kalır."
+},
+{
+"q": "Eklentilere özgü sütunlar ne olacak?",
+"a": "Fazla sütunlar olduğu gibi kalır: düzeltilmiş dosya, yüklediğiniz dosyayla aynı sütunlara ve aynı sıraya sahiptir."
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"Etsy satıcıları ilanlarını toplu düzenleme, denetim ve taşıma hazırlığı için sık sık elektronik tablolara aktarır. Bu ön ayar yaygın Etsy ilan CSV alanlarını doğrular ve verilerinizin tutarlı kalması için güvenli temizlik uygular.",
+"Başlıklara, fiyatlara, miktara, etiketlere ve görsel URL'lerine odaklanır. İlanın anlamını değiştirebilecek her şey görünür bir sorun olarak kalır."
+],
+"howItWorks": [
+"Etsy ilan CSV'nizi yükleyin.",
+"Zorunlu alanları ve Etsy alanlarının yaygın sınırlarını doğrularız.",
+"Güvenli düzeltmeler otomatik olarak uygulanır (kırpma/normalleştirme, URL temizliği, sayı biçimi).",
+"Kalan sorunları inceleyin, ardından temiz bir dosya dışa aktarın."
+],
+"commonFixes": [
+"Boşlukları kırpma ve etiket ayırıcılarını normalleştirme",
+"Price değerinin geçerli bir ondalık sayı, Quantity değerinin tam sayı olduğundan emin olma",
+"Görsel URL listelerini doğrulama ve temizleme",
+"Başlıklar veya etiketler Etsy sınırlarını aştığında uyarma"
+],
+"faq": [
+{
+"q": "Bu resmi bir Etsy ilan içe aktarıcısı mı?",
+"a": "Bu ön ayar yaygın Etsy CSV ilan iş akışlarını (dışa aktarımlar ve toplu düzenleme tabloları) hedefler ve alanları Etsy'nin belgelenmiş sınırları içinde tutar."
+},
+{
+"q": "Neleri doğrular?",
+"a": "Başlıkları, fiyatları, miktarları, etiketleri (sayı/uzunluk) ve görsel URL'lerini. Toplu düzenleme iş akışlarını sıklıkla bozan geçersiz veya boş değerleri işaretler."
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"eBay'in toplu yükleme özelliği (Seller Hub › Raporlar › Yüklemeler, eski adıyla File Exchange) satıcıların tek bir CSV ile binlerce ilan ekleyip güncellemesini sağlar. Bu ön ayar her satırı eBay'in o Action için istediklerine göre kontrol eder: yeni ilanlar başlık, sayısal kategori, fiyat, miktar ve durum gerektirir; Revise, Relist ve End satırları ilanın ItemID değerine ihtiyaç duyar.",
+"Dosyanız kendi sütunlarını ve başlık metnini korur; ilk sütundaki site ve para birimi de dahil (örneğin *Action(SiteID=UK|Country=GB|Currency=GBP|...)), böylece doğru eBay pazaryerine yüklenir."
+],
+"howItWorks": [
+"eBay'e göndermeyi planladığınız CSV'yi yükleyin (herhangi bir eBay sitesi).",
+"eBay'in sütun adlarını, zorunlu alan işareti * olsa da olmasa da tanırız.",
+"Her satır Action değerine göre kontrol edilir: başlıklar, kategori kimlikleri, fiyatlar, miktarlar, durum kimlikleri, süreler ve fotoğraf URL'leri.",
+"Yinelenen CustomLabel (SKU) değerleri birbirinin üzerine yazmadan önce işaretlenir.",
+"Orijinal sütunlarınız korunmuş olarak düzeltilmiş dosyayı indirin."
+],
+"commonFixes": [
+"Action büyük/küçük harflerini normalleştirme (Add, Revise, Relist, End)",
+"12,50 veya $12.50 gibi fiyatları düz ondalık sayılara çevirme",
+"\"New\" veya \"Used\" gibi durum adlarını ConditionID değerlerine çevirme",
+"| ile ayrılmış fotoğraf URL listelerini temizleme (en fazla 24 fotoğraf)",
+"eBay'in 80 karakter sınırını aşan başlıkları işaretleme",
+"GTC olmayan sabit fiyatlı ilanları işaretleme"
+],
+"faq": [
+{
+"q": "Hangi eBay siteleriyle çalışır?",
+"a": "Hepsiyle. Site ve para birimi ilk sütunun başlığından (SiteID, Country, Currency) gelir ve bu başlık yüklendiği gibi korunur."
+},
+{
+"q": "ConditionID nedir?",
+"a": "ConditionID, eBay'in sayısal ürün durumudur, ör. 1000 = Yeni, 1500 = Yeni (diğer), 2750 = Yeni gibi, 3000 = Kullanılmış, 7000 = Parça için veya çalışmıyor. İzin verilen kimlikler kategoriye göre değişir. Dosyanızdaki durum adları, belirsizlik olmadığında kimliklere çevrilir."
+},
+{
+"q": "Hangi süre değerleri desteklenir?",
+"a": "Sabit fiyatlı ilanlar GTC (Good 'Til Cancelled) olarak yayınlanır. Açık artırmalar Days_1, Days_3, Days_5, Days_7 veya Days_10 sürer."
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"Bir eBay varyasyon ilanı, birkaç beden ve renkteki bir tişört gibi ilişkili ürünleri tek bir ilan altında toplar. eBay'in yükleme dosyasında bu, bir ana satır (başlık, kategori ve tüm değerleri listeleyen RelationshipDetails, ör. Color=Blue;Red|Size=M;L) ve ardından her varyant için kendi SKU, fiyat ve miktarını içeren bir Relationship=Variation satırıdır.",
+"Bu ön ayar bu yapıyı kontrol eder: her varyasyon ana satırından sonra gelir, yalnızca ana satırın bildirdiği değerleri kullanır ve benzersiz bir kombinasyona, fiyata ve miktara sahiptir."
+],
+"howItWorks": [
+"eBay varyasyon CSV'nizi yükleyin.",
+"Her ana satırı ve altındaki varyasyon satırlarını buluruz.",
+"Her varyasyonun RelationshipDetails değeri ana satırla karşılaştırılır ve yinelenen kombinasyonlar işaretlenir.",
+"Fiyatlar, miktarlar ve fotoğraf URL'leri her satırda temizlenir.",
+"Orijinal sütunlarınız korunmuş olarak düzeltilmiş dosyayı indirin."
+],
+"commonFixes": [
+"Değerleri ana satırın RelationshipDetails alanında olmayan varyasyonları işaretleme",
+"Bir ilandaki yinelenen beden/renk kombinasyonlarını işaretleme",
+"Fiyatı veya miktarı eksik varyasyon satırlarını işaretleme",
+"12,50 gibi fiyatları düz ondalık sayılara çevirme",
+"Eski tablolardaki VariationSpecificsName / VariationSpecificsValue çiftlerini doğrulama"
+],
+"faq": [
+{
+"q": "RelationshipDetails nasıl çalışır?",
+"a": "Ana satırda her varyasyon adını tüm değerleriyle listeleyin: Color=Blue;Red|Size=M;L. Her varyasyon satırında o varyantın değerlerini verin: Color=Blue|Size=M. Varyasyon satırları Action ve Title alanlarını boş bırakır."
+},
+{
+"q": "Tablom VariationSpecificsName sütunlarını kullanıyor. Bu destekleniyor mu?",
+"a": "Evet. | ile ayrılmış adlar ve değerler (Color|Size ve Blue|M) sayılarının eşleşmesi ve yinelenen kombinasyonlar açısından kontrol edilir."
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"Amazon Inventory Loader, zaten ASIN'i olan ürünlere teklif eklemek veya teklifleri güncellemek için kullanılan Seller Central yüklemesidir: fiyat, miktar, durum ve gönderim. Bu ön ayar her satırı Amazon'un kurallarına göre kontrol eder ve sütun adlarınızı olduğu gibi korur, çünkü Amazon sütunları tam adlarıyla eşleştirir.",
+"Amazon'un satırları reddetmesine veya teklifleri yanlış ürüne bağlamasına yol açan sorunları yakalar: bir elektronik tablonun 1.23457E+11'e çevirdiği barkodlar, baştaki sıfırı kaybolmuş UPC'ler, yanlış product-id-type kodları, 40 karakteri aşan SKU'lar ve yinelenen SKU'lar."
+],
+"howItWorks": [
+"Inventory Loader dosyanızı yükleyin (item_sku ve external_product_id gibi kategori şablonu sütunları da tanınır).",
+"Her satır kontrol edilir: SKU, ürün kimliği ve türü, fiyat, miktar, durum, add-delete ve gönderim merkezi.",
+"12,50 veya $12.50 şeklinde yazılan fiyatlar düz ondalık sayılara çevrilir.",
+"Yinelenen SKU'lar birbirinin üzerine yazmadan önce işaretlenir.",
+"Orijinal sütunlarınız korunmuş olarak dosyayı indirin."
+],
+"commonFixes": [
+"Fiyatları ve asgari/azami fiyatları düz ondalık sayılara çevirme",
+"Bilimsel gösterimdeki barkodları (1.23457E+11) ve eksik baştaki sıfırları işaretleme",
+"UPC/EAN/ISBN/ASIN uzunluğunu product-id-type değerine göre kontrol etme",
+"Amazon'un 40 karakter sınırını aşan SKU'ları işaretleme",
+"add-delete değerini doğrulama (a, d veya x)",
+"Yinelenen SKU'ları tespit etme"
+],
+"faq": [
+{
+"q": "Hangi biçimi hedefliyor?",
+"a": "Amazon Inventory Loader (teklif dosyası); sku, product-id, product-id-type, price, quantity ve add-delete gibi küçük harfli ve tireli sütunlarla."
+},
+{
+"q": "product-id-type kodları nelerdir?",
+"a": "Inventory Loader'da product-id-type bir sayıdır: 1 = ASIN, 2 = ISBN, 3 = UPC, 4 = EAN. Kategori şablonları bunun yerine adları kullanır."
+},
+{
+"q": "Geçerli item-condition kodları nelerdir?",
+"a": "11 = Yeni, 10 = Yenilenmiş, 1–4 = Kullanılmış (Yeni gibi, Çok iyi, İyi, Kabul edilebilir), 5–8 = Koleksiyonluk dereceleri."
+},
+{
+"q": "add-delete ne işe yarar?",
+"a": "a teklifi ekler veya günceller, d teklifi siler, x ise teklifi ve sağladığınız ürün verilerini siler."
+},
+{
+"q": "fulfillment-center-id nedir?",
+"a": "DEFAULT, siparişi kendiniz gönderdiğiniz anlamına gelir. AMAZON_NA, AMAZON_EU, AMAZON_FE veya AMAZON_IN o bölgede Amazon Lojistik (FBA) anlamına gelir."
+}
+]
+}
+}
+}
