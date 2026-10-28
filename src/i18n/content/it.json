@@ -1,1 +1,317 @@
-{ "guides": {}, "presets": {} }
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Errori di importazione dei file flat Amazon: cause e soluzioni",
+"description": "Correggi gli errori più comuni di importazione dei file flat CSV di Amazon: problemi di SKU, codici di condizione non validi, formato dei prezzi, valori del canale di evasione e modelli non corrispondenti."
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Campi booleani dei file flat Amazon: y/n, TRUE/FALSE e trappole comuni",
+"description": "Scopri quali campi booleani dei file flat di Seller Central si aspettano 'y' o 'n' (non TRUE/FALSE o 1/0), come correggere in blocco i valori non validi ed evitare la formattazione automatica del foglio di calcolo che rovina queste colonne."
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "CategoryID di eBay e File Exchange: cos'è e come impostarlo",
+"description": "Capisci cos'è il campo CategoryID di eBay, perché è obbligatorio nei caricamenti File Exchange, come trovare l'ID di categoria giusto per i tuoi prodotti e come compilarlo in blocco in tutto il catalogo."
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "Errori CSV di eBay File Exchange: cause e soluzioni",
+"description": "Correggi gli errori CSV comuni di eBay File Exchange: valori Action non validi, problemi con l'ID di categoria, titoli troppo lunghi, codici di condizione, formato dei prezzi e URL delle immagini."
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Guida al modello CSV di Etsy: campi, formati ed errori comuni",
+"description": "Una guida completa al modello CSV delle inserzioni Etsy: ogni campo spiegato, i valori accettati negli elenchi, le colonne obbligatorie e facoltative, e come correggere gli errori di importazione più comuni."
+},
+"general/append-vs-merge-join-csv": {
+"title": "Accodare, unire o collegare: come combinare correttamente i file CSV",
+"description": "Capisci la differenza tra accodare righe, unire file con la stessa struttura e collegare file con dati correlati. Scegli l'approccio giusto per gestire il tuo catalogo e-commerce."
+},
+"general/csv-basics-for-imports": {
+"title": "Nozioni di base sul CSV per le importazioni e-commerce",
+"description": "Comprendi intestazioni, codifica UTF-8, virgolette, fine riga e gli errori più comuni che fanno fallire le importazioni CSV, prima del tuo primo caricamento."
+},
+"general/csv-column-mismatch-fix": {
+"title": "Correggere le colonne CSV non corrispondenti",
+"description": "Come diagnosticare e correggere gli errori di colonne nelle importazioni CSV: nomi di colonna sbagliati, differenze tra maiuscole e minuscole, spazi in più e problemi di ordine delle colonne sulle varie piattaforme."
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "Regole di formattazione CSV per le importazioni e-commerce",
+"description": "Le regole di formattazione esatte che il tuo CSV deve rispettare per superare le importazioni delle piattaforme e-commerce: delimitatori, virgolette, fine riga, codifica e intestazioni."
+},
+"general/csv-import-checklist": {
+"title": "Checklist di importazione CSV per le piattaforme e-commerce",
+"description": "Una checklist completa da seguire prima di importare file CSV in Shopify, WooCommerce, Etsy, eBay e Amazon: codifica, intestazioni, tipi di dati e regole specifiche di ogni piattaforma."
+},
+"general/csv-import-errors-explained": {
+"title": "Gli errori di importazione CSV spiegati",
+"description": "Una spiegazione semplice dei messaggi di errore di importazione CSV più comuni su Shopify, WooCommerce, Etsy, eBay e Amazon, e come correggere ciascuno."
+},
+"general/fix-blank-rows-in-csv": {
+"title": "Eliminare le righe vuote da un file CSV",
+"description": "Come trovare ed eliminare le righe vuote di un file CSV prima di importarlo in Shopify, WooCommerce, Etsy, eBay o Amazon, con Excel, Google Sheets o Python."
+},
+"general/fix-csv-encoding-errors": {
+"title": "Correggere gli errori di codifica dei CSV",
+"description": "Diagnostica e correggi i problemi di codifica UTF-8 nei file CSV: caratteri illeggibili, marcatori BOM, mojibake e file ANSI che fanno fallire le importazioni."
+},
+"general/fix-extra-columns-in-csv": {
+"title": "Eliminare le colonne in eccesso da un file CSV",
+"description": "Come trovare e rimuovere colonne in eccesso o inattese da un file CSV prima di importarlo in Shopify, WooCommerce, Etsy, eBay o Amazon."
+},
+"general/fix-mojibake-encoding": {
+"title": "Correggere il mojibake e gli errori di codifica nei file CSV",
+"description": "Risolvi il testo illeggibile causato da codifiche non corrispondenti. Impara a riconoscere i conflitti tra UTF-8 e Latin-1, a rimuovere il BOM e a salvare di nuovo i file correttamente."
+},
+"general/merge-two-csv-files": {
+"title": "Come unire due file CSV",
+"description": "Guida passo passo per combinare due file CSV in uno con Power Query di Excel, Google Sheets o una semplice riga di comando, senza esperienza di programmazione."
+},
+"general/prevent-excel-scientific-notation": {
+"title": "Impedire a Excel di convertire SKU e codici a barre in notazione scientifica",
+"description": "Evita che Excel trasformi SKU, codici EAN e UPC in notazione scientifica come 1.23456E+11. Formatta le colonne come testo prima di incollare, usa l'importazione guidata e ripara i file esistenti."
+},
+"general/remove-duplicate-header-rows": {
+"title": "Rimuovere le righe di intestazione duplicate dai file CSV",
+"description": "Trova ed elimina le righe di intestazione ripetute a metà delle esportazioni CSV. Scopri le cause più comuni, individuale con i filtri di Excel e Google Sheets ed evitale nelle esportazioni future."
+},
+"general/validate-csv-before-import": {
+"title": "Convalida il tuo CSV prima di caricarlo su qualsiasi piattaforma e-commerce",
+"description": "Una checklist pratica per individuare errori di codifica, intestazioni mancanti, righe di lunghezza diversa, problemi di virgolette e altri difetti prima che l'importazione fallisca. Copre Shopify, WooCommerce, eBay, Amazon ed Etsy."
+},
+"shopify/images-in-product-csv": {
+"title": "Immagini prodotto Shopify nel CSV: Image Src, testo alternativo e posizioni",
+"description": "Scopri come strutturare gli URL delle immagini nel CSV prodotti di Shopify: le colonne Image Src, Image Position e Image Alt Text, come aggiungere più immagini per prodotto ed evitare gli errori di importazione più comuni."
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Guida al campo Handle nel CSV di Shopify",
+"description": "Tutto quello che devi sapere sul campo Handle del CSV prodotti di Shopify: a cosa serve, le regole per un handle valido, come raggruppa le varianti e come correggere gli errori di handle."
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Errori di importazione CSV di Shopify: cause comuni e soluzioni",
+"description": "Una guida completa agli errori di importazione CSV più comuni di Shopify: colonne mancanti, booleani non validi, problemi di struttura delle varianti, errori di prezzo e conflitti di handle."
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Il modello CSV prodotti di Shopify spiegato",
+"description": "Una spiegazione colonna per colonna di ogni campo del modello CSV prodotti ufficiale di Shopify: a cosa serve ogni colonna, quali valori accetta e quali sono obbligatorie."
+},
+"shopify/variants-explained": {
+"title": "Le varianti di prodotto Shopify spiegate: struttura CSV ed errori comuni",
+"description": "Scopri come il formato CSV di Shopify rappresenta le varianti con il raggruppamento per Handle, le colonne Option e le righe principali/figlie. Evita gli errori che dividono i prodotti, fanno sparire varianti o bloccano l'importazione."
+},
+"woocommerce/variable-products-parent-child": {
+"title": "Prodotti variabili WooCommerce nel CSV: righe principali e di variazione",
+"description": "Capisci come l'importatore di prodotti WooCommerce rappresenta i prodotti variabili con righe principali e figlie (variazioni): colonne degli attributi, campi obbligatori per tipo di riga e le trappole di importazione più comuni."
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "Attributi di prodotto WooCommerce nel CSV: guida completa",
+"description": "Come formattare correttamente gli attributi di prodotto WooCommerce in un file CSV: nomi degli attributi, attributi globali e locali, attributi di variazione ed errori comuni."
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "Errori di importazione CSV dei prodotti WooCommerce: cause e soluzioni",
+"description": "Correggi gli errori più comuni di importazione CSV dei prodotti WooCommerce: SKU mancanti, tipi non validi, problemi nelle righe di variazione, formato dei prezzi e colonne degli attributi."
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Le importazioni di prodotti in Shopify sono esigenti: un solo prezzo malformato, un valore di opzione mancante o una riga di immagine fuori posto possono far fallire l'intera importazione.",
+"Questa preimpostazione convalida il tuo CSV rispetto al modello ufficiale di Shopify e applica correzioni automatiche sicure, così puoi caricarlo con tranquillità. Mantieni il pieno controllo dei tuoi dati: ogni correzione viene registrata e il CSV esportato resta pronto per l'importazione in Shopify."
+],
+"howItWorks": [
+"Carica la tua esportazione CSV di Shopify o il modello ufficiale.",
+"Normalizziamo le intestazioni e i formati comuni (booleani, importi, valori di inventario) e convalidiamo i campi obbligatori.",
+"Correggiamo automaticamente i problemi sicuri (come rimuovere spazi, uniformare TRUE/FALSE, normalizzare i campi prezzo) e segnaliamo quelli rischiosi da controllare.",
+"Esporta un CSV pulito che corrisponde allo schema atteso da Shopify."
+],
+"commonFixes": [
+"Uniformare i booleani (TRUE/FALSE) e i valori di stato (active/draft/archived).",
+"Normalizzare gli importi (Price, Compare-at price, Cost per item) e rimuovere simboli di valuta superflui.",
+"Rilevare SKU duplicati e collisioni di varianti che bloccano l'importazione.",
+"Convalidare la struttura delle opzioni (nome/valore di Option1/2/3) e segnalare le righe di variante incomplete.",
+"Convalidare le righe di immagini (Product image URL, Image position) e segnalare URL mancanti o non validi.",
+"Ripulire e normalizzare spazi, tag e formato degli handle per maggiore coerenza."
+],
+"faq": [
+{
+"q": "Modificherà i miei dati di prodotto?",
+"a": "Vengono applicate automaticamente solo correzioni di formato sicure e reversibili (ad esempio la rimozione degli spazi o la normalizzazione di TRUE/FALSE). Gli elementi rischiosi vengono segnalati così puoi decidere prima di esportare."
+},
+{
+"q": "Funziona con le esportazioni di altre app?",
+"a": "Sì. Molte app di Shopify aggiungono colonne in più. StriveFormats conserva le colonne sconosciute e si concentra sul rendere pronti per l'importazione i campi obbligatori di Shopify."
+},
+{
+"q": "Posso usare il modello ufficiale di Shopify?",
+"a": "Sì. Puoi scaricare l'esempio del modello ufficiale da questa pagina e caricarlo direttamente nel correttore."
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"L'importatore CSV di prodotti integrato in WooCommerce è rigido su nomi di colonna, tipi di dati e struttura delle variazioni. Questa preimpostazione convalida il tuo file rispetto ai campi standard dell'importatore e applica normalizzazioni sicure perché l'importazione vada a buon fine.",
+"Usala per migrazioni, aggiornamenti di prezzo in blocco, aggiunta di categorie/tag e importazione di prodotti variabili con le loro variazioni. Tutto ciò che è rischioso resta nell'elenco dei problemi per una verifica manuale."
+],
+"howItWorks": [
+"Carica il tuo CSV prodotti di WooCommerce (esportazione o modello di importazione).",
+"Normalizziamo le intestazioni e i valori comuni, e segnaliamo i campi obbligatori mancanti.",
+"Le correzioni sicure vengono applicate automaticamente (booleani, prezzi, pulizia degli URL).",
+"Controlla i problemi rimanenti, poi esporta un CSV pronto per l'importazione."
+],
+"commonFixes": [
+"Normalizzare Published / In stock? / Backorders allowed? / Sold individually?",
+"Normalizzare Regular price / Sale price in decimali semplici (senza simboli di valuta)",
+"Rimuovere gli spazi ovunque e normalizzare i separatori di categorie/tag",
+"Convalidare gli URL delle immagini e rimuovere le voci vuote",
+"Rilevare combinazioni di attributi di variazione duplicate sotto lo stesso prodotto principale"
+],
+"faq": [
+{
+"q": "Funziona con l'importatore integrato di WooCommerce?",
+"a": "Sì. Questa preimpostazione è costruita intorno ai campi dell'importatore CSV di prodotti di WooCommerce e alle intestazioni di esportazione comuni che mappi nella schermata di importazione."
+},
+{
+"q": "Gestisce le variazioni?",
+"a": "Convalida la struttura delle variazioni (Parent + attributi) e rileva le combinazioni di variazione duplicate. Le correzioni sicure vengono applicate automaticamente; gli errori di struttura restano bloccanti."
+},
+{
+"q": "E le colonne specifiche dei plugin?",
+"a": "Le colonne in più restano come sono: il file corretto ha le stesse colonne, nello stesso ordine, del file che hai caricato."
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"I venditori Etsy esportano spesso le inserzioni in fogli di calcolo per modifiche in blocco, verifiche o per preparare una migrazione. Questa preimpostazione convalida i campi comuni del CSV delle inserzioni Etsy e applica una pulizia sicura per mantenere i dati coerenti.",
+"Si concentra su titoli, prezzi, quantità, tag e URL delle immagini. Tutto ciò che potrebbe cambiare il significato di un'inserzione resta visibile come problema."
+],
+"howItWorks": [
+"Carica il tuo CSV di inserzioni Etsy.",
+"Convalidiamo i campi obbligatori e i limiti comuni dei campi Etsy.",
+"Le correzioni sicure vengono applicate automaticamente (pulizia, normalizzazione, URL, formato numerico).",
+"Controlla i problemi rimanenti, poi esporta un file pulito."
+],
+"commonFixes": [
+"Rimuovere gli spazi e normalizzare i separatori dei tag",
+"Verificare che Price sia un decimale valido e Quantity un numero intero",
+"Convalidare e ripulire gli elenchi di URL delle immagini",
+"Avvisare quando titoli o tag superano i limiti di Etsy"
+],
+"faq": [
+{
+"q": "È un importatore ufficiale di inserzioni Etsy?",
+"a": "Questa preimpostazione è pensata per i flussi comuni con CSV di inserzioni Etsy (esportazioni e fogli di modifica in blocco) e mantiene i campi entro i limiti documentati da Etsy."
+},
+{
+"q": "Cosa convalida?",
+"a": "Titoli, prezzi, quantità, tag (numero/lunghezza) e URL delle immagini. Segnala i valori non validi o vuoti che spesso compromettono le modifiche in blocco."
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"Il caricamento in blocco di eBay (Seller Hub › Report › Caricamenti, ex File Exchange) permette di aggiungere e aggiornare migliaia di inserzioni da un solo CSV. Questa preimpostazione controlla ogni riga in base a ciò che eBay richiede per la sua Action: le nuove inserzioni hanno bisogno di titolo, categoria numerica, prezzo, quantità e condizione; le righe Revise, Relist ed End hanno bisogno dell'ItemID dell'inserzione.",
+"Il tuo file mantiene le sue colonne e intestazioni, inclusi sito e valuta nella prima colonna (ad esempio *Action(SiteID=UK|Country=GB|Currency=GBP|...)), così viene caricato sul sito eBay giusto."
+],
+"howItWorks": [
+"Carica il CSV che vuoi inviare a eBay (qualsiasi sito eBay).",
+"Riconosciamo i nomi di colonna di eBay, con o senza l'asterisco * dei campi obbligatori.",
+"Ogni riga viene controllata in base alla sua Action: titoli, ID di categoria, prezzi, quantità, ID di condizione, durate e URL delle foto.",
+"I CustomLabel (SKU) duplicati vengono segnalati prima che si sovrascrivano.",
+"Scarica il file corretto con le tue colonne originali intatte."
+],
+"commonFixes": [
+"Normalizzare maiuscole/minuscole di Action (Add, Revise, Relist, End)",
+"Convertire prezzi come 12,50 o $12.50 in decimali semplici",
+"Convertire nomi di condizione come \"New\" o \"Used\" in ConditionID",
+"Ripulire gli elenchi di URL delle foto separati da | (fino a 24 foto)",
+"Segnalare i titoli oltre il limite di 80 caratteri di eBay",
+"Segnalare le inserzioni a prezzo fisso che non sono GTC"
+],
+"faq": [
+{
+"q": "Con quali siti eBay funziona?",
+"a": "Con tutti. Sito e valuta derivano dall'intestazione della prima colonna (SiteID, Country, Currency), che viene mantenuta esattamente come caricata."
+},
+{
+"q": "Cos'è ConditionID?",
+"a": "ConditionID è la condizione numerica dell'oggetto su eBay, es. 1000 = Nuovo, 1500 = Nuovo (altro), 2750 = Come nuovo, 3000 = Usato, 7000 = Per ricambi o non funzionante. Gli ID consentiti variano in base alla categoria. I nomi di condizione nel tuo file vengono convertiti in ID quando non ci sono ambiguità."
+},
+{
+"q": "Quali durate sono supportate?",
+"a": "Le inserzioni a prezzo fisso sono GTC (Good 'Til Cancelled). Le aste durano Days_1, Days_3, Days_5, Days_7 o Days_10."
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"Un'inserzione eBay con variazioni raggruppa articoli correlati, come una maglietta in più taglie e colori, in un'unica inserzione. Nel file di caricamento eBay è una riga principale (titolo, categoria e RelationshipDetails con tutti i valori, es. Color=Blue;Red|Size=M;L) seguita da una riga Relationship=Variation per ogni variante, con il proprio SKU, prezzo e quantità.",
+"Questa preimpostazione controlla quella struttura: ogni variazione segue la sua principale, usa solo valori dichiarati dalla principale e ha combinazione, prezzo e quantità propri."
+],
+"howItWorks": [
+"Carica il tuo CSV di variazioni eBay.",
+"Troviamo ogni riga principale e le righe di variazione sotto di essa.",
+"Il RelationshipDetails di ogni variazione viene confrontato con quello della principale e le combinazioni duplicate vengono segnalate.",
+"Prezzi, quantità e URL delle foto vengono ripuliti in ogni riga.",
+"Scarica il file corretto con le tue colonne originali intatte."
+],
+"commonFixes": [
+"Segnalare le variazioni con valori assenti dal RelationshipDetails della principale",
+"Segnalare combinazioni taglia/colore duplicate in un'inserzione",
+"Segnalare le righe di variazione senza prezzo o quantità",
+"Convertire prezzi come 12,50 in decimali semplici",
+"Convalidare le coppie VariationSpecificsName / VariationSpecificsValue dei fogli di calcolo meno recenti"
+],
+"faq": [
+{
+"q": "Come funziona RelationshipDetails?",
+"a": "Nella riga principale, elenca ogni nome di variazione con tutti i suoi valori: Color=Blue;Red|Size=M;L. In ogni riga di variazione, indica i valori di quella variante: Color=Blue|Size=M. Le righe di variazione lasciano vuoti Action e Title."
+},
+{
+"q": "Il mio foglio di calcolo usa colonne VariationSpecificsName. È supportato?",
+"a": "Sì. Nomi e valori separati da | (Color|Size e Blue|M) vengono controllati per il numero corrispondente e le combinazioni duplicate."
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"L'Inventory Loader di Amazon è il caricamento di Seller Central per aggiungere o aggiornare offerte su prodotti che hanno già un ASIN: prezzo, quantità, condizione ed evasione. Questa preimpostazione controlla ogni riga secondo le regole di Amazon e mantiene i nomi delle colonne esattamente come sono, perché Amazon abbina le colonne per nome esatto.",
+"Individua i problemi che fanno rifiutare righe ad Amazon o collegano offerte al prodotto sbagliato: codici a barre trasformati in 1.23457E+11 da un foglio di calcolo, UPC che hanno perso uno zero iniziale, codici product-id-type errati, SKU oltre i 40 caratteri e SKU duplicati."
+],
+"howItWorks": [
+"Carica il tuo file Inventory Loader (vengono riconosciute anche le colonne dei modelli di categoria come item_sku ed external_product_id).",
+"Ogni riga viene controllata: SKU, ID prodotto e relativo tipo, prezzo, quantità, condizione, add-delete e centro di evasione.",
+"I prezzi scritti come 12,50 o $12.50 vengono convertiti in decimali semplici.",
+"Gli SKU duplicati vengono segnalati prima che si sovrascrivano.",
+"Scarica il file con le tue colonne originali intatte."
+],
+"commonFixes": [
+"Convertire prezzi e prezzi min/max in decimali semplici",
+"Segnalare codici a barre in notazione scientifica (1.23457E+11) e zeri iniziali mancanti",
+"Controllare la lunghezza di UPC/EAN/ISBN/ASIN in base a product-id-type",
+"Segnalare gli SKU oltre il limite di 40 caratteri di Amazon",
+"Convalidare add-delete (a, d o x)",
+"Rilevare SKU duplicati"
+],
+"faq": [
+{
+"q": "Quale formato è supportato?",
+"a": "L'Inventory Loader di Amazon (file delle offerte), con colonne minuscole e con trattini come sku, product-id, product-id-type, price, quantity e add-delete."
+},
+{
+"q": "Quali sono i codici product-id-type?",
+"a": "Nell'Inventory Loader, product-id-type è un numero: 1 = ASIN, 2 = ISBN, 3 = UPC, 4 = EAN. I modelli di categoria usano invece i nomi."
+},
+{
+"q": "Quali sono i codici item-condition validi?",
+"a": "11 = Nuovo, 10 = Ricondizionato, 1–4 = Usato (Come nuovo, Ottime condizioni, Buone condizioni, Accettabile), 5–8 = livelli da collezione."
+},
+{
+"q": "A cosa serve add-delete?",
+"a": "a aggiunge o aggiorna l'offerta, d elimina l'offerta e x elimina l'offerta e i dati di prodotto che hai fornito."
+},
+{
+"q": "Cos'è fulfillment-center-id?",
+"a": "DEFAULT significa che spedisci tu l'ordine. AMAZON_NA, AMAZON_EU, AMAZON_FE o AMAZON_IN significa Logistica di Amazon in quella regione."
+}
+]
+}
+}
+}
