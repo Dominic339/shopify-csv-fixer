@@ -901,11 +901,7 @@ useEffect(() => {
       // Large files are parsed + validated in a Web Worker so the page stays responsive.
       const res = await processCsv(csvText, format, { strictShopify: getStrictMode() });
 
-      const nextParseIssues: UiIssue[] = (res.parseErrors ?? []).map((m) => ({
-        message: m,
-        level: "error",
-        severity: "error",
-      }));
+      const nextParseIssues: UiIssue[] = (res.parseIssues ?? []).map((p) => ({ ...p, level: p.severity }));
 
       setParseIssues(nextParseIssues);
 

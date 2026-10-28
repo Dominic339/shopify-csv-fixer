@@ -218,7 +218,7 @@ test("profile: language selector is visible", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Language/i })).toBeVisible({ timeout: 8_000 });
 
   // A select element with locale options should exist
-  const langSelect = page.locator('select[aria-label="Select language"]');
+  const langSelect = page.locator('select[aria-label="Language"]');
   await expect(langSelect).toBeVisible();
 
   // Should have at least "English" option
@@ -230,7 +230,7 @@ test("profile: language selector is visible", async ({ page }) => {
 test("profile: changing language updates selection", async ({ page }) => {
   await page.goto("/profile");
 
-  const langSelect = page.locator('select[aria-label="Select language"]');
+  const langSelect = page.locator('select[aria-label="Language"]');
   await expect(langSelect).toBeVisible({ timeout: 8_000 });
 
   // Wait for navigation that may occur after selecting a locale

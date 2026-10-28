@@ -2,14 +2,45 @@ import Papa from "papaparse";
 
 export type CsvRow = Record<string, string>;
 
+/** A structural problem the CSV parser found, as an issue the fixer can show. */
+export type ParseIssue = {
+  rowIndex: number; // 0-based data row, or -1 for the whole file
+  column: string;
+  severity: "error" | "warning";
+  code: string;
+  message: string;
+};
+
 export type ParseResult = {
   headers: string[];
   rows: CsvRow[];
   parseErrors: string[];
+  parseIssues: ParseIssue[];
 };
+
+/**
+ * Rows are rebuilt from the header on export, so extra cells are dropped and missing ones
+ * come out empty: worth a warning. Broken quoting means cells ran together: that is an error.
+ */
+function toParseIssue(e: Papa.ParseError): ParseIssue {
+  const rowIndex = typeof e.row === "number" ? e.row : -1;
+  const where = rowIndex >= 0 ? `Row ${rowIndex + 1}` : "The file";
+  switch (e.code) {
+    case "TooManyFields":
+      return { rowIndex, column: "(file)", severity: "warning", code: "csv/too_many_fields", message: `${where} has more cells than there are headers. The extra cells are dropped on export.` };
+    case "TooFewFields":
+      return { rowIndex, column: "(file)", severity: "warning", code: "csv/too_few_fields", message: `${where} has fewer cells than there are headers. The missing cells are exported empty; check the values didn't shift into the wrong columns.` };
+    case "MissingQuotes":
+    case "InvalidQuotes":
+      return { rowIndex, column: "(file)", severity: "error", code: "csv/broken_quotes", message: `${where} has a quote that is never closed, so the following cells ran together. Fix the quoting in the source file and upload it again.` };
+    default:
+      return { rowIndex, column: "(file)", severity: "error", code: "csv/parse_error", message: `${where}: ${e.message}` };
+  }
+}
 
 export function parseCsv(text: string): ParseResult {
   const parseErrors: string[] = [];
+  const parseIssues: ParseIssue[] = [];
 
   const res = Papa.parse<Record<string, unknown>>(text, {
     header: true,
@@ -21,6 +52,8 @@ export function parseCsv(text: string): ParseResult {
   if (res.errors?.length) {
     for (const e of res.errors) {
       parseErrors.push(`${e.code}: ${e.message} (row ${e.row ?? "?"})`);
+      // "UndetectableDelimiter" just means a one-column file; not a problem.
+      if (e.code !== "UndetectableDelimiter") parseIssues.push(toParseIssue(e));
     }
   }
 
@@ -35,7 +68,7 @@ export function parseCsv(text: string): ParseResult {
   const headers =
     (res.meta?.fields?.map((h) => String(h)) ?? []).filter((h) => h.trim().length > 0);
 
-  return { headers, rows: data, parseErrors };
+  return { headers, rows: data, parseErrors, parseIssues };
 }
 
 export function toCsv(headers: string[], rows: CsvRow[]): string {

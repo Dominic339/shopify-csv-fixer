@@ -2,7 +2,7 @@
 // Parse CSV text and run a format over it. Shared by the main thread and the
 // CSV Web Worker, so it must not touch window/document.
 
-import { parseCsv } from "@/lib/csv";
+import { parseCsv, type ParseIssue } from "@/lib/csv";
 import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
 import { userFormatToCsvFormat, type UserFormatV1 } from "@/lib/formats/customUser";
@@ -14,7 +14,7 @@ export type FormatRef = { kind: "builtin"; id: string } | { kind: "user"; spec: 
 
 export type ProcessCsvOptions = { strictShopify: boolean };
 
-export type ProcessCsvResult = CsvFixResult & { parseErrors: string[] };
+export type ProcessCsvResult = CsvFixResult & { parseErrors: string[]; parseIssues: ParseIssue[] };
 
 export function resolveFormat(ref: FormatRef): CsvFormat | null {
   if (ref.kind === "user") return userFormatToCsvFormat(ref.spec);
@@ -26,7 +26,7 @@ export function processCsvText(text: string, format: CsvFormat, opts: ProcessCsv
   try {
     const parsed = parseCsv(text);
     const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
-    return { ...res, parseErrors: parsed.parseErrors ?? [] };
+    return { ...res, parseErrors: parsed.parseErrors ?? [], parseIssues: parsed.parseIssues ?? [] };
   } finally {
     setStrictModeOverride(null);
   }
