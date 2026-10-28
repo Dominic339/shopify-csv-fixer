@@ -298,10 +298,10 @@ export default function ProfileClient({ tProfile, navT }: Props) {
               ) : null}
 
               <Link
-                href="/ecommerce-csv-fixer"
+                href={localeHref(currentLocale, "/app")}
                 className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
               >
-                {tProfile.backToEcommerce}
+                {navT.csvFixer}
               </Link>
             </div>
 

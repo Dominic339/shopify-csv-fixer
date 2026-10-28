@@ -141,8 +141,8 @@ export default function AmazonCsvFixerPage() {
         <Link href="/presets" className="hover:underline">
           Preset Formats
         </Link>
-        <Link href="/ecommerce/amazon" className="hover:underline">
-          Amazon resources
+        <Link href="/guides/amazon" className="hover:underline">
+          Amazon guides
         </Link>
         <Link href="/shopify-csv-fixer" className="hover:underline">
           Shopify CSV Fixer

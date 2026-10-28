@@ -139,8 +139,8 @@ export default function EbayCsvFixerPage() {
         <Link href="/presets" className="hover:underline">
           Preset Formats
         </Link>
-        <Link href="/ecommerce/ebay" className="hover:underline">
-          eBay resources
+        <Link href="/guides/ebay" className="hover:underline">
+          eBay guides
         </Link>
         <Link href="/ebay-variations-csv-fixer" className="hover:underline">
           eBay Variations CSV Fixer

@@ -109,8 +109,8 @@ export default function EtsyCsvFixerPage() {
         <Link href="/presets" className="hover:underline">
           Preset Formats
         </Link>
-        <Link href="/ecommerce/etsy" className="hover:underline">
-          Etsy resources
+        <Link href="/guides/etsy" className="hover:underline">
+          Etsy guides
         </Link>
         <Link href="/ebay-csv-fixer" className="hover:underline">
           eBay CSV Fixer

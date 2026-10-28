@@ -123,8 +123,8 @@ export default function EbayVariationsCsvFixerPage() {
         <Link href="/ebay-csv-fixer" className="hover:underline">
           eBay CSV Fixer
         </Link>
-        <Link href="/ecommerce/ebay" className="hover:underline">
-          eBay resources
+        <Link href="/guides/ebay" className="hover:underline">
+          eBay guides
         </Link>
         <Link href="/amazon-csv-fixer" className="hover:underline">
           Amazon CSV Fixer

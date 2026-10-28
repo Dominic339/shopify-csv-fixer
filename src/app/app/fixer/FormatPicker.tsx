@@ -53,7 +53,7 @@ export function FormatPicker({ f, t }: { f: Fixer; t: AppStrings }) {
         ) : (
           <>
             {t.customFormatsAdvancedOnly}{" "}
-            <Link className="underline" href={localeHref(f.currentLocale, "/checkout")}>
+            <Link className="underline" href={`${localeHref(f.currentLocale, "/")}#pricing`}>
               {t.upgradeToAdvanced}
             </Link>
           </>

@@ -88,8 +88,8 @@ export default function WooCommerceVariableCsvFixerPage() {
         <Link href="/presets" className="hover:underline">
           Preset Formats
         </Link>
-        <Link href="/ecommerce/woocommerce" className="hover:underline">
-          WooCommerce resources
+        <Link href="/guides/woocommerce" className="hover:underline">
+          WooCommerce guides
         </Link>
         <Link href="/ebay-csv-fixer" className="hover:underline">
           eBay CSV Fixer

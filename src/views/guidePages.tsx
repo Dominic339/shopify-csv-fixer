@@ -510,7 +510,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                   {t.guide.viewTemplates}
                 </Link>
                 {platform !== "general" && (
-                  <Link className="pill-btn" href={`/ecommerce/${platform}`}>
+                  <Link className="pill-btn" href={href(`/guides/${platform}`)}>
                     {fmt(t.guide.platformGuide, { platform: label })}
                   </Link>
                 )}
