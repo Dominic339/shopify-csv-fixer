@@ -35,14 +35,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/guides", "monthly", 0.8),
     ...getPresetFormats().flatMap((preset) => translated(`/presets/${encodeURIComponent(preset.id)}`, "monthly", 0.7)),
 
-    // Platform landing pages (English)
-    english("/shopify-csv-fixer", "monthly", 0.85),
-    english("/woocommerce-csv-fixer", "monthly", 0.85),
-    english("/woocommerce-variable-csv-fixer", "monthly", 0.8),
-    english("/etsy-csv-fixer", "monthly", 0.8),
-    english("/ebay-csv-fixer", "monthly", 0.8),
-    english("/ebay-variations-csv-fixer", "monthly", 0.75),
-    english("/amazon-csv-fixer", "monthly", 0.8),
+    // Platform landing pages (translated)
+    ...translated("/shopify-csv-fixer", "monthly", 0.85),
+    ...translated("/woocommerce-csv-fixer", "monthly", 0.85),
+    ...translated("/woocommerce-variable-csv-fixer", "monthly", 0.8),
+    ...translated("/etsy-csv-fixer", "monthly", 0.8),
+    ...translated("/ebay-csv-fixer", "monthly", 0.8),
+    ...translated("/ebay-variations-csv-fixer", "monthly", 0.75),
+    ...translated("/amazon-csv-fixer", "monthly", 0.8),
     english("/formats", "monthly", 0.7),
     english("/about", "monthly", 0.4),
     english("/privacy", "yearly", 0.2),

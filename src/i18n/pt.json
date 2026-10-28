@@ -819,5 +819,32 @@
     "toastExported": "Arquivo de formato baixado",
     "toastImported": "Formatos importados: {count}",
     "toastImportFailed": "Esse arquivo não é um arquivo de formato válido."
+  },
+  "landing": {
+    "checkFree": "Verifique seu arquivo grátis",
+    "downloadSample": "Baixar um CSV de exemplo",
+    "trustLine": "Funciona no seu navegador · Sem cadastro · {count} exportações grátis por mês",
+    "statChecks": "verificações",
+    "statBlockers": "bloqueios de importação detectados",
+    "statFixes": "correções automáticas no exemplo abaixo",
+    "demoTitle": "O que ele faz com um arquivo bagunçado",
+    "demoIntro": "Um arquivo pequeno ({kind}) com erros típicos e o resultado real do corretor. As células verdes foram corrigidas automaticamente; as vermelhas e amarelas precisam da sua decisão.",
+    "before": "Antes",
+    "after": "Depois",
+    "fixedAuto": "Corrigido automaticamente ({count})",
+    "leftForYou": "Fica com você ({count})",
+    "gotchasTitle": "Três erros comuns em arquivos de {kind}",
+    "howTitle": "Como usar",
+    "howOpen": "Abra o corretor",
+    "howOpenRest": "e solte o arquivo. As correções seguras são aplicadas na hora.",
+    "howWork": "Resolva o que sobrou na tabela; cada problema mostra a linha e a coluna.",
+    "howExport": "Exporte o arquivo corrigido e baixe o registro de correções se quiser um histórico de cada alteração.",
+    "blockersTitle": "Bloqueios de importação que ele detecta",
+    "autoFix": "correção automática",
+    "seeAllChecks": "Ver todas as {count} verificações →",
+    "questions": "Perguntas",
+    "guidesTitle": "Guias",
+    "allGuides": "Todos os guias de {platform} →",
+    "otherFixers": "Outros corretores"
   }
 }

@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "Lege cellen overschrijven echte gegevens",
+    "body": "Als je importeert met \"Producten met overeenkomende handles overschrijven\", vervangt een lege cel de waarde die al in je winkel staat. De hersteller exporteert alleen de kolommen die je bestand echt gebruikt, dus een ontbrekende kolom kan niets wissen."
+   },
+   {
+    "title": "Varianten zijn rijen met dezelfde handle",
+    "body": "Alleen de eerste rij van een product bevat de titel en beschrijving. Elke volgende rij is een variant en heeft eigen optiewaarden nodig. Twee rijen met dezelfde opties worden geweigerd, en de hersteller laat je beide zien."
+   },
+   {
+    "title": "Prijzen en booleans in Shopify-notatie",
+    "body": "\"$ 45\", \"45,00\" en \"yes\" zien er in een spreadsheet prima uit, maar mislukken bij het importeren. Ze worden herschreven naar 45.00 en true, en elke wijziging staat in het correctielogboek."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Werkt het met oude Shopify-exports?",
+    "a": "Ja. Oudere kolomnamen zoals \"Variant Price\" en \"Body (HTML)\" worden herkend, en het gecorrigeerde bestand gebruikt de namen van de huidige sjabloon, die Shopify accepteert."
+   },
+   {
+    "q": "Worden er rijen verwijderd?",
+    "a": "Nee. Elke rij met gegevens blijft behouden (alleen volledig lege regels worden overgeslagen), en elke automatische wijziging staat in het correctielogboek."
+   },
+   {
+    "q": "Waarom zie ik zoveel problemen bij een groot bestand?",
+    "a": "Eén structureel probleem, zoals een ontbrekende optiekolom, herhaalt zich op elke variantrij. Los het één keer op in de tabel en het aantal daalt snel."
+   }
+  ],
+  "metaTitle": "Shopify CSV-hersteller | Importfouten in Shopify-product-CSV's oplossen | StriveFormats",
+  "metaDescription": "Controleer een Shopify-product-CSV vóór het importeren aan de hand van de officiële sjabloon. Prijzen, handles en true/false-waarden worden automatisch gecorrigeerd; problemen met varianten en overschrijven worden per rij aangewezen.",
+  "kicker": "Shopify-producten",
+  "title": "CSV-hersteller voor Shopify",
+  "intro": "De Shopify-import is streng: één product met een foute handle of twee identieke varianten kan het hele bestand tegenhouden. Controleer je CSV hier eerst, krijg de veilige correcties gratis en zie precies welke rijen nog jouw aandacht nodig hebben.",
+  "exportTip": "In de Shopify-beheeromgeving: Producten → Exporteren → \"Gewoon CSV-bestand\". Of begin met de officiële sjabloon."
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "Ja/nee-kolommen zijn 1 en 0",
+    "body": "Published, \"In stock?\" en vergelijkbare kolommen verwachten 1 of 0 (Published staat ook -1 toe voor concepten). Waarden zoals \"yes\" of \"TRUE\" worden voor je omgezet."
+   },
+   {
+    "title": "SKU's moeten uniek zijn",
+    "body": "De importer vindt bestaande producten via ID of SKU. Twee rijen met dezelfde SKU betekent dat er één mislukt of de andere overschrijft, dus de hersteller markeert beide."
+   },
+   {
+    "title": "De actieprijs moet lager zijn",
+    "body": "Een actieprijs gelijk aan of hoger dan de normale prijs wordt geaccepteerd, maar toont een zinloze \"aanbieding\". Hij wordt als waarschuwing gemarkeerd, zodat je typefouten vindt vóór je klanten."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Verandert het mijn kolomnamen?",
+    "a": "Nee. Het gecorrigeerde bestand behoudt precies de kolommen die je uploadde, in dezelfde volgorde, dus het importeert opnieuw met dezelfde kolomkoppeling."
+   },
+   {
+    "q": "En variabele producten?",
+    "a": "Gebruik de hersteller voor variabele WooCommerce-producten. Die controleert ook of elke variatie naar een hoofdproduct verwijst en een unieke combinatie van attributen heeft."
+   }
+  ],
+  "metaTitle": "WooCommerce CSV-hersteller | Importfouten bij WooCommerce-producten oplossen | StriveFormats",
+  "metaDescription": "Controleer een WooCommerce-product-CSV voordat je de importer start. Prijzen, booleans en voorraadwaarden worden genormaliseerd; dubbele SKU's en fouten in de actieprijs worden per rij gemarkeerd.",
+  "kicker": "WooCommerce-producten",
+  "title": "CSV-hersteller voor WooCommerce",
+  "intro": "De ingebouwde importer van WooCommerce slaat rijen over die hij niet begrijpt en vertelt niet altijd waarom. Controleer het bestand hier eerst: de hersteller leest dezelfde kolommen die WooCommerce exporteert en wijst de rijen aan die overgeslagen zouden worden.",
+  "exportTip": "In WordPress: Producten → Exporteren. Laat \"Alle kolommen exporteren\" aangevinkt."
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "Elke variatie heeft een hoofdproduct nodig",
+    "body": "De kolom Parent bevat de SKU van het hoofdproduct (of id:123). Staat het hoofdproduct niet in het bestand, dan moet het al in je winkel bestaan; de hersteller vertelt je welke hij niet kon vinden."
+   },
+   {
+    "title": "Eén combinatie per variatie",
+    "body": "Twee variaties van hetzelfde product met dezelfde attribuutwaarden kunnen niet allebei bestaan. De hersteller markeert het paar, zodat je er één kunt aanpassen."
+   },
+   {
+    "title": "Hoofdproducten noemen alle waarden",
+    "body": "De rij van het hoofdproduct noemt alle waarden van een attribuut, gescheiden door komma's (\"S, M, L\"); elke variatierij alleen haar eigen waarde."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kunnen hoofdproducten en variaties in aparte bestanden staan?",
+    "a": "Ja, zolang de hoofdproducten eerst worden geïmporteerd. Een variatie waarvan het hoofdproduct niet in het bestand staat, wordt als informatie gemeld, niet als fout."
+   },
+   {
+    "q": "Werkt het met meer dan één attribuut?",
+    "a": "Ja. Attribute 1, Attribute 2 enzovoort worden allemaal vergeleken bij het zoeken naar dubbele combinaties."
+   }
+  ],
+  "metaTitle": "Hersteller voor variabele WooCommerce-producten | Variaties en attributen | StriveFormats",
+  "metaDescription": "Controleer variabele WooCommerce-producten en variaties vóór het importeren: verwijzingen naar het hoofdproduct, attribuutwaarden en dubbele variatiecombinaties, rij voor rij.",
+  "kicker": "variabele WooCommerce-producten",
+  "title": "Hersteller voor variabele WooCommerce-producten",
+  "intro": "Bij variabele producten gaan WooCommerce-imports meestal mis: een variatie die naar het verkeerde hoofdproduct verwijst, of twee variaties met dezelfde attributen. De hersteller controleert de hele productfamilie samen, niet één rij tegelijk.",
+  "exportTip": "Exporteer via Producten → Exporteren, inclusief variaties. Hoofdproducten hebben Type \"variable\", onderliggende producten \"variation\"."
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "13 tags, niet meer",
+    "body": "Etsy houdt de eerste 13 tags en laat de rest vallen. De hersteller telt ze voor elke listing en normaliseert de scheidingstekens."
+   },
+   {
+    "title": "Prijzen zonder symbolen",
+    "body": "Prijzen zijn gewone getallen in de valuta van je winkel: \"$18\" wordt 18.00, en valutacodes worden in hoofdletters gezet (usd → USD)."
+   },
+   {
+    "title": "Afbeeldingslinks moeten volledige URL's zijn",
+    "body": "\"example.com/mug.jpg\" laadt niet; er moet https:// voor. Kapotte afbeeldingslinks worden vóór het uploaden gemarkeerd."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kan ik het gecorrigeerde bestand direct naar Etsy uploaden?",
+    "a": "Etsy heeft geen eigen CSV-upload voor listings, dus de meeste verkopers gebruiken het gecorrigeerde bestand met een app voor bulkbewerking of als schone masterkopie van hun catalogus."
+   },
+   {
+    "q": "Controleert het ook andere Etsy-limieten?",
+    "a": "Het controleert tags, prijzen, aantallen, valutacodes en afbeeldings-URL's. Categorie en verzendprofiel stel je nog steeds in bij Etsy in."
+   }
+  ],
+  "metaTitle": "Etsy CSV-hersteller | Etsy-listing-CSV's opschonen | StriveFormats",
+  "metaDescription": "Schoon een Etsy-listing-CSV op: prijzen, valutacodes en tags worden genormaliseerd, en taglimieten, afbeeldings-URL's en ontbrekende gegevens worden per rij gemarkeerd.",
+  "kicker": "Etsy-listings",
+  "title": "CSV-hersteller voor Etsy",
+  "intro": "De listingexport van Etsy is handig om in bulk te bewerken in een spreadsheet, en net zo makkelijk kapot te maken. De hersteller zet prijzen, valutacodes en tags recht en waarschuwt voor alles wat Etsy zou afkappen of weigeren.",
+  "exportTip": "In Shop Manager: Instellingen → Opties → Gegevens downloaden → \"CSV downloaden\" onder Listings."
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "Staten zijn getallen",
+    "body": "eBay wil een ConditionID zoals 1000 (Nieuw) of 3000 (Gebruikt). Woorden als \"Used\" worden omgezet naar de bijbehorende code."
+   },
+   {
+    "title": "Vaste prijs betekent GTC",
+    "body": "Listings met vaste prijs lopen altijd \"Good 'Til Cancelled\". Elke andere looptijd op een rij met vaste prijs wordt gemarkeerd (eBay zou er GTC van maken), en waarden als \"30\" die helemaal geen geldige looptijd zijn, zijn fouten."
+   },
+   {
+    "title": "Nieuwe listings hebben een categorie nodig",
+    "body": "Een listing toevoegen zonder categorienummer mislukt. Wijzigingen mogen hem leeg laten, dus de hersteller markeert hem alleen op Add-rijen."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Blijft de kop *Action(SiteID=...) behouden?",
+    "a": "Ja. De kop van de eerste kolom bevat je site- en valuta-instellingen en blijft precies zoals je hem uploadde."
+   },
+   {
+    "q": "En listings met meerdere variaties?",
+    "a": "Gebruik de hersteller voor eBay-variaties, die ook de hoofd- en subrijen van elke listing met elkaar vergelijkt."
+   }
+  ],
+  "metaTitle": "eBay CSV-hersteller | Uploads voor File Exchange en Seller Hub corrigeren | StriveFormats",
+  "metaDescription": "Controleer een eBay-listingbestand voordat je het uploadt naar de Seller Hub-rapporten of File Exchange: acties, staat-ID's, looptijden, categorieën, prijzen en aantallen.",
+  "kicker": "eBay-listings",
+  "title": "CSV-hersteller voor eBay",
+  "intro": "De uploadsjablonen van eBay zijn kieskeurig over codes: de Action-kolom, numerieke staat-ID's en looptijden moeten precies kloppen. De hersteller zet de gangbare waarden voor je om en wijst de rest aan.",
+  "exportTip": "Seller Hub → Rapporten → Uploads → \"Sjabloon downloaden\", of exporteer je actieve listings."
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "De hoofdrij noemt elke optie",
+    "body": "De RelationshipDetails van de hoofdrij ziet er zo uit: Size=8;9|Color=Blue. Elke subrij mag alleen waarden gebruiken die daar staan."
+   },
+   {
+    "title": "Subrijen hebben prijs en aantal",
+    "body": "Elke Variation-rij heeft een eigen SKU, prijs en aantal, terwijl titel en categorie op de hoofdrij staan."
+   },
+   {
+    "title": "Geen dubbele combinaties",
+    "body": "Twee subrijen met Size=8|Color=Blue worden geweigerd. De hersteller markeert het paar, en ook dubbele SKU's."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kan ik losse listings en listings met variaties combineren?",
+    "a": "Ja. Rijen zonder Relationship worden als losse listings behandeld en gecontroleerd zoals met de voorinstelling voor eBay-listings."
+   },
+   {
+    "q": "Verandert het de volgorde van mijn rijen?",
+    "a": "Nee. Elke subrij hoort bij de dichtstbijzijnde hoofdrij erboven, dus de volgorde waarin je uploadde blijft behouden."
+   }
+  ],
+  "metaTitle": "Hersteller voor eBay-variaties | Listings met meerdere variaties controleren | StriveFormats",
+  "metaDescription": "Controleer eBay-listings met meerdere variaties vóór het uploaden: de opties van elke variatie moeten op de hoofdrij staan, en geen twee variaties mogen dezelfde combinatie hebben.",
+  "kicker": "eBay-listings met variaties",
+  "title": "Hersteller voor eBay-variaties",
+  "intro": "Een listing met variaties is één hoofdrij en een subrij per maat of kleur, met elkaar verbonden via RelationshipDetails. De hersteller leest de hele groep en vertelt je welke subrij niet bij de hoofdrij past.",
+  "exportTip": "Download de variatiesjabloon via Seller Hub → Rapporten → Uploads, of exporteer listings met variaties."
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "Codes, geen woorden",
+    "body": "product-id-type is 1 (ASIN), 2 (ISBN), 3 (UPC) of 4 (EAN), en item-condition is een getal, zoals 11 voor Nieuw. Woorden worden automatisch omgezet."
+   },
+   {
+    "title": "Spreadsheets beschadigen barcodes",
+    "body": "Excel maakt van 012345678905 de waarde 1.23457E+11 of laat de voorloopnul weg. Beide worden herkend; bij een weggevallen nul wordt het waarschijnlijke originele nummer voorgesteld."
+   },
+   {
+    "title": "Blijf binnen je prijsbereik",
+    "body": "Valt de prijs buiten je minimaal/maximaal toegestane verkoopprijs, dan deactiveert Amazon de aanbieding. De hersteller vergelijkt alle drie."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Werkt het met categoriesjablonen (flatfiles)?",
+    "a": "Het accepteert hun kolomnamen, zoals item_sku en external_product_id_type, en laat ze staan, maar de controles zijn bedoeld voor aanbiedingsbestanden."
+   },
+   {
+    "q": "Mijn bestand is een tab-gescheiden .txt. Kan ik dat gebruiken?",
+    "a": "Ja, upload het zoals het is. Het gecorrigeerde bestand wordt als CSV geëxporteerd; open het in een spreadsheet en sla het op als tab-gescheiden tekst als Seller Central om een .txt vraagt."
+   }
+  ],
+  "metaTitle": "Amazon Inventory Loader-hersteller | Amazon-aanbiedingsbestanden corrigeren | StriveFormats",
+  "metaDescription": "Controleer een Amazon Inventory Loader-bestand vóór het uploaden: product-ID-typen en staatcodes worden omgezet, en beschadigde barcodes, aantallen en prijsbereiken worden gemarkeerd.",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Hersteller voor de Amazon Inventory Loader",
+  "intro": "De Inventory Loader voegt aanbiedingen toe aan producten die al op Amazon staan, of werkt ze bij. Het is een kort bestand, maar het hangt af van codes en ID's die spreadsheets graag beschadigen. De hersteller zet de codes om en vangt de schade op.",
+  "exportTip": "Seller Central → Catalogus → Producten toevoegen via upload → Een voorraadbestand downloaden (Inventory Loader)."
+ }
+}

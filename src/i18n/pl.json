@@ -819,5 +819,32 @@
     "toastExported": "Pobrano plik formatu",
     "toastImported": "Zaimportowane formaty: {count}",
     "toastImportFailed": "Ten plik nie jest prawidłowym plikiem formatu."
+  },
+  "landing": {
+    "checkFree": "Sprawdź plik za darmo",
+    "downloadSample": "Pobierz przykładowy CSV",
+    "trustLine": "Działa w przeglądarce · Bez rejestracji · {count} darmowych eksportów miesięcznie",
+    "statChecks": "sprawdzeń",
+    "statBlockers": "wykrywanych blokad importu",
+    "statFixes": "automatycznych poprawek w przykładzie poniżej",
+    "demoTitle": "Co robi z nieuporządkowanym plikiem",
+    "demoIntro": "Mały plik ({kind}) z typowymi błędami i rzeczywisty wynik korektora. Zielone komórki poprawiono automatycznie; o czerwonych i żółtych musisz zdecydować sam.",
+    "before": "Przed",
+    "after": "Po",
+    "fixedAuto": "Poprawione automatycznie ({count})",
+    "leftForYou": "Do zrobienia przez Ciebie ({count})",
+    "gotchasTitle": "Trzy częste błędy w plikach: {kind}",
+    "howTitle": "Jak z tego korzystać",
+    "howOpen": "Otwórz korektor",
+    "howOpenRest": "i upuść plik. Bezpieczne poprawki są stosowane od razu.",
+    "howWork": "Przejrzyj to, co zostało w tabeli; każdy problem podaje wiersz i kolumnę.",
+    "howExport": "Wyeksportuj poprawiony plik i pobierz dziennik poprawek, jeśli chcesz mieć zapis każdej zmiany.",
+    "blockersTitle": "Wykrywane blokady importu",
+    "autoFix": "auto-poprawka",
+    "seeAllChecks": "Zobacz wszystkie sprawdzenia ({count}) →",
+    "questions": "Pytania",
+    "guidesTitle": "Poradniki",
+    "allGuides": "Wszystkie poradniki: {platform} →",
+    "otherFixers": "Inne korektory"
   }
 }

@@ -819,5 +819,32 @@
     "toastExported": "Format file downloaded",
     "toastImported": "Imported {count} format(s)",
     "toastImportFailed": "That file is not a valid format file."
+  },
+  "landing": {
+    "checkFree": "Check your file, free",
+    "downloadSample": "Download a sample CSV",
+    "trustLine": "Runs in your browser · No sign-up · {count} free exports a month",
+    "statChecks": "checks",
+    "statBlockers": "import blockers caught",
+    "statFixes": "automatic fixes in the example below",
+    "demoTitle": "What it does to a messy file",
+    "demoIntro": "A small {kind} file with typical mistakes, and the fixer's actual output for it. Green cells were fixed automatically; red and amber cells need a decision.",
+    "before": "Before",
+    "after": "After",
+    "fixedAuto": "Fixed automatically ({count})",
+    "leftForYou": "Left for you ({count})",
+    "gotchasTitle": "Three things {kind} files get wrong",
+    "howTitle": "How to use it",
+    "howOpen": "Open the fixer",
+    "howOpenRest": "and drop in the file. Safe fixes are applied straight away.",
+    "howWork": "Work through what's left in the table; every issue says which row and column it's on.",
+    "howExport": "Export the fixed file and download the fix log if you want a record of every change.",
+    "blockersTitle": "Import blockers it catches",
+    "autoFix": "auto-fix",
+    "seeAllChecks": "See all {count} checks →",
+    "questions": "Questions",
+    "guidesTitle": "Guides",
+    "allGuides": "All {platform} guides →",
+    "otherFixers": "Other fixers"
   }
 }

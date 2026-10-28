@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import { pathInLocale, splitLocale, isLocalisedPath } from "@/lib/i18n/paths";
 import { pageAlternates } from "@/lib/i18n/seo";
 import { fmt, getTranslations } from "@/lib/i18n/getTranslations";
-import { LOCALES } from "@/lib/i18n/locales";
+import { LOCALES, pickLocale } from "@/lib/i18n/locales";
 import en from "@/i18n/en.json";
 
 describe("locale paths", () => {
@@ -57,5 +57,27 @@ describe("translations", () => {
   it("fills placeholders", () => {
     expect(fmt("Why {platform} rejects this", { platform: "eBay" })).toBe("Why eBay rejects this");
     expect(fmt("{a} {missing}", { a: 1 })).toBe("1 {missing}");
+  });
+});
+
+describe("pickLocale (device language)", () => {
+  it("picks the highest-ranked supported language from Accept-Language", () => {
+    expect(pickLocale("ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")).toBe("ru");
+    expect(pickLocale("sv-SE,sv;q=0.9,de;q=0.8,en;q=0.7")).toBe("de");
+    expect(pickLocale("en;q=0.5,fr;q=0.9")).toBe("fr");
+    expect(pickLocale("pt-BR")).toBe("pt");
+    expect(pickLocale("zh-TW,zh;q=0.9")).toBe("zh");
+  });
+
+  it("returns English for English devices and null when nothing matches", () => {
+    expect(pickLocale("en-GB,en;q=0.9")).toBe("en");
+    expect(pickLocale("sv-SE,fi;q=0.8")).toBeNull();
+    expect(pickLocale("*")).toBeNull();
+    expect(pickLocale("")).toBeNull();
+    expect(pickLocale(null)).toBeNull();
+  });
+
+  it("accepts navigator.languages", () => {
+    expect(pickLocale(["ja-JP", "en-US"])).toBe("ja");
   });
 });

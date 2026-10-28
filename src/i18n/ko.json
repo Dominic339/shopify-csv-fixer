@@ -819,5 +819,32 @@
     "toastExported": "형식 파일을 다운로드했습니다",
     "toastImported": "형식 {count}개를 가져왔습니다",
     "toastImportFailed": "유효한 형식 파일이 아닙니다."
+  },
+  "landing": {
+    "checkFree": "무료로 파일 검사하기",
+    "downloadSample": "샘플 CSV 다운로드",
+    "trustLine": "브라우저에서 실행 · 가입 불필요 · 매월 무료 내보내기 {count}회",
+    "statChecks": "검사 항목",
+    "statBlockers": "감지하는 가져오기 차단 문제",
+    "statFixes": "아래 샘플의 자동 수정",
+    "demoTitle": "엉망인 파일을 어떻게 고치는지",
+    "demoIntro": "흔한 실수가 담긴 작은 {kind} 파일과 수정기가 실제로 만들어 낸 결과입니다. 초록색 셀은 자동으로 수정되었고, 빨간색과 노란색 셀은 직접 판단하셔야 합니다.",
+    "before": "수정 전",
+    "after": "수정 후",
+    "fixedAuto": "자동 수정됨 ({count})",
+    "leftForYou": "직접 확인할 항목 ({count})",
+    "gotchasTitle": "{kind} 파일에서 흔히 생기는 세 가지 함정",
+    "howTitle": "사용 방법",
+    "howOpen": "수정기를 열고",
+    "howOpenRest": "파일을 끌어다 놓으세요. 안전한 수정은 바로 적용됩니다.",
+    "howWork": "나머지는 표에서 처리하세요. 각 문제에는 행과 열이 표시됩니다.",
+    "howExport": "수정된 파일을 내보내고, 필요하면 모든 변경 사항이 담긴 수정 로그도 다운로드하세요.",
+    "blockersTitle": "감지하는 가져오기 차단 문제",
+    "autoFix": "자동 수정",
+    "seeAllChecks": "검사 {count}개 모두 보기 →",
+    "questions": "자주 묻는 질문",
+    "guidesTitle": "가이드",
+    "allGuides": "{platform} 가이드 전체 보기 →",
+    "otherFixers": "다른 수정기"
   }
 }

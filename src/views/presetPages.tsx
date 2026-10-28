@@ -135,7 +135,7 @@ export async function PresetsView({ locale }: { locale: Locale }) {
         <p className={`mt-2 text-base ${muted}`}>{t.common.platformFixersDesc}</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {FIXER_PAGES.map(({ href: h, platform, variations }) => (
-            <Link key={h} href={h} className={`${card} p-5 text-base font-semibold text-[var(--text)] hover:border-[var(--ring)]`}>
+            <Link key={h} href={href(h)} className={`${card} p-5 text-base font-semibold text-[var(--text)] hover:border-[var(--ring)]`}>
               {fmt(variations ? t.presets.variationsFixer : t.guides.fixerButton, { platform })}
             </Link>
           ))}

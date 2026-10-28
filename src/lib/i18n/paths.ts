@@ -4,7 +4,22 @@
 import { DEFAULT_LOCALE, isValidLocale, localeHref, type Locale } from "@/lib/i18n/locales";
 
 /** Page groups that have a /<locale>/ version. Other pages are English-only. */
-export const LOCALISED_PREFIXES = ["/guides", "/app", "/convert", "/merge", "/csv-inspector", "/profile", "/presets"];
+export const LOCALISED_PREFIXES = [
+  "/guides",
+  "/app",
+  "/convert",
+  "/merge",
+  "/csv-inspector",
+  "/profile",
+  "/presets",
+  "/shopify-csv-fixer",
+  "/woocommerce-csv-fixer",
+  "/woocommerce-variable-csv-fixer",
+  "/etsy-csv-fixer",
+  "/ebay-csv-fixer",
+  "/ebay-variations-csv-fixer",
+  "/amazon-csv-fixer",
+];
 
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 

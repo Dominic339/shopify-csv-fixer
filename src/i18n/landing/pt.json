@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "Células vazias sobrescrevem dados reais",
+    "body": "Ao importar com \"Sobrescrever produtos com handles correspondentes\", uma célula vazia substitui o valor que já está na sua loja. O corretor exporta só as colunas que seu arquivo realmente usa, então uma coluna ausente não apaga nada."
+   },
+   {
+    "title": "Variantes são linhas com o mesmo handle",
+    "body": "Só a primeira linha de um produto tem o título e a descrição. Cada linha seguinte é uma variante e precisa dos próprios valores de opção. Duas linhas com as mesmas opções são rejeitadas, e o corretor mostra as duas."
+   },
+   {
+    "title": "Preços e booleanos no formato do Shopify",
+    "body": "\"$ 45\", \"45,00\" e \"yes\" parecem certos na planilha, mas falham na importação. Eles são reescritos como 45.00 e true, e cada alteração aparece no registro de correções."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Funciona com exportações antigas do Shopify?",
+    "a": "Sim. Nomes de coluna antigos como \"Variant Price\" e \"Body (HTML)\" são reconhecidos, e o arquivo corrigido usa os nomes do modelo atual, que o Shopify aceita."
+   },
+   {
+    "q": "Ele apaga linhas?",
+    "a": "Não. Toda linha com dados é mantida (só linhas totalmente vazias são ignoradas), e cada alteração automática aparece no registro de correções."
+   },
+   {
+    "q": "Por que vejo tantos problemas num arquivo grande?",
+    "a": "Um único problema de estrutura, como uma coluna de opção ausente, se repete em cada linha de variante. Corrija uma vez na tabela e o número cai rápido."
+   }
+  ],
+  "metaTitle": "Corretor de CSV do Shopify | Corrija erros de importação de produtos no Shopify | StriveFormats",
+  "metaDescription": "Confira um CSV de produtos do Shopify com o modelo oficial antes de importar. Preços, handles e valores true/false são corrigidos automaticamente; problemas de variantes e sobrescrita são apontados na linha exata.",
+  "kicker": "produtos do Shopify",
+  "title": "Corretor de CSV para Shopify",
+  "intro": "O importador do Shopify é rigoroso: um produto com handle errado ou duas variantes idênticas podem travar o arquivo inteiro. Confira seu CSV aqui primeiro, receba as correções seguras de graça e veja exatamente quais linhas ainda precisam de você.",
+  "exportTip": "No painel do Shopify: Produtos → Exportar → \"Arquivo CSV simples\". Ou comece pelo modelo oficial."
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "Colunas de sim/não são 1 e 0",
+    "body": "Published, \"In stock?\" e colunas parecidas esperam 1 ou 0 (Published também aceita -1 para rascunhos). Valores como \"yes\" ou \"TRUE\" são convertidos para você."
+   },
+   {
+    "title": "SKUs precisam ser únicos",
+    "body": "O importador encontra produtos existentes por ID ou SKU. Duas linhas com o mesmo SKU fazem uma falhar ou sobrescrever a outra, por isso o corretor marca as duas."
+   },
+   {
+    "title": "O preço promocional tem que ser menor",
+    "body": "Um preço promocional igual ou maior que o normal é aceito, mas mostra uma \"promoção\" sem sentido. Ele é marcado como aviso para você pegar erros de digitação antes dos clientes."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Ele muda os nomes das minhas colunas?",
+    "a": "Não. O arquivo corrigido mantém exatamente as colunas enviadas, na mesma ordem, então ele é importado de novo com o mesmo mapeamento."
+   },
+   {
+    "q": "E os produtos variáveis?",
+    "a": "Use o corretor de produtos variáveis do WooCommerce. Ele também confere se cada variação aponta para um produto principal e tem uma combinação de atributos única."
+   }
+  ],
+  "metaTitle": "Corretor de CSV do WooCommerce | Corrija erros de importação de produtos no WooCommerce | StriveFormats",
+  "metaDescription": "Confira um CSV de produtos do WooCommerce antes de rodar o importador. Preços, booleanos e valores de estoque são normalizados; SKUs duplicados e erros no preço promocional são apontados por linha.",
+  "kicker": "produtos do WooCommerce",
+  "title": "Corretor de CSV para WooCommerce",
+  "intro": "O importador nativo do WooCommerce pula linhas que não entende e nem sempre diz por quê. Confira o arquivo aqui primeiro: o corretor lê as mesmas colunas que o WooCommerce exporta e aponta as linhas que seriam puladas.",
+  "exportTip": "No WordPress: Produtos → Exportar. Mantenha \"Exportar todas as colunas\" selecionado."
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "Toda variação precisa de um produto principal",
+    "body": "A coluna Parent traz o SKU do principal (ou id:123). Se o principal não estiver no arquivo, ele já precisa existir na sua loja; o corretor diz quais não encontrou."
+   },
+   {
+    "title": "Uma combinação por variação",
+    "body": "Duas variações do mesmo produto com os mesmos valores de atributo não podem coexistir. O corretor marca o par para você mudar uma delas."
+   },
+   {
+    "title": "Os principais listam todos os valores",
+    "body": "A linha principal lista todos os valores de um atributo separados por vírgulas (\"S, M, L\"); cada linha de variação traz só o próprio valor."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Principais e variações podem ficar em arquivos separados?",
+    "a": "Sim, desde que os principais sejam importados antes. Uma variação cujo principal não está no arquivo é informada como aviso, não como erro."
+   },
+   {
+    "q": "Funciona com mais de um atributo?",
+    "a": "Sim. Attribute 1, Attribute 2 e assim por diante são todos comparados na busca por combinações duplicadas."
+   }
+  ],
+  "metaTitle": "Corretor de CSV de produtos variáveis do WooCommerce | Variações e atributos | StriveFormats",
+  "metaDescription": "Confira produtos variáveis e variações do WooCommerce antes de importar: referências ao produto principal, valores de atributo e combinações de variação duplicadas, linha por linha.",
+  "kicker": "produtos variáveis do WooCommerce",
+  "title": "Corretor de produtos variáveis do WooCommerce",
+  "intro": "É nos produtos variáveis que as importações do WooCommerce costumam dar errado: uma variação que aponta para o produto principal errado, ou duas variações com os mesmos atributos. O corretor confere a família inteira junta, não só uma linha por vez.",
+  "exportTip": "Exporte em Produtos → Exportar, incluindo variações. Os principais têm Type \"variable\" e os filhos \"variation\"."
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "13 tags, nada mais",
+    "body": "O Etsy mantém as 13 primeiras tags e descarta o resto. O corretor conta as tags de cada anúncio e normaliza os separadores."
+   },
+   {
+    "title": "Preços sem símbolos",
+    "body": "Preços são números simples na moeda da sua loja: \"$18\" vira 18.00, e os códigos de moeda ficam em maiúsculas (usd → USD)."
+   },
+   {
+    "title": "Links de imagem precisam ser URLs completas",
+    "body": "\"example.com/mug.jpg\" não carrega; precisa de https://. Links de imagem quebrados são apontados antes do envio."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Posso enviar o arquivo corrigido direto para o Etsy?",
+    "a": "O Etsy não tem upload de CSV nativo para anúncios, então a maioria dos vendedores usa o arquivo corrigido com um app de edição em massa ou como cópia mestre limpa do catálogo."
+   },
+   {
+    "q": "Ele confere outros limites do Etsy?",
+    "a": "Ele confere tags, preços, quantidades, códigos de moeda e URLs de imagem. Categoria e perfil de envio continuam sendo definidos no Etsy."
+   }
+  ],
+  "metaTitle": "Corretor de CSV do Etsy | Limpe CSVs de anúncios do Etsy | StriveFormats",
+  "metaDescription": "Limpe um CSV de anúncios do Etsy: preços, códigos de moeda e tags são normalizados, e limites de tags, URLs de imagem e dados ausentes são apontados por linha.",
+  "kicker": "anúncios do Etsy",
+  "title": "Corretor de CSV para Etsy",
+  "intro": "A exportação de anúncios do Etsy é ótima para editar em massa numa planilha, e igualmente fácil de estragar. O corretor arruma preços, códigos de moeda e tags, e avisa sobre tudo o que o Etsy cortaria ou rejeitaria.",
+  "exportTip": "No Shop Manager: Configurações → Opções → Baixar dados → \"Baixar CSV\" em Anúncios."
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "Condições são números",
+    "body": "O eBay quer um ConditionID como 1000 (Novo) ou 3000 (Usado). Palavras como \"Used\" são convertidas no código correspondente."
+   },
+   {
+    "title": "Preço fixo significa GTC",
+    "body": "Anúncios de preço fixo sempre ficam \"Good 'Til Cancelled\". Qualquer outra duração numa linha de preço fixo é marcada (o eBay trocaria por GTC), e valores como \"30\", que nem são durações válidas, são erros."
+   },
+   {
+    "title": "Anúncios novos precisam de categoria",
+    "body": "Adicionar um anúncio sem número de categoria falha. Revisões podem deixá-la em branco, então o corretor só marca isso nas linhas Add."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Ele mantém o cabeçalho *Action(SiteID=...)?",
+    "a": "Sim. O cabeçalho da primeira coluna traz suas configurações de site e moeda, e é mantido exatamente como você enviou."
+   },
+   {
+    "q": "E os anúncios com várias variações?",
+    "a": "Use o corretor de variações do eBay, que também compara as linhas principais e filhas de cada anúncio entre si."
+   }
+  ],
+  "metaTitle": "Corretor de CSV do eBay | Corrija envios do File Exchange e do Seller Hub | StriveFormats",
+  "metaDescription": "Confira um arquivo de anúncios do eBay antes de enviá-lo aos relatórios do Seller Hub ou ao File Exchange: ações, IDs de condição, durações, categorias, preços e quantidades.",
+  "kicker": "anúncios do eBay",
+  "title": "Corretor de CSV para eBay",
+  "intro": "Os modelos de upload do eBay são exigentes com códigos: a coluna Action, os IDs numéricos de condição e as durações do anúncio precisam estar exatos. O corretor converte os valores comuns para você e aponta o resto.",
+  "exportTip": "Seller Hub → Relatórios → Uploads → \"Baixar modelo\", ou exporte seus anúncios ativos."
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "A principal lista todas as opções",
+    "body": "O RelationshipDetails da principal fica assim: Size=8;9|Color=Blue. Cada filha só pode usar valores que aparecem ali."
+   },
+   {
+    "title": "As filhas têm preço e quantidade",
+    "body": "Cada linha Variation tem o próprio SKU, preço e quantidade, enquanto título e categoria ficam na principal."
+   },
+   {
+    "title": "Sem combinações duplicadas",
+    "body": "Duas filhas com Size=8|Color=Blue são rejeitadas. O corretor marca o par, e também SKUs duplicados."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Posso misturar anúncios simples e com variações?",
+    "a": "Sim. Linhas sem Relationship são tratadas como anúncios simples e conferidas como na predefinição de anúncios do eBay."
+   },
+   {
+    "q": "Ele muda a ordem das minhas linhas?",
+    "a": "Não. Cada filha pertence à principal mais próxima acima dela, então a ordem enviada é mantida."
+   }
+  ],
+  "metaTitle": "Corretor de CSV de variações do eBay | Confira anúncios com várias variações | StriveFormats",
+  "metaDescription": "Confira anúncios do eBay com várias variações antes de enviar: as opções de cada variação precisam existir na linha principal, e duas variações não podem ter a mesma combinação.",
+  "kicker": "anúncios do eBay com variações",
+  "title": "Corretor de variações do eBay",
+  "intro": "Um anúncio com variações é uma linha principal e uma linha filha por tamanho ou cor, ligadas pelo RelationshipDetails. O corretor lê o grupo inteiro e diz qual filha não combina com a principal.",
+  "exportTip": "Baixe o modelo de variações em Seller Hub → Relatórios → Uploads, ou exporte anúncios com variações."
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "Códigos, não palavras",
+    "body": "product-id-type é 1 (ASIN), 2 (ISBN), 3 (UPC) ou 4 (EAN), e item-condition é um número, como 11 para Novo. Palavras são convertidas automaticamente."
+   },
+   {
+    "title": "Planilhas estragam códigos de barras",
+    "body": "O Excel transforma 012345678905 em 1.23457E+11 ou remove o zero à esquerda. Os dois casos são detectados; quando falta um zero, o número original provável é sugerido."
+   },
+   {
+    "title": "Fique dentro da sua faixa de preço",
+    "body": "Se o preço ficar fora do mínimo/máximo permitido pelo vendedor, a Amazon desativa a oferta. O corretor compara os três."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Funciona com modelos de categoria (arquivos planos)?",
+    "a": "Ele aceita os nomes de coluna deles, como item_sku e external_product_id_type, e os mantém, mas as verificações foram pensadas para arquivos de ofertas."
+   },
+   {
+    "q": "Meu arquivo é um .txt separado por tabulações. Posso usar?",
+    "a": "Sim, envie como está. O arquivo corrigido é exportado como CSV; abra numa planilha e salve como texto separado por tabulações se o Seller Central pedir .txt."
+   }
+  ],
+  "metaTitle": "Corretor de CSV do Amazon Inventory Loader | Corrija arquivos de ofertas da Amazon | StriveFormats",
+  "metaDescription": "Confira um arquivo do Amazon Inventory Loader antes de enviar: tipos de ID de produto e códigos de condição são convertidos, e códigos de barras estragados, quantidades e faixas de preço são apontados.",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Corretor para o Amazon Inventory Loader",
+  "intro": "O Inventory Loader adiciona ou atualiza ofertas de produtos que já existem na Amazon. O arquivo é curto, mas depende de códigos e identificadores que as planilhas adoram estragar. O corretor converte os códigos e pega os estragos.",
+  "exportTip": "Seller Central → Catálogo → Adicionar produtos via upload → Baixar um arquivo de estoque (Inventory Loader)."
+ }
+}

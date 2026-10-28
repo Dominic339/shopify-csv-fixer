@@ -49,3 +49,26 @@ export function localeHref(locale: Locale, path = ""): string {
   if (locale === DEFAULT_LOCALE) return norm || "/";
   return norm === "/" ? `/${locale}` : `/${locale}${norm}`;
 }
+
+/**
+ * The best supported locale for a browser's language preferences: an Accept-Language
+ * header ("ru-RU,ru;q=0.9,en;q=0.8") or a list like navigator.languages. Regional
+ * variants match their base language (pt-BR → pt, zh-TW → zh). Null if none match.
+ */
+export function pickLocale(preferences: string | readonly string[] | null | undefined): Locale | null {
+  if (!preferences) return null;
+  const entries =
+    typeof preferences === "string"
+      ? preferences.split(",").map((part, i) => {
+          const [tag, ...params] = part.trim().split(";");
+          const q = params.map((p) => p.trim()).find((p) => p.startsWith("q="));
+          return { tag, q: q ? Number(q.slice(2)) : 1, i };
+        })
+      : preferences.map((tag, i) => ({ tag, q: 1, i }));
+  const ranked = entries.filter((e) => e.tag && e.q > 0).sort((a, b) => b.q - a.q || a.i - b.i);
+  for (const { tag } of ranked) {
+    const base = tag.toLowerCase().split("-")[0];
+    if (isValidLocale(base)) return base;
+  }
+  return null;
+}

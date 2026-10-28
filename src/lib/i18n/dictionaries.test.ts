@@ -12,6 +12,8 @@ import { EBAY_ISSUE_META } from "@/lib/validation/issueMetaEbay";
 import { AMAZON_ISSUE_META } from "@/lib/validation/issueMetaAmazon";
 import { listCuratedGuides } from "@/lib/guides/mdxLoader";
 import { getAllFormats } from "@/lib/formats";
+import { PLATFORM_LANDINGS } from "@/lib/landing/platforms";
+import en from "@/i18n/en.json";
 
 const root = process.cwd();
 const read = (dir: string, loc: string) => JSON.parse(fs.readFileSync(path.join(root, "src/i18n", dir, `${loc}.json`), "utf8"));
@@ -45,5 +47,21 @@ describe.each(LOCALES.filter((l) => l !== "en"))("%s dictionaries", (loc) => {
         expect(t[field]?.length, `${f.id}.${field}`).toBe(f.seo![field]?.length ?? 0);
       }
     }
+  });
+
+  it("translate every platform landing page and its UI labels", () => {
+    const landing = read("landing", loc);
+    for (const [slug, p] of Object.entries(PLATFORM_LANDINGS)) {
+      const t = landing[slug];
+      expect(t, slug).toBeTruthy();
+      for (const field of ["metaTitle", "metaDescription", "kicker", "title", "intro", "exportTip"] as const) {
+        expect(t[field], `${slug}.${field}`).toBeTruthy();
+      }
+      expect(t.gotchas?.length, `${slug}.gotchas`).toBe(p.gotchas.length);
+      expect(t.faq?.length, `${slug}.faq`).toBe(p.faq.length);
+    }
+    const ui: Record<string, string> = JSON.parse(fs.readFileSync(path.join(root, "src/i18n", `${loc}.json`), "utf8")).landing ?? {};
+    const bad = Object.entries(en.landing).filter(([k, v]) => !ui[k] || placeholders(ui[k]).join() !== placeholders(v).join());
+    expect(bad.map(([k]) => k)).toEqual([]);
   });
 });

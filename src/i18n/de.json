@@ -819,5 +819,32 @@
     "toastExported": "Formatdatei heruntergeladen",
     "toastImported": "Importierte Formate: {count}",
     "toastImportFailed": "Diese Datei ist keine gültige Formatdatei."
+  },
+  "landing": {
+    "checkFree": "Datei kostenlos prüfen",
+    "downloadSample": "Beispiel-CSV herunterladen",
+    "trustLine": "Läuft in deinem Browser · Ohne Anmeldung · {count} kostenlose Exporte pro Monat",
+    "statChecks": "Prüfungen",
+    "statBlockers": "erkannte Import-Blocker",
+    "statFixes": "automatische Korrekturen im Beispiel unten",
+    "demoTitle": "Was es mit einer unordentlichen Datei macht",
+    "demoIntro": "Eine kleine Datei ({kind}) mit typischen Fehlern und die tatsächliche Ausgabe des Reparateurs dafür. Grüne Zellen wurden automatisch korrigiert; bei roten und gelben Zellen musst du entscheiden.",
+    "before": "Vorher",
+    "after": "Nachher",
+    "fixedAuto": "Automatisch korrigiert ({count})",
+    "leftForYou": "Bleibt für dich ({count})",
+    "gotchasTitle": "Drei typische Fehler in Dateien für {kind}",
+    "howTitle": "So funktioniert es",
+    "howOpen": "Öffne den Reparateur",
+    "howOpenRest": "und lege die Datei ab. Sichere Korrekturen werden sofort angewendet.",
+    "howWork": "Arbeite den Rest in der Tabelle ab; jedes Problem nennt Zeile und Spalte.",
+    "howExport": "Exportiere die korrigierte Datei und lade bei Bedarf das Korrekturprotokoll mit allen Änderungen herunter.",
+    "blockersTitle": "Import-Blocker, die erkannt werden",
+    "autoFix": "Auto-Korrektur",
+    "seeAllChecks": "Alle {count} Prüfungen ansehen →",
+    "questions": "Fragen",
+    "guidesTitle": "Anleitungen",
+    "allGuides": "Alle Anleitungen zu {platform} →",
+    "otherFixers": "Weitere Reparateure"
   }
 }

@@ -1,6 +1,7 @@
-// Shared body for the platform landing pages (/shopify-csv-fixer, /etsy-csv-fixer, ...).
-// Each page's content comes from src/lib/landing/platforms.ts; the before/after example
-// is the real fixer run on LANDING_DEMOS when the page is built.
+// Shared body for the platform landing pages (/shopify-csv-fixer, /de/etsy-csv-fixer, ...).
+// Each page's content comes from src/lib/landing/platforms.ts (translations in
+// src/i18n/landing); the before/after example is the real fixer run on LANDING_DEMOS
+// when the page is built, with its messages translated.
 
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -9,25 +10,30 @@ import FAQJsonLd from "@/components/FAQJsonLd";
 import { parseCsv } from "@/lib/csv";
 import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
-import { getGuidesByPlatform, issueCodeToSlug, PLATFORM_LABEL } from "@/lib/guidesRegistry";
+import { getGuidesByPlatform, issueCodeToSlug } from "@/lib/guidesRegistry";
+import { guideLocalizer } from "@/lib/guides/localizeGuide";
 import { LANDING_DEMOS } from "@/lib/landing/demos";
-import { PLATFORM_LANDINGS, type LandingSlug } from "@/lib/landing/platforms";
+import { type LandingSlug } from "@/lib/landing/platforms";
+import { localizedLandings } from "@/lib/landing/localize";
 import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
 import { SHOPIFY_HEADER_ALIASES } from "@/lib/shopifySchema";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
-import { SITE_URL } from "@/lib/i18n/seo";
+import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { fmt, getTranslations, platformLabel } from "@/lib/i18n/getTranslations";
+import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
+import { loadValidationDicts, validationText } from "@/lib/i18n/validationText";
 import type { CsvIssue, CsvRow } from "@/lib/formats/types";
 
 const card = "min-w-0 rounded-3xl border border-[var(--border)] bg-[var(--surface)]";
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
 
-export function platformLandingMetadata(slug: LandingSlug): Metadata {
-  const p = PLATFORM_LANDINGS[slug];
+export async function platformLandingMetadata(slug: LandingSlug, locale: Locale = DEFAULT_LOCALE): Promise<Metadata> {
+  const p = (await localizedLandings(locale))[slug];
   return {
     title: p.metaTitle,
     description: p.metaDescription,
-    alternates: { canonical: p.path },
-    openGraph: { title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${p.path}` },
+    alternates: pageAlternates(locale, p.path),
+    openGraph: { title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${localeHref(locale, p.path)}` },
   };
 }
 
@@ -116,16 +122,30 @@ function DemoTable({ caption, headers, rows, tone }: { caption: string; headers:
   );
 }
 
-export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
-  const p = PLATFORM_LANDINGS[slug];
-  const fixerHref = `/app?preset=${encodeURIComponent(p.presetId)}`;
+export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { slug: LandingSlug; locale?: Locale }) {
+  const [landings, t, dicts, localizeGuide] = await Promise.all([
+    localizedLandings(locale),
+    getTranslations(locale),
+    loadValidationDicts(locale),
+    guideLocalizer(locale),
+  ]);
+  const p = landings[slug];
+  const L = t.landing;
+  const vt = validationText(dicts);
+  const href = (path: string) => localeHref(locale, path);
+  const fixerHref = href(`/app?preset=${encodeURIComponent(p.presetId)}`);
   const sampleHref = `/presets/${encodeURIComponent(p.presetId)}/sample.csv`;
 
-  const checks = Object.values(ISSUE_META_REGISTRY[p.presetId] ?? {}).filter((m) => m.checked !== false);
+  const checks = Object.values(ISSUE_META_REGISTRY[p.presetId] ?? {})
+    .filter((m) => m.checked !== false)
+    .map((m) => vt.meta(m));
   const blockers = checks.filter((m) => m.blocking);
 
   const demo = runDemo(slug);
-  const guides = getGuidesByPlatform(p.guidePlatform).filter((g) => g.kind === "curated").slice(0, 4);
+  const guides = getGuidesByPlatform(p.guidePlatform)
+    .filter((g) => g.kind === "curated")
+    .slice(0, 4)
+    .map(localizeGuide);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -134,7 +154,7 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web browser",
     description: p.metaDescription,
-    url: `${SITE_URL}${p.path}`,
+    url: `${SITE_URL}${localeHref(locale, p.path)}`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
 
@@ -151,22 +171,22 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
           <p className={`mt-4 max-w-2xl text-base leading-7 ${muted}`}>{p.intro}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link className="btn-primary text-center" href={fixerHref}>
-              Check your file, free
+              {L.checkFree}
             </Link>
             <Link className="pill-btn text-center" href={sampleHref}>
-              Download a sample CSV
+              {L.downloadSample}
             </Link>
           </div>
           <p className={`mt-4 text-xs ${muted}`}>
-            Runs in your browser · No sign-up · {FREE_EXPORTS_PER_MONTH} free exports a month
+            {fmt(L.trustLine, { count: FREE_EXPORTS_PER_MONTH })}
           </p>
         </div>
 
         <dl className={`${card} grid grid-cols-3 gap-2 p-5 text-center md:grid-cols-1 md:text-left`}>
           {[
-            [checks.length, "checks"],
-            [blockers.length, "import blockers caught"],
-            [demo?.result.fixesApplied.length ?? 0, "automatic fixes in the example below"],
+            [checks.length, L.statChecks],
+            [blockers.length, L.statBlockers],
+            [demo?.result.fixesApplied.length ?? 0, L.statFixes],
           ].map(([n, label]) => (
             <div key={label} className="min-w-0">
               <dt className="sr-only">{label}</dt>
@@ -182,14 +202,12 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
       {/* Live before / after */}
       {demo && (
         <section className={`${card} mt-10 p-5 sm:p-7`}>
-          <h2 className="text-2xl font-bold text-[var(--text)]">What it does to a messy file</h2>
-          <p className={`mt-2 text-sm ${muted}`}>
-            A small {p.kicker} file with typical mistakes, and the fixer&apos;s actual output for it. Green cells were fixed automatically; red and amber cells need a decision.
-          </p>
+          <h2 className="text-2xl font-bold text-[var(--text)]">{L.demoTitle}</h2>
+          <p className={`mt-2 text-sm ${muted}`}>{fmt(L.demoIntro, { kind: p.kicker })}</p>
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
-            <DemoTable caption="Before" tone="before" headers={demo.parsed.headers} rows={demo.parsed.rows.map((r: CsvRow) => demo.parsed.headers.map((h) => r[h] ?? ""))} />
+            <DemoTable caption={L.before} tone="before" headers={demo.parsed.headers} rows={demo.parsed.rows.map((r: CsvRow) => demo.parsed.headers.map((h) => r[h] ?? ""))} />
             <DemoTable
-              caption="After"
+              caption={L.after}
               tone="after"
               headers={demo.columns.map((c) => c.out)}
               rows={demo.result.fixedRows.map((r, ri) =>
@@ -205,24 +223,24 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
           </div>
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-green-400">Fixed automatically ({demo.result.fixesApplied.length})</h3>
+              <h3 className="text-sm font-semibold text-green-400">{fmt(L.fixedAuto, { count: demo.result.fixesApplied.length })}</h3>
               <ul className={`mt-2 list-disc space-y-1 pl-5 text-sm ${muted}`}>
                 {demo.result.fixesApplied.slice(0, 6).map((f) => (
-                  <li key={f}>{f}</li>
+                  <li key={f}>{vt.msg(f)}</li>
                 ))}
               </ul>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-red-400">Left for you ({demo.problems.length})</h3>
+              <h3 className="text-sm font-semibold text-red-400">{fmt(L.leftForYou, { count: demo.problems.length })}</h3>
               <ul className={`mt-2 list-disc space-y-1 pl-5 text-sm ${muted}`}>
                 {demo.problems.slice(0, 6).map((i) => (
                   <li key={`${i.code}-${i.rowIndex}`}>
                     {i.code ? (
-                      <Link className="hover:underline" href={`/guides/${p.guidePlatform}/${issueCodeToSlug(i.code)}`}>
-                        {i.message}
+                      <Link className="hover:underline" href={href(`/guides/${p.guidePlatform}/${issueCodeToSlug(i.code)}`)}>
+                        {vt.msg(i.message)}
                       </Link>
                     ) : (
-                      i.message
+                      vt.msg(i.message)
                     )}
                   </li>
                 ))}
@@ -234,7 +252,7 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
 
       {/* Platform specifics */}
       <section className="mt-10">
-        <h2 className="text-2xl font-bold text-[var(--text)]">Three things {p.kicker} files get wrong</h2>
+        <h2 className="text-2xl font-bold text-[var(--text)]">{fmt(L.gotchasTitle, { kind: p.kicker })}</h2>
         <ol className="mt-5 grid gap-4 md:grid-cols-3">
           {p.gotchas.map((g, i) => (
             <li key={g.title} className={`${card} p-5`}>
@@ -249,34 +267,36 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
       {/* How to use + blockers */}
       <section className="mt-10 grid gap-6 md:grid-cols-2">
         <div className={`${card} p-5 sm:p-7`}>
-          <h2 className="text-xl font-bold text-[var(--text)]">How to use it</h2>
+          <h2 className="text-xl font-bold text-[var(--text)]">{L.howTitle}</h2>
           <ol className={`mt-4 list-decimal space-y-2 pl-5 text-sm leading-6 ${muted}`}>
             <li>{p.exportTip}</li>
             <li>
               <Link className="font-semibold text-[var(--text)] hover:underline" href={fixerHref}>
-                Open the fixer
-              </Link>{" "}
-              and drop in the file. Safe fixes are applied straight away.
+                {L.howOpen}
+              </Link>
+              {/* Japanese and Chinese don't put spaces between words. */}
+              {locale === "ja" || locale === "zh" ? "" : " "}
+              {L.howOpenRest}
             </li>
-            <li>Work through what&apos;s left in the table; every issue says which row and column it&apos;s on.</li>
-            <li>Export the fixed file and download the fix log if you want a record of every change.</li>
+            <li>{L.howWork}</li>
+            <li>{L.howExport}</li>
           </ol>
         </div>
         <div className={`${card} p-5 sm:p-7`}>
-          <h2 className="text-xl font-bold text-[var(--text)]">Import blockers it catches</h2>
+          <h2 className="text-xl font-bold text-[var(--text)]">{L.blockersTitle}</h2>
           <ul className="mt-4 space-y-2 text-sm">
             {blockers.slice(0, 7).map((m) => (
               <li key={m.code} className="flex gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-                <Link className="text-[var(--text)] hover:underline" href={`/guides/${p.guidePlatform}/${issueCodeToSlug(m.code)}`}>
+                <Link className="text-[var(--text)] hover:underline" href={href(`/guides/${p.guidePlatform}/${issueCodeToSlug(m.code)}`)}>
                   {m.title}
                 </Link>
-                {m.autoFixable && <span className="shrink-0 text-xs text-green-400">auto-fix</span>}
+                {m.autoFixable && <span className="shrink-0 text-xs text-green-400">{L.autoFix}</span>}
               </li>
             ))}
           </ul>
-          <Link className={`mt-4 inline-block text-sm font-semibold ${p.accent.text} hover:underline`} href={`/presets/${p.presetId}`}>
-            See all {checks.length} checks →
+          <Link className={`mt-4 inline-block text-sm font-semibold ${p.accent.text} hover:underline`} href={href(`/presets/${p.presetId}`)}>
+            {fmt(L.seeAllChecks, { count: checks.length })}
           </Link>
         </div>
       </section>
@@ -284,7 +304,7 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
       {/* Guides + FAQ */}
       <section className="mt-10 grid gap-6 md:grid-cols-2">
         <div className={`${card} p-5 sm:p-7`}>
-          <h2 className="text-xl font-bold text-[var(--text)]">Questions</h2>
+          <h2 className="text-xl font-bold text-[var(--text)]">{L.questions}</h2>
           <div className="mt-4 space-y-3">
             {p.faq.map((f) => (
               <details key={f.q} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
@@ -295,32 +315,32 @@ export function PlatformLandingView({ slug }: { slug: LandingSlug }) {
           </div>
         </div>
         <div className={`${card} p-5 sm:p-7`}>
-          <h2 className="text-xl font-bold text-[var(--text)]">Guides</h2>
+          <h2 className="text-xl font-bold text-[var(--text)]">{L.guidesTitle}</h2>
           <ul className="mt-4 space-y-3">
             {guides.map((g) => (
               <li key={g.slug}>
-                <Link className="text-sm font-semibold text-[var(--text)] hover:underline" href={`/guides/${g.platform}/${g.slug}`}>
+                <Link className="text-sm font-semibold text-[var(--text)] hover:underline" href={href(`/guides/${g.platform}/${g.slug}`)}>
                   {g.title}
                 </Link>
                 <p className={`mt-0.5 line-clamp-2 text-xs ${muted}`}>{g.description}</p>
               </li>
             ))}
           </ul>
-          <Link className={`mt-4 inline-block text-sm font-semibold ${p.accent.text} hover:underline`} href={`/guides/${p.guidePlatform}`}>
-            All {PLATFORM_LABEL[p.guidePlatform]} guides →
+          <Link className={`mt-4 inline-block text-sm font-semibold ${p.accent.text} hover:underline`} href={href(`/guides/${p.guidePlatform}`)}>
+            {fmt(L.allGuides, { platform: platformLabel(t, p.guidePlatform) })}
           </Link>
         </div>
       </section>
 
       {/* Related */}
-      <nav className="mt-10" aria-label="Other fixers">
-        <h2 className={`text-xs font-bold uppercase tracking-widest ${muted}`}>Other fixers</h2>
+      <nav className="mt-10" aria-label={L.otherFixers}>
+        <h2 className={`text-xs font-bold uppercase tracking-widest ${muted}`}>{L.otherFixers}</h2>
         <ul className="mt-3 grid gap-3 sm:grid-cols-3">
           {p.related.map((r) => {
-            const o = PLATFORM_LANDINGS[r];
+            const o = landings[r];
             return (
               <li key={r}>
-                <Link href={o.path} className={`${card} block p-4 transition-colors hover:bg-[var(--surface-2)]`}>
+                <Link href={href(o.path)} className={`${card} block p-4 transition-colors hover:bg-[var(--surface-2)]`}>
                   <span className={`text-xs font-semibold ${o.accent.text}`}>{o.kicker}</span>
                   <span className="mt-1 block text-sm font-bold text-[var(--text)]">{o.title}</span>
                 </Link>

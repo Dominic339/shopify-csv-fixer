@@ -819,5 +819,32 @@
     "toastExported": "已下载格式文件",
     "toastImported": "已导入 {count} 个格式",
     "toastImportFailed": "该文件不是有效的格式文件。"
+  },
+  "landing": {
+    "checkFree": "免费检查您的文件",
+    "downloadSample": "下载示例CSV",
+    "trustLine": "在浏览器中运行 · 无需注册 · 每月{count}次免费导出",
+    "statChecks": "检查项",
+    "statBlockers": "可检测的导入阻断问题",
+    "statFixes": "下方示例中的自动修复",
+    "demoTitle": "它如何处理一份混乱的文件",
+    "demoIntro": "一个包含常见错误的小型{kind}文件，以及修复工具实际输出的结果。绿色单元格已自动修复；红色和黄色单元格需要您来决定。",
+    "before": "修复前",
+    "after": "修复后",
+    "fixedAuto": "已自动修复（{count}）",
+    "leftForYou": "需要您处理（{count}）",
+    "gotchasTitle": "{kind}文件中常见的三个陷阱",
+    "howTitle": "使用方法",
+    "howOpen": "打开修复工具",
+    "howOpenRest": "，然后拖入您的文件。安全的修复会立即应用。",
+    "howWork": "在表格中处理其余问题；每个问题都会标明行和列。",
+    "howExport": "导出修复后的文件，如有需要，还可以下载记录了所有更改的修复日志。",
+    "blockersTitle": "可检测的导入阻断问题",
+    "autoFix": "自动修复",
+    "seeAllChecks": "查看全部{count}项检查 →",
+    "questions": "常见问题",
+    "guidesTitle": "指南",
+    "allGuides": "所有{platform}指南 →",
+    "otherFixers": "其他修复工具"
   }
 }

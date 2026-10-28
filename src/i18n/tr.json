@@ -819,5 +819,32 @@
     "toastExported": "Biçim dosyası indirildi",
     "toastImported": "İçe aktarılan biçim: {count}",
     "toastImportFailed": "Bu dosya geçerli bir biçim dosyası değil."
+  },
+  "landing": {
+    "checkFree": "Dosyanızı ücretsiz kontrol edin",
+    "downloadSample": "Örnek CSV indirin",
+    "trustLine": "Tarayıcınızda çalışır · Kayıt gerekmez · Ayda {count} ücretsiz dışa aktarma",
+    "statChecks": "kontrol",
+    "statBlockers": "yakalanan içe aktarma engeli",
+    "statFixes": "aşağıdaki örnekteki otomatik düzeltme",
+    "demoTitle": "Dağınık bir dosyaya ne yapıyor",
+    "demoIntro": "Tipik hatalar içeren küçük bir dosya ({kind}) ve düzelticinin bu dosya için gerçek çıktısı. Yeşil hücreler otomatik düzeltildi; kırmızı ve sarı hücreler sizin kararınızı bekliyor.",
+    "before": "Önce",
+    "after": "Sonra",
+    "fixedAuto": "Otomatik düzeltildi ({count})",
+    "leftForYou": "Size kalan ({count})",
+    "gotchasTitle": "{kind} dosyalarında sık yapılan üç hata",
+    "howTitle": "Nasıl kullanılır",
+    "howOpen": "Düzelticiyi açın",
+    "howOpenRest": "ve dosyayı bırakın. Güvenli düzeltmeler hemen uygulanır.",
+    "howWork": "Tabloda kalanları halledin; her sorun hangi satır ve sütunda olduğunu gösterir.",
+    "howExport": "Düzeltilmiş dosyayı dışa aktarın; her değişikliğin kaydını istiyorsanız düzeltme günlüğünü indirin.",
+    "blockersTitle": "Yakaladığı içe aktarma engelleri",
+    "autoFix": "otomatik düzeltme",
+    "seeAllChecks": "{count} kontrolün tamamını görün →",
+    "questions": "Sorular",
+    "guidesTitle": "Rehberler",
+    "allGuides": "Tüm {platform} rehberleri →",
+    "otherFixers": "Diğer düzelticiler"
   }
 }

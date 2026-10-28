@@ -819,5 +819,32 @@
     "toastExported": "Fichier de format téléchargé",
     "toastImported": "Formats importés : {count}",
     "toastImportFailed": "Ce fichier n'est pas un fichier de format valide."
+  },
+  "landing": {
+    "checkFree": "Vérifiez votre fichier gratuitement",
+    "downloadSample": "Télécharger un exemple de CSV",
+    "trustLine": "Fonctionne dans votre navigateur · Sans inscription · {count} exports gratuits par mois",
+    "statChecks": "vérifications",
+    "statBlockers": "blocages d'import détectés",
+    "statFixes": "corrections automatiques dans l'exemple ci-dessous",
+    "demoTitle": "Ce qu'il fait d'un fichier en désordre",
+    "demoIntro": "Un petit fichier ({kind}) avec des erreurs typiques, et le résultat réel du correcteur. Les cellules vertes ont été corrigées automatiquement ; les rouges et orange demandent une décision.",
+    "before": "Avant",
+    "after": "Après",
+    "fixedAuto": "Corrigé automatiquement ({count})",
+    "leftForYou": "À traiter par vous ({count})",
+    "gotchasTitle": "Trois erreurs fréquentes dans les fichiers {kind}",
+    "howTitle": "Mode d'emploi",
+    "howOpen": "Ouvrez le correcteur",
+    "howOpenRest": "et déposez le fichier. Les corrections sûres sont appliquées immédiatement.",
+    "howWork": "Traitez ce qui reste dans le tableau ; chaque problème indique sa ligne et sa colonne.",
+    "howExport": "Exportez le fichier corrigé et téléchargez le journal des corrections si vous voulez garder une trace de chaque modification.",
+    "blockersTitle": "Blocages d'import détectés",
+    "autoFix": "correction auto",
+    "seeAllChecks": "Voir les {count} vérifications →",
+    "questions": "Questions",
+    "guidesTitle": "Guides",
+    "allGuides": "Tous les guides {platform} →",
+    "otherFixers": "Autres correcteurs"
   }
 }

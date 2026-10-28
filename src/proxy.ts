@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "./lib/rateLimit";
-import { DEFAULT_LOCALE, isValidLocale } from "./lib/i18n/locales";
+import { DEFAULT_LOCALE, isValidLocale, pickLocale } from "./lib/i18n/locales";
 import { isLocalisedPath, LOCALE_COOKIE } from "./lib/i18n/paths";
 
 // Exempt from rate limiting — verified by Stripe signature instead.
@@ -58,15 +58,23 @@ export async function proxy(req: NextRequest) {
   }
 
   // ── Locale redirect: all pages with [locale] route variants ─────────────
-  // Only redirect if the user has a non-English locale cookie AND the current
-  // path is one of the pages that actually has a translated version.
+  // A language the visitor picked (cookie) wins. Without one, the device's language
+  // (Accept-Language) is used on the first visit and remembered. English, or a
+  // language we don't have, stays on the un-prefixed page.
   if (isLocalisedPath(pathname)) {
     try {
-      const cookieLocale = req.cookies.get(LOCALE_COOKIE)?.value;
-      if (cookieLocale && isValidLocale(cookieLocale) && cookieLocale !== DEFAULT_LOCALE) {
+      const cookieValue = req.cookies.get(LOCALE_COOKIE)?.value;
+      const cookieLocale = cookieValue && isValidLocale(cookieValue) ? cookieValue : null;
+      const locale = cookieLocale ?? pickLocale(req.headers.get("accept-language"));
+      if (locale && locale !== DEFAULT_LOCALE) {
         const url = req.nextUrl.clone();
-        url.pathname = `/${cookieLocale}${pathname === "/" ? "" : pathname}`;
-        return NextResponse.redirect(url, { status: 307 });
+        url.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
+        const res = NextResponse.redirect(url, { status: 307 });
+        res.headers.set("Vary", "Accept-Language, Cookie");
+        if (!cookieLocale) {
+          res.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+        }
+        return res;
       }
     } catch {
       // Never let locale logic block a page request.
@@ -90,5 +98,12 @@ export const config = {
     "/presets",
     "/presets/:path*",
     "/guides/:path*",
+    "/shopify-csv-fixer",
+    "/woocommerce-csv-fixer",
+    "/woocommerce-variable-csv-fixer",
+    "/etsy-csv-fixer",
+    "/ebay-csv-fixer",
+    "/ebay-variations-csv-fixer",
+    "/amazon-csv-fixer",
   ],
 };

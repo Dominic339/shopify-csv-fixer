@@ -233,7 +233,7 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
         {(fixerHref || presetId) && (
           <div className="mt-4 flex flex-wrap gap-3">
             {fixerHref && (
-              <Link className="rg-btn" href={fixerHref}>
+              <Link className="rg-btn" href={href(fixerHref)}>
                 {fmt(t.guides.fixerButton, { platform: label })}
               </Link>
             )}
@@ -604,7 +604,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                     </Link>
                   )}
                   {fixerHref && (
-                    <Link className="pill-btn" href={fixerHref}>
+                    <Link className="pill-btn" href={href(fixerHref)}>
                       {fmt(t.guide.fixerGuide, { platform: label })}
                     </Link>
                   )}

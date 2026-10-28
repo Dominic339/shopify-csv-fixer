@@ -819,5 +819,32 @@
     "toastExported": "Archivo de formato descargado",
     "toastImported": "Formatos importados: {count}",
     "toastImportFailed": "Ese archivo no es un archivo de formato válido."
+  },
+  "landing": {
+    "checkFree": "Revisa tu archivo gratis",
+    "downloadSample": "Descargar un CSV de ejemplo",
+    "trustLine": "Funciona en tu navegador · Sin registro · {count} exportaciones gratis al mes",
+    "statChecks": "comprobaciones",
+    "statBlockers": "bloqueos de importación detectados",
+    "statFixes": "correcciones automáticas en el ejemplo de abajo",
+    "demoTitle": "Qué hace con un archivo desordenado",
+    "demoIntro": "Un archivo pequeño ({kind}) con errores típicos y el resultado real del corrector. Las celdas verdes se corrigieron automáticamente; las rojas y ámbar necesitan que decidas tú.",
+    "before": "Antes",
+    "after": "Después",
+    "fixedAuto": "Corregido automáticamente ({count})",
+    "leftForYou": "Pendiente para ti ({count})",
+    "gotchasTitle": "Tres errores habituales en archivos de {kind}",
+    "howTitle": "Cómo usarlo",
+    "howOpen": "Abre el corrector",
+    "howOpenRest": "y suelta el archivo. Las correcciones seguras se aplican al instante.",
+    "howWork": "Revisa lo que queda en la tabla; cada problema indica en qué fila y columna está.",
+    "howExport": "Exporta el archivo corregido y descarga el registro de correcciones si quieres un historial de cada cambio.",
+    "blockersTitle": "Bloqueos de importación que detecta",
+    "autoFix": "autocorrección",
+    "seeAllChecks": "Ver las {count} comprobaciones →",
+    "questions": "Preguntas",
+    "guidesTitle": "Guías",
+    "allGuides": "Todas las guías de {platform} →",
+    "otherFixers": "Otros correctores"
   }
 }

@@ -819,5 +819,32 @@
     "toastExported": "Formaatbestand gedownload",
     "toastImported": "Geïmporteerde formaten: {count}",
     "toastImportFailed": "Dat bestand is geen geldig formaatbestand."
+  },
+  "landing": {
+    "checkFree": "Controleer je bestand gratis",
+    "downloadSample": "Download een voorbeeld-CSV",
+    "trustLine": "Werkt in je browser · Geen account nodig · {count} gratis exports per maand",
+    "statChecks": "controles",
+    "statBlockers": "importblokkades gevonden",
+    "statFixes": "automatische correcties in het voorbeeld hieronder",
+    "demoTitle": "Wat het doet met een rommelig bestand",
+    "demoIntro": "Een klein bestand ({kind}) met typische fouten, en de echte uitvoer van de hersteller. Groene cellen zijn automatisch gecorrigeerd; bij rode en gele cellen beslis jij.",
+    "before": "Voor",
+    "after": "Na",
+    "fixedAuto": "Automatisch gecorrigeerd ({count})",
+    "leftForYou": "Nog voor jou ({count})",
+    "gotchasTitle": "Drie veelgemaakte fouten in bestanden voor {kind}",
+    "howTitle": "Zo gebruik je het",
+    "howOpen": "Open de hersteller",
+    "howOpenRest": "en zet het bestand erin. Veilige correcties worden meteen toegepast.",
+    "howWork": "Werk af wat er in de tabel overblijft; elk probleem vermeldt de rij en kolom.",
+    "howExport": "Exporteer het gecorrigeerde bestand en download het correctielogboek als je elke wijziging wilt bewaren.",
+    "blockersTitle": "Importblokkades die het vindt",
+    "autoFix": "auto-correctie",
+    "seeAllChecks": "Bekijk alle {count} controles →",
+    "questions": "Vragen",
+    "guidesTitle": "Handleidingen",
+    "allGuides": "Alle handleidingen voor {platform} →",
+    "otherFixers": "Andere herstellers"
   }
 }

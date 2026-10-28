@@ -819,5 +819,32 @@
     "toastExported": "形式ファイルをダウンロードしました",
     "toastImported": "{count}件の形式をインポートしました",
     "toastImportFailed": "そのファイルは有効な形式ファイルではありません。"
+  },
+  "landing": {
+    "checkFree": "ファイルを無料でチェック",
+    "downloadSample": "サンプルCSVをダウンロード",
+    "trustLine": "ブラウザ内で動作 · 登録不要 · 毎月{count}回まで無料エクスポート",
+    "statChecks": "チェック項目",
+    "statBlockers": "検出できるインポートブロック",
+    "statFixes": "下のサンプルでの自動修正",
+    "demoTitle": "乱れたファイルをどう直すか",
+    "demoIntro": "よくあるミスを含む小さな{kind}ファイルと、修正ツールが実際に出力した結果です。緑のセルは自動修正済み、赤と黄色のセルはご自身で判断が必要です。",
+    "before": "修正前",
+    "after": "修正後",
+    "fixedAuto": "自動修正済み（{count}）",
+    "leftForYou": "要確認（{count}）",
+    "gotchasTitle": "{kind}ファイルでよくある3つの落とし穴",
+    "howTitle": "使い方",
+    "howOpen": "修正ツールを開き",
+    "howOpenRest": "、ファイルをドロップします。安全な修正はすぐに適用されます。",
+    "howWork": "残りの問題は表の中で対応します。各問題には行と列が表示されます。",
+    "howExport": "修正済みファイルをエクスポートし、必要に応じてすべての変更を記録した修正ログもダウンロードできます。",
+    "blockersTitle": "検出できるインポートブロック",
+    "autoFix": "自動修正",
+    "seeAllChecks": "全{count}項目のチェックを見る →",
+    "questions": "よくある質問",
+    "guidesTitle": "ガイド",
+    "allGuides": "{platform}のガイド一覧 →",
+    "otherFixers": "その他の修正ツール"
   }
 }

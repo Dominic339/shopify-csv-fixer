@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "空单元格会覆盖真实数据",
+    "body": "使用\"覆盖具有相同handle的商品\"导入时，空单元格会替换店铺中的值。修复工具只导出您的文件实际使用的列，因此缺失的列不会清除任何数据。"
+   },
+   {
+    "title": "变体是handle相同的行",
+    "body": "只有商品的第一行包含标题和描述。之后的每一行都是一个变体，需要各自的选项值。选项相同的两行会被拒绝，修复工具会同时显示这两行。"
+   },
+   {
+    "title": "价格和布尔值须采用Shopify格式",
+    "body": "\"$ 45\"、\"45,00\"和\"yes\"在表格中看起来没问题，但导入时会失败。它们会被改写为45.00和true，所有更改都会记录在修复日志中。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "它适用于旧版Shopify导出文件吗？",
+    "a": "适用。它能识别\"Variant Price\"和\"Body (HTML)\"等旧列名，修复后的文件使用Shopify接受的当前模板列名。"
+   },
+   {
+    "q": "会删除行吗？",
+    "a": "不会。所有含有数据的行都会保留（只跳过完全空白的行），每一项自动更改都会记录在修复日志中。"
+   },
+   {
+    "q": "为什么大文件会显示这么多问题？",
+    "a": "一个结构性问题（例如缺少选项列）会在每个变体行中重复出现。在表格中修复一次，问题数量就会迅速下降。"
+   }
+  ],
+  "metaTitle": "Shopify CSV修复工具 | 修复Shopify商品CSV导入错误 | StriveFormats",
+  "metaDescription": "在导入之前，对照官方模板检查您的Shopify商品CSV。价格、handle和true/false值会自动修复；变体和覆盖问题会精确定位到具体行。",
+  "kicker": "Shopify商品",
+  "title": "Shopify CSV修复工具",
+  "intro": "Shopify的导入非常严格：一个handle有误的商品，或两个完全相同的变体，就可能让整个文件导入失败。请先在这里检查您的CSV，免费获得安全的修复，并准确查看哪些行仍需要您处理。",
+  "exportTip": "在Shopify后台：商品 → 导出 → \"纯CSV文件\"。或者从官方模板开始。"
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "是/否列使用1和0",
+    "body": "Published、\"In stock?\"等列需要1或0（Published还允许用-1表示草稿）。\"yes\"或\"TRUE\"等值会自动为您转换。"
+   },
+   {
+    "title": "SKU必须唯一",
+    "body": "导入工具通过ID或SKU匹配现有商品。两行使用相同的SKU会导致其中一行失败或覆盖另一行，因此修复工具会同时标出两行。"
+   },
+   {
+    "title": "促销价必须更低",
+    "body": "等于或高于常规价格的促销价也会被接受，但会显示毫无意义的\"促销\"。它会以警告形式标出，让您在顾客看到之前发现输入错误。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "它会更改我的列名吗？",
+    "a": "不会。修复后的文件完全保留您上传的列及其顺序，因此可以使用相同的列映射重新导入。"
+   },
+   {
+    "q": "可变商品怎么办？",
+    "a": "请使用WooCommerce可变商品修复工具。它还会检查每个变体是否指向父商品，以及属性组合是否唯一。"
+   }
+  ],
+  "metaTitle": "WooCommerce CSV修复工具 | 修复WooCommerce商品导入错误 | StriveFormats",
+  "metaDescription": "在运行导入工具之前检查您的WooCommerce商品CSV。统一价格、布尔值和库存值，并逐行标出重复的SKU和促销价错误。",
+  "kicker": "WooCommerce商品",
+  "title": "WooCommerce CSV修复工具",
+  "intro": "WooCommerce自带的导入工具会跳过它无法理解的行，而且并不总是说明原因。请先在这里检查文件：修复工具读取与WooCommerce导出相同的列，并显示会被跳过的行。",
+  "exportTip": "在WordPress中：商品 → 导出。保持选中\"导出所有列\"。"
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "每个变体都需要父商品",
+    "body": "Parent列填写父商品的SKU（或id:123）。如果父商品不在文件中，它必须已存在于您的店铺中；修复工具会告诉您哪些找不到。"
+   },
+   {
+    "title": "每个变体对应一种组合",
+    "body": "同一商品的两个变体不能具有相同的属性值。修复工具会标出这一对，方便您修改其中一个。"
+   },
+   {
+    "title": "父商品列出所有值",
+    "body": "父商品行用逗号分隔列出属性的所有值（\"S, M, L\"）；每个变体行只填写自己的值。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "父商品和变体可以放在不同的文件中吗？",
+    "a": "可以，只要先导入父商品即可。父商品不在文件中的变体会作为提示报告，而不是错误。"
+   },
+   {
+    "q": "它支持多个属性吗？",
+    "a": "支持。查找重复组合时，会比较Attribute 1、Attribute 2等所有属性。"
+   }
+  ],
+  "metaTitle": "WooCommerce可变商品修复工具 | 变体与属性 | StriveFormats",
+  "metaDescription": "在导入之前检查WooCommerce可变商品和变体：逐行检查父商品引用、属性值和重复的变体组合。",
+  "kicker": "WooCommerce可变商品",
+  "title": "WooCommerce可变商品修复工具",
+  "intro": "WooCommerce导入最容易出错的就是可变商品：变体指向了错误的父商品，或两个变体具有相同的属性。修复工具会将整个商品族一起检查，而不只是单独的行。",
+  "exportTip": "通过商品 → 导出进行导出，并包含变体。父商品的Type为\"variable\"，子项为\"variation\"。"
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "最多13个标签",
+    "body": "Etsy只保留前13个标签，其余的会被丢弃。修复工具会统计每个商品的标签数量并统一分隔符。"
+   },
+   {
+    "title": "价格不带符号",
+    "body": "价格是以店铺货币表示的纯数字：\"$18\"会变为18.00，货币代码会转为大写（usd → USD）。"
+   },
+   {
+    "title": "图片链接必须是完整URL",
+    "body": "\"example.com/mug.jpg\"无法加载，需要加上https://。损坏的图片链接会在上传前被标出。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "修复后的文件可以直接上传到Etsy吗？",
+    "a": "Etsy没有原生的商品CSV上传功能，因此大多数卖家会将修复后的文件用于批量编辑应用，或作为商品目录的干净主副本。"
+   },
+   {
+    "q": "它还会检查Etsy的其他限制吗？",
+    "a": "它会检查标签、价格、数量、货币代码和图片URL。类目和运费模板仍需在Etsy上设置。"
+   }
+  ],
+  "metaTitle": "Etsy CSV修复工具 | 整理Etsy商品CSV | StriveFormats",
+  "metaDescription": "整理您的Etsy商品CSV：统一价格、货币代码和标签，并逐行标出标签数量限制、图片URL和缺失的信息。",
+  "kicker": "Etsy商品",
+  "title": "Etsy CSV修复工具",
+  "intro": "Etsy的商品导出便于在表格中批量编辑，但也同样容易被弄乱。修复工具会整理价格、货币代码和标签，并对Etsy会截断或拒绝的所有内容发出警告。",
+  "exportTip": "在店铺管理器中：设置 → 选项 → 下载数据 → 商品下的\"下载CSV\"。"
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "商品状况是数字",
+    "body": "eBay需要像1000（全新）或3000（二手）这样的ConditionID。\"Used\"等词语会被转换为对应的代码。"
+   },
+   {
+    "title": "一口价即GTC",
+    "body": "一口价刊登始终为\"Good 'Til Cancelled\"。一口价行中的任何其他时长都会被标出（eBay会将其改为GTC），而像\"30\"这样根本不是有效时长的值则属于错误。"
+   },
+   {
+    "title": "新刊登需要类目",
+    "body": "不带类目编号添加刊登会失败。修改（Revise）时可以留空，因此修复工具只在Add行中标出。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "它会保留*Action(SiteID=...)标题吗？",
+    "a": "会。第一列的标题包含您的站点和货币设置，会完全按照您上传时的样子保留。"
+   },
+   {
+    "q": "多变体刊登怎么办？",
+    "a": "请使用eBay变体修复工具。它还会将每个刊登的父行和子行相互核对。"
+   }
+  ],
+  "metaTitle": "eBay CSV修复工具 | 修复File Exchange和Seller Hub上传文件 | StriveFormats",
+  "metaDescription": "在上传到Seller Hub报告或File Exchange之前检查您的eBay刊登文件：操作、商品状况ID、刊登时长、类目、价格和数量。",
+  "kicker": "eBay刊登",
+  "title": "eBay CSV修复工具",
+  "intro": "eBay的上传模板对代码要求严格：Action列、数字形式的商品状况ID和刊登时长都必须完全正确。修复工具会为您转换常见的值，并指出其余问题。",
+  "exportTip": "Seller Hub → 报告 → 上传 → \"下载模板\"，或导出您的在线刊登。"
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "父行列出所有选项",
+    "body": "父行的RelationshipDetails形如Size=8;9|Color=Blue。每个子行只能使用其中列出的值。"
+   },
+   {
+    "title": "子行填写价格和数量",
+    "body": "每个Variation行都有自己的SKU、价格和数量，而标题和类目放在父行中。"
+   },
+   {
+    "title": "不允许重复组合",
+    "body": "两个Size=8|Color=Blue的子行会被拒绝。修复工具会标出这一对，同时也会标出重复的SKU。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "可以混合单品刊登和变体刊登吗？",
+    "a": "可以。没有Relationship的行会被视为单品刊登，并按照eBay刊登模板进行同样的检查。"
+   },
+   {
+    "q": "它会改变我的行顺序吗？",
+    "a": "不会。每个子行属于其上方最近的父行，因此会保留您上传时的顺序。"
+   }
+  ],
+  "metaTitle": "eBay变体修复工具 | 检查多变体刊登 | StriveFormats",
+  "metaDescription": "在上传之前检查eBay多变体刊登：每个变体的选项都必须列在父行中，且任意两个变体不能具有相同的组合。",
+  "kicker": "eBay变体刊登",
+  "title": "eBay变体修复工具",
+  "intro": "变体刊登由一个父行和每个尺码或颜色各一个子行组成，通过RelationshipDetails关联。修复工具会读取整个组，并告诉您哪个子行与其父行不匹配。",
+  "exportTip": "从Seller Hub → 报告 → 上传下载变体模板，或导出带有变体的刊登。"
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "使用代码而非文字",
+    "body": "product-id-type为1（ASIN）、2（ISBN）、3（UPC）或4（EAN），item-condition是数字，例如11表示全新。文字会自动转换。"
+   },
+   {
+    "title": "表格软件会损坏条形码",
+    "body": "Excel会把012345678905变成数字1.23457E+11，或去掉开头的零。这两种情况都能被检测到；如果缺少零，会建议可能的原始编号。"
+   },
+   {
+    "title": "保持在价格范围内",
+    "body": "如果价格超出您设置的最低/最高允许售价，Amazon会停用该刊登。修复工具会比较这三个值。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "它适用于类目模板（平面文件）吗？",
+    "a": "它接受并保留item_sku和external_product_id_type等列名，但各项检查是针对刊登文件设计的。"
+   },
+   {
+    "q": "我的文件是制表符分隔的.txt文件，可以使用吗？",
+    "a": "可以，直接上传即可。修复后的文件会导出为CSV；如果卖家平台需要.txt，请在表格软件中打开并另存为制表符分隔的文本。"
+   }
+  ],
+  "metaTitle": "Amazon Inventory Loader修复工具 | 修复Amazon刊登文件 | StriveFormats",
+  "metaDescription": "在上传之前检查Amazon Inventory Loader文件：转换商品ID类型和商品状况代码，并标出损坏的条形码、数量和价格范围问题。",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Amazon Inventory Loader修复工具",
+  "intro": "Inventory Loader用于为Amazon上已存在的商品添加或更新报价。文件虽短，却依赖于表格软件很容易弄坏的代码和标识符。修复工具会转换这些代码并找出损坏之处。",
+  "exportTip": "卖家平台 → 目录 → 批量上传商品 → 下载库存文件（Inventory Loader）。"
+ }
+}
