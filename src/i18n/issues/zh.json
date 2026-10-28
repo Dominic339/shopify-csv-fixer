@@ -1,1 +1,860 @@
-{}
+{
+"shopify/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "您的 CSV 缺少 Shopify 必填的列标题。",
+"whyPlatformCares": "Shopify 在导入时会校验列标题。缺少必填标题可能导致无法创建或更新商品。",
+"howToFix": "请添加缺少的必填列标题（值可以为空）。"
+},
+"shopify/blank_title": {
+"title": "缺少 Title",
+"explanation": "至少有一行的 Title 为空。",
+"whyPlatformCares": "Shopify 创建商品时需要 Title。没有 Title 的行可能导入失败或生成不完整的商品。",
+"howToFix": "请在每个商品行的 Title 中填写商品名称。"
+},
+"shopify/blank_handle": {
+"title": "缺少 URL handle",
+"explanation": "至少有一行的 URL handle 为空。",
+"whyPlatformCares": "Shopify 按 URL handle 将变体和图片分组，并用它更新现有商品。缺少 handle 会导致分组和更新失效。",
+"howToFix": "请用小写字母、数字和连字符填写 URL handle（不含空格）。"
+},
+"shopify/invalid_handle": {
+"title": "URL handle 无效",
+"explanation": "URL handle 包含 Shopify 可能拒绝的字符。",
+"whyPlatformCares": "无效的 handle 可能导致导入错误和商品网址失效。",
+"howToFix": "只使用小写字母、数字和连字符。"
+},
+"shopify/invalid_boolean_published": {
+"title": "Published 值无效",
+"explanation": "Published on online store 的值不是布尔值。",
+"whyPlatformCares": "Shopify 需要 TRUE/FALSE（或留空）。无效的值可能导致导入被阻止。",
+"howToFix": "请使用 TRUE、FALSE 或留空。"
+},
+"shopify/invalid_status": {
+"title": "Status 值无效",
+"explanation": "Status 不是 Active、Draft 或 Archived。",
+"whyPlatformCares": "意外的状态值可能导致 Shopify 忽略该行或错误解读。",
+"howToFix": "请使用 \"Active\"、\"Draft\" 或 \"Archived\"（或留空）。"
+},
+"shopify/option_order_invalid": {
+"title": "选项列顺序错误",
+"explanation": "Option1 为空，但 Option2/Option3 有值。",
+"whyPlatformCares": "Shopify 要求按顺序填写选项（先 Option1，再 Option2，再 Option3）。",
+"howToFix": "请先填 Option1 再填 Option2，先填 Option2 再填 Option3。"
+},
+"shopify/variant_option_missing_value": {
+"title": "有选项名称但没有值",
+"explanation": "填写了选项名称，但对应的选项值为空。",
+"whyPlatformCares": "缺少选项值可能产生无效或令人困惑的变体。",
+"howToFix": "请填写选项值（例如 Size = Small），或清空选项名称。"
+},
+"shopify/option_name_inconsistent": {
+"title": "变体之间的选项名称不一致",
+"explanation": "共用同一 handle 的行，Option1/2/3 的名称应保持一致。",
+"whyPlatformCares": "选项名称不一致可能导致变体导入错误或分组错乱。",
+"howToFix": "同一 handle 下的所有变体行请使用相同的 Option1/Option2/Option3 名称。"
+},
+"shopify/options_not_unique": {
+"title": "变体选项不唯一",
+"explanation": "同一 handle 下有两个或更多变体的选项值完全相同。",
+"whyPlatformCares": "Shopify 会合并选项组合相同的变体，可能导致数据丢失或变体被覆盖。",
+"howToFix": "请让每个变体的选项组合唯一（或删除重复项）。"
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "变体缺少 Option1 value",
+"explanation": "这一行看起来是变体数据，但 Option1 value 为空。",
+"whyPlatformCares": "Shopify 用选项值生成变体组合。缺少选项值可能导致该行被拒绝或导入错误。",
+"howToFix": "请填写 Option1 value（或从这一行删除变体专用字段）。"
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\" 与真实选项混用",
+"explanation": "同一 handle 下同时存在 \"Default Title\" 行和带选项的变体行。",
+"whyPlatformCares": "这通常说明误将单变体和多变体的商品结构混在了一起。",
+"howToFix": "只有商品只有一个变体时才使用 \"Default Title\"。多变体商品请在每个变体行中使用真实的选项值。"
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "变体信息相同的重复行",
+"explanation": "有些行共用同一 handle，看起来是重复行而不是真正的变体。",
+"whyPlatformCares": "重复行可能让导入出现混乱，并导致意外覆盖。",
+"howToFix": "如果是变体，请确保每行的选项值（或 SKU）不同。如果是额外图片，请在这些行中只保留 handle 和图片字段。"
+},
+"shopify/handle_title_mismatch": {
+"title": "同一 handle 的 Title 不同",
+"explanation": "共用同一 URL handle 的行使用了多个不同的 Title。",
+"whyPlatformCares": "Shopify 按 handle 将行分组。标题冲突可能导致覆盖或导入混乱。",
+"howToFix": "同一 handle 下的所有行请使用一个统一的 Title。"
+},
+"shopify/product_missing_variant_row": {
+"title": "商品有图片但没有变体行",
+"explanation": "某个 handle 似乎只有图片行。",
+"whyPlatformCares": "Shopify 需要至少一行主商品/变体行（Title + 变体字段）才能创建商品，仅有图片行无法创建商品。",
+"howToFix": "请为该 handle 添加一行含 Title 和变体字段（Price/SKU/Options）的主行，并将额外图片行放在主行之后。"
+},
+"shopify/blank_price": {
+"title": "缺少 Price",
+"explanation": "某个变体行的 Price 为空。",
+"whyPlatformCares": "Shopify 会将空价格导入为 0.00，这样该变体就会被免费出售。",
+"howToFix": "除非该变体确实免费，否则请在 Price 中填写 19.99 这样的数字。"
+},
+"shopify/invalid_numeric_price": {
+"title": "Price 无效",
+"explanation": "Price 不是有效数字。",
+"whyPlatformCares": "Shopify 的价格字段需要数值。",
+"howToFix": "请使用 19.99 这样的数字。"
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "Compare-at price 无效",
+"explanation": "Compare-at price 不是有效数字。",
+"whyPlatformCares": "Shopify 的价格字段需要数值。",
+"howToFix": "请使用 24.99 这样的数字，或留空。"
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price 低于 Price",
+"explanation": "Compare-at price 低于 Price。",
+"whyPlatformCares": "Compare-at price 用来表示更高的原价。",
+"howToFix": "请确保 Compare-at price ≥ Price，或将其留空。"
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "库存数量无效",
+"explanation": "Inventory quantity 不是有效整数。",
+"whyPlatformCares": "库存数量必须是整数。",
+"howToFix": "请使用 0、5、100 这样的整数。"
+},
+"shopify/negative_inventory": {
+"title": "负库存",
+"explanation": "Inventory quantity 为负数。",
+"whyPlatformCares": "负库存通常是数据错误，可能导致发货问题。",
+"howToFix": "请使用 0 或正数。"
+},
+"shopify/invalid_inventory_policy": {
+"title": "库存策略无效",
+"explanation": "Continue selling when out of stock 不是 DENY/CONTINUE。",
+"whyPlatformCares": "库存策略决定缺货时是否允许继续销售。",
+"howToFix": "请使用 \"DENY\" 或 \"CONTINUE\"（或留空）。"
+},
+"shopify/invalid_image_url": {
+"title": "图片网址无效",
+"explanation": "商品图片网址不是有效的 http(s) 网址。",
+"whyPlatformCares": "Shopify 必须能通过有效网址获取图片。",
+"howToFix": "请使用指向可公开访问图片的完整 http(s) 网址。"
+},
+"shopify/invalid_image_position": {
+"title": "图片位置无效",
+"explanation": "Image position 不是有效整数。",
+"whyPlatformCares": "Image position 决定图片顺序。",
+"howToFix": "请使用 1、2、3…，或留空。"
+},
+"shopify/image_row_has_variant_fields": {
+"title": "图片行包含变体字段",
+"explanation": "某行看起来是纯图片行，却包含 SKU/Price/Options/Inventory 字段。",
+"whyPlatformCares": "这可能破坏变体分组，让导入出现混乱。",
+"howToFix": "额外的图片行只保留 handle 和图片字段，请将变体字段移到主行。"
+},
+"shopify/duplicate_image_position": {
+"title": "图片位置重复",
+"explanation": "同一 handle 下有两行的 Image position 相同。",
+"whyPlatformCares": "重复会让图片顺序变得不可预测。",
+"howToFix": "请为每个 handle 使用唯一的 Image position 值（1、2、3…）。"
+},
+"shopify/image_alt_text_too_long": {
+"title": "替代文本过长",
+"explanation": "图片替代文本超过了 Shopify 建议的上限。",
+"whyPlatformCares": "过长的替代文本可能被截断或造成格式问题。",
+"howToFix": "请将替代文本缩短到 512 个字符以内。"
+},
+"shopify/duplicate_sku": {
+"title": "SKU 重复",
+"explanation": "同一个 SKU 出现在多个变体行中。",
+"whyPlatformCares": "许多库存和发货流程都要求每个变体的 SKU 唯一。",
+"howToFix": "请让每个变体的 SKU 唯一（如果不使用 SKU，可以留空）。"
+},
+"shopify/duplicate_sku_across_products": {
+"title": "不同商品间 SKU 重复",
+"explanation": "同一个 SKU 出现在不同的 URL handle（不同商品）下。",
+"whyPlatformCares": "在不同商品间重复使用 SKU 可能让库存系统、物流工具和数据分析出现混乱。",
+"howToFix": "请确保整个目录中的 SKU 唯一（推荐），或确认重复使用是有意为之。"
+},
+"shopify/seo_title_too_long": {
+"title": "SEO 标题过长",
+"explanation": "SEO 标题超过了建议长度。",
+"whyPlatformCares": "过长的标题可能在搜索结果中被截断。",
+"howToFix": "请将 SEO 标题缩短到 70 个字符以内。"
+},
+"shopify/seo_description_too_long": {
+"title": "SEO 描述过长",
+"explanation": "SEO 描述超过了建议长度。",
+"whyPlatformCares": "过长的描述可能在搜索结果摘要中被截断。",
+"howToFix": "请将 SEO 描述缩短到 320 个字符以内。"
+},
+"shopify/seo_title_missing": {
+"title": "缺少 SEO 标题",
+"explanation": "SEO 标题为空（Shopify 将改用 Title）。",
+"whyPlatformCares": "自定义 SEO 标题可以提高点击率。",
+"howToFix": "可选：填写自定义 SEO 标题。"
+},
+"shopify/seo_description_missing": {
+"title": "缺少 SEO 描述",
+"explanation": "SEO 描述为空（Shopify 将改用 Description）。",
+"whyPlatformCares": "自定义描述可以提高搜索结果中的点击率和清晰度。",
+"howToFix": "可选：填写自定义 SEO 描述。"
+},
+"shopify/vendor_missing": {
+"title": "缺少 Vendor",
+"explanation": "主商品行的 Vendor 为空。",
+"whyPlatformCares": "Vendor 有助于整理商品，并改善店铺中的筛选。",
+"howToFix": "请添加 Vendor（品牌）值。"
+},
+"shopify/product_category_missing": {
+"title": "缺少商品类目",
+"explanation": "主商品行的 Product category 为空。",
+"whyPlatformCares": "类目能提升商品的可发现性和报表质量。",
+"howToFix": "请添加 Product category。"
+},
+"shopify/tags_missing": {
+"title": "缺少标签",
+"explanation": "主商品行的 Tags 为空。",
+"whyPlatformCares": "标签可以驱动商品系列，并帮助店内搜索。",
+"howToFix": "请添加标签（用逗号分隔）。"
+},
+"shopify/description_too_short": {
+"title": "描述非常短",
+"explanation": "有描述，但极其简短。",
+"whyPlatformCares": "更丰富的描述可以提升转化率和 SEO。",
+"howToFix": "建议补充描述内容。"
+},
+"shopify/status_unrecognized": {
+"title": "不常见的 Status 值",
+"explanation": "Status 的值不在 Shopify 常用值之内。",
+"whyPlatformCares": "意外的值可能被忽略或产生令人困惑的结果。",
+"howToFix": "请使用 \"Active\"、\"Draft\" 或 \"Archived\"（或留空）。"
+},
+"shopify/missing_status_value": {
+"title": "缺少 Status",
+"explanation": "存在 Status 列，但商品行没有值。",
+"whyPlatformCares": "文件包含该列时，Shopify 要求每个商品行都有 Status 值。",
+"howToFix": "请将 Status 设为 active、draft 或 archived。"
+},
+"shopify/handle_generated_column": {
+"title": "已生成 URL handle",
+"explanation": "文件中没有 URL handle 列，因此已根据每个 Title 生成 handle。",
+"whyPlatformCares": "Shopify 通过 URL handle 匹配现有商品。没有真实的 handle，更新会变成创建新商品。",
+"howToFix": "如果要更新商品，请添加包含其现有 handle 的 URL handle 列。"
+},
+"shopify/handle_rewritten": {
+"title": "URL handle 已更改",
+"explanation": "某个 URL handle 包含 Shopify 不允许的字符，已被改写。",
+"whyPlatformCares": "Shopify 通过 URL handle 匹配现有商品，因此更改后的 handle 会作为新商品导入。",
+"howToFix": "如果要更新该商品，请确认新的 handle 与 Shopify 中的一致。"
+},
+"shopify/image_url_not_https": {
+"title": "图片网址使用了 http",
+"explanation": "某个图片网址以 http:// 而不是 https:// 开头。",
+"whyPlatformCares": "Shopify 从公开的 https:// 网址下载图片；普通 http 链接可能失败。",
+"howToFix": "如果您的主机支持，请使用图片的 https:// 地址。"
+},
+"shopify/invalid_charge_tax": {
+"title": "Charge tax 无效",
+"explanation": "Charge tax 不是 true 或 false。",
+"whyPlatformCares": "Shopify 的 Charge tax 只接受 true 或 false。",
+"howToFix": "请将值改为 true 或 false。"
+},
+"shopify/invalid_requires_shipping": {
+"title": "Requires shipping 无效",
+"explanation": "Requires shipping 不是 true 或 false。",
+"whyPlatformCares": "Shopify 的 Requires shipping 只接受 true 或 false。",
+"howToFix": "请将值改为 true 或 false。"
+},
+"shopify/invalid_gift_card": {
+"title": "Gift card 无效",
+"explanation": "Gift card 不是 true 或 false。",
+"whyPlatformCares": "Shopify 的 Gift card 只接受 true 或 false。",
+"howToFix": "请将值改为 true 或 false。"
+},
+"shopify/gift_card_import": {
+"title": "CSV 中有礼品卡",
+"explanation": "有一行被标记为礼品卡。",
+"whyPlatformCares": "Shopify 无法通过 CSV 导入创建礼品卡商品。",
+"howToFix": "请改在 Shopify 后台创建礼品卡。"
+},
+"shopify/invalid_numeric_cost": {
+"title": "Cost per item 无效",
+"explanation": "Cost per item 不是有效数字。",
+"whyPlatformCares": "Shopify 的成本需要不带货币符号的普通数字。",
+"howToFix": "请使用 7.50 这样的数字。"
+},
+"shopify/invalid_weight": {
+"title": "重量无效",
+"explanation": "Weight value (grams) 不是整数克数。",
+"whyPlatformCares": "Shopify 以克为单位存储重量，不带小数和单位。",
+"howToFix": "只填写克数，例如 1.5 kg = 1500。"
+},
+"shopify/invalid_weight_unit": {
+"title": "重量单位无效",
+"explanation": "Weight unit for display 不是 g、kg、lb 或 oz。",
+"whyPlatformCares": "Shopify 的显示单位只接受 g、kg、lb 或 oz。",
+"howToFix": "请使用 g、kg、lb 或 oz。"
+},
+"shopify/invalid_inventory_tracker": {
+"title": "库存跟踪设置无效",
+"explanation": "Inventory tracker 中有 Shopify 无法识别的值。",
+"whyPlatformCares": "Shopify 接受 shopify、shipwire、amazon_marketplace_web，或在不跟踪库存时留空。",
+"howToFix": "跟踪库存请使用 shopify，否则留空。"
+},
+"shopify/invalid_fulfillment_service": {
+"title": "发货服务无效",
+"explanation": "Fulfillment service 不是有效的服务 handle。",
+"whyPlatformCares": "Shopify 需要 manual，或您在后台设置的发货服务的 handle（小写字母、连字符）。",
+"howToFix": "请使用 manual，或您自定义服务的 handle。"
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category 看起来像 Google ID",
+"explanation": "Product category 只有数字，类似 Google 商品类目 ID。",
+"whyPlatformCares": "Shopify 的 Product category 使用 Shopify 自己的分类体系；Google 类目 ID 应填在单独的列中。",
+"howToFix": "请使用 Shopify 分类路径或 ID，并将 Google ID 移到\"Google Shopping / Google product category\"。"
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "包装尺寸不完整",
+"explanation": "包装的长、宽、高和单位只填写了一部分。",
+"whyPlatformCares": "如果包装尺寸只设置了一部分，Shopify 会拒绝该行。",
+"howToFix": "请填写全部四个包装字段，或将四项全部清空。"
+},
+"shopify/too_many_tags": {
+"title": "标签过多",
+"explanation": "某个商品的标签超过 250 个。",
+"whyPlatformCares": "Shopify 每个商品最多允许 250 个标签。",
+"howToFix": "请删除标签，直到不超过 250 个。"
+},
+"woocommerce/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "表头行缺少一个或多个 WooCommerce 导入必填列。",
+"whyPlatformCares": "WooCommerce 在导入时依靠特定的列名来对应字段。",
+"howToFix": "请从 WooCommerce 重新导出一份示例 CSV，确认所有必填列都存在且拼写完全一致。"
+},
+"woocommerce/unknown_header": {
+"title": "未知列",
+"explanation": "WooCommerce 导入器无法识别此列。",
+"whyPlatformCares": "未知列会被忽略，可能掩盖数据问题。",
+"howToFix": "请删除该列，或将其重命名为 WooCommerce 导入支持的列标题。"
+},
+"woocommerce/missing_type": {
+"title": "缺少商品类型",
+"explanation": "Type 列为必填，决定了该行如何被解读。",
+"whyPlatformCares": "WooCommerce 通过 Type 判断一行是商品、变体还是父级分组。",
+"howToFix": "请将每行的 Type 设为 simple、variable、variation、grouped 或 external。"
+},
+"woocommerce/invalid_type": {
+"title": "商品类型无效",
+"explanation": "Type 的值不在 WooCommerce 支持的类型之内。",
+"whyPlatformCares": "无效的类型可能导致行导入错误或被拒绝。",
+"howToFix": "请使用以下之一：simple、variable、variation、grouped、external。"
+},
+"woocommerce/missing_name": {
+"title": "缺少商品名称",
+"explanation": "非变体的商品行应填写 Name。",
+"whyPlatformCares": "没有名称的商品无法在店铺中使用。",
+"howToFix": "请为所有非变体行填写 Name。"
+},
+"woocommerce/variation_missing_parent": {
+"title": "变体未关联父商品",
+"explanation": "变体行必须通过 Parent 字段关联到父级可变商品。",
+"whyPlatformCares": "孤立的变体无法正确导入。",
+"howToFix": "请将 Parent 设为父商品的 ID（或在可变商品导入预设中启用自动创建父商品）。"
+},
+"woocommerce/variation_missing_attributes": {
+"title": "变体缺少属性",
+"explanation": "变体行需要属性名称/值对，才能组成有效的变体组合。",
+"whyPlatformCares": "没有属性，WooCommerce 无法生成独立的变体。",
+"howToFix": "请在每个变体行填写 Attribute 1 name（例如 Size）和 Attribute 1 value(s)（例如 M）。"
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "变体组合重复",
+"explanation": "同一父商品下有两个或更多变体的属性组合相同。",
+"whyPlatformCares": "重复的组合可能相互覆盖，或被意外合并。",
+"howToFix": "请确保每个变体在其父商品下都有唯一的属性值组合。"
+},
+"woocommerce/missing_sku": {
+"title": "缺少 SKU",
+"explanation": "缺少 SKU 会降低更新的可靠性，并可能破坏库存跟踪。",
+"whyPlatformCares": "SKU 用于匹配、更新和第三方集成。",
+"howToFix": "请尽可能为每个商品/变体填写唯一的 SKU。"
+},
+"woocommerce/duplicate_sku": {
+"title": "SKU 重复风险",
+"explanation": "有两行或更多行的 SKU 相同。",
+"whyPlatformCares": "导入时，重复的 SKU 可能覆盖现有商品，或把数据关联到错误的商品上。",
+"howToFix": "请让 SKU 唯一。如果确实需要重复，请拆分目录，或采用一致的父/子结构。"
+},
+"woocommerce/invalid_regular_price": {
+"title": "常规价无效",
+"explanation": "Regular price 必须是有效数字。",
+"whyPlatformCares": "无效的价格会导致导入失败，或店铺显示错误的价格。",
+"howToFix": "请使用 19.99 这样的数值（不带货币符号）。"
+},
+"woocommerce/invalid_sale_price": {
+"title": "促销价无效",
+"explanation": "Sale price 必须是有效数字。",
+"whyPlatformCares": "无效的促销价可能被忽略或引起价格问题。",
+"howToFix": "请使用 14.99 这样的数值（不带货币符号）。"
+},
+"woocommerce/missing_image": {
+"title": "缺少图片",
+"explanation": "此商品行没有图片网址。",
+"whyPlatformCares": "没有图片也能导入成功，但缺少图片会降低商品页面质量和转化率。",
+"howToFix": "请在商品的 Images 中填写网址（多个网址用逗号分隔）。"
+},
+"woocommerce/invalid_bool": {
+"title": "布尔值无效",
+"explanation": "Published、In stock?、Is featured? 等布尔字段需要 1/0 或 true/false。",
+"whyPlatformCares": "WooCommerce 导入器可能误解意外的值，导致商品被隐藏或配置错误。",
+"howToFix": "请使用 1（是/真）或 0（否/假）。常见写法（yes、no、true、false）可以自动规范化。"
+},
+"woocommerce/invalid_price": {
+"title": "价格值无效",
+"explanation": "某个价格字段包含非数字的值。",
+"whyPlatformCares": "WooCommerce 需要普通的小数价格。货币符号或文字会导致导入失败或价格变为 0。",
+"howToFix": "请使用 19.99 这样的普通小数（不带货币符号、逗号或文字）。"
+},
+"woocommerce/invalid_int": {
+"title": "整数值无效",
+"explanation": "某个整数字段（如 Stock）包含非整数的值。",
+"whyPlatformCares": "WooCommerce 的库存数量需要整数。小数可能被截断或拒绝。",
+"howToFix": "请使用 0、5 或 12 这样的整数。"
+},
+"woocommerce/invalid_visibility": {
+"title": "可见性值无效",
+"explanation": "Visibility in catalog 必须是四个允许值之一。",
+"whyPlatformCares": "无法识别的可见性值可能让商品默认可见，或导致导入失败。",
+"howToFix": "请使用以下之一：visible、catalog、search 或 hidden。"
+},
+"woocommerce/invalid_image_url": {
+"title": "图片网址无效",
+"explanation": "Images 列中有一个或多个网址不是有效的 http(s) 网址。",
+"whyPlatformCares": "WooCommerce 在导入时从提供的网址获取图片。网址无效会导致商品没有图片。",
+"howToFix": "请使用以逗号分隔的完整 https:// 网址，并确保图片可公开访问。"
+},
+"woocommerce/sale_price_not_lower": {
+"title": "促销价不低于常规价",
+"explanation": "Sale price 应低于 Regular price，折扣才有意义。",
+"whyPlatformCares": "WooCommerce 可能会以划线价/促销价的形式同时显示两个价格。如果促销价等于或高于常规价，价格显示会令人困惑或出错。",
+"howToFix": "请将 Sale price 设为低于 Regular price 的值，或清空 Sale price 字段。"
+},
+"woocommerce/invalid_value": {
+"title": "无法识别的值",
+"explanation": "某个状态类列中有 WooCommerce 无法识别的值。",
+"whyPlatformCares": "WooCommerce 的 Published、In stock?、Backorders allowed? 和 Tax status 只接受特定的值，其他值会被忽略或拒绝。",
+"howToFix": "请使用问题中列出的值之一。"
+},
+"woocommerce/variation_multiple_values": {
+"title": "变体有多个值",
+"explanation": "某个变体行为一个属性列出了多个值。",
+"whyPlatformCares": "每个 WooCommerce 变体都是一个具体组合，因此每个属性只能有一个值。",
+"howToFix": "请将所有值放在父行，每个变体行只写一个值。"
+},
+"woocommerce/parent_not_in_file": {
+"title": "父商品不在文件中",
+"explanation": "某个变体指向的父商品不在此文件中。",
+"whyPlatformCares": "WooCommerce 会将变体关联到现有的可变商品；如果父商品还不存在，该变体会被跳过。",
+"howToFix": "请先导入父商品，或将其所在行加入此文件。"
+},
+"etsy/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "缺少一个或多个 Etsy 批量刊登必填列。",
+"whyPlatformCares": "Etsy 导入器需要准确的表头才能正确对应刊登字段。",
+"howToFix": "请从 Etsy 重新导出一份批量刊登 CSV，确认必填表头存在且未被修改。"
+},
+"etsy/invalid_price": {
+"title": "价格无效",
+"explanation": "价格必须是有效数字。",
+"whyPlatformCares": "无效的价格可能导致刊登被拒绝。",
+"howToFix": "请使用 19.99 这样的数值（不带货币符号）。"
+},
+"etsy/title_too_long": {
+"title": "标题过长",
+"explanation": "Etsy 标题有长度上限。",
+"whyPlatformCares": "过长的标题可能被截断或拒绝，具体取决于导入器。",
+"howToFix": "请缩短标题（我们可以安全地截断到最大长度）。"
+},
+"etsy/tags_too_many": {
+"title": "标签过多",
+"explanation": "Etsy 刊登最多支持 13 个标签。",
+"whyPlatformCares": "超出上限的标签会被忽略，影响搜索优化。",
+"howToFix": "请保留最好的 13 个标签（我们可以自动限制为 13 个）。"
+},
+"etsy/too_many_tags": {
+"title": "标签过多",
+"explanation": "Etsy 刊登最多支持 13 个标签。",
+"whyPlatformCares": "超出上限的标签会被忽略，影响搜索优化。",
+"howToFix": "请保留最好的 13 个标签（我们可以自动限制为 13 个）。"
+},
+"etsy/tag_too_long": {
+"title": "标签超过 20 个字符",
+"explanation": "Etsy 每个标签最多 20 个字符。",
+"whyPlatformCares": "超过 20 个字符的标签会被 Etsy 拒绝。",
+"howToFix": "请将相关标签缩短到 20 个字符以内。"
+},
+"etsy/missing_title": {
+"title": "缺少刊登标题",
+"explanation": "所有 Etsy 刊登都需要标题。",
+"whyPlatformCares": "没有标题的刊登无法发布或导入。",
+"howToFix": "请填写有描述性的标题（最多 140 个字符）。"
+},
+"etsy/missing_price": {
+"title": "缺少价格",
+"explanation": "所有 Etsy 刊登都需要价格。",
+"whyPlatformCares": "没有价格的刊登无法发布。",
+"howToFix": "请以普通小数填写刊登价格（例如 19.99）。"
+},
+"etsy/invalid_quantity": {
+"title": "数量无效",
+"explanation": "数量必须是非负整数。",
+"whyPlatformCares": "无效的数量会导致刊登导入或发布失败。",
+"howToFix": "请使用 0、1 或 10 这样的整数。"
+},
+"etsy/invalid_currency": {
+"title": "币种代码无效",
+"explanation": "币种必须是有效的 3 个字母 ISO 4217 代码（例如 USD、GBP、EUR）。",
+"whyPlatformCares": "无效的币种代码可能导致导入失败或价格显示错误。",
+"howToFix": "请使用标准的 3 个字母币种代码（我们可以自动转为大写）。"
+},
+"etsy/invalid_image_url": {
+"title": "图片网址无效",
+"explanation": "有一个或多个图片网址不是有效的 http(s) 网址。",
+"whyPlatformCares": "Etsy 无法从无效网址获取图片，刊登将没有照片。",
+"howToFix": "请使用以逗号分隔、指向可公开访问图片的完整 https:// 网址。"
+},
+"etsy/duplicate_tags": {
+"title": "标签重复",
+"explanation": "重复的标签会浪费有限的标签名额。",
+"whyPlatformCares": "标签重复会降低曝光度。",
+"howToFix": "请删除重复项（我们可以在保持顺序的情况下自动去重）。"
+},
+"etsy/missing_shipping_profile": {
+"title": "缺少运费模板",
+"explanation": "发布需要运费模板（或等效的运费字段）。",
+"whyPlatformCares": "没有运费设置的刊登无法发布。",
+"howToFix": "请填写有效的运费模板 ID/名称，或导出文件所需的运费字段。"
+},
+"etsy/duplicate_listing_id": {
+"title": "Listing ID 重复风险",
+"explanation": "有两行或更多行的 Listing ID 相同。",
+"whyPlatformCares": "重复的 ID 可能覆盖现有刊登，而不是创建新刊登。",
+"howToFix": "创建新刊登时请确保 Listing ID 唯一；更新现有刊登时再有意设置。"
+},
+"etsy/duplicate_sku": {
+"title": "SKU 重复风险",
+"explanation": "有两个或更多刊登的 SKU 相同。",
+"whyPlatformCares": "重复的 SKU 可能造成库存和集成上的混乱。",
+"howToFix": "请尽量让 SKU 唯一。"
+},
+"etsy/missing_required_field": {
+"title": "缺少必填字段",
+"explanation": "缺少 Etsy 必填字段。",
+"whyPlatformCares": "缺少必填字段会导致刊登被拒绝。",
+"howToFix": "请按问题详情的提示填写缺少的必填字段。"
+},
+"etsy/unknown_header": {
+"title": "未知列",
+"explanation": "Etsy 导入器无法识别此列。",
+"whyPlatformCares": "未知列会被忽略，可能掩盖数据问题。",
+"howToFix": "请删除该列，或将其重命名为 Etsy 支持的列标题。"
+},
+"etsy/too_many_materials": {
+"title": "材料过多",
+"explanation": "某个刊登的材料超过 13 种。",
+"whyPlatformCares": "Etsy 每个刊登最多允许 13 种材料；批量编辑时多出的部分会被拒绝。",
+"howToFix": "请保留最重要的 13 种材料。"
+},
+"etsy/quantity_too_high": {
+"title": "数量超过 999",
+"explanation": "数量大于 999。",
+"whyPlatformCares": "Etsy 每个刊登的数量上限为 999。",
+"howToFix": "请将 Quantity 设为 999 或更少。"
+},
+"ebay/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "表头行缺少一个或多个 eBay File Exchange 必填列。",
+"whyPlatformCares": "eBay File Exchange 上传时需要特定的列名才能正确对应字段。",
+"howToFix": "请使用 eBay File Exchange 模板，并确认必填列（Title、StartPrice、Quantity）都存在。"
+},
+"ebay/invalid_action": {
+"title": "Action 值无效",
+"explanation": "Action 列的值不是 eBay 接受的操作之一。",
+"whyPlatformCares": "eBay File Exchange 通过 Action 决定是添加（Add）、修改（Revise）、删除还是结束（End）刊登。无效的值会导致整行被拒绝。",
+"howToFix": "请使用以下之一：Add、Revise、Relist、End、VerifyAdd 或 Status。"
+},
+"ebay/missing_title": {
+"title": "缺少刊登标题",
+"explanation": "所有 eBay 刊登都必须填写 Title 字段。",
+"whyPlatformCares": "没有标题的刊登无法在 eBay 上发布。",
+"howToFix": "请填写不超过 80 个字符、有描述性的刊登标题。"
+},
+"ebay/title_too_long": {
+"title": "标题超过 80 个字符",
+"explanation": "eBay 对刊登标题有 80 个字符的硬性限制。",
+"whyPlatformCares": "超过 80 个字符的标题会被 eBay File Exchange 拒绝，无法上传。",
+"howToFix": "请将标题缩短到 80 个字符以内，重点使用买家会搜索的关键词。"
+},
+"ebay/missing_price": {
+"title": "缺少 StartPrice",
+"explanation": "所有 eBay 刊登都必须填写 StartPrice。",
+"whyPlatformCares": "没有价格的刊登在上传时会被拒绝。",
+"howToFix": "请以小数格式填写 StartPrice（例如 19.99）。"
+},
+"ebay/invalid_price": {
+"title": "StartPrice 无效",
+"explanation": "StartPrice 必须是有效的小数。",
+"whyPlatformCares": "无效的价格会导致刊登行上传失败。",
+"howToFix": "请使用 19.99 这样不带货币符号和逗号的普通小数。"
+},
+"ebay/invalid_quantity": {
+"title": "Quantity 无效",
+"explanation": "Quantity 必须是非负整数。",
+"whyPlatformCares": "eBay 要求所有刊登都填写数字数量。无效的值会导致上传失败。",
+"howToFix": "请使用 0、1 或 10 这样的整数。"
+},
+"ebay/invalid_condition_id": {
+"title": "无法识别的 ConditionID",
+"explanation": "ConditionID 的值不符合 eBay 标准状况代码。",
+"whyPlatformCares": "eBay 通过 ConditionID 向买家显示物品状况。无法识别的 ID 可能被拒绝或显示错误的状况。",
+"howToFix": "请使用 eBay 标准 ConditionID，例如 1000=全新、1500=全新（其他）、2000=认证翻新、2500=卖家翻新、3000=二手、7000=零件或无法使用。可用的 ID 因类目而异。"
+},
+"ebay/invalid_duration": {
+"title": "Duration 无效",
+"explanation": "Duration 的值不符合 eBay 可识别的刊登时长格式。",
+"whyPlatformCares": "无法识别的时长可能默认变成短期拍卖，或导致刊登被拒绝。",
+"howToFix": "一口价刊登请使用 GTC（Good 'Til Cancelled），拍卖请使用 Days_1、Days_3、Days_5、Days_7 或 Days_10。"
+},
+"ebay/invalid_format": {
+"title": "刊登 Format 无效",
+"explanation": "Format 的值不是 eBay 可识别的刊登类型。",
+"whyPlatformCares": "Format 字段告诉 eBay 如何展示刊登。无效的值可能导致该行失败。",
+"howToFix": "一口价刊登请使用 FixedPrice，拍卖式刊登请使用 Auction。"
+},
+"ebay/too_many_images": {
+"title": "图片过多",
+"explanation": "eBay 每个刊登最多允许 24 张照片。",
+"whyPlatformCares": "超过 24 张上限的照片会被 eBay 拒绝或丢弃。",
+"howToFix": "请将 PictureURL 列表减少到 24 个以内的网址，用 | 分隔。"
+},
+"ebay/invalid_picture_url": {
+"title": "照片网址无效",
+"explanation": "有一个或多个照片网址不是有效的 http(s) 网址。",
+"whyPlatformCares": "eBay 在刊登时从提供的网址获取图片。网址无效会导致刊登缺少图片。",
+"howToFix": "请使用指向可公开访问图片的完整 https:// 网址，多个网址用竖线（|）分隔。"
+},
+"ebay/invalid_dispatch_time": {
+"title": "DispatchTimeMax 无效",
+"explanation": "DispatchTimeMax 应为表示处理天数的非负整数。",
+"whyPlatformCares": "eBay 会向买家显示处理时间。无效的值可能导致刊登无法上传。",
+"howToFix": "请使用 1、2 或 3 这样的整数（发货所需天数）。"
+},
+"ebay/duplicate_sku": {
+"title": "CustomLabel (SKU) 重复",
+"explanation": "有两行或更多行的 CustomLabel 值相同。",
+"whyPlatformCares": "Add 操作中重复的 CustomLabel 可能产生冲突的刊登。更新现有刊登请使用 Revise 操作。",
+"howToFix": "请确保每个刊登的 CustomLabel 唯一，或使用 Action=Revise 更新现有刊登。"
+},
+"ebay/variation_specifics_mismatch": {
+"title": "变体规格不匹配",
+"explanation": "VariationSpecificsName 和 VariationSpecificsValue 必须同时填写或同时留空。",
+"whyPlatformCares": "eBay 需要相互匹配的名称/值对来生成变体属性。不匹配会导致无法创建变体。",
+"howToFix": "请在每个变体行同时填写 VariationSpecificsName（例如 'Color|Size'）和 VariationSpecificsValue（例如 'Blue|Medium'）。"
+},
+"ebay/duplicate_variation_combo": {
+"title": "变体组合重复",
+"explanation": "同一刊登下有两个或更多变体行的 VariationSpecifics 组合相同。",
+"whyPlatformCares": "重复的变体组合在上传时会相互覆盖，导致数据丢失。",
+"howToFix": "请确保每个变体行的 VariationSpecificsName 和 VariationSpecificsValue 组合唯一。"
+},
+"ebay/missing_category_id": {
+"title": "Category 为空",
+"explanation": "某个新刊登没有 eBay 类目编号。",
+"whyPlatformCares": "eBay 要求每个新刊登都有类目；没有类目的行会被拒绝。",
+"howToFix": "请在 eBay 类目树中查找数字类目 ID，并填写到每个新刊登行中。"
+},
+"ebay/invalid_category_id": {
+"title": "Category 无效",
+"explanation": "Category 的值不是数字形式的 eBay 类目 ID。",
+"whyPlatformCares": "eBay 类目 ID 始终是数字。类目名称在上传时会被拒绝。",
+"howToFix": "请使用 eBay 类目树中的数字 ID（例如手机和智能手机为 9355）。"
+},
+"ebay/missing_action_column": {
+"title": "没有 Action 列",
+"explanation": "文件中没有 Action 列。",
+"whyPlatformCares": "eBay 上传通过第一列（Action，表头中带有站点和币种）决定如何处理每一行。",
+"howToFix": "请从 Seller Hub 上传模板开始，并保留其第一列。"
+},
+"ebay/missing_action": {
+"title": "缺少 Action",
+"explanation": "某个刊登行没有 Action。",
+"whyPlatformCares": "只有变体行可以将 Action 留空；其他行会被 eBay 跳过。",
+"howToFix": "请将 Action 设为 Add、Revise、Relist 或 End。"
+},
+"ebay/missing_item_id": {
+"title": "缺少 ItemID",
+"explanation": "某个 Revise、Relist 或 End 行没有 ItemID。",
+"whyPlatformCares": "eBay 需要物品编号才能找到要修改的刊登。",
+"howToFix": "请在 ItemID 列中添加 eBay 物品编号。"
+},
+"ebay/missing_end_code": {
+"title": "缺少 EndCode",
+"explanation": "某个 End 行没有 EndCode。",
+"whyPlatformCares": "eBay 会询问提前结束刊登的原因。",
+"howToFix": "请使用 NotAvailable、LostOrBroken、Incorrect 或 OtherListingError。"
+},
+"ebay/missing_condition": {
+"title": "缺少物品状况",
+"explanation": "某个新刊登没有 ConditionID。",
+"whyPlatformCares": "大多数 eBay 类目都要求填写物品状况。",
+"howToFix": "请设置 ConditionID，例如 1000（全新）或 3000（二手）。"
+},
+"ebay/fixed_price_not_gtc": {
+"title": "一口价未使用 GTC",
+"explanation": "某个一口价刊登的时长不是 GTC。",
+"whyPlatformCares": "eBay 的所有一口价刊登都按 Good 'Til Cancelled 刊登。",
+"howToFix": "请将 Duration 设为 GTC。"
+},
+"ebay/invalid_relationship_details": {
+"title": "RelationshipDetails 无效",
+"explanation": "RelationshipDetails 不符合 eBay 的 Name=Value 格式。",
+"whyPlatformCares": "eBay 根据 RelationshipDetails 生成变体选择器；格式错误会导致刊登被拒绝。",
+"howToFix": "父行：Color=Blue;Red|Size=M;L。变体：Color=Blue|Size=M。"
+},
+"ebay/variation_without_parent": {
+"title": "变体没有父行",
+"explanation": "某个变体行没有跟在父刊登行之后。",
+"whyPlatformCares": "eBay 会将 Relationship=Variation 行关联到其正上方的父行。",
+"howToFix": "请将变体行移到其父行的正下方。"
+},
+"ebay/variation_value_not_in_parent": {
+"title": "未声明的变体值",
+"explanation": "某个变体使用了父行中没有列出的值。",
+"whyPlatformCares": "eBay 只接受在父行 RelationshipDetails 中声明的变体值。",
+"howToFix": "请将该值添加到父行，或修正此变体。"
+},
+"amazon/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "表头行缺少一个或多个 Amazon 平面文件必填列。",
+"whyPlatformCares": "Amazon 的平面文件处理程序需要准确的列名才能正确对应字段。缺少列会导致文件被拒绝。",
+"howToFix": "请使用 Amazon Inventory Loader 或类目模板；每个文件都需要 sku 列。"
+},
+"amazon/missing_sku": {
+"title": "缺少 SKU",
+"explanation": "每个 Amazon 库存行都必须填写 sku 字段。",
+"whyPlatformCares": "Amazon 用 SKU 唯一标识您的商品。没有 SKU 的行会被拒绝。",
+"howToFix": "请为每个商品行填写唯一的 SKU（最多 40 个字符）。"
+},
+"amazon/sku_too_long": {
+"title": "SKU 超过 40 个字符",
+"explanation": "Amazon 的 SKU 最多 40 个字符。",
+"whyPlatformCares": "超过 40 个字符的 SKU 会被平面文件处理程序拒绝。",
+"howToFix": "请在保持唯一的前提下，将 SKU 缩短到 40 个字符以内。"
+},
+"amazon/duplicate_sku": {
+"title": "SKU 重复",
+"explanation": "此文件中有两行或更多行的 SKU 相同。",
+"whyPlatformCares": "重复的 SKU 会导致处理时一行覆盖另一行，可能删除库存或价格数据。",
+"howToFix": "请确保每个 SKU 在文件中只出现一次。如需删除商品，请明确使用 add-delete='d'。"
+},
+"amazon/missing_item_name": {
+"title": "缺少 item-name",
+"explanation": "Amazon 商品必须填写 item-name 字段（商品标题）。",
+"whyPlatformCares": "Amazon 需要商品标题才能在搜索结果和商品页面中展示商品。",
+"howToFix": "请在 item-name 列中填写有描述性的商品标题（最多 500 个字符）。"
+},
+"amazon/item_name_too_long": {
+"title": "item-name 过长",
+"explanation": "Amazon 的 item-name 通常最多 500 个字符。",
+"whyPlatformCares": "超出上限的标题可能被截断或拒绝，具体取决于类目模板。",
+"howToFix": "请将 item-name 缩短到 500 个字符以内，重点突出品牌、商品类型和关键属性。"
+},
+"amazon/missing_price": {
+"title": "缺少价格",
+"explanation": "在添加或更新报价的行中，price 为空。",
+"whyPlatformCares": "现有报价会保留当前价格，但没有价格的新报价无法上线。",
+"howToFix": "请以小数格式填写有效价格（例如 29.99）。"
+},
+"amazon/invalid_price": {
+"title": "价格无效",
+"explanation": "price 的值不是有效的小数。",
+"whyPlatformCares": "无效的价格会导致 Amazon 平面文件处理程序拒绝该行。",
+"howToFix": "请使用 29.99 这样的普通小数（不带美元符号、逗号或文字）。"
+},
+"amazon/invalid_quantity": {
+"title": "数量无效",
+"explanation": "quantity 的值必须是非负整数。",
+"whyPlatformCares": "Amazon 会拒绝数量不是有效数字的行，也不接受负数。",
+"howToFix": "请使用 0、5 或 100 这样的整数。"
+},
+"amazon/invalid_product_id_type": {
+"title": "product-id-type 无效",
+"explanation": "product-id-type 的值不是 Amazon 可识别的标识符类型。",
+"whyPlatformCares": "Amazon 通过 product-id-type 来解读 product-id 字段（例如按 ASIN 或 UPC）。类型无效会导致商品匹配失败。",
+"howToFix": "Inventory Loader：1（ASIN）、2（ISBN）、3（UPC）、4（EAN）。类目模板：ASIN、UPC、EAN、ISBN 或 GTIN。"
+},
+"amazon/invalid_item_condition": {
+"title": "item-condition 无效",
+"explanation": "item-condition 代码不是 Amazon 可识别的状况值。",
+"whyPlatformCares": "Amazon 会向买家显示状况，并用它对商品分类。无法识别的代码可能被拒绝。",
+"howToFix": "请使用 Amazon 数字状况代码：11=全新，10=翻新，1=二手 - 近乎全新，2=二手 - 非常好，3=二手 - 良好，4=二手 - 可接受。"
+},
+"amazon/min_above_max_price": {
+"title": "最低价高于最高价",
+"explanation": "minimum-seller-allowed-price 高于 maximum-seller-allowed-price，因此没有任何价格能同时满足两者。",
+"whyPlatformCares": "Amazon 会拒绝该价格范围，并停用范围之外的所有报价。",
+"howToFix": "请交换这两个值，或清空其中一个。"
+},
+"amazon/price_outside_allowed_range": {
+"title": "价格超出允许范围",
+"explanation": "价格低于 minimum-seller-allowed-price 或高于 maximum-seller-allowed-price。",
+"whyPlatformCares": "价格超出您所设范围的报价会被 Amazon 停用，商品将停止销售。",
+"howToFix": "请修改价格，或放宽最低/最高价格范围。"
+},
+"amazon/invalid_add_delete": {
+"title": "add-delete 值无效",
+"explanation": "add-delete 字段必须为 'a'（添加或更新）、'd'（删除报价）或 'x'（删除报价及其商品数据）。",
+"whyPlatformCares": "add-delete 值无效会导致 Amazon 处理程序跳过该行。",
+"howToFix": "使用 'a' 添加或更新报价，'d' 删除报价，'x' 连同商品数据一起删除。"
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "fulfillment-center-id 无效",
+"explanation": "fulfillment-center-id 的值不是 Amazon 可识别的配送方式。",
+"whyPlatformCares": "配送渠道决定订单由 Amazon（FBA）还是由您自己（MFN）发货。无效的值可能导致错误的默认设置。",
+"howToFix": "卖家自配送（您自己发货）请使用 DEFAULT，对应地区的 FBA 请使用 AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN。"
+},
+"amazon/invalid_image_url": {
+"title": "图片网址无效",
+"explanation": "image-url 不是有效的 http(s) 网址。",
+"whyPlatformCares": "Amazon 从提供的网址获取商品图片。网址无效会导致商品没有图片，降低转化率。",
+"howToFix": "请使用指向可公开访问商品图片的完整 https:// 网址（JPEG 或 PNG，建议至少 500×500 px）。"
+},
+"amazon/description_too_long": {
+"title": "item-description 过长",
+"explanation": "item-description 超过了 Amazon 通常的 2000 个字符上限。",
+"whyPlatformCares": "超出上限的描述可能被截断或拒绝，具体取决于类目模板。",
+"howToFix": "请将 item-description 缩短到 2000 个字符以内。"
+},
+"amazon/brand_name_too_long": {
+"title": "brand-name 过长",
+"explanation": "brand-name 超过了 Amazon 50 个字符的上限。",
+"whyPlatformCares": "超出上限的品牌名称可能被截断或拒绝。",
+"howToFix": "请将 brand-name 缩短到 50 个字符以内。"
+},
+"amazon/invalid_boolean_field": {
+"title": "布尔字段值无效",
+"explanation": "某个配送相关的布尔字段（will-ship-internationally 或 expedited-shipping）的值不是 'y' 或 'n'。",
+"whyPlatformCares": "Amazon 平面文件处理程序要求这些字段严格为 'y'、'n' 或留空。无效的值会被静默忽略，或导致该行被拒绝。",
+"howToFix": "使用 'y' 启用或 'n' 关闭该配送选项，或留空以使用账户默认设置。"
+},
+"amazon/product_id_scientific_notation": {
+"title": "条形码被电子表格破坏",
+"explanation": "某个 product-id 看起来像 1.23457E+11：电子表格把条形码转换成了科学计数法。",
+"whyPlatformCares": "前几位之后的数字会丢失，因此 Amazon 无法匹配商品。",
+"howToFix": "请将该列设为\"文本\"格式，并重新输入完整的条形码。"
+},
+"amazon/invalid_product_id": {
+"title": "product-id 无效",
+"explanation": "product-id 的长度或字符与其类型不符。",
+"whyPlatformCares": "Amazon 通过此 ID 将报价与商品匹配；ID 错误会导致报错，或将报价关联到错误的商品。",
+"howToFix": "请核对条形码或 ASIN：UPC 为 12 位，EAN 为 13 位，ISBN 为 10 位或 13 位，ASIN 为 10 位字母和数字。"
+}
+}
