@@ -5,7 +5,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
-import { parseCsv, toCsv } from "@/lib/csv";
+import { toCsv } from "@/lib/csv";
+import { processCsv } from "@/lib/processCsvClient";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { createClient } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
@@ -742,8 +743,12 @@ useEffect(() => {
 
     const out: number[] = [];
 
-    // Include pinned rows first (sorted)
-    for (const r of pinnedSorted) out.push(r);
+    // Include pinned rows first (sorted). Capped: a file where every row has an
+    // issue would otherwise render thousands of rows of inputs and freeze the page.
+    for (const r of pinnedSorted) {
+      if (out.length >= LIMIT) break;
+      out.push(r);
+    }
 
     // Fill with non-pinned rows up to the preview limit
     if (out.length < LIMIT) {
@@ -921,10 +926,10 @@ useEffect(() => {
     setErrorBanner(null);
 
     try {
-      const parsed = parseCsv(csvText);
-      const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
+      // Large files are parsed + validated in a Web Worker so the page stays responsive.
+      const res = await processCsv(csvText, format, { strictShopify: getStrictMode() });
 
-      const nextParseIssues: UiIssue[] = (parsed.parseErrors ?? []).map((m) => ({
+      const nextParseIssues: UiIssue[] = (res.parseErrors ?? []).map((m) => ({
         message: m,
         level: "error",
         severity: "error",
@@ -1984,7 +1989,7 @@ useEffect(() => {
                 </table>
 
                 <div className="px-3 py-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                  Preview shows pinned rows first, then fills up to 50 rows. Scroll horizontally to see all columns. Hover a cell to view the full value.
+                  Preview shows up to 50 rows, pinned rows first{pinnedSorted.length > previewRows.length ? ` (${pinnedSorted.length - previewRows.length} more pinned rows are in Manual fixes)` : ""}. Scroll horizontally to see all columns. Hover a cell to view the full value.
                 </div>
               </div>
             ) : null}

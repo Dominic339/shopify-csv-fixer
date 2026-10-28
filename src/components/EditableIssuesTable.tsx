@@ -53,6 +53,11 @@ export function EditableIssuesTable(props: {
   // Expand state for pinned rows
   const [open, setOpen] = useState<Set<number>>(() => new Set());
 
+  // Render the worklist in pages; thousands of pinned rows would freeze the page.
+  const PAGE = 25;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const visiblePinned = pinnedRows.slice(0, visibleCount);
+
   // Expand state for "Why is this blocking?" panels per issue instance
   const [openWhy, setOpenWhy] = useState<Record<string, boolean>>({});
 
@@ -64,6 +69,7 @@ export function EditableIssuesTable(props: {
   useEffect(() => {
     setOpen(new Set());
     setOpenWhy({});
+    setVisibleCount(PAGE);
   }, [resetKey]);
 
   const issuesByRow = useMemo(() => {
@@ -142,7 +148,7 @@ export function EditableIssuesTable(props: {
         </div>
       ) : (
         <div className="mt-4 space-y-3">
-          {pinnedRows.map((rowIndex) => {
+          {visiblePinned.map((rowIndex) => {
             const counts = rowCounts.get(rowIndex) ?? { errors: 0, warnings: 0, tips: 0, hasEW: false };
             const isOpen = open.has(rowIndex);
             const row = rows[rowIndex] ?? {};
@@ -329,6 +335,17 @@ export function EditableIssuesTable(props: {
               </div>
             );
           })}
+
+          {pinnedRows.length > visiblePinned.length ? (
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+              <span>
+                Showing {visiblePinned.length} of {pinnedRows.length} pinned rows.
+              </span>
+              <button type="button" className="pill-btn" onClick={() => setVisibleCount((n) => n + PAGE)}>
+                Show {Math.min(PAGE, pinnedRows.length - visiblePinned.length)} more
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

@@ -10,7 +10,15 @@
 
 const KEY = "striveformats_strict_shopify_v1";
 
+// Web Workers have no localStorage, so the CSV worker passes the preference in.
+let override: boolean | null = null;
+
+export function setStrictModeOverride(next: boolean | null) {
+  override = next;
+}
+
 export function getStrictMode(): boolean {
+  if (override !== null) return override;
   if (typeof window === "undefined") return false;
   try {
     const v = window.localStorage.getItem(KEY);
