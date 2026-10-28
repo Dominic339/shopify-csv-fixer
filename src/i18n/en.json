@@ -76,7 +76,11 @@
     "autoFixableBadge": "Auto-fixable",
     "englishOnly": "This guide is written in English.",
     "platformGuide": "{platform} platform guide",
-    "notChecked": "StriveFormats doesn’t check for this issue yet. Use the steps below to fix it by hand."
+    "notChecked": "StriveFormats doesn’t check for this issue yet. Use the steps below to fix it by hand.",
+    "metaTitle": "{title} | {platform} CSV Guide",
+    "metaIssueDescription": "{description} Learn how to fix this {platform} CSV import error step by step in StriveFormats, Excel, and Google Sheets.",
+    "faqWhatIs": "What is the \"{title}\" error?",
+    "faqHowFix": "How do I fix \"{title}\"?"
   },
   "guides": {
     "title": "CSV Import Guides",

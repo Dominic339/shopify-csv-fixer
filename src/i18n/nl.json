@@ -76,7 +76,11 @@
     "autoFixableBadge": "Automatisch op te lossen",
     "englishOnly": "Deze gids is in het Engels geschreven.",
     "platformGuide": "{platform}-platformgids",
-    "notChecked": "StriveFormats controleert dit probleem nog niet. Volg de stappen hieronder om het met de hand op te lossen."
+    "notChecked": "StriveFormats controleert dit probleem nog niet. Volg de stappen hieronder om het met de hand op te lossen.",
+    "metaTitle": "{title} | {platform} CSV-handleiding",
+    "metaIssueDescription": "{description} Zo los je deze {platform} CSV-importfout stap voor stap op in StriveFormats, Excel en Google Spreadsheets.",
+    "faqWhatIs": "Wat is de fout „{title}”?",
+    "faqHowFix": "Hoe los ik „{title}” op?"
   },
   "guides": {
     "title": "CSV-importhanleidingen",

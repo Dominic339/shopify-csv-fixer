@@ -1,8 +1,10 @@
 // Guides in the page's language: issue guides take their text from the translated issue
-// rules (src/i18n/issues), curated guides their card title/description from src/i18n/content.
-// Article bodies stay English.
+// rules (src/i18n/issues) and the sentences of their generated body from src/i18n/guideText;
+// curated guides take their card title/description from src/i18n/content and their article
+// from src/content/guides-i18n/<locale>/ (see readCuratedGuide).
 
 import type { Guide } from "@/lib/guidesRegistry";
+import { fillTemplate, type Tr } from "@/lib/guides/issueGuideExpander";
 import type { Locale } from "@/lib/i18n/locales";
 import { loadValidationDicts, validationText } from "@/lib/i18n/validationText";
 
@@ -59,4 +61,32 @@ export async function guideLocalizer(locale: Locale): Promise<GuideLocalizer> {
     const card = cards[`${g.platform}/${g.slug}`];
     return card ? { ...g, title: card.title || g.title, description: card.description || g.description } : g;
   }) as GuideLocalizer;
+}
+
+/** English sentence template -> translated template (same {placeholders}). */
+export type GuideTextDict = Record<string, string>;
+
+const GUIDE_TEXT_LOADERS: Record<Exclude<Locale, "en">, () => Promise<{ default: GuideTextDict }>> = {
+  es: () => import("@/i18n/guideText/es.json"),
+  de: () => import("@/i18n/guideText/de.json"),
+  fr: () => import("@/i18n/guideText/fr.json"),
+  pt: () => import("@/i18n/guideText/pt.json"),
+  it: () => import("@/i18n/guideText/it.json"),
+  nl: () => import("@/i18n/guideText/nl.json"),
+  pl: () => import("@/i18n/guideText/pl.json"),
+  tr: () => import("@/i18n/guideText/tr.json"),
+  ru: () => import("@/i18n/guideText/ru.json"),
+  ja: () => import("@/i18n/guideText/ja.json"),
+  ko: () => import("@/i18n/guideText/ko.json"),
+  zh: () => import("@/i18n/guideText/zh.json"),
+};
+
+/**
+ * The sentence translator for issue guide bodies (expandIssueContent), and whether this
+ * language has those sentences at all. Untranslated sentences stay English.
+ */
+export async function guideTextTranslator(locale: Locale): Promise<{ tr: Tr; translated: boolean }> {
+  if (locale === "en") return { tr: fillTemplate, translated: true };
+  const dict = (await GUIDE_TEXT_LOADERS[locale]()).default;
+  return { tr: (t, v) => fillTemplate(dict[t] ?? t, v), translated: Object.keys(dict).length > 0 };
 }

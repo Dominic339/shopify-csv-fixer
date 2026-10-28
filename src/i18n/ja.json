@@ -76,7 +76,11 @@
     "autoFixableBadge": "自動修正可",
     "englishOnly": "このガイドは英語で書かれています。",
     "platformGuide": "{platform} プラットフォームガイド",
-    "notChecked": "StriveFormats はまだこの問題をチェックしていません。以下の手順で手動で修正してください。"
+    "notChecked": "StriveFormats はまだこの問題をチェックしていません。以下の手順で手動で修正してください。",
+    "metaTitle": "{title} | {platform} CSVガイド",
+    "metaIssueDescription": "{description} この{platform} CSVインポートエラーをStriveFormats、Excel、Googleスプレッドシートで解決する手順を解説します。",
+    "faqWhatIs": "「{title}」エラーとは？",
+    "faqHowFix": "「{title}」はどう解決しますか？"
   },
   "guides": {
     "title": "CSVインポートガイド",

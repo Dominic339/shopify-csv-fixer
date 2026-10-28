@@ -76,7 +76,11 @@
     "autoFixableBadge": "Автоисправление",
     "englishOnly": "Это руководство написано на английском языке.",
     "platformGuide": "Руководство по платформе {platform}",
-    "notChecked": "StriveFormats пока не проверяет эту проблему. Исправьте её вручную по шагам ниже."
+    "notChecked": "StriveFormats пока не проверяет эту проблему. Исправьте её вручную по шагам ниже.",
+    "metaTitle": "{title} | Руководство по CSV для {platform}",
+    "metaIssueDescription": "{description} Пошаговое исправление этой ошибки импорта CSV в {platform} в StriveFormats, Excel и Google Таблицах.",
+    "faqWhatIs": "Что означает ошибка «{title}»?",
+    "faqHowFix": "Как исправить «{title}»?"
   },
   "guides": {
     "title": "Руководства по импорту CSV",

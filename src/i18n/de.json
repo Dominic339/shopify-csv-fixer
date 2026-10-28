@@ -76,7 +76,11 @@
     "autoFixableBadge": "Automatisch behebbar",
     "englishOnly": "Diese Anleitung ist auf Englisch verfasst.",
     "platformGuide": "{platform}-Plattformleitfaden",
-    "notChecked": "StriveFormats prüft dieses Problem noch nicht. Behebe es mit den folgenden Schritten von Hand."
+    "notChecked": "StriveFormats prüft dieses Problem noch nicht. Behebe es mit den folgenden Schritten von Hand.",
+    "metaTitle": "{title} | {platform}-CSV-Anleitung",
+    "metaIssueDescription": "{description} So behebst du diesen {platform}-CSV-Importfehler Schritt für Schritt in StriveFormats, Excel und Google Tabellen.",
+    "faqWhatIs": "Was bedeutet der Fehler „{title}“?",
+    "faqHowFix": "Wie behebe ich „{title}“?"
   },
   "guides": {
     "title": "CSV-Import-Anleitungen",

@@ -76,7 +76,11 @@
     "autoFixableBadge": "Otomatik düzeltilir",
     "englishOnly": "Bu rehber İngilizce yazılmıştır.",
     "platformGuide": "{platform} platform rehberi",
-    "notChecked": "StriveFormats bu sorunu henüz kontrol etmiyor. Elle düzeltmek için aşağıdaki adımları izleyin."
+    "notChecked": "StriveFormats bu sorunu henüz kontrol etmiyor. Elle düzeltmek için aşağıdaki adımları izleyin.",
+    "metaTitle": "{title} | {platform} CSV Rehberi",
+    "metaIssueDescription": "{description} Bu {platform} CSV içe aktarma hatasını StriveFormats, Excel ve Google E-Tablolar'da adım adım nasıl düzelteceğinizi öğrenin.",
+    "faqWhatIs": "\"{title}\" hatası nedir?",
+    "faqHowFix": "\"{title}\" nasıl düzeltilir?"
   },
   "guides": {
     "title": "CSV İçe Aktarma Kılavuzları",

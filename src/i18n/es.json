@@ -76,7 +76,11 @@
     "autoFixableBadge": "Corrección automática",
     "englishOnly": "Esta guía está escrita en inglés.",
     "platformGuide": "Guía de la plataforma {platform}",
-    "notChecked": "StriveFormats aún no comprueba este problema. Sigue los pasos de abajo para corregirlo manualmente."
+    "notChecked": "StriveFormats aún no comprueba este problema. Sigue los pasos de abajo para corregirlo manualmente.",
+    "metaTitle": "{title} | Guía CSV de {platform}",
+    "metaIssueDescription": "{description} Aprende a corregir este error de importación CSV de {platform} paso a paso en StriveFormats, Excel y Google Sheets.",
+    "faqWhatIs": "¿Qué es el error «{title}»?",
+    "faqHowFix": "¿Cómo corrijo «{title}»?"
   },
   "guides": {
     "title": "Guías de importación CSV",

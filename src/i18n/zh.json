@@ -76,7 +76,11 @@
     "autoFixableBadge": "可自动修复",
     "englishOnly": "本指南为英文内容。",
     "platformGuide": "{platform} 平台指南",
-    "notChecked": "StriveFormats 暂不检查此问题。请按以下步骤手动修复。"
+    "notChecked": "StriveFormats 暂不检查此问题。请按以下步骤手动修复。",
+    "metaTitle": "{title} | {platform} CSV指南",
+    "metaIssueDescription": "{description} 了解如何在StriveFormats、Excel和Google表格中逐步修复这个{platform} CSV导入错误。",
+    "faqWhatIs": "什么是\"{title}\"错误？",
+    "faqHowFix": "如何修复\"{title}\"？"
   },
   "guides": {
     "title": "CSV导入指南",

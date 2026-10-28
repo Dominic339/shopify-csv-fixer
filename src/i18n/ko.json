@@ -76,7 +76,11 @@
     "autoFixableBadge": "자동 수정 가능",
     "englishOnly": "이 가이드는 영어로 작성되었습니다.",
     "platformGuide": "{platform} 플랫폼 가이드",
-    "notChecked": "StriveFormats는 아직 이 문제를 검사하지 않습니다. 아래 단계에 따라 직접 수정하세요."
+    "notChecked": "StriveFormats는 아직 이 문제를 검사하지 않습니다. 아래 단계에 따라 직접 수정하세요.",
+    "metaTitle": "{title} | {platform} CSV 가이드",
+    "metaIssueDescription": "{description} 이 {platform} CSV 가져오기 오류를 StriveFormats, Excel, Google 스프레드시트에서 단계별로 해결하는 방법을 알아보세요.",
+    "faqWhatIs": "'{title}' 오류란 무엇인가요?",
+    "faqHowFix": "'{title}' 문제는 어떻게 해결하나요?"
   },
   "guides": {
     "title": "CSV 가져오기 가이드",

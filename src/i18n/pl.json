@@ -76,7 +76,11 @@
     "autoFixableBadge": "Poprawka automatyczna",
     "englishOnly": "Ten poradnik jest napisany po angielsku.",
     "platformGuide": "Przewodnik po platformie {platform}",
-    "notChecked": "StriveFormats jeszcze nie sprawdza tego problemu. Skorzystaj z poniższych kroków, aby naprawić go ręcznie."
+    "notChecked": "StriveFormats jeszcze nie sprawdza tego problemu. Skorzystaj z poniższych kroków, aby naprawić go ręcznie.",
+    "metaTitle": "{title} | Poradnik CSV {platform}",
+    "metaIssueDescription": "{description} Dowiedz się, jak krok po kroku naprawić ten błąd importu CSV w {platform} w StriveFormats, Excelu i Arkuszach Google.",
+    "faqWhatIs": "Co oznacza błąd „{title}”?",
+    "faqHowFix": "Jak naprawić „{title}”?"
   },
   "guides": {
     "title": "Poradniki importu CSV",

@@ -23,7 +23,7 @@ import {
   type Guide,
   type GuidePlatform,
 } from "@/lib/guidesRegistry";
-import { guideLocalizer } from "@/lib/guides/localizeGuide";
+import { guideLocalizer, guideTextTranslator } from "@/lib/guides/localizeGuide";
 import { readCuratedGuide } from "@/lib/guides/mdxLoader";
 import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
 import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
@@ -290,20 +290,32 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
 // /guides/<platform>/<slug>
 // ---------------------------------------------------------------------------
 
+/** Whether a guide's body exists in this language (otherwise the page shows English). */
+async function guideBodyTranslated(locale: Locale, g: Guide): Promise<boolean> {
+  if (locale === DEFAULT_LOCALE) return true;
+  if (g.kind === "curated") return readCuratedGuide(g.platform, g.slug, locale)?.translated ?? false;
+  return (await guideTextTranslator(locale)).translated;
+}
+
 export async function guideMetadata(locale: Locale, platform: string, slug: string): Promise<Metadata> {
   if (!isPlatform(platform)) return {};
-  const guide = (await guideLocalizer(locale))(getGuide(platform, slug));
-  if (!guide) return {};
-  const label = PLATFORM_LABEL[guide.platform];
-  const title = `${guide.title} | ${label} CSV Guide`;
+  const english = getGuide(platform, slug);
+  const guide = (await guideLocalizer(locale))(english);
+  if (!english || !guide) return {};
+  const t = await getTranslations(locale);
+  const label = platformLabel(t, guide.platform);
+  const title = fmt(t.guide.metaTitle, { title: guide.title, platform: label });
   const description =
-    guide.kind === "issue" ? `${guide.description} Learn how to fix this ${label} CSV import error step by step in StriveFormats, Excel, and Google Sheets.` : guide.description;
-  const url = `${SITE_URL}/guides/${platform}/${slug}`;
+    guide.kind === "issue" ? fmt(t.guide.metaIssueDescription, { description: guide.description, platform: label }) : guide.description;
+  const translated = await guideBodyTranslated(locale, english);
+  const path = `/guides/${platform}/${slug}`;
+  const url = `${SITE_URL}${localeHref(translated ? locale : DEFAULT_LOCALE, path)}`;
   return {
     title,
     description,
     keywords: [guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
-    alternates: pageAlternates(locale, `/guides/${platform}/${slug}`, false),
+    // Until a language has the article body, its copy points its canonical at the English page.
+    alternates: pageAlternates(locale, path, translated),
     openGraph: { title, description, url },
     twitter: { card: "summary", title, description },
   };
@@ -365,10 +377,14 @@ function Steps({ title, items, numbered }: { title: string; items: string[]; num
 export async function GuideView({ locale, platform, slug }: { locale: Locale; platform: string; slug: string }) {
   if (!isPlatform(platform)) notFound();
   const L = await guideLocalizer(locale);
-  const guide = L(getGuide(platform, slug));
-  if (!guide) notFound();
+  // Related guides and the generated body are worked out from the English rule text,
+  // then rendered in the page's language.
+  const english = getGuide(platform, slug);
+  const guide = L(english);
+  if (!english || !guide) notFound();
 
   const t = await getTranslations(locale);
+  const guideText = await guideTextTranslator(locale);
   const href = (path: string) => localeHref(locale, path);
   const label = platformLabel(t, platform);
   const presetId = PLATFORM_PRESET_ID[platform];
@@ -376,13 +392,17 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
   const fixerAppHref = presetId ? `${href("/app")}?preset=${presetId}` : href("/app");
   const checked = guide.checkedByFixer !== false;
 
-  const related = relatedGuides(guide, platform, slug).map(L);
-  const expanded = guide.kind === "issue" && guide.issueCode ? expandIssueContent(issueInput(guide, platform)) : null;
+  const related = relatedGuides(english, platform, slug).map(L);
+  const expanded =
+    english.kind === "issue" && english.issueCode
+      ? expandIssueContent({ ...issueInput(english, platform), localTitle: guide.title }, guideText.tr)
+      : null;
   const showWooVariableLink = platform === "woocommerce" && expanded?.issueType === "variant_structure";
-  const curated = guide.kind === "curated" ? readCuratedGuide(platform, slug) : null;
+  const curated = guide.kind === "curated" ? readCuratedGuide(platform, slug, locale) : null;
   const toc = curated ? extractTocFromMdx(curated.rawMdx) : [];
+  const bodyTranslated = curated ? curated.translated : guideText.translated;
 
-  const guideUrl = `${SITE_URL}/guides/${platform}/${slug}`;
+  const guideUrl = `${SITE_URL}${href(`/guides/${platform}/${slug}`)}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -390,7 +410,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
     description: guide.description,
     dateModified: guide.lastUpdated ?? undefined,
     url: guideUrl,
-    inLanguage: "en",
+    inLanguage: bodyTranslated ? locale : DEFAULT_LOCALE,
     publisher: { "@type": "Organization", name: "StriveFormats" },
   };
   const faqLd =
@@ -399,8 +419,8 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
           "@context": "https://schema.org",
           "@type": "FAQPage",
           mainEntity: [
-            { "@type": "Question", name: `What is the "${guide.title}" error?`, acceptedAnswer: { "@type": "Answer", text: guide.explanation } },
-            { "@type": "Question", name: `How do I fix "${guide.title}"?`, acceptedAnswer: { "@type": "Answer", text: guide.howToFix } },
+            { "@type": "Question", name: fmt(t.guide.faqWhatIs, { title: guide.title }), acceptedAnswer: { "@type": "Answer", text: guide.explanation } },
+            { "@type": "Question", name: fmt(t.guide.faqHowFix, { title: guide.title }), acceptedAnswer: { "@type": "Answer", text: guide.howToFix } },
           ],
         }
       : null;
@@ -445,7 +465,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
               {t.guide.updated} {guide.lastUpdated}
             </div>
           )}
-          {locale !== DEFAULT_LOCALE && <p className={`mt-3 text-sm ${muted}`}>{t.guide.englishOnly}</p>}
+          {!bodyTranslated && <p className={`mt-3 text-sm ${muted}`}>{t.guide.englishOnly}</p>}
         </header>
 
         {curated ? (
