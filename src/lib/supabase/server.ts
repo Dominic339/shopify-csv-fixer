@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 type CookieToSet = {
   name: string;
   value: string;
-  options?: any;
+  options?: CookieOptions;
 };
 
 export async function createSupabaseServerClient() {

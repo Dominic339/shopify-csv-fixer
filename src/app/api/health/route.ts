@@ -54,10 +54,10 @@ export async function GET() {
         error: error?.message ?? null,
       };
     }
-  } catch (e: any) {
+  } catch (e) {
     subscriptionRead = {
       ok: false,
-      error: e?.message ?? "health check failed",
+      error: e instanceof Error ? e.message : "health check failed",
     };
   }
 
