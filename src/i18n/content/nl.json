@@ -1,1 +1,317 @@
-{ "guides": {}, "presets": {} }
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Importfouten in Amazon-flatfiles: oorzaken en oplossingen",
+"description": "Los de meest voorkomende importfouten in Amazon-flatfiles op: SKU-problemen, ongeldige staatcodes, prijsnotatie, waarden voor het fulfillmentkanaal en sjablonen die niet overeenkomen."
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Booleaanse velden in Amazon-flatfiles: y/n, TRUE/FALSE en valkuilen",
+"description": "Ontdek welke booleaanse velden in Seller Central-flatfiles 'y' of 'n' verwachten (geen TRUE/FALSE of 1/0), hoe je ongeldige waarden in bulk herstelt en hoe je voorkomt dat de automatische opmaak van je spreadsheet deze kolommen verpest."
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "eBay CategoryID en File Exchange: wat het is en hoe je het instelt",
+"description": "Lees wat het CategoryID-veld van eBay is, waarom het verplicht is bij File Exchange-uploads, hoe je de juiste categorie-ID voor je producten vindt en hoe je die in bulk voor je hele catalogus invult."
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "CSV-fouten in eBay File Exchange: oorzaken en oplossingen",
+"description": "Los veelvoorkomende CSV-fouten in eBay File Exchange op: ongeldige Action-waarden, problemen met categorie-ID's, te lange titels, staatcodes, prijsnotatie en afbeeldings-URL's."
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Gids voor het Etsy-CSV-sjabloon: velden, formaten en veelgemaakte fouten",
+"description": "Een complete gids voor het CSV-sjabloon voor Etsy-listings: elk veld uitgelegd, toegestane waarden voor keuzelijsten, verplichte en optionele kolommen, en hoe je veelvoorkomende importfouten oplost."
+},
+"general/append-vs-merge-join-csv": {
+"title": "Toevoegen, samenvoegen of koppelen: CSV-bestanden goed combineren",
+"description": "Begrijp het verschil tussen rijen toevoegen, bestanden met dezelfde structuur samenvoegen en bestanden met gerelateerde gegevens koppelen. Kies de juiste aanpak voor je catalogus."
+},
+"general/csv-basics-for-imports": {
+"title": "CSV-basiskennis voor e-commerce-imports",
+"description": "Begrijp kolomkoppen, UTF-8-codering, aanhalingstekens, regeleinden en de meest voorkomende fouten die CSV-imports laten mislukken, nog vóór je eerste upload."
+},
+"general/csv-column-mismatch-fix": {
+"title": "CSV-kolommen die niet overeenkomen oplossen",
+"description": "Hoe je kolomfouten in CSV-imports opspoort en oplost: verkeerde kolomnamen, verschillen in hoofdletters, extra spaties en problemen met de kolomvolgorde op verschillende platforms."
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "Opmaakregels voor CSV bij e-commerce-imports",
+"description": "De exacte opmaakregels waaraan je CSV moet voldoen om door de imports van e-commerceplatforms te komen: scheidingstekens, aanhalingstekens, regeleinden, codering en kolomkoppen."
+},
+"general/csv-import-checklist": {
+"title": "CSV-importchecklist voor e-commerceplatforms",
+"description": "Een complete checklist vóór het importeren van CSV-bestanden in Shopify, WooCommerce, Etsy, eBay en Amazon: codering, kolomkoppen, gegevenstypen en regels per platform."
+},
+"general/csv-import-errors-explained": {
+"title": "CSV-importfouten uitgelegd",
+"description": "Een heldere uitleg van de meest voorkomende CSV-importfoutmeldingen bij Shopify, WooCommerce, Etsy, eBay en Amazon, en hoe je ze elk oplost."
+},
+"general/fix-blank-rows-in-csv": {
+"title": "Lege rijen uit een CSV-bestand verwijderen",
+"description": "Hoe je lege rijen in een CSV-bestand vindt en verwijdert voordat je importeert in Shopify, WooCommerce, Etsy, eBay of Amazon, met Excel, Google Sheets of Python."
+},
+"general/fix-csv-encoding-errors": {
+"title": "Coderingsfouten in CSV oplossen",
+"description": "Spoor UTF-8-coderingsproblemen in CSV-bestanden op en los ze op: onleesbare tekens, BOM-markeringen, mojibake en ANSI-bestanden die imports laten mislukken."
+},
+"general/fix-extra-columns-in-csv": {
+"title": "Extra kolommen uit een CSV-bestand verwijderen",
+"description": "Hoe je extra of onverwachte kolommen in een CSV-bestand vindt en verwijdert voordat je importeert in Shopify, WooCommerce, Etsy, eBay of Amazon."
+},
+"general/fix-mojibake-encoding": {
+"title": "Mojibake en coderingsfouten in CSV-bestanden oplossen",
+"description": "Los onleesbare tekst op die ontstaat door een verkeerde codering. Leer conflicten tussen UTF-8 en Latin-1 herkennen, de BOM verwijderen en bestanden correct opnieuw opslaan."
+},
+"general/merge-two-csv-files": {
+"title": "Twee CSV-bestanden samenvoegen",
+"description": "Stapsgewijze uitleg om twee CSV-bestanden samen te voegen met Power Query in Excel, Google Sheets of een eenvoudige opdrachtregel, zonder programmeerervaring."
+},
+"general/prevent-excel-scientific-notation": {
+"title": "Voorkomen dat Excel SKU's en barcodes omzet naar wetenschappelijke notatie",
+"description": "Voorkom dat Excel SKU's, EAN- en UPC-codes omzet naar wetenschappelijke notatie zoals 1.23456E+11. Zet kolommen op tekst voordat je plakt, gebruik de importwizard en herstel bestaande bestanden."
+},
+"general/remove-duplicate-header-rows": {
+"title": "Dubbele koprijen uit CSV-bestanden verwijderen",
+"description": "Vind en verwijder herhaalde koprijen midden in CSV-exports. Begrijp de oorzaken, spoor ze op met filters in Excel en Google Sheets, en voorkom ze bij volgende exports."
+},
+"general/validate-csv-before-import": {
+"title": "Valideer je CSV voordat je hem naar een e-commerceplatform uploadt",
+"description": "Een praktische checklist om coderingsfouten, ontbrekende kolomkoppen, rijen met verschillende lengtes, problemen met aanhalingstekens en meer te vinden voordat je import mislukt. Voor Shopify, WooCommerce, eBay, Amazon en Etsy."
+},
+"shopify/images-in-product-csv": {
+"title": "Shopify-productafbeeldingen in CSV: Image Src, alt-tekst en posities",
+"description": "Leer hoe je afbeeldings-URL's in de Shopify-product-CSV opbouwt: de kolommen Image Src, Image Position en Image Alt Text, meerdere afbeeldingen per product toevoegen en de meest voorkomende importfouten bij afbeeldingen voorkomen."
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Gids voor het Handle-veld in de Shopify-CSV",
+"description": "Alles wat je moet weten over het Handle-veld in de product-CSV van Shopify: wat het doet, de regels voor een geldige handle, hoe het varianten groepeert en hoe je handlefouten oplost."
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Shopify-CSV-importfouten: veelvoorkomende oorzaken en oplossingen",
+"description": "Een complete gids voor de meest voorkomende CSV-importfouten bij Shopify: ontbrekende kolommen, ongeldige booleaanse waarden, problemen met de variantstructuur, prijsfouten en handleconflicten."
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Het Shopify-product-CSV-sjabloon uitgelegd",
+"description": "Een uitleg per kolom van elk veld in het officiële product-CSV-sjabloon van Shopify: wat elke kolom doet, welke waarden hij accepteert en welke verplicht zijn."
+},
+"shopify/variants-explained": {
+"title": "Shopify-productvarianten uitgelegd: CSV-structuur en veelgemaakte fouten",
+"description": "Lees hoe het CSV-formaat van Shopify varianten weergeeft met groepering op Handle, de Option-kolommen en hoofd-/subrijen. Voorkom de fouten waardoor producten worden opgesplitst, varianten verdwijnen en imports mislukken."
+},
+"woocommerce/variable-products-parent-child": {
+"title": "Variabele WooCommerce-producten in CSV: hoofd- en variatierijen",
+"description": "Begrijp hoe de productimporter van WooCommerce variabele producten weergeeft met hoofd- en subrijen (variaties): attribuutkolommen, verplichte velden per rijtype en de meest voorkomende valkuilen bij het importeren."
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "WooCommerce-productattributen in CSV: complete gids",
+"description": "Hoe je WooCommerce-productattributen correct opmaakt in een CSV-bestand: attribuutnamen, globale en lokale attributen, variatieattributen en veelgemaakte fouten."
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "Importfouten in WooCommerce-product-CSV's: oorzaken en oplossingen",
+"description": "Los de meest voorkomende importfouten in WooCommerce-product-CSV's op: ontbrekende SKU's, ongeldige typen, problemen met variatierijen, prijsnotatie en attribuutkolommen."
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Productimports in Shopify zijn kritisch: één verkeerd opgemaakte prijs, een ontbrekende optiewaarde of een afbeeldingsrij op de verkeerde plek kan de hele import laten mislukken.",
+"Deze voorinstelling valideert je CSV tegen het officiële sjabloon van Shopify en past veilige automatische correcties toe, zodat je met vertrouwen kunt uploaden. Je houdt volledige controle over je gegevens: elke correctie wordt gelogd en de geëxporteerde CSV blijft klaar voor import in Shopify."
+],
+"howItWorks": [
+"Upload je Shopify-CSV-export of het officiële sjabloon.",
+"We normaliseren kolomkoppen en veelvoorkomende notaties (booleaanse waarden, bedragen, voorraadwaarden) en controleren de verplichte velden.",
+"Veilige problemen corrigeren we automatisch (zoals spaties verwijderen, TRUE/FALSE gelijktrekken en prijsvelden normaliseren); riskante problemen markeren we zodat je ze kunt nakijken.",
+"Exporteer een schone CSV die overeenkomt met het schema dat Shopify verwacht."
+],
+"commonFixes": [
+"Booleaanse waarden (TRUE/FALSE) en statuswaarden (active/draft/archived) gelijktrekken.",
+"Bedragvelden (Price, Compare-at price, Cost per item) normaliseren en losse valutasymbolen verwijderen.",
+"Dubbele SKU's en botsende varianten opsporen die de import laten mislukken.",
+"De optiestructuur (naam/waarde van Option1/2/3) controleren en onvolledige variantrijen markeren.",
+"Afbeeldingsrijen (Product image URL, Image position) controleren en ontbrekende of ongeldige URL's markeren.",
+"Spaties, tags en de notatie van handles opschonen en normaliseren voor consistentie."
+],
+"faq": [
+{
+"q": "Worden mijn productgegevens gewijzigd?",
+"a": "Alleen veilige, omkeerbare opmaakcorrecties worden automatisch toegepast (bijvoorbeeld spaties verwijderen of TRUE/FALSE normaliseren). Riskante punten worden gemarkeerd zodat jij beslist voordat je exporteert."
+},
+{
+"q": "Werkt het met exports uit andere apps?",
+"a": "Ja. Veel Shopify-apps voegen extra kolommen toe. StriveFormats laat onbekende kolommen staan en richt zich erop de verplichte Shopify-velden importklaar te maken."
+},
+{
+"q": "Kan ik het officiële Shopify-sjabloon gebruiken?",
+"a": "Ja. Je kunt het officiële voorbeeldsjabloon op deze pagina downloaden en direct in de hersteller uploaden."
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"De ingebouwde product-CSV-importer van WooCommerce is streng op kolomnamen, gegevenstypen en de structuur van variaties. Deze voorinstelling valideert je bestand tegen de standaardvelden van de importer en past veilige normalisaties toe, zodat je import soepel verloopt.",
+"Gebruik hem voor migraties, prijsupdates in bulk, het toevoegen van categorieën/tags en het importeren van variabele producten met variaties. Alles wat riskant is, blijft in de lijst met problemen staan zodat je het zelf kunt controleren."
+],
+"howItWorks": [
+"Upload je WooCommerce-product-CSV (export of importsjabloon).",
+"We normaliseren kolomkoppen en veelvoorkomende waarden, en markeren ontbrekende verplichte velden.",
+"Veilige correcties worden automatisch toegepast (booleaanse waarden, prijzen, URL's opschonen).",
+"Bekijk de resterende problemen en exporteer daarna een importklare CSV."
+],
+"commonFixes": [
+"Published / In stock? / Backorders allowed? / Sold individually? normaliseren",
+"Regular price / Sale price normaliseren naar gewone decimale getallen (zonder valutasymbolen)",
+"Overal spaties verwijderen en scheidingstekens voor categorieën/tags normaliseren",
+"Afbeeldings-URL's controleren en lege items verwijderen",
+"Dubbele combinaties van variatieattributen onder hetzelfde hoofdproduct opsporen"
+],
+"faq": [
+{
+"q": "Werkt dit met de ingebouwde importer van WooCommerce?",
+"a": "Ja. Deze voorinstelling is gebouwd rond de velden van de product-CSV-importer van WooCommerce en de gebruikelijke exportkoppen die je in het importscherm koppelt."
+},
+{
+"q": "Kan het overweg met variaties?",
+"a": "Het controleert de structuur van variaties (Parent + attributen) en spoort dubbele variatiecombinaties op. Veilige correcties worden automatisch toegepast; structuurfouten blijven als blokkade staan."
+},
+{
+"q": "En kolommen van plug-ins?",
+"a": "Extra kolommen blijven zoals ze zijn: het gecorrigeerde bestand heeft dezelfde kolommen, in dezelfde volgorde, als het bestand dat je hebt geüpload."
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"Etsy-verkopers exporteren hun listings vaak naar een spreadsheet voor bulkbewerkingen, controles of het voorbereiden van een migratie. Deze voorinstelling valideert de gebruikelijke velden van de Etsy-listing-CSV en schoont veilig op, zodat je gegevens consistent blijven.",
+"De focus ligt op titels, prijzen, aantallen, tags en afbeeldings-URL's. Alles wat de betekenis van een listing zou kunnen veranderen, blijft zichtbaar als probleem."
+],
+"howItWorks": [
+"Upload je Etsy-listing-CSV.",
+"We controleren de verplichte velden en de gebruikelijke limieten van Etsy-velden.",
+"Veilige correcties worden automatisch toegepast (opschonen, normaliseren, URL's, getalnotatie).",
+"Bekijk de resterende problemen en exporteer daarna een schoon bestand."
+],
+"commonFixes": [
+"Spaties verwijderen en scheidingstekens voor tags normaliseren",
+"Controleren of Price een geldig decimaal getal is en Quantity een geheel getal",
+"Lijsten met afbeeldings-URL's controleren en opschonen",
+"Waarschuwen als titels of tags de limieten van Etsy overschrijden"
+],
+"faq": [
+{
+"q": "Is dit een officiële Etsy-listingimporter?",
+"a": "Deze voorinstelling is bedoeld voor de gebruikelijke werkwijzen met Etsy-listing-CSV's (exports en spreadsheets voor bulkbewerking) en houdt de velden binnen de limieten die Etsy documenteert."
+},
+{
+"q": "Wat wordt er gecontroleerd?",
+"a": "Titels, prijzen, aantallen, tags (aantal/lengte) en afbeeldings-URL's. Het markeert ongeldige of lege waarden die bulkbewerkingen vaak laten mislukken."
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"Met de bulkupload van eBay (Seller Hub › Rapporten › Uploads, voorheen File Exchange) voeg je duizenden listings toe of werk je ze bij vanuit één CSV. Deze voorinstelling controleert elke rij op wat eBay voor de Action nodig heeft: nieuwe listings hebben een titel, numerieke categorie, prijs, aantal en staat nodig; Revise-, Relist- en End-rijen hebben de ItemID van de listing nodig.",
+"Je bestand behoudt zijn eigen kolommen en koppen, inclusief de site en valuta in de eerste kolom (bijvoorbeeld *Action(SiteID=UK|Country=GB|Currency=GBP|...)), zodat het op de juiste eBay-site terechtkomt."
+],
+"howItWorks": [
+"Upload de CSV die je naar eBay wilt sturen (elke eBay-site).",
+"We herkennen de kolomnamen van eBay, met of zonder het sterretje * voor verplichte velden.",
+"Elke rij wordt gecontroleerd op basis van de Action: titels, categorie-ID's, prijzen, aantallen, staat-ID's, looptijden en foto-URL's.",
+"Dubbele CustomLabels (SKU's) worden gemarkeerd voordat ze elkaar overschrijven.",
+"Download het gecorrigeerde bestand met je oorspronkelijke kolommen intact."
+],
+"commonFixes": [
+"Hoofdletters van Action normaliseren (Add, Revise, Relist, End)",
+"Prijzen zoals 12,50 of $12.50 omzetten naar gewone decimale getallen",
+"Staatnamen zoals \"New\" of \"Used\" omzetten naar ConditionID's",
+"Lijsten met foto-URL's gescheiden door | opschonen (maximaal 24 foto's)",
+"Titels boven de limiet van 80 tekens van eBay markeren",
+"Listings met vaste prijs markeren die niet op GTC staan"
+],
+"faq": [
+{
+"q": "Met welke eBay-sites werkt dit?",
+"a": "Met allemaal. De site en valuta komen uit de kop van de eerste kolom (SiteID, Country, Currency), die precies zo blijft als je hem hebt geüpload."
+},
+{
+"q": "Wat is ConditionID?",
+"a": "ConditionID is de numerieke staat van een object bij eBay, bijv. 1000 = Nieuw, 1500 = Nieuw (overig), 2750 = Zo goed als nieuw, 3000 = Gebruikt, 7000 = Voor onderdelen of werkt niet. Welke ID's zijn toegestaan, verschilt per categorie. Staatnamen in je bestand worden omgezet naar ID's als dat eenduidig is."
+},
+{
+"q": "Welke looptijden worden ondersteund?",
+"a": "Listings met vaste prijs lopen GTC (Good 'Til Cancelled). Veilingen duren Days_1, Days_3, Days_5, Days_7 of Days_10."
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"Een eBay-listing met variaties groepeert verwante artikelen, zoals een shirt in verschillende maten en kleuren, onder één listing. In het uploadbestand van eBay is dat een hoofdrij (titel, categorie en RelationshipDetails met alle waarden, bijv. Color=Blue;Red|Size=M;L) gevolgd door één Relationship=Variation-rij per variant, met een eigen SKU, prijs en aantal.",
+"Deze voorinstelling controleert die structuur: elke variatie volgt op haar hoofdrij, gebruikt alleen waarden die de hoofdrij opgeeft en heeft een unieke combinatie, prijs en aantal."
+],
+"howItWorks": [
+"Upload je eBay-variatie-CSV.",
+"We zoeken elke hoofdrij en de variatierijen eronder.",
+"De RelationshipDetails van elke variatie worden vergeleken met die van de hoofdrij, en dubbele combinaties worden gemarkeerd.",
+"Prijzen, aantallen en foto-URL's worden op elke rij opgeschoond.",
+"Download het gecorrigeerde bestand met je oorspronkelijke kolommen intact."
+],
+"commonFixes": [
+"Variaties markeren waarvan de waarden ontbreken in de RelationshipDetails van de hoofdrij",
+"Dubbele maat/kleur-combinaties binnen een listing markeren",
+"Variatierijen zonder prijs of aantal markeren",
+"Prijzen zoals 12,50 omzetten naar gewone decimale getallen",
+"VariationSpecificsName / VariationSpecificsValue-paren in oudere spreadsheets controleren"
+],
+"faq": [
+{
+"q": "Hoe werkt RelationshipDetails?",
+"a": "Noem op de hoofdrij elke variatienaam met al zijn waarden: Color=Blue;Red|Size=M;L. Geef op elke variatierij de waarden van die variant: Color=Blue|Size=M. Variatierijen laten Action en Title leeg."
+},
+{
+"q": "Mijn spreadsheet gebruikt VariationSpecificsName-kolommen. Wordt dat ondersteund?",
+"a": "Ja. Namen en waarden gescheiden door | (Color|Size en Blue|M) worden gecontroleerd op overeenkomend aantal en dubbele combinaties."
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"De Inventory Loader van Amazon is de Seller Central-upload voor het toevoegen of bijwerken van aanbiedingen op producten die al een ASIN hebben: prijs, aantal, staat en fulfillment. Deze voorinstelling controleert elke rij op de regels van Amazon en laat je kolomnamen precies zoals ze zijn, omdat Amazon kolommen op hun exacte naam koppelt.",
+"Het vangt de problemen waardoor Amazon rijen weigert of aanbiedingen aan het verkeerde product koppelt: barcodes die een spreadsheet heeft omgezet in 1.23457E+11, UPC's die een voorloopnul kwijt zijn, verkeerde product-id-type-codes, SKU's van meer dan 40 tekens en dubbele SKU's."
+],
+"howItWorks": [
+"Upload je Inventory Loader-bestand (kolommen uit categoriesjablonen zoals item_sku en external_product_id worden ook herkend).",
+"Elke rij wordt gecontroleerd: SKU, product-ID en het type ervan, prijs, aantal, staat, add-delete en fulfillmentcentrum.",
+"Prijzen geschreven als 12,50 of $12.50 worden omgezet naar gewone decimale getallen.",
+"Dubbele SKU's worden gemarkeerd voordat ze elkaar overschrijven.",
+"Download het bestand met je oorspronkelijke kolommen intact."
+],
+"commonFixes": [
+"Prijzen en min./max.-prijzen omzetten naar gewone decimale getallen",
+"Barcodes in wetenschappelijke notatie (1.23457E+11) en ontbrekende voorloopnullen markeren",
+"De lengte van UPC/EAN/ISBN/ASIN controleren op basis van product-id-type",
+"SKU's boven de Amazon-limiet van 40 tekens markeren",
+"add-delete controleren (a, d of x)",
+"Dubbele SKU's opsporen"
+],
+"faq": [
+{
+"q": "Op welk formaat is dit gericht?",
+"a": "De Inventory Loader van Amazon (aanbiedingsbestand), met kolommen in kleine letters met streepjes zoals sku, product-id, product-id-type, price, quantity en add-delete."
+},
+{
+"q": "Wat zijn de product-id-type-codes?",
+"a": "In de Inventory Loader is product-id-type een getal: 1 = ASIN, 2 = ISBN, 3 = UPC, 4 = EAN. Categoriesjablonen gebruiken de namen."
+},
+{
+"q": "Wat zijn geldige item-condition-codes?",
+"a": "11 = Nieuw, 10 = Gereviseerd, 1–4 = Gebruikt (Zo goed als nieuw, Zeer goed, Goed, Acceptabel), 5–8 = verzamelobjectniveaus."
+},
+{
+"q": "Wat doet add-delete?",
+"a": "a voegt de aanbieding toe of werkt hem bij, d verwijdert de aanbieding en x verwijdert de aanbieding en de productgegevens die je hebt aangeleverd."
+},
+{
+"q": "Wat is fulfillment-center-id?",
+"a": "DEFAULT betekent dat je de bestelling zelf verzendt. AMAZON_NA, AMAZON_EU, AMAZON_FE of AMAZON_IN betekent Fulfillment by Amazon in die regio."
+}
+]
+}
+}
+}
