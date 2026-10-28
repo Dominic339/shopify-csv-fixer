@@ -37,6 +37,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/tags_too_many": {
     code: "etsy/tags_too_many",
+    checked: false,
     title: "Too many tags",
     category: "tags",
     blocking: false,
@@ -126,6 +127,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/duplicate_tags": {
     code: "etsy/duplicate_tags",
+    checked: false,
     title: "Duplicate tags",
     category: "tags",
     blocking: false,
@@ -137,6 +139,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/missing_shipping_profile": {
     code: "etsy/missing_shipping_profile",
+    checked: false,
     title: "Missing shipping profile",
     category: "shipping",
     blocking: true,
@@ -170,6 +173,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/missing_required_field": {
     code: "etsy/missing_required_field",
+    checked: false,
     title: "Missing required field",
     category: "compliance",
     blocking: true,
@@ -181,6 +185,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/unknown_header": {
     code: "etsy/unknown_header",
+    checked: false,
     title: "Unknown column",
     category: "structure",
     blocking: false,

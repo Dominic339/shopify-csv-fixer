@@ -179,6 +179,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/product_missing_variant_row": {
     code: "shopify/product_missing_variant_row",
+    checked: false,
     title: "Product has images but no variant row",
     explanation: "A handle appears to contain only image rows.",
     whyPlatformCares:
@@ -397,6 +398,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
   // Strict-mode informational checks
   "shopify/vendor_missing": {
     code: "shopify/vendor_missing",
+    checked: false,
     title: "Vendor missing",
     explanation: "Vendor is blank on the main product row.",
     whyPlatformCares: "Vendor helps organize products and improves storefront filtering.",
@@ -408,6 +410,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/product_category_missing": {
     code: "shopify/product_category_missing",
+    checked: false,
     title: "Product category missing",
     explanation: "Product category is blank on the main product row.",
     whyPlatformCares: "Categories improve discovery and reporting.",
@@ -419,6 +422,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/tags_missing": {
     code: "shopify/tags_missing",
+    checked: false,
     title: "Tags missing",
     explanation: "Tags are blank on the main product row.",
     whyPlatformCares: "Tags can drive collections and help store search.",
@@ -430,6 +434,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/description_too_short": {
     code: "shopify/description_too_short",
+    checked: false,
     title: "Description is very short",
     explanation: "Description is present but extremely short.",
     whyPlatformCares: "Richer descriptions can improve conversion and SEO.",
@@ -441,6 +446,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/status_unrecognized": {
     code: "shopify/status_unrecognized",
+    checked: false,
     title: "Unusual Status value",
     explanation: "Status has a value outside Shopify's common values.",
     whyPlatformCares: "Unexpected values may be ignored or produce confusing results.",

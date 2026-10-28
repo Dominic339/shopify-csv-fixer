@@ -15,6 +15,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/unknown_header": {
     code: "woocommerce/unknown_header",
+    checked: false,
     title: "Unknown column",
     category: "structure",
     blocking: false,
@@ -26,6 +27,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/missing_type": {
     code: "woocommerce/missing_type",
+    checked: false,
     title: "Missing product type",
     category: "structure",
     blocking: true,
@@ -92,6 +94,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/missing_sku": {
     code: "woocommerce/missing_sku",
+    checked: false,
     title: "Missing SKU",
     category: "sku",
     blocking: false,
@@ -114,6 +117,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/invalid_regular_price": {
     code: "woocommerce/invalid_regular_price",
+    checked: false,
     title: "Invalid regular price",
     category: "pricing",
     blocking: true,
@@ -125,6 +129,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/invalid_sale_price": {
     code: "woocommerce/invalid_sale_price",
+    checked: false,
     title: "Invalid sale price",
     category: "pricing",
     blocking: false,
@@ -136,6 +141,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/missing_image": {
     code: "woocommerce/missing_image",
+    checked: false,
     title: "Missing image",
     category: "media",
     blocking: false,

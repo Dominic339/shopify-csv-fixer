@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "./lib/rateLimit";
 import { DEFAULT_LOCALE, isValidLocale } from "./lib/i18n/locales";
+import { isLocalisedPath, LOCALE_COOKIE } from "./lib/i18n/paths";
 
 // Exempt from rate limiting — verified by Stripe signature instead.
 const RATE_LIMIT_EXEMPT = new Set(["/api/stripe/webhook"]);
@@ -59,13 +60,9 @@ export async function proxy(req: NextRequest) {
   // ── Locale redirect: all pages with [locale] route variants ─────────────
   // Only redirect if the user has a non-English locale cookie AND the current
   // path is one of the pages that actually has a translated version.
-  const LOCALISABLE_PREFIXES = ["/guides", "/app", "/convert", "/merge", "/csv-inspector", "/profile", "/presets"];
-  const isLocalisable =
-    pathname === "/" ||
-    LOCALISABLE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + "/"));
-  if (isLocalisable) {
+  if (isLocalisedPath(pathname)) {
     try {
-      const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value;
+      const cookieLocale = req.cookies.get(LOCALE_COOKIE)?.value;
       if (cookieLocale && isValidLocale(cookieLocale) && cookieLocale !== DEFAULT_LOCALE) {
         const url = req.nextUrl.clone();
         url.pathname = `/${cookieLocale}${pathname === "/" ? "" : pathname}`;

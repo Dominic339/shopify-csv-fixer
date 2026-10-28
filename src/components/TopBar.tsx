@@ -22,11 +22,14 @@ type SubStatus = {
 type SupabaseUser = { email?: string | null };
 type SupabaseSession = { user?: SupabaseUser };
 
+type NavStrings = Translations["nav"];
+
 type Props = {
-  navT?: Translations["nav"];
+  /** Nav strings for every locale; the active one is picked from the URL. */
+  navByLocale: Record<Locale, NavStrings>;
 };
 
-export default function TopBar({ navT }: Props) {
+export default function TopBar({ navByLocale }: Props) {
   const { theme } = useTheme();
   const pathname = usePathname();
 
@@ -35,10 +38,13 @@ export default function TopBar({ navT }: Props) {
     const segment = pathname?.split("/")?.[1] ?? "";
     return isValidLocale(segment) ? segment : DEFAULT_LOCALE;
   }, [pathname]);
+  const navT = navByLocale[currentLocale] ?? navByLocale[DEFAULT_LOCALE];
+  const href = (path: string) => localeHref(currentLocale, path);
 
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [session, setSession] = useState<SupabaseSession | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -118,6 +124,13 @@ export default function TopBar({ navT }: Props) {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [menuOpen, toolsOpen]);
 
+  // Close the mobile menu whenever the route changes.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    setMobileOpen(false);
+  }
+
   async function signOut() {
     try {
       const supabase = createClient();
@@ -141,99 +154,146 @@ export default function TopBar({ navT }: Props) {
     return email.slice(0, 1).toUpperCase();
   }, [session?.user?.email]);
 
-  const upgradeTitle = plan === "advanced" ? "Advanced" : "Upgrade";
-  const upgradeMessage = signedIn
-    ? "Upgrade to unlock higher export limits and advanced Shopify tools."
-    : "Sign in to upgrade and unlock higher export limits and advanced Shopify tools.";
+  const upgradeTitle = plan === "advanced" ? navT.advanced : navT.upgrade;
+  const upgradeMessage = signedIn ? navT.upgradeMessage : navT.upgradeMessageSignedOut;
+  const customFormatsUpgradeMessage = signedIn ? navT.customFormatsUpgrade : navT.customFormatsUpgradeSignedOut;
 
-  const customFormatsUpgradeMessage = signedIn
-    ? "Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
-    : "Sign in to upgrade to Advanced and unlock Custom Formats.";
+  const tools = [
+    { path: "/convert", label: navT.formatConverter },
+    { path: "/merge", label: navT.csvMerger },
+    { path: "/csv-inspector", label: navT.csvInspector },
+  ];
+  const openCustomFormats = () => {
+    setMenuOpen(false);
+    setMobileOpen(false);
+    setUpgradeOpen(true);
+  };
+  const betaBadge = (
+    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+      {navT.beta}
+    </span>
+  );
+
+  const accountMenu = (
+    <>
+      <div className="px-4 py-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+        {signedIn ? (
+          <div>
+            <div className="truncate font-semibold text-[var(--text)]">{session?.user?.email}</div>
+            <div className="mt-1">
+              {navT.plan}: <span className="font-semibold text-[var(--text)]">{plan}</span>{" "}
+              <span>({isActive ? navT.active : status})</span>
+            </div>
+          </div>
+        ) : (
+          <div className="font-semibold text-[var(--text)]">{navT.notSignedIn}</div>
+        )}
+      </div>
+      <div className="border-t border-[var(--border)]" />
+      <div className="p-2">
+        {[
+          { path: "/#pricing", label: navT.pricing },
+          { path: "/profile", label: navT.profile },
+        ].map((l) => (
+          <Link
+            key={l.path}
+            href={l.path === "/#pricing" ? `${href("/")}#pricing` : href(l.path)}
+            className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+            onClick={() => setMenuOpen(false)}
+          >
+            {l.label}
+          </Link>
+        ))}
+        <button
+          type="button"
+          className="w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+          onClick={() => {
+            setMenuOpen(false);
+            setMobileOpen(false);
+            setUpgradeOpen(true);
+          }}
+        >
+          {upgradeTitle}
+        </button>
+        <div className="my-2 border-t border-[var(--border)]" />
+        {signedIn ? (
+          <button
+            type="button"
+            className="w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+            onClick={signOut}
+          >
+            {navT.signOut}
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="block rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text)] hover:bg-[var(--surface-2)]"
+            onClick={() => setMenuOpen(false)}
+          >
+            {navT.signIn}
+          </Link>
+        )}
+      </div>
+    </>
+  );
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src={logoSrc}
-            alt="StriveFormats"
-            width={180}
-            height={36}
-            priority
-            className="h-8 w-auto"
-          />
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 md:py-4">
+        <Link href={href("/")} className="flex shrink-0 items-center gap-3">
+          <Image src={logoSrc} alt="StriveFormats" width={180} height={36} priority className="h-7 w-auto md:h-8" />
         </Link>
 
-        <nav className="flex items-center gap-1">
-          <Link className="nav-link" href={localeHref(currentLocale, "/presets")}>
-            {navT?.templates ?? "Templates"}
+        {/* Desktop navigation */}
+        <nav className="hidden items-center gap-1 md:flex">
+          <Link className="nav-link" href={href("/presets")}>
+            {navT.templates}
+          </Link>
+          <Link className="nav-link" href={href("/guides")}>
+            {navT.guides}
           </Link>
 
-          <Link className="nav-link" href={localeHref(currentLocale, "/guides")}>
-            {navT?.guides ?? "Guides"}
-          </Link>
-
-          {/* Tools dropdown */}
           <div className="relative" ref={toolsRef}>
             <button
               type="button"
               className="nav-link"
               onClick={() => setToolsOpen((v) => !v)}
-              aria-label="Tools menu"
+              aria-expanded={toolsOpen}
+              aria-haspopup="menu"
             >
-              {navT?.tools ?? "Tools"}</button>
+              {navT.tools}
+            </button>
             {toolsOpen && (
-              <div className="popover-surface absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl shadow-xl z-50">
+              <div className="popover-surface absolute left-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl shadow-xl">
                 <div className="p-2">
-                  <Link
-                    href={localeHref(currentLocale, "/convert")}
-                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setToolsOpen(false)}
-                  >
-                    {navT?.formatConverter ?? "Format Converter"}
-                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
-                  </Link>
-                  <Link
-                    href={localeHref(currentLocale, "/merge")}
-                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setToolsOpen(false)}
-                  >
-                    {navT?.csvMerger ?? "CSV Merger"}
-                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
-                  </Link>
-                  <Link
-                    href={localeHref(currentLocale, "/csv-inspector")}
-                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setToolsOpen(false)}
-                  >
-                    {navT?.csvInspector ?? "CSV Inspector"}
-                    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
-                  </Link>
+                  {tools.map((tool) => (
+                    <Link
+                      key={tool.path}
+                      href={href(tool.path)}
+                      className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
+                      onClick={() => setToolsOpen(false)}
+                    >
+                      {tool.label}
+                      {betaBadge}
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}
           </div>
 
           {canAccessCustomFormats ? (
-            <Link className="nav-link" href="/formats" title="Open Custom Formats builder">
-              {navT?.customFormats ?? "Custom formats"}
+            <Link className="nav-link" href="/formats">
+              {navT.customFormats}
             </Link>
           ) : (
-            <button
-              type="button"
-              className="nav-link"
-              onClick={() => {
-                setMenuOpen(false);
-                setUpgradeOpen(true);
-              }}
-              title="Advanced plan required"
-            >
-              {navT?.customFormats ?? "Custom formats"}
+            <button type="button" className="nav-link" onClick={openCustomFormats} title={navT.advancedRequired}>
+              {navT.customFormats}
             </button>
           )}
 
-          <Link href={localeHref(currentLocale, "/app")} className="btn-primary ml-2 hidden md:inline-flex">
-            {navT?.csvFixer ?? "CSV Fixer"}
+          <Link href={href("/app")} className="btn-primary ml-2">
+            {navT.csvFixer}
           </Link>
 
           <div className="relative" ref={menuRef}>
@@ -241,111 +301,78 @@ export default function TopBar({ navT }: Props) {
               type="button"
               className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-base font-semibold text-[var(--text)]"
               onClick={() => setMenuOpen((v) => !v)}
-              title={signedIn ? "Account" : "Sign in"}
-              aria-label="Account menu"
+              aria-label={navT.account}
+              aria-expanded={menuOpen}
             >
               {signedIn ? profileLabel : "?"}
             </button>
-
             {menuOpen ? (
-              <div className="popover-surface absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl shadow-xl">
-                <div className="px-4 py-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-                  {signedIn ? (
-                    <div>
-                      <div className="font-semibold text-[var(--text)]">{session?.user?.email}</div>
-                      <div className="mt-1">
-                        {navT?.plan ?? "Plan"}: <span className="font-semibold text-[var(--text)]">{plan}</span>{" "}
-                        {isActive ? (
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({navT?.active ?? "active"})</span>
-                        ) : (
-                          <span className="text-[color:rgba(var(--muted-rgb),1)]">({status})</span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="font-semibold text-[var(--text)]">{navT?.notSignedIn ?? "Not signed in"}</div>
-                  )}
-                </div>
-
-                <div className="border-t border-[var(--border)]" />
-
-                <div className="p-2">
-                  <Link
-                    href={`${localeHref(currentLocale, "/")}#pricing`}
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {navT?.pricing ?? "Pricing"}
-                  </Link>
-
-                  <Link
-                    href={localeHref(currentLocale, "/")}
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {navT?.home ?? "Home"}
-                  </Link>
-
-                  <Link
-                    href={localeHref(currentLocale, "/profile")}
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {navT?.profile ?? "Profile"}
-                  </Link>
-
-                  <Link
-                    href={localeHref(currentLocale, "/app")}
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {navT?.csvFixer ?? "CSV Fixer"}
-                  </Link>
-
-                  <Link
-                    href="/formats"
-                    className="block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {navT?.customFormats ?? "Custom Formats"}
-                  </Link>
-
-                  <button
-                    type="button"
-                    className="mt-1 w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setUpgradeOpen(true);
-                    }}
-                  >
-                    {upgradeTitle}
-                  </button>
-
-                  <div className="mt-2 border-t border-[var(--border)]" />
-
-                  {signedIn ? (
-                    <button
-                      type="button"
-                      className="mt-2 w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                      onClick={signOut}
-                    >
-                      {navT?.signOut ?? "Sign out"}
-                    </button>
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="mt-2 block rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {navT?.signIn ?? "Sign in"}
-                    </Link>
-                  )}
-                </div>
-              </div>
+              <div className="popover-surface absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl shadow-xl">{accountMenu}</div>
             ) : null}
           </div>
         </nav>
+
+        {/* Mobile: primary action + menu button */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link href={href("/app")} className="btn-primary px-4 py-2 text-sm">
+            {navT.csvFixer}
+          </Link>
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label={mobileOpen ? navT.closeMenu : navT.menu}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              {mobileOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {mobileOpen && (
+        <div id="mobile-menu" className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-[var(--border)] bg-[var(--bg)] md:hidden">
+          <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
+            {[
+              { path: "/presets", label: navT.templates },
+              { path: "/guides", label: navT.guides },
+            ].map((l) => (
+              <Link key={l.path} href={href(l.path)} className="rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]">
+                {l.label}
+              </Link>
+            ))}
+            <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.8)]">
+              {navT.tools}
+            </div>
+            {tools.map((tool) => (
+              <Link
+                key={tool.path}
+                href={href(tool.path)}
+                className="flex items-center justify-between rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]"
+              >
+                {tool.label}
+                {betaBadge}
+              </Link>
+            ))}
+            {canAccessCustomFormats ? (
+              <Link href="/formats" className="rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]">
+                {navT.customFormats}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="rounded-xl px-3 py-3 text-left text-base text-[var(--text)] hover:bg-[var(--surface-2)]"
+                onClick={openCustomFormats}
+              >
+                {navT.customFormats}
+              </button>
+            )}
+            <div className="mt-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)]">{accountMenu}</div>
+          </nav>
+        </div>
+      )}
 
       <UpgradeModal
         open={upgradeOpen}

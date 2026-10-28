@@ -48,6 +48,7 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
 
   "amazon/missing_item_name": {
     code: "amazon/missing_item_name",
+    checked: false,
     title: "Missing item-name",
     category: "compliance",
     blocking: true,

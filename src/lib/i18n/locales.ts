@@ -47,5 +47,5 @@ export function isValidLocale(value: string): value is Locale {
 export function localeHref(locale: Locale, path = ""): string {
   const norm = path.startsWith("/") ? path : `/${path}`;
   if (locale === DEFAULT_LOCALE) return norm || "/";
-  return `/${locale}${norm}`;
+  return norm === "/" ? `/${locale}` : `/${locale}${norm}`;
 }

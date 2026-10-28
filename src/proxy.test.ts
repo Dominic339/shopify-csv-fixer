@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { NextRequest } from "next/server";
+import { isLocalisedPath } from "./lib/i18n/paths";
 
 // ── Minimal NextRequest stub ──────────────────────────────────────────────────
 
@@ -34,16 +35,9 @@ function makeReq(pathname: string, cookies: Record<string, string> = {}): NextRe
   } as unknown as NextRequest;
 }
 
-// ── isLocalisable helper (mirrors proxy logic) ───────────────────────────
+// ── isLocalisable: the same helper the proxy uses ─────────────────────────────
 
-const LOCALISABLE_PREFIXES = ["/guides", "/app", "/convert", "/merge", "/csv-inspector", "/profile", "/presets"];
-
-function isLocalisable(pathname: string): boolean {
-  if (pathname === "/") return true;
-  return LOCALISABLE_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/"),
-  );
-}
+const isLocalisable = isLocalisedPath;
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 

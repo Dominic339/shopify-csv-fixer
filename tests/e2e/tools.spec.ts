@@ -291,11 +291,31 @@ test("convert: source format select has color-scheme property set", async ({ pag
 test("topbar: Tools dropdown appears and contains tool links", async ({ page }) => {
   await page.goto("/");
 
-  // Click the Tools button in nav
-  await page.getByRole("button", { name: /Tools/i }).click();
+  // Click the Tools button in nav (the footer also links to the tools, so scope to the header)
+  const header = page.locator("header").first();
+  await header.getByRole("button", { name: /Tools/i }).click();
 
   // Dropdown should appear with links
-  await expect(page.getByRole("link", { name: /Format Converter/i })).toBeVisible({ timeout: 4_000 });
-  await expect(page.getByRole("link", { name: /CSV Merger/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /CSV Inspector/i })).toBeVisible();
+  await expect(header.getByRole("link", { name: /Format Converter/i })).toBeVisible({ timeout: 4_000 });
+  await expect(header.getByRole("link", { name: /CSV Merger/i })).toBeVisible();
+  await expect(header.getByRole("link", { name: /CSV Inspector/i })).toBeVisible();
+});
+
+test("mobile: menu button opens navigation and the page does not scroll sideways", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ["/app", "/presets/shopify_products", "/guides/shopify/missing-required-header", "/de/convert"]) {
+    await page.goto(path);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, `horizontal overflow on ${path}`).toBeLessThanOrEqual(0);
+  }
+  await page.goto("/");
+  await page.getByRole("button", { name: /Open menu/i }).click();
+  await expect(page.locator("#mobile-menu").getByRole("link", { name: /CSV Merger/i })).toBeVisible();
+});
+
+test("footer language switcher moves to the same page in another language", async ({ page }) => {
+  await page.goto("/presets");
+  await page.locator("#footer-language").selectOption("de");
+  await expect(page).toHaveURL(/\/de\/presets$/);
+  await expect(page.locator("header").first()).toContainText("Vorlagen");
 });
