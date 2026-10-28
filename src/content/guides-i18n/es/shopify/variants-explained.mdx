@@ -1,0 +1,145 @@
+---
+title: "Las variantes de producto de Shopify explicadas: estructura CSV y errores comunes"
+description: "Aprende cómo el formato CSV de Shopify representa las variantes mediante la agrupación por Handle, las columnas Option y las filas principales/secundarias. Evita los errores que dividen productos, hacen desaparecer variantes o rompen la importación."
+keywords: ["variantes shopify csv", "importar variantes de producto shopify", "shopify handle variantes", "shopify option1 option2", "shopify csv producto principal variante", "precio de variante shopify csv", "estructura csv shopify"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Cómo usa Shopify el Handle para agrupar un producto principal y sus variantes"
+  - "Qué columnas necesitan las filas principales y cuáles las filas de variante"
+  - "Cómo funcionan juntas Option1 Name, Option1 Value y las columnas Variant"
+  - "Los errores de estructura de variantes más comunes y cómo corregirlos"
+  - "Cómo añadir variantes nuevas a un producto existente sin sobrescribirlo"
+bestFor: "Comerciantes y desarrolladores de Shopify que importan o actualizan productos con tallas, colores, materiales u otras opciones"
+timeToComplete: "12 minutos"
+---
+
+## Cómo representa Shopify las variantes en el CSV
+
+En el CSV de productos de Shopify, un producto con varias variantes se representa con **varias filas que comparten el mismo Handle**. La primera fila es la fila «principal»: contiene los datos del producto. Cada fila siguiente con el mismo Handle es una fila de variante.
+
+### Ejemplo mínimo: camiseta en dos tallas
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+Lo importante:
+- Las dos filas comparten el Handle `blue-shirt`.
+- La segunda fila tiene Title vacío, Image Src vacío y un Option1 Value nuevo.
+- Cada fila representa una variante que se puede comprar (una combinación de valores de opción).
+
+---
+
+## La fila principal
+
+La primera fila de cada Handle es la fila principal. Define los campos del producto:
+
+| Columna | Obligatoria en la principal | Notas |
+|---|---|---|
+| Handle | Sí | Identificador único del producto; minúsculas y solo guiones |
+| Title | Sí | El nombre del producto |
+| Body HTML | No | Descripción del producto; solo hace falta en la fila principal |
+| Vendor | No | Nombre de la marca |
+| Type | No | Tipo de producto (para colecciones) |
+| Tags | No | Etiquetas separadas por comas |
+| Published | No | TRUE o FALSE |
+| Option1 Name | Sí (si usas opciones) | Nombre de la primera opción (p. ej., «Size») |
+| Option1 Value | Sí (si usas opciones) | Valor de la primera variante (p. ej., «Small») |
+| Image Src | No | URL de la imagen principal |
+
+**Una fila principal debe tener Title.** Si el Title está vacío, Shopify no la reconoce como fila principal y la importación puede dar resultados incorrectos.
+
+---
+
+## Filas de variante
+
+Cada fila después de la primera con el mismo Handle es una fila de variante. Las filas de variante:
+- Comparten el mismo Handle que la principal.
+- Tienen el Title vacío (o el mismo Title: Shopify lo ignora fuera de la fila principal).
+- Tienen su propio Option1 Value (y Option2 Value, Option3 Value si los hay).
+- Tienen sus propios Variant Price, Variant SKU, Variant Inventory Qty, etc.
+
+### Columnas propias de cada variante
+
+| Columna | Notas |
+|---|---|
+| Variant Price | Obligatoria en cada variante; número decimal (sin símbolo de moneda) |
+| Variant SKU | Opcional pero muy recomendable; debe ser única en toda la tienda |
+| Variant Grams | Peso en gramos |
+| Variant Inventory Qty | Stock inicial |
+| Variant Inventory Policy | `deny` o `continue` (continue = permitir vender sin stock) |
+| Variant Fulfillment Service | Normalmente `manual` |
+| Variant Requires Shipping | TRUE o FALSE |
+| Variant Taxable | TRUE o FALSE |
+| Variant Barcode | EAN, UPC u otro código de barras |
+
+---
+
+## Varias opciones (talla Y color)
+
+Shopify admite hasta tres opciones con las columnas Option1, Option2 y Option3.
+
+Ejemplo: camiseta con talla y color
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name y Option2 Name solo tienen que estar en la fila principal (la primera de cada Handle). Repetirlos en las filas de variante no hace daño.
+- Cada combinación de opciones necesita su propia fila.
+- Un producto con 3 tallas y 4 colores necesita 12 filas de variante.
+
+---
+
+## Errores comunes
+
+### Error 1: Handles distintos para el mismo producto
+
+**Síntoma:** Lo que debería ser un producto con variantes aparece como varios productos separados tras la importación.
+
+**Solución:** Todas las filas de un producto deben tener exactamente el mismo Handle. Una errata (`blue-shirt` frente a `blue-shirt-`) hace que Shopify cree un producto nuevo.
+
+### Error 2: Title en todas las filas
+
+**Síntoma:** La importación funciona, pero Shopify crea productos duplicados o trata las filas de variante como productos independientes.
+
+**Solución:** Solo la primera fila de cada Handle debe tener Title. Deja el Title vacío en todas las filas de variante.
+
+### Error 3: falta la columna Option1 Name
+
+**Síntoma:** Error de importación «Option1 Name is required» o todas las variantes aparecen como una sola opción llamada «Default Title».
+
+**Solución:** Incluye siempre `Option1 Name` en los encabezados y un valor al menos en la fila principal. Si tu producto no tiene opciones reales, pon `Title` en Option1 Name y `Default Title` en Option1 Value.
+
+### Error 4: los valores de opción no coinciden entre filas
+
+**Síntoma:** Shopify crea más variantes de las esperadas o los nombres de opción aparecen duplicados.
+
+**Solución:** Option1 Name debe ser exactamente el mismo texto en todas las filas de un Handle. Si la fila principal dice `Size`, cada fila de variante también debe decir `Size` (o quedar vacía). Mezclar `Size`, `size` y `Sizes` genera datos de opciones incoherentes.
+
+### Error 5: Variant Price está vacío
+
+**Síntoma:** La importación falla con «Variant Price is required» o se crean variantes con precio 0.00.
+
+**Solución:** Variant Price es obligatorio en todas las filas. No se hereda: aunque todas las variantes tengan el mismo precio, cada fila debe indicarlo.
+
+### Error 6: añadir una variante nueva sobrescribe las existentes
+
+**Síntoma:** Tras una importación parcial (añadiendo una variante nueva), desaparecen todas las demás variantes.
+
+**Solución:** Cuando actualices un producto mediante importación CSV, debes incluir **todas** las variantes existentes en el archivo, no solo la nueva. El importador de Shopify reemplaza el conjunto completo de variantes de un Handle. Si omites variantes existentes, se eliminan.
+
+---
+
+## Consejos para catálogos grandes
+
+- **Genera las filas de variante de forma automática.** Para productos con muchas combinaciones (3 tallas × 4 colores × 2 materiales = 24 filas), usa una fórmula de la hoja de cálculo o un script para generar las combinaciones en lugar de escribirlas a mano.
+- **Usa patrones de SKU coherentes.** Una SKU como `BASE-TALLA-COLOR` (p. ej., `SHIRT-SM-BLU`) facilita identificar y ordenar las variantes.
+- **Prueba primero con un solo producto.** Importa un producto (la fila principal y todas sus variantes) antes de subir el catálogo completo. Comprueba la estructura de variantes en el panel de Shopify antes de seguir.

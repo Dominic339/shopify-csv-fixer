@@ -1,0 +1,145 @@
+---
+title: "Shopify ürün varyantları açıklandı: CSV yapısı ve yaygın hatalar"
+description: "Shopify'ın CSV biçiminin varyantları Handle gruplaması, Option sütunları ve ana/alt satırlarla nasıl gösterdiğini öğrenin. Ürünleri bölen, varyantları kaybettiren ve içe aktarmayı bozan en yaygın hatalardan kaçının."
+keywords: ["shopify varyant csv", "shopify ürün varyantı içe aktarma", "shopify handle varyant", "shopify option1 option2", "shopify csv ana ürün varyant", "shopify varyant fiyatı csv", "shopify csv yapısı"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify'ın bir ana ürünü ve varyantlarını Handle ile nasıl grupladığı"
+  - "Ana satırların ve varyant satırlarının hangi sütunlara ihtiyaç duyduğu"
+  - "Option1 Name, Option1 Value ve Variant sütunlarının birlikte nasıl çalıştığı"
+  - "En yaygın varyant yapısı hataları ve nasıl düzeltileceği"
+  - "Mevcut bir ürünün üzerine yazmadan ona yeni varyantların nasıl ekleneceği"
+bestFor: "Beden, renk, malzeme veya başka seçeneklere sahip ürünleri içe aktaran ya da güncelleyen Shopify satıcıları ve geliştiricileri"
+timeToComplete: "12 dakika"
+---
+
+## Shopify varyantları CSV'de nasıl gösterir
+
+Shopify'ın ürün CSV'sinde birden fazla varyantı olan bir ürün, **aynı Handle'ı paylaşan birden fazla satırla** gösterilir. İlk satır "ana" satırdır ve ürün düzeyindeki verileri içerir. Aynı Handle'a sahip sonraki her satır bir varyant satırıdır.
+
+### En basit örnek: iki bedenli bir tişört
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+Dikkat edilecekler:
+- İki satır da `blue-shirt` Handle'ını paylaşıyor.
+- İkinci satırda Title ve Image Src boş, Option1 Value ise yeni.
+- Her satır satın alınabilir bir varyantı (seçenek değerlerinin bir kombinasyonunu) temsil eder.
+
+---
+
+## Ana satır
+
+Bir Handle'ın ilk satırı ana satırdır. Ürün düzeyindeki alanları belirler:
+
+| Sütun | Ana satırda zorunlu | Not |
+|---|---|---|
+| Handle | Evet | Bu ürünün benzersiz kısa adı; küçük harf, yalnızca tire |
+| Title | Evet | Ürün adı |
+| Body HTML | Hayır | Ürün açıklaması; yalnızca ana satırda gerekir |
+| Vendor | Hayır | Marka adı |
+| Type | Hayır | Ürün türü (koleksiyonlar için) |
+| Tags | Hayır | Virgülle ayrılmış etiketler |
+| Published | Hayır | TRUE veya FALSE |
+| Option1 Name | Evet (seçenek varsa) | İlk seçeneğin adı (ör. "Size") |
+| Option1 Value | Evet (seçenek varsa) | İlk varyantın değeri (ör. "Small") |
+| Image Src | Hayır | Ana görselin URL'si |
+
+**Ana satırda Title bulunmalıdır.** Title boşsa Shopify satırı ana satır olarak tanımaz ve içe aktarma yanlış sonuçlar verebilir.
+
+---
+
+## Varyant satırları
+
+Aynı Handle'a sahip ilk satırdan sonraki her satır bir varyant satırıdır. Varyant satırları:
+- Ana satırla aynı Handle'ı paylaşır.
+- Title'ı boştur (veya aynıdır; Shopify ana satır dışında bunu yok sayar).
+- Kendi Option1 Value değerine (varsa Option2 Value ve Option3 Value değerlerine) sahiptir.
+- Kendi Variant Price, Variant SKU, Variant Inventory Qty vb. değerlerine sahiptir.
+
+### Varyanta özgü sütunlar
+
+| Sütun | Not |
+|---|---|
+| Variant Price | Her varyant için zorunlu; ondalık sayı (para birimi simgesi yok) |
+| Variant SKU | İsteğe bağlı ama kesinlikle önerilir; tüm mağazada benzersiz olmalı |
+| Variant Grams | Gram cinsinden ağırlık |
+| Variant Inventory Qty | Başlangıç stok miktarı |
+| Variant Inventory Policy | `deny` veya `continue` (continue = stok olmadan satışa izin ver) |
+| Variant Fulfillment Service | Genellikle `manual` |
+| Variant Requires Shipping | TRUE veya FALSE |
+| Variant Taxable | TRUE veya FALSE |
+| Variant Barcode | EAN, UPC veya başka bir barkod |
+
+---
+
+## Birden fazla seçenek (beden VE renk)
+
+Shopify, Option1, Option2 ve Option3 sütunlarıyla en fazla üç seçeneği destekler.
+
+Örnek: beden ve renk seçenekli tişört
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name ve Option2 Name'in yalnızca ana satırda (her Handle'ın ilk satırında) bulunması yeterlidir. Varyant satırlarında tekrarlamak zarar vermez.
+- Her seçenek kombinasyonunun kendi satırı olmalıdır.
+- 3 beden ve 4 rengi olan bir ürün 12 varyant satırı gerektirir.
+
+---
+
+## Yaygın hatalar
+
+### Hata 1: aynı ürün için farklı Handle'lar
+
+**Belirti:** Varyantlı tek bir ürün olması gereken şey, içe aktarmadan sonra birden çok ayrı ürün olarak görünür.
+
+**Çözüm:** Bir ürüne ait tüm satırlar tam olarak aynı Handle değerine sahip olmalıdır. Bir yazım hatası (`blue-shirt` yerine `blue-shirt-`) Shopify'ın yeni bir ürün oluşturmasına yol açar.
+
+### Hata 2: her satırda Title
+
+**Belirti:** İçe aktarma başarılı olur ama Shopify yinelenen ürünler oluşturur veya varyant satırlarını ayrı ürün gibi işler.
+
+**Çözüm:** Yalnızca her Handle'ın ilk satırında Title olmalıdır. Tüm varyant satırlarında Title'ı boş bırakın.
+
+### Hata 3: Option1 Name sütunu eksik
+
+**Belirti:** "Option1 Name is required" içe aktarma hatası alınır veya tüm varyantlar "Default Title" adlı tek bir seçenek olarak görünür.
+
+**Çözüm:** Başlık satırına her zaman `Option1 Name` ekleyin ve en azından ana satırda bir değer girin. Ürününüzün gerçek seçenekleri yoksa Option1 Name'i `Title`, Option1 Value'yu `Default Title` yapın.
+
+### Hata 4: satırlar arasında seçenek değerleri uyuşmuyor
+
+**Belirti:** Shopify beklenenden fazla varyant oluşturur veya seçenek adları yinelenmiş görünür.
+
+**Çözüm:** Option1 Name, bir Handle'ın tüm satırlarında tamamen aynı metin olmalıdır. Ana satırda `Size` yazıyorsa her varyant satırında da `Size` yazmalı (veya boş bırakılmalı). `Size`, `size` ve `Sizes` değerlerini karıştırmak tutarsız seçenek verileri oluşturur.
+
+### Hata 5: Variant Price boş
+
+**Belirti:** İçe aktarma "Variant Price is required" hatasıyla başarısız olur veya varyantlar 0.00 fiyatla oluşturulur.
+
+**Çözüm:** Variant Price her satırda zorunludur. Değer devralınmaz: tüm varyantların fiyatı aynı olsa bile her satırda belirtilmelidir.
+
+### Hata 6: yeni bir varyant eklemek mevcut varyantların üzerine yazıyor
+
+**Belirti:** Kısmi bir içe aktarmadan (yeni bir varyant eklemekten) sonra diğer tüm varyantlar kaybolur.
+
+**Çözüm:** Bir ürünü CSV içe aktarmasıyla güncellerken dosyaya yalnızca yenisini değil, mevcut **tüm** varyantları eklemeniz gerekir. Shopify içe aktarıcısı bir Handle'ın tüm varyant kümesini değiştirir. Dahil etmediğiniz mevcut varyantlar silinir.
+
+---
+
+## Büyük kataloglar için ipuçları
+
+- **Varyant satırlarını otomatik oluşturun.** Çok sayıda kombinasyonu olan ürünlerde (3 beden × 4 renk × 2 malzeme = 24 satır), kombinasyonları elle girmek yerine bir tablo formülü veya betikle üretin.
+- **Tutarlı SKU kalıpları kullanın.** `TEMEL-BEDEN-RENK` gibi bir SKU (ör. `SHIRT-SM-BLU`) varyantları tanımayı ve sıralamayı kolaylaştırır.
+- **Önce tek bir ürünle deneyin.** Tüm kataloğu yüklemeden önce tek bir ürünü (ana satır ve tüm varyantları) içe aktarın. Devam etmeden önce Shopify yönetim panelinde varyant yapısını kontrol edin.
