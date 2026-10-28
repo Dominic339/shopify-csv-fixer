@@ -9,7 +9,7 @@ whatYouLearn:
   - "Welche Spalten Elternzeilen und welche Variationszeilen brauchen"
   - "Wie die Attributspalten (Attribute 1 name, Attribute 1 value(s)) funktionieren"
   - "Typische Fehler, die verwaiste Variationen oder doppelte Produkte erzeugen"
-  - "Wie Sie eine vollständige CSV mit variablen Produkten für den Import aufbauen"
+  - "Wie du eine vollständige CSV mit variablen Produkten für den Import aufbaust"
 bestFor: "WooCommerce-Shopbetreiber, Entwickler und Katalogverantwortliche, die variable Produkte importieren oder aktualisieren (Kleidung, Schuhe, Elektronik mit mehreren Optionen)"
 timeToComplete: "12 Minuten"
 ---
@@ -72,10 +72,10 @@ Jede Variationszeile steht für eine kaufbare Kombination von Optionen und muss 
 ### Variationen mit dem Elternprodukt verknüpfen
 
 Die Spalte `Parent` akzeptiert zwei Formate:
-- **Per Datenbank-ID:** `id:123` – wenn Sie die WooCommerce-Produkt-ID kennen.
+- **Per Datenbank-ID:** `id:123` – wenn du die WooCommerce-Produkt-ID kennst.
 - **Per SKU:** `sku:SHIRT-BLUE` – besser übertragbar; für neue Produkte, die noch keine ID haben.
 
-Wenn Sie neue variable Produkte von Grund auf anlegen, verwenden Sie das Format `sku:PARENT_SKU`. Importieren Sie zuerst die Elternzeile (oder setzen Sie sie in derselben Datei über die Variationen).
+Wenn du neue variable Produkte von Grund auf anlegst, verwende das Format `sku:PARENT_SKU`. Importiere zuerst die Elternzeile (oder setze sie in derselben Datei über die Variationen).
 
 ---
 
@@ -95,7 +95,7 @@ ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),A
 
 ## Zweidimensionale Variationen (Größe UND Farbe)
 
-Für ein zweites Attribut (Farbe) fügen Sie der Elternzeile die Spalten für Attribute 2 hinzu und geben in jeder Variation beide Attributspalten an:
+Für ein zweites Attribut (Farbe) fügst du der Elternzeile die Spalten für Attribute 2 hinzu und gibst in jeder Variation beide Attributspalten an:
 
 **Elternzeile:**
 ```
@@ -113,7 +113,7 @@ Attribute 2 name: Color
 Attribute 2 value(s): Blue
 ```
 
-Für 2 Größen × 2 Farben brauchen Sie 4 Variationszeilen.
+Für 2 Größen × 2 Farben brauchst du 4 Variationszeilen.
 
 ---
 
@@ -129,13 +129,13 @@ Für 2 Größen × 2 Farben brauchen Sie 4 Variationszeilen.
 
 **Symptom:** Die Variationen werden als eigenständige einfache Produkte angelegt, statt dem Elternprodukt zugeordnet zu werden.
 
-**Lösung:** Achten Sie darauf, dass jede Variationszeile in der Spalte `Parent` einen Wert im Format `sku:PARENT_SKU` oder `id:123` hat. Fehlende oder fehlerhafte Verweise erzeugen verwaiste Variationen.
+**Lösung:** Achte darauf, dass jede Variationszeile in der Spalte `Parent` einen Wert im Format `sku:PARENT_SKU` oder `id:123` hat. Fehlende oder fehlerhafte Verweise erzeugen verwaiste Variationen.
 
 ### Fehler 3: Attributwerte in der Elternzeile nicht durch senkrechte Striche getrennt
 
 **Symptom:** Die Produktseite zeigt im Auswahlmenü nur eine Option, oder die Schaltfläche „In den Warenkorb“ fehlt.
 
-**Lösung:** Führen Sie in der Elternzeile alle möglichen Attributwerte getrennt durch ` | ` (Leerzeichen, senkrechter Strich, Leerzeichen) auf: `Small | Medium | Large`. WooCommerce füllt mit dieser Liste das Auswahlmenü.
+**Lösung:** Führe in der Elternzeile alle möglichen Attributwerte getrennt durch ` | ` (Leerzeichen, senkrechter Strich, Leerzeichen) auf: `Small | Medium | Large`. WooCommerce füllt mit dieser Liste das Auswahlmenü.
 
 ### Fehler 4: Attributname in Eltern- und Variationszeile unterschiedlich
 
@@ -153,16 +153,16 @@ Für 2 Größen × 2 Farben brauchen Sie 4 Variationszeilen.
 
 **Symptom:** Die Variationen werden als verwaiste Produkte angelegt, weil ID oder SKU des Elternprodukts noch nicht existieren.
 
-**Lösung:** Achten Sie darauf, dass die Elternzeile in der CSV vor ihren Variationszeilen steht. WooCommerce verarbeitet die Zeilen von oben nach unten.
+**Lösung:** Achte darauf, dass die Elternzeile in der CSV vor ihren Variationszeilen steht. WooCommerce verarbeitet die Zeilen von oben nach unten.
 
 ---
 
 ## Verhalten bei Aktualisierungen
 
-Wenn Sie ein bereits vorhandenes variables Produkt erneut importieren:
+Wenn du ein bereits vorhandenes variables Produkt erneut importierst:
 
 - **Abgleich per ID:** die sicherste Methode. WooCommerce aktualisiert das vorhandene Produkt, wenn die ID übereinstimmt.
-- **Abgleich per SKU:** WooCommerce kann auch über die SKU abgleichen. Lassen Sie die ID leer und geben Sie die SKU an.
-- **Neue Variationen hinzufügen:** Nehmen Sie die vorhandenen Variationen zusammen mit den neuen in die Importdatei auf. Variationen, die im Backend vorhanden sind, aber in der Importdatei fehlen, werden **nicht** gelöscht – das kann jedoch je nach WooCommerce-Version und Einstellungen des Import-Plugins abweichen.
+- **Abgleich per SKU:** WooCommerce kann auch über die SKU abgleichen. Lass die ID leer und gib die SKU an.
+- **Neue Variationen hinzufügen:** Nimm die vorhandenen Variationen zusammen mit den neuen in die Importdatei auf. Variationen, die im Backend vorhanden sind, aber in der Importdatei fehlen, werden **nicht** gelöscht – das kann jedoch je nach WooCommerce-Version und Einstellungen des Import-Plugins abweichen.
 
-Testen Sie Aktualisierungen immer in einem Staging-Shop oder mit einem Backup, bevor Sie in den Live-Shop importieren.
+Teste Aktualisierungen immer in einem Staging-Shop oder mit einem Backup, bevor du in den Live-Shop importierst.

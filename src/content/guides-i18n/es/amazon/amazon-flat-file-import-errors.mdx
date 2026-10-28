@@ -1,0 +1,163 @@
+---
+title: "Errores de importación de archivos planos de Amazon: causas y soluciones"
+description: "Corrige los errores más comunes al importar archivos planos CSV de Amazon: problemas de SKU, códigos de estado no válidos, formato de precios, valores del canal logístico y plantillas que no coinciden."
+keywords: ["errores archivo plano amazon", "errores importación csv amazon", "error archivo de inventario amazon", "corregir csv amazon", "errores inventory loader amazon", "validar archivo plano amazon", "errores carga masiva amazon"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Cómo valida Amazon las cargas de archivos planos CSV y qué provoca los fallos"
+  - "Campos obligatorios del Inventory Loader y de las plantillas de archivo plano habituales"
+  - "Cómo corregir errores de SKU, estado, precio, canal logístico y ASIN"
+  - "Cómo leer el informe de procesamiento de Amazon para saber exactamente qué filas fallaron"
+  - "Cómo elegir la plantilla de Amazon correcta para la categoría de tu producto"
+bestFor: "Vendedores de Amazon que cargan archivos planos en Seller Central y reciben errores de procesamiento o importaciones parciales"
+timeToComplete: "12 minutos"
+---
+
+## Cómo valida Amazon los archivos planos
+
+Los archivos planos de Amazon son archivos CSV delimitados por tabulaciones o comas que siguen esquemas de columnas estrictos definidos para cada categoría de producto. Cuando cargas un archivo plano, Amazon lo pasa por un proceso de validación:
+
+1. **Coincidencia de plantilla**: comprueba que los encabezados de columna coincidan con la plantilla esperada para ese tipo de archivo
+2. **Validación de campos obligatorios**: verifica que todas las columnas obligatorias tengan valor
+3. **Validación de tipos de datos**: revisa números, booleanos y valores de listas cerradas
+4. **Reglas de negocio**: verifica los ASIN, valida los SKU y comprueba los códigos de estado y los rangos de precio
+5. **Comprobación del catálogo**: busca los identificadores de producto en el catálogo de Amazon
+
+Tras el procesamiento, Amazon genera un **informe de procesamiento** (disponible en Seller Central, en Inventario → Añadir productos mediante carga). Revisa siempre el informe de procesamiento: enumera cada fila que falló y el error concreto.
+
+---
+
+## Error: seller_sku no válido o ausente
+
+**Causa:** `seller_sku` está vacío, supera los 40 caracteres, contiene caracteres no válidos o repite un SKU que ya existe en tu catálogo.
+
+**Reglas de seller_sku:**
+- Máximo 40 caracteres
+- Sin espacios (usa guiones o guiones bajos)
+- Letras y números, más `-`, `_`, `.`
+- Debe ser único en toda tu cuenta de vendedor de Amazon
+
+**Solución:** asegúrate de que cada fila tenga un SKU único. Usa una fórmula como `=CONTAR.SI($A:$A; A2)` para encontrar duplicados. Acorta los SKU de más de 40 caracteres.
+
+---
+
+## Error: falta item_name o el título es demasiado largo
+
+**Causa:** `item_name` está vacío o supera el límite de longitud de título de Amazon (varía según la categoría, pero suele estar entre 200 y 500 caracteres).
+
+**Solución:**
+- Rellena `item_name` en cada fila de producto
+- Usa `=LARGO(B2)` en Excel para encontrar títulos que superen el límite de tu categoría
+- Consulta tu plantilla concreta para conocer el límite exacto de caracteres
+
+---
+
+## Error: condition_type no válido
+
+**Causa:** la columna `condition_type` contiene un valor que no está en la lista permitida por Amazon.
+
+**Valores aceptados:**
+
+| Valor | Descripción |
+|---|---|
+| `New` | Nuevo, precintado de fábrica |
+| `UsedLikeNew` | Usado: como nuevo |
+| `UsedVeryGood` | Usado: muy bueno |
+| `UsedGood` | Usado: bueno |
+| `UsedAcceptable` | Usado: aceptable |
+| `CollectibleLikeNew` | Coleccionable: como nuevo |
+| `CollectibleVeryGood` | Coleccionable: muy bueno |
+| `CollectibleGood` | Coleccionable: bueno |
+| `CollectibleAcceptable` | Coleccionable: aceptable |
+| `Refurbished` | Reacondicionado por el vendedor |
+| `Club` | Club (categoría de medios) |
+
+**Solución:** sustituye cualquier valor de estado no estándar por uno de la lista anterior. `New` debe ir con mayúscula inicial; `new` (en minúsculas) se rechaza.
+
+---
+
+## Error: precio no válido
+
+**Causa:** la columna `price` contiene un símbolo de moneda (`$`), usa coma decimal, es cero, es negativa o está vacía.
+
+**Reglas de precios de Amazon:**
+- Número decimal simple: `19.99`
+- Sin símbolos de moneda
+- Debe ser positivo (mayor que 0)
+- Punto como separador decimal
+
+**Solución:** elimina los símbolos de moneda y cambia las comas decimales por puntos. Da formato de número a la columna de precio en Excel antes de guardar.
+
+---
+
+## Error: fulfillment_center_id o canal logístico no válido
+
+**Causa:** la columna del canal logístico contiene un valor no reconocido.
+
+**Valores aceptados:**
+
+| Valor | Descripción |
+|---|---|
+| `DEFAULT` | Gestionado por el vendedor (FBM) |
+| `AMAZON_NA` (o `AMAZON`) | Logística de Amazon (FBA) |
+
+El nombre exacto de la columna y los valores aceptados varían ligeramente según la plantilla de archivo plano. Consulta tu plantilla concreta.
+
+**Solución:** usa `DEFAULT` para FBM y `AMAZON_NA` o `AMAZON` para FBA. No uses `FBA`, `FBM` ni otras abreviaturas.
+
+---
+
+## Error: product_id o ASIN no encontrado
+
+**Causa:** el `product_id` (ASIN, UPC, EAN o ISBN) no coincide con ningún producto del catálogo de Amazon, o `product_id_type` no corresponde al tipo de identificador indicado.
+
+**Valores de product_id_type:**
+
+| Valor | Tipo de identificador |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Solución:**
+- Comprueba que el identificador de producto sea correcto y esté activo en el catálogo de Amazon
+- Haz que `product_id_type` corresponda al tipo de identificador de `product_id`
+- Para productos nuevos que aún no tienen ASIN, puede que tengas que crear un anuncio nuevo en lugar de añadir inventario a uno existente
+
+---
+
+## Error: plantilla incorrecta para la categoría del producto
+
+**Causa:** usaste una plantilla general de Inventory Loader para una categoría que exige un archivo plano específico (por ejemplo, ropa, zapatos o joyería).
+
+Amazon tiene plantillas por categoría con campos obligatorios adicionales. Si usas la plantilla equivocada, faltarán todos los campos obligatorios propios de la categoría.
+
+**Solución:**
+- En Seller Central, ve a Inventario → Añadir productos mediante carga → Descargar una plantilla de inventario
+- Selecciona la categoría de tu producto para obtener la plantilla correcta
+- Descarga el archivo plano de la categoría y pasa tus datos a él
+
+Categorías habituales con plantilla propia: ropa, zapatos, joyería, electrónica, libros, música, vídeo, deportes y aire libre.
+
+---
+
+## Cómo leer el informe de procesamiento
+
+Después de la carga, descarga el informe de procesamiento desde Seller Central (Inventario → Añadir productos mediante carga → Supervisar el estado de la carga → Ver informe de procesamiento).
+
+El informe tiene tres pestañas:
+- **Summary**: total de filas, correctas y fallidas
+- **Results**: una fila por registro de tu archivo, con su estado y el mensaje de error
+- **Original**: los datos originales que cargaste
+
+Para encontrar las filas fallidas, filtra la pestaña Results por la columna `status`. Las filas `FAILURE` incluyen un `error-code` y un `error-message` que explican exactamente qué salió mal.
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+Sube tu archivo plano de Amazon a StriveFormats. El validador revisa los SKU, los códigos de estado, los precios, los valores del canal logístico y los campos obligatorios, y señala las filas y celdas exactas con problemas.
+
+[Abrir el corrector de CSV de Amazon](/app?preset=amazon_inventory_loader) | [Ver la plantilla de Amazon](/presets/amazon_inventory_loader)

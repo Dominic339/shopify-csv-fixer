@@ -1,0 +1,163 @@
+---
+title: "Amazon-Flatfile-Importfehler: Ursachen und Lösungen"
+description: "Behebe die häufigsten Importfehler in Amazon-Flatfile-CSVs: SKU-Probleme, ungültige Zustandscodes, Preisformate, Werte für den Versandkanal und nicht passende Vorlagen."
+keywords: ["amazon flatfile fehler", "amazon csv import fehler", "amazon lagerdatei fehler", "amazon csv korrigieren", "amazon inventory loader fehler", "amazon flatfile validierung", "amazon massenupload fehler"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Wie Amazon Flatfile-Uploads prüft und was zu Fehlern führt"
+  - "Pflichtfelder im Inventory Loader und in gängigen Flatfile-Vorlagen"
+  - "Wie du Fehler bei SKU, Zustand, Preis, Versandkanal und ASIN behebst"
+  - "Wie du Amazons Verarbeitungsbericht liest, um genau die fehlgeschlagenen Zeilen zu finden"
+  - "Wie du die richtige Amazon-Vorlage für deine Produktkategorie wählst"
+bestFor: "Amazon-Verkäufer, die Flatfiles in Seller Central hochladen und Verarbeitungsfehler oder unvollständige Importe erhalten"
+timeToComplete: "12 Minuten"
+---
+
+## Wie Amazon Flatfiles prüft
+
+Amazon-Flatfiles sind tabulator- oder kommagetrennte CSV-Dateien, die strengen, je Produktkategorie festgelegten Spaltenschemata folgen. Wenn du ein Flatfile hochlädst, durchläuft es bei Amazon mehrere Prüfschritte:
+
+1. **Vorlagenabgleich**: prüft, ob deine Spaltenüberschriften zur erwarteten Vorlage für den Dateityp passen
+2. **Pflichtfeldprüfung**: stellt sicher, dass alle Pflichtspalten Werte enthalten
+3. **Datentypprüfung**: prüft Zahlen, boolesche Werte und Werte aus festen Auswahllisten
+4. **Geschäftsregeln**: prüft ASINs, validiert SKUs und kontrolliert Zustandscodes und Preisspannen
+5. **Katalogabgleich**: gleicht Produkt-IDs mit dem Amazon-Katalog ab
+
+Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller Central unter Lagerbestand → Produkte über Upload hinzufügen). Sieh dir den Verarbeitungsbericht immer an – er listet jede fehlgeschlagene Zeile mit dem konkreten Fehler auf.
+
+---
+
+## Fehler: seller_sku ungültig oder fehlt
+
+**Ursache:** `seller_sku` ist leer, länger als 40 Zeichen, enthält ungültige Zeichen oder wiederholt eine SKU, die es in deinem Katalog schon gibt.
+
+**Regeln für seller_sku:**
+- Höchstens 40 Zeichen
+- Keine Leerzeichen (verwende Bindestriche oder Unterstriche)
+- Buchstaben und Ziffern sowie `-`, `_`, `.`
+- Muss in deinem gesamten Amazon-Verkäuferkonto eindeutig sein
+
+**Lösung:** Sorge dafür, dass jede Zeile eine eindeutige SKU hat. Mit einer Formel wie `=ZÄHLENWENN($A:$A; A2)` findest du Duplikate. Kürze SKUs, die länger als 40 Zeichen sind.
+
+---
+
+## Fehler: item_name fehlt oder Titel zu lang
+
+**Ursache:** `item_name` ist leer oder überschreitet die Titellänge, die Amazon erlaubt (je nach Kategorie unterschiedlich, typisch sind 200–500 Zeichen).
+
+**Lösung:**
+- Fülle `item_name` in jeder Produktzeile aus
+- Finde mit `=LÄNGE(B2)` in Excel Titel, die das Limit deiner Kategorie überschreiten
+- Sieh in deiner konkreten Vorlage nach, wie hoch das genaue Zeichenlimit ist
+
+---
+
+## Fehler: condition_type ungültig
+
+**Ursache:** Die Spalte `condition_type` enthält einen Wert, der nicht in Amazons Liste erlaubter Werte steht.
+
+**Zulässige Werte:**
+
+| Wert | Beschreibung |
+|---|---|
+| `New` | Neu, originalverpackt |
+| `UsedLikeNew` | Gebraucht – wie neu |
+| `UsedVeryGood` | Gebraucht – sehr gut |
+| `UsedGood` | Gebraucht – gut |
+| `UsedAcceptable` | Gebraucht – akzeptabel |
+| `CollectibleLikeNew` | Sammlerstück – wie neu |
+| `CollectibleVeryGood` | Sammlerstück – sehr gut |
+| `CollectibleGood` | Sammlerstück – gut |
+| `CollectibleAcceptable` | Sammlerstück – akzeptabel |
+| `Refurbished` | Vom Verkäufer generalüberholt |
+| `Club` | Club (Medienkategorie) |
+
+**Lösung:** Ersetze alle nicht standardmäßigen Zustandswerte durch einen Wert aus der Liste oben. `New` muss großgeschrieben werden; `new` (klein) wird abgelehnt.
+
+---
+
+## Fehler: ungültiger Preis
+
+**Ursache:** Die Spalte `price` enthält ein Währungssymbol (`$`), verwendet ein Dezimalkomma, ist null, negativ oder leer.
+
+**Preisregeln bei Amazon:**
+- Einfache Dezimalzahl: `19.99`
+- Keine Währungssymbole
+- Muss positiv sein (größer als 0)
+- Punkt als Dezimaltrennzeichen
+
+**Lösung:** Entferne Währungssymbole und ersetze Dezimalkommas durch Punkte. Formatiere die Preisspalte in Excel vor dem Speichern als Zahl.
+
+---
+
+## Fehler: fulfillment_center_id bzw. Versandkanal ungültig
+
+**Ursache:** Die Spalte für den Versandkanal enthält einen unbekannten Wert.
+
+**Zulässige Werte:**
+
+| Wert | Beschreibung |
+|---|---|
+| `DEFAULT` | Versand durch Verkäufer (FBM) |
+| `AMAZON_NA` (oder `AMAZON`) | Versand durch Amazon (FBA) |
+
+Der genaue Spaltenname und die zulässigen Werte unterscheiden sich je nach Flatfile-Vorlage leicht. Prüfe deine konkrete Vorlage.
+
+**Lösung:** Verwende `DEFAULT` für FBM und `AMAZON_NA` oder `AMAZON` für FBA. Verwende nicht `FBA`, `FBM` oder andere Kurzformen.
+
+---
+
+## Fehler: product_id bzw. ASIN nicht gefunden
+
+**Ursache:** Die `product_id` (ASIN, UPC, EAN oder ISBN) passt zu keinem Produkt im Amazon-Katalog, oder `product_id_type` passt nicht zur Art der angegebenen ID.
+
+**Werte für product_id_type:**
+
+| Wert | ID-Typ |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Lösung:**
+- Prüfe, ob die Produkt-ID korrekt und im Amazon-Katalog aktiv ist
+- Stimme `product_id_type` auf die Art der ID in `product_id` ab
+- Für neue Produkte, die noch keine ASIN haben, musst du eventuell ein neues Angebot anlegen, statt Bestand zu einem bestehenden Angebot hinzuzufügen
+
+---
+
+## Fehler: falsche Vorlage für die Produktkategorie
+
+**Ursache:** Du hast eine allgemeine Inventory-Loader-Vorlage für eine Kategorie verwendet, die ein kategoriespezifisches Flatfile verlangt (z. B. Bekleidung, Schuhe, Schmuck).
+
+Amazon hat kategoriespezifische Vorlagen mit zusätzlichen Pflichtfeldern. Mit der falschen Vorlage fehlen alle kategoriespezifischen Pflichtfelder.
+
+**Lösung:**
+- Gehe in Seller Central zu Lagerbestand → Produkte über Upload hinzufügen → Lagerbestandsdatei herunterladen
+- Wähle deine Produktkategorie, um die richtige Vorlage zu erhalten
+- Lade das kategoriespezifische Flatfile herunter und übertrage deine Daten hinein
+
+Gängige Kategorien mit eigener Vorlage: Bekleidung, Schuhe, Schmuck, Elektronik, Bücher, Musik, Video, Sport & Freizeit.
+
+---
+
+## Den Verarbeitungsbericht lesen
+
+Lade nach dem Upload den Verarbeitungsbericht aus Seller Central herunter (Lagerbestand → Produkte über Upload hinzufügen → Upload-Status überwachen → Verarbeitungsbericht anzeigen).
+
+Der Bericht hat drei Registerkarten:
+- **Summary**: Gesamtzahl der Zeilen, Erfolge und Fehler
+- **Results**: eine Zeile pro Datensatz deiner Datei, mit Status und Fehlermeldung
+- **Original**: deine ursprünglich hochgeladenen Daten
+
+So findest du fehlgeschlagene Zeilen: Filtere die Registerkarte Results nach der Spalte `status`. Zeilen mit `FAILURE` enthalten einen `error-code` und eine `error-message`, die genau erklären, was schiefgelaufen ist.
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade dein Amazon-Flatfile in StriveFormats hoch. Der Validator prüft SKUs, Zustandscodes, Preise, Werte für den Versandkanal und Pflichtfelder – und markiert die genauen Zeilen und Zellen mit Problemen.
+
+[Amazon-CSV-Fixer öffnen](/app?preset=amazon_inventory_loader) | [Amazon-Vorlage ansehen](/presets/amazon_inventory_loader)

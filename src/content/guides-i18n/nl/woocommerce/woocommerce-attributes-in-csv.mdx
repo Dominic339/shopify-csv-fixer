@@ -7,9 +7,9 @@ kind: "curated"
 whatYouLearn:
   - "Hoe WooCommerce-attribuutkolommen in de CSV heten en genummerd worden"
   - "Het verschil tussen globale en lokale attributen bij CSV-import"
-  - "Hoe u attributen instelt voor variabele producten en hun variaties"
-  - "Hoe u meerdere attribuutwaarden importeert (bijv. een product in blauw en rood)"
-  - "Hoe u de meest voorkomende fouten bij het importeren van attributen oplost"
+  - "Hoe je attributen instelt voor variabele producten en hun variaties"
+  - "Hoe je meerdere attribuutwaarden importeert (bijv. een product in blauw en rood)"
+  - "Hoe je de meest voorkomende fouten bij het importeren van attributen oplost"
 bestFor: "WooCommerce-winkeleigenaren die variabele producten importeren met maat, kleur, materiaal of andere attribuutdimensies"
 timeToComplete: "10 minuten"
 ---
@@ -24,7 +24,7 @@ Het naampatroon van de kolommen is:
 - `Attribute 1 visible`
 - `Attribute 1 global`
 
-Voor een tweede attribuut herhaalt u het patroon met `Attribute 2 name`, `Attribute 2 value(s)` enzovoort.
+Voor een tweede attribuut herhaal je het patroon met `Attribute 2 name`, `Attribute 2 value(s)` enzovoort.
 
 Staat WordPress in het Nederlands, dan gebruikt de export Nederlandse kolomnamen; de importer accepteert die net zo goed als de Engelse. In deze handleiding staan de Engelse namen.
 
@@ -43,7 +43,7 @@ Staat WordPress in het Nederlands, dan gebruikt de export Nederlandse kolomnamen
 
 ## Eenvoudige producten met meerdere attribuutwaarden
 
-Voor een eenvoudig product dat in meerdere kleuren verkrijgbaar is (maar niet als aparte variaties), zet u alle waarden in de kolom `Attribute 1 value(s)`, gescheiden door een verticaal streepje `|`:
+Voor een eenvoudig product dat in meerdere kleuren verkrijgbaar is (maar niet als aparte variaties), zet je alle waarden in de kolom `Attribute 1 value(s)`, gescheiden door een verticaal streepje `|`:
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
@@ -108,8 +108,8 @@ Elke variatierij geeft per attribuut precies één waarde (geen lijst met vertic
 
 Globale attributen zijn vastgelegd in de attribuuttaxonomie van WooCommerce (Producten → Eigenschappen in het WordPress-beheer). Gebruik globale attributen wanneer:
 - meerdere producten dezelfde attribuuttermen delen (dezelfde kleuren, dezelfde maten)
-- u producten op winkelpagina's op attribuut wilt filteren
-- u de widget voor gelaagde navigatie van WooCommerce gebruikt
+- je producten op winkelpagina's op attribuut wilt filteren
+- je de widget voor gelaagde navigatie van WooCommerce gebruikt
 
 Bij een import met `global: 1` maakt WooCommerce de attribuutterm aan als die nog niet bestaat. Attribuutnamen moeten exact overeenkomen (hoofdlettergevoelig) zodat WooCommerce ze aan de bestaande taxonomie koppelt.
 
@@ -117,7 +117,7 @@ Bij een import met `global: 1` maakt WooCommerce de attribuutterm aan als die no
 
 Lokale attributen horen bij één product. Gebruik ze voor productspecifieke kenmerken die nergens anders gelden (bijv. `Material: 100% cashmere` bij één bepaald product).
 
-Lokale attributen kunt u niet gebruiken voor het filteren van variaties of voor gelaagde navigatie.
+Lokale attributen kun je niet gebruiken voor het filteren van variaties of voor gelaagde navigatie.
 
 ---
 
@@ -148,6 +148,6 @@ Goed: `Attribute 1 name`
 
 ## Automatisch oplossen met StriveFormats
 
-Upload uw WooCommerce-CSV naar StriveFormats. De validator controleert de namen van de attribuutkolommen, de consistentie van attributen tussen hoofd- en variatierijen en de opmaak van de scheidingstekens, en meldt problemen met de exacte rij en kolom.
+Upload je WooCommerce-CSV naar StriveFormats. De validator controleert de namen van de attribuutkolommen, de consistentie van attributen tussen hoofd- en variatierijen en de opmaak van de scheidingstekens, en meldt problemen met de exacte rij en kolom.
 
 [Open de WooCommerce CSV-fixer](/app?preset=woocommerce_products) | [Bekijk de WooCommerce-sjabloon](/presets/woocommerce_products)

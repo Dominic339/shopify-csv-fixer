@@ -9,14 +9,14 @@ whatYouLearn:
   - "Welke kolommen verplicht zijn voor hoofdrijen en voor variatierijen"
   - "Hoe de attribuutkolommen (Attribute 1 name, Attribute 1 value(s)) werken"
   - "Veelgemaakte fouten die losse variaties of dubbele producten opleveren"
-  - "Hoe u een complete CSV met variabele producten opbouwt voor import"
+  - "Hoe je een complete CSV met variabele producten opbouwt voor import"
 bestFor: "WooCommerce-winkeleigenaren, ontwikkelaars en catalogusbeheerders die variabele producten importeren of bijwerken (kleding, schoenen, elektronica met meerdere opties)"
 timeToComplete: "12 minuten"
 ---
 
 ## Hoe WooCommerce variabele producten opbouwt
 
-In WooCommerce is een **variabel product** een product met koopbare variaties, bijvoorbeeld een T-shirt in de maten S, M en L. In de CSV gebruikt u daarvoor twee soorten rijen:
+In WooCommerce is een **variabel product** een product met koopbare variaties, bijvoorbeeld een T-shirt in de maten S, M en L. In de CSV gebruik je daarvoor twee soorten rijen:
 
 1. **Hoofdrij**: staat voor de productcontainer. Het Type is `variable`.
 2. **Variatierijen**: elke rij staat voor één koopbare combinatie van opties. Het Type is `variation`.
@@ -72,10 +72,10 @@ Elke variatierij staat voor één koopbare combinatie van opties en moet naar he
 ### Variaties aan het hoofdproduct koppelen
 
 De kolom `Parent` accepteert twee notaties:
-- **Via database-ID:** `id:123` – als u de WooCommerce-product-ID kent.
+- **Via database-ID:** `id:123` – als je de WooCommerce-product-ID kent.
 - **Via SKU:** `sku:SHIRT-BLUE` – beter overdraagbaar; voor nieuwe producten die nog geen ID hebben.
 
-Maakt u nieuwe variabele producten vanaf nul aan, gebruik dan de notatie `sku:PARENT_SKU`. Importeer eerst de hoofdrij (of zet die in hetzelfde bestand boven de variaties).
+Maak je nieuwe variabele producten vanaf nul aan, gebruik dan de notatie `sku:PARENT_SKU`. Importeer eerst de hoofdrij (of zet die in hetzelfde bestand boven de variaties).
 
 ---
 
@@ -95,7 +95,7 @@ ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),A
 
 ## Tweedimensionale variaties (maat EN kleur)
 
-Voor een tweede attribuut (kleur) voegt u de kolommen van Attribute 2 toe aan de hoofdrij en vult u in elke variatie beide attribuutkolommen in:
+Voor een tweede attribuut (kleur) voeg je de kolommen van Attribute 2 toe aan de hoofdrij en vul je in elke variatie beide attribuutkolommen in:
 
 **Hoofdrij:**
 ```
@@ -113,7 +113,7 @@ Attribute 2 name: Color
 Attribute 2 value(s): Blue
 ```
 
-Voor 2 maten × 2 kleuren hebt u 4 variatierijen nodig.
+Voor 2 maten × 2 kleuren heb je 4 variatierijen nodig.
 
 ---
 
@@ -159,10 +159,10 @@ Voor 2 maten × 2 kleuren hebt u 4 variatierijen nodig.
 
 ## Gedrag bij bijwerken
 
-Wanneer u een variabel product dat al bestaat opnieuw importeert:
+Wanneer je een variabel product dat al bestaat opnieuw importeert:
 
 - **Koppelen op ID:** de veiligste methode. WooCommerce werkt het bestaande product bij als de ID overeenkomt.
 - **Koppelen op SKU:** WooCommerce kan ook op SKU koppelen. Laat de ID leeg en vul de SKU in.
 - **Nieuwe variaties toevoegen:** neem de bestaande variaties samen met de nieuwe op in het importbestand. Variaties die wel in de beheeromgeving staan maar niet in het importbestand, worden **niet** verwijderd, maar dit kan per WooCommerce-versie en instelling van de importplug-in verschillen.
 
-Test updates altijd eerst in een testwinkel of met een back-up voordat u in de live winkel importeert.
+Test updates altijd eerst in een testwinkel of met een back-up voordat je in de live winkel importeert.

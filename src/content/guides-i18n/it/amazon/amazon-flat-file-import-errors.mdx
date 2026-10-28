@@ -1,0 +1,163 @@
+---
+title: "Errori di importazione dei file flat Amazon: cause e soluzioni"
+description: "Correggi gli errori più comuni di importazione dei file flat CSV di Amazon: problemi di SKU, codici di condizione non validi, formato dei prezzi, valori del canale di evasione e modelli non corrispondenti."
+keywords: ["errori file flat amazon", "errore importazione csv amazon", "errore file di inventario amazon", "correggere csv amazon", "errori inventory loader amazon", "validazione file flat amazon", "errore caricamento massivo amazon"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Come Amazon convalida i caricamenti di file flat CSV e cosa causa gli errori"
+  - "I campi obbligatori dell'Inventory Loader e dei modelli di file flat più comuni"
+  - "Come correggere gli errori di SKU, condizione, prezzo, canale di evasione e ASIN"
+  - "Come leggere il report di elaborazione di Amazon per trovare esattamente le righe non riuscite"
+  - "Come scegliere il modello Amazon giusto per la categoria del tuo prodotto"
+bestFor: "Venditori Amazon che caricano file flat in Seller Central e ricevono errori di elaborazione o importazioni parziali"
+timeToComplete: "12 minuti"
+---
+
+## Come Amazon convalida i file flat
+
+I file flat di Amazon sono file CSV delimitati da tabulazioni o virgole che seguono schemi di colonne rigidi, definiti per ciascuna categoria di prodotto. Quando carichi un file flat, Amazon lo sottopone a una serie di controlli:
+
+1. **Corrispondenza del modello**: verifica che le intestazioni delle colonne corrispondano al modello previsto per quel tipo di file
+2. **Convalida dei campi obbligatori**: verifica che tutte le colonne obbligatorie abbiano un valore
+3. **Convalida dei tipi di dati**: controlla numeri, valori booleani e valori di elenchi chiusi
+4. **Regole commerciali**: verifica gli ASIN, convalida gli SKU e controlla i codici di condizione e le fasce di prezzo
+5. **Controllo del catalogo**: confronta gli identificativi dei prodotti con il catalogo Amazon
+
+Al termine dell'elaborazione, Amazon genera un **report di elaborazione** (disponibile in Seller Central in Inventario → Aggiungi prodotti tramite caricamento). Controlla sempre il report di elaborazione: elenca ogni riga non riuscita con l'errore specifico.
+
+---
+
+## Errore: seller_sku non valido o mancante
+
+**Causa:** `seller_sku` è vuoto, supera i 40 caratteri, contiene caratteri non validi o ripete uno SKU già presente nel tuo catalogo.
+
+**Regole per seller_sku:**
+- Massimo 40 caratteri
+- Niente spazi (usa trattini o trattini bassi)
+- Lettere e numeri, più `-`, `_`, `.`
+- Deve essere univoco in tutto il tuo account venditore Amazon
+
+**Soluzione:** assicurati che ogni riga abbia uno SKU univoco. Usa una formula come `=CONTA.SE($A:$A; A2)` per trovare i duplicati. Accorcia gli SKU che superano i 40 caratteri.
+
+---
+
+## Errore: item_name mancante o titolo troppo lungo
+
+**Causa:** `item_name` è vuoto o supera il limite di lunghezza del titolo di Amazon (varia per categoria, ma in genere è tra 200 e 500 caratteri).
+
+**Soluzione:**
+- Compila `item_name` in ogni riga di prodotto
+- Usa `=LUNGHEZZA(B2)` in Excel per trovare i titoli che superano il limite della tua categoria
+- Controlla nel tuo modello il limite esatto di caratteri
+
+---
+
+## Errore: condition_type non valido
+
+**Causa:** la colonna `condition_type` contiene un valore che non è nell'elenco consentito da Amazon.
+
+**Valori accettati:**
+
+| Valore | Descrizione |
+|---|---|
+| `New` | Nuovo, sigillato in fabbrica |
+| `UsedLikeNew` | Usato – come nuovo |
+| `UsedVeryGood` | Usato – ottime condizioni |
+| `UsedGood` | Usato – buone condizioni |
+| `UsedAcceptable` | Usato – condizioni accettabili |
+| `CollectibleLikeNew` | Da collezione – come nuovo |
+| `CollectibleVeryGood` | Da collezione – ottime condizioni |
+| `CollectibleGood` | Da collezione – buone condizioni |
+| `CollectibleAcceptable` | Da collezione – condizioni accettabili |
+| `Refurbished` | Ricondizionato dal venditore |
+| `Club` | Club (categoria media) |
+
+**Soluzione:** sostituisci qualsiasi valore di condizione non standard con uno dell'elenco qui sopra. `New` deve avere l'iniziale maiuscola; `new` (minuscolo) viene rifiutato.
+
+---
+
+## Errore: prezzo non valido
+
+**Causa:** la colonna `price` contiene un simbolo di valuta (`$`), usa la virgola decimale, è zero, è negativa o è vuota.
+
+**Regole di prezzo di Amazon:**
+- Numero decimale semplice: `19.99`
+- Nessun simbolo di valuta
+- Deve essere positivo (maggiore di 0)
+- Punto come separatore decimale
+
+**Soluzione:** elimina i simboli di valuta e sostituisci le virgole decimali con i punti. Prima di salvare, formatta la colonna del prezzo come Numero in Excel.
+
+---
+
+## Errore: fulfillment_center_id o canale di evasione non valido
+
+**Causa:** la colonna del canale di evasione contiene un valore non riconosciuto.
+
+**Valori accettati:**
+
+| Valore | Descrizione |
+|---|---|
+| `DEFAULT` | Spedito dal venditore (FBM) |
+| `AMAZON_NA` (o `AMAZON`) | Logistica di Amazon (FBA) |
+
+Il nome esatto della colonna e i valori accettati variano leggermente a seconda del modello di file flat. Controlla il tuo modello.
+
+**Soluzione:** usa `DEFAULT` per FBM e `AMAZON_NA` o `AMAZON` per FBA. Non usare `FBA`, `FBM` o altre abbreviazioni.
+
+---
+
+## Errore: product_id o ASIN non trovato
+
+**Causa:** il `product_id` (ASIN, UPC, EAN o ISBN) non corrisponde a nessun prodotto del catalogo Amazon, oppure `product_id_type` non corrisponde al tipo di identificativo fornito.
+
+**Valori di product_id_type:**
+
+| Valore | Tipo di identificativo |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Soluzione:**
+- Verifica che l'identificativo del prodotto sia corretto e attivo nel catalogo Amazon
+- Fai corrispondere `product_id_type` al tipo di identificativo presente in `product_id`
+- Per i prodotti nuovi che non hanno ancora un ASIN, potresti dover creare una nuova offerta invece di aggiungere inventario a un'offerta esistente
+
+---
+
+## Errore: modello sbagliato per la categoria del prodotto
+
+**Causa:** hai usato un modello Inventory Loader generico per una categoria che richiede un file flat specifico (ad esempio abbigliamento, scarpe, gioielli).
+
+Amazon ha modelli specifici per categoria con campi obbligatori aggiuntivi. Con il modello sbagliato mancano tutti i campi obbligatori propri della categoria.
+
+**Soluzione:**
+- In Seller Central, vai in Inventario → Aggiungi prodotti tramite caricamento → Scarica un modello di file di inventario
+- Seleziona la categoria del tuo prodotto per ottenere il modello giusto
+- Scarica il file flat della categoria e trasferisci i tuoi dati al suo interno
+
+Categorie comuni con un modello proprio: abbigliamento, scarpe, gioielli, elettronica, libri, musica, video, sport e tempo libero.
+
+---
+
+## Leggere il report di elaborazione
+
+Dopo il caricamento, scarica il report di elaborazione da Seller Central (Inventario → Aggiungi prodotti tramite caricamento → Monitora lo stato del caricamento → Visualizza il report di elaborazione).
+
+Il report ha tre schede:
+- **Summary**: totale delle righe, riuscite e non riuscite
+- **Results**: una riga per ogni record del file, con stato e messaggio di errore
+- **Original**: i dati che hai caricato
+
+Per trovare le righe non riuscite, filtra la scheda Results in base alla colonna `status`. Le righe `FAILURE` contengono un `error-code` e un `error-message` che spiegano esattamente cosa è andato storto.
+
+---
+
+## Correggi automaticamente con StriveFormats
+
+Carica il tuo file flat Amazon su StriveFormats. Il validatore controlla SKU, codici di condizione, prezzi, valori del canale di evasione e campi obbligatori, e segnala le righe e le celle esatte con problemi.
+
+[Apri il correttore CSV per Amazon](/app?preset=amazon_inventory_loader) | [Vedi il modello Amazon](/presets/amazon_inventory_loader)
