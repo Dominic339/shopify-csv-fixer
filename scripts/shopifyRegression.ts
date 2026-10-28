@@ -4,7 +4,7 @@ import path from "node:path";
 import { parseCsv, toCsv } from "../src/lib/csv";
 import { validateAndFixShopifyBasic } from "../src/lib/shopifyBasic";
 import { validateShopifyStrict } from "../src/lib/shopifyStrictValidate";
-import { SHOPIFY_CANONICAL_HEADERS } from "../src/lib/shopifySchema";
+import { SHOPIFY_CANONICAL_HEADERS, SHOPIFY_HEADER_ALIASES } from "../src/lib/shopifySchema";
 
 type CaseResult = {
   name: string;
@@ -29,14 +29,19 @@ function runOne(name: string, csvText: string): CaseResult {
   const basic = validateAndFixShopifyBasic(parsed.headers, parsed.rows);
   const strictIssues = validateShopifyStrict(basic.fixedHeaders, basic.fixedRows);
 
-  // 1) Canonical headers must be present at the start, in-order
+  // 1) Shopify columns that are present come first, in official order. Columns the input
+  //    did not have are not added (blank cells would erase data on overwrite imports).
   const fixedHeaders = basic.fixedHeaders;
-  for (let i = 0; i < SHOPIFY_CANONICAL_HEADERS.length; i++) {
-    assert(
-      fixedHeaders[i] === SHOPIFY_CANONICAL_HEADERS[i],
-      `Header mismatch at index ${i}: expected "${SHOPIFY_CANONICAL_HEADERS[i]}", got "${fixedHeaders[i]}"`,
-      details
-    );
+  const canonicalPresent = fixedHeaders.filter((h) => SHOPIFY_CANONICAL_HEADERS.includes(h));
+  const expectedOrder = SHOPIFY_CANONICAL_HEADERS.filter((h) => canonicalPresent.includes(h));
+  assert(
+    JSON.stringify(canonicalPresent) === JSON.stringify(expectedOrder) &&
+      JSON.stringify(fixedHeaders.slice(0, canonicalPresent.length)) === JSON.stringify(canonicalPresent),
+    `Shopify columns out of order: ${canonicalPresent.join(", ")}`,
+    details
+  );
+  for (const required of ["Title", "URL handle"]) {
+    assert(fixedHeaders.includes(required), `Missing required column "${required}"`, details);
   }
 
   // 2) No header is dropped: output must include every parsed header (possibly canonicalized)
@@ -45,8 +50,10 @@ function runOne(name: string, csvText: string): CaseResult {
   const outputHeaderSet = new Set(fixedHeaders.map((h) => String(h).trim()));
 
   // unknown headers are those that are not part of canonical list.
-  const canonicalSet = new Set(SHOPIFY_CANONICAL_HEADERS);
-  const inputUnknown = [...inputHeaderSet].filter((h) => !canonicalSet.has(h));
+  const known = new Set(
+    SHOPIFY_CANONICAL_HEADERS.flatMap((h) => [h, ...(SHOPIFY_HEADER_ALIASES[h] ?? [])]).map((h) => h.toLowerCase())
+  );
+  const inputUnknown = [...inputHeaderSet].filter((h) => !known.has(h.toLowerCase()));
 
   for (const uh of inputUnknown) {
     assert(outputHeaderSet.has(uh), `Unknown header was dropped: "${uh}"`, details);

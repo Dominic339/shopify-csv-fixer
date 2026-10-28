@@ -1,6 +1,6 @@
 // src/lib/validation/fixAllShopify.ts
 import type { CsvIssue, CsvRow } from "@/lib/formats/types";
-import { normalizeShopifyInventoryPolicy } from "@/lib/shopifySchema";
+import { formatShopifyMoney, normalizeShopifyInventoryPolicy, parseLocaleNumber } from "@/lib/shopifySchema";
 
 type FixAllResult = {
   fixedHeaders: string[];
@@ -53,18 +53,13 @@ function normalizeBoolStrict(v: string): string | null {
 }
 
 function normalizeMoneyStrict(v: string): string | null {
-  const s = (v ?? "").toString().trim();
-  if (!s) return null;
-  const cleaned = s.replace(/[$,\s]/g, "");
-  if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return null;
-  return cleaned;
+  const n = parseLocaleNumber(v);
+  return n == null ? null : formatShopifyMoney(n);
 }
 
 function normalizeIntegerStrict(v: string): string | null {
-  const s = (v ?? "").toString().trim();
-  if (!s) return null;
-  if (!/^-?\d+$/.test(s)) return null;
-  return s;
+  const n = parseLocaleNumber(v);
+  return n != null && Number.isInteger(n) ? String(n) : null;
 }
 
 /**

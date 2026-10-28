@@ -69,12 +69,29 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
   };
 
 
-  // 1) Status: if the column exists, it must have a value (Shopify rule)
+  // Rows are grouped by URL handle; the first row of a handle is the product row and the
+  // rest may leave product-level fields (Status, option names) blank.
+  const firstRowOfHandle = new Map<string, number>();
+  const optionNameOfHandle = new Map<string, string>();
+  fixedRows.forEach((r, i) => {
+    const h = get(r, COL.handle).trim().toLowerCase();
+    if (!h) return;
+    if (!firstRowOfHandle.has(h)) firstRowOfHandle.set(h, i);
+    const n1 = get(r, COL.opt1Name).trim();
+    if (n1 && !optionNameOfHandle.has(h)) optionNameOfHandle.set(h, n1);
+  });
+  const isProductRow = (i: number) => {
+    const h = get(fixedRows[i], COL.handle).trim().toLowerCase();
+    return !h || firstRowOfHandle.get(h) === i;
+  };
+
+  // 1) Status: if the column exists, the product row must have a value (Shopify rule)
   if (has(COL.status)) {
     for (let i = 0; i < fixedRows.length; i++) {
       const row = i + 1;
       const r = fixedRows[i];
       const raw = get(r, COL.status).trim();
+      if (!raw && !isProductRow(i)) continue;
       if (!raw) {
         issues.push({
           severity: "error",
@@ -282,7 +299,7 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
       const rowHasVariantData = variantDataCols.some((c) => get(r, c).trim());
       if (!rowHasVariantData) continue;
 
-      const o1n = get(r, COL.opt1Name).trim();
+      const o1n = get(r, COL.opt1Name).trim() || optionNameOfHandle.get(handle.toLowerCase()) || "";
       const o1v = get(r, COL.opt1Val).trim();
       if (!o1n || !o1v) {
         issues.push({
@@ -409,12 +426,12 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
         const price = get(r, COL.price).trim();
         if (!price) {
           issues.push({
-            severity: "error",
+            severity: "warning",
             code: "shopify/blank_price",
             row,
             column: COL.price,
-            message: `Row ${row}: Price can't be blank for a variant row.`,
-            suggestion: "Fill Price with a number like 19.99.",
+            message: `Row ${row}: Price is blank, so Shopify will import this variant at 0.00.`,
+            suggestion: "Fill Price with a number like 19.99, unless this variant really is free.",
           });
         }
       }
