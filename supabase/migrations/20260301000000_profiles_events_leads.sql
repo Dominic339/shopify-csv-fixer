@@ -65,17 +65,15 @@ create index if not exists tool_events_created_at_idx on public.tool_events(crea
 -- Allow the service role (used by API routes) to insert
 alter table public.tool_events enable row level security;
 
+drop policy if exists "service role full access" on public.tool_events;
 create policy "service role full access" on public.tool_events
   as permissive for all
   to service_role
   using (true)
   with check (true);
 
--- Allow anon/authenticated to insert (we validate on the API side)
-create policy "insert for all" on public.tool_events
-  as permissive for insert
-  to anon, authenticated
-  with check (true);
+-- No anon/authenticated policies: events are written by /api/events/track with the
+-- service role (rate limited). A direct-insert policy was removed in 20261028000000.
 
 -- ── 5. Create lead_emails table for quota wall email capture ──
 create table if not exists public.lead_emails (
@@ -89,6 +87,7 @@ create index if not exists lead_emails_email_idx on public.lead_emails(email);
 
 alter table public.lead_emails enable row level security;
 
+drop policy if exists "service role full access" on public.lead_emails;
 create policy "service role full access" on public.lead_emails
   as permissive for all
   to service_role

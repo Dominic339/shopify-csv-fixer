@@ -55,3 +55,8 @@ create table if not exists public.stripe_events (
 
 alter table public.stripe_events enable row level security;
 -- No policies: only the service role (which bypasses RLS) touches this table.
+
+-- ── 3. tool_events: no direct inserts with the public anon key ──
+-- The app writes events through /api/events/track (service role, rate limited).
+-- This policy let anyone with the public key insert rows directly.
+drop policy if exists "insert for all" on public.tool_events;

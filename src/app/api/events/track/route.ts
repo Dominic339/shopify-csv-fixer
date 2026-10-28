@@ -12,7 +12,9 @@ export async function POST(req: Request) {
       metadata?: Record<string, unknown>;
     };
 
-    if (!event_name || typeof event_name !== "string") {
+    // Keep rows small: this endpoint is public, and the table lives on a free-tier database.
+    const metadataJson = JSON.stringify(metadata ?? {});
+    if (!event_name || typeof event_name !== "string" || event_name.length > 64 || metadataJson.length > 2000) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
 
@@ -30,9 +32,9 @@ export async function POST(req: Request) {
     await admin.from("tool_events").insert({
       event_name,
       user_id: userId,
-      session_key: session_key ?? null,
-      plan: plan ?? "free",
-      metadata: metadata ?? {},
+      session_key: typeof session_key === "string" ? session_key.slice(0, 64) : null,
+      plan: plan === "basic" || plan === "advanced" ? plan : "free",
+      metadata: JSON.parse(metadataJson),
     });
 
     return NextResponse.json({ ok: true });
