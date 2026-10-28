@@ -8,15 +8,18 @@ import { DEFAULT_LOCALE, LOCALES, localeHref, type Locale } from "@/lib/i18n/loc
 export const SITE_URL = "https://striveformats.com";
 
 /**
- * @param translated  true when the page's main content is translated. Pages whose body is
- *   English everywhere (guides, preset write-ups) point localized copies at the English page
- *   as canonical and do not claim other-language versions.
+ * @param translated  true when the page's main content is translated (in every language, or
+ *   in the listed ones). A localized copy whose body is still English points its canonical at
+ *   the English page and claims no other-language versions; hreflang lists only languages
+ *   that have the content.
  */
-export function pageAlternates(locale: Locale, path: string, translated = true): Metadata["alternates"] {
-  if (!translated) return { canonical: localeHref(DEFAULT_LOCALE, path) };
+export function pageAlternates(locale: Locale, path: string, translated: boolean | readonly Locale[] = true): Metadata["alternates"] {
+  const available = translated === true ? LOCALES : translated === false ? [DEFAULT_LOCALE] : [DEFAULT_LOCALE, ...translated];
+  if (!available.includes(locale)) return { canonical: localeHref(DEFAULT_LOCALE, path) };
+  if (available.length === 1) return { canonical: localeHref(locale, path) };
 
   const languages: Record<string, string> = {};
-  for (const l of LOCALES) languages[l] = `${SITE_URL}${localeHref(l, path)}`;
+  for (const l of LOCALES) if (available.includes(l)) languages[l] = `${SITE_URL}${localeHref(l, path)}`;
   languages["x-default"] = `${SITE_URL}${localeHref(DEFAULT_LOCALE, path)}`;
   return { canonical: localeHref(locale, path), languages };
 }

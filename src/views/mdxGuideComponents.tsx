@@ -4,6 +4,8 @@
 
 import type { ReactNode } from "react";
 import { slugifyHeading } from "@/lib/guides/slug";
+import { localeHref, type Locale } from "@/lib/i18n/locales";
+import { isLocalisedPath } from "@/lib/i18n/paths";
 
 type C = { children?: ReactNode };
 
@@ -56,3 +58,17 @@ export const mdxGuideComponents = {
     <blockquote className="border-l-4 border-[var(--border)] pl-4 italic text-[color:rgba(var(--muted-rgb),0.8)]">{children}</blockquote>
   ),
 };
+
+/** The same components, with site links ("/app?preset=...") pointing at `locale`'s pages. */
+export function mdxGuideComponentsFor(locale: Locale) {
+  if (locale === "en") return mdxGuideComponents;
+  const localize = (href?: string) => {
+    if (!href?.startsWith("/") || href.startsWith("//")) return href;
+    const path = href.split(/[?#]/)[0];
+    return isLocalisedPath(path) ? localeHref(locale, path) + href.slice(path.length) : href;
+  };
+  return {
+    ...mdxGuideComponents,
+    a: ({ children, href }: C & { href?: string }) => mdxGuideComponents.a({ children, href: localize(href) }),
+  };
+}

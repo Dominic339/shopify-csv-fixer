@@ -29,9 +29,9 @@ import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpand
 import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
 import { rehypeWrapSections } from "@/lib/guides/rehypeWrapSections";
 import { fmt, getTranslations, platformLabel, type Translations } from "@/lib/i18n/getTranslations";
-import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
-import { mdxGuideComponents } from "@/views/mdxGuideComponents";
+import { mdxGuideComponentsFor } from "@/views/mdxGuideComponents";
 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
 const card = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
@@ -290,11 +290,12 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
 // /guides/<platform>/<slug>
 // ---------------------------------------------------------------------------
 
-/** Whether a guide's body exists in this language (otherwise the page shows English). */
-async function guideBodyTranslated(locale: Locale, g: Guide): Promise<boolean> {
-  if (locale === DEFAULT_LOCALE) return true;
-  if (g.kind === "curated") return readCuratedGuide(g.platform, g.slug, locale)?.translated ?? false;
-  return (await guideTextTranslator(locale)).translated;
+/** The languages other than English that have this guide's body (others show English). */
+async function guideBodyLocales(g: Guide): Promise<Locale[]> {
+  const others = LOCALES.filter((l) => l !== DEFAULT_LOCALE);
+  if (g.kind === "curated") return others.filter((l) => readCuratedGuide(g.platform, g.slug, l)?.translated);
+  const has = await Promise.all(others.map(async (l) => (await guideTextTranslator(l)).translated));
+  return others.filter((_, i) => has[i]);
 }
 
 export async function guideMetadata(locale: Locale, platform: string, slug: string): Promise<Metadata> {
@@ -307,7 +308,8 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
   const title = fmt(t.guide.metaTitle, { title: guide.title, platform: label });
   const description =
     guide.kind === "issue" ? fmt(t.guide.metaIssueDescription, { description: guide.description, platform: label }) : guide.description;
-  const translated = await guideBodyTranslated(locale, english);
+  const bodyLocales = await guideBodyLocales(english);
+  const translated = locale === DEFAULT_LOCALE || bodyLocales.includes(locale);
   const path = `/guides/${platform}/${slug}`;
   const url = `${SITE_URL}${localeHref(translated ? locale : DEFAULT_LOCALE, path)}`;
   return {
@@ -315,7 +317,7 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
     description,
     keywords: [guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
     // Until a language has the article body, its copy points its canonical at the English page.
-    alternates: pageAlternates(locale, path, translated),
+    alternates: pageAlternates(locale, path, bodyLocales),
     openGraph: { title, description, url },
     twitter: { card: "summary", title, description },
   };
@@ -513,7 +515,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                   // rehype plugin typing differs between unified versions
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   options={{ mdxOptions: { rehypePlugins: [rehypeWrapSections as any] } }}
-                  components={mdxGuideComponents}
+                  components={mdxGuideComponentsFor(locale)}
                 />
               </div>
               {toc.length > 0 && (

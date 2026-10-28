@@ -7,10 +7,16 @@
  * Identical input always produces identical output across all consumers.
  */
 export function slugifyHeading(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  return (
+    text
+      .toLowerCase()
+      // Accents are dropped (é -> e) so ASCII ids stay as they were; other scripts
+      // (Cyrillic, Japanese, Korean, Chinese...) keep their letters.
+      .normalize("NFKD")
+      .replace(/\p{M}/gu, "")
+      .replace(/[^\p{L}\p{N}]+/gu, "-")
+      .replace(/^-|-$/g, "")
+  );
 }
 
 /**

@@ -1,0 +1,151 @@
+---
+title: "Shopify CSV 가져오기 오류: 흔한 원인과 해결 방법"
+description: "Shopify CSV에서 가장 흔한 가져오기 오류에 대한 완전한 가이드입니다. 빠진 열, 잘못된 참/거짓 값, 변형 구조 문제, 가격 오류, handle 충돌을 다룹니다."
+keywords: ["shopify csv 가져오기 오류", "shopify 제품 csv 가져오기 실패", "shopify csv 오류", "shopify 제품 가져오기 오류", "shopify csv 수정", "shopify csv 검사", "shopify csv 업로드 오류"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "가장 흔한 Shopify CSV 가져오기 오류와 각각의 원인"
+  - "Shopify가 제품, 변형, handle, 필수 필드를 검증하는 방식"
+  - "빠진 열, 잘못된 참/거짓 값, 가격 오류를 고치는 방법"
+  - "제품이 나뉘거나 사라지게 만드는 변형 구조 문제를 진단하는 방법"
+  - "공식 Shopify 템플릿으로 가져오기 실패를 막는 방법"
+bestFor: "제품 CSV 가져오기가 실패했거나 일부만 들어간 원인을 찾는 Shopify 판매자와 개발자"
+timeToComplete: "12분"
+---
+
+## Shopify가 CSV 가져오기를 검증하는 방식
+
+제품 CSV를 가져오면 Shopify는 모든 행을 여러 단계의 검증에 통과시킵니다.
+
+1. **머리글 확인**: 필수 열이 있는지 확인
+2. **handle로 묶기**: Handle이 같은 행을 하나의 제품으로 묶음
+3. **필드 검증**: 데이터 형식, 필수 값, 허용 값을 확인
+4. **충돌 감지**: 기존 제품과 handle·SKU가 충돌하는지 확인
+
+어느 단계에서든 오류가 나면 해당 행은 실패합니다. Shopify는 유효한 행만 가져오고 실패한 행은 건너뛰는 경우가 많아서, 오류를 먼저 모두 고치지 않으면 일부만 가져와질 수 있습니다.
+
+---
+
+## 오류: 필수 열 없음
+
+**메시지:** "Your CSV file is missing the following columns: Handle, Title..."
+
+**원인:** 머리글 행에 필수 열이 하나 이상 없거나, 철자가 틀렸거나, 대소문자가 다릅니다.
+
+**Shopify 필수 열:**
+
+| 열 | 참고 |
+|---|---|
+| `Handle` | URL에 쓸 수 있는 짧은 이름, 변형을 묶음 |
+| `Title` | 제품 이름 |
+| `Variant Price` | 모든 변형 행의 가격 |
+
+**해결 방법:**
+- 머리글 행을 [공식 Shopify 제품 CSV 템플릿](https://help.shopify.com/ko/manual/products/import-export/using-csv)과 비교하세요
+- 대소문자를 확인하세요: `handle`이 아니라 `Handle`, `Variant price`가 아니라 `Variant Price`
+- 열 이름 앞뒤에 공백이 없는지 확인하세요(Excel이 아니라 텍스트 편집기에서 열어 보세요)
+- 첫 번째 열이 `﻿Handle`(앞에 BOM이 붙음)로 보이면 BOM 없는 UTF-8로 다시 저장하세요
+
+---
+
+## 오류: 잘못된 참/거짓 값
+
+**메시지:** 행은 가져와지지만 Published, Gift Card, Requires Shipping 값이 잘못 표시됨
+
+**원인:** Shopify의 참/거짓 열은 `TRUE` 또는 `FALSE`(대문자)를 기대합니다. `Yes`, `yes`, `1`, `true`, `True` 같은 값은 모든 필드에서 허용되지는 않습니다.
+
+**해당 열:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**해결 방법:** 찾기 및 바꾸기로 모든 표기를 바꾸세요.
+
+| 바꿀 값 | 바뀔 값 |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+Excel에서는 `Ctrl+H`(찾기 및 바꾸기)를 누르고, 긴 값 안의 글자까지 바뀌지 않도록 "전체 셀 내용 일치"에 체크하세요.
+
+---
+
+## 오류: 변형 가격이 비어 있거나 잘못됨
+
+**메시지:** "Variant Price can't be blank" 또는 가격이 0.00으로 가져와짐
+
+**원인:** `Variant Price`가 비어 있거나, 통화 기호가 있거나(`$19.99`), 소수점으로 쉼표를 썼거나(`19,99`), 텍스트입니다.
+
+**해결 방법:**
+- 모든 행(상위 행과 변형 행 모두)에 `Variant Price`를 입력하세요
+- 통화 기호를 없애세요: 찾기 및 바꾸기로 `$`를 지우세요
+- 소수점 쉼표를 마침표로 바꾸세요: `19,99` → `19.99`
+- 저장하기 전에 Excel에서 열 서식을 숫자로 지정하세요(기호가 다시 붙지 않도록)
+
+---
+
+## 오류: 변형 구조 / 옵션 열 없음
+
+**메시지:** 제품이 변형 없이 가져와지거나 변형이 별도 제품으로 표시됨
+
+**원인:** Handle은 제대로 쓰였지만(한 제품의 모든 행에 같은 값) 옵션 열이 잘못되었습니다.
+
+- 일부 행에 `Option1 Name`이나 `Option1 Value`가 없거나 비어 있음
+- 같은 그룹의 행끼리 옵션 열 이름이 일치하지 않음
+- 같은 제품이어야 할 행의 handle이 다름
+
+**변형 행 규칙:**
+- 같은 제품의 모든 행은 정확히 같은 `Handle`을 써야 합니다
+- 모든 행에 `Option1 Name`과 `Option1 Value`가 있어야 합니다
+- 옵션이 3개라면 모든 행에 `Option1`, `Option2`, `Option3` 열이 있어야 합니다
+- `Option1 Name`(예: `Size`)은 그룹의 모든 행에서 같아야 하고, 바뀌는 것은 `Option1 Value`뿐입니다
+
+**올바른 변형 구조 예시:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## 오류: handle 중복
+
+**메시지:** 제품끼리 서로 덮어쓰거나 변형 묶음이 깨짐
+
+**원인:** 서로 관계없는 두 제품이 같은 Handle을 씁니다. Shopify는 Handle이 같은 행을 모두 하나의 제품으로 묶기 때문에, Handle이 중복되면 서로 다른 제품이 합쳐집니다.
+
+**해결 방법:** 제품마다 고유한 Handle을 쓰세요. Handle은 URL에 쓸 수 있어야 하므로 영문 소문자, 숫자, 하이픈만 사용하고 공백이나 특수 문자는 쓰지 마세요.
+
+기존 제품을 업데이트하는 중이고 그 Handle이 이미 Shopify에 있다면 의도된 동작이며, 가져오기로 그 제품이 업데이트됩니다. 하지만 새 제품이 실수로 기존 제품과 같은 Handle을 쓰면 기존 제품의 데이터가 덮어써집니다.
+
+---
+
+## 오류: SKU 충돌
+
+**메시지:** 제품은 가져와지지만 재고가 맞지 않거나 SKU가 중복으로 보고됨
+
+**원인:** 같은 SKU가 서로 다른 두 행(또는 서로 다른 두 제품)에 있습니다. Shopify는 재고 관리에 SKU를 사용하므로, SKU가 중복되면 재고가 잘못 합쳐집니다.
+
+**해결 방법:** 모든 변형 행이 고유한 SKU를 갖도록 하세요. SKU 기반 재고 관리를 쓰지 않는다면 SKU를 비워 둬도 되지만, 행끼리 중복되면 안 됩니다.
+
+---
+
+## 오류: 이미지가 가져와지지 않음
+
+**메시지:** 제품은 가져와지지만 이미지가 없음
+
+**원인:**
+- `Image Src` URL이 공개된 HTTPS URL이 아님
+- URL에 인코딩이 필요한 공백이나 특수 문자가 있음
+- 지원하지 않는 이미지 형식임(Shopify는 JPG, JPEG, PNG, GIF, WEBP 지원)
+
+**해결 방법:** 각 이미지 URL을 브라우저에서 열어 이미지가 바로 표시되는지 확인하세요. Google 드라이브, Dropbox, localhost에 있는 이미지는 가져오기 전에 공개 호스팅 주소로 옮겨야 합니다.
+
+---
+
+## StriveFormats로 자동 수정
+
+Shopify CSV를 StriveFormats에 업로드하세요. 검사기가 모든 필수 열, 참/거짓 형식, 변형 구조, 가격 필드, handle 고유성을 확인하고, 안전한 문제는 클릭 한 번으로 자동 수정합니다.
+
+[Shopify CSV 수정기 열기](/app?preset=shopify_products) | [Shopify 템플릿 보기](/presets/shopify_products)
