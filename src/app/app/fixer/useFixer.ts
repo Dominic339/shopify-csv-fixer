@@ -8,6 +8,8 @@ import { isValidLocale, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 import { toCsv } from "@/lib/csv";
 import { processCsv } from "@/lib/processCsvClient";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
+import { exportCountsTowardLimit } from "@/lib/plans";
+import { clearPendingFile, loginHrefForHere, stashPendingFile, startPassCheckout, takePendingFile } from "@/lib/passCheckout";
 import { createClient } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
 
@@ -1007,6 +1009,22 @@ useEffect(() => {
     }
   }
 
+  // Pick up a file stashed before sign-in / pass checkout.
+  const restoredPendingRef = useRef(false);
+  useEffect(() => {
+    if (restoredPendingRef.current || !allFormats.length) return;
+    restoredPendingRef.current = true;
+    const pending = takePendingFile("fixer");
+    if (!pending) return;
+    const format = allFormats.find((f) => f.id === pending.formatId) ?? activeFormat;
+    if (!format) return;
+    setFormatId(format.id);
+    setLastUploadedText(pending.text);
+    setFileName(pending.name);
+    void runFormatOnText(format, pending.text, pending.name).then(() => setInfoBanner(t.fileRestored));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFormats]);
+
   // Re-run when format changes
   useEffect(() => {
     setIssues([]);
@@ -1048,7 +1066,7 @@ useEffect(() => {
     setErrorBanner(null);
     trackToolEvent("export_attempted", { format: activeFormat?.id ?? null }, subStatus?.plan);
     try {
-      await consumeExport();
+      await consumeExport(rows.length);
 
       const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
       const csv = toCsv(cols, rows);
@@ -1102,6 +1120,32 @@ useEffect(() => {
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
   const quotaExceeded = !isUnlimited && left !== null && left <= 0;
+  // Small files never count, so only a large file is stopped by the limit.
+  const exportNeedsQuota = exportCountsTowardLimit(rows.length);
+  const passExpiresAt: string | null = (quota as { passExpiresAt?: string | null } | null)?.passExpiresAt ?? null;
+
+  const [passBusy, setPassBusy] = useState(false);
+
+  /** Keep the current (edited) file, then go to sign-in or Stripe for the pass. */
+  async function buyPass() {
+    if (activeFormat && rows.length) {
+      const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
+      stashPendingFile({ tool: "fixer", formatId: activeFormat.id, name: fileName ?? "file.csv", text: toCsv(cols, rows) });
+    }
+    setPassBusy(true);
+    setErrorBanner(null);
+    trackToolEvent("pass_checkout_started", { format: activeFormat?.id ?? null, rows: rows.length }, subStatus?.plan);
+    const r = await startPassCheckout();
+    if (r === "signin") {
+      window.location.href = loginHrefForHere();
+      return;
+    }
+    if (r !== "redirected") {
+      clearPendingFile();
+      setPassBusy(false);
+      setErrorBanner(t.passError);
+    }
+  }
 
 
   const fixLogBase = safeBaseName(exportBaseName ?? fileName ?? "csv");
@@ -1157,6 +1201,10 @@ useEffect(() => {
     fixLogBase,
     // export
     exportFixedCsv,
+    exportNeedsQuota,
+    passExpiresAt,
+    buyPass,
+    passBusy,
     lastExportStats,
     upsellDismissed,
     setUpsellDismissed,

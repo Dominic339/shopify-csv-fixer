@@ -564,7 +564,15 @@
     "logActions": "Azioni",
     "logSummary": "Riepilogo per tipo",
     "logFullList": "Elenco completo delle azioni",
-    "logUnknown": "sconosciuto"
+    "logUnknown": "sconosciuto",
+    "passCta": "Esportazioni illimitate per 24 ore: {price}",
+    "passSignIn": "Accedi per acquistare un pass di 24 ore ({price})",
+    "passStarting": "Apertura del pagamento…",
+    "passActive": "Esportazioni illimitate fino alle {time}.",
+    "passError": "Impossibile aprire il pagamento. Riprova.",
+    "smallFilesFree": "I file fino a {rows} righe si scaricano sempre gratis.",
+    "upsellPass": "Oppure esporta senza limiti per 24 ore con un pass una tantum da {price}.",
+    "fileRestored": "Il tuo file è stato ricaricato: ora puoi scaricarlo."
   },
   "profile": {
     "verifySubscription": "Verifica il tuo abbonamento e gestisci la fatturazione.",
@@ -689,7 +697,16 @@
     "close": "Chiudi",
     "syncingBilling": "Sincronizzazione delle informazioni di fatturazione…",
     "billingError": "Impossibile raggiungere la fatturazione in questo momento. Riprova tra un minuto.",
-    "allPlansFormats": "Tutti i piani includono tutti i formati integrati: Shopify, WooCommerce, Etsy, eBay e Amazon."
+    "allPlansFormats": "Tutti i piani includono tutti i formati integrati: Shopify, WooCommerce, Etsy, eBay e Amazon.",
+    "pass": "Pass 24 ore",
+    "oneTime": "una tantum",
+    "passBullet1": "Esportazioni illimitate per 24 ore",
+    "passBullet2": "Nessun abbonamento, niente da disdire",
+    "passBullet3": "Ideale per una migrazione di negozio o un grande catalogo",
+    "buyPass": "Acquista il pass",
+    "signInToBuy": "Accedi per acquistare",
+    "passActiveUntil": "Attivo fino alle {time}",
+    "freeBulletSmall": "File fino a 100 righe sempre gratis"
   },
   "auth": {
     "loginTitle": "Accedi",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "Il pagamento è stato annullato. Non ti è stato addebitato nulla.",
     "checkoutPreparing": "Preparazione del pagamento…",
     "planName": "Piano: {plan}",
-    "viewProfile": "Vedi profilo"
+    "viewProfile": "Vedi profilo",
+    "checkoutPassActivated": "Il tuo pass di 24 ore è attivo. Torno al correttore…",
+    "checkoutPassSyncing": "Conferma del pagamento in corso. Tra un attimo tornerai indietro.",
+    "backToFixer": "Torna al correttore"
   },
   "formats": {
     "title": "Formati personalizzati",

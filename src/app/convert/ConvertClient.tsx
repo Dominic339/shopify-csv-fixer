@@ -38,6 +38,7 @@ export default function ConvertClient({ t }: Props) {
   const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [plan, setPlan] = useState<Plan>("free");
+  const [hasPass, setHasPass] = useState(false);
   const [sourceFormatId, setSourceFormatId] = useState("shopify_products");
   const [targetFormatId, setTargetFormatId] = useState("woocommerce_products");
   const [fileName, setFileName] = useState<string | null>(null);
@@ -71,7 +72,15 @@ export default function ConvertClient({ t }: Props) {
     return () => { alive = false; };
   }, []);
 
-  const rowLimit = getConvertRowLimit(plan);
+  // A running 24-hour pass lifts the row limit too.
+  useEffect(() => {
+    fetch("/api/quota/status", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => setHasPass(Boolean(j?.passExpiresAt)))
+      .catch(() => {});
+  }, []);
+
+  const rowLimit = hasPass ? null : getConvertRowLimit(plan);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

@@ -54,6 +54,7 @@ CI (`.github/workflows/ci.yml`) runs all four on every push.
 | `STRIPE_WEBHOOK_SECRET` | Billing | Signing secret of the webhook endpoint below. |
 | `STRIPE_PRICE_BASIC` | Billing | Price ID (`price_...`) of the Basic plan. Also used to tell plans apart in webhooks. |
 | `STRIPE_PRICE_ADVANCED` | Billing | Price ID of the Advanced plan. |
+| `STRIPE_PRICE_PASS` | Billing | Price ID of the one-time 24-hour pass. Until it is set, buying the pass shows a billing error. |
 | `UPSTASH_REDIS_REST_URL` | Rate limiting | Optional. `/api/*` is rate limited when set (fails open when not). |
 | `UPSTASH_REDIS_REST_TOKEN` | Rate limiting | Optional. |
 | `NEXT_PUBLIC_GA_ID` | Analytics | Optional Google Analytics ID. |
@@ -66,11 +67,14 @@ Run the files in `supabase/migrations/` in order, in the Supabase SQL Editor. Ea
 2. `20260301000000_profiles_events_leads.sql`: profile trigger, `tool_events`, `lead_emails`.
 3. `20261028000000_atomic_quota_and_stripe_events.sql`: `consume_exports()` (atomic quota), `stripe_events` (webhook de-duplication), and removal of a direct-insert policy on `tool_events`.
 
-The code falls back to slower, non-atomic behaviour if migration 3 hasn't been run yet.
+4. `20261029000000_export_passes.sql`: `export_passes` (24-hour passes bought with a one-time payment).
+
+The code falls back to slower, non-atomic behaviour if migration 3 hasn't been run yet, and treats everyone as having no pass until migration 4 has been run.
 
 ## Stripe
 
 1. Create two recurring prices (Basic and Advanced) and put their IDs in `STRIPE_PRICE_BASIC` / `STRIPE_PRICE_ADVANCED`.
+   Create one **one-time** price for the 24-hour pass ($2.99) and put its ID in `STRIPE_PRICE_PASS`.
 2. Add a webhook endpoint at `https://<your-site>/api/stripe/webhook` with these events:
    - `checkout.session.completed`
    - `checkout.session.async_payment_succeeded`
@@ -82,7 +86,8 @@ The code falls back to slower, non-atomic behaviour if migration 3 hasn't been r
 
 Defined in `src/lib/plans.ts`. Checking and fixing are always free; only exports count.
 
-- **Free:** 3 exports a month, counted per device in `localStorage` (no account needed) or per account when signed in.
+- **Free:** 3 exports a month, counted per device in `localStorage` (no account needed) or per account when signed in. Files of up to 100 rows never count.
+- **24-hour pass:** a one-time payment for unlimited exports (and unlimited converter rows) for 24 hours. A second pass bought while one is running adds another 24 hours. Recorded by the webhook in `export_passes`.
 - **Basic:** 100 exports a month.
 - **Advanced:** unlimited, plus Custom Formats.
 

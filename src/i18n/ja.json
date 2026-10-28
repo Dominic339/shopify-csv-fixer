@@ -564,7 +564,15 @@
     "logActions": "操作",
     "logSummary": "種類別の概要",
     "logFullList": "すべての操作",
-    "logUnknown": "不明"
+    "logUnknown": "不明",
+    "passCta": "24時間エクスポート無制限：{price}",
+    "passSignIn": "ログインして24時間パスを購入（{price}）",
+    "passStarting": "決済画面を開いています…",
+    "passActive": "{time}までエクスポート無制限です。",
+    "passError": "決済画面を開けませんでした。もう一度お試しください。",
+    "smallFilesFree": "{rows}行までのファイルはいつでも無料でダウンロードできます。",
+    "upsellPass": "または、1回限りの{price}のパスで24時間エクスポート無制限にできます。",
+    "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。"
   },
   "profile": {
     "verifySubscription": "サブスクリプションを確認し、請求を管理します。",
@@ -689,7 +697,16 @@
     "close": "閉じる",
     "syncingBilling": "請求情報を同期中…",
     "billingError": "現在、請求サービスに接続できません。1分ほどしてからもう一度お試しください。",
-    "allPlansFormats": "すべてのプランで、Shopify、WooCommerce、Etsy、eBay、Amazonの組み込み形式をすべて使えます。"
+    "allPlansFormats": "すべてのプランで、Shopify、WooCommerce、Etsy、eBay、Amazonの組み込み形式をすべて使えます。",
+    "pass": "24時間パス",
+    "oneTime": "1回のみ",
+    "passBullet1": "24時間エクスポート無制限",
+    "passBullet2": "サブスクなし、解約手続きも不要",
+    "passBullet3": "ストアの移行や大きなカタログ1つに最適",
+    "buyPass": "パスを購入",
+    "signInToBuy": "ログインして購入",
+    "passActiveUntil": "{time}まで有効",
+    "freeBulletSmall": "100行までのファイルはいつでも無料"
   },
   "auth": {
     "loginTitle": "ログイン",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "お支払いはキャンセルされました。料金は発生していません。",
     "checkoutPreparing": "お支払いの準備中…",
     "planName": "プラン:{plan}",
-    "viewProfile": "プロフィールを見る"
+    "viewProfile": "プロフィールを見る",
+    "checkoutPassActivated": "24時間パスが有効になりました。修正ツールに戻ります…",
+    "checkoutPassSyncing": "お支払いを確認しています。まもなく戻ります。",
+    "backToFixer": "修正ツールに戻る"
   },
   "formats": {
     "title": "独自形式",

@@ -7,7 +7,8 @@
 
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Plan } from "@/lib/plans";
+import { PASS_HOURS, type Plan } from "@/lib/plans";
+import { grantPass } from "@/lib/quotaServer";
 
 type PaidPlan = Exclude<Plan, "free">;
 
@@ -106,6 +107,15 @@ export async function handleStripeEvent(event: Stripe.Event, { stripe, admin }: 
     case "checkout.session.completed":
     case "checkout.session.async_payment_succeeded": {
       const session = event.data.object;
+
+      if (session.mode === "payment" && session.metadata?.plan === "pass") {
+        // Delayed payment methods complete later via async_payment_succeeded.
+        if (session.payment_status !== "paid") return "skipped";
+        const userId = session.metadata?.user_id ?? session.client_reference_id;
+        if (!userId) return "no_user";
+        return grantPass(admin, { userId, sessionId: session.id, hours: PASS_HOURS });
+      }
+
       const subscriptionId = idOf(session.subscription);
       if (session.mode !== "subscription" || !subscriptionId) return "skipped";
 

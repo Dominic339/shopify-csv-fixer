@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { localeHref } from "@/lib/i18n/locales";
 import { fmt, plural } from "@/lib/i18n/fmt";
+import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
 import { FIX_TYPE_LABELS, groupFixesByType, generateFixesLogText, type FixLogText, type FixTypeId } from "@/lib/validation/fixesLog";
 import type { ScoreNote } from "@/lib/validation/scoreNotes";
 import { downloadText, type AppStrings, type Fixer } from "./useFixer";
@@ -18,6 +19,24 @@ function Stat({ label, value, tone }: { label: string; value: string | number; t
       <div className={`text-2xl font-bold ${color}`}>{value}</div>
       <div className={`text-xs ${muted}`}>{label}</div>
     </div>
+  );
+}
+
+/** "Tue 3:42 PM" in the reader's language. */
+export function formatPassTime(iso: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, { weekday: "short", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+}
+
+/** One-time pass button; signed-out users are sent to sign in first. */
+function PassButton({ f, t }: { f: Fixer; t: AppStrings }) {
+  return (
+    <button type="button" className="rg-btn mt-3 justify-center" onClick={() => void f.buyPass()} disabled={f.passBusy}>
+      {f.passBusy
+        ? t.passStarting
+        : f.subStatus?.signedIn
+          ? fmt(t.passCta, { price: PASS_PRICE_LABEL })
+          : fmt(t.passSignIn, { price: PASS_PRICE_LABEL })}
+    </button>
   );
 }
 
@@ -58,7 +77,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
   };
 
   function onExport() {
-    if (f.quotaExceeded && !f.subStatus?.signedIn) {
+    if (f.quotaExceeded && f.exportNeedsQuota && !f.subStatus?.signedIn) {
       f.setShowQuotaModal(true);
       return;
     }
@@ -123,7 +142,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
           type="button"
           className="rg-btn justify-center"
           onClick={onExport}
-          disabled={f.busy || f.rows.length === 0 || (f.quotaExceeded && f.subStatus?.signedIn)}
+          disabled={f.busy || f.rows.length === 0 || (f.quotaExceeded && f.exportNeedsQuota && f.subStatus?.signedIn)}
         >
           {f.busy ? t.working : blocked ? t.exportAnyway : t.exportFixed}
         </button>
@@ -162,23 +181,42 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
       </div>
 
       {/* Quota */}
-      {f.quotaExceeded && (
+      {f.passExpiresAt && (
+        <p className="mt-4 text-sm text-green-700 dark:text-green-400">
+          {fmt(t.passActive, { time: formatPassTime(f.passExpiresAt, f.currentLocale) })}
+        </p>
+      )}
+
+      {f.quotaExceeded && f.exportNeedsQuota && (
         <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
           {f.subStatus?.signedIn ? fmt(t.limitReachedAccount, { limit: f.limit ?? 0 }) : fmt(t.limitReachedDevice, { limit: f.limit ?? 0 })}{" "}
-          <Link href={`${href("/")}#pricing`} className="font-semibold underline">
-            {t.viewPlans}
-          </Link>
+          {fmt(t.smallFilesFree, { rows: FREE_ROWS_PER_EXPORT })}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <PassButton f={f} t={t} />
+            <Link href={`${href("/")}#pricing`} className="mt-1 font-semibold underline sm:mt-3">
+              {t.viewPlans}
+            </Link>
+          </div>
         </div>
       )}
 
-      {f.lastExportStats && !f.upsellDismissed && !f.isUnlimited && f.subStatus?.plan === "free" && (
+      {!f.isUnlimited && !f.exportNeedsQuota && f.rows.length > 0 && (
+        <p className={`mt-3 text-xs ${muted}`}>{fmt(t.smallFilesFree, { rows: FREE_ROWS_PER_EXPORT })}</p>
+      )}
+
+      {f.lastExportStats && !f.upsellDismissed && !f.isUnlimited && f.subStatus?.plan === "free" && !f.quotaExceeded && (
         <div className="mt-4 flex items-start justify-between gap-3 rounded-xl border border-[color:rgba(var(--accent-rgb),0.3)] bg-[color:rgba(var(--accent-rgb),0.06)] px-4 py-3 text-sm">
           <div>
             <p className="font-semibold text-[var(--text)]">{fmt(t.upsellTitle, { limit: f.limit ?? 3 })}</p>
-            <p className={`mt-0.5 ${muted}`}>{t.upsellBody}</p>
-            <Link href={`${href("/")}#pricing`} className="mt-2 inline-block font-semibold text-[var(--text)] underline hover:opacity-80">
-              {t.viewPlans} →
-            </Link>
+            <p className={`mt-0.5 ${muted}`}>
+              {t.upsellBody} {fmt(t.upsellPass, { price: PASS_PRICE_LABEL })}
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <PassButton f={f} t={t} />
+              <Link href={`${href("/")}#pricing`} className="mt-1 inline-block font-semibold text-[var(--text)] underline hover:opacity-80 sm:mt-3">
+                {t.viewPlans} →
+              </Link>
+            </div>
           </div>
           <button type="button" className={`shrink-0 text-lg leading-none ${muted}`} onClick={() => f.setUpsellDismissed(true)} aria-label={t.dismiss}>
             ×

@@ -81,3 +81,65 @@ export async function consumeExports(
 
   return { ok: true, used: nextUsed };
 }
+
+// ── 24-hour passes ────────────────────────────────────────────────────────
+
+// PostgREST reports a missing table as PGRST205 (or 42P01 from Postgres).
+function isMissingTable(err: { code?: string } | null) {
+  return err?.code === "PGRST205" || err?.code === "42P01";
+}
+
+/** End of the user's latest pass if it is still running, else null. */
+export async function loadActivePassExpiry(
+  admin: SupabaseClient,
+  userId: string,
+  now = new Date()
+): Promise<string | null> {
+  const { data, error } = await admin
+    .from("export_passes")
+    .select("expires_at")
+    .eq("user_id", userId)
+    .gt("expires_at", now.toISOString())
+    .order("expires_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    if (isMissingTable(error)) return null;
+    throw new Error(error.message || "Failed to load pass.");
+  }
+  return (data?.expires_at as string | undefined) ?? null;
+}
+
+/**
+ * Record a paid pass. Idempotent per Checkout Session: a replayed webhook
+ * leaves the existing row alone. A pass bought while another is running
+ * starts when that one ends.
+ */
+export async function grantPass(
+  admin: SupabaseClient,
+  args: { userId: string; sessionId: string; hours: number },
+  now = new Date()
+): Promise<"granted" | "duplicate"> {
+  const { data: existing, error: findErr } = await admin
+    .from("export_passes")
+    .select("id")
+    .eq("stripe_session_id", args.sessionId)
+    .maybeSingle();
+  if (findErr) throw new Error(`Supabase lookup failed: ${findErr.message}`);
+  if (existing) return "duplicate";
+
+  const running = await loadActivePassExpiry(admin, args.userId, now);
+  const start = running && new Date(running) > now ? new Date(running) : now;
+  const end = new Date(start.getTime() + args.hours * 3600_000);
+
+  const { error } = await admin.from("export_passes").insert({
+    user_id: args.userId,
+    stripe_session_id: args.sessionId,
+    starts_at: start.toISOString(),
+    expires_at: end.toISOString(),
+  });
+  if (error?.code === "23505") return "duplicate";
+  if (error) throw new Error(`Supabase insert failed: ${error.message}`);
+  return "granted";
+}

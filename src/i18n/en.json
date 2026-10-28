@@ -567,7 +567,15 @@
     "logUnknown": "unknown",
     "plan_free": "Free",
     "plan_basic": "Basic",
-    "plan_advanced": "Advanced"
+    "plan_advanced": "Advanced",
+    "passCta": "Unlimited exports for 24 hours: {price}",
+    "passSignIn": "Sign in to buy a 24-hour pass ({price})",
+    "passStarting": "Opening checkout…",
+    "passActive": "Unlimited exports until {time}.",
+    "passError": "Couldn't open checkout. Please try again.",
+    "smallFilesFree": "Files with up to {rows} rows are always free to download.",
+    "upsellPass": "Or get unlimited exports for 24 hours with a one-time {price} pass.",
+    "fileRestored": "Your file is loaded again, so you can download it now."
   },
   "profile": {
     "verifySubscription": "Verify your subscription and manage billing.",
@@ -638,7 +646,16 @@
     "close": "Close",
     "syncingBilling": "Syncing billing info…",
     "billingError": "Couldn't reach billing right now. Please try again in a minute.",
-    "allPlansFormats": "All plans include every built-in format: Shopify, WooCommerce, Etsy, eBay and Amazon."
+    "allPlansFormats": "All plans include every built-in format: Shopify, WooCommerce, Etsy, eBay and Amazon.",
+    "pass": "24-hour pass",
+    "oneTime": "one-time",
+    "passBullet1": "Unlimited exports for 24 hours",
+    "passBullet2": "No subscription, nothing to cancel",
+    "passBullet3": "Made for a store migration or one big catalogue",
+    "buyPass": "Buy pass",
+    "signInToBuy": "Sign in to buy",
+    "passActiveUntil": "Active until {time}",
+    "freeBulletSmall": "Files up to 100 rows are always free"
   },
   "inspector": {
     "title": "CSV Inspector",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "Checkout was cancelled. You have not been charged.",
     "checkoutPreparing": "Preparing your checkout…",
     "planName": "Plan: {plan}",
-    "viewProfile": "View profile"
+    "viewProfile": "View profile",
+    "checkoutPassActivated": "Your 24-hour pass is active. Taking you back to the fixer…",
+    "checkoutPassSyncing": "Confirming your payment. You'll be taken back in a moment.",
+    "backToFixer": "Back to the fixer"
   },
   "formats": {
     "title": "Custom Formats",

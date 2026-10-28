@@ -564,7 +564,15 @@
     "logActions": "İşlemler",
     "logSummary": "Türe göre özet",
     "logFullList": "Tüm işlemlerin listesi",
-    "logUnknown": "bilinmiyor"
+    "logUnknown": "bilinmiyor",
+    "passCta": "24 saat sınırsız dışa aktarma: {price}",
+    "passSignIn": "24 saatlik geçiş satın almak için giriş yapın ({price})",
+    "passStarting": "Ödeme sayfası açılıyor…",
+    "passActive": "{time} saatine kadar sınırsız dışa aktarma.",
+    "passError": "Ödeme sayfası açılamadı. Lütfen tekrar deneyin.",
+    "smallFilesFree": "En fazla {rows} satırlık dosyalar her zaman ücretsiz indirilir.",
+    "upsellPass": "Ya da tek seferlik {price} geçişle 24 saat sınırsız dışa aktarın.",
+    "fileRestored": "Dosyanız yeniden yüklendi; şimdi indirebilirsiniz."
   },
   "profile": {
     "verifySubscription": "Aboneliğinizi doğrulayın ve faturalandırmayı yönetin.",
@@ -689,7 +697,16 @@
     "close": "Kapat",
     "syncingBilling": "Fatura bilgileri senkronize ediliyor…",
     "billingError": "Faturalandırmaya şu anda ulaşılamıyor. Lütfen bir dakika sonra tekrar deneyin.",
-    "allPlansFormats": "Tüm planlar her yerleşik biçimi içerir: Shopify, WooCommerce, Etsy, eBay ve Amazon."
+    "allPlansFormats": "Tüm planlar her yerleşik biçimi içerir: Shopify, WooCommerce, Etsy, eBay ve Amazon.",
+    "pass": "24 saatlik geçiş",
+    "oneTime": "tek seferlik",
+    "passBullet1": "24 saat sınırsız dışa aktarma",
+    "passBullet2": "Abonelik yok, iptal edilecek bir şey yok",
+    "passBullet3": "Mağaza taşıma veya tek büyük katalog için ideal",
+    "buyPass": "Geçiş satın al",
+    "signInToBuy": "Satın almak için giriş yapın",
+    "passActiveUntil": "{time} saatine kadar etkin",
+    "freeBulletSmall": "100 satıra kadar dosyalar her zaman ücretsiz"
   },
   "auth": {
     "loginTitle": "Giriş yap",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "Ödeme iptal edildi. Sizden ücret alınmadı.",
     "checkoutPreparing": "Ödeme hazırlanıyor…",
     "planName": "Plan: {plan}",
-    "viewProfile": "Profili görüntüle"
+    "viewProfile": "Profili görüntüle",
+    "checkoutPassActivated": "24 saatlik geçişiniz etkin. Düzelticiye dönülüyor…",
+    "checkoutPassSyncing": "Ödemeniz onaylanıyor. Birazdan geri döneceksiniz.",
+    "backToFixer": "Düzelticiye dön"
   },
   "formats": {
     "title": "Özel biçimler",

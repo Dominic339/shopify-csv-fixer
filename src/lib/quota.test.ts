@@ -1,7 +1,7 @@
 // Unit tests for the client export-quota fallback rules.
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { consumeExport } from "@/lib/quota";
-import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
+import { FREE_EXPORTS_PER_MONTH, FREE_ROWS_PER_EXPORT } from "@/lib/plans";
 
 function makeStorage() {
   const m = new Map<string, string>();
@@ -72,5 +72,26 @@ describe("consumeExport", () => {
 
     await consumeExport();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("never counts exports of small files", async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes("status") ? json(200, { signedIn: false }) : json(401, { ok: false })
+    );
+
+    for (let i = 0; i < FREE_EXPORTS_PER_MONTH + 2; i++) await expect(consumeExport(FREE_ROWS_PER_EXPORT)).resolves.toBeUndefined();
+    expect(fetchMock).not.toHaveBeenCalled();
+    // The full device allowance is still there for a large file.
+    await expect(consumeExport(FREE_ROWS_PER_EXPORT + 1)).resolves.toBeUndefined();
+  });
+
+  it("does not count exports while a pass is running", async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes("status")
+        ? json(200, { ...signedInFree, unlimited: true, passExpiresAt: "2099-01-01T00:00:00Z" })
+        : json(403, { ok: false, message: "Monthly export limit reached." })
+    );
+
+    await expect(consumeExport(5000)).resolves.toBeUndefined();
   });
 });

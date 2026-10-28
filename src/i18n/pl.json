@@ -564,7 +564,15 @@
     "logActions": "Działania",
     "logSummary": "Podsumowanie według typu",
     "logFullList": "Pełna lista działań",
-    "logUnknown": "nieznany"
+    "logUnknown": "nieznany",
+    "passCta": "Nielimitowany eksport przez 24 godziny: {price}",
+    "passSignIn": "Zaloguj się, aby kupić karnet 24-godzinny ({price})",
+    "passStarting": "Otwieranie płatności…",
+    "passActive": "Nielimitowany eksport do {time}.",
+    "passError": "Nie udało się otworzyć płatności. Spróbuj ponownie.",
+    "smallFilesFree": "Pliki do {rows} wierszy zawsze pobierzesz za darmo.",
+    "upsellPass": "Albo eksportuj bez limitu przez 24 godziny z jednorazowym karnetem za {price}.",
+    "fileRestored": "Twój plik został ponownie wczytany, możesz go teraz pobrać."
   },
   "profile": {
     "verifySubscription": "Sprawdź swoją subskrypcję i zarządzaj rozliczeniami.",
@@ -689,7 +697,16 @@
     "close": "Zamknij",
     "syncingBilling": "Synchronizowanie informacji rozliczeniowych…",
     "billingError": "Nie można teraz połączyć się z rozliczeniami. Spróbuj ponownie za minutę.",
-    "allPlansFormats": "Wszystkie plany obejmują każdy wbudowany format: Shopify, WooCommerce, Etsy, eBay i Amazon."
+    "allPlansFormats": "Wszystkie plany obejmują każdy wbudowany format: Shopify, WooCommerce, Etsy, eBay i Amazon.",
+    "pass": "Karnet 24-godzinny",
+    "oneTime": "jednorazowo",
+    "passBullet1": "Nielimitowany eksport przez 24 godziny",
+    "passBullet2": "Bez subskrypcji, nie trzeba niczego anulować",
+    "passBullet3": "Idealny przy przenosinach sklepu lub jednym dużym katalogu",
+    "buyPass": "Kup karnet",
+    "signInToBuy": "Zaloguj się, aby kupić",
+    "passActiveUntil": "Aktywny do {time}",
+    "freeBulletSmall": "Pliki do 100 wierszy zawsze za darmo"
   },
   "auth": {
     "loginTitle": "Zaloguj się",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "Płatność została anulowana. Nic nie zostało pobrane.",
     "checkoutPreparing": "Przygotowywanie płatności…",
     "planName": "Plan: {plan}",
-    "viewProfile": "Zobacz profil"
+    "viewProfile": "Zobacz profil",
+    "checkoutPassActivated": "Twój karnet 24-godzinny jest aktywny. Wracamy do narzędzia…",
+    "checkoutPassSyncing": "Potwierdzamy płatność. Za chwilę wrócisz.",
+    "backToFixer": "Wróć do narzędzia"
   },
   "formats": {
     "title": "Własne formaty",

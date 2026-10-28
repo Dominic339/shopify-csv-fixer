@@ -14,22 +14,39 @@ type Row = Record<string, unknown>;
 
 /** Just enough of the supabase-js query builder for webhookSync. */
 function fakeSupabase() {
-  const tables: Record<string, Row[]> = { user_subscriptions: [], stripe_events: [] };
-  const keys: Record<string, string> = { user_subscriptions: "user_id", stripe_events: "id" };
+  const tables: Record<string, Row[]> = { user_subscriptions: [], stripe_events: [], export_passes: [] };
+  const keys: Record<string, string> = { user_subscriptions: "user_id", stripe_events: "id", export_passes: "stripe_session_id" };
 
   function from(name: string) {
     const rows = tables[name];
     const key = keys[name];
-    const filters: [string, unknown][] = [];
-    const match = (r: Row) => filters.every(([c, v]) => r[c] === v);
+    const filters: ((r: Row) => boolean)[] = [];
+    const match = (r: Row) => filters.every((f) => f(r));
+    let orderBy: { c: string; asc: boolean } | null = null;
 
     const builder = {
       select: () => builder,
       eq: (c: string, v: unknown) => {
-        filters.push([c, v]);
+        filters.push((r) => r[c] === v);
         return builder;
       },
-      maybeSingle: async () => ({ data: rows.find(match) ?? null, error: null }),
+      gt: (c: string, v: string) => {
+        filters.push((r) => String(r[c]) > v);
+        return builder;
+      },
+      order: (c: string, o: { ascending: boolean }) => {
+        orderBy = { c, asc: o.ascending };
+        return builder;
+      },
+      limit: () => builder,
+      maybeSingle: async () => {
+        const found = rows.filter(match);
+        if (orderBy) {
+          const { c, asc } = orderBy;
+          found.sort((a, b) => (String(a[c]) < String(b[c]) ? -1 : 1) * (asc ? 1 : -1));
+        }
+        return { data: found[0] ?? null, error: null };
+      },
       insert: async (row: Row) => {
         if (rows.some((r) => r[key] === row[key])) return { error: { code: "23505", message: "dup" } };
         rows.push({ ...row });
@@ -180,5 +197,55 @@ describe("webhookSync", () => {
     expect(await claimEvent(admin, e)).toBe("duplicate");
     await releaseEvent(admin, e.id);
     expect(await claimEvent(admin, e)).toBe("claimed");
+  });
+
+  it("a paid pass checkout grants 24 hours, once per session", async () => {
+    const { admin, tables } = fakeSupabase();
+    const stripe = fakeStripe({});
+    const session = {
+      id: "cs_1",
+      mode: "payment",
+      payment_status: "paid",
+      metadata: { user_id: "user_1", plan: "pass" },
+    };
+
+    const before = Date.now();
+    await handleStripeEvent(event("checkout.session.completed", session), { stripe, admin });
+    await handleStripeEvent(event("checkout.session.completed", session, "evt_2"), { stripe, admin });
+
+    expect(tables.export_passes).toHaveLength(1);
+    const pass = tables.export_passes[0];
+    expect(pass.user_id).toBe("user_1");
+    const hours = (Date.parse(String(pass.expires_at)) - before) / 3600_000;
+    expect(hours).toBeGreaterThan(23.9);
+    expect(hours).toBeLessThan(24.1);
+    expect(tables.user_subscriptions).toHaveLength(0);
+  });
+
+  it("an unpaid pass session waits for async_payment_succeeded", async () => {
+    const { admin, tables } = fakeSupabase();
+    const stripe = fakeStripe({});
+    const session = { id: "cs_1", mode: "payment", payment_status: "unpaid", metadata: { user_id: "user_1", plan: "pass" } };
+
+    await handleStripeEvent(event("checkout.session.completed", session), { stripe, admin });
+    expect(tables.export_passes).toHaveLength(0);
+
+    await handleStripeEvent(
+      event("checkout.session.async_payment_succeeded", { ...session, payment_status: "paid" }, "evt_2"),
+      { stripe, admin }
+    );
+    expect(tables.export_passes).toHaveLength(1);
+  });
+
+  it("a second pass bought while one is running starts when the first ends", async () => {
+    const { admin, tables } = fakeSupabase();
+    const stripe = fakeStripe({});
+    const paid = (id: string) => ({ id, mode: "payment", payment_status: "paid", metadata: { user_id: "user_1", plan: "pass" } });
+
+    await handleStripeEvent(event("checkout.session.completed", paid("cs_1")), { stripe, admin });
+    await handleStripeEvent(event("checkout.session.completed", paid("cs_2"), "evt_2"), { stripe, admin });
+
+    const [first, second] = tables.export_passes;
+    expect(second.starts_at).toBe(first.expires_at);
   });
 });

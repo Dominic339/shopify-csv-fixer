@@ -1,5 +1,5 @@
 import { getMonthKey } from "@/lib/month";
-import { FREE_EXPORTS_PER_MONTH, getPlanLimit, type Plan } from "@/lib/plans";
+import { FREE_EXPORTS_PER_MONTH, exportCountsTowardLimit, getPlanLimit, type Plan } from "@/lib/plans";
 
 const KEY = "striveformats_free_quota_v1";
 
@@ -49,6 +49,7 @@ function getLocalQuota(limitPerMonth = FREE_EXPORTS_PER_MONTH) {
     limit: limitPerMonth,
     remaining,
     unlimited: false as const,
+    passExpiresAt: null as string | null,
   };
 }
 
@@ -77,6 +78,7 @@ export async function getQuota() {
         plan: "free" as Plan,
         monthKey: getMonthKey(),
         unlimited: false,
+        passExpiresAt: null as string | null,
       };
     }
     const j = await r.json();
@@ -88,6 +90,7 @@ export async function getQuota() {
       limit: Number(j?.limit ?? FREE_EXPORTS_PER_MONTH),
       remaining: Number(j?.remaining ?? FREE_EXPORTS_PER_MONTH),
       unlimited: Boolean(j?.unlimited ?? false),
+      passExpiresAt: (j?.passExpiresAt ?? null) as string | null,
     };
   }
 
@@ -108,17 +111,21 @@ export async function getQuota() {
       limit: Number(j?.limit ?? getPlanLimits(j?.plan ?? "free").exportsPerMonth),
       remaining: Number(j?.remaining ?? 0),
       unlimited: Boolean(j?.unlimited ?? false),
+      passExpiresAt: (j?.passExpiresAt ?? null) as string | null,
     };
   } catch {
     return getLocalQuota();
   }
 }
 
-export async function consumeExport(): Promise<void> {
+/** Count one export of `rows` data rows. Small files are always free. */
+export async function consumeExport(rows = Infinity): Promise<void> {
+  if (!exportCountsTowardLimit(rows)) return;
+
   const q = await getQuota();
 
-  // signed in + advanced => unlimited
-  if (q?.signedIn && q?.plan === "advanced") return;
+  // Advanced or a running pass => unlimited
+  if (q?.signedIn && q?.unlimited) return;
 
   let r: Response;
   try {

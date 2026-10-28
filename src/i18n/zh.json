@@ -564,7 +564,15 @@
     "logActions": "操作",
     "logSummary": "按类型汇总",
     "logFullList": "完整操作列表",
-    "logUnknown": "未知"
+    "logUnknown": "未知",
+    "passCta": "24 小时无限导出：{price}",
+    "passSignIn": "登录以购买 24 小时通行证（{price}）",
+    "passStarting": "正在打开付款页面…",
+    "passActive": "在 {time} 之前可无限导出。",
+    "passError": "无法打开付款页面，请重试。",
+    "smallFilesFree": "不超过 {rows} 行的文件始终可以免费下载。",
+    "upsellPass": "或者购买一次性 {price} 通行证，24 小时内无限导出。",
+    "fileRestored": "文件已重新载入，现在可以下载了。"
   },
   "profile": {
     "verifySubscription": "验证您的订阅并管理账单。",
@@ -689,7 +697,16 @@
     "close": "关闭",
     "syncingBilling": "正在同步结算信息…",
     "billingError": "暂时无法连接计费服务,请一分钟后重试。",
-    "allPlansFormats": "所有套餐都包含全部内置格式:Shopify、WooCommerce、Etsy、eBay 和 Amazon。"
+    "allPlansFormats": "所有套餐都包含全部内置格式:Shopify、WooCommerce、Etsy、eBay 和 Amazon。",
+    "pass": "24 小时通行证",
+    "oneTime": "一次性",
+    "passBullet1": "24 小时无限导出",
+    "passBullet2": "无需订阅，无需取消",
+    "passBullet3": "适合店铺迁移或一份大型商品目录",
+    "buyPass": "购买通行证",
+    "signInToBuy": "登录后购买",
+    "passActiveUntil": "有效期至 {time}",
+    "freeBulletSmall": "不超过 100 行的文件始终免费"
   },
   "auth": {
     "loginTitle": "登录",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "结账已取消,未产生任何费用。",
     "checkoutPreparing": "正在准备结账…",
     "planName": "套餐:{plan}",
-    "viewProfile": "查看个人资料"
+    "viewProfile": "查看个人资料",
+    "checkoutPassActivated": "24 小时通行证已生效，正在返回修复工具…",
+    "checkoutPassSyncing": "正在确认付款，稍后将返回。",
+    "backToFixer": "返回修复工具"
   },
   "formats": {
     "title": "自定义格式",

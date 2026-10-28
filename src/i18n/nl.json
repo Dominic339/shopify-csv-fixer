@@ -564,7 +564,15 @@
     "logActions": "Acties",
     "logSummary": "Samenvatting per type",
     "logFullList": "Volledige lijst van acties",
-    "logUnknown": "onbekend"
+    "logUnknown": "onbekend",
+    "passCta": "24 uur onbeperkt exporteren: {price}",
+    "passSignIn": "Log in om een pas van 24 uur te kopen ({price})",
+    "passStarting": "Betaalpagina openen…",
+    "passActive": "Onbeperkt exporteren tot {time}.",
+    "passError": "De betaalpagina kon niet worden geopend. Probeer het opnieuw.",
+    "smallFilesFree": "Bestanden met maximaal {rows} rijen download je altijd gratis.",
+    "upsellPass": "Of exporteer 24 uur lang onbeperkt met een eenmalige pas van {price}.",
+    "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden."
   },
   "profile": {
     "verifySubscription": "Controleer je abonnement en beheer de facturering.",
@@ -689,7 +697,16 @@
     "close": "Sluiten",
     "syncingBilling": "Factureringsgegevens synchroniseren…",
     "billingError": "De facturatie is nu niet bereikbaar. Probeer het over een minuut opnieuw.",
-    "allPlansFormats": "Alle abonnementen bevatten alle ingebouwde formaten: Shopify, WooCommerce, Etsy, eBay en Amazon."
+    "allPlansFormats": "Alle abonnementen bevatten alle ingebouwde formaten: Shopify, WooCommerce, Etsy, eBay en Amazon.",
+    "pass": "Pas van 24 uur",
+    "oneTime": "eenmalig",
+    "passBullet1": "24 uur onbeperkt exporteren",
+    "passBullet2": "Geen abonnement, niets op te zeggen",
+    "passBullet3": "Ideaal voor een winkelverhuizing of één grote catalogus",
+    "buyPass": "Pas kopen",
+    "signInToBuy": "Log in om te kopen",
+    "passActiveUntil": "Actief tot {time}",
+    "freeBulletSmall": "Bestanden tot 100 rijen altijd gratis"
   },
   "auth": {
     "loginTitle": "Inloggen",
@@ -735,7 +752,10 @@
     "checkoutCanceled": "Het afrekenen is geannuleerd. Er is niets in rekening gebracht.",
     "checkoutPreparing": "Afrekenen wordt voorbereid…",
     "planName": "Abonnement: {plan}",
-    "viewProfile": "Profiel bekijken"
+    "viewProfile": "Profiel bekijken",
+    "checkoutPassActivated": "Je pas van 24 uur is actief. Terug naar de fixer…",
+    "checkoutPassSyncing": "Je betaling wordt bevestigd. Je gaat zo terug.",
+    "backToFixer": "Terug naar de fixer"
   },
   "formats": {
     "title": "Eigen formaten",
