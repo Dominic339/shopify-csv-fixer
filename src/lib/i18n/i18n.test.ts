@@ -41,6 +41,19 @@ describe("translations", () => {
     for (const l of LOCALES) expect(keys(await getTranslations(l)).sort(), l).toEqual(expect.arrayContaining(expected));
   });
 
+  it("each locale file translates every English string and keeps its {placeholders}", async () => {
+    const flat = (o: object, p = ""): [string, string][] =>
+      Object.entries(o).flatMap(([k, v]) => (v && typeof v === "object" ? flat(v, `${p}${k}.`) : [[`${p}${k}`, String(v)] as [string, string]]));
+    const placeholders = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort();
+    for (const l of LOCALES) {
+      const raw = Object.fromEntries(flat((await import(`@/i18n/${l}.json`)).default));
+      for (const [key, english] of flat(en)) {
+        expect(raw[key], `${l}: ${key} is missing`).toBeDefined();
+        expect(placeholders(raw[key]), `${l}: ${key}`).toEqual(placeholders(english));
+      }
+    }
+  });
+
   it("fills placeholders", () => {
     expect(fmt("Why {platform} rejects this", { platform: "eBay" })).toBe("Why eBay rejects this");
     expect(fmt("{a} {missing}", { a: 1 })).toBe("1 {missing}");
