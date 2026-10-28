@@ -2,7 +2,7 @@
  * Tests for src/lib/csvInspector.ts
  */
 import { describe, it, expect } from "vitest";
-import { inspectCsv } from "@/lib/csvInspector";
+import { detectPlatform, inspectCsv } from "@/lib/csvInspector";
 
 // ---------------------------------------------------------------------------
 // Basic stats
@@ -179,5 +179,63 @@ describe("inspectCsv: empty or minimal input", () => {
     const result = inspectCsv("Title,Price,SKU\n");
     expect(result.rowCount).toBe(0);
     expect(result.columnCount).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Quoted cells, header problems and platform detection
+// ---------------------------------------------------------------------------
+
+describe("inspectCsv: quoted cells", () => {
+  it("keeps line breaks and delimiters inside quoted cells in one row", () => {
+    const csv = 'Handle,Title,Body (HTML)\nshirt,Shirt,"<p>Soft, warm</p>\n<p>Machine wash</p>"\ncap,Cap,"Plain"\n';
+    const result = inspectCsv(csv);
+    expect(result.rowCount).toBe(2);
+    expect(result.inconsistentColumnCounts).toHaveLength(0);
+    expect(result.unclosedQuote).toBe(false);
+  });
+
+  it("guesses the delimiter from the header, not from commas in the data", () => {
+    const csv = 'A;B\n"one, two, three";x\n"four, five";y\n';
+    expect(inspectCsv(csv).delimiterGuess).toBe(";");
+  });
+
+  it("reports an unclosed quote", () => {
+    expect(inspectCsv('A,B\n"open,1\n2,3\n').unclosedQuote).toBe(true);
+  });
+
+  it("reports total counts beyond the display caps", () => {
+    const csv = "A,B\n" + "1\n".repeat(30);
+    const result = inspectCsv(csv);
+    expect(result.inconsistentRowCount).toBe(30);
+    expect(result.inconsistentColumnCounts).toHaveLength(20);
+  });
+});
+
+describe("inspectCsv: header problems", () => {
+  it("finds empty and padded header names", () => {
+    const result = inspectCsv("Title,,Price \nA,x,1\n");
+    expect(result.emptyHeaderColumns).toEqual([2]);
+    expect(result.paddedHeaders).toEqual(["Price"]);
+  });
+
+  it("ignores the BOM when reading headers", () => {
+    const result = inspectCsv("﻿Handle,Title\nshirt,Shirt\n");
+    expect(result.paddedHeaders).toEqual([]);
+    expect(result.detectedPlatform).toBe("shopify_products");
+  });
+});
+
+describe("detectPlatform", () => {
+  it.each([
+    [["Handle", "Title", "Option1 Name", "Variant Price"], "shopify_products"],
+    [["Title", "URL handle", "Price", "SKU"], "shopify_products"],
+    [["ID", "Type", "SKU", "Name", "Published", "Regular price"], "woocommerce_products"],
+    [["TITLE", "DESCRIPTION", "PRICE", "QUANTITY", "TAGS"], "etsy_listings"],
+    [["*Action(SiteID=US|Country=US|Currency=USD|Version=1193)", "Title"], "ebay_listings"],
+    [["sku", "product-id", "product-id-type", "price"], "amazon_inventory_loader"],
+    [["email", "first_name"], null],
+  ])("%j -> %s", (headers, expected) => {
+    expect(detectPlatform(headers as string[])).toBe(expected);
   });
 });

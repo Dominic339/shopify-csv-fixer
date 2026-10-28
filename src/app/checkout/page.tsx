@@ -2,16 +2,18 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import CheckoutClient from "./CheckoutClient";
+import { sectionByLocale } from "@/lib/i18n/getTranslations";
 
 export const metadata: Metadata = {
   title: "Checkout",
   robots: { index: false, follow: false },
 };
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const authByLocale = await sectionByLocale("auth");
   return (
     <Suspense fallback={null}>
-      <CheckoutClient />
+      <CheckoutClient authByLocale={authByLocale} />
     </Suspense>
   );
 }

@@ -3,8 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/browser";
+import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
+import type { Locale } from "@/lib/i18n/locales";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
-export default function ResetPasswordClient() {
+type Props = { authByLocale: Record<Locale, Translations["auth"]> };
+
+export default function ResetPasswordClient({ authByLocale }: Props) {
+  const t = authByLocale[useCookieLocale()];
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -19,9 +25,9 @@ export default function ResetPasswordClient() {
       const redirectTo = `${window.location.origin}/auth/callback?redirect=/update-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) throw error;
-      setMsg({ text: "Check your email for a password reset link.", ok: true });
+      setMsg({ text: t.resetSent, ok: true });
     } catch (err: any) {
-      setMsg({ text: err?.message ?? "Something went wrong.", ok: false });
+      setMsg({ text: err?.message || t.somethingWrong, ok: false });
     } finally {
       setBusy(false);
     }
@@ -30,9 +36,9 @@ export default function ResetPasswordClient() {
   return (
     <main className="mx-auto max-w-lg px-6 py-16">
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <h1 className="text-2xl font-semibold">Reset password</h1>
+        <h1 className="text-2xl font-semibold">{t.resetTitle}</h1>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Enter your email address and we&apos;ll send you a link to reset your password.
+          {t.resetDesc}
         </p>
 
         {msg ? (
@@ -49,7 +55,7 @@ export default function ResetPasswordClient() {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-3">
           <div>
-            <label className="text-sm font-semibold">Email</label>
+            <label className="text-sm font-semibold">{t.email}</label>
             <input
               className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm"
               value={email}
@@ -65,16 +71,16 @@ export default function ResetPasswordClient() {
             disabled={busy || (msg?.ok ?? false)}
             className="rgb-btn w-full bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {busy ? "Sending…" : "Send Reset Link"}
+            {busy ? t.sending : t.sendResetLink}
           </button>
         </form>
 
         <div className="mt-4 flex items-center justify-between text-sm">
           <Link href="/login" className="text-[var(--muted)] hover:underline">
-            Back to log in
+            {t.backToLogin}
           </Link>
           <Link href="/" className="text-[var(--muted)] hover:underline">
-            Back home
+            {t.backHome}
           </Link>
         </div>
       </div>

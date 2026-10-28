@@ -23,7 +23,7 @@ function downloadCsv(filename: string, content: string) {
 }
 
 type Props = {
-  t?: Translations["convert"];
+  t: Translations["convert"];
 };
 
 export default function ConvertClient({ t }: Props) {
@@ -81,11 +81,11 @@ export default function ConvertClient({ t }: Props) {
 
   function handleConvert() {
     if (!csvText) {
-      setError("Please upload a CSV file first.");
+      setError(t.errNoFile);
       return;
     }
     if (sourceFormatId === safeTargetFormatId) {
-      setError("Source and target formats must be different.");
+      setError(t.errSameFormat);
       return;
     }
     setBusy(true);
@@ -95,7 +95,8 @@ export default function ConvertClient({ t }: Props) {
       const out = convertCsv(headers, rows, sourceFormatId, safeTargetFormatId, plan);
       setResult(out);
     } catch (e: any) {
-      setError(e?.message ?? "Conversion failed.");
+      console.error(e);
+      setError(t.errFailed);
     } finally {
       setBusy(false);
     }
@@ -118,24 +119,24 @@ export default function ConvertClient({ t }: Props) {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="flex items-center gap-3 text-2xl font-semibold">
-        {t?.title ?? "CSV Format Converter"}
+        {t.title}
         <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
       </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        {t?.description ?? "Convert between Shopify, WooCommerce, Etsy, eBay, and Amazon CSV formats. Fields that cannot map perfectly are flagged as warnings."}
+        {t.description}
       </p>
 
       <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
-        {t?.yourPlan ?? "Your plan"}: <span className="font-semibold capitalize">{plan}</span>
+        {t.yourPlan}: <span className="font-semibold capitalize">{plan}</span>
         {rowLimit !== null ? (
-          <> — {t?.upTo ?? "up to"}{" "}
-          <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t?.rowsPerConversion ?? "rows per conversion"}</>
+          <> — {t.upTo}{" "}
+          <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t.rowsPerConversion}</>
         ) : (
-          <> — <span className="font-semibold">{t?.planUnlimited ?? "Unlimited"}</span></>
+          <> — <span className="font-semibold">{t.planUnlimited}</span></>
         )}
         {plan === "free" && (
           <>{" "}<a href="/profile?upgrade=basic" className="underline hover:no-underline">
-            {t?.upgradeForLarger ?? "Upgrade for larger files."}
+            {t.upgradeForLarger}
           </a></>
         )}
       </div>
@@ -144,17 +145,17 @@ export default function ConvertClient({ t }: Props) {
         {/* Upload */}
         <FileDropZone onFile={(f) => void loadFile(f)}>
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-sm font-semibold">1. {t?.uploadStep ?? "Upload CSV"}</h2>
-          <p className="mt-1 text-xs text-[var(--muted)]">{t?.uploadDesc ?? "Upload the file you want to convert."}</p>
+          <h2 className="text-sm font-semibold">1. {t.uploadStep}</h2>
+          <p className="mt-1 text-xs text-[var(--muted)]">{t.uploadDesc}</p>
           <div className="mt-3 flex items-center gap-3">
             <button
               type="button"
               className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
               onClick={() => fileInputRef.current?.click()}
             >
-              {t?.chooseFile ?? "Choose file"}
+              {t.chooseFile}
             </button>
-            <span className="text-sm text-[var(--muted)]">{fileName ?? (t?.noFileChosen ?? "No file chosen")}</span>
+            <span className="text-sm text-[var(--muted)]">{fileName ?? t.noFileChosen}</span>
           </div>
           <input
             ref={fileInputRef}
@@ -168,11 +169,11 @@ export default function ConvertClient({ t }: Props) {
 
         {/* Format selection */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-sm font-semibold">2. {t?.selectFormats ?? "Select formats"}</h2>
+          <h2 className="text-sm font-semibold">2. {t.selectFormats}</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-[var(--muted)] mb-1">
-                {t?.sourceFormat ?? "Source format"}
+                {t.sourceFormat}
               </label>
               <select
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -198,7 +199,7 @@ export default function ConvertClient({ t }: Props) {
             </div>
             <div>
               <label className="block text-xs font-medium text-[var(--muted)] mb-1">
-                {t?.targetFormat ?? "Target format"}
+                {t.targetFormat}
               </label>
               <select
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -232,30 +233,30 @@ export default function ConvertClient({ t }: Props) {
             onClick={handleConvert}
             disabled={busy || !csvText}
           >
-            {busy ? (t?.converting ?? "Converting…") : (t?.convert ?? "Convert")}
+            {busy ? t.converting : t.convert}
           </button>
         </div>
 
         {/* Result */}
         {result && (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-            <h2 className="text-sm font-semibold">{t?.conversionSummary ?? "Conversion summary"}</h2>
+            <h2 className="text-sm font-semibold">{t.conversionSummary}</h2>
 
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.rowsProcessed ?? "Rows processed"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.rowsProcessed}</div>
                 <div className="font-semibold">{result.rowsProcessed.toLocaleString()}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.totalRows ?? "Total rows"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.totalRows}</div>
                 <div className="font-semibold">{result.rowsTotal.toLocaleString()}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.outputColumns ?? "Output columns"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.outputColumns}</div>
                 <div className="font-semibold">{result.headers.length}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.warnings ?? "Warnings"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.warnings}</div>
                 <div className={`font-semibold ${result.warnings.length > 0 ? "text-amber-600 dark:text-amber-400" : ""}`}>
                   {result.warnings.length}
                 </div>
@@ -265,11 +266,11 @@ export default function ConvertClient({ t }: Props) {
             {/* Conversion quality indicator */}
             {result.warnings.length === 0 && result.unmappedSourceFields.length === 0 ? (
               <div className="mt-4 rounded-xl border border-green-400/40 bg-green-400/10 px-3 py-2 text-sm text-green-800 dark:text-green-300">
-                {t?.allMapped ?? "All source fields mapped successfully. Output should be import-ready."}
+                {t.allMapped}
               </div>
             ) : (
               <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300 font-medium">
-                {t?.convertedWithWarnings ?? "Converted with warnings — review dropped columns before importing."}
+                {t.convertedWithWarnings}
               </div>
             )}
 
@@ -288,7 +289,7 @@ export default function ConvertClient({ t }: Props) {
 
             {result.unmappedSourceFields.length > 0 && (
               <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--muted)]">
-                <span className="font-semibold">{t?.droppedColumns ?? "Dropped columns"}</span> (no equivalent in target format):{" "}
+                <span className="font-semibold">{t.droppedColumns}</span> (no equivalent in target format):{" "}
                 <span className="font-mono">{result.unmappedSourceFields.join(", ")}</span>
               </div>
             )}
@@ -299,7 +300,7 @@ export default function ConvertClient({ t }: Props) {
                 className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
                 onClick={handleDownload}
               >
-                {t?.downloadConverted ?? "Download converted CSV"}
+                {t.downloadConverted}
               </button>
             </div>
           </div>

@@ -6,6 +6,7 @@
 import { useRef } from "react";
 import { QuotaWallCapture } from "@/components/QuotaWallCapture";
 import { fmt } from "@/lib/i18n/fmt";
+import { localeHref } from "@/lib/i18n/locales";
 import { useFixer, type AppStrings } from "./fixer/useFixer";
 import { FormatPicker } from "./fixer/FormatPicker";
 import { UploadPanel } from "./fixer/UploadPanel";
@@ -78,7 +79,15 @@ export default function AppClient({ tApp }: { tApp: AppStrings }) {
         )}
       </div>
 
-      {f.showQuotaModal && <QuotaWallCapture onDismiss={() => f.setShowQuotaModal(false)} />}
+      {f.showQuotaModal && (
+        <QuotaWallCapture
+          t={t}
+          locale={f.currentLocale}
+          limit={f.limit ?? 3}
+          pricingHref={`${localeHref(f.currentLocale, "/")}#pricing`}
+          onDismiss={() => f.setShowQuotaModal(false)}
+        />
+      )}
     </>
   );
 }

@@ -10,8 +10,7 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import { getTranslations } from "@/lib/i18n/getTranslations";
-import { LOCALES, type Locale } from "@/lib/i18n/locales";
+import { sectionByLocale } from "@/lib/i18n/getTranslations";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://striveformats.com"),
@@ -69,9 +68,7 @@ export const metadata: Metadata = {
 // No cookies or headers here: every page stays statically renderable. The top bar and
 // footer pick their language from the URL, so they receive the strings for every locale.
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const navByLocale = Object.fromEntries(
-    await Promise.all(LOCALES.map(async (l) => [l, (await getTranslations(l)).nav] as const))
-  ) as Record<Locale, Awaited<ReturnType<typeof getTranslations>>["nav"]>;
+  const navByLocale = await sectionByLocale("nav");
 
   return (
     <html lang="en" suppressHydrationWarning>

@@ -4,7 +4,7 @@
 
 import type en from "@/i18n/en.json";
 import type { Locale } from "./locales";
-import { DEFAULT_LOCALE } from "./locales";
+import { DEFAULT_LOCALE, LOCALES } from "./locales";
 
 /** Shape of every locale file; en.json is the source of truth (other locales fall back to it). */
 export type Translations = typeof en;
@@ -48,6 +48,12 @@ export async function getTranslations(locale: Locale): Promise<Translations> {
   const t = locale === DEFAULT_LOCALE ? english : withFallback(await load(locale), english);
   cache.set(locale, t);
   return t;
+}
+
+/** One section in every language, for client components on pages that pick the language at runtime. */
+export async function sectionByLocale<K extends keyof Translations>(key: K): Promise<Record<Locale, Translations[K]>> {
+  const entries = await Promise.all(LOCALES.map(async (l) => [l, (await getTranslations(l))[key]] as const));
+  return Object.fromEntries(entries) as Record<Locale, Translations[K]>;
 }
 
 export { fmt } from "./fmt";
