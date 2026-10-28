@@ -108,6 +108,23 @@ describe("Amazon Inventory Loader", () => {
     expect(res.fixedHeaders[0]).toBe("item_sku");
   });
 
+  it("converts type and condition names to the codes Inventory Loader requires", () => {
+    const res = run("amazon_inventory_loader", "sku,product-id,product-id-type,price,item-condition,quantity,add-delete\nA,B08XYZABCD,ASIN,10,New,1,a\nB,012345678905,upc,10,Used; Like New,1,a");
+    expect(res.issues).toEqual([]);
+    expect(res.fixedRows.map((r) => [r["product-id-type"], r["item-condition"]])).toEqual([["1", "11"], ["3", "1"]]);
+  });
+
+  it("checks the price against the seller-allowed range", () => {
+    const res = run(
+      "amazon_inventory_loader",
+      "sku,product-id,product-id-type,price,minimum-seller-allowed-price,maximum-seller-allowed-price,quantity\nA,B08XYZABCD,1,12,15,10,1\nB,B08XYZABCE,1,9,10,20,1\nC,B08XYZABCF,1,15,10,20,1"
+    );
+    expect(res.issues.map((i) => [i.rowIndex, i.code])).toEqual([
+      [0, "amazon/min_above_max_price"],
+      [1, "amazon/price_outside_allowed_range"],
+    ]);
+  });
+
   it("catches barcodes damaged by spreadsheets", () => {
     const res = run("amazon_inventory_loader", "sku,product-id,product-id-type,price,quantity\nA,1.23457E+11,3,1,1\nB,01234567890,3,1,1");
     expect(codes(res)).toEqual(["amazon/product_id_scientific_notation", "amazon/invalid_product_id"]);

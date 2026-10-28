@@ -1,83 +1,124 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { PLATFORM_LANDINGS } from "@/lib/landing/platforms";
+import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "About StriveFormats",
   description:
-    "StriveFormats is an in-browser CSV fixer for ecommerce imports. Validate Shopify and other templates, apply safe auto-fixes, and export clean import-ready files.",
+    "StriveFormats checks and fixes product CSVs for Shopify, WooCommerce, Etsy, eBay and Amazon in your browser. What it does, what runs where, and how it's built.",
+  alternates: { canonical: "/about" },
 };
+
+const card = "min-w-0 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-7";
+const muted = "text-[color:rgba(var(--muted-rgb),1)]";
+
+const DATA_FLOW: { what: string; where: string }[] = [
+  { what: "Your CSV file and every edit you make", where: "Stays in your browser. It is never uploaded." },
+  { what: "Custom formats and workspaces", where: "Saved in your browser. Export a format as a file to move it." },
+  { what: "Free export count (signed out)", where: "Kept in your browser for this device." },
+  { what: "Export count and plan (signed in)", where: "Stored with your account so it works on every device." },
+  { what: "Anonymous usage events", where: "Which tools are used, never what's in your files." },
+  { what: "Payments", where: "Handled by Stripe. We never see your card details." },
+];
+
+const TOOLS: { href: string; name: string; desc: string }[] = [
+  { href: "/app", name: "CSV Fixer", desc: "Validate against a platform's rules, auto-fix what's safe, edit the rest in a table." },
+  { href: "/csv-inspector", name: "CSV Inspector", desc: "Check any CSV's structure: delimiters, quoting, encoding, empty and duplicate columns." },
+  { href: "/convert", name: "Format Converter", desc: "Move products between Shopify, WooCommerce, Etsy, eBay and Amazon layouts." },
+  { href: "/merge", name: "CSV Merger", desc: "Combine two files and remove duplicates on a shared column." },
+  { href: "/formats", name: "Custom Formats", desc: "Save the columns and rules of any file you handle regularly (Advanced plan)." },
+];
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-14">
+    <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <header>
-        <h1 className="text-3xl font-semibold text-[var(--text)]">About StriveFormats</h1>
-        <p className="mt-3 text-base text-[color:rgba(var(--muted-rgb),1)]">
-          StriveFormats helps you clean, standardize, and validate CSV files before you import them into ecommerce
-          platforms. It runs in the browser, applies format-specific checks, and exports a file you can trust.
+        <h1 className="text-3xl font-black tracking-tight text-[var(--text)] sm:text-4xl">About StriveFormats</h1>
+        <p className={`mt-4 text-base leading-7 ${muted}`}>
+          StriveFormats checks product CSV files before you import them into an online store, fixes the problems that are safe to fix,
+          and points at the exact row and column of everything else. It runs in your browser, so your catalogue never leaves your computer.
         </p>
       </header>
 
-      <section className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-        <h2 className="text-xl font-semibold text-[var(--text)]">What it does</h2>
-        <ul className="mt-4 list-disc space-y-2 pl-5 text-base text-[color:rgba(var(--muted-rgb),1)]">
-          <li>Validates your CSV against a known import template (starting with Shopify Products).</li>
-          <li>Auto-fixes safe issues (whitespace, basic normalization) and flags risky issues for review.</li>
-          <li>Exports a clean CSV using the expected headers and consistent formatting.</li>
-          <li>Provides preset templates and “View information” pages so you can see what each platform expects.</li>
-        </ul>
-      </section>
-
-      <section className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-        <h2 className="text-xl font-semibold text-[var(--text)]">How it works</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">1) Pick a format</div>
-            <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-              Use a preset (Shopify, WooCommerce, Etsy, Amazon, eBay) or create a reusable Custom Format on the
-              Advanced plan.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">2) Upload and validate</div>
-            <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-              StriveFormats reads your CSV, normalizes headers, and runs checks for missing required fields,
-              inconsistent values, and import blockers.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">3) Auto-fix safe issues</div>
-            <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-              Safe fixes can be applied automatically. Risky issues are shown as warnings or errors so you can
-              make informed changes.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-            <div className="text-sm font-semibold text-[var(--text)]">4) Export clean CSV</div>
-            <p className="mt-2 text-base text-[color:rgba(var(--muted-rgb),1)]">
-              Export a clean file with the expected headers and normalized values so imports succeed more
-              reliably.
-            </p>
-          </div>
+      <section className={`${card} mt-8`}>
+        <h2 className="text-xl font-bold text-[var(--text)]">Why it exists</h2>
+        <div className={`mt-3 space-y-3 text-sm leading-7 ${muted}`}>
+          <p>
+            Store importers are strict, and their error messages rarely say which row is wrong. A file that looks fine in a spreadsheet can fail
+            because of a price written as &ldquo;45,00&rdquo;, a variant row that lost its handle, or a blank cell that would quietly erase data
+            already in the store.
+          </p>
+          <p>
+            StriveFormats knows each platform&apos;s rules, applies the fixes that can&apos;t change what your data means, and leaves every decision
+            that could to you, with an explanation and a link to a guide.
+          </p>
         </div>
       </section>
 
-      <section className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-        <h2 className="text-xl font-semibold text-[var(--text)]">Privacy and where your data goes</h2>
-        <p className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-          StriveFormats is designed to run in-browser for fast iteration and a simple workflow. Your CSV is
-          processed on your device for validation and export. If you choose to use account features (like plan
-          status, usage limits, or Custom Formats), the app may store small settings locally and call the StriveFormats
-          API to verify your subscription.
+      <section className={`${card} mt-6`}>
+        <h2 className="text-xl font-bold text-[var(--text)]">How it&apos;s run</h2>
+        <ul className={`mt-3 space-y-2 text-sm leading-6 ${muted}`}>
+          <li>
+            <span className="font-semibold text-[var(--text)]">Try it before you sign up.</span> Every check and fix works without an account,
+            and you get {FREE_EXPORTS_PER_MONTH} free exports a month on each device.
+          </li>
+          <li>
+            <span className="font-semibold text-[var(--text)]">Nothing changes silently.</span> Every automatic change is listed in a fix log you
+            can download with the file.
+          </li>
+          <li>
+            <span className="font-semibold text-[var(--text)]">Small and independent.</span> The tool does its work in your browser, which keeps
+            it fast, private and cheap to run, and keeps the free tier free.
+          </li>
+        </ul>
+      </section>
+
+      <section className={`${card} mt-6`}>
+        <h2 className="text-xl font-bold text-[var(--text)]">What runs where</h2>
+        <dl className="mt-4 divide-y divide-[var(--border)]">
+          {DATA_FLOW.map((d) => (
+            <div key={d.what} className="grid gap-1 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] sm:gap-4">
+              <dt className="text-sm font-semibold text-[var(--text)]">{d.what}</dt>
+              <dd className={`text-sm ${muted}`}>{d.where}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className={`mt-3 text-xs ${muted}`}>
+          Details in the{" "}
+          <Link className="underline" href="/privacy">
+            privacy policy
+          </Link>
+          .
         </p>
       </section>
 
-      <section className="mt-7 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-7">
-        <h2 className="text-xl font-semibold text-[var(--text)]">Why presets and landing pages matter</h2>
-        <p className="mt-4 text-base text-[color:rgba(var(--muted-rgb),1)]">
-          Each preset format includes a landing page that documents expected columns, example rows, common fixes,
-          and how the import template works. These pages help users choose the right template quickly and also
-          improve discoverability through search.
-        </p>
+      <section className="mt-6 grid gap-6 md:grid-cols-2">
+        <div className={card}>
+          <h2 className="text-xl font-bold text-[var(--text)]">Platforms</h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {Object.values(PLATFORM_LANDINGS).map((p) => (
+              <li key={p.slug}>
+                <Link className="text-[var(--text)] hover:underline" href={p.path}>
+                  <span className={`font-semibold ${p.accent.text}`}>{p.kicker}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className={card}>
+          <h2 className="text-xl font-bold text-[var(--text)]">Tools</h2>
+          <ul className="mt-3 space-y-3 text-sm">
+            {TOOLS.map((t) => (
+              <li key={t.href}>
+                <Link className="font-semibold text-[var(--text)] hover:underline" href={t.href}>
+                  {t.name}
+                </Link>
+                <p className={`text-xs ${muted}`}>{t.desc}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </main>
   );

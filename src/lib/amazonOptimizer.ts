@@ -61,6 +61,14 @@ const VALID_CONDITION_NAMES = new Set([
   "collectiblelikenew", "collectibleverygood", "collectiblegood", "collectibleacceptable", "club",
 ]);
 
+// Inventory Loader files need the numeric codes; category templates use the names.
+const PRODUCT_ID_TYPE_CODES: Record<string, string> = { asin: "1", isbn: "2", upc: "3", ean: "4" };
+const CONDITION_CODES: Record<string, string> = {
+  usedlikenew: "1", usedverygood: "2", usedgood: "3", usedacceptable: "4",
+  collectiblelikenew: "5", collectibleverygood: "6", collectiblegood: "7", collectibleacceptable: "8",
+  club: "9", refurbished: "10", new: "11",
+};
+
 // Amazon add-delete values
 // a = add/update, d = delete the offer, x = delete the offer and product data
 const VALID_ADD_DELETE = new Set(["a", "d", "x"]);
@@ -140,6 +148,8 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
   const issues: CsvIssue[] = [];
 
   const canonHeaders = canonicalAmazonInventoryHeaders(headers);
+  // Columns only the Inventory Loader (offer file) has; category templates name them differently.
+  const isInventoryLoader = headers.some((h) => ["add-delete", "item-condition", "product-id-type"].includes(h.trim().toLowerCase()));
 
   // Required header checks
   for (const h of ["sku"]) {
@@ -269,6 +279,32 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
       }
     }
 
+    // The price has to sit inside the seller's own min/max range, or Amazon deactivates the offer.
+    {
+      const min = parseShopifyMoney(out["minimum-seller-allowed-price"] ?? "");
+      const max = parseShopifyMoney(out["maximum-seller-allowed-price"] ?? "");
+      const price = parseShopifyMoney(out["price"] ?? "");
+      if (min != null && max != null && min > max) {
+        issues.push({
+          rowIndex,
+          column: "minimum-seller-allowed-price",
+          severity: "error",
+          code: "amazon/min_above_max_price",
+          message: `minimum-seller-allowed-price (${formatShopifyMoney(min)}) is higher than maximum-seller-allowed-price (${formatShopifyMoney(max)}).`,
+          suggestion: "Swap the two values, or clear one of them.",
+        });
+      } else if (price != null && ((min != null && price < min) || (max != null && price > max))) {
+        issues.push({
+          rowIndex,
+          column: "price",
+          severity: "warning",
+          code: "amazon/price_outside_allowed_range",
+          message: `price (${formatShopifyMoney(price)}) is outside this SKU's allowed range (${min != null ? formatShopifyMoney(min) : "no minimum"} to ${max != null ? formatShopifyMoney(max) : "no maximum"}).`,
+          suggestion: "Amazon deactivates offers priced outside the seller-allowed range. Change the price or the range.",
+        });
+      }
+    }
+
     // quantity: required, non-negative integer
     const qRaw = out["quantity"] ?? "";
     const qn = isEmpty(qRaw) ? null : parseShopifyMoney(qRaw);
@@ -291,7 +327,13 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
     // product-id-type: numeric codes (Inventory Loader) or names (category templates)
     let idType = "";
     if ("product-id-type" in out) {
-      const pidType = (out["product-id-type"] ?? "").trim();
+      let pidType = (out["product-id-type"] ?? "").trim();
+      const code = PRODUCT_ID_TYPE_CODES[pidType.toLowerCase()];
+      if (isInventoryLoader && code) {
+        out["product-id-type"] = code;
+        fixesApplied.push(`Converted product-id-type '${pidType}' to Inventory Loader code ${code} on row ${rowIndex + 1}`);
+        pidType = code;
+      }
       idType = PRODUCT_ID_TYPE_NUMBERS[pidType] ?? pidType.toLowerCase();
       if (pidType && !VALID_PRODUCT_ID_TYPES.has(idType)) {
         issues.push({
@@ -347,7 +389,13 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
 
     // item-condition: Amazon numeric condition codes
     if ("item-condition" in out) {
-      const cond = (out["item-condition"] ?? "").trim();
+      let cond = (out["item-condition"] ?? "").trim();
+      const condCode = CONDITION_CODES[cond.toLowerCase().replace(/[\s_;-]/g, "")];
+      if (isInventoryLoader && condCode) {
+        out["item-condition"] = condCode;
+        fixesApplied.push(`Converted item-condition '${cond}' to code ${condCode} on row ${rowIndex + 1}`);
+        cond = condCode;
+      }
       if (cond && !VALID_ITEM_CONDITIONS.has(cond) && !VALID_CONDITION_NAMES.has(cond.toLowerCase().replace(/[\s_-]/g, ""))) {
         issues.push({
           rowIndex,

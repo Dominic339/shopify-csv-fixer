@@ -124,6 +124,28 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     howToFix: "Use a numeric Amazon condition code: 11=New, 10=Refurbished, 1=Used Like New, 2=Used Very Good, 3=Used Good, 4=Used Acceptable.",
   },
 
+  "amazon/min_above_max_price": {
+    code: "amazon/min_above_max_price",
+    title: "Minimum price is above the maximum",
+    category: "pricing",
+    blocking: true,
+    autoFixable: false,
+    explanation: "minimum-seller-allowed-price is higher than maximum-seller-allowed-price, so no price can satisfy both.",
+    whyPlatformCares: "Amazon rejects the price range, and any offer outside it is deactivated.",
+    howToFix: "Swap the two values, or clear one of them.",
+  },
+
+  "amazon/price_outside_allowed_range": {
+    code: "amazon/price_outside_allowed_range",
+    title: "Price outside the allowed range",
+    category: "pricing",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The price is below minimum-seller-allowed-price or above maximum-seller-allowed-price.",
+    whyPlatformCares: "Amazon deactivates offers whose price falls outside the range you set, so the item stops selling.",
+    howToFix: "Change the price, or widen the minimum/maximum range.",
+  },
+
   "amazon/invalid_add_delete": {
     code: "amazon/invalid_add_delete",
     title: "Invalid add-delete value",
