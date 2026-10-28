@@ -1,0 +1,201 @@
+---
+title: "O modelo CSV de produtos do Shopify explicado"
+description: "Uma explicação coluna por coluna de cada campo do modelo CSV oficial de produtos do Shopify: o que cada coluna faz, quais valores aceita e quais são obrigatórias."
+keywords: ["modelo csv produtos shopify", "colunas csv shopify explicadas", "guia do modelo csv shopify", "modelo de importação shopify", "campos csv shopify", "colunas importação de produtos shopify", "referência csv shopify"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "O que cada coluna do modelo CSV de produtos do Shopify faz"
+  - "Quais colunas são obrigatórias e quais são opcionais"
+  - "Os valores e formatos aceitos para cada tipo de campo"
+  - "Como funcionam as colunas de produto e as de variante"
+  - "Como preencher o modelo corretamente para produtos simples e com variantes"
+bestFor: "Lojistas Shopify preparando a primeira importação ou desenvolvedores montando uma exportação de CSV para o Shopify"
+timeToComplete: "15 minutos"
+---
+
+## Visão geral do modelo
+
+O modelo CSV oficial de produtos do Shopify tem dois tipos de coluna: **de produto** (preenchidas uma vez por produto, na primeira linha ou linha principal) e **de variante** (preenchidas em todas as linhas do produto). Quando um produto tem várias variantes, ele ocupa várias linhas no arquivo, todas com o mesmo Handle.
+
+Baixe o modelo atual no painel do Shopify: Produtos → Importar → Baixar CSV de exemplo.
+
+---
+
+## Colunas de identificação
+
+### Handle (obrigatória)
+
+O Handle é o identificador único do produto, próprio para URL. Ele precisa:
+- Ser único entre todos os produtos da loja
+- Usar só letras minúsculas, números e hifens
+- Não mudar depois da primeira importação (mudar o Handle cria uma nova URL de produto)
+
+**Exemplo:** `blue-leather-wallet`
+
+Todas as linhas do mesmo produto precisam ter o mesmo Handle. O Shopify usa isso para agrupar as linhas de variante.
+
+### Title (obrigatória na linha principal)
+
+O nome do produto como aparece na loja. Preencha na primeira linha do produto e deixe vazio nas linhas de variante.
+
+**Exemplo:** `Blue Leather Wallet`
+
+### Body (HTML)
+
+A descrição do produto. Pode conter HTML. Se a descrição tiver vírgulas ou sinais de menor e maior, coloque o valor inteiro entre aspas duplas. Quebras de linha dentro da descrição também precisam estar dentro de um valor entre aspas.
+
+### Vendor
+
+O nome da marca ou do fornecedor. Texto simples.
+
+### Type
+
+O seu tipo de produto personalizado (para organização). Não é a categoria de produto do Shopify: é um texto livre usado para filtrar.
+
+### Tags
+
+Uma lista de tags separadas por vírgula. Se uma tag tiver vírgula, o conteúdo inteiro da célula Tags precisa estar entre aspas.
+
+**Exemplo:** `"summer, sale, leather"`
+
+---
+
+## Colunas de publicação
+
+### Published (booleano)
+
+Se o produto fica visível para os clientes. Aceita `TRUE` ou `FALSE` (em maiúsculas).
+
+- `TRUE`: o produto está ativo e visível
+- `FALSE`: o produto é um rascunho (oculto na loja)
+
+### Published Scope
+
+Onde o produto é publicado. Valores comuns: `web` (loja virtual), `global` (todos os canais).
+
+---
+
+## Colunas de opção
+
+Estas colunas definem as dimensões das variantes (tamanho, cor, material etc.).
+
+### Option1 Name / Option1 Value
+
+`Option1 Name` é o nome da dimensão (ex.: `Size`, `Color`). `Option1 Value` é o valor de cada linha (ex.: `Small`, `Medium`, `Blue`).
+
+Regras:
+- `Option1 Name` deve ser igual em todas as linhas do mesmo produto
+- `Option1 Value` muda a cada linha de variante
+- Se você tem só uma opção, use apenas Option1: não inclua as colunas Option2 e Option3 a não ser que tenha uma segunda ou terceira opção
+
+### Option2 Name / Option2 Value (opcional)
+
+Uma segunda dimensão (ex.: cor). Só é necessária se o produto tiver duas dimensões.
+
+### Option3 Name / Option3 Value (opcional)
+
+Uma terceira dimensão. O Shopify aceita até 3 opções por produto.
+
+---
+
+## Colunas de variante
+
+Estas colunas valem para todas as linhas (principais e de variante).
+
+### Variant SKU
+
+Um identificador único desta variante. É opcional, mas, se você controla estoque, os SKUs precisam ser únicos. Deixe vazio se não controla estoque por SKU.
+
+### Variant Price (obrigatória)
+
+O preço de venda desta variante. Um número decimal simples, sem símbolo de moeda e sem separador de milhar.
+
+**Exemplo:** `19.99`
+
+### Variant Compare At Price
+
+O preço "de" mostrado riscado. Deixe vazio se não houver preço promocional.
+
+### Variant Inventory Qty
+
+A quantidade em estoque. Número inteiro. Use `0` se estiver sem estoque. Deixe vazio se o controle de estoque estiver desativado para esta variante.
+
+### Variant Inventory Policy
+
+O que acontece quando o estoque chega a zero. Valores aceitos: `deny` (impedir a compra) ou `continue` (permitir a compra mesmo sem estoque).
+
+### Variant Fulfillment Service
+
+Como a variante é enviada. `manual` para o processamento padrão, ou o nome de API de um serviço de terceiros.
+
+### Variant Requires Shipping (booleano)
+
+`TRUE` para produtos físicos que precisam de envio; `FALSE` para produtos digitais.
+
+### Variant Taxable (booleano)
+
+`TRUE` se esta variante é tributável; `FALSE` se é isenta.
+
+### Variant Barcode
+
+Código de barras UPC, EAN ou ISBN. Texto simples. O Shopify não valida, só armazena.
+
+### Variant Weight / Variant Weight Unit
+
+O peso da variante e a unidade. O peso é um número decimal. A unidade aceita `kg`, `g`, `lb` ou `oz`.
+
+---
+
+## Colunas de imagem
+
+### Image Src
+
+A URL da imagem do produto. Precisa ser uma URL HTTPS de acesso público. Formatos aceitos: JPG, JPEG, PNG, GIF, WEBP.
+
+- Na linha principal: a imagem principal do produto
+- Nas linhas de variante: a imagem da combinação de opções daquela variante (ex.: a amostra da cor azul)
+
+### Image Position
+
+A ordem de exibição da imagem. Número inteiro a partir de 1. A imagem principal deve ser a 1.
+
+### Image Alt Text
+
+O texto alternativo da imagem, para acessibilidade e SEO.
+
+---
+
+## Colunas de SEO
+
+### SEO Title
+
+A tag de título da página (aparece na aba do navegador e nos resultados de busca). Se ficar vazia, é usado o Title do produto. Recomendado: menos de 70 caracteres.
+
+### SEO Description
+
+A meta descrição da página do produto. Recomendado: menos de 160 caracteres.
+
+---
+
+## Coluna de cartão-presente
+
+### Gift Card (booleano)
+
+`TRUE` só se o produto for um cartão-presente. Na maioria dos produtos deve ser `FALSE` ou ficar vazia.
+
+---
+
+## Produto simples x produto com variantes
+
+**Produto simples (uma variante):** uma linha por produto. Preencha todas as colunas obrigatórias. As colunas de opção são opcionais.
+
+**Produto com variantes:** várias linhas por produto, todas com o mesmo Handle. A primeira é a linha principal (com Title, Image Src, Body HTML etc.). As seguintes são linhas de variante (Title vazio; elas herdam os dados do produto pelo agrupamento por Handle).
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu modelo do Shopify para o StriveFormats e valide coluna por coluna. Ele confere os campos obrigatórios, os formatos booleanos, a estrutura de variantes e as URLs de imagem, e depois exporta um arquivo limpo e pronto para importar.
+
+[Abrir o Corretor de CSV do Shopify](/app?preset=shopify_products) | [Ver o modelo do Shopify](/presets/shopify_products)
