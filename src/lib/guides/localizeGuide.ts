@@ -1,5 +1,5 @@
 // Guides in the page's language: issue guides take their text from the translated issue
-// rules (src/i18n/issues), curated guides their card title/description from src/i18n/guides.
+// rules (src/i18n/issues), curated guides their card title/description from src/i18n/content.
 // Article bodies stay English.
 
 import type { Guide } from "@/lib/guidesRegistry";

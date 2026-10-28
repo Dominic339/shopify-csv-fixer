@@ -28,7 +28,7 @@ import { readCuratedGuide } from "@/lib/guides/mdxLoader";
 import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
 import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
 import { rehypeWrapSections } from "@/lib/guides/rehypeWrapSections";
-import { fmt, getTranslations, type Translations } from "@/lib/i18n/getTranslations";
+import { fmt, getTranslations, platformLabel, type Translations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
 import { mdxGuideComponents } from "@/views/mdxGuideComponents";
@@ -54,7 +54,7 @@ export async function GuidesShell({ locale, children }: { locale: Locale; childr
   const t = await getTranslations(locale);
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 md:flex-row md:gap-10 md:py-14">
-      <GuideSidebar searchPlaceholder={t.guides.searchPlaceholder} allGuides={t.guides.allGuides} platformsLabel={t.guides.platformsLabel} />
+      <GuideSidebar searchPlaceholder={t.guides.searchPlaceholder} allGuides={t.guides.allGuides} platformsLabel={t.guides.platformsLabel} generalLabel={t.guides.categories.general} />
       <main className="min-w-0 flex-1">{children}</main>
     </div>
   );
@@ -78,7 +78,7 @@ function GuideLink({ g, locale, t }: { g: Guide; locale: Locale; t: Translations
   return (
     <Link href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} block p-5 hover:border-[var(--ring)]`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className={`text-xs font-semibold uppercase ${muted}`}>{PLATFORM_LABEL[g.platform]}</span>
+        <span className={`text-xs font-semibold uppercase ${muted}`}>{platformLabel(t, g.platform)}</span>
         {g.kind === "curated" && <span className={`rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-xs ${muted}`}>{t.guides.guideLabel}</span>}
       </div>
       <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
@@ -140,7 +140,7 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
                 const count = counts[p] ?? 0;
                 return (
                   <Link key={p} href={localeHref(locale, `/guides/${p}`)} className={`${card} flex flex-col p-5 hover:border-[var(--ring)]`}>
-                    <div className="font-semibold text-[var(--text)]">{PLATFORM_LABEL[p]}</div>
+                    <div className="font-semibold text-[var(--text)]">{platformLabel(t, p)}</div>
                     <div className={`mt-1 text-sm ${muted}`}>
                       {count} {count === 1 ? t.guides.guideCount : t.guides.guidesCount}
                     </div>
@@ -189,7 +189,7 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
 export async function guidesPlatformMetadata(locale: Locale, platform: string): Promise<Metadata> {
   if (!isPlatform(platform)) return {};
   const t = await getTranslations(locale);
-  const label = PLATFORM_LABEL[platform];
+  const label = platformLabel(t, platform);
   const title = fmt(t.guides.platformTitle, { platform: label });
   const description = platform === "general" ? t.guides.generalGuidesDesc : fmt(t.guides.platformMetaDesc, { platform: label });
   return {
@@ -206,7 +206,7 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
   const href = (path: string) => localeHref(locale, path);
   const L = await guideLocalizer(locale);
   const guides = getGuidesByPlatform(platform).map(L);
-  const label = PLATFORM_LABEL[platform];
+  const label = platformLabel(t, platform);
   const presetId = PLATFORM_PRESET_ID[platform];
   const fixerHref = PLATFORM_FIXER_HREF[platform];
   const fixerAppHref = presetId ? `${href("/app")}?preset=${presetId}` : href("/app");
@@ -370,7 +370,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
 
   const t = await getTranslations(locale);
   const href = (path: string) => localeHref(locale, path);
-  const label = PLATFORM_LABEL[platform];
+  const label = platformLabel(t, platform);
   const presetId = PLATFORM_PRESET_ID[platform];
   const fixerHref = PLATFORM_FIXER_HREF[platform];
   const fixerAppHref = presetId ? `${href("/app")}?preset=${presetId}` : href("/app");

@@ -13,10 +13,10 @@ import { getFormatById } from "@/lib/formats";
 import { getPopularGuides } from "@/lib/guides/getPopularGuides";
 import { guideLocalizer, loadContent } from "@/lib/guides/localizeGuide";
 import { loadValidationDicts, validationText } from "@/lib/i18n/validationText";
-import { issueCodeToSlug, PLATFORM_LABEL, type GuidePlatform } from "@/lib/guidesRegistry";
+import { issueCodeToSlug, type GuidePlatform } from "@/lib/guidesRegistry";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 import type { IssueMeta } from "@/lib/validation/issueMeta";
-import { fmt, getTranslations, presetText, type Translations } from "@/lib/i18n/getTranslations";
+import { fmt, getTranslations, platformLabel, presetText, type Translations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
 import { mergeExampleRow } from "@/app/presets/[id]/presetDetailHelpers";
@@ -65,7 +65,7 @@ async function PopularGuides({ t, locale, platform }: { t: Translations; locale:
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {guides.map((g) => (
           <Link key={`${g.platform}/${g.slug}`} href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} p-5 hover:border-[var(--ring)]`}>
-            <div className="text-xs text-[color:rgba(var(--muted-rgb),0.7)]">{PLATFORM_LABEL[g.platform]}</div>
+            <div className="text-xs text-[color:rgba(var(--muted-rgb),0.7)]">{platformLabel(t, g.platform)}</div>
             <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
             <p className={`mt-1 line-clamp-2 text-sm ${muted}`}>{g.description}</p>
           </Link>
@@ -113,7 +113,7 @@ export async function PresetsView({ locale }: { locale: Locale }) {
           const checks = Object.values(ISSUE_META_REGISTRY[p.formatId] ?? {}).filter((m) => m.checked !== false).length;
           return (
             <div key={p.id} className={`${card} flex flex-col p-6 sm:p-7`}>
-              <div className={`text-sm ${muted}`}>{PLATFORM_LABEL[PRESET_TO_PLATFORM[p.id]] ?? p.category}</div>
+              <div className={`text-sm ${muted}`}>{platformLabel(t, PRESET_TO_PLATFORM[p.id]) ?? p.category}</div>
               <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">{presetText(t, p.id, "name") ?? p.name}</h2>
               <p className={`mt-3 flex-1 text-base ${muted}`}>{presetText(t, p.id, "desc") ?? p.description}</p>
               {checks > 0 && <div className={`mt-4 text-sm ${muted}`}>{fmt(t.presets.checksCount, { count: checks })}</div>}
@@ -269,7 +269,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
               <Link href={href("/presets")} className="hover:underline">
                 {t.presets.presetFormats}
               </Link>
-              {platform ? ` / ${PLATFORM_LABEL[platform]}` : null}
+              {platform ? ` / ${platformLabel(t, platform)}` : null}
             </div>
             <h1 className="mt-2 text-2xl font-semibold text-[var(--text)] sm:text-3xl">{name}</h1>
             <p className={`mt-3 text-base ${muted}`}>{description}</p>

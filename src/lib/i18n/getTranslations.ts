@@ -5,6 +5,7 @@
 import type en from "@/i18n/en.json";
 import type { Locale } from "./locales";
 import { DEFAULT_LOCALE, LOCALES } from "./locales";
+import { PLATFORM_LABEL, type GuidePlatform } from "@/lib/guidesConstants";
 
 /** Shape of every locale file; en.json is the source of truth (other locales fall back to it). */
 export type Translations = typeof en;
@@ -13,6 +14,14 @@ export type Translations = typeof en;
 export function presetText(t: Translations, presetId: string, field: "name" | "desc"): string | undefined {
   const value = (t.presets as Record<string, string>)[`${field}_${presetId}`];
   return typeof value === "string" && value ? value : undefined;
+}
+
+/** Platform names are brands, except "general", which is translated. */
+export function platformLabel(t: Translations, platform: GuidePlatform): string;
+export function platformLabel(t: Translations, platform: GuidePlatform | undefined): string | undefined;
+export function platformLabel(t: Translations, platform: GuidePlatform | undefined): string | undefined {
+  if (!platform) return undefined;
+  return platform === "general" ? t.guides.categories.general : PLATFORM_LABEL[platform];
 }
 
 // Cache translations in memory across requests (module-level, server only)

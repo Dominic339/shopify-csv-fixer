@@ -12,9 +12,10 @@ type Props = {
   searchPlaceholder?: string;
   allGuides?: string;
   platformsLabel?: string;
+  generalLabel?: string;
 };
 
-export default function GuideSidebar({ searchPlaceholder, allGuides, platformsLabel }: Props) {
+export default function GuideSidebar({ searchPlaceholder, allGuides, platformsLabel, generalLabel }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   // Read ?q after mount instead of useSearchParams, so the sidebar is part of the
@@ -84,7 +85,7 @@ export default function GuideSidebar({ searchPlaceholder, allGuides, platformsLa
             {GUIDE_PLATFORMS.map((p) => (
               <li key={p}>
                 <Link href={`${guidesBase}/${p}`} className={linkClass(activePlatform === p)}>
-                  {PLATFORM_LABEL[p]}
+                  {p === "general" && generalLabel ? generalLabel : PLATFORM_LABEL[p]}
                 </Link>
               </li>
             ))}
