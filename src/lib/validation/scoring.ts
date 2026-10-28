@@ -146,7 +146,8 @@ export function computeValidationBreakdown(issues: CsvIssue[], opts: { formatId:
     else if (sev === "warning") catCounts[cat].warnings += 1;
     else catCounts[cat].infos += 1;
 
-    const isBlocking = Boolean(meta?.blocking && sev === "error");
+    // Same rule as readiness.ts: an error blocks unless its metadata says it doesn't.
+    const isBlocking = sev === "error" && (meta?.blocking ?? true);
     if (isBlocking) {
       blockingErrors++;
       catCounts[cat].blockingErrors += 1;

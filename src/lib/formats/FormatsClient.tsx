@@ -4,9 +4,27 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
-import type { RuleType, UserFormatColumn, UserFormatRule, UserFormatV1 } from "@/lib/formats/customUser";
-import { USER_FORMATS_STORAGE_KEY } from "@/lib/formats/customUser";
+import {
+  generateUserFormatId,
+  importUserFormatsIntoStorage,
+  loadUserFormatsFromStorage,
+  saveUserFormatsToStorage,
+  suggestFormatFromCsv,
+  userFormatToCsvFormat,
+  type RuleType,
+  type UserFormatColumn,
+  type UserFormatRule,
+  type UserFormatV1,
+} from "@/lib/formats/customUser";
+import { parseCsv } from "@/lib/csv";
+import type { CsvRow } from "@/lib/formats/types";
 import { createClient } from "@/lib/supabase/browser";
+import { fmt } from "@/lib/i18n/fmt";
+import { localeHref, type Locale } from "@/lib/i18n/locales";
+import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
+import type { Translations } from "@/lib/i18n/getTranslations";
+
+type T = Translations["formats"];
 
 type SubStatus = {
   signedIn: boolean;
@@ -14,26 +32,12 @@ type SubStatus = {
   status: string;
 };
 
+type Sample = { name: string; headers: string[]; rows: CsvRow[] };
+
+const PREVIEW_ROWS = 5;
+
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function loadFormats(): UserFormatV1[] {
-  try {
-    const raw = localStorage.getItem(USER_FORMATS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(Boolean);
-  } catch {
-    return [];
-  }
-}
-
-function saveFormats(formats: UserFormatV1[]) {
-  localStorage.setItem(USER_FORMATS_STORAGE_KEY, JSON.stringify(formats));
-  // Notify Fixer tab instantly (same-tab event)
-  window.dispatchEvent(new Event("striveformats-formats-changed"));
 }
 
 function downloadJson(filename: string, obj: unknown) {
@@ -49,47 +53,72 @@ function downloadJson(filename: string, obj: unknown) {
 }
 
 function safeNamePart(s: string) {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 40);
+  return (
+    s
+      .trim()
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 40) || "format"
+  );
 }
 
-function colLabel(i: number) {
-  return `Column ${i + 1}`;
-}
-
-function headerLabelForColumn(c: UserFormatColumn, idx: number) {
-  const t = (c.title ?? "").trim();
-  const k = (c.key ?? "").trim();
-  return t || k || colLabel(idx);
-}
-
-const RULES: { type: RuleType; label: string; needsValue?: boolean; valueLabel?: string }[] = [
-  { type: "trim", label: "Trim" },
-  { type: "uppercase", label: "Uppercase" },
-  { type: "no_spaces", label: "No spaces" },
-  { type: "no_special_chars", label: "No special characters", needsValue: true, valueLabel: "Allowed characters (optional)" },
-  { type: "numeric_only", label: "Numeric only" },
-  { type: "max_length", label: "Max length", needsValue: true, valueLabel: "Max" },
-  { type: "required", label: "Required" },
-  { type: "default_value", label: "Default value", needsValue: true, valueLabel: "Default" },
-  { type: "allowed_values", label: "Allowed values", needsValue: true, valueLabel: "Comma list" },
-  { type: "regex_allow", label: "Regex allow", needsValue: true, valueLabel: "Pattern" },
-  { type: "regex_block", label: "Regex block", needsValue: true, valueLabel: "Pattern" },
+/** Rule types, with the input each one needs. "required" is a column toggle, not listed here. */
+const RULE_TYPES: { type: RuleType; value?: "text" | "number" | "list" | "pattern"; global?: boolean }[] = [
+  { type: "trim", global: true },
+  { type: "uppercase", global: true },
+  { type: "lowercase", global: true },
+  { type: "no_spaces", global: true },
+  { type: "no_special_chars", value: "text", global: true },
+  { type: "max_length", value: "number", global: true },
+  { type: "number" },
+  { type: "numeric_only" },
+  { type: "allowed_values", value: "list" },
+  { type: "default_value", value: "text" },
+  { type: "regex_allow", value: "pattern" },
+  { type: "regex_block", value: "pattern" },
 ];
 
-export default function FormatsClient() {
+function ruleLabel(t: T, type: RuleType): string {
+  const labels: Partial<Record<RuleType, string>> = {
+    trim: t.ruleTrim,
+    uppercase: t.ruleUppercase,
+    lowercase: t.ruleLowercase,
+    no_spaces: t.ruleNoSpaces,
+    no_special_chars: t.ruleNoSpecial,
+    max_length: t.ruleMaxLength,
+    number: t.ruleNumber,
+    numeric_only: t.ruleDigits,
+    allowed_values: t.ruleAllowed,
+    default_value: t.ruleDefault,
+    regex_allow: t.ruleRegexAllow,
+    regex_block: t.ruleRegexBlock,
+    required: t.required,
+  };
+  return labels[type] ?? type;
+}
+
+function valuePlaceholder(t: T, kind: (typeof RULE_TYPES)[number]["value"]) {
+  return kind === "number" ? "100" : kind === "list" ? t.valueList : kind === "pattern" ? t.valuePattern : t.valueText;
+}
+
+type Props = { formatsByLocale: Record<Locale, T> };
+
+export default function FormatsClient({ formatsByLocale }: Props) {
+  const locale = useCookieLocale();
+  const t = formatsByLocale[locale];
+
   const [sub, setSub] = useState<SubStatus | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-
   const [formats, setFormats] = useState<UserFormatV1[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [toast, setToast] = useState<string>("");
+  const [toast, setToast] = useState("");
+  const [sample, setSample] = useState<Sample | null>(null);
+  const [openColumn, setOpenColumn] = useState<string | null>(null);
 
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const csvInputRef = useRef<HTMLInputElement | null>(null);
+  const csvIntent = useRef<"create" | "sample">("create");
 
   useEffect(() => {
     let cancelled = false;
@@ -109,90 +138,117 @@ export default function FormatsClient() {
           .maybeSingle();
         if (cancelled) return;
         const activePlan = data?.status === "active" ? data.plan : "free";
-        setSub({
-          signedIn: true,
-          plan: (activePlan ?? "free") as SubStatus["plan"],
-          status: data?.status ?? "none",
-        });
+        setSub({ signedIn: true, plan: (activePlan ?? "free") as SubStatus["plan"], status: data?.status ?? "none" });
       } catch {
         if (!cancelled) setSub({ signedIn: false, plan: "free", status: "none" });
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const isAdvanced = useMemo(() => {
-    return !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
-  }, [sub]);
-
+  const isAdvanced = !!sub?.signedIn && sub.plan === "advanced" && sub.status === "active";
   const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvanced;
 
   useEffect(() => {
-    const initial = loadFormats();
+    const initial = loadUserFormatsFromStorage();
     setFormats(initial);
     setSelectedId(initial[0]?.id ?? null);
   }, []);
 
   useEffect(() => {
     if (!toast) return;
-    const t = window.setTimeout(() => setToast(""), 2200);
-    return () => window.clearTimeout(t);
+    const id = window.setTimeout(() => setToast(""), 2500);
+    return () => window.clearTimeout(id);
   }, [toast]);
 
   const selected = useMemo(() => formats.find((f) => f.id === selectedId) ?? null, [formats, selectedId]);
 
   function setAndPersist(next: UserFormatV1[]) {
     setFormats(next);
-    saveFormats(next);
+    saveUserFormatsToStorage(next);
   }
 
   function updateSelected(patch: Partial<UserFormatV1>) {
     if (!selected) return;
-    const next = formats.map((f) => (f.id === selected.id ? { ...f, ...patch, updatedAt: Date.now() } : f));
-    setAndPersist(next);
+    setAndPersist(formats.map((f) => (f.id === selected.id ? { ...f, ...patch, updatedAt: Date.now() } : f)));
   }
 
-  function createNewFormat() {
-    const now = Date.now();
-    const f: UserFormatV1 = {
-      version: 1,
-      id: `custom_${now}`,
-      name: "New format",
-      source: "user",
-      columns: [],
-      rules: [],
-      globalRules: [],
-      createdAt: now,
-      updatedAt: now,
-    };
-    const next = [f, ...formats];
-    setAndPersist(next);
+  function addFormat(f: UserFormatV1, message: string) {
+    setAndPersist([f, ...formats]);
     setSelectedId(f.id);
-    setToast("Created new format");
+    setToast(message);
+  }
+
+  function createBlankFormat() {
+    const now = Date.now();
+    addFormat(
+      {
+        version: 1,
+        id: generateUserFormatId(new Set(formats.map((f) => f.id))),
+        name: t.newFormatName,
+        source: "user",
+        columns: [],
+        rules: [],
+        globalRules: [{ scope: "global", type: "trim" }],
+        createdAt: now,
+        updatedAt: now,
+      },
+      t.toastCreated
+    );
+    setSample(null);
+  }
+
+  async function onCsvFile(file: File) {
+    try {
+      const parsed = parseCsv(await file.text());
+      if (!parsed.headers.length) throw new Error("no headers");
+      const next: Sample = { name: file.name, headers: parsed.headers, rows: parsed.rows };
+      setSample(next);
+      if (csvIntent.current === "create") {
+        const name = file.name.replace(/\.(csv|tsv|txt)$/i, "");
+        const f = suggestFormatFromCsv(name, parsed.headers, parsed.rows, new Set(formats.map((x) => x.id)));
+        addFormat(f, fmt(t.toastFromCsv, { count: f.columns.length }));
+      }
+    } catch {
+      setToast(t.toastCsvFailed);
+    }
+  }
+
+  function pickCsv(intent: "create" | "sample") {
+    csvIntent.current = intent;
+    csvInputRef.current?.click();
   }
 
   function deleteSelected() {
-    if (!selected) return;
+    if (!selected || !window.confirm(fmt(t.confirmDelete, { name: selected.name }))) return;
     const next = formats.filter((f) => f.id !== selected.id);
     setAndPersist(next);
     setSelectedId(next[0]?.id ?? null);
-    setToast("Deleted format");
+    setToast(t.toastDeleted);
+  }
+
+  function duplicateSelected() {
+    if (!selected) return;
+    const now = Date.now();
+    addFormat(
+      {
+        ...structuredClone(selected),
+        id: generateUserFormatId(new Set(formats.map((f) => f.id))),
+        name: fmt(t.copyName, { name: selected.name }),
+        createdAt: now,
+        updatedAt: now,
+      },
+      t.toastDuplicated
+    );
   }
 
   function addColumn() {
     if (!selected) return;
-    const index0 = selected.columns.length;
-    const col: UserFormatColumn = {
-      id: uid(),
-      key: "",
-      // Default to a visible name so users can immediately rename it.
-      // If this is empty, the UI falls back to "Column N" which makes it feel like renaming is broken.
-      title: `Column ${index0 + 1}`,
-      required: false,
-      defaultValue: "",
-    };
+    const col: UserFormatColumn = { id: uid(), key: "", title: fmt(t.columnN, { n: selected.columns.length + 1 }), required: false, defaultValue: "" };
     updateSelected({ columns: [...selected.columns, col] });
-    setToast("Added column");
+    setOpenColumn(col.id);
   }
 
   function updateColumn(idx: number, patch: Partial<UserFormatColumn>) {
@@ -202,237 +258,155 @@ export default function FormatsClient() {
     updateSelected({ columns: cols });
   }
 
+  function moveColumn(idx: number, dir: -1 | 1) {
+    if (!selected) return;
+    const j = idx + dir;
+    if (j < 0 || j >= selected.columns.length) return;
+    const cols = [...selected.columns];
+    [cols[idx], cols[j]] = [cols[j], cols[idx]];
+    updateSelected({ columns: cols });
+  }
+
   function removeColumn(idx: number) {
     if (!selected) return;
-    const cols = selected.columns.filter((_, i) => i !== idx);
-
-    // Remove column scoped rules that referenced the removed columnId
     const removedId = selected.columns[idx]?.id;
-    const rules = (selected.rules ?? []).filter((r) => r.columnId !== removedId);
-
-    updateSelected({ columns: cols, rules });
-    setToast("Removed column");
+    updateSelected({
+      columns: selected.columns.filter((_, i) => i !== idx),
+      rules: (selected.rules ?? []).filter((r) => r.columnId !== removedId),
+    });
   }
 
   function toggleGlobalRule(type: RuleType, enabled: boolean) {
     if (!selected) return;
-    const existing = (selected.globalRules ?? []).filter((r) => r.type === type);
-    if (enabled && existing.length) return;
-    if (!enabled && !existing.length) return;
-
-    const nextRules = enabled
-      ? [...(selected.globalRules ?? []), { scope: "global", type } as UserFormatRule]
-      : (selected.globalRules ?? []).filter((r) => r.type !== type);
-
-    updateSelected({ globalRules: nextRules });
+    const rest = (selected.globalRules ?? []).filter((r) => r.type !== type);
+    updateSelected({ globalRules: enabled ? [...rest, { scope: "global", type }] : rest });
   }
 
-  function setGlobalRuleValue(type: RuleType, value: any) {
+  function setGlobalRuleValue(type: RuleType, value: string) {
     if (!selected) return;
-    const nextRules = (selected.globalRules ?? []).map((r) => (r.type === type ? { ...r, value } : r));
-    updateSelected({ globalRules: nextRules });
+    updateSelected({ globalRules: (selected.globalRules ?? []).map((r) => (r.type === type ? { ...r, value } : r)) });
   }
 
-  function toggleColumnRule(columnId: string, type: RuleType, enabled: boolean) {
-    if (!selected) return;
-    const all = selected.rules ?? [];
-    const exists = all.some((r) => r.scope === "column" && r.columnId === columnId && r.type === type);
-
-    if (enabled && exists) return;
-    if (!enabled && !exists) return;
-
-    const next =
-      enabled
-        ? [...all, { scope: "column", columnId, type } as UserFormatRule]
-        : all.filter((r) => !(r.scope === "column" && r.columnId === columnId && r.type === type));
-
-    updateSelected({ rules: next });
+  function columnRules(columnId: string) {
+    return (selected?.rules ?? []).filter((r) => r.scope === "column" && r.columnId === columnId);
   }
 
-  function setColumnRuleValue(columnId: string, type: RuleType, value: any) {
+  function addColumnRule(columnId: string, type: RuleType) {
+    if (!selected || columnRules(columnId).some((r) => r.type === type)) return;
+    updateSelected({ rules: [...(selected.rules ?? []), { scope: "column", columnId, type } as UserFormatRule] });
+  }
+
+  function removeColumnRule(columnId: string, type: RuleType) {
     if (!selected) return;
-    const all = selected.rules ?? [];
-    const next = all.map((r) => {
-      if (r.scope === "column" && r.columnId === columnId && r.type === type) return { ...r, value };
-      return r;
+    updateSelected({ rules: (selected.rules ?? []).filter((r) => !(r.scope === "column" && r.columnId === columnId && r.type === type)) });
+  }
+
+  function setColumnRuleValue(columnId: string, type: RuleType, value: string) {
+    if (!selected) return;
+    updateSelected({
+      rules: (selected.rules ?? []).map((r) => (r.scope === "column" && r.columnId === columnId && r.type === type ? { ...r, value } : r)),
     });
-    updateSelected({ rules: next });
-  }
-
-  function getGlobalRule(type: RuleType) {
-    return (selected?.globalRules ?? []).find((r) => r.type === type) ?? null;
-  }
-
-  function getColumnRule(columnId: string, type: RuleType) {
-    return (selected?.rules ?? []).find((r) => r.scope === "column" && r.columnId === columnId && r.type === type) ?? null;
   }
 
   function exportSelected() {
     if (!selected) return;
-    const base = selected.name ? safeNamePart(selected.name) : selected.id;
-    downloadJson(`${base}.striveformats-format.json`, selected);
-    setToast("Exported format file");
+    downloadJson(`${safeNamePart(selected.name)}.striveformats-format.json`, selected);
+    setToast(t.toastExported);
   }
 
   async function onImportFile(file: File) {
     try {
-      const text = await file.text();
-      const obj = JSON.parse(text);
-
-      if (!obj || typeof obj !== "object") throw new Error("Invalid format file");
-      if (obj.version !== 1) throw new Error("Unsupported format version");
-
-      const now = Date.now();
-      const imported: UserFormatV1 = {
-        version: 1,
-        id: typeof obj.id === "string" ? obj.id : `custom_${now}`,
-        name: typeof obj.name === "string" ? obj.name : "Imported format",
-        source: "user",
-        columns: Array.isArray(obj.columns) ? obj.columns : [],
-        rules: Array.isArray(obj.rules) ? obj.rules : [],
-        globalRules: Array.isArray(obj.globalRules) ? obj.globalRules : [],
-        createdAt: typeof obj.createdAt === "number" ? obj.createdAt : now,
-        updatedAt: now,
-      };
-
-      const next = [imported, ...formats];
-      setAndPersist(next);
-      setSelectedId(imported.id);
-      setToast("Imported format");
-    } catch (e: any) {
-      setToast(e?.message ?? "Import failed");
+      const { imported } = importUserFormatsIntoStorage(JSON.parse(await file.text()));
+      if (!imported) throw new Error("nothing imported");
+      const next = loadUserFormatsFromStorage();
+      setFormats(next);
+      setSelectedId(next[0]?.id ?? null);
+      setToast(fmt(t.toastImported, { count: imported }));
+    } catch {
+      setToast(t.toastImportFailed);
     }
   }
 
-  // Preview grid headers
-  const previewHeaders = useMemo(() => {
+  const duplicateHeaders = useMemo(() => {
     if (!selected) return [];
-    return selected.columns.map((c, i) => headerLabelForColumn(c, i));
-  }, [selected]);
-
-  const headerNameProblems = useMemo(() => {
-    if (!selected) return { duplicates: [] as string[] };
-    const names = selected.columns.map((c, i) => headerLabelForColumn(c, i).trim());
-    const norm = names.map((n) => n.toLowerCase());
     const counts = new Map<string, number>();
-    for (const n of norm) counts.set(n, (counts.get(n) ?? 0) + 1);
-    const dups = [...counts.entries()]
-      .filter(([k, v]) => k && v > 1)
-      .map(([k]) => k)
-      .slice(0, 12);
-    return { duplicates: dups };
+    for (const c of selected.columns) {
+      const k = (c.title ?? "").trim().toLowerCase();
+      if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    return [...counts].filter(([, n]) => n > 1).map(([k]) => k);
   }, [selected]);
 
-  // Preview rows (fake sample showing rule effects)
-  const previewRows = useMemo(() => {
-    if (!selected) return [];
-    const cols = selected.columns;
+  // Preview: run the real engine on the sample file, so it matches the fixer exactly.
+  const preview = useMemo(() => {
+    if (!selected || !sample || selected.columns.length === 0) return null;
+    const rows = sample.rows.slice(0, PREVIEW_ROWS);
+    const result = userFormatToCsvFormat(selected).apply(sample.headers, rows);
+    const fullIssues = userFormatToCsvFormat(selected).apply(sample.headers, sample.rows.slice(0, 2000)).issues;
+    const flagged = new Set(result.issues.filter((i) => i.rowIndex >= 0).map((i) => `${i.rowIndex}:${i.column}`));
+    return { result, flagged, issueCount: fullIssues.length, fileIssues: fullIssues.filter((i) => i.rowIndex < 0) };
+  }, [selected, sample]);
 
-    const sampleRaw = cols.map((_, i) => (i === 0 ? "  Example value  " : i === 1 ? "ab c-12" : "Test123"));
-    const applyOne = (value: string, rules: UserFormatRule[]) => {
-      let v = value;
-
-      const doTrim = rules.some((r) => r.type === "trim");
-      if (doTrim) v = v.trim();
-
-      if (rules.some((r) => r.type === "uppercase")) v = v.toUpperCase();
-      if (rules.some((r) => r.type === "no_spaces")) v = v.replace(/\s+/g, "");
-
-      const ns = rules.find((r) => r.type === "no_special_chars");
-      if (ns) {
-        const allowed = String(ns.value ?? "").trim();
-        const re = new RegExp(`[^a-zA-Z0-9${allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}]`, "g");
-        v = v.replace(re, "");
-      }
-
-      if (rules.some((r) => r.type === "numeric_only")) v = v.replace(/[^\d]/g, "");
-
-      const ml = rules.find((r) => r.type === "max_length");
-      if (ml) {
-        const n = Number(ml.value ?? 0);
-        if (Number.isFinite(n) && n > 0 && v.length > n) v = v.slice(0, n);
-      }
-
-      const dv = rules.find((r) => r.type === "default_value");
-      if (dv && !v) v = String(dv.value ?? "");
-
-      return v;
-    };
-
-    const global = selected.globalRules ?? [];
-
-    const row1: Record<string, string> = {};
-    const row2: Record<string, string> = {};
-
-    cols.forEach((c, i) => {
-      const header = previewHeaders[i];
-      const colRules = (selected.rules ?? []).filter((r) => r.scope === "column" && r.columnId === c.id);
-      const allRules = [...global, ...colRules];
-
-      row1[header] = sampleRaw[i] ?? "";
-      row2[header] = applyOne(sampleRaw[i] ?? "", allRules);
-    });
-
-    return [row1, row2];
-  }, [selected, previewHeaders]);
+  const btn = "rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text)] disabled:opacity-50";
+  const input = "mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-base text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)] sm:text-sm";
+  const card = "min-w-0 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6";
 
   if (!canAccessCustomFormats) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-16">
-        <h1 className="text-3xl font-semibold text-[var(--text)]">Custom Formats</h1>
-        <p className="mt-3 max-w-2xl text-sm text-[var(--muted)]">
-          Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats for any workflow.
-        </p>
-
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
+        <h1 className="text-3xl font-semibold text-[var(--text)]">{t.title}</h1>
+        <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{t.lockedDesc}</p>
+        <ul className="mt-6 space-y-3 text-sm text-[var(--text)]">
+          {[t.lockedPoint1, t.lockedPoint2, t.lockedPoint3].map((p) => (
+            <li key={p} className="flex gap-3">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+              {p}
+            </li>
+          ))}
+        </ul>
         <div className="mt-8 flex flex-wrap gap-3">
-          <button type="button" className="rgb-btn" onClick={() => setUpgradeOpen(true)}>
-            <span className="px-6 py-3 text-sm font-semibold text-[var(--text)]">Upgrade to Advanced</span>
+          <button type="button" className="btn-primary" onClick={() => setUpgradeOpen(true)}>
+            {t.upgrade}
           </button>
-
-          <Link href="/" className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]">
-            Back to Home
+          <Link href={localeHref(locale, "/app")} className={btn}>
+            {t.openFixer}
           </Link>
         </div>
-
         <UpgradeModal
           open={upgradeOpen}
-          title="Advanced only"
-          message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
+          title={t.upgradeTitle}
+          message={t.lockedDesc}
+          signedIn={Boolean(sub?.signedIn)}
+          upgradePlan="advanced"
           onClose={() => setUpgradeOpen(false)}
+          labelClose={t.close}
+          labelViewPricing={t.viewPricing}
+          labelGoToAccount={t.goToAccount}
+          labelSignInToUpgrade={t.signInToUpgrade}
         />
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold text-[var(--text)]">Custom Formats</h1>
-          <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
-            Define expected columns, apply cleanup rules, validate data, and reuse the same format across files.
-          </p>
+    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-semibold text-[var(--text)]">{t.title}</h1>
+          <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">{t.description}</p>
         </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Link href="/app" className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]">
-            CSV Fixer
+        {selected ? (
+          <Link
+            href={`${localeHref(locale, "/app")}?preset=${encodeURIComponent(selected.id)}&exportName=${encodeURIComponent(selected.name || selected.id)}`}
+            className="btn-primary shrink-0 text-center"
+          >
+            {t.useInFixer}
           </Link>
-
-          {selected ? (
-            <Link
-              href={`/app?preset=${encodeURIComponent(selected.id)}&exportName=${encodeURIComponent(selected.name ?? selected.id)}`}
-              className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--text)]"
-              title="Open the CSV Fixer with this format selected"
-            >
-              Open this format
-            </Link>
-          ) : null}
-        </div>
+        ) : null}
       </div>
 
       {toast ? (
-        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)]">
+        <div className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)] shadow-lg" role="status">
           {toast}
         </div>
       ) : null}
@@ -445,322 +419,339 @@ export default function FormatsClient() {
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) void onImportFile(f);
-          if (e.target) e.target.value = "";
+          e.target.value = "";
+        }}
+      />
+      <input
+        ref={csvInputRef}
+        type="file"
+        accept=".csv,.tsv,.txt,text/csv"
+        className="hidden"
+        data-testid="formats-csv-input"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void onCsvFile(f);
+          e.target.value = "";
         }}
       />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
-        {/* LEFT */}
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <div className="text-sm font-semibold text-[var(--text)]">Your formats</div>
-          <p className="mt-2 text-sm text-[var(--muted)]">Saved formats appear here.</p>
+      <div className="mt-8 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        {/* Format list */}
+        <aside className={card}>
+          <h2 className="text-sm font-semibold text-[var(--text)]">{t.yourFormats}</h2>
 
           <div className="mt-4 space-y-2">
             {formats.length === 0 ? (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[var(--muted)]">
-                No formats yet. Create one to get started.
-              </div>
+              <p className="rounded-2xl border border-dashed border-[var(--border)] p-4 text-sm text-[var(--muted)]">{t.noFormats}</p>
             ) : (
-              formats.map((f) => {
-                const active = f.id === selectedId;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setSelectedId(f.id)}
-                    className={
-                      "w-full rounded-2xl border px-4 py-3 text-left text-sm " +
-                      (active ? "border-transparent bg-[var(--surface-2)] text-[var(--text)]" : "border-[var(--border)] bg-[var(--surface)] text-[var(--text)]")
-                    }
-                  >
-                    <div className="font-semibold">{f.name}</div>
-                    <div className="mt-1 text-xs text-[var(--muted)]">{f.columns?.length ?? 0} columns</div>
-                  </button>
-                );
-              })
+              formats.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(f.id);
+                    setOpenColumn(null);
+                  }}
+                  aria-current={f.id === selectedId ? "true" : undefined}
+                  className={`w-full rounded-2xl border px-4 py-3 text-left text-sm text-[var(--text)] ${
+                    f.id === selectedId ? "border-[var(--accent)] bg-[var(--surface-2)]" : "border-[var(--border)] bg-[var(--surface)]"
+                  }`}
+                >
+                  <div className="truncate font-semibold">{f.name}</div>
+                  <div className="mt-1 text-xs text-[var(--muted)]">{fmt(t.columnCount, { count: f.columns?.length ?? 0 })}</div>
+                </button>
+              ))
             )}
           </div>
 
-          <div className="mt-6 flex flex-col gap-2">
-            <button type="button" className="rgb-btn" onClick={createNewFormat}>
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">New format</span>
+          <div className="mt-5 flex flex-col gap-2">
+            <button type="button" className="btn-primary" onClick={() => pickCsv("create")}>
+              {t.fromCsv}
             </button>
-
-            <button type="button" className="rgb-btn" onClick={() => importInputRef.current?.click()}>
-              <span className="px-4 py-3 text-sm font-semibold text-[var(--text)]">Import format file</span>
+            <button type="button" className={btn} onClick={createBlankFormat}>
+              {t.newBlank}
+            </button>
+            <button type="button" className={btn} onClick={() => importInputRef.current?.click()}>
+              {t.importFile}
             </button>
           </div>
+          <p className="mt-3 text-xs text-[var(--muted)]">{t.fromCsvHint}</p>
+          <p className="mt-4 rounded-2xl bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">{t.storageNote}</p>
+        </aside>
 
-          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--muted)]">
-            Formats are saved locally on your device. Export a format file to back up or share it.
-          </div>
-        </div>
+        {/* Builder */}
+        {!selected ? (
+          <section className={`${card} flex flex-col items-start justify-center gap-4`}>
+            <h2 className="text-lg font-semibold">{t.emptyTitle}</h2>
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-[var(--muted)]">
+              <li>{t.emptyStep1}</li>
+              <li>{t.emptyStep2}</li>
+              <li>{t.emptyStep3}</li>
+            </ol>
+            <button type="button" className="btn-primary" onClick={() => pickCsv("create")}>
+              {t.fromCsv}
+            </button>
+          </section>
+        ) : (
+          <div className="min-w-0 space-y-6">
+            {/* Name + actions */}
+            <section className={card}>
+              <label className="text-sm font-semibold text-[var(--text)]" htmlFor="format-name">
+                {t.formatName}
+              </label>
+              <input id="format-name" className={input} value={selected.name} onChange={(e) => updateSelected({ name: e.target.value })} />
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" className={btn} onClick={exportSelected}>
+                  {t.exportFile}
+                </button>
+                <button type="button" className={btn} onClick={duplicateSelected}>
+                  {t.duplicate}
+                </button>
+                <button type="button" className={`${btn} !text-red-500`} onClick={deleteSelected}>
+                  {t.delete}
+                </button>
+              </div>
+            </section>
 
-        {/* RIGHT */}
-        <div className="lg:col-span-2 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="text-sm font-semibold text-[var(--text)]">Format Builder</div>
-              <p className="mt-2 text-sm text-[var(--muted)]">
-                Add columns, configure rules, and preview the final CSV layout.
-              </p>
-            </div>
+            {/* Rules for every column */}
+            <section className={card}>
+              <h2 className="text-sm font-semibold text-[var(--text)]">{t.globalRules}</h2>
+              <p className="mt-1 text-xs text-[var(--muted)]">{t.globalRulesHint}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {RULE_TYPES.filter((r) => r.global).map((r) => {
+                  const rule = (selected.globalRules ?? []).find((g) => g.type === r.type);
+                  return (
+                    <div key={r.type} className="flex flex-wrap items-center gap-2">
+                      <label
+                        className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${
+                          rule ? "border-[var(--accent)] bg-[var(--surface-2)] text-[var(--text)]" : "border-[var(--border)] text-[var(--muted)]"
+                        }`}
+                      >
+                        <input type="checkbox" className="sr-only" checked={!!rule} onChange={(e) => toggleGlobalRule(r.type, e.target.checked)} />
+                        {rule ? "✓ " : ""}
+                        {ruleLabel(t, r.type)}
+                      </label>
+                      {rule && r.value ? (
+                        <input
+                          className="w-36 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-base text-[var(--text)] sm:text-sm"
+                          aria-label={ruleLabel(t, r.type)}
+                          value={String(rule.value ?? "")}
+                          inputMode={r.value === "number" ? "numeric" : undefined}
+                          placeholder={valuePlaceholder(t, r.value)}
+                          onChange={(e) => setGlobalRuleValue(r.type, e.target.value)}
+                        />
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
-                onClick={addColumn}
-                disabled={!selected}
-              >
-                Add column
-              </button>
-
-              <button
-                type="button"
-                className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text)]"
-                onClick={exportSelected}
-                disabled={!selected}
-              >
-                Export format
-              </button>
-
-              <button
-                type="button"
-                className="rgb-btn border border-red-500/60 bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-red-300 disabled:opacity-50"
-                onClick={deleteSelected}
-                disabled={!selected}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-
-          {!selected ? (
-            <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-6 text-sm text-[var(--muted)]">
-              Select a format or create a new one to begin editing.
-            </div>
-          ) : (
-            <div className="mt-6 space-y-6">
-              {/* NAME */}
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-                <div className="text-sm font-semibold text-[var(--text)]">Format name</div>
-                <input
-                  className="mt-3 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)] outline-none"
-                  value={selected.name}
-                  onChange={(e) => updateSelected({ name: e.target.value })}
-                  placeholder="Format name"
-                />
-                <div className="mt-2 text-xs text-[var(--muted)]">ID: {selected.id}</div>
+            {/* Preview */}
+            <section className={card}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="text-sm font-semibold text-[var(--text)]">{t.preview}</h2>
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    {sample ? fmt(t.previewWith, { file: sample.name, count: Math.min(PREVIEW_ROWS, sample.rows.length) }) : t.previewHint}
+                  </p>
+                </div>
+                <button type="button" className={btn} onClick={() => pickCsv("sample")}>
+                  {sample ? t.changeSample : t.loadSample}
+                </button>
               </div>
 
-              {/* GLOBAL RULES */}
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-                <div className="text-sm font-semibold text-[var(--text)]">Format rules (apply to all columns)</div>
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {RULES.filter((r) => ["trim", "uppercase", "no_spaces", "no_special_chars", "numeric_only", "max_length"].includes(r.type)).map((r) => {
-                    const existing = getGlobalRule(r.type);
-                    const enabled = !!existing;
-
-                    return (
-                      <div key={r.type} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                        <label className="flex items-center gap-2 text-sm text-[var(--text)]">
-                          <input
-                            type="checkbox"
-                            checked={enabled}
-                            onChange={(e) => toggleGlobalRule(r.type, e.target.checked)}
-                          />
-                          {r.label}
-                        </label>
-
-                        {r.needsValue && enabled ? (
-                          <div className="mt-3">
-                            <div className="text-xs text-[var(--muted)]">{r.valueLabel}</div>
-                            <input
-                              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                              value={String(existing?.value ?? "")}
-                              onChange={(e) => setGlobalRuleValue(r.type, e.target.value)}
-                              placeholder={r.type === "max_length" ? "10" : ""}
-                            />
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* PREVIEW */}
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-                <div className="text-sm font-semibold text-[var(--text)]">Preview</div>
-                <div className="mt-2 text-xs text-[var(--muted)]">
-                  Row 1 is sample input. Row 2 shows the output after applying your current rules.
-                </div>
-
-                {headerNameProblems.duplicates.length > 0 ? (
-                  <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text)]">
-                    <div className="font-semibold">Duplicate header names detected</div>
-                    <div className="mt-1 text-xs text-[var(--muted)]">
-                      Duplicate headers can overwrite data on export. Rename one of the duplicates.
-                    </div>
-                    <div className="mt-2 text-xs text-[var(--muted)]">
-                      Duplicates: {headerNameProblems.duplicates.join(", ")}
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className="mt-4 overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-                  <table className="min-w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[var(--border)]">
-                        {previewHeaders.map((h, i) => (
-                          <th key={i} className="px-3 py-2 font-semibold text-[var(--text)] whitespace-nowrap">
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previewRows.map((r, idx) => (
-                        <tr key={idx} className={idx === 0 ? "border-b border-[var(--border)]" : ""}>
-                          {previewHeaders.map((h, i) => (
-                            <td key={i} className="px-3 py-2 text-[var(--text)] whitespace-nowrap">
-                              {(r as any)[h] ?? ""}
-                            </td>
+              {preview ? (
+                <>
+                  <p className={`mt-4 text-sm font-semibold ${preview.issueCount ? "text-amber-600 dark:text-amber-400" : "text-green-600 dark:text-green-400"}`}>
+                    {preview.issueCount ? fmt(t.previewIssues, { count: preview.issueCount }) : t.previewClean}
+                  </p>
+                  {preview.fileIssues.length > 0 && (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-[var(--muted)]">
+                      {preview.fileIssues.map((i) => (
+                        <li key={i.column}>{fmt(t.missingInSample, { column: i.column })}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="mt-3 overflow-x-auto rounded-2xl border border-[var(--border)]">
+                    <table className="min-w-full text-left text-xs">
+                      <thead className="bg-[var(--surface-2)]">
+                        <tr>
+                          {preview.result.fixedHeaders.map((h, i) => (
+                            <th key={i} className="whitespace-nowrap px-3 py-2 font-semibold text-[var(--text)]">
+                              {h}
+                            </th>
                           ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {preview.result.fixedRows.map((r, ri) => (
+                          <tr key={ri} className="border-t border-[var(--border)]">
+                            {preview.result.fixedHeaders.map((h, i) => (
+                              <td
+                                key={i}
+                                className={`max-w-[16rem] truncate whitespace-nowrap px-3 py-2 ${
+                                  preview.flagged.has(`${ri}:${h}`) ? "bg-red-500/10 text-red-700 dark:text-red-300" : "text-[var(--text)]"
+                                }`}
+                              >
+                                {r[h] ?? ""}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : null}
+            </section>
+            {/* Columns */}
+            <section className={card}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-[var(--text)]">{t.columns}</h2>
+                  <p className="mt-1 text-xs text-[var(--muted)]">{t.columnsHint}</p>
                 </div>
+                <button type="button" className={btn} onClick={addColumn}>
+                  {t.addColumn}
+                </button>
               </div>
 
-              {/* COLUMNS */}
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
-                <div className="text-sm font-semibold text-[var(--text)]">Columns</div>
-                <div className="mt-2 text-xs text-[var(--muted)]">
-                  Header name becomes the actual CSV column header your file exports with. If you leave it blank,
-                  we’ll fall back to Key or a default (Column 1, Column 2, …).
-                </div>
+              {duplicateHeaders.length > 0 && (
+                <p className="mt-4 rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+                  {fmt(t.duplicateWarning, { names: duplicateHeaders.join(", ") })}
+                </p>
+              )}
 
-                <div className="mt-4 space-y-3">
-                  {selected.columns.length === 0 ? (
-                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
-                      No columns yet. Click Add column to begin.
-                    </div>
-                  ) : null}
-
-                  {selected.columns.map((c, idx) => {
-                    const label = headerLabelForColumn(c, idx);
-
-                    return (
-                      <div key={c.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-[var(--text)]">{label}</div>
-                            <div className="mt-1 text-xs text-[var(--muted)]">Internal ID: {c.id}</div>
-                          </div>
-
-                          <button
-                            type="button"
-                            className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--text)]"
-                            onClick={() => removeColumn(idx)}
-                          >
-                            Remove
-                          </button>
-                        </div>
-
-                        <div className="mt-4 grid gap-3 md:grid-cols-2">
-                          <div>
-                            <div className="text-xs text-[var(--muted)]">Key (optional)</div>
-                            <input
-                              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                              value={c.key ?? ""}
-                              onChange={(e) => updateColumn(idx, { key: e.target.value })}
-                              placeholder=""
-                            />
-                          </div>
-
-                          <div>
-                            <div className="text-xs text-[var(--muted)]">Header name (optional)</div>
-                            <input
-                              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                              value={c.title ?? ""}
-                              onChange={(e) => updateColumn(idx, { title: e.target.value })}
-                              placeholder="Example: Title"
-                            />
-                          </div>
-
-                          <label className="flex items-center gap-2 text-sm text-[var(--text)]">
-                            <input
-                              type="checkbox"
-                              checked={!!c.required}
-                              onChange={(e) => updateColumn(idx, { required: e.target.checked })}
-                            />
-                            Required
-                          </label>
-
-                          <div>
-                            <div className="text-xs text-[var(--muted)]">Default value</div>
-                            <input
-                              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                              value={c.defaultValue ?? ""}
-                              onChange={(e) => updateColumn(idx, { defaultValue: e.target.value })}
-                            />
-                          </div>
-                        </div>
-
-                        {/* PER COLUMN RULES */}
-                        <div className="mt-5">
-                          <div className="text-sm font-semibold text-[var(--text)]">Column rules</div>
-                          <div className="mt-3 grid gap-3 md:grid-cols-2">
-                            {RULES.map((r) => {
-                              const existing = getColumnRule(c.id, r.type);
-                              const enabled = !!existing;
-
-                              return (
-                                <div key={r.type} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-                                  <label className="flex items-center gap-2 text-sm text-[var(--text)]">
-                                    <input
-                                      type="checkbox"
-                                      checked={enabled}
-                                      onChange={(e) => toggleColumnRule(c.id, r.type, e.target.checked)}
-                                    />
-                                    {r.label}
-                                  </label>
-
-                                  {r.needsValue && enabled ? (
-                                    <div className="mt-3">
-                                      <div className="text-xs text-[var(--muted)]">{r.valueLabel}</div>
-                                      <input
-                                        className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none"
-                                        value={String(existing?.value ?? "")}
-                                        onChange={(e) => setColumnRuleValue(c.id, r.type, e.target.value)}
-                                        placeholder={r.type === "max_length" ? "10" : ""}
-                                      />
-                                    </div>
-                                  ) : null}
-                                </div>
-                              );
-                            })}
-                          </div>
+              <ol className="mt-4 space-y-2">
+                {selected.columns.length === 0 && (
+                  <li className="rounded-2xl border border-dashed border-[var(--border)] p-4 text-sm text-[var(--muted)]">{t.noColumns}</li>
+                )}
+                {selected.columns.map((c, idx) => {
+                  const rules = columnRules(c.id);
+                  const open = openColumn === c.id;
+                  const name = (c.title ?? "").trim() || fmt(t.columnN, { n: idx + 1 });
+                  const available = RULE_TYPES.filter((r) => !rules.some((x) => x.type === r.type));
+                  return (
+                    <li key={c.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
+                      <div className="flex items-center gap-2 p-3">
+                        <button
+                          type="button"
+                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                          aria-expanded={open}
+                          onClick={() => setOpenColumn(open ? null : c.id)}
+                        >
+                          <span className="w-6 shrink-0 text-xs text-[var(--muted)]">{idx + 1}</span>
+                          <span className="truncate text-sm font-semibold text-[var(--text)]">{name}</span>
+                          {c.required && (
+                            <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-600 dark:text-red-300">
+                              {t.required}
+                            </span>
+                          )}
+                          {rules.length > 0 && (
+                            <span className="hidden shrink-0 text-xs text-[var(--muted)] sm:inline">{fmt(t.ruleCount, { count: rules.length })}</span>
+                          )}
+                        </button>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <IconButton label={t.moveUp} disabled={idx === 0} onClick={() => moveColumn(idx, -1)}>↑</IconButton>
+                          <IconButton label={t.moveDown} disabled={idx === selected.columns.length - 1} onClick={() => moveColumn(idx, 1)}>↓</IconButton>
+                          <IconButton label={t.removeColumn} onClick={() => removeColumn(idx)}>✕</IconButton>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
 
-      <UpgradeModal
-        open={upgradeOpen}
-        title="Advanced only"
-        message="Custom Formats are available on the Advanced plan. Upgrade to create and manage reusable CSV formats."
-        onClose={() => setUpgradeOpen(false)}
-      />
+                      {open && (
+                        <div className="space-y-4 border-t border-[var(--border)] p-4">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="text-xs text-[var(--muted)]">
+                              {t.headerName}
+                              <input className={input} value={c.title ?? ""} onChange={(e) => updateColumn(idx, { title: e.target.value })} />
+                            </label>
+                            <label className="text-xs text-[var(--muted)]">
+                              {t.alsoAccept}
+                              <input
+                                className={input}
+                                value={c.key ?? ""}
+                                placeholder={t.alsoAcceptPlaceholder}
+                                onChange={(e) => updateColumn(idx, { key: e.target.value })}
+                              />
+                            </label>
+                            <label className="text-xs text-[var(--muted)]">
+                              {t.defaultValue}
+                              <input className={input} value={c.defaultValue ?? ""} onChange={(e) => updateColumn(idx, { defaultValue: e.target.value })} />
+                            </label>
+                            <label className="flex items-center gap-2 self-end pb-2 text-sm text-[var(--text)]">
+                              <input type="checkbox" checked={!!c.required} onChange={(e) => updateColumn(idx, { required: e.target.checked })} />
+                              {t.requiredLabel}
+                            </label>
+                          </div>
+
+                          <div>
+                            <div className="text-xs font-semibold text-[var(--text)]">{t.columnRules}</div>
+                            <ul className="mt-2 space-y-2">
+                              {rules.map((r) => {
+                                const def = RULE_TYPES.find((x) => x.type === r.type);
+                                return (
+                                  <li key={r.type} className="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
+                                    <span className="text-sm text-[var(--text)]">{ruleLabel(t, r.type)}</span>
+                                    {def?.value ? (
+                                      <input
+                                        className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 text-base text-[var(--text)] sm:text-sm"
+                                        aria-label={ruleLabel(t, r.type)}
+                                        value={String(r.value ?? "")}
+                                        inputMode={def.value === "number" ? "numeric" : undefined}
+                                        placeholder={valuePlaceholder(t, def.value)}
+                                        onChange={(e) => setColumnRuleValue(c.id, r.type, e.target.value)}
+                                      />
+                                    ) : (
+                                      <span className="flex-1" />
+                                    )}
+                                    <IconButton label={t.removeRule} onClick={() => removeColumnRule(c.id, r.type)}>✕</IconButton>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                            {available.length > 0 && (
+                              <select
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-base text-[var(--text)] sm:w-auto sm:text-sm"
+                                value=""
+                                aria-label={t.addRule}
+                                onChange={(e) => e.target.value && addColumnRule(c.id, e.target.value as RuleType)}
+                              >
+                                <option value="">{t.addRule}</option>
+                                {available.map((r) => (
+                                  <option key={r.type} value={r.type}>
+                                    {ruleLabel(t, r.type)}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+
+          </div>
+        )}
+      </div>
     </main>
+  );
+}
+
+function IconButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--text)] disabled:opacity-30"
+    >
+      {children}
+    </button>
   );
 }

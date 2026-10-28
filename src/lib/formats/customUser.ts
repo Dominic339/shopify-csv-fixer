@@ -1,5 +1,6 @@
 // src/lib/formats/customUser.ts
 import type { CsvFormat, CsvFixResult, CsvIssue, CsvRow } from "./types";
+import { parseLocaleNumber } from "@/lib/shopifySchema";
 
 export const USER_FORMATS_STORAGE_KEY = "striveformats_user_formats_v1";
 const _LEGACY_FORMATS_KEY = "csnest_user_formats_v1";
@@ -7,9 +8,11 @@ const _LEGACY_FORMATS_KEY = "csnest_user_formats_v1";
 export type RuleType =
   | "trim"
   | "uppercase"
+  | "lowercase"
   | "no_spaces"
   | "no_special_chars"
-  | "numeric_only"
+  | "numeric_only" // digits only (barcodes, phone numbers)
+  | "number" // a number in any common format, written as 1234.5
   | "max_length"
   | "required"
   | "default_value"
@@ -70,6 +73,10 @@ function applyTransform(value: string, rule: UserFormatRule) {
       v = v.toUpperCase();
       break;
 
+    case "lowercase":
+      v = v.toLowerCase();
+      break;
+
     case "no_spaces":
       v = v.replace(/\s+/g, "");
       break;
@@ -77,7 +84,8 @@ function applyTransform(value: string, rule: UserFormatRule) {
     case "no_special_chars": {
       const allowed = safeString(rule.value?.allowed ?? rule.value ?? "");
       const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
-      const re = new RegExp(`[^a-zA-Z0-9${esc}]`, "g");
+      // Letters and digits in any script (é, ß, 日本) are kept, not only A–Z.
+      const re = new RegExp(`[^\\p{L}\\p{M}\\p{N}${esc}]`, "gu");
       v = v.replace(re, "");
       break;
     }
@@ -85,6 +93,14 @@ function applyTransform(value: string, rule: UserFormatRule) {
     case "numeric_only":
       v = v.replace(/[^\d]/g, "");
       break;
+
+    case "number": {
+      // Plain numbers ("12.50") are left as they are; "1.234,50" or "$ 12" become "1234.5" / "12".
+      if (/^-?\d+(\.\d+)?$/.test(v.trim())) break;
+      const n = parseLocaleNumber(v);
+      if (n !== null) v = String(n);
+      break;
+    }
 
     case "max_length": {
       const n = Number(rule.value?.n ?? rule.value ?? 0);
@@ -117,6 +133,9 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
     case "required":
       return value ? null : "Required value is missing";
 
+    case "number":
+      return !value || parseLocaleNumber(value) !== null ? null : "Value must be a number";
+
     case "allowed_values": {
       const raw = rule.value;
       const list = Array.isArray(raw)
@@ -126,7 +145,8 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
             .map((x) => x.trim())
             .filter(Boolean);
 
-      if (!list.length) return null;
+      // Empty cells are the "required" rule's job.
+      if (!list.length || !value) return null;
       return list.includes(value) ? null : `Value must be one of: ${list.join(", ")}`;
     }
 
@@ -135,7 +155,7 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
       if (!pattern) return null;
       try {
         const re = new RegExp(pattern);
-        return re.test(value) ? null : "Value does not match required pattern";
+        return !value || re.test(value) ? null : "Value does not match required pattern";
       } catch {
         return "Invalid regex allow pattern";
       }
@@ -280,8 +300,25 @@ function matchKeysForColumn(col: UserFormatColumn, idx: number) {
   return out.map(normalizeHeaderKey);
 }
 
+/** Find which input header feeds each format column (by header name, alias, or "Column N"). */
+export function matchFormatColumns(uf: UserFormatV1, headers: string[]): (string | null)[] {
+  const indexByNorm = new Map<string, number>();
+  headers.forEach((h, idx) => {
+    const k = normalizeHeaderKey(h);
+    if (!indexByNorm.has(k)) indexByNorm.set(k, idx);
+  });
+  return (uf.columns ?? []).map((c, idx) => {
+    for (const cand of matchKeysForColumn(c, idx)) {
+      const hit = indexByNorm.get(cand);
+      if (typeof hit === "number") return headers[hit];
+    }
+    return null;
+  });
+}
+
 /**
  * Convert a saved user format into a CsvFormat usable by the Fixer.
+ * Output columns are exactly the format's columns, in the format's order.
  */
 export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
   return {
@@ -291,26 +328,12 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
     category: "Custom",
     source: "user",
     apply: (headers: string[], rows: CsvRow[]): CsvFixResult => {
-      const fixesApplied: string[] = [];
       const issues: CsvIssue[] = [];
-
-      const expectedHeaders = (uf.columns ?? []).map((c, idx) => displayTitle(c, idx));
-
-      const inputNorm = headers.map((h) => normalizeHeaderKey(h));
-      const inputIndexByNorm = new Map<string, number>();
-      inputNorm.forEach((h, idx) => inputIndexByNorm.set(h, idx));
-
-      const inputHeaderForCol: (string | null)[] = (uf.columns ?? []).map((c, idx) => {
-        const candidates = matchKeysForColumn(c, idx);
-        for (const cand of candidates) {
-          const hit = inputIndexByNorm.get(cand);
-          if (typeof hit === "number") return headers[hit];
-        }
-        return null;
-      });
+      const columns = uf.columns ?? [];
+      const expectedHeaders = columns.map((c, idx) => displayTitle(c, idx));
+      const inputHeaderForCol = matchFormatColumns(uf, headers);
 
       const globalRules = (uf.globalRules ?? []).filter((r) => r?.scope === "global");
-
       const rulesByColumnId = new Map<string, UserFormatRule[]>();
       for (const r of uf.rules ?? []) {
         if (r?.scope !== "column" || !r.columnId) continue;
@@ -319,56 +342,58 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
         rulesByColumnId.set(r.columnId, list);
       }
 
+      // A column the file doesn't have: say so once, instead of only per-row "missing" errors.
+      columns.forEach((col, ci) => {
+        if (inputHeaderForCol[ci]) return;
+        const hasDefault = !!safeString(col.defaultValue) || (rulesByColumnId.get(col.id) ?? []).some((r) => r.type === "default_value");
+        issues.push({
+          rowIndex: -1,
+          column: expectedHeaders[ci],
+          severity: col.required && !hasDefault ? "error" : "warning",
+          code: "custom/missing_column",
+          message: hasDefault
+            ? `Column "${expectedHeaders[ci]}" is not in the file. It will be added and filled with the default value.`
+            : `Column "${expectedHeaders[ci]}" is not in the file. It will be added empty.`,
+        });
+      });
+
+      const defaultsApplied = new Map<string, number>();
+      const changedByRules = new Map<string, number>();
+
       const fixedRows: CsvRow[] = rows.map((inRow, rowIndex) => {
         const out: CsvRow = {};
 
-        for (let ci = 0; ci < (uf.columns ?? []).length; ci++) {
-          const col = uf.columns[ci];
+        for (let ci = 0; ci < columns.length; ci++) {
+          const col = columns[ci];
           const outHeader = expectedHeaders[ci];
           const inputHeader = inputHeaderForCol[ci];
+          const colRules = rulesByColumnId.get(col.id) ?? [];
 
-          // pull value from input row
-          let v = "";
-          if (inputHeader && inRow && Object.prototype.hasOwnProperty.call(inRow, inputHeader)) {
-            v = safeString((inRow as any)[inputHeader]);
-          } else {
-            // fallback: if input already has same header name
-            if (inRow && Object.prototype.hasOwnProperty.call(inRow, outHeader)) {
-              v = safeString((inRow as any)[outHeader]);
-            }
-          }
+          const original = inputHeader && inRow && Object.prototype.hasOwnProperty.call(inRow, inputHeader)
+            ? safeString(inRow[inputHeader])
+            : "";
+          let v = original;
 
-          // apply default value
           const dv = safeString(col.defaultValue ?? "");
           if (!v && dv) {
             v = dv;
-            fixesApplied.push(`Row ${rowIndex + 1}: Applied default value for ${outHeader}`);
+            defaultsApplied.set(outHeader, (defaultsApplied.get(outHeader) ?? 0) + 1);
           }
 
-          // transforms
           for (const gr of globalRules) v = applyTransform(v, gr);
-
-          const colRules = rulesByColumnId.get(col.id) ?? [];
           for (const r of colRules) v = applyTransform(v, r);
+          if (original && v !== original && v !== dv) changedByRules.set(outHeader, (changedByRules.get(outHeader) ?? 0) + 1);
 
-          // validations
-          if (col.required && !v) {
-            issues.push({
-              rowIndex,
-              column: outHeader,
-              severity: "error",
-              message: "Required value is missing",
-            });
+          // "Required" can be set on the column and as a rule; report it once.
+          const required = col.required || colRules.some((r) => r.type === "required") || globalRules.some((r) => r.type === "required");
+          if (required && !v) {
+            issues.push({ rowIndex, column: outHeader, severity: "error", code: "custom/required", message: "Required value is missing" });
           }
 
-          for (const r of colRules) {
+          for (const r of [...colRules, ...globalRules]) {
+            if (r.type === "required") continue;
             const msg = validateValue(v, r);
-            if (msg) issues.push({ rowIndex, column: outHeader, severity: "error", message: msg });
-          }
-
-          for (const gr of globalRules) {
-            const msg = validateValue(v, gr);
-            if (msg) issues.push({ rowIndex, column: outHeader, severity: "error", message: msg });
+            if (msg) issues.push({ rowIndex, column: outHeader, severity: "error", code: `custom/${r.type}`, message: msg });
           }
 
           out[outHeader] = v;
@@ -377,7 +402,53 @@ export function userFormatToCsvFormat(uf: UserFormatV1): CsvFormat {
         return out;
       });
 
+      const fixesApplied = [
+        ...[...defaultsApplied].map(([h, n]) => `Filled the default value into ${n} empty "${h}" cell${n === 1 ? "" : "s"}`),
+        ...[...changedByRules].map(([h, n]) => `Cleaned ${n} "${h}" value${n === 1 ? "" : "s"} with the format's rules`),
+      ];
+
       return { fixedHeaders: expectedHeaders, fixedRows, issues, fixesApplied };
     },
+  };
+}
+
+/** Suggest a format from a sample CSV: one column per header, with rules the data already follows. */
+export function suggestFormatFromCsv(
+  name: string,
+  headers: string[],
+  rows: CsvRow[],
+  existingIds: Set<string> = new Set()
+): UserFormatV1 {
+  const now = Date.now();
+  const columns: UserFormatColumn[] = [];
+  const rules: UserFormatRule[] = [];
+  const sample = rows.slice(0, 2000);
+
+  headers.forEach((header, idx) => {
+    const title = header.trim() || columnTemplateTitle(idx);
+    const id = `col_${idx}_${Math.random().toString(36).slice(2, 8)}`;
+    const values = sample.map((r) => safeString(r[header]).trim());
+    const filled = values.filter(Boolean);
+    const distinct = new Set(filled);
+
+    columns.push({ id, title, key: "", required: sample.length > 0 && filled.length === sample.length, defaultValue: "" });
+
+    if (filled.length >= 5 && filled.every((v) => parseLocaleNumber(v) !== null) && !filled.some((v) => /^0\d/.test(v))) {
+      rules.push({ scope: "column", columnId: id, type: "number" });
+    } else if (filled.length >= 10 && distinct.size >= 2 && distinct.size <= 8 && [...distinct].every((v) => v.length <= 40)) {
+      rules.push({ scope: "column", columnId: id, type: "allowed_values", value: [...distinct].join(", ") });
+    }
+  });
+
+  return {
+    version: 1,
+    id: generateUserFormatId(existingIds),
+    name: name.trim() || "New format",
+    source: "user",
+    columns,
+    rules,
+    globalRules: [{ scope: "global", type: "trim" }],
+    createdAt: now,
+    updatedAt: now,
   };
 }

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* The site has one dark identity whatever the OS setting, so `dark:` utilities always apply.
+   (By default they follow prefers-color-scheme, which left light-mode colours on a dark page.) */
+@custom-variant dark (&);
+
 /* ===== Brand Theme — single identity, green/cyan on deep dark ===== */
 :root,
 [data-theme="light"],
