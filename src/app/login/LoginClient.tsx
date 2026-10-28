@@ -103,7 +103,7 @@ export default function LoginClient({ authByLocale }: Props) {
 
           <button
             disabled={busy}
-            className="rgb-btn w-full bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rg-btn w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
           >
             {busy ? t.pleaseWait : mode === "signup" ? t.signUp : t.logIn}
           </button>

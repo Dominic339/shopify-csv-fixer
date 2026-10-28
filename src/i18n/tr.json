@@ -34,7 +34,9 @@
     "privacy": "Gizlilik",
     "terms": "Koşullar",
     "tagline": "Ürün CSV dosyalarınızı içe aktarma başarısız olmadan düzeltin. Dosyalarınız tarayıcınızda işlenir.",
-    "language": "Dil"
+    "language": "Dil",
+    "themeDark": "Koyu moda geç",
+    "themeLight": "Açık moda geç"
   },
   "guide": {
     "whatYouLearn": "Neler öğreneceksiniz",

@@ -241,7 +241,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
               {sub.signedIn && sub.status === "active" ? (
                 sub.stripeCustomerId ? (
                   <button
-                    className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                    className="rg-btn px-5 py-3 text-sm font-semibold disabled:opacity-60"
                     onClick={openPortal}
                     disabled={busy || billingUnavailable}
                     type="button"
@@ -295,7 +295,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                       ? `/login?redirect=${encodeURIComponent(`/profile?upgrade=${upgradeIntent}`)}&msg=upgrade`
                       : "/login?redirect=%2Fprofile"
                   }
-                  className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
+                  className="rg-btn px-5 py-3 text-sm font-semibold"
                 >
                   {navT.signIn}
                 </Link>

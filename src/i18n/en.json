@@ -34,7 +34,9 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "tagline": "Fix product CSV imports before they fail. Your files are processed in your browser.",
-    "language": "Language"
+    "language": "Language",
+    "themeDark": "Switch to dark mode",
+    "themeLight": "Switch to light mode"
   },
   "guide": {
     "whatYouLearn": "What you'll learn",

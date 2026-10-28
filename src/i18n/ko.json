@@ -34,7 +34,9 @@
     "privacy": "개인정보 처리방침",
     "terms": "이용약관",
     "tagline": "가져오기가 실패하기 전에 상품 CSV를 고치세요. 파일은 브라우저 안에서 처리됩니다.",
-    "language": "언어"
+    "language": "언어",
+    "themeDark": "다크 모드로 전환",
+    "themeLight": "라이트 모드로 전환"
   },
   "guide": {
     "whatYouLearn": "배울 내용",

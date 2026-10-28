@@ -34,7 +34,9 @@
     "privacy": "プライバシー",
     "terms": "利用規約",
     "tagline": "商品 CSV のインポートが失敗する前に修正。ファイルはブラウザー内で処理されます。",
-    "language": "言語"
+    "language": "言語",
+    "themeDark": "ダークモードに切り替え",
+    "themeLight": "ライトモードに切り替え"
   },
   "guide": {
     "whatYouLearn": "学べること",

@@ -69,7 +69,7 @@ export function QuotaWallCapture({ t, locale, limit, pricingHref, onDismiss, onB
         <p className="mt-2 text-sm text-[var(--muted)]">{fmt(t.quotaBody, { limit, date: resetDate })}</p>
         <p className="mt-2 text-sm text-[var(--muted)]">{fmt(t.smallFilesFree, { rows: FREE_ROWS_PER_EXPORT })}</p>
 
-        <button type="button" className="rg-btn mt-5 w-full justify-center" onClick={onBuyPass} disabled={passBusy}>
+        <button type="button" className="rg-btn is-secondary mt-5 w-full justify-center" onClick={onBuyPass} disabled={passBusy}>
           {passBusy ? t.passStarting : fmt(t.passSignIn, { price: PASS_PRICE_LABEL })}
         </button>
 

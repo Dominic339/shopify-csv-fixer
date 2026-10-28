@@ -34,7 +34,9 @@
     "privacy": "Confidentialité",
     "terms": "Conditions",
     "tagline": "Corrigez vos CSV produits avant l’échec de l’import. Vos fichiers sont traités dans votre navigateur.",
-    "language": "Langue"
+    "language": "Langue",
+    "themeDark": "Passer en mode sombre",
+    "themeLight": "Passer en mode clair"
   },
   "guide": {
     "whatYouLearn": "Ce que vous allez apprendre",

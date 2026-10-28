@@ -2,7 +2,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { THEME_INIT_SCRIPT, ThemeProvider } from "@/components/theme/ThemeProvider";
 import TopBar from "@/components/TopBar";
 import Footer from "@/components/Footer";
 
@@ -22,14 +22,7 @@ export const metadata: Metadata = {
     "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
   applicationName: "StriveFormats",
 
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png" },
-    ],
-    shortcut: ["/favicon.ico"],
-    apple: ["/apple-icon.png"],
-  },
+  // Icons come from the file conventions in src/app: favicon.ico, icon.svg, icon.png, apple-icon.png.
 
   openGraph: {
     type: "website",
@@ -71,7 +64,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const navByLocale = await sectionByLocale("nav");
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <ThemeProvider>
           <TopBar navByLocale={navByLocale} />

@@ -34,7 +34,9 @@
     "privacy": "Datenschutz",
     "terms": "AGB",
     "tagline": "Produkt-CSVs reparieren, bevor der Import scheitert. Deine Dateien werden in deinem Browser verarbeitet.",
-    "language": "Sprache"
+    "language": "Sprache",
+    "themeDark": "Zum dunklen Modus wechseln",
+    "themeLight": "Zum hellen Modus wechseln"
   },
   "guide": {
     "whatYouLearn": "Was du lernst",

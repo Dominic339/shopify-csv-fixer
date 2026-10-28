@@ -69,7 +69,7 @@ export default function ResetPasswordClient({ authByLocale }: Props) {
 
           <button
             disabled={busy || (msg?.ok ?? false)}
-            className="rgb-btn w-full bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rg-btn w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
           >
             {busy ? t.sending : t.sendResetLink}
           </button>

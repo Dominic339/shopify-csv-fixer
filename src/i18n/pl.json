@@ -34,7 +34,9 @@
     "privacy": "Prywatność",
     "terms": "Regulamin",
     "tagline": "Popraw pliki CSV produktów, zanim import się nie powiedzie. Pliki są przetwarzane w Twojej przeglądarce.",
-    "language": "Język"
+    "language": "Język",
+    "themeDark": "Przełącz na tryb ciemny",
+    "themeLight": "Przełącz na tryb jasny"
   },
   "guide": {
     "whatYouLearn": "Czego się nauczysz",

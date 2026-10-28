@@ -34,7 +34,9 @@
     "privacy": "Privacidade",
     "terms": "Termos",
     "tagline": "Corrija seus CSV de produtos antes que a importação falhe. Seus arquivos são processados no seu navegador.",
-    "language": "Idioma"
+    "language": "Idioma",
+    "themeDark": "Mudar para o modo escuro",
+    "themeLight": "Mudar para o modo claro"
   },
   "guide": {
     "whatYouLearn": "O que você vai aprender",

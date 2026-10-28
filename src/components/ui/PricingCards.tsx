@@ -129,7 +129,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
           {t.billingUnavailable}
         </div>
       )}
-      {msg && <div className="mb-4 text-sm text-red-400">{msg}</div>}
+      {msg && <div className="mb-4 text-sm text-red-600 dark:text-red-400">{msg}</div>}
 
       <div className={`grid gap-6 ${gridCols}`}>
         {/* Free */}
@@ -155,7 +155,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
 
         {/* 24-hour pass */}
         {showPass && (
-          <div className={`rounded-3xl border p-6 shadow-sm ${passTime ? "border-[var(--accent)] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface)]"}`}>
+          <div className={`rounded-3xl border p-6 shadow-sm ${passTime ? "border-[var(--secondary)] bg-[var(--surface)]" : "border-[rgba(var(--secondary-rgb),0.35)] bg-[var(--surface)]"}`}>
             <div className="flex items-center justify-between">
               <div className="text-sm text-[var(--muted)]">{t.pass}</div>
               {passTime && (
@@ -171,7 +171,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
               <li>{t.passBullet3}</li>
             </ul>
             <button
-              className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
+              className="rg-btn is-secondary mt-6 w-full px-5 py-3 text-sm font-semibold disabled:opacity-50"
               onClick={buyPass}
               disabled={busy !== null || billingUnavailable}
               type="button"

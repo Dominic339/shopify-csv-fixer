@@ -13,7 +13,7 @@ import { card, muted, platformLabel, StepTitle } from "./ui";
 
 function Stat({ label, value, tone }: { label: string; value: string | number; tone?: "bad" | "warn" | "good" }) {
   const color =
-    tone === "bad" ? "text-red-600 dark:text-red-400" : tone === "warn" ? "text-amber-600 dark:text-amber-400" : tone === "good" ? "text-green-600 dark:text-green-400" : "text-[var(--text)]";
+    tone === "bad" ? "text-red-600 dark:text-red-400" : tone === "warn" ? "text-amber-600 dark:text-amber-400" : tone === "good" ? "text-[var(--accent-text)]" : "text-[var(--text)]";
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
       <div className={`text-2xl font-bold ${color}`}>{value}</div>
@@ -30,7 +30,7 @@ export function formatPassTime(iso: string, locale: string) {
 /** One-time pass button; signed-out users are sent to sign in first. */
 function PassButton({ f, t }: { f: Fixer; t: AppStrings }) {
   return (
-    <button type="button" className="rg-btn mt-3 justify-center" onClick={() => void f.buyPass()} disabled={f.passBusy}>
+    <button type="button" className="rg-btn is-secondary mt-3 justify-center" onClick={() => void f.buyPass()} disabled={f.passBusy}>
       {f.passBusy
         ? t.passStarting
         : f.subStatus?.signedIn
@@ -104,11 +104,11 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
       {/* Status */}
       <div
         className={`mt-4 rounded-2xl border p-4 sm:p-5 ${
-          blocked ? "border-red-300 bg-red-50 dark:border-red-900/50 dark:bg-red-900/10" : "border-green-300 bg-green-50 dark:border-green-900/50 dark:bg-green-900/10"
+          blocked ? "border-red-300 bg-red-50 dark:border-red-900/50 dark:bg-red-900/10" : "border-[rgba(var(--accent-rgb),0.35)] bg-[var(--accent-soft)]"
         }`}
         role="status"
       >
-        <div className={`text-lg font-semibold ${blocked ? "text-red-700 dark:text-red-300" : "text-green-700 dark:text-green-300"}`}>
+        <div className={`text-lg font-semibold ${blocked ? "text-red-700 dark:text-red-300" : "text-[var(--accent-text)]"}`}>
           {blocked ? plural(f.blockingCount, t.blockedTitleOne, t.blockedTitle) : platform ? fmt(t.readyFor, { platform }) : t.readyGeneric}
         </div>
         <p className={`mt-1 text-sm ${muted}`}>{blocked ? t.blockedDesc : t.readyDesc}</p>

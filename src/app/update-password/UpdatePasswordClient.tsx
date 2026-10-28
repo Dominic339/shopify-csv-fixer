@@ -78,7 +78,7 @@ export default function UpdatePasswordClient({ authByLocale }: Props) {
           </p>
           <a
             href="/reset-password"
-            className="rgb-btn mt-6 inline-block bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white"
+            className="rg-btn mt-6 inline-block px-4 py-3 text-sm font-semibold"
           >
             {t.requestNewLink}
           </a>
@@ -138,7 +138,7 @@ export default function UpdatePasswordClient({ authByLocale }: Props) {
 
           <button
             disabled={busy || (msg?.ok ?? false)}
-            className="rgb-btn w-full bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rg-btn w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
           >
             {busy ? t.updating : t.updatePassword}
           </button>
