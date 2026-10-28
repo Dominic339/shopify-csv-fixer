@@ -1,0 +1,160 @@
+---
+title: "Champs booléens du fichier plat Amazon : y/n, TRUE/FALSE et pièges courants"
+description: "Découvrez quels champs booléens des fichiers plats Seller Central attendent 'y' ou 'n' (et non TRUE/FALSE ou 1/0), comment corriger les valeurs non valides en masse et comment éviter la mise en forme automatique du tableur qui abîme ces colonnes."
+keywords: ["fichier plat amazon booléen", "champs booléens csv amazon", "amazon y n csv", "fichier plat amazon true false", "seller central csv vrai faux", "amazon is_adult_product", "amazon batteries_required", "erreurs fichier plat amazon"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Quelles valeurs booléennes les fichiers plats Amazon acceptent (y/n, TRUE/FALSE ou 1/0)"
+  - "Quels champs courants du fichier plat sont booléens"
+  - "Comment Excel et Google Sheets altèrent les valeurs y/n sans prévenir"
+  - "Comment repérer et corriger des valeurs booléennes non valides sur des centaines de lignes"
+  - "Comment éviter que les booléens soient altérés lors des prochains exports"
+bestFor: "Vendeurs Amazon qui utilisent les fichiers plats Seller Central pour créer ou mettre à jour des offres en masse, en particulier les champs de conformité, d'expédition et d'état de l'article"
+timeToComplete: "8 minutes"
+---
+
+## Les valeurs booléennes dans les fichiers plats Amazon
+
+Les modèles de fichier plat par catégorie d'Amazon (téléchargés depuis Seller Central) utilisent des conventions booléennes différentes selon la colonne. Une erreur provoque des erreurs de validation au chargement ou des problèmes de données silencieux.
+
+Les trois formats que vous rencontrerez :
+
+| Format | Exemple | Quand il est utilisé |
+|---|---|---|
+| `y` / `n` | `y`, `n` | La plupart des champs booléens de sécurité et d'expédition |
+| `true` / `false` | `true`, `false` | Certaines versions de modèle ; insensible à la casse |
+| `1` / `0` | Peu courant | Rare ; certains fichiers plats personnalisés |
+
+**L'erreur la plus fréquente :** utiliser `TRUE`/`FALSE` (l'affichage booléen par défaut d'Excel) dans une colonne qui attend `y`/`n`. Amazon les rejette avec une erreur de validation ou ignore le champ sans prévenir. Dans un Excel en français, ces valeurs apparaissent sous la forme `VRAI`/`FAUX`, qui ne sont pas valides non plus.
+
+---
+
+## Champs booléens courants dans les fichiers plats Amazon
+
+Ces colonnes figurent dans de nombreux modèles de catégorie et demandent une attention particulière :
+
+| Nom de colonne | Valeurs attendues | Ce qu'il contrôle |
+|---|---|---|
+| `batteries_required` | `y` / `n` | Si l'article nécessite des piles |
+| `batteries_included` | `y` / `n` | Si les piles sont fournies dans le colis |
+| `is_adult_product` | `y` / `n` | Classement comme contenu pour adultes |
+| `is_expiration_dated_product` | `y` / `n` | Si le produit a une date de péremption |
+| `item_package_quantity` | nombre entier | (Pas un booléen, mais souvent confondu) |
+| `hazmat_applicable` | `y` / `n` | Indicateur de matière dangereuse |
+| `fragile` | `y` / `n` | Si l'article est fragile pour l'expédition |
+| `is_discontinued_by_manufacturer` | `y` / `n` | Indicateur de produit arrêté |
+| `generic_keywords` | texte | (Pas un booléen ; cité pour éviter toute confusion) |
+
+> **Remarque :** les noms exacts des colonnes et les valeurs acceptées varient selon le modèle de catégorie. Consultez toujours l'onglet des définitions de données du modèle que vous avez téléchargé depuis Seller Central pour votre catégorie.
+
+---
+
+## Comment les tableurs altèrent les valeurs booléennes
+
+### La conversion automatique d'Excel
+
+Quand vous tapez `y` dans une cellule, Excel la laisse en texte. Mais des problèmes surviennent quand :
+
+1. **Vous ouvrez un CSV qui contient déjà des valeurs y/n :** si Excel interprète la colonne comme booléenne et la met en forme automatiquement, `y` peut s'afficher correctement mais être enregistré sous une autre valeur à l'export.
+2. **Vous utilisez TRUE/FALSE :** si quelqu'un saisit `TRUE` ou `FALSE` (les valeurs logiques intégrées d'Excel ; `VRAI` et `FAUX` dans un Excel en français), Excel les enregistre comme booléens. À l'export CSV, Excel les écrit en majuscules dans la langue d'Excel, et Amazon les rejette dans les colonnes `y`/`n`.
+3. **Des formules renvoient TRUE/FALSE :** si une formule comme `=SI(A2>0; VRAI; FAUX)` sert à remplir des colonnes booléennes, le résultat est `VRAI`/`FAUX`, pas `y`/`n`.
+
+### Google Sheets
+
+Même comportement : le type booléen de Sheets utilise `TRUE`/`FALSE`. Les formules et les colonnes de cases à cocher produisent ces valeurs, pas `y`/`n`.
+
+---
+
+## Repérer les valeurs booléennes non valides
+
+### Dans Excel
+
+1. Ouvrez le CSV du fichier plat via **Données → À partir d'un fichier texte/CSV** pour éviter la mise en forme automatique.
+2. Pour chaque colonne booléenne (par exemple `batteries_required`) :
+   a. Cliquez sur la flèche du filtre.
+   b. Cherchez les valeurs autres que `y` et `n`.
+   c. Signalez toute ligne contenant `TRUE`, `FALSE`, `VRAI`, `FAUX`, `1`, `0`, `yes`, `no` ou vide là où une valeur est requise.
+
+### Avec une formule dans une colonne d'aide
+
+Ajoutez une colonne à côté de chaque champ booléen pour le vérifier :
+
+```
+=IF(OR(LOWER(A2)="y", LOWER(A2)="n", A2=""), "OK", "INVALID: "&A2)
+```
+
+Dans un Excel en français, la même formule s'écrit `=SI(OU(MINUSCULE(A2)="y"; MINUSCULE(A2)="n"; A2=""); "OK"; "INVALID: "&A2)`.
+
+Filtrez les lignes qui affichent `INVALID` pour trouver toutes les valeurs à corriger.
+
+---
+
+## Corriger les valeurs booléennes non valides en masse
+
+### Rechercher et remplacer dans Excel
+
+1. Appuyez sur **Ctrl+H** (Rechercher et remplacer).
+2. Dans **Rechercher**, saisissez `VRAI` (ou `TRUE`).
+3. Dans **Remplacer par**, saisissez `y` (si VRAI doit correspondre à y) ou `n`.
+4. Cliquez sur **Options → Regarder dans : Valeurs** pour comparer les valeurs des cellules et non les formules.
+5. Cliquez sur **Remplacer tout**.
+6. Recommencez pour `FAUX` → `n` (ou `y`, selon la signification du champ).
+
+> **Important :** décidez de la correspondance pour chaque champ : `VRAI` peut signifier `y` pour `batteries_included`, mais n'a peut-être pas de sens pour `is_adult_product`. Vérifiez la signification du champ avant de tout remplacer.
+
+### Remplacer les résultats de formules par des valeurs
+
+Si vos colonnes booléennes sont calculées par des formules :
+
+1. Sélectionnez toute la colonne.
+2. Copiez (**Ctrl+C**).
+3. Clic droit → **Collage spécial → Valeurs** (ou passez par la boîte de dialogue Collage spécial).
+4. Les formules sont remplacées par du texte fixe.
+5. Utilisez ensuite Rechercher et remplacer comme ci-dessus pour convertir `VRAI`/`FAUX` en `y`/`n`.
+
+### L'équivalent dans Google Sheets
+
+1. Sélectionnez la colonne booléenne.
+2. **Édition → Rechercher et remplacer** (Ctrl+H).
+3. Recherchez `TRUE` (ou `VRAI`) et remplacez par `y`. Appliquez à « Cette feuille ».
+4. Recommencez pour `FALSE` → `n`.
+5. Cochez « Respecter la casse » pour éviter de remplacer par erreur des morceaux de texte.
+
+---
+
+## Éviter que les booléens soient altérés à l'avenir
+
+### N'utilisez jamais de cellules booléennes Excel pour les colonnes du fichier plat
+
+Mettez vos colonnes booléennes au format **Texte** (clic droit → Format de cellule → Texte) avant de saisir des données. Ainsi, Excel n'interprète pas `y`/`n` ni `TRUE`/`FALSE` comme des valeurs booléennes natives.
+
+### Utilisez des listes déroulantes de validation des données
+
+Dans Excel, créez une liste déroulante pour les colonnes booléennes :
+
+1. Sélectionnez les cellules de la colonne (sous l'en-tête).
+2. Allez dans **Données → Validation des données**.
+3. Sous « Autoriser », choisissez **Liste**.
+4. Dans « Source », saisissez : `y;n`
+5. Cliquez sur OK.
+
+Seuls `y` ou `n` peuvent désormais être saisis dans ces cellules, ce qui évite les `VRAI`/`FAUX` accidentels ou les saisies libres.
+
+### Vérifiez avant chaque chargement
+
+Avant de charger votre fichier plat dans Seller Central :
+1. Ouvrez le CSV final dans un éditeur de texte (pas dans Excel) et parcourez les colonnes booléennes.
+2. Vérifiez que vous ne voyez que `y` et `n` (ou le format indiqué par votre modèle).
+3. Aucun `TRUE`, `FALSE`, `VRAI`, `FAUX`, `Yes`, `No` ni cellule vide là où le champ est requis.
+
+---
+
+## Erreurs de chargement Amazon liées aux champs booléens
+
+| Erreur | Cause probable |
+|---|---|
+| "Invalid value for batteries_required" | `TRUE` ou `Yes` au lieu de `y` |
+| "batteries_required is required" | Champ laissé vide pour un produit physique |
+| Ligne ignorée sans message | `FALSE` utilisé : Amazon ignore la mise à jour du champ |
+| "Value not in valid range" | `1`/`0` dans une colonne `y`/`n` |
