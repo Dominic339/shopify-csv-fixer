@@ -198,7 +198,8 @@ const CANON: Record<string, string> = {
   "variation picture url": "VariationPictureURL",
 };
 
-function canonicalName(header: string): string | null {
+/** eBay column name without "*" marker or "(SiteID=...)" metadata, e.g. "*Action(...)" → "Action". */
+export function canonicalEbayColumn(header: string): string | null {
   const key = header
     .trim()
     .replace(/^\*/, "")
@@ -212,7 +213,7 @@ function isEmpty(v: string | undefined) {
 }
 
 /** "Color=Blue;Red|Size=M" → Map(color → ["Blue","Red"], size → ["M"]) */
-function parseRelationshipDetails(raw: string): Map<string, { name: string; values: string[] }> | null {
+export function parseRelationshipDetails(raw: string): Map<string, { name: string; values: string[] }> | null {
   const out = new Map<string, { name: string; values: string[] }>();
   for (const part of raw.split("|").map((s) => s.trim()).filter(Boolean)) {
     const eq = part.indexOf("=");
@@ -238,7 +239,7 @@ function validateEbay(headers: string[], rows: CsvRow[], mode: Mode): CsvFixResu
   // canonical name → the file's own header for it (first match wins)
   const col = new Map<string, string>();
   for (const h of headers) {
-    const c = canonicalName(h);
+    const c = canonicalEbayColumn(h);
     if (c && !col.has(c)) col.set(c, h);
   }
   const has = (c: string) => col.has(c);
