@@ -1,0 +1,168 @@
+---
+title: "CSV'de WooCommerce değişken ürünleri: ana ve varyasyon satırları"
+description: "WooCommerce ürün içe aktarıcısının değişken ürünleri ana ve alt (varyasyon) satırlarla nasıl gösterdiğini anlayın: nitelik sütunları, satır türüne göre zorunlu alanlar ve en yaygın içe aktarma tuzakları."
+keywords: ["woocommerce değişken ürün csv", "woocommerce varyasyon içe aktarma", "woocommerce ana alt ürün csv", "woocommerce nitelikler csv", "woocommerce csv varyasyon içe aktarma", "değişken ürün woocommerce", "woocommerce ürün içe aktarıcı"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "WooCommerce'in değişken ürünleri ana satır ve varyasyon satırlarıyla nasıl gösterdiği"
+  - "Ana satırlarda ve varyasyon satırlarında hangi sütunların zorunlu olduğu"
+  - "Nitelik sütunlarının (Attribute 1 name, Attribute 1 value(s)) nasıl çalıştığı"
+  - "Sahipsiz varyasyonlara veya yinelenen ürünlere yol açan yaygın hatalar"
+  - "İçe aktarma için eksiksiz bir değişken ürün CSV'sinin nasıl kurulacağı"
+bestFor: "Değişken ürünleri (birden çok seçenekli giyim, ayakkabı, elektronik) içe aktaran veya güncelleyen WooCommerce mağaza sahipleri, geliştiriciler ve katalog yöneticileri"
+timeToComplete: "12 dakika"
+---
+
+## WooCommerce değişken ürünleri nasıl modeller
+
+WooCommerce'te **değişken ürün**, satın alınabilir varyasyonları olan bir üründür; örneğin S, M ve L bedenlerde satılan bir tişört. CSV'de iki tür satırla gösterilir:
+
+1. **Ana satır**: ürün kapsayıcısını temsil eder. Type değeri `variable` olur.
+2. **Varyasyon satırları**: her biri satın alınabilir bir seçenek kombinasyonunu temsil eder. Type değeri `variation` olur.
+
+Varyasyonlar ana ürüne, ana ürünün SKU'su veya kimliği aracılığıyla bağlanır.
+
+WordPress Türkçe ise dışa aktarma Türkçe sütun adları kullanır (ör. `Type` yerine "Tür"); içe aktarıcı ikisini de tanır. Bu rehberde İngilizce adlar kullanılmıştır.
+
+---
+
+## Ana satır
+
+Ana satır, ürün düzeyindeki alanları tanımlar ve ürünün hangi nitelikleri kullandığını bildirir.
+
+### Ana satırların temel sütunları
+
+| Sütun | Değer | Notlar |
+|---|---|---|
+| ID | (boş veya mevcut kimlik) | Yeni ürünlerde boş bırakın |
+| Type | `variable` | Tam olarak `variable` olmalıdır |
+| SKU | `SHIRT-BLUE` | Benzersiz ana ürün SKU'su |
+| Name | `Blue Cotton T-Shirt` | Ürün adı |
+| Published | `1` | 1 = yayında, 0 = taslak |
+| Attribute 1 name | `Size` | Boyutun adı |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Mevcut tüm değerlerin dikey çizgiyle ayrılmış listesi |
+| Attribute 1 visible | `1` | Ürün sayfasında göster |
+| Attribute 1 global | `1` | Genel (paylaşılan) nitelik kullan |
+
+- Birden çok nitelik sırayla numaralandırılmış sütunlar kullanır: `Attribute 1 name`, `Attribute 2 name` vb.
+- Ana satırın `Regular price` alanı boş bırakılabilir veya en düşük varyasyon fiyatı yazılabilir. Her varyasyonun gerçek fiyatı varyasyon satırlarındadır.
+
+---
+
+## Varyasyon satırları
+
+Her varyasyon satırı satın alınabilir bir seçenek kombinasyonunu temsil eder ve ana ürüne bağlanmalıdır.
+
+### Varyasyon satırlarının temel sütunları
+
+| Sütun | Değer | Notlar |
+|---|---|---|
+| ID | (boş veya mevcut varyasyon kimliği) | Yeni varyasyonlarda boş bırakın |
+| Type | `variation` | Tam olarak `variation` olmalıdır |
+| SKU | `SHIRT-BLUE-SM` | Her varyasyon için benzersiz |
+| Name | `Blue Cotton T-Shirt` | Ana ürünün adıyla aynı olmalıdır |
+| Parent | `id:123` veya `sku:SHIRT-BLUE` | Ana ürüne kimlik veya SKU ile bağlar |
+| Regular price | `19.99` | Her varyasyon için zorunlu |
+| Attribute 1 name | `Size` | Ana ürünün nitelik adıyla aynı olmalıdır |
+| Attribute 1 value(s) | `Small` | Bu varyasyona ait tek bir değer |
+| Stock | `50` | Varyasyon başına stok miktarı |
+| Weight | `0.3` | Mağazada ayarlı birimle |
+
+### Varyasyonları ana ürüne bağlama
+
+`Parent` sütunu iki biçimi kabul eder:
+- **Veritabanı kimliğiyle:** `id:123`; WooCommerce ürün kimliğini biliyorsanız kullanın.
+- **SKU ile:** `sku:SHIRT-BLUE`; daha taşınabilirdir, henüz kimlik atanmamış yeni ürünleri içe aktarırken kullanın.
+
+Sıfırdan yeni değişken ürünler oluştururken `sku:PARENT_SKU` biçimini kullanın. Önce ana satırı içe aktarın (veya aynı dosyada varyasyonların üstüne koyun).
+
+---
+
+## Tam örnek: değişken tişört
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Not: Kısalık için `Parent` sütunu burada yazılmamıştır. Uygulamada varyasyon satırları `Parent: sku:SHIRT-BLUE` içermelidir.
+
+---
+
+## İki boyutlu varyasyonlar (beden VE renk)
+
+İkinci bir nitelik (renk) eklemek için ana satıra Attribute 2 sütunlarını, her varyasyona da iki nitelik sütununu ekleyin:
+
+**Ana satır:**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Varyasyon (Small, Blue):**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+2 beden × 2 renk için 4 varyasyon satırı gerekir.
+
+---
+
+## Yaygın hatalar
+
+### Hata 1: ana satırın Type değeri `variable` yerine `simple`
+
+**Belirti:** Varyasyonlar oluşturulur ama ürün sayfasında görünmez. Ürün basit ürün olarak gösterilir.
+
+**Çözüm:** Ana satırın Type sütunu `variable` (küçük harfle) olmalıdır. Doğru tür olmadan WooCommerce içe aktarmada basit bir ürünü değişken ürüne dönüştürmez.
+
+### Hata 2: varyasyon ana ürüne bağlı değil
+
+**Belirti:** Varyasyonlar ana ürüne bağlanmak yerine bağımsız basit ürünler olarak oluşturulur.
+
+**Çözüm:** Her varyasyon satırının `Parent` sütununda `sku:PARENT_SKU` veya `id:123` biçiminde bir değer olduğundan emin olun. Eksik veya hatalı ana ürün başvuruları sahipsiz varyasyonlar oluşturur.
+
+### Hata 3: ana satırda nitelik değerleri dikey çizgiyle ayrılmamış
+
+**Belirti:** Ürün sayfası açılır listede yalnızca bir seçenek gösterir veya "Sepete ekle" düğmesi görünmez.
+
+**Çözüm:** Ana satırda olası tüm nitelik değerlerini ` | ` (boşluk, dikey çizgi, boşluk) ile ayırarak yazın: `Small | Medium | Large`. WooCommerce açılır listeyi bu listeyle doldurur.
+
+### Hata 4: ana satır ile varyasyon arasında nitelik adı uyuşmuyor
+
+**Belirti:** İçe aktarma başarılı olur ama varyasyonlar nitelikleriyle eşleşmez veya yanlış seçenekler görünür.
+
+**Çözüm:** `Attribute 1 name` değeri ana satırda ve her varyasyon satırında aynı olmalıdır. `Size` ile ` Size` (boşluklu) farklı nitelikler olarak değerlendirilir.
+
+### Hata 5: varyasyon satırlarında Regular price eksik
+
+**Belirti:** Varyasyonlar fiyatsız oluşturulur ve ürün satın alınamaz olarak görünür.
+
+**Çözüm:** `Regular price` her varyasyon satırında zorunludur. Ana üründen devralınamaz.
+
+### Hata 6: varyasyonları ana üründen önce içe aktarmak
+
+**Belirti:** Ana ürünün kimliği veya SKU'su henüz var olmadığı için varyasyonlar sahipsiz ürünler olarak oluşturulur.
+
+**Çözüm:** CSV'de ana satırın kendi varyasyon satırlarından önce geldiğinden emin olun. WooCommerce satırları yukarıdan aşağıya işler.
+
+---
+
+## Güncelleme davranışı
+
+Zaten var olan bir değişken ürünü yeniden içe aktarırken:
+
+- **Kimlikle eşleştirme:** en güvenli güncelleme yöntemi. Kimlik eşleşirse WooCommerce mevcut ürünü günceller.
+- **SKU ile eşleştirme:** WooCommerce SKU ile de eşleştirebilir. ID alanını boş bırakıp SKU'yu girin.
+- **Yeni varyasyon ekleme:** mevcut varyasyonları yenileriyle birlikte içe aktarma dosyasına koyun. Yönetim panelinde olup dosyada olmayan varyasyonlar **silinmez**; ancak bu, WooCommerce sürümüne ve içe aktarma eklentisinin ayarlarına göre değişebilir.
+
+Canlı mağazaya içe aktarmadan önce güncellemeleri her zaman bir test mağazasında veya bir yedekle deneyin.

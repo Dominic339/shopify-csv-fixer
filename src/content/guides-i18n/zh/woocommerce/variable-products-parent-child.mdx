@@ -1,0 +1,168 @@
+---
+title: "CSV 中的 WooCommerce 可变商品：父行与变体行"
+description: "了解 WooCommerce 商品导入器如何用父行和子行（变体）表示可变商品：属性列、各类行的必填字段，以及最常见的导入陷阱。"
+keywords: ["woocommerce 可变商品 csv", "woocommerce 变体导入", "woocommerce 父子商品 csv", "woocommerce 属性 csv", "woocommerce csv 导入变体", "可变商品 woocommerce", "woocommerce 商品导入工具"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "WooCommerce 如何用父行和变体行表示可变商品"
+  - "父行和变体行分别需要哪些列"
+  - "属性列（Attribute 1 name、Attribute 1 value(s)）如何工作"
+  - "导致孤立变体或重复商品的常见错误"
+  - "如何为导入构建一份完整的可变商品 CSV"
+bestFor: "导入或更新可变商品（有多个选项的服装、鞋类、电子产品）的 WooCommerce 店主、开发者和商品目录管理员"
+timeToComplete: "12 分钟"
+---
+
+## WooCommerce 如何表示可变商品
+
+在 WooCommerce 中，**可变商品**是带有可购买变体的商品，例如有 S、M、L 三个尺码的 T 恤。在 CSV 中，它用两种行来表示：
+
+1. **父行**：代表商品这个容器。Type 为 `variable`。
+2. **变体行**：每一行代表一种可购买的选项组合。Type 为 `variation`。
+
+变体通过父商品的 SKU 或 ID 与父商品关联。
+
+如果您的 WordPress 使用中文，导出文件会使用中文列名（例如用“类型”代替 `Type`），导入工具两种列名都能识别。本指南使用英文列名。
+
+---
+
+## 父行
+
+父行定义商品层面的字段，并声明该商品使用哪些属性。
+
+### 父行的关键列
+
+| 列 | 值 | 说明 |
+|---|---|---|
+| ID | （留空或现有 ID） | 新商品请留空 |
+| Type | `variable` | 必须正好是 `variable` |
+| SKU | `SHIRT-BLUE` | 唯一的父商品 SKU |
+| Name | `Blue Cotton T-Shirt` | 商品名称 |
+| Published | `1` | 1 = 已发布，0 = 草稿 |
+| Attribute 1 name | `Size` | 规格维度的名称 |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | 用竖线分隔的全部可选值 |
+| Attribute 1 visible | `1` | 在商品页面显示 |
+| Attribute 1 global | `1` | 使用全局（共享）属性 |
+
+- 多个属性使用按顺序编号的列：`Attribute 1 name`、`Attribute 2 name` 等。
+- 父行的 `Regular price` 可以留空，也可以填写变体中的最低价格。每个变体的实际价格写在变体行中。
+
+---
+
+## 变体行
+
+每个变体行代表一种可购买的选项组合，并且必须关联到父商品。
+
+### 变体行的关键列
+
+| 列 | 值 | 说明 |
+|---|---|---|
+| ID | （留空或现有变体 ID） | 新变体请留空 |
+| Type | `variation` | 必须正好是 `variation` |
+| SKU | `SHIRT-BLUE-SM` | 每个变体唯一 |
+| Name | `Blue Cotton T-Shirt` | 应与父商品名称一致 |
+| Parent | `id:123` 或 `sku:SHIRT-BLUE` | 通过 ID 或 SKU 关联到父商品 |
+| Regular price | `19.99` | 每个变体都必须填写 |
+| Attribute 1 name | `Size` | 必须与父商品的属性名称一致 |
+| Attribute 1 value(s) | `Small` | 该变体对应的单个值 |
+| Stock | `50` | 每个变体的库存数量 |
+| Weight | `0.3` | 使用店铺设置的单位 |
+
+### 把变体关联到父商品
+
+`Parent` 列接受两种格式：
+- **按数据库 ID**：`id:123`，在您知道 WooCommerce 商品 ID 时使用。
+- **按 SKU**：`sku:SHIRT-BLUE`，更便于迁移；在导入尚未分配 ID 的新商品时使用。
+
+从零开始创建新的可变商品时，请使用 `sku:PARENT_SKU` 格式。先导入父行（或者把父行放在同一文件中、位于变体之上）。
+
+---
+
+## 完整示例：可变 T 恤
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> 注意：为简洁起见，这里省略了 `Parent` 列。实际使用时，变体行应包含 `Parent: sku:SHIRT-BLUE`。
+
+---
+
+## 二维变体（尺码和颜色）
+
+要添加第二个属性（颜色），请在父行中加入 Attribute 2 的列，并在每个变体中填写两个属性的列：
+
+**父行**：
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**变体（Small、Blue**）：
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+2 个尺码 × 2 种颜色需要 4 个变体行。
+
+---
+
+## 常见错误
+
+### 错误 1：父行的 Type 是 `simple` 而不是 `variable`
+
+**症状**：变体已创建，但没有显示在商品页面上。商品显示为简单商品。
+
+**解决方法**：父行的 Type 列必须是 `variable`（小写）。类型不正确时，WooCommerce 在导入时不会把简单商品转换为可变商品。
+
+### 错误 2：变体没有关联到父商品
+
+**症状**：变体被创建为独立的简单商品，而没有挂到父商品下。
+
+**解决方法**：确保每个变体行的 `Parent` 列都有 `sku:PARENT_SKU` 或 `id:123` 格式的值。缺少父商品引用或格式错误会产生孤立变体。
+
+### 错误 3：父行的属性值没有用竖线分隔
+
+**症状**：商品页面的下拉菜单中只有一个选项，或者“加入购物车”按钮不见了。
+
+**解决方法**：在父行中，用 ` | `（空格、竖线、空格）分隔列出属性的所有可能值：`Small | Medium | Large`。WooCommerce 用这个列表填充下拉菜单。
+
+### 错误 4：父行与变体的属性名称不一致
+
+**症状**：导入成功，但变体与属性对不上，或者出现了错误的选项。
+
+**解决方法**：`Attribute 1 name` 的值在父行和每个变体行中必须完全相同。`Size` 和 ` Size`（前面带空格）会被当作不同的属性。
+
+### 错误 5：变体行缺少 Regular price
+
+**症状**：变体创建后没有价格，导致商品显示为无法购买。
+
+**解决方法**：每个变体行都必须填写 `Regular price`，它不能从父商品继承。
+
+### 错误 6：在父商品之前导入变体
+
+**症状**：由于父商品的 ID 或 SKU 尚不存在，变体被创建为孤立商品。
+
+**解决方法**：确保 CSV 中父行位于其变体行之前。WooCommerce 从上到下依次处理各行。
+
+---
+
+## 更新时的行为
+
+重新导入已存在的可变商品时：
+
+- **按 ID 匹配**：最安全的更新方式。ID 一致时，WooCommerce 会更新现有商品。
+- **按 SKU 匹配**：WooCommerce 也可以按 SKU 匹配。把 ID 留空并填写 SKU 即可。
+- **添加新变体**：把现有变体和新变体一起放进导入文件。后台中存在但导入文件中没有的变体**不会**被删除，不过这可能因 WooCommerce 版本和导入插件设置而异。
+
+导入到正式店铺之前，请务必先在测试店铺上或在有备份的情况下测试更新。

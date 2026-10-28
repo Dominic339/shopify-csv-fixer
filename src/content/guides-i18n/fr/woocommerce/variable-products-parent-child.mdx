@@ -1,0 +1,168 @@
+---
+title: "Produits variables WooCommerce en CSV : lignes parent et variation"
+description: "Comprenez comment l'importateur de produits WooCommerce représente les produits variables avec des lignes parent et enfant (variation) : colonnes d'attributs, champs requis selon le type de ligne et pièges d'import les plus courants."
+keywords: ["csv produit variable woocommerce", "importer variations woocommerce", "csv parent enfant woocommerce", "attributs woocommerce csv", "import csv variations woocommerce", "produit variable woocommerce", "importateur de produits woocommerce"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Comment WooCommerce répartit un produit variable entre ligne parent et lignes de variation"
+  - "Quelles colonnes sont requises sur les lignes parent et sur les lignes de variation"
+  - "Comment fonctionnent les colonnes d'attributs (Attribute 1 name, Attribute 1 value(s))"
+  - "Les erreurs courantes qui créent des variations orphelines ou des produits en double"
+  - "Comment structurer un CSV complet de produits variables pour l'import"
+bestFor: "Marchands WooCommerce, développeurs et gestionnaires de catalogue qui importent ou mettent à jour des produits variables (vêtements, chaussures, électronique avec plusieurs options)"
+timeToComplete: "12 minutes"
+---
+
+## Comment WooCommerce modélise les produits variables
+
+Dans WooCommerce, un **produit variable** est un produit qui possède des variations achetables, par exemple un t-shirt vendu en S, M et L. Dans le CSV, il est représenté par deux types de lignes :
+
+1. **Ligne parent** : représente le conteneur du produit. Son Type est `variable`.
+2. **Lignes de variation** : chacune représente une combinaison d'options achetable. Leur Type est `variation`.
+
+Les variations sont reliées à leur parent par le SKU ou l'ID de celui-ci.
+
+Si WordPress est en français, l'export utilise des noms de colonnes en français (par exemple « UGS » au lieu de `SKU`) ; l'importateur accepte les deux. Ce guide utilise les noms anglais.
+
+---
+
+## La ligne parent
+
+La ligne parent définit les champs au niveau du produit et déclare les attributs utilisés par le produit.
+
+### Colonnes clés des lignes parent
+
+| Colonne | Valeur | Remarques |
+|---|---|---|
+| ID | (vide ou ID existant) | Laisser vide pour les nouveaux produits |
+| Type | `variable` | Doit être exactement `variable` |
+| SKU | `SHIRT-BLUE` | SKU parent unique |
+| Name | `Blue Cotton T-Shirt` | Nom du produit |
+| Published | `1` | 1 = publié, 0 = brouillon |
+| Attribute 1 name | `Size` | Nom de la dimension |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Liste de toutes les valeurs disponibles, séparées par des barres verticales |
+| Attribute 1 visible | `1` | Afficher sur la page produit |
+| Attribute 1 global | `1` | Utiliser un attribut global (partagé) |
+
+- Plusieurs attributs utilisent des colonnes numérotées à la suite : `Attribute 1 name`, `Attribute 2 name`, etc.
+- Le `Regular price` de la ligne parent peut rester vide ou contenir le prix de variante le plus bas. Les vrais prix de chaque variation se trouvent dans les lignes de variation.
+
+---
+
+## Lignes de variation
+
+Chaque ligne de variation représente une combinaison d'options achetable et doit être reliée à son parent.
+
+### Colonnes clés des lignes de variation
+
+| Colonne | Valeur | Remarques |
+|---|---|---|
+| ID | (vide ou ID de variation existant) | Laisser vide pour les nouvelles variations |
+| Type | `variation` | Doit être exactement `variation` |
+| SKU | `SHIRT-BLUE-SM` | Unique pour chaque variation |
+| Name | `Blue Cotton T-Shirt` | Doit correspondre au nom du parent |
+| Parent | `id:123` ou `sku:SHIRT-BLUE` | Relie au parent par ID ou par SKU |
+| Regular price | `19.99` | Requis pour chaque variation |
+| Attribute 1 name | `Size` | Doit correspondre au nom d'attribut du parent |
+| Attribute 1 value(s) | `Small` | Une seule valeur pour cette variation précise |
+| Stock | `50` | Stock propre à la variation |
+| Weight | `0.3` | Dans l'unité configurée pour la boutique |
+
+### Relier les variations à leur parent
+
+La colonne `Parent` accepte deux formats :
+- **Par ID de base de données :** `id:123`, à utiliser quand vous connaissez l'ID du produit WooCommerce.
+- **Par SKU :** `sku:SHIRT-BLUE`, plus portable ; à utiliser pour les nouveaux produits qui n'ont pas encore d'ID.
+
+Pour créer de nouveaux produits variables de zéro, utilisez le format `sku:PARENT_SKU`. Importez d'abord la ligne parent (ou placez-la dans le même fichier, au-dessus des variations).
+
+---
+
+## Exemple complet : t-shirt variable
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Remarque : la colonne `Parent` est omise ici par souci de concision. En pratique, les lignes de variation doivent contenir `Parent: sku:SHIRT-BLUE`.
+
+---
+
+## Variations à deux dimensions (taille ET couleur)
+
+Pour ajouter un second attribut (couleur), ajoutez les colonnes Attribute 2 à la ligne parent et les deux colonnes d'attribut à chaque variation :
+
+**Parent :**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Variation (Small, Blue) :**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+Il vous faut 4 lignes de variation pour 2 tailles × 2 couleurs.
+
+---
+
+## Erreurs courantes
+
+### Erreur 1 : le Type du parent est `simple` au lieu de `variable`
+
+**Symptôme :** les variations sont créées mais n'apparaissent pas sur la page produit. Le produit s'affiche comme un produit simple.
+
+**Solution :** la colonne Type de la ligne parent doit valoir `variable` (en minuscules). Sans le bon type, WooCommerce ne convertit pas un produit simple en produit variable lors de l'import.
+
+### Erreur 2 : variation non reliée au parent
+
+**Symptôme :** les variations sont créées comme des produits simples indépendants au lieu d'être rattachées au parent.
+
+**Solution :** vérifiez que chaque ligne de variation a une valeur dans la colonne `Parent` au format `sku:PARENT_SKU` ou `id:123`. Des références au parent manquantes ou mal formées créent des variations orphelines.
+
+### Erreur 3 : valeurs d'attribut non séparées par des barres verticales sur la ligne parent
+
+**Symptôme :** la page produit n'affiche qu'une seule option dans la liste déroulante, ou le bouton « Ajouter au panier » est absent.
+
+**Solution :** sur la ligne parent, listez toutes les valeurs possibles de l'attribut séparées par ` | ` (espace, barre verticale, espace) : `Small | Medium | Large`. WooCommerce utilise cette liste pour remplir la liste déroulante.
+
+### Erreur 4 : nom d'attribut différent entre parent et variation
+
+**Symptôme :** l'import réussit, mais les variations ne correspondent pas à leurs attributs, ou de mauvaises options apparaissent.
+
+**Solution :** la valeur de `Attribute 1 name` doit être identique sur la ligne parent et sur chaque ligne de variation. `Size` et ` Size` (avec une espace) sont traités comme deux attributs différents.
+
+### Erreur 5 : Regular price manquant sur les lignes de variation
+
+**Symptôme :** les variations sont créées sans prix, si bien que le produit apparaît comme non achetable.
+
+**Solution :** `Regular price` est requis sur chaque ligne de variation. Il ne peut pas être hérité du parent.
+
+### Erreur 6 : variations importées avant leur parent
+
+**Symptôme :** les variations sont créées comme des produits orphelins, car l'ID ou le SKU du parent n'existe pas encore.
+
+**Solution :** placez la ligne parent avant ses lignes de variation dans le CSV. WooCommerce traite les lignes de haut en bas.
+
+---
+
+## Comportement lors des mises à jour
+
+Quand vous réimportez un produit variable qui existe déjà :
+
+- **Correspondance par ID :** la méthode de mise à jour la plus sûre. WooCommerce met à jour le produit existant si l'ID correspond.
+- **Correspondance par SKU :** WooCommerce peut aussi faire correspondre par SKU. Laissez l'ID vide et indiquez le SKU.
+- **Ajout de nouvelles variations :** incluez les variations existantes dans le fichier d'import avec les nouvelles. Les variations présentes dans l'administration mais absentes du fichier ne sont **pas** supprimées, mais ce comportement peut varier selon la version de WooCommerce et les réglages de l'extension d'import.
+
+Testez toujours les mises à jour sur une boutique de préproduction ou avec une sauvegarde avant d'importer en production.

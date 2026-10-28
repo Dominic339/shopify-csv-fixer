@@ -1,0 +1,168 @@
+---
+title: "Prodotti variabili WooCommerce nel CSV: righe principali e di variazione"
+description: "Capisci come l'importatore di prodotti WooCommerce rappresenta i prodotti variabili con righe principali e figlie (variazioni): colonne degli attributi, campi obbligatori per tipo di riga e le trappole di importazione più comuni."
+keywords: ["csv prodotto variabile woocommerce", "importare variazioni woocommerce", "csv padre figlio woocommerce", "attributi woocommerce csv", "importazione csv variazioni woocommerce", "prodotto variabile woocommerce", "importatore prodotti woocommerce"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Come WooCommerce rappresenta i prodotti variabili con righe principali e righe di variazione"
+  - "Quali colonne servono nelle righe principali e quali nelle righe di variazione"
+  - "Come funzionano le colonne degli attributi (Attribute 1 name, Attribute 1 value(s))"
+  - "Gli errori comuni che creano variazioni orfane o prodotti duplicati"
+  - "Come strutturare un CSV completo di prodotti variabili per l'importazione"
+bestFor: "Titolari di negozi WooCommerce, sviluppatori e responsabili del catalogo che importano o aggiornano prodotti variabili (abbigliamento, scarpe, elettronica con più opzioni)"
+timeToComplete: "12 minuti"
+---
+
+## Come WooCommerce modella i prodotti variabili
+
+In WooCommerce, un **prodotto variabile** è un prodotto con variazioni acquistabili, ad esempio una maglietta venduta nelle taglie S, M e L. Nel CSV è rappresentato da due tipi di righe:
+
+1. **Riga principale**: rappresenta il contenitore del prodotto. Il Type è `variable`.
+2. **Righe di variazione**: ognuna rappresenta una combinazione di opzioni acquistabile. Il Type è `variation`.
+
+Le variazioni sono collegate al prodotto principale tramite il suo SKU o il suo ID.
+
+Se WordPress è in italiano, l'esportazione usa nomi di colonna in italiano (ad esempio "Tipo" invece di `Type`); l'importatore li riconosce entrambi. In questa guida usiamo i nomi inglesi.
+
+---
+
+## La riga principale
+
+La riga principale definisce i campi a livello di prodotto e dichiara quali attributi usa il prodotto.
+
+### Colonne chiave delle righe principali
+
+| Colonna | Valore | Note |
+|---|---|---|
+| ID | (vuoto o ID esistente) | Lascialo vuoto per i nuovi prodotti |
+| Type | `variable` | Deve essere esattamente `variable` |
+| SKU | `SHIRT-BLUE` | SKU principale univoco |
+| Name | `Blue Cotton T-Shirt` | Nome del prodotto |
+| Published | `1` | 1 = pubblicato, 0 = bozza |
+| Attribute 1 name | `Size` | Il nome della dimensione |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Elenco di tutti i valori disponibili separati da barre verticali |
+| Attribute 1 visible | `1` | Mostra nella pagina del prodotto |
+| Attribute 1 global | `1` | Usa un attributo globale (condiviso) |
+
+- Più attributi usano colonne numerate in sequenza: `Attribute 1 name`, `Attribute 2 name` e così via.
+- Il `Regular price` della riga principale può restare vuoto o contenere il prezzo più basso tra le varianti. I prezzi reali di ogni variazione stanno nelle righe di variazione.
+
+---
+
+## Righe di variazione
+
+Ogni riga di variazione rappresenta una combinazione di opzioni acquistabile e deve essere collegata al prodotto principale.
+
+### Colonne chiave delle righe di variazione
+
+| Colonna | Valore | Note |
+|---|---|---|
+| ID | (vuoto o ID di variazione esistente) | Lascialo vuoto per le nuove variazioni |
+| Type | `variation` | Deve essere esattamente `variation` |
+| SKU | `SHIRT-BLUE-SM` | Univoco per ogni variazione |
+| Name | `Blue Cotton T-Shirt` | Deve corrispondere al nome del principale |
+| Parent | `id:123` o `sku:SHIRT-BLUE` | Collega al principale tramite ID o SKU |
+| Regular price | `19.99` | Obbligatorio per ogni variazione |
+| Attribute 1 name | `Size` | Deve corrispondere al nome dell'attributo del principale |
+| Attribute 1 value(s) | `Small` | Un solo valore per questa specifica variazione |
+| Stock | `50` | Giacenza di ogni variazione |
+| Weight | `0.3` | Nell'unità configurata nel negozio |
+
+### Collegare le variazioni al prodotto principale
+
+La colonna `Parent` accetta due formati:
+- **Tramite ID del database:** `id:123`, da usare quando conosci l'ID del prodotto WooCommerce.
+- **Tramite SKU:** `sku:SHIRT-BLUE`, più portabile; da usare quando importi prodotti nuovi che non hanno ancora un ID.
+
+Quando crei da zero nuovi prodotti variabili, usa il formato `sku:PARENT_SKU`. Importa prima la riga principale (oppure inseriscila nello stesso file, sopra le variazioni).
+
+---
+
+## Esempio completo: maglietta variabile
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Nota: qui la colonna `Parent` è omessa per brevità. In pratica, le righe di variazione dovrebbero includere `Parent: sku:SHIRT-BLUE`.
+
+---
+
+## Variazioni a due dimensioni (taglia E colore)
+
+Per aggiungere un secondo attributo (colore), inserisci le colonne di Attribute 2 nella riga principale ed entrambe le colonne degli attributi in ogni variazione:
+
+**Principale:**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Variazione (Small, Blue):**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+Per 2 taglie × 2 colori servono 4 righe di variazione.
+
+---
+
+## Errori comuni
+
+### Errore 1: il Type del principale è `simple` invece di `variable`
+
+**Sintomo:** le variazioni vengono create ma non compaiono nella pagina del prodotto. Il prodotto appare come prodotto semplice.
+
+**Soluzione:** la colonna Type della riga principale deve essere `variable` (in minuscolo). Senza il tipo corretto, WooCommerce non converte un prodotto semplice in variabile durante l'importazione.
+
+### Errore 2: variazione non collegata al principale
+
+**Sintomo:** le variazioni vengono create come prodotti semplici indipendenti invece di essere associate al principale.
+
+**Soluzione:** assicurati che ogni riga di variazione abbia un valore nella colonna `Parent` nel formato `sku:PARENT_SKU` o `id:123`. Riferimenti al principale mancanti o malformati creano variazioni orfane.
+
+### Errore 3: valori dell'attributo non separati da barre verticali nella riga principale
+
+**Sintomo:** la pagina del prodotto mostra una sola opzione nel menu a discesa, oppure manca il pulsante "Aggiungi al carrello".
+
+**Soluzione:** nella riga principale, elenca tutti i valori possibili dell'attributo separati da ` | ` (spazio, barra verticale, spazio): `Small | Medium | Large`. WooCommerce usa questo elenco per riempire il menu a discesa.
+
+### Errore 4: nome dell'attributo diverso tra principale e variazione
+
+**Sintomo:** l'importazione riesce, ma le variazioni non corrispondono ai loro attributi oppure compaiono opzioni sbagliate.
+
+**Soluzione:** il valore di `Attribute 1 name` deve essere identico nella riga principale e in ogni riga di variazione. `Size` e ` Size` (con uno spazio) vengono trattati come attributi diversi.
+
+### Errore 5: Regular price mancante nelle righe di variazione
+
+**Sintomo:** le variazioni vengono create senza prezzo, quindi il prodotto risulta non acquistabile.
+
+**Soluzione:** `Regular price` è obbligatorio in ogni riga di variazione. Non può essere ereditato dal principale.
+
+### Errore 6: importare le variazioni prima del principale
+
+**Sintomo:** le variazioni vengono create come prodotti orfani perché l'ID o lo SKU del principale non esiste ancora.
+
+**Soluzione:** assicurati che la riga principale compaia prima delle sue righe di variazione nel CSV. WooCommerce elabora le righe dall'alto verso il basso.
+
+---
+
+## Comportamento negli aggiornamenti
+
+Quando reimporti un prodotto variabile già esistente:
+
+- **Corrispondenza per ID:** il metodo di aggiornamento più sicuro. WooCommerce aggiorna il prodotto esistente se l'ID corrisponde.
+- **Corrispondenza per SKU:** WooCommerce può anche abbinare tramite SKU. Lascia vuoto l'ID e indica lo SKU.
+- **Aggiungere nuove variazioni:** includi nel file di importazione le variazioni esistenti insieme a quelle nuove. Le variazioni presenti nel pannello ma assenti dal file **non** vengono eliminate, anche se questo può variare a seconda della versione di WooCommerce e delle impostazioni del plugin di importazione.
+
+Prova sempre gli aggiornamenti su un negozio di staging o con un backup prima di importare in produzione.

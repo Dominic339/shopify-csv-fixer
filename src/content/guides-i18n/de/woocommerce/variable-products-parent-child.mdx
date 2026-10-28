@@ -1,0 +1,168 @@
+---
+title: "Variable WooCommerce-Produkte in der CSV: Eltern- und Variationszeilen"
+description: "Wie der WooCommerce-Produktimporter variable Produkte mit Eltern- und Variationszeilen abbildet: Attributspalten, Pflichtfelder pro Zeilentyp und die häufigsten Fallen beim Import."
+keywords: ["woocommerce variables produkt csv", "woocommerce variationen importieren", "woocommerce eltern kind csv", "woocommerce attribute csv", "woocommerce csv import variationen", "variables produkt woocommerce", "woocommerce produktimporter"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Wie WooCommerce variable Produkte auf Eltern- und Variationszeilen verteilt"
+  - "Welche Spalten Elternzeilen und welche Variationszeilen brauchen"
+  - "Wie die Attributspalten (Attribute 1 name, Attribute 1 value(s)) funktionieren"
+  - "Typische Fehler, die verwaiste Variationen oder doppelte Produkte erzeugen"
+  - "Wie Sie eine vollständige CSV mit variablen Produkten für den Import aufbauen"
+bestFor: "WooCommerce-Shopbetreiber, Entwickler und Katalogverantwortliche, die variable Produkte importieren oder aktualisieren (Kleidung, Schuhe, Elektronik mit mehreren Optionen)"
+timeToComplete: "12 Minuten"
+---
+
+## Wie WooCommerce variable Produkte abbildet
+
+In WooCommerce ist ein **variables Produkt** ein Produkt mit kaufbaren Variationen – zum Beispiel ein T-Shirt in den Größen S, M und L. In der CSV gibt es dafür zwei Arten von Zeilen:
+
+1. **Elternzeile**: steht für den Produktcontainer. Der Type ist `variable`.
+2. **Variationszeilen**: Jede steht für eine kaufbare Kombination von Optionen. Der Type ist `variation`.
+
+Variationen werden über die SKU oder ID des Elternprodukts mit diesem verknüpft.
+
+Läuft WordPress auf Deutsch, verwendet der Export deutsche Spaltennamen (z. B. „Typ“ statt `Type`); der Importer akzeptiert beide. Diese Anleitung verwendet die englischen Namen.
+
+---
+
+## Die Elternzeile
+
+Die Elternzeile legt die Felder auf Produktebene fest und gibt an, welche Attribute das Produkt verwendet.
+
+### Wichtige Spalten für Elternzeilen
+
+| Spalte | Wert | Hinweise |
+|---|---|---|
+| ID | (leer oder vorhandene ID) | Bei neuen Produkten leer lassen |
+| Type | `variable` | Muss genau `variable` lauten |
+| SKU | `SHIRT-BLUE` | Eindeutige SKU des Elternprodukts |
+| Name | `Blue Cotton T-Shirt` | Produktname |
+| Published | `1` | 1 = veröffentlicht, 0 = Entwurf |
+| Attribute 1 name | `Size` | Name der Dimension |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Alle verfügbaren Werte, durch senkrechte Striche getrennt |
+| Attribute 1 visible | `1` | Auf der Produktseite anzeigen |
+| Attribute 1 global | `1` | Globales (gemeinsames) Attribut verwenden |
+
+- Mehrere Attribute nutzen fortlaufend nummerierte Spalten: `Attribute 1 name`, `Attribute 2 name` usw.
+- Der `Regular price` der Elternzeile kann leer bleiben oder den niedrigsten Variantenpreis enthalten. Die tatsächlichen Preise stehen in den Variationszeilen.
+
+---
+
+## Variationszeilen
+
+Jede Variationszeile steht für eine kaufbare Kombination von Optionen und muss auf das Elternprodukt verweisen.
+
+### Wichtige Spalten für Variationszeilen
+
+| Spalte | Wert | Hinweise |
+|---|---|---|
+| ID | (leer oder vorhandene Variations-ID) | Bei neuen Variationen leer lassen |
+| Type | `variation` | Muss genau `variation` lauten |
+| SKU | `SHIRT-BLUE-SM` | Eindeutig pro Variation |
+| Name | `Blue Cotton T-Shirt` | Sollte dem Namen des Elternprodukts entsprechen |
+| Parent | `id:123` oder `sku:SHIRT-BLUE` | Verknüpft per ID oder SKU mit dem Elternprodukt |
+| Regular price | `19.99` | Für jede Variation erforderlich |
+| Attribute 1 name | `Size` | Muss dem Attributnamen des Elternprodukts entsprechen |
+| Attribute 1 value(s) | `Small` | Ein einzelner Wert für genau diese Variation |
+| Stock | `50` | Lagerbestand pro Variation |
+| Weight | `0.3` | In der im Shop eingestellten Einheit |
+
+### Variationen mit dem Elternprodukt verknüpfen
+
+Die Spalte `Parent` akzeptiert zwei Formate:
+- **Per Datenbank-ID:** `id:123` – wenn Sie die WooCommerce-Produkt-ID kennen.
+- **Per SKU:** `sku:SHIRT-BLUE` – besser übertragbar; für neue Produkte, die noch keine ID haben.
+
+Wenn Sie neue variable Produkte von Grund auf anlegen, verwenden Sie das Format `sku:PARENT_SKU`. Importieren Sie zuerst die Elternzeile (oder setzen Sie sie in derselben Datei über die Variationen).
+
+---
+
+## Vollständiges Beispiel: variables T-Shirt
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Hinweis: Die Spalte `Parent` ist hier der Kürze halber weggelassen. In der Praxis sollten die Variationszeilen `Parent: sku:SHIRT-BLUE` enthalten.
+
+---
+
+## Zweidimensionale Variationen (Größe UND Farbe)
+
+Für ein zweites Attribut (Farbe) fügen Sie der Elternzeile die Spalten für Attribute 2 hinzu und geben in jeder Variation beide Attributspalten an:
+
+**Elternzeile:**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Variation (Small, Blue):**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+Für 2 Größen × 2 Farben brauchen Sie 4 Variationszeilen.
+
+---
+
+## Häufige Fehler
+
+### Fehler 1: Type der Elternzeile ist `simple` statt `variable`
+
+**Symptom:** Die Variationen werden angelegt, erscheinen aber nicht auf der Produktseite. Das Produkt wird als einfaches Produkt angezeigt.
+
+**Lösung:** Die Spalte Type der Elternzeile muss `variable` (kleingeschrieben) lauten. Ohne den richtigen Typ wandelt WooCommerce ein einfaches Produkt beim Import nicht in ein variables um.
+
+### Fehler 2: Variation nicht mit dem Elternprodukt verknüpft
+
+**Symptom:** Die Variationen werden als eigenständige einfache Produkte angelegt, statt dem Elternprodukt zugeordnet zu werden.
+
+**Lösung:** Achten Sie darauf, dass jede Variationszeile in der Spalte `Parent` einen Wert im Format `sku:PARENT_SKU` oder `id:123` hat. Fehlende oder fehlerhafte Verweise erzeugen verwaiste Variationen.
+
+### Fehler 3: Attributwerte in der Elternzeile nicht durch senkrechte Striche getrennt
+
+**Symptom:** Die Produktseite zeigt im Auswahlmenü nur eine Option, oder die Schaltfläche „In den Warenkorb“ fehlt.
+
+**Lösung:** Führen Sie in der Elternzeile alle möglichen Attributwerte getrennt durch ` | ` (Leerzeichen, senkrechter Strich, Leerzeichen) auf: `Small | Medium | Large`. WooCommerce füllt mit dieser Liste das Auswahlmenü.
+
+### Fehler 4: Attributname in Eltern- und Variationszeile unterschiedlich
+
+**Symptom:** Der Import gelingt, aber die Variationen passen nicht zu ihren Attributen, oder es erscheinen falsche Optionen.
+
+**Lösung:** Der Wert in `Attribute 1 name` muss in der Elternzeile und in jeder Variationszeile identisch sein. `Size` und ` Size` (mit Leerzeichen) gelten als verschiedene Attribute.
+
+### Fehler 5: Regular price fehlt in den Variationszeilen
+
+**Symptom:** Die Variationen werden ohne Preis angelegt, sodass das Produkt als nicht kaufbar angezeigt wird.
+
+**Lösung:** `Regular price` ist in jeder Variationszeile erforderlich. Er wird nicht vom Elternprodukt übernommen.
+
+### Fehler 6: Variationen vor dem Elternprodukt importiert
+
+**Symptom:** Die Variationen werden als verwaiste Produkte angelegt, weil ID oder SKU des Elternprodukts noch nicht existieren.
+
+**Lösung:** Achten Sie darauf, dass die Elternzeile in der CSV vor ihren Variationszeilen steht. WooCommerce verarbeitet die Zeilen von oben nach unten.
+
+---
+
+## Verhalten bei Aktualisierungen
+
+Wenn Sie ein bereits vorhandenes variables Produkt erneut importieren:
+
+- **Abgleich per ID:** die sicherste Methode. WooCommerce aktualisiert das vorhandene Produkt, wenn die ID übereinstimmt.
+- **Abgleich per SKU:** WooCommerce kann auch über die SKU abgleichen. Lassen Sie die ID leer und geben Sie die SKU an.
+- **Neue Variationen hinzufügen:** Nehmen Sie die vorhandenen Variationen zusammen mit den neuen in die Importdatei auf. Variationen, die im Backend vorhanden sind, aber in der Importdatei fehlen, werden **nicht** gelöscht – das kann jedoch je nach WooCommerce-Version und Einstellungen des Import-Plugins abweichen.
+
+Testen Sie Aktualisierungen immer in einem Staging-Shop oder mit einem Backup, bevor Sie in den Live-Shop importieren.

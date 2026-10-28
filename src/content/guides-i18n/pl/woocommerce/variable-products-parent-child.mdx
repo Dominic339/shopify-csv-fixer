@@ -1,0 +1,168 @@
+---
+title: "Produkty zmienne WooCommerce w CSV: wiersze nadrzędne i wariantów"
+description: "Poznaj sposób, w jaki importer produktów WooCommerce zapisuje produkty zmienne za pomocą wierszy nadrzędnych i podrzędnych (wariantów): kolumny atrybutów, pola wymagane dla każdego typu wiersza i najczęstsze pułapki importu."
+keywords: ["woocommerce produkt zmienny csv", "import wariantów woocommerce", "woocommerce csv rodzic dziecko", "atrybuty woocommerce csv", "import csv wariantów woocommerce", "produkt zmienny woocommerce", "importer produktów woocommerce"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Jak WooCommerce dzieli produkt zmienny na wiersz nadrzędny i wiersze wariantów"
+  - "Które kolumny są wymagane w wierszach nadrzędnych, a które w wierszach wariantów"
+  - "Jak działają kolumny atrybutów (Attribute 1 name, Attribute 1 value(s))"
+  - "Częste błędy, które tworzą osierocone warianty lub zduplikowane produkty"
+  - "Jak zbudować kompletny plik CSV z produktami zmiennymi do importu"
+bestFor: "Właściciele sklepów WooCommerce, programiści i osoby zarządzające katalogiem, które importują lub aktualizują produkty zmienne (odzież, obuwie, elektronika z wieloma opcjami)"
+timeToComplete: "12 minut"
+---
+
+## Jak WooCommerce modeluje produkty zmienne
+
+W WooCommerce **produkt zmienny** to produkt z wariantami, które można kupić — na przykład koszulka sprzedawana w rozmiarach S, M i L. W pliku CSV zapisuje się go za pomocą dwóch rodzajów wierszy:
+
+1. **Wiersz nadrzędny** — reprezentuje kontener produktu. Type ma wartość `variable`.
+2. **Wiersze wariantów** — każdy reprezentuje jedną kombinację opcji, którą można kupić. Type ma wartość `variation`.
+
+Warianty są powiązane z produktem nadrzędnym przez jego SKU lub ID.
+
+Jeśli WordPress działa po polsku, eksport używa polskich nazw kolumn (np. „Typ” zamiast `Type`); importer rozpoznaje obie wersje. W tym przewodniku używamy nazw angielskich.
+
+---
+
+## Wiersz nadrzędny
+
+Wiersz nadrzędny określa pola na poziomie produktu i deklaruje, jakich atrybutów produkt używa.
+
+### Najważniejsze kolumny wierszy nadrzędnych
+
+| Kolumna | Wartość | Uwagi |
+|---|---|---|
+| ID | (puste lub istniejące ID) | Zostaw puste dla nowych produktów |
+| Type | `variable` | Musi mieć dokładnie wartość `variable` |
+| SKU | `SHIRT-BLUE` | Unikalny SKU produktu nadrzędnego |
+| Name | `Blue Cotton T-Shirt` | Nazwa produktu |
+| Published | `1` | 1 = opublikowany, 0 = szkic |
+| Attribute 1 name | `Size` | Nazwa wymiaru |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Lista wszystkich dostępnych wartości rozdzielonych pionowymi kreskami |
+| Attribute 1 visible | `1` | Pokazuj na stronie produktu |
+| Attribute 1 global | `1` | Użyj atrybutu globalnego (wspólnego) |
+
+- Kolejne atrybuty mają kolumny numerowane po kolei: `Attribute 1 name`, `Attribute 2 name` itd.
+- `Regular price` wiersza nadrzędnego może zostać pusty albo zawierać najniższą cenę wariantu. Właściwe ceny poszczególnych wariantów znajdują się w wierszach wariantów.
+
+---
+
+## Wiersze wariantów
+
+Każdy wiersz wariantu reprezentuje jedną kombinację opcji, którą można kupić, i musi wskazywać produkt nadrzędny.
+
+### Najważniejsze kolumny wierszy wariantów
+
+| Kolumna | Wartość | Uwagi |
+|---|---|---|
+| ID | (puste lub istniejące ID wariantu) | Zostaw puste dla nowych wariantów |
+| Type | `variation` | Musi mieć dokładnie wartość `variation` |
+| SKU | `SHIRT-BLUE-SM` | Unikalny dla każdego wariantu |
+| Name | `Blue Cotton T-Shirt` | Powinna być taka sama jak nazwa produktu nadrzędnego |
+| Parent | `id:123` lub `sku:SHIRT-BLUE` | Wskazuje produkt nadrzędny przez ID lub SKU |
+| Regular price | `19.99` | Wymagana dla każdego wariantu |
+| Attribute 1 name | `Size` | Musi być taka sama jak nazwa atrybutu produktu nadrzędnego |
+| Attribute 1 value(s) | `Small` | Jedna wartość dla tego konkretnego wariantu |
+| Stock | `50` | Stan magazynowy wariantu |
+| Weight | `0.3` | W jednostce ustawionej w sklepie |
+
+### Łączenie wariantów z produktem nadrzędnym
+
+Kolumna `Parent` przyjmuje dwa formaty:
+- **Przez ID w bazie danych:** `id:123` — gdy znasz ID produktu w WooCommerce.
+- **Przez SKU:** `sku:SHIRT-BLUE` — łatwiej przenośny; przy imporcie nowych produktów, które nie mają jeszcze ID.
+
+Tworząc nowe produkty zmienne od zera, używaj formatu `sku:PARENT_SKU`. Najpierw zaimportuj wiersz nadrzędny (albo umieść go w tym samym pliku nad wariantami).
+
+---
+
+## Pełny przykład: koszulka jako produkt zmienny
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Uwaga: dla zwięzłości pominięto tu kolumnę `Parent`. W praktyce wiersze wariantów powinny zawierać `Parent: sku:SHIRT-BLUE`.
+
+---
+
+## Warianty dwuwymiarowe (rozmiar ORAZ kolor)
+
+Aby dodać drugi atrybut (kolor), dodaj kolumny Attribute 2 do wiersza nadrzędnego, a w każdym wariancie wypełnij obie kolumny atrybutów:
+
+**Wiersz nadrzędny:**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Wariant (Small, Blue):**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+Dla 2 rozmiarów × 2 kolorów potrzebujesz 4 wierszy wariantów.
+
+---
+
+## Częste błędy
+
+### Błąd 1: Type wiersza nadrzędnego to `simple` zamiast `variable`
+
+**Objaw:** warianty powstają, ale nie pojawiają się na stronie produktu. Produkt wyświetla się jako produkt prosty.
+
+**Rozwiązanie:** kolumna Type wiersza nadrzędnego musi mieć wartość `variable` (małymi literami). Bez właściwego typu WooCommerce nie zamieni podczas importu produktu prostego na zmienny.
+
+### Błąd 2: wariant niepowiązany z produktem nadrzędnym
+
+**Objaw:** warianty powstają jako osobne produkty proste zamiast zostać przypisane do produktu nadrzędnego.
+
+**Rozwiązanie:** upewnij się, że każdy wiersz wariantu ma w kolumnie `Parent` wartość w formacie `sku:PARENT_SKU` lub `id:123`. Brakujące lub błędne odwołania tworzą osierocone warianty.
+
+### Błąd 3: wartości atrybutu w wierszu nadrzędnym nie są rozdzielone pionowymi kreskami
+
+**Objaw:** strona produktu pokazuje w liście rozwijanej tylko jedną opcję albo brakuje przycisku „Dodaj do koszyka”.
+
+**Rozwiązanie:** w wierszu nadrzędnym wypisz wszystkie możliwe wartości atrybutu rozdzielone ` | ` (spacja, pionowa kreska, spacja): `Small | Medium | Large`. WooCommerce wypełnia tą listą listę rozwijaną.
+
+### Błąd 4: różne nazwy atrybutu w wierszu nadrzędnym i w wariancie
+
+**Objaw:** import się udaje, ale warianty nie pasują do swoich atrybutów albo pojawiają się złe opcje.
+
+**Rozwiązanie:** wartość `Attribute 1 name` musi być identyczna w wierszu nadrzędnym i w każdym wierszu wariantu. `Size` i ` Size` (ze spacją) są traktowane jako różne atrybuty.
+
+### Błąd 5: brak Regular price w wierszach wariantów
+
+**Objaw:** warianty powstają bez ceny, więc produkt wyświetla się jako niedostępny do kupienia.
+
+**Rozwiązanie:** `Regular price` jest wymagana w każdym wierszu wariantu. Nie jest dziedziczona z produktu nadrzędnego.
+
+### Błąd 6: import wariantów przed produktem nadrzędnym
+
+**Objaw:** warianty powstają jako osierocone produkty, bo ID lub SKU produktu nadrzędnego jeszcze nie istnieje.
+
+**Rozwiązanie:** upewnij się, że wiersz nadrzędny znajduje się w pliku CSV przed swoimi wierszami wariantów. WooCommerce przetwarza wiersze od góry do dołu.
+
+---
+
+## Zachowanie przy aktualizacji
+
+Gdy ponownie importujesz istniejący już produkt zmienny:
+
+- **Dopasowanie po ID:** najbezpieczniejsza metoda. WooCommerce aktualizuje istniejący produkt, jeśli ID się zgadza.
+- **Dopasowanie po SKU:** WooCommerce może też dopasowywać po SKU. Zostaw ID puste i podaj SKU.
+- **Dodawanie nowych wariantów:** umieść w pliku importu istniejące warianty razem z nowymi. Warianty obecne w panelu, ale nieobecne w pliku, **nie** są usuwane, choć może to zależeć od wersji WooCommerce i ustawień wtyczki importu.
+
+Zawsze testuj aktualizacje w sklepie testowym lub z kopią zapasową, zanim zaimportujesz dane do sklepu produkcyjnego.
