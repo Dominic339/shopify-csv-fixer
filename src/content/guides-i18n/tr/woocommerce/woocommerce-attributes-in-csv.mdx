@@ -1,0 +1,153 @@
+---
+title: "CSV'de WooCommerce ürün nitelikleri: eksiksiz rehber"
+description: "WooCommerce ürün niteliklerini bir CSV dosyasında doğru biçimlendirme: nitelik adlandırma, genel ve yerel nitelikler, varyasyon nitelikleri ve yaygın hatalar."
+keywords: ["woocommerce nitelikler csv", "woocommerce ürün nitelikleri içe aktarma", "woocommerce nitelik sütunları csv", "woocommerce varyasyon nitelikleri", "woocommerce csv nitelik biçimi", "woocommerce genel nitelikler csv", "woocommerce nitelik içe aktarma hatası"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "WooCommerce nitelik sütunlarının CSV'de nasıl adlandırılıp numaralandırıldığı"
+  - "CSV içe aktarmalarında genel ve yerel nitelikler arasındaki fark"
+  - "Değişken ürünler ve varyasyonları için niteliklerin nasıl ayarlanacağı"
+  - "Birden çok nitelik değerinin nasıl içe aktarılacağı (ör. mavi ve kırmızı renkte satılan bir ürün)"
+  - "En yaygın nitelik içe aktarma hatalarının nasıl düzeltileceği"
+bestFor: "Beden, renk, malzeme veya başka nitelik boyutlarına sahip değişken ürünleri içe aktaran WooCommerce mağaza sahipleri"
+timeToComplete: "10 dakika"
+---
+
+## WooCommerce nitelikleri CSV'de nasıl çalışır
+
+WooCommerce ürün nitelikleri, bir ürünün hangi boyutlarda farklılaştığını tanımlar; genellikle beden, renk veya malzeme. CSV içe aktarmasında nitelikler numaralı sütun gruplarıyla gösterilir. Dört sütunluk her grup bir niteliği kapsar.
+
+Sütun adlandırma kalıbı şöyledir:
+- `Attribute 1 name`
+- `Attribute 1 value(s)`
+- `Attribute 1 visible`
+- `Attribute 1 global`
+
+İkinci bir nitelik için kalıbı `Attribute 2 name`, `Attribute 2 value(s)` vb. ile tekrarlayın.
+
+WordPress Türkçe ise dışa aktarma Türkçe sütun adları kullanır; içe aktarıcı bu adları da İngilizce adları da kabul eder. Bu rehberde İngilizce adlar kullanılmıştır.
+
+---
+
+## Sütun başvurusu
+
+| Sütun | Biçim | Açıklama |
+|---|---|---|
+| `Attribute N name` | Metin | Niteliğin adı (ör. `Color`, `Size`) |
+| `Attribute N value(s)` | Dikey çizgiyle ayrılmış metin | Bu satırın değeri veya değerleri (ör. `Blue` ya da `Blue | Red`) |
+| `Attribute N visible` | `1` veya `0` | `1` = ürün sayfasında gösterilir; `0` = gizli |
+| `Attribute N global` | `1` veya `0` | `1` = genel taksonomi niteliği; `0` = yerel nitelik |
+
+---
+
+## Birden çok nitelik değerine sahip basit ürünler
+
+Birden çok renkte satılan (ama ayrı varyasyonlar olarak değil) basit bir ürün için tüm değerleri `Attribute 1 value(s)` sütununda dikey çizgi `|` ile ayırarak yazın:
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+```
+
+Bu, ürün sayfasında üç renk değerini de gösteren Color niteliğine sahip tek bir ürün oluşturur.
+
+---
+
+## Varyasyonlu değişken ürünler
+
+Değişken ürünlerde nitelikler farklı çalışır. Ana satır, niteliğin olası tüm değerlerini listeler. Her varyasyon satırı yalnızca o varyasyona ait değeri içerir.
+
+**Ana satır (Type: variable):**
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+```
+
+**Varyasyon satırları (Type: variation):**
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+,variation,TSHIRT-S,18.00,Size,S,1,1
+,variation,TSHIRT-M,18.00,Size,M,1,1
+,variation,TSHIRT-L,20.00,Size,L,1,1
+,variation,TSHIRT-XL,20.00,Size,XL,1,1
+```
+
+Varyasyon satırlarında `Name` sütunu boştur; WooCommerce varyasyon adını nitelik değerlerinden üretir.
+
+---
+
+## İki nitelik (beden + renk)
+
+İki nitelik boyutu olan bir ürün için:
+
+**Ana satır:**
+
+```
+Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
+Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+```
+
+**Varyasyon satırları:**
+
+```
+,variation,SHOE-7-BLK,Size,7,1,1,Color,Black,1,1
+,variation,SHOE-7-WHT,Size,7,1,1,Color,White,1,1
+,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
+```
+
+Her varyasyon satırı nitelik başına tam olarak bir değer belirtir (dikey çizgiyle ayrılmış bir liste değil).
+
+---
+
+## Genel ve yerel nitelikler
+
+### Genel nitelikler (`Attribute N global: 1`)
+
+Genel nitelikler WooCommerce'in nitelik taksonomisinde tanımlanır (WordPress yönetim panelinde Ürünler → Nitelikler). Şu durumlarda genel nitelik kullanın:
+- Birden çok ürün aynı nitelik terimlerini paylaşıyorsa (aynı renkler, aynı bedenler)
+- Mağaza sayfalarında ürünleri niteliğe göre filtrelemek istiyorsanız
+- WooCommerce'in katmanlı gezinme bileşenini kullanıyorsanız
+
+`global: 1` ile içe aktarırken WooCommerce, nitelik terimi henüz yoksa onu oluşturur. WooCommerce'in nitelikleri mevcut taksonomiyle eşleştirebilmesi için adların tam olarak aynı olması gerekir (büyük/küçük harfe duyarlı).
+
+### Yerel nitelikler (`Attribute N global: 0`)
+
+Yerel nitelikler tek bir ürüne özgüdür. Başka yerde geçerli olmayan, ürüne özel özellikler için kullanın (ör. belirli bir üründe `Material: 100% cashmere`).
+
+Yerel nitelikler varyasyon filtrelemede veya katmanlı gezinmede kullanılamaz.
+
+---
+
+## Yaygın nitelik içe aktarma hataları
+
+### Nitelik sütunları tanınmıyor
+
+**Neden:** Sütun adları kalıba tam uymuyor; boşluklar, numaralandırma yanlış ya da adlar kısaltılmış.
+
+Yanlış: `Attribute1 name`, `attribute 1 name`, `Attr 1 name`
+Doğru: `Attribute 1 name`
+
+**Çözüm:** `Attribute` ile numara arasında bir boşluk bırakarak tam sütun adlarını kullanın.
+
+### Varyasyon nitelikleri ana ürünle eşleşmiyor
+
+**Neden:** Bir varyasyon satırındaki nitelik adı ana satırdakiyle aynı değil ya da varyasyon, ana ürünün değer listesinde olmayan bir değer belirtiyor.
+
+**Çözüm:** Nitelik adları ana satırlarda ve varyasyon satırlarında aynı olmalıdır. Varyasyon değerleri, ana satırda listelenen değerler arasında yer almalıdır.
+
+### Boşluklu dikey çizgi ayırıcı
+
+**Neden:** ` | ` (çizginin etrafında boşluklarla) ve `|` (boşluksuz) karışık kullanılıyor. WooCommerce değerlerdeki boşlukları kırpar, ancak tutarsızlıklar uyuşmazlıklara yol açabilir.
+
+**Çözüm:** `|` işaretini, etrafında boşluk olsun ya da olmasın, tüm dosyada tutarlı biçimde kullanın. WooCommerce her değerin etrafındaki boşlukları kırpar.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+WooCommerce CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı nitelik sütunlarının adlarını, ana ürün ile varyasyonlar arasındaki nitelik tutarlılığını ve dikey çizgi ayırıcıların biçimini kontrol eder, sorunları tam satır ve sütun konumlarıyla işaretler.
+
+[WooCommerce CSV Düzelticisini açın](/app?preset=woocommerce_products) | [WooCommerce şablonunu görüntüleyin](/presets/woocommerce_products)

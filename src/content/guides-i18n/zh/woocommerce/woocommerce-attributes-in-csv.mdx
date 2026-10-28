@@ -1,0 +1,153 @@
+---
+title: "CSV 中的 WooCommerce 商品属性：完整指南"
+description: "如何在 CSV 文件中正确设置 WooCommerce 商品属性：属性命名、全局属性与本地属性、变体属性以及常见错误。"
+keywords: ["woocommerce 属性 csv", "woocommerce 商品属性导入", "woocommerce 属性列 csv", "woocommerce 变体属性", "woocommerce csv 属性格式", "woocommerce 全局属性 csv", "woocommerce 属性导入错误"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "WooCommerce 属性列在 CSV 中如何命名和编号"
+  - "CSV 导入中全局属性与本地属性的区别"
+  - "如何为可变商品及其变体设置属性"
+  - "如何导入多个属性值（例如有蓝色和红色两种的商品）"
+  - "如何修复最常见的属性导入错误"
+bestFor: "导入带有尺码、颜色、材质或其他属性维度的可变商品的 WooCommerce 店主"
+timeToComplete: "10 分钟"
+---
+
+## WooCommerce 属性在 CSV 中如何工作
+
+WooCommerce 商品属性定义了商品在哪些维度上有所不同，通常是尺码、颜色或材质。在 CSV 导入中，属性以编号的列组来表示。每组四列对应一个属性。
+
+列的命名规则如下：
+- `Attribute 1 name`
+- `Attribute 1 value(s)`
+- `Attribute 1 visible`
+- `Attribute 1 global`
+
+第二个属性则按同样规则使用 `Attribute 2 name`、`Attribute 2 value(s)` 等。
+
+如果您的 WordPress 使用中文，导出文件会使用中文列名；导入工具中文和英文列名都能识别。本指南使用英文列名。
+
+---
+
+## 列说明
+
+| 列 | 格式 | 说明 |
+|---|---|---|
+| `Attribute N name` | 文本 | 属性名称（例如 `Color`、`Size`） |
+| `Attribute N value(s)` | 文本，用竖线分隔 | 该行的值（例如 `Blue` 或 `Blue | Red`） |
+| `Attribute N visible` | `1` 或 `0` | `1` = 在商品页面显示；`0` = 隐藏 |
+| `Attribute N global` | `1` 或 `0` | `1` = 全局分类法属性；`0` = 本地属性 |
+
+---
+
+## 有多个属性值的简单商品
+
+对于有多种颜色（但不作为单独变体）的简单商品，请在 `Attribute 1 value(s)` 列中列出所有值，并用竖线 `|` 分隔：
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+```
+
+这样会创建一个带有 Color 属性的商品，并在商品页面显示全部三种颜色。
+
+---
+
+## 带变体的可变商品
+
+对于可变商品，属性的用法有所不同。父行列出属性的所有可能值，每个变体行只填写该变体对应的值。
+
+**父行（Type: variable**）：
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+```
+
+**变体行（Type: variation**）：
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+,variation,TSHIRT-S,18.00,Size,S,1,1
+,variation,TSHIRT-M,18.00,Size,M,1,1
+,variation,TSHIRT-L,20.00,Size,L,1,1
+,variation,TSHIRT-XL,20.00,Size,XL,1,1
+```
+
+变体行的 `Name` 列留空，WooCommerce 会根据属性值生成变体名称。
+
+---
+
+## 两个属性（尺码 + 颜色）
+
+对于有两个属性维度的商品：
+
+**父行**：
+
+```
+Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
+Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+```
+
+**变体行**：
+
+```
+,variation,SHOE-7-BLK,Size,7,1,1,Color,Black,1,1
+,variation,SHOE-7-WHT,Size,7,1,1,Color,White,1,1
+,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
+```
+
+每个变体行的每个属性只填写一个值（而不是用竖线分隔的列表）。
+
+---
+
+## 全局属性与本地属性
+
+### 全局属性（`Attribute N global: 1`）
+
+全局属性在 WooCommerce 的属性分类法中定义（WordPress 后台的“产品”→“属性”）。以下情况请使用全局属性：
+- 多个商品共用相同的属性项（相同的颜色、相同的尺码）
+- 您希望在商店页面按属性筛选商品
+- 您使用 WooCommerce 的分层导航小工具
+
+使用 `global: 1` 导入时，如果属性项尚不存在，WooCommerce 会自动创建。属性名称必须完全一致（区分大小写），WooCommerce 才能将其与现有分类法对应起来。
+
+### 本地属性（`Attribute N global: 0`）
+
+本地属性只属于某一个商品。请把它用于不适用于其他商品的特定规格（例如某个商品的 `Material: 100% cashmere`）。
+
+本地属性不能用于变体筛选或分层导航。
+
+---
+
+## 常见的属性导入错误
+
+### 无法识别属性列
+
+**原因**：列名没有完全遵循命名规则，比如空格不对、编号不对或使用了缩写。
+
+错误：`Attribute1 name`、`attribute 1 name`、`Attr 1 name`
+正确：`Attribute 1 name`
+
+**解决方法**：使用准确的列名，并在 `Attribute` 和数字之间加一个空格。
+
+### 变体属性与父商品不一致
+
+**原因**：变体行的属性名称与父行不一致，或者变体填写了父商品值列表中没有的值。
+
+**解决方法**：父行和变体行的属性名称必须完全相同。变体的值必须是父行所列值中的一个。
+
+### 带空格的竖线分隔符
+
+**原因**：混用了 ` | `（竖线前后有空格）和 `|`（没有空格）。WooCommerce 会去掉值前后的空格，但写法不统一仍可能导致匹配失败。
+
+**解决方法**：无论前后是否加空格，都要在整个文件中统一使用 `|`。WooCommerce 会去掉每个值前后的空格。
+
+---
+
+## 用 StriveFormats 自动修复
+
+将您的 WooCommerce CSV 上传到 StriveFormats。验证器会检查属性列的命名、父商品与变体之间的属性一致性以及竖线分隔符的格式，并标出问题所在的具体行和列。
+
+[打开 WooCommerce CSV 修复工具](/app?preset=woocommerce_products) | [查看 WooCommerce 模板](/presets/woocommerce_products)
