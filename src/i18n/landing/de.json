@@ -28,7 +28,7 @@
     "a": "Ein einziges Strukturproblem, etwa eine fehlende Optionsspalte, wiederholt sich in jeder Variantenzeile. Behebe es einmal in der Tabelle, und die Zahl sinkt schnell."
    }
   ],
-  "metaTitle": "Shopify-CSV-Reparateur | Importfehler in Shopify-Produkt-CSVs beheben | StriveFormats",
+  "metaTitle": "Shopify CSV-Import-Fehler beheben – Produkt-CSV kostenlos prüfen | StriveFormats",
   "metaDescription": "Prüfe eine Shopify-Produkt-CSV vor dem Import gegen die offizielle Vorlage. Preise, Handles und true/false-Werte werden automatisch korrigiert; Varianten- und Überschreibprobleme werden genau der Zeile zugeordnet.",
   "kicker": "Shopify-Produkte",
   "title": "CSV-Reparateur für Shopify",
@@ -60,7 +60,7 @@
     "a": "Nutze den Reparateur für variable WooCommerce-Produkte. Er prüft zusätzlich, dass jede Variation auf ein übergeordnetes Produkt zeigt und eine eindeutige Attributkombination hat."
    }
   ],
-  "metaTitle": "WooCommerce-CSV-Reparateur | Importfehler bei WooCommerce-Produkten beheben | StriveFormats",
+  "metaTitle": "WooCommerce CSV-Import-Fehler beheben – kostenlos prüfen | StriveFormats",
   "metaDescription": "Prüfe eine WooCommerce-Produkt-CSV, bevor du den Importer startest. Preise, Wahrheitswerte und Lagerwerte werden vereinheitlicht; doppelte SKUs und Fehler beim Angebotspreis werden je Zeile markiert.",
   "kicker": "WooCommerce-Produkte",
   "title": "CSV-Reparateur für WooCommerce",
@@ -92,7 +92,7 @@
     "a": "Ja. Attribute 1, Attribute 2 usw. werden alle verglichen, wenn nach doppelten Kombinationen gesucht wird."
    }
   ],
-  "metaTitle": "Reparateur für variable WooCommerce-Produkte | Variationen & Attribute | StriveFormats",
+  "metaTitle": "Variable Produkte in WooCommerce per CSV importieren – ohne Fehler | StriveFormats",
   "metaDescription": "Prüfe variable WooCommerce-Produkte und Variationen vor dem Import: Verweise auf übergeordnete Produkte, Attributwerte und doppelte Variationskombinationen, Zeile für Zeile.",
   "kicker": "Variable WooCommerce-Produkte",
   "title": "Reparateur für variable WooCommerce-Produkte",
@@ -124,7 +124,7 @@
     "a": "Es prüft Tags, Preise, Mengen, Währungscodes und Bild-URLs. Kategorie und Versandprofil musst du weiterhin bei Etsy festlegen."
    }
   ],
-  "metaTitle": "Etsy-CSV-Reparateur | Etsy-Angebots-CSVs bereinigen | StriveFormats",
+  "metaTitle": "Etsy-CSV prüfen und bereinigen – kostenlos | StriveFormats",
   "metaDescription": "Bereinige eine Etsy-Angebots-CSV: Preise, Währungscodes und Tags werden vereinheitlicht, und Tag-Limits, Bild-URLs und fehlende Angaben werden je Zeile markiert.",
   "kicker": "Etsy-Angebote",
   "title": "CSV-Reparateur für Etsy",
@@ -156,7 +156,7 @@
     "a": "Nutze den Reparateur für eBay-Variationen. Er prüft zusätzlich die übergeordneten und untergeordneten Zeilen jedes Angebots gegeneinander."
    }
   ],
-  "metaTitle": "eBay-CSV-Reparateur | Uploads für File Exchange & Seller Hub korrigieren | StriveFormats",
+  "metaTitle": "eBay CSV-Upload-Fehler beheben – File Exchange & Seller Hub | StriveFormats",
   "metaDescription": "Prüfe eine eBay-Angebotsdatei, bevor du sie in die Seller-Hub-Berichte oder File Exchange hochlädst: Aktionen, Zustands-IDs, Laufzeiten, Kategorien, Preise und Mengen.",
   "kicker": "eBay-Angebote",
   "title": "CSV-Reparateur für eBay",
@@ -188,7 +188,7 @@
     "a": "Nein. Jede Kindzeile gehört zur nächsten übergeordneten Zeile darüber, daher bleibt die hochgeladene Reihenfolge erhalten."
    }
   ],
-  "metaTitle": "Reparateur für eBay-Variationen | Angebote mit mehreren Varianten prüfen | StriveFormats",
+  "metaTitle": "eBay-Variationen per CSV hochladen – Datei kostenlos prüfen | StriveFormats",
   "metaDescription": "Prüfe eBay-Angebote mit mehreren Varianten vor dem Hochladen: Die Optionen jeder Variation müssen in der übergeordneten Zeile stehen, und keine zwei Variationen dürfen dieselbe Kombination haben.",
   "kicker": "eBay-Angebote mit Varianten",
   "title": "Reparateur für eBay-Variationen",
@@ -220,7 +220,7 @@
     "a": "Ja, lade sie einfach hoch. Die korrigierte Datei wird als CSV exportiert; öffne sie in einer Tabelle und speichere sie als tabgetrennten Text, wenn Seller Central eine .txt verlangt."
    }
   ],
-  "metaTitle": "Amazon-Inventory-Loader-Reparateur | Amazon-Angebotsdateien korrigieren | StriveFormats",
+  "metaTitle": "Amazon Inventory Loader: Fehler in der Lagerbestandsdatei beheben | StriveFormats",
   "metaDescription": "Prüfe eine Amazon-Inventory-Loader-Datei vor dem Hochladen: Produkt-ID-Typen und Zustandscodes werden umgewandelt, und beschädigte Barcodes, Mengen und Preisspannen werden markiert.",
   "kicker": "Amazon Inventory Loader",
   "title": "Reparateur für den Amazon Inventory Loader",

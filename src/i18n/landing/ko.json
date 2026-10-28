@@ -28,7 +28,7 @@
     "a": "옵션 열 누락 같은 구조적 문제 하나가 모든 변형 행에서 반복되기 때문입니다. 표에서 한 번 고치면 개수가 빠르게 줄어듭니다."
    }
   ],
-  "metaTitle": "Shopify CSV 수정기 | Shopify 상품 CSV 가져오기 오류 수정 | StriveFormats",
+  "metaTitle": "Shopify 제품 CSV 가져오기 오류 해결 – 무료 CSV 검사 | StriveFormats",
   "metaDescription": "가져오기 전에 Shopify 상품 CSV를 공식 템플릿과 대조해 검사하세요. 가격, 핸들, true/false 값은 자동으로 수정되고, 변형 및 덮어쓰기 문제는 정확한 행까지 짚어 줍니다.",
   "kicker": "Shopify 상품",
   "title": "Shopify용 CSV 수정기",
@@ -60,7 +60,7 @@
     "a": "WooCommerce 가변 상품 수정기를 사용하세요. 각 변형이 상위 상품을 가리키는지, 속성 조합이 고유한지도 추가로 검사합니다."
    }
   ],
-  "metaTitle": "WooCommerce CSV 수정기 | WooCommerce 상품 가져오기 오류 수정 | StriveFormats",
+  "metaTitle": "WooCommerce 제품 CSV 가져오기 오류 해결 – 무료 검사 | StriveFormats",
   "metaDescription": "가져오기 도구를 실행하기 전에 WooCommerce 상품 CSV를 검사하세요. 가격, 참/거짓 값, 재고 값을 통일하고, 중복 SKU와 할인 가격 실수를 행별로 표시합니다.",
   "kicker": "WooCommerce 상품",
   "title": "WooCommerce용 CSV 수정기",
@@ -92,7 +92,7 @@
     "a": "네. 중복 조합을 찾을 때 Attribute 1, Attribute 2 등 모든 속성을 비교합니다."
    }
   ],
-  "metaTitle": "WooCommerce 가변 상품 수정기 | 변형과 속성 | StriveFormats",
+  "metaTitle": "WooCommerce 가변 제품 CSV 가져오기를 오류 없이 | StriveFormats",
   "metaDescription": "가져오기 전에 WooCommerce 가변 상품과 변형을 검사하세요. 상위 상품 참조, 속성 값, 중복된 변형 조합을 행별로 확인합니다.",
   "kicker": "WooCommerce 가변 상품",
   "title": "WooCommerce 가변 상품 수정기",
@@ -124,7 +124,7 @@
     "a": "태그, 가격, 수량, 통화 코드, 이미지 URL을 검사합니다. 카테고리와 배송 프로필은 여전히 Etsy에서 직접 설정해야 합니다."
    }
   ],
-  "metaTitle": "Etsy CSV 수정기 | Etsy 상품 등록 CSV 정리 | StriveFormats",
+  "metaTitle": "Etsy 상품 등록 CSV 무료 검사 및 정리 | StriveFormats",
   "metaDescription": "Etsy 상품 등록 CSV를 정리하세요. 가격, 통화 코드, 태그를 통일하고, 태그 개수 제한, 이미지 URL, 누락된 정보를 행별로 표시합니다.",
   "kicker": "Etsy 상품 등록",
   "title": "Etsy용 CSV 수정기",
@@ -156,7 +156,7 @@
     "a": "eBay 변형 수정기를 사용하세요. 각 상품의 상위 행과 하위 행을 서로 대조해 추가로 검사합니다."
    }
   ],
-  "metaTitle": "eBay CSV 수정기 | File Exchange 및 Seller Hub 업로드 수정 | StriveFormats",
+  "metaTitle": "eBay CSV 업로드 오류 해결 – File Exchange·Seller Hub | StriveFormats",
   "metaDescription": "Seller Hub 보고서나 File Exchange에 업로드하기 전에 eBay 상품 등록 파일을 검사하세요. 액션, 상태 ID, 판매 기간, 카테고리, 가격, 수량을 확인합니다.",
   "kicker": "eBay 상품 등록",
   "title": "eBay용 CSV 수정기",
@@ -188,7 +188,7 @@
     "a": "아니요. 각 하위 행은 바로 위의 가장 가까운 상위 행에 속하므로, 업로드한 순서가 그대로 유지됩니다."
    }
   ],
-  "metaTitle": "eBay 변형 수정기 | 다중 변형 상품 검사 | StriveFormats",
+  "metaTitle": "eBay 변형 상품 CSV 무료 검사 | StriveFormats",
   "metaDescription": "업로드 전에 eBay 다중 변형 상품을 검사하세요. 각 변형의 옵션이 상위 행에 나열되어 있는지, 두 변형이 같은 조합을 갖지 않는지 확인합니다.",
   "kicker": "eBay 변형 상품",
   "title": "eBay 변형 수정기",
@@ -220,7 +220,7 @@
     "a": "네, 그대로 업로드하세요. 수정된 파일은 CSV로 내보내집니다. 셀러 센트럴에서 .txt가 필요하면 스프레드시트에서 열어 탭으로 구분된 텍스트로 저장하세요."
    }
   ],
-  "metaTitle": "Amazon Inventory Loader 수정기 | Amazon 상품 등록 파일 수정 | StriveFormats",
+  "metaTitle": "Amazon 재고 파일(Inventory Loader) 오류 해결 | StriveFormats",
   "metaDescription": "업로드 전에 Amazon Inventory Loader 파일을 검사하세요. 상품 ID 유형과 상태 코드를 변환하고, 손상된 바코드, 수량, 가격 범위를 표시합니다.",
   "kicker": "Amazon Inventory Loader",
   "title": "Amazon Inventory Loader 수정기",

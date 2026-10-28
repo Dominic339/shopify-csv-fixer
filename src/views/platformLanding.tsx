@@ -30,7 +30,8 @@ const muted = "text-[color:rgba(var(--muted-rgb),1)]";
 export async function platformLandingMetadata(slug: LandingSlug, locale: Locale = DEFAULT_LOCALE): Promise<Metadata> {
   const p = (await localizedLandings(locale))[slug];
   return {
-    title: p.metaTitle,
+    // metaTitle already ends with the brand, so skip the layout's "%s | StriveFormats".
+    title: { absolute: p.metaTitle },
     description: p.metaDescription,
     alternates: pageAlternates(locale, p.path),
     openGraph: { title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${localeHref(locale, p.path)}` },
@@ -155,6 +156,7 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
     operatingSystem: "Web browser",
     description: p.metaDescription,
     url: `${SITE_URL}${localeHref(locale, p.path)}`,
+    inLanguage: locale,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
 

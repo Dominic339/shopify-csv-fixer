@@ -28,7 +28,7 @@
     "a": "オプション列の欠落など、1つの構造的な問題がすべてのバリエーション行で繰り返されるためです。表の中で一度修正すれば、件数はすぐに減ります。"
    }
   ],
-  "metaTitle": "Shopify CSV修正ツール | Shopify商品CSVのインポートエラーを修正 | StriveFormats",
+  "metaTitle": "Shopify 商品CSVのインポートエラーを解決｜無料でCSVチェック | StriveFormats",
   "metaDescription": "Shopify商品CSVをインポート前に公式テンプレートと照合してチェックします。価格、ハンドル、true/falseの値は自動修正され、バリエーションや上書きの問題は該当する行まで特定されます。",
   "kicker": "Shopify商品",
   "title": "Shopify向けCSV修正ツール",
@@ -60,7 +60,7 @@
     "a": "WooCommerce可変商品の修正ツールをご利用ください。各バリエーションが親商品を参照していること、属性の組み合わせが一意であることも追加でチェックします。"
    }
   ],
-  "metaTitle": "WooCommerce CSV修正ツール | WooCommerce商品のインポートエラーを修正 | StriveFormats",
+  "metaTitle": "WooCommerce CSVインポートエラーを解決｜無料でチェック | StriveFormats",
   "metaDescription": "インポーターを実行する前にWooCommerce商品CSVをチェックします。価格、真偽値、在庫の値を統一し、重複したSKUやセール価格のミスを行ごとに指摘します。",
   "kicker": "WooCommerce商品",
   "title": "WooCommerce向けCSV修正ツール",
@@ -92,7 +92,7 @@
     "a": "はい。重複する組み合わせを探す際は、Attribute 1、Attribute 2などすべての属性が比較されます。"
    }
   ],
-  "metaTitle": "WooCommerce可変商品の修正ツール | バリエーションと属性 | StriveFormats",
+  "metaTitle": "WooCommerce 可変商品をCSVでエラーなくインポート | StriveFormats",
   "metaDescription": "WooCommerceの可変商品とバリエーションをインポート前にチェックします。親商品への参照、属性値、重複したバリエーションの組み合わせを1行ずつ確認します。",
   "kicker": "WooCommerce可変商品",
   "title": "WooCommerce可変商品の修正ツール",
@@ -124,7 +124,7 @@
     "a": "タグ、価格、数量、通貨コード、画像URLをチェックします。カテゴリと配送プロファイルは引き続きEtsy上で設定する必要があります。"
    }
   ],
-  "metaTitle": "Etsy CSV修正ツール | Etsy出品CSVを整える | StriveFormats",
+  "metaTitle": "Etsy 出品CSVを無料でチェック・整形 | StriveFormats",
   "metaDescription": "Etsyの出品CSVを整えます。価格、通貨コード、タグを統一し、タグ数の上限、画像URL、欠けている情報を行ごとに指摘します。",
   "kicker": "Etsy出品",
   "title": "Etsy向けCSV修正ツール",
@@ -156,7 +156,7 @@
     "a": "eBayバリエーションの修正ツールをご利用ください。各出品の親行と子行を相互にチェックします。"
    }
   ],
-  "metaTitle": "eBay CSV修正ツール | File ExchangeとSeller Hubのアップロードを修正 | StriveFormats",
+  "metaTitle": "eBay CSVアップロードエラーを解決｜File Exchange・Seller Hub | StriveFormats",
   "metaDescription": "Seller HubのレポートやFile Exchangeにアップロードする前に、eBayの出品ファイルをチェックします。アクション、コンディションID、出品期間、カテゴリ、価格、数量を確認します。",
   "kicker": "eBay出品",
   "title": "eBay向けCSV修正ツール",
@@ -188,7 +188,7 @@
     "a": "いいえ。各子行はその上にある最も近い親行に属するため、アップロードした順序がそのまま保持されます。"
    }
   ],
-  "metaTitle": "eBayバリエーションの修正ツール | 複数バリエーション出品をチェック | StriveFormats",
+  "metaTitle": "eBay バリエーション出品のCSVを無料でチェック | StriveFormats",
   "metaDescription": "eBayの複数バリエーション出品をアップロード前にチェックします。各バリエーションのオプションが親行に記載されていること、2つのバリエーションが同じ組み合わせになっていないことを確認します。",
   "kicker": "eBayバリエーション出品",
   "title": "eBayバリエーションの修正ツール",
@@ -220,7 +220,7 @@
     "a": "はい、そのままアップロードしてください。修正済みファイルはCSVでエクスポートされます。セラーセントラルで.txtが必要な場合は、表計算ソフトで開いてタブ区切りテキストとして保存してください。"
    }
   ],
-  "metaTitle": "Amazon Inventory Loader修正ツール | Amazon出品ファイルを修正 | StriveFormats",
+  "metaTitle": "Amazon 在庫ファイル（Inventory Loader）のエラーを解決 | StriveFormats",
   "metaDescription": "Amazon Inventory Loaderファイルをアップロード前にチェックします。商品IDタイプとコンディションコードを変換し、破損したバーコード、数量、価格帯を指摘します。",
   "kicker": "Amazon Inventory Loader",
   "title": "Amazon Inventory Loaderの修正ツール",

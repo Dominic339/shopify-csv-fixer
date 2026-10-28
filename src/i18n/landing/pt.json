@@ -28,7 +28,7 @@
     "a": "Um único problema de estrutura, como uma coluna de opção ausente, se repete em cada linha de variante. Corrija uma vez na tabela e o número cai rápido."
    }
   ],
-  "metaTitle": "Corretor de CSV do Shopify | Corrija erros de importação de produtos no Shopify | StriveFormats",
+  "metaTitle": "Erro ao importar CSV de produtos no Shopify: verifique grátis | StriveFormats",
   "metaDescription": "Confira um CSV de produtos do Shopify com o modelo oficial antes de importar. Preços, handles e valores true/false são corrigidos automaticamente; problemas de variantes e sobrescrita são apontados na linha exata.",
   "kicker": "produtos do Shopify",
   "title": "Corretor de CSV para Shopify",
@@ -60,7 +60,7 @@
     "a": "Use o corretor de produtos variáveis do WooCommerce. Ele também confere se cada variação aponta para um produto principal e tem uma combinação de atributos única."
    }
   ],
-  "metaTitle": "Corretor de CSV do WooCommerce | Corrija erros de importação de produtos no WooCommerce | StriveFormats",
+  "metaTitle": "Erro ao importar CSV no WooCommerce: verifique seu arquivo grátis | StriveFormats",
   "metaDescription": "Confira um CSV de produtos do WooCommerce antes de rodar o importador. Preços, booleanos e valores de estoque são normalizados; SKUs duplicados e erros no preço promocional são apontados por linha.",
   "kicker": "produtos do WooCommerce",
   "title": "Corretor de CSV para WooCommerce",
@@ -92,7 +92,7 @@
     "a": "Sim. Attribute 1, Attribute 2 e assim por diante são todos comparados na busca por combinações duplicadas."
    }
   ],
-  "metaTitle": "Corretor de CSV de produtos variáveis do WooCommerce | Variações e atributos | StriveFormats",
+  "metaTitle": "Importar produtos variáveis no WooCommerce por CSV sem erros | StriveFormats",
   "metaDescription": "Confira produtos variáveis e variações do WooCommerce antes de importar: referências ao produto principal, valores de atributo e combinações de variação duplicadas, linha por linha.",
   "kicker": "produtos variáveis do WooCommerce",
   "title": "Corretor de produtos variáveis do WooCommerce",
@@ -124,7 +124,7 @@
     "a": "Ele confere tags, preços, quantidades, códigos de moeda e URLs de imagem. Categoria e perfil de envio continuam sendo definidos no Etsy."
    }
   ],
-  "metaTitle": "Corretor de CSV do Etsy | Limpe CSVs de anúncios do Etsy | StriveFormats",
+  "metaTitle": "Validar e limpar o CSV de anúncios do Etsy grátis | StriveFormats",
   "metaDescription": "Limpe um CSV de anúncios do Etsy: preços, códigos de moeda e tags são normalizados, e limites de tags, URLs de imagem e dados ausentes são apontados por linha.",
   "kicker": "anúncios do Etsy",
   "title": "Corretor de CSV para Etsy",
@@ -156,7 +156,7 @@
     "a": "Use o corretor de variações do eBay, que também compara as linhas principais e filhas de cada anúncio entre si."
    }
   ],
-  "metaTitle": "Corretor de CSV do eBay | Corrija envios do File Exchange e do Seller Hub | StriveFormats",
+  "metaTitle": "Erros de CSV no eBay File Exchange e Seller Hub: verifique grátis | StriveFormats",
   "metaDescription": "Confira um arquivo de anúncios do eBay antes de enviá-lo aos relatórios do Seller Hub ou ao File Exchange: ações, IDs de condição, durações, categorias, preços e quantidades.",
   "kicker": "anúncios do eBay",
   "title": "Corretor de CSV para eBay",
@@ -188,7 +188,7 @@
     "a": "Não. Cada filha pertence à principal mais próxima acima dela, então a ordem enviada é mantida."
    }
   ],
-  "metaTitle": "Corretor de CSV de variações do eBay | Confira anúncios com várias variações | StriveFormats",
+  "metaTitle": "CSV de variações do eBay: valide anúncios com variantes | StriveFormats",
   "metaDescription": "Confira anúncios do eBay com várias variações antes de enviar: as opções de cada variação precisam existir na linha principal, e duas variações não podem ter a mesma combinação.",
   "kicker": "anúncios do eBay com variações",
   "title": "Corretor de variações do eBay",
@@ -220,7 +220,7 @@
     "a": "Sim, envie como está. O arquivo corrigido é exportado como CSV; abra numa planilha e salve como texto separado por tabulações se o Seller Central pedir .txt."
    }
   ],
-  "metaTitle": "Corretor de CSV do Amazon Inventory Loader | Corrija arquivos de ofertas da Amazon | StriveFormats",
+  "metaTitle": "Erros no arquivo Inventory Loader da Amazon: verifique grátis | StriveFormats",
   "metaDescription": "Confira um arquivo do Amazon Inventory Loader antes de enviar: tipos de ID de produto e códigos de condição são convertidos, e códigos de barras estragados, quantidades e faixas de preço são apontados.",
   "kicker": "Amazon Inventory Loader",
   "title": "Corretor para o Amazon Inventory Loader",

@@ -28,7 +28,7 @@
     "a": "Eén structureel probleem, zoals een ontbrekende optiekolom, herhaalt zich op elke variantrij. Los het één keer op in de tabel en het aantal daalt snel."
    }
   ],
-  "metaTitle": "Shopify CSV-hersteller | Importfouten in Shopify-product-CSV's oplossen | StriveFormats",
+  "metaTitle": "Shopify CSV-importfout oplossen – product-CSV gratis controleren | StriveFormats",
   "metaDescription": "Controleer een Shopify-product-CSV vóór het importeren aan de hand van de officiële sjabloon. Prijzen, handles en true/false-waarden worden automatisch gecorrigeerd; problemen met varianten en overschrijven worden per rij aangewezen.",
   "kicker": "Shopify-producten",
   "title": "CSV-hersteller voor Shopify",
@@ -60,7 +60,7 @@
     "a": "Gebruik de hersteller voor variabele WooCommerce-producten. Die controleert ook of elke variatie naar een hoofdproduct verwijst en een unieke combinatie van attributen heeft."
    }
   ],
-  "metaTitle": "WooCommerce CSV-hersteller | Importfouten bij WooCommerce-producten oplossen | StriveFormats",
+  "metaTitle": "WooCommerce CSV-importfout oplossen – gratis controleren | StriveFormats",
   "metaDescription": "Controleer een WooCommerce-product-CSV voordat je de importer start. Prijzen, booleans en voorraadwaarden worden genormaliseerd; dubbele SKU's en fouten in de actieprijs worden per rij gemarkeerd.",
   "kicker": "WooCommerce-producten",
   "title": "CSV-hersteller voor WooCommerce",
@@ -92,7 +92,7 @@
     "a": "Ja. Attribute 1, Attribute 2 enzovoort worden allemaal vergeleken bij het zoeken naar dubbele combinaties."
    }
   ],
-  "metaTitle": "Hersteller voor variabele WooCommerce-producten | Variaties en attributen | StriveFormats",
+  "metaTitle": "Variabele producten in WooCommerce importeren via CSV zonder fouten | StriveFormats",
   "metaDescription": "Controleer variabele WooCommerce-producten en variaties vóór het importeren: verwijzingen naar het hoofdproduct, attribuutwaarden en dubbele variatiecombinaties, rij voor rij.",
   "kicker": "variabele WooCommerce-producten",
   "title": "Hersteller voor variabele WooCommerce-producten",
@@ -124,7 +124,7 @@
     "a": "Het controleert tags, prijzen, aantallen, valutacodes en afbeeldings-URL's. Categorie en verzendprofiel stel je nog steeds in bij Etsy in."
    }
   ],
-  "metaTitle": "Etsy CSV-hersteller | Etsy-listing-CSV's opschonen | StriveFormats",
+  "metaTitle": "Etsy-CSV gratis controleren en opschonen | StriveFormats",
   "metaDescription": "Schoon een Etsy-listing-CSV op: prijzen, valutacodes en tags worden genormaliseerd, en taglimieten, afbeeldings-URL's en ontbrekende gegevens worden per rij gemarkeerd.",
   "kicker": "Etsy-listings",
   "title": "CSV-hersteller voor Etsy",
@@ -156,7 +156,7 @@
     "a": "Gebruik de hersteller voor eBay-variaties, die ook de hoofd- en subrijen van elke listing met elkaar vergelijkt."
    }
   ],
-  "metaTitle": "eBay CSV-hersteller | Uploads voor File Exchange en Seller Hub corrigeren | StriveFormats",
+  "metaTitle": "eBay CSV-uploadfouten oplossen – File Exchange en Seller Hub | StriveFormats",
   "metaDescription": "Controleer een eBay-listingbestand voordat je het uploadt naar de Seller Hub-rapporten of File Exchange: acties, staat-ID's, looptijden, categorieën, prijzen en aantallen.",
   "kicker": "eBay-listings",
   "title": "CSV-hersteller voor eBay",
@@ -188,7 +188,7 @@
     "a": "Nee. Elke subrij hoort bij de dichtstbijzijnde hoofdrij erboven, dus de volgorde waarin je uploadde blijft behouden."
    }
   ],
-  "metaTitle": "Hersteller voor eBay-variaties | Listings met meerdere variaties controleren | StriveFormats",
+  "metaTitle": "eBay-variaties uploaden via CSV – bestand gratis controleren | StriveFormats",
   "metaDescription": "Controleer eBay-listings met meerdere variaties vóór het uploaden: de opties van elke variatie moeten op de hoofdrij staan, en geen twee variaties mogen dezelfde combinatie hebben.",
   "kicker": "eBay-listings met variaties",
   "title": "Hersteller voor eBay-variaties",
@@ -220,7 +220,7 @@
     "a": "Ja, upload het zoals het is. Het gecorrigeerde bestand wordt als CSV geëxporteerd; open het in een spreadsheet en sla het op als tab-gescheiden tekst als Seller Central om een .txt vraagt."
    }
   ],
-  "metaTitle": "Amazon Inventory Loader-hersteller | Amazon-aanbiedingsbestanden corrigeren | StriveFormats",
+  "metaTitle": "Fouten in je Amazon Inventory Loader-bestand oplossen | StriveFormats",
   "metaDescription": "Controleer een Amazon Inventory Loader-bestand vóór het uploaden: product-ID-typen en staatcodes worden omgezet, en beschadigde barcodes, aantallen en prijsbereiken worden gemarkeerd.",
   "kicker": "Amazon Inventory Loader",
   "title": "Hersteller voor de Amazon Inventory Loader",

@@ -3,7 +3,7 @@ import FormatsClient from "@/lib/formats/FormatsClient";
 import { sectionByLocale } from "@/lib/i18n/getTranslations";
 
 export const metadata: Metadata = {
-  title: "Custom Formats | StriveFormats",
+  title: "Custom Formats",
   description:
     "Create reusable CSV formats from a sample file: columns, required fields, allowed values and cleanup rules, checked automatically in the CSV Fixer.",
   alternates: { canonical: "/formats" },

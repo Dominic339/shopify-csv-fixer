@@ -4,7 +4,7 @@ import ResetPasswordClient from "./ResetPasswordClient";
 import { sectionByLocale } from "@/lib/i18n/getTranslations";
 
 export const metadata: Metadata = {
-  title: "Reset Password | StriveFormats",
+  title: "Reset Password",
   description: "Reset your StriveFormats account password.",
 };
 

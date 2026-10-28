@@ -4,7 +4,7 @@ import UpdatePasswordClient from "./UpdatePasswordClient";
 import { sectionByLocale } from "@/lib/i18n/getTranslations";
 
 export const metadata: Metadata = {
-  title: "Update Password | StriveFormats",
+  title: "Update Password",
   description: "Set a new password for your StriveFormats account.",
 };
 

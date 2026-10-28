@@ -28,7 +28,7 @@
     "a": "Jeden problem ze strukturą, np. brakująca kolumna opcji, powtarza się w każdym wierszu wariantu. Napraw go raz w tabeli, a liczba szybko spadnie."
    }
   ],
-  "metaTitle": "Korektor CSV dla Shopify | Napraw błędy importu produktów w Shopify | StriveFormats",
+  "metaTitle": "Błąd importu CSV w Shopify – sprawdź plik produktów za darmo | StriveFormats",
   "metaDescription": "Sprawdź plik CSV produktów Shopify z oficjalnym szablonem przed importem. Ceny, handle i wartości true/false są poprawiane automatycznie; problemy z wariantami i nadpisywaniem są wskazywane co do wiersza.",
   "kicker": "produkty Shopify",
   "title": "Korektor CSV dla Shopify",
@@ -60,7 +60,7 @@
     "a": "Użyj korektora produktów zmiennych WooCommerce. Sprawdza on też, czy każdy wariant wskazuje produkt nadrzędny i ma unikalną kombinację atrybutów."
    }
   ],
-  "metaTitle": "Korektor CSV dla WooCommerce | Napraw błędy importu produktów WooCommerce | StriveFormats",
+  "metaTitle": "Błąd importu CSV w WooCommerce – sprawdź plik za darmo | StriveFormats",
   "metaDescription": "Sprawdź plik CSV produktów WooCommerce przed uruchomieniem importera. Ceny, wartości logiczne i stany magazynowe są ujednolicane; zduplikowane SKU i błędy ceny promocyjnej są oznaczane w każdym wierszu.",
   "kicker": "produkty WooCommerce",
   "title": "Korektor CSV dla WooCommerce",
@@ -92,7 +92,7 @@
     "a": "Tak. Attribute 1, Attribute 2 itd. są porównywane przy szukaniu zduplikowanych kombinacji."
    }
   ],
-  "metaTitle": "Korektor CSV produktów zmiennych WooCommerce | Warianty i atrybuty | StriveFormats",
+  "metaTitle": "Import produktów zmiennych WooCommerce z CSV bez błędów | StriveFormats",
   "metaDescription": "Sprawdź produkty zmienne i warianty WooCommerce przed importem: odwołania do produktu nadrzędnego, wartości atrybutów i zduplikowane kombinacje wariantów, wiersz po wierszu.",
   "kicker": "produkty zmienne WooCommerce",
   "title": "Korektor produktów zmiennych WooCommerce",
@@ -124,7 +124,7 @@
     "a": "Sprawdza tagi, ceny, ilości, kody walut i adresy zdjęć. Kategorię i profil wysyłki nadal ustawiasz w Etsy."
    }
   ],
-  "metaTitle": "Korektor CSV dla Etsy | Uporządkuj pliki CSV ofert Etsy | StriveFormats",
+  "metaTitle": "Sprawdź i uporządkuj plik CSV ofert Etsy za darmo | StriveFormats",
   "metaDescription": "Uporządkuj plik CSV ofert Etsy: ceny, kody walut i tagi są ujednolicane, a limity tagów, adresy zdjęć i brakujące dane są oznaczane w każdym wierszu.",
   "kicker": "oferty Etsy",
   "title": "Korektor CSV dla Etsy",
@@ -156,7 +156,7 @@
     "a": "Użyj korektora wariantów eBay, który porównuje też ze sobą wiersze nadrzędne i podrzędne każdej oferty."
    }
   ],
-  "metaTitle": "Korektor CSV dla eBay | Napraw pliki dla File Exchange i Seller Hub | StriveFormats",
+  "metaTitle": "Błędy CSV w eBay File Exchange i Seller Hub – sprawdź za darmo | StriveFormats",
   "metaDescription": "Sprawdź plik ofert eBay przed przesłaniem do raportów Seller Hub lub File Exchange: akcje, ID stanu, czas trwania, kategorie, ceny i ilości.",
   "kicker": "oferty eBay",
   "title": "Korektor CSV dla eBay",
@@ -188,7 +188,7 @@
     "a": "Nie. Każdy wiersz podrzędny należy do najbliższego wiersza nadrzędnego nad nim, więc przesłana kolejność zostaje zachowana."
    }
   ],
-  "metaTitle": "Korektor CSV wariantów eBay | Sprawdź oferty z wieloma wariantami | StriveFormats",
+  "metaTitle": "Plik CSV wariantów eBay – sprawdź oferty z wariantami | StriveFormats",
   "metaDescription": "Sprawdź oferty eBay z wieloma wariantami przed przesłaniem: opcje każdego wariantu muszą być w wierszu nadrzędnym, a żadne dwa warianty nie mogą mieć tej samej kombinacji.",
   "kicker": "oferty eBay z wariantami",
   "title": "Korektor wariantów eBay",
@@ -220,7 +220,7 @@
     "a": "Tak, prześlij go bez zmian. Poprawiony plik jest eksportowany jako CSV; otwórz go w arkuszu i zapisz jako tekst rozdzielany tabulatorami, jeśli Seller Central wymaga pliku .txt."
    }
   ],
-  "metaTitle": "Korektor CSV dla Amazon Inventory Loader | Napraw pliki ofert Amazon | StriveFormats",
+  "metaTitle": "Błędy w pliku Inventory Loader Amazon – sprawdź za darmo | StriveFormats",
   "metaDescription": "Sprawdź plik Amazon Inventory Loader przed przesłaniem: typy ID produktu i kody stanu są zamieniane, a uszkodzone kody kreskowe, ilości i zakresy cen są oznaczane.",
   "kicker": "Amazon Inventory Loader",
   "title": "Korektor dla Amazon Inventory Loader",

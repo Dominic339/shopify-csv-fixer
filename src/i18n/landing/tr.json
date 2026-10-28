@@ -28,7 +28,7 @@
     "a": "Eksik bir seçenek sütunu gibi tek bir yapısal sorun her varyant satırında tekrarlanır. Tabloda bir kez düzeltin, sayı hızla düşer."
    }
   ],
-  "metaTitle": "Shopify CSV Düzeltici | Shopify ürün CSV içe aktarma hatalarını düzeltin | StriveFormats",
+  "metaTitle": "Shopify CSV içe aktarma hatası çözümü – ürün CSV'nizi ücretsiz kontrol edin | StriveFormats",
   "metaDescription": "Bir Shopify ürün CSV'sini içe aktarmadan önce resmi şablona göre kontrol edin. Fiyatlar, handle'lar ve true/false değerleri otomatik düzeltilir; varyant ve üzerine yazma sorunları tam satırıyla gösterilir.",
   "kicker": "Shopify ürünleri",
   "title": "Shopify için CSV Düzeltici",
@@ -60,7 +60,7 @@
     "a": "WooCommerce değişken ürün düzelticisini kullanın. O da her varyasyonun bir ana ürüne işaret ettiğini ve benzersiz bir nitelik kombinasyonu olduğunu kontrol eder."
    }
   ],
-  "metaTitle": "WooCommerce CSV Düzeltici | WooCommerce ürün içe aktarma hatalarını düzeltin | StriveFormats",
+  "metaTitle": "WooCommerce CSV içe aktarma hatası çözümü – ücretsiz kontrol | StriveFormats",
   "metaDescription": "İçe aktarıcıyı çalıştırmadan önce bir WooCommerce ürün CSV'sini kontrol edin. Fiyatlar, mantıksal değerler ve stok değerleri normalleştirilir; yinelenen SKU'lar ve indirimli fiyat hataları satır satır işaretlenir.",
   "kicker": "WooCommerce ürünleri",
   "title": "WooCommerce için CSV Düzeltici",
@@ -92,7 +92,7 @@
     "a": "Evet. Yinelenen kombinasyonlar aranırken Attribute 1, Attribute 2 vb. hepsi karşılaştırılır."
    }
   ],
-  "metaTitle": "WooCommerce Değişken Ürün CSV Düzeltici | Varyasyonlar ve nitelikler | StriveFormats",
+  "metaTitle": "WooCommerce değişken ürünleri CSV ile hatasız içe aktarın | StriveFormats",
   "metaDescription": "İçe aktarmadan önce WooCommerce değişken ürünlerini ve varyasyonlarını kontrol edin: ana ürün referansları, nitelik değerleri ve yinelenen varyasyon kombinasyonları, satır satır.",
   "kicker": "WooCommerce değişken ürünleri",
   "title": "WooCommerce Değişken Ürün Düzeltici",
@@ -124,7 +124,7 @@
     "a": "Etiketleri, fiyatları, miktarları, para birimi kodlarını ve görsel URL'lerini kontrol eder. Kategori ve kargo profili seçimlerini yine Etsy'de yapmanız gerekir."
    }
   ],
-  "metaTitle": "Etsy CSV Düzeltici | Etsy ilan CSV'lerini temizleyin | StriveFormats",
+  "metaTitle": "Etsy CSV dosyanızı ücretsiz kontrol edin ve temizleyin | StriveFormats",
   "metaDescription": "Bir Etsy ilan CSV'sini temizleyin: fiyatlar, para birimi kodları ve etiketler normalleştirilir; etiket sınırları, görsel URL'leri ve eksik bilgiler satır satır işaretlenir.",
   "kicker": "Etsy ilanları",
   "title": "Etsy için CSV Düzeltici",
@@ -156,7 +156,7 @@
     "a": "eBay Varyasyon düzelticisini kullanın; her ilanın ana ve alt satırlarını birbiriyle de karşılaştırır."
    }
   ],
-  "metaTitle": "eBay CSV Düzeltici | File Exchange ve Seller Hub yüklemelerini düzeltin | StriveFormats",
+  "metaTitle": "eBay File Exchange ve Seller Hub CSV hataları – ücretsiz kontrol | StriveFormats",
   "metaDescription": "Bir eBay ilan dosyasını Seller Hub raporlarına veya File Exchange'e yüklemeden önce kontrol edin: işlemler, durum kimlikleri, süreler, kategoriler, fiyatlar ve miktarlar.",
   "kicker": "eBay ilanları",
   "title": "eBay için CSV Düzeltici",
@@ -188,7 +188,7 @@
     "a": "Hayır. Her alt satır, üstündeki en yakın ana satıra aittir; bu yüzden yüklediğiniz sıra korunur."
    }
   ],
-  "metaTitle": "eBay Varyasyon CSV Düzeltici | Çok varyasyonlu ilanları kontrol edin | StriveFormats",
+  "metaTitle": "eBay varyasyon CSV'si – varyasyonlu ilanları kontrol edin | StriveFormats",
   "metaDescription": "Çok varyasyonlu eBay ilanlarını yüklemeden önce kontrol edin: her varyasyonun seçenekleri ana satırda bulunmalı ve hiçbir iki varyasyon aynı kombinasyonu paylaşmamalıdır.",
   "kicker": "eBay çok varyasyonlu ilanlar",
   "title": "eBay Varyasyon Düzeltici",
@@ -220,7 +220,7 @@
     "a": "Evet, olduğu gibi yükleyin. Düzeltilmiş dosya CSV olarak dışa aktarılır; Seller Central .txt isterse bir elektronik tabloda açıp sekmeyle ayrılmış metin olarak kaydedin."
    }
   ],
-  "metaTitle": "Amazon Inventory Loader CSV Düzeltici | Amazon teklif dosyalarını düzeltin | StriveFormats",
+  "metaTitle": "Amazon Inventory Loader dosyası hataları – ücretsiz kontrol | StriveFormats",
   "metaDescription": "Bir Amazon Inventory Loader dosyasını yüklemeden önce kontrol edin: ürün kimliği türleri ve durum kodları dönüştürülür; bozuk barkodlar, miktarlar ve fiyat aralıkları işaretlenir.",
   "kicker": "Amazon Inventory Loader",
   "title": "Amazon Inventory Loader Düzeltici",

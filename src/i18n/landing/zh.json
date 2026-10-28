@@ -28,7 +28,7 @@
     "a": "一个结构性问题（例如缺少选项列）会在每个变体行中重复出现。在表格中修复一次，问题数量就会迅速下降。"
    }
   ],
-  "metaTitle": "Shopify CSV修复工具 | 修复Shopify商品CSV导入错误 | StriveFormats",
+  "metaTitle": "Shopify 产品CSV导入错误怎么解决？免费检查CSV | StriveFormats",
   "metaDescription": "在导入之前，对照官方模板检查您的Shopify商品CSV。价格、handle和true/false值会自动修复；变体和覆盖问题会精确定位到具体行。",
   "kicker": "Shopify商品",
   "title": "Shopify CSV修复工具",
@@ -60,7 +60,7 @@
     "a": "请使用WooCommerce可变商品修复工具。它还会检查每个变体是否指向父商品，以及属性组合是否唯一。"
    }
   ],
-  "metaTitle": "WooCommerce CSV修复工具 | 修复WooCommerce商品导入错误 | StriveFormats",
+  "metaTitle": "WooCommerce CSV导入错误怎么解决？免费检查 | StriveFormats",
   "metaDescription": "在运行导入工具之前检查您的WooCommerce商品CSV。统一价格、布尔值和库存值，并逐行标出重复的SKU和促销价错误。",
   "kicker": "WooCommerce商品",
   "title": "WooCommerce CSV修复工具",
@@ -92,7 +92,7 @@
     "a": "支持。查找重复组合时，会比较Attribute 1、Attribute 2等所有属性。"
    }
   ],
-  "metaTitle": "WooCommerce可变商品修复工具 | 变体与属性 | StriveFormats",
+  "metaTitle": "用CSV导入WooCommerce可变商品，避免出错 | StriveFormats",
   "metaDescription": "在导入之前检查WooCommerce可变商品和变体：逐行检查父商品引用、属性值和重复的变体组合。",
   "kicker": "WooCommerce可变商品",
   "title": "WooCommerce可变商品修复工具",
@@ -124,7 +124,7 @@
     "a": "它会检查标签、价格、数量、货币代码和图片URL。类目和运费模板仍需在Etsy上设置。"
    }
   ],
-  "metaTitle": "Etsy CSV修复工具 | 整理Etsy商品CSV | StriveFormats",
+  "metaTitle": "免费检查和整理Etsy商品CSV | StriveFormats",
   "metaDescription": "整理您的Etsy商品CSV：统一价格、货币代码和标签，并逐行标出标签数量限制、图片URL和缺失的信息。",
   "kicker": "Etsy商品",
   "title": "Etsy CSV修复工具",
@@ -156,7 +156,7 @@
     "a": "请使用eBay变体修复工具。它还会将每个刊登的父行和子行相互核对。"
    }
   ],
-  "metaTitle": "eBay CSV修复工具 | 修复File Exchange和Seller Hub上传文件 | StriveFormats",
+  "metaTitle": "eBay CSV上传错误解决：File Exchange与Seller Hub | StriveFormats",
   "metaDescription": "在上传到Seller Hub报告或File Exchange之前检查您的eBay刊登文件：操作、商品状况ID、刊登时长、类目、价格和数量。",
   "kicker": "eBay刊登",
   "title": "eBay CSV修复工具",
@@ -188,7 +188,7 @@
     "a": "不会。每个子行属于其上方最近的父行，因此会保留您上传时的顺序。"
    }
   ],
-  "metaTitle": "eBay变体修复工具 | 检查多变体刊登 | StriveFormats",
+  "metaTitle": "免费检查eBay多属性（变体）刊登CSV | StriveFormats",
   "metaDescription": "在上传之前检查eBay多变体刊登：每个变体的选项都必须列在父行中，且任意两个变体不能具有相同的组合。",
   "kicker": "eBay变体刊登",
   "title": "eBay变体修复工具",
@@ -220,7 +220,7 @@
     "a": "可以，直接上传即可。修复后的文件会导出为CSV；如果卖家平台需要.txt，请在表格软件中打开并另存为制表符分隔的文本。"
    }
   ],
-  "metaTitle": "Amazon Inventory Loader修复工具 | 修复Amazon刊登文件 | StriveFormats",
+  "metaTitle": "Amazon库存文件（Inventory Loader）错误解决 | StriveFormats",
   "metaDescription": "在上传之前检查Amazon Inventory Loader文件：转换商品ID类型和商品状况代码，并标出损坏的条形码、数量和价格范围问题。",
   "kicker": "Amazon Inventory Loader",
   "title": "Amazon Inventory Loader修复工具",
