@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 import { getMonthKey } from "@/lib/month";
+import { getPlanLimit } from "@/lib/plans";
+import { consumeExports, loadEffectivePlan } from "@/lib/quotaServer";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-
-type Plan = "free" | "basic" | "advanced";
-
-function getPlanLimit(plan: Plan) {
-  if (plan === "advanced") return { unlimited: true as const, limit: 0 };
-  if (plan === "basic") return { unlimited: false as const, limit: 100 };
-  return { unlimited: false as const, limit: 3 };
-}
 
 export async function POST(req: Request) {
   try {
@@ -23,128 +17,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, message: "Not signed in" }, { status: 401 });
     }
 
-    let body: any = {};
-    try {
-      body = await req.json();
-    } catch {
-      body = {};
-    }
-
-    const amount = Math.max(1, Math.min(10, Number(body.amount ?? 1)));
+    const body: { amount?: unknown } = await req.json().catch(() => ({}));
+    const amount = Math.max(1, Math.min(10, Number(body.amount ?? 1) || 1));
     const monthKey = getMonthKey();
 
     const admin = createSupabaseAdminClient();
-
-    // Determine plan from user_subscriptions
-    const { data: subRow, error: subErr } = await admin
-      .from("user_subscriptions")
-      .select("plan,status")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (subErr) {
-      return NextResponse.json(
-        { ok: false, message: subErr.message || "Failed to load subscription." },
-        { status: 500 }
-      );
-    }
-
-    const status = String(subRow?.status ?? "").toLowerCase();
-    const rawPlan = String(subRow?.plan ?? "free").toLowerCase();
-    const plan: Plan = rawPlan === "advanced" ? "advanced" : rawPlan === "basic" ? "basic" : "free";
-
-    // Only treat as paid if status is active
-    const effectivePlan: Plan = status === "active" ? plan : "free";
-    const { unlimited, limit } = getPlanLimit(effectivePlan);
+    const plan = await loadEffectivePlan(admin, user.id);
+    const { unlimited, limit } = getPlanLimit(plan);
 
     // Advanced is unlimited: never block, never count
     if (unlimited) {
-      return NextResponse.json(
-        {
-          ok: true,
-          signedIn: true,
-          plan: effectivePlan,
-          unlimited: true,
-          monthKey,
-          used: 0,
-          limit: 0,
-          remaining: 0,
-        },
-        { status: 200 }
-      );
+      return NextResponse.json({
+        ok: true,
+        signedIn: true,
+        plan,
+        unlimited: true,
+        monthKey,
+        used: 0,
+        limit: 0,
+        remaining: 0,
+      });
     }
 
-    // Read current usage for this month
-    const { data: usageRow, error: usageErr } = await admin
-      .from("export_usage")
-      .select("exports_used")
-      .eq("user_id", user.id)
-      .eq("month_key", monthKey)
-      .maybeSingle();
-
-    if (usageErr) {
-      return NextResponse.json(
-        { ok: false, message: usageErr.message || "Failed to read usage." },
-        { status: 500 }
-      );
-    }
-
-    const used = Number(usageRow?.exports_used ?? 0);
-    const nextUsed = used + amount;
-
-    if (nextUsed > limit) {
-      return NextResponse.json(
-        {
-          ok: false,
-          message: "Monthly export limit reached.",
-          signedIn: true,
-          plan: effectivePlan,
-          unlimited: false,
-          monthKey,
-          used,
-          limit,
-          remaining: Math.max(0, limit - used),
-        },
-        { status: 403 }
-      );
-    }
-
-    // Upsert next usage
-    const { error: upErr } = await admin
-      .from("export_usage")
-      .upsert(
-        {
-          user_id: user.id,
-          month_key: monthKey,
-          exports_used: nextUsed,
-        },
-        { onConflict: "user_id,month_key" }
-      );
-
-    if (upErr) {
-      return NextResponse.json(
-        { ok: false, message: upErr.message || "Failed to update usage." },
-        { status: 500 }
-      );
-    }
+    const result = await consumeExports(admin, { userId: user.id, monthKey, amount, limit });
 
     return NextResponse.json(
       {
-        ok: true,
+        ok: result.ok,
+        ...(result.ok ? {} : { message: "Monthly export limit reached." }),
         signedIn: true,
-        plan: effectivePlan,
+        plan,
         unlimited: false,
         monthKey,
-        used: nextUsed,
+        used: result.used,
         limit,
-        remaining: Math.max(0, limit - nextUsed),
+        remaining: Math.max(0, limit - result.used),
       },
-      { status: 200 }
+      { status: result.ok ? 200 : 403 }
     );
-  } catch (e: any) {
-    return NextResponse.json(
-      { ok: false, message: e?.message ?? "Quota consume failed." },
-      { status: 500 }
-    );
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Quota consume failed.";
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
