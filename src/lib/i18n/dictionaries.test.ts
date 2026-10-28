@@ -13,6 +13,8 @@ import { AMAZON_ISSUE_META } from "@/lib/validation/issueMetaAmazon";
 import { listCuratedGuides } from "@/lib/guides/mdxLoader";
 import { getAllFormats } from "@/lib/formats";
 import { PLATFORM_LANDINGS } from "@/lib/landing/platforms";
+import { getAllGuides } from "@/lib/guidesRegistry";
+import { expandIssueContent, fillTemplate } from "@/lib/guides/issueGuideExpander";
 import en from "@/i18n/en.json";
 import enPages from "@/i18n/pages/en.json";
 
@@ -22,6 +24,19 @@ const placeholders = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort();
 
 const issueCodes = [SHOPIFY_ISSUE_META, WOOCOMMERCE_ISSUE_META, ETSY_ISSUE_META, EBAY_ISSUE_META, AMAZON_ISSUE_META].flatMap((m) => Object.keys(m));
 const guideKeys = listCuratedGuides().map((g) => `${g.platform}/${g.slug}`);
+// Every sentence template the issue-guide generator uses for some guide.
+const guideTemplates = (() => {
+  const seen = new Set<string>();
+  const tr = (t: string, v?: Record<string, string | number>) => (seen.add(t), fillTemplate(t, v));
+  for (const g of getAllGuides()) {
+    if (g.kind !== "issue" || !g.issueCode) continue;
+    expandIssueContent(
+      { issueCode: g.issueCode, title: g.title, explanation: g.explanation ?? "", whyPlatformCares: g.whyPlatformCares ?? "", howToFix: g.howToFix ?? "", category: g.category, autoFixable: !!g.autoFixable, blocking: !!g.blocking, platform: g.platform },
+      tr,
+    );
+  }
+  return [...seen];
+})();
 const presets = getAllFormats().filter((f) => f.source === "builtin" && f.seo);
 
 describe.each(LOCALES.filter((l) => l !== "en"))("%s dictionaries", (loc) => {
@@ -83,5 +98,12 @@ describe.each(LOCALES.filter((l) => l !== "en"))("%s dictionaries", (loc) => {
     walk(enPages, pages, loc);
     expect(diff).toEqual([]);
     expect(pages.translationNote).toBeTruthy();
+  });
+
+  it("translate every sentence of the generated issue guides with the same placeholders", () => {
+    const dict: Record<string, string> = read("guideText", loc);
+    const missing = guideTemplates.filter((t) => !dict[t]);
+    const badPlaceholders = guideTemplates.filter((t) => dict[t] && [...new Set(placeholders(dict[t]))].join() !== [...new Set(placeholders(t))].join());
+    expect({ missing, badPlaceholders }).toEqual({ missing: [], badPlaceholders: [] });
   });
 });

@@ -195,7 +195,7 @@ export async function guidesPlatformMetadata(locale: Locale, platform: string): 
   return {
     title,
     description,
-    alternates: pageAlternates(locale, `/guides/${platform}`, false),
+    alternates: pageAlternates(locale, `/guides/${platform}`),
     openGraph: { title, description },
   };
 }

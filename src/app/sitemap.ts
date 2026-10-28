@@ -2,15 +2,16 @@
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "../lib/presets";
 import { getAllGuides, GUIDE_PLATFORMS } from "../lib/guidesRegistry";
-import { LOCALES, localeHref } from "../lib/i18n/locales";
+import { LOCALES, localeHref, type Locale } from "../lib/i18n/locales";
+import { readCuratedGuide } from "../lib/guides/mdxLoader";
 import { SITE_URL } from "../lib/i18n/seo";
 
 type Freq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
 /** A page with a translated copy under /<locale>/: one entry per language, each listing the others. */
-function translated(path: string, changeFrequency: Freq, priority: number): MetadataRoute.Sitemap {
-  const languages = Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}${localeHref(l, path)}`]));
-  return LOCALES.map((l) => ({
+function translated(path: string, changeFrequency: Freq, priority: number, locales: readonly Locale[] = LOCALES): MetadataRoute.Sitemap {
+  const languages = Object.fromEntries(locales.map((l) => [l, `${SITE_URL}${localeHref(l, path)}`]));
+  return locales.map((l) => ({
     url: `${SITE_URL}${localeHref(l, path)}`,
     changeFrequency,
     priority: l === "en" ? priority : Math.round(priority * 0.8 * 100) / 100,
@@ -48,9 +49,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/privacy", "yearly", 0.2),
     ...translated("/terms", "yearly", 0.2),
 
-    // Guide pages: article bodies are English in every language, so only the English URL
-    // is listed (localized copies point their canonical at it).
-    ...GUIDE_PLATFORMS.map((p) => english(`/guides/${p}`, "monthly", 0.75)),
-    ...getAllGuides().map((g) => english(`/guides/${g.platform}/${g.slug}`, "monthly", 0.7)),
+    // Guide pages: issue guides are generated in every language; a curated article is
+    // listed in the languages it has been translated into.
+    ...GUIDE_PLATFORMS.flatMap((p) => translated(`/guides/${p}`, "monthly", 0.75)),
+    ...getAllGuides().flatMap((g) => {
+      const path = `/guides/${g.platform}/${g.slug}`;
+      if (g.kind !== "curated") return translated(path, "monthly", 0.7);
+      return translated(path, "monthly", 0.7, LOCALES.filter((l) => readCuratedGuide(g.platform, g.slug, l)?.translated));
+    }),
   ];
 }
