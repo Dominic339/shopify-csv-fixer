@@ -1,0 +1,146 @@
+---
+title: "WooCommerce 商品 CSV 导入错误：原因与解决方法"
+description: "解决最常见的 WooCommerce 商品 CSV 导入错误：缺少 SKU、类型无效、变体行问题、价格格式和属性列问题。"
+keywords: ["woocommerce csv 导入错误", "woocommerce 产品导入失败", "woocommerce csv 报错", "修复 woocommerce csv", "woocommerce 导入问题", "检查 woocommerce csv", "woocommerce 商品上传错误"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "最常见的 WooCommerce CSV 导入错误及其含义"
+  - "Type 列如何决定导入行为"
+  - "如何修复父商品与变体之间的关联错误"
+  - "如何正确填写价格、布尔值和属性"
+  - "如何使用 WooCommerce 导入工具的错误报告"
+bestFor: "排查商品 CSV 导入失败或只导入了一部分的 WooCommerce 店主和开发者"
+timeToComplete: "12 分钟"
+---
+
+## WooCommerce 如何验证 CSV 导入
+
+WooCommerce 自带的商品导入工具会读取您的 CSV 文件，并按列名匹配各列。它会根据 WooCommerce 的商品数据模型验证每一行。验证失败时，WooCommerce 会跳过该行并记录错误。导入完成后，您会看到一份摘要，列出导入了多少行、跳过了多少行以及原因。
+
+如果您的 WordPress 使用中文，导出文件会使用中文列名（例如用“类型”代替 `Type`），导入工具两种列名都能识别。本指南使用英文列名。
+
+了解这些验证规则，就能提前避免大多数导入失败。
+
+---
+
+## 错误：商品类型无效或缺失
+
+**原因**：`Type` 列中有无法识别的值，或者缺少该列。
+
+**可接受的值**：
+
+| Type | 说明 |
+|---|---|
+| `simple` | 没有变体的简单商品 |
+| `variable` | 有变体的商品（父行） |
+| `variation` | 可变商品的某个具体变体（子行） |
+| `grouped` | 一组相关商品 |
+| `external` | 链接到外部网站的商品 |
+
+**解决方法**：
+- 如果缺少 `Type` 列，请添加
+- 把自定义或拼写错误的值改为上表中的某个值
+- `Variable`（大写 V）与 `variable` 不同，请使用小写
+
+---
+
+## 错误：缺少 SKU 或 SKU 重复
+
+**原因**：简单商品或可变商品行的 `SKU` 为空，或者同一个 SKU 出现在两行中。
+
+WooCommerce 把 SKU 作为唯一标识符，用来把导入的行与现有商品对应起来。如果 SKU 为空，WooCommerce 每次导入都会新建商品，而不是更新现有商品。
+
+**解决方法**：
+- 为每个商品行（简单商品和可变商品的父行）设置唯一的 SKU
+- 变体行可以沿用父商品的 SKU，也可以有自己的 SKU，但不能与其他商品的 SKU 重复
+- 在 Excel 中用 `COUNTIF` 查找重复：`=COUNTIF($A:$A, A2)`，结果大于 1 即为重复
+
+---
+
+## 错误：常规价格无效
+
+**原因**：`Regular price` 中带有货币符号（`€`、`$`）、用逗号作小数点（`19,99`），或在简单商品、可变商品中为空。
+
+**解决方法**：
+- 去掉货币符号：用查找和替换删除 `$`、`€`、`£`
+- 把小数点逗号改为句点：`19,99` → `19.99`
+- 确保每个简单商品和可变商品都有价格；变体行可以沿用父商品的价格
+
+---
+
+## 错误：布尔字段无效
+
+**原因**：WooCommerce 的布尔列（`In stock?`、`Backorders allowed?`、`Sold individually?`、`Is featured?`）只接受 `1`（真）或 `0`（假）。`yes`、`TRUE`、`Y` 等值会导致验证错误。
+
+**解决方法**：替换所有布尔值：
+
+| 替换前 | 替换后 |
+|---|---|
+| `yes`、`Yes`、`TRUE`、`true` | `1` |
+| `no`、`No`、`FALSE`、`false` | `0` |
+
+使用查找和替换，并勾选“单元格匹配”。
+
+---
+
+## 错误：找不到变体的父商品
+
+**原因**：某个 `Type: variation` 行引用的父商品既不在导入文件中，也不在数据库中。
+
+WooCommerce 的变体行需要一个父商品。可以通过 `Parent` 列（应填写父商品在数据库中的 ID）关联，或者把父商品放在同一个导入文件中。
+
+**解决方法**：
+- 把父商品行放进同一个 CSV 文件
+- 在变体行的 `Parent` 列中填写父商品的 WooCommerce 商品 ID（WordPress 后台显示的编号）
+- 确认父行使用的是 `Type: variable`，而不是 `Type: simple`
+
+---
+
+## 错误：无法识别属性列
+
+**原因**：属性列的名称没有完全遵循 WooCommerce 的命名规则。
+
+**WooCommerce 属性列格式**：
+
+- `Attribute 1 name`：第一个属性的名称（例如 `Color`）
+- `Attribute 1 value(s)`：该行的值（例如 `Blue`，多个值时写 `Blue | Red`）
+- `Attribute 1 visible`：在商品页面显示为 `1`，隐藏为 `0`
+- `Attribute 1 global`：使用全局属性为 `1`，本地属性为 `0`
+
+**解决方法**：
+- 使用带空格的准确格式：`Attribute 1 name`，而不是 `attribute_1_name` 或 `Attribute1Name`
+- 从 1 开始按顺序为属性编号
+- 不要跳号（没有使用 Attribute 2 时，不要使用 Attribute 3）
+
+---
+
+## 错误：图片网址无法访问
+
+**原因**：`Images` 列中的图片网址不是可公开访问的 HTTPS 网址、需要登录，或者使用了 HTTPS 以外的协议。
+
+WooCommerce 会在导入过程中下载图片，并保存到媒体库中。
+
+**解决方法**：
+- 在浏览器中逐一打开图片网址，应无需登录即可直接显示图片
+- 使用 HTTPS 网址（不要用 HTTP）
+- 对于 Google 云端硬盘或 Dropbox 中的图片，请使用直接下载链接（而不是分享链接）
+- 如果图片在 localhost 或测试服务器上，请先移到可公开访问的位置
+
+---
+
+## 如何阅读 WooCommerce 导入错误报告
+
+导入完成后，WooCommerce 会显示一份摘要，包括：
+- “已导入 X 个产品”：成功创建或更新的数量
+- “X 个产品导入失败”：点击“查看导入日志”，即可看到哪些行失败以及原因
+
+导入日志会显示行号和具体错误。用行号在 CSV 中找到对应的行（注意：标题是第 1 行，数据从第 2 行开始）。
+
+---
+
+## 用 StriveFormats 自动修复
+
+将您的 WooCommerce CSV 上传到 StriveFormats。验证器会检查商品类型、SKU、价格、布尔值、属性列以及父商品与变体之间的关联，并自动修复安全的问题。
+
+[打开 WooCommerce CSV 修复工具](/app?preset=woocommerce_products) | [查看 WooCommerce 模板](/presets/woocommerce_products)

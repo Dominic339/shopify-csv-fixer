@@ -1,0 +1,146 @@
+---
+title: "WooCommerce ürün CSV içe aktarma hataları: nedenleri ve çözümleri"
+description: "En yaygın WooCommerce ürün CSV içe aktarma hatalarını düzeltin: eksik SKU'lar, geçersiz türler, varyasyon satırı sorunları, fiyat biçimi ve nitelik sütunları."
+keywords: ["woocommerce csv içe aktarma hatası", "woocommerce ürün içe aktarma başarısız", "woocommerce csv hataları", "woocommerce csv düzeltme", "woocommerce içe aktarma sorunları", "woocommerce csv kontrol", "woocommerce ürün yükleme hatası"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "En yaygın WooCommerce CSV içe aktarma hataları ve her birinin anlamı"
+  - "Type sütununun içe aktarma davranışını nasıl belirlediği"
+  - "Ana ürün ile varyasyon arasındaki ilişki hatalarının nasıl düzeltileceği"
+  - "Fiyatların, mantıksal değerlerin ve niteliklerin doğru biçimlendirilmesi"
+  - "WooCommerce içe aktarıcısının hata raporunun nasıl kullanılacağı"
+bestFor: "Başarısız veya eksik kalan ürün CSV içe aktarmalarını inceleyen WooCommerce mağaza sahipleri ve geliştiricileri"
+timeToComplete: "12 dakika"
+---
+
+## WooCommerce CSV içe aktarmalarını nasıl doğrular
+
+WooCommerce'in yerleşik ürün içe aktarıcısı CSV dosyanızı okur ve sütunları adlarına göre eşleştirir. Her satırı WooCommerce'in ürün veri modeline göre doğrular. Doğrulama başarısız olursa WooCommerce satırı atlar ve bir hata kaydeder. İçe aktarmadan sonra kaç satırın içe aktarıldığını, kaçının atlandığını ve nedenini gösteren bir özet görürsünüz.
+
+WordPress Türkçe ise dışa aktarma Türkçe sütun adları kullanır (ör. `Type` yerine "Tür"); içe aktarıcı ikisini de tanır. Bu rehberde İngilizce adlar kullanılmıştır.
+
+Doğrulama kurallarını bilmek, içe aktarma hatalarının çoğunu daha oluşmadan önler.
+
+---
+
+## Hata: geçersiz veya eksik ürün türü
+
+**Neden:** `Type` sütununda tanınmayan bir değer var ya da sütun eksik.
+
+**Kabul edilen değerler:**
+
+| Type | Açıklama |
+|---|---|
+| `simple` | Varyasyonu olmayan basit bir ürün |
+| `variable` | Varyasyonları olan bir ürün (ana satır) |
+| `variation` | Değişken bir ürünün belirli bir varyasyonu (alt satır) |
+| `grouped` | İlişkili ürünlerden oluşan bir grup |
+| `external` | Harici bir siteye bağlantı veren ürün |
+
+**Çözüm:**
+- Eksikse bir `Type` sütunu ekleyin
+- Özel veya yanlış yazılmış değerleri yukarıdakilerden biriyle değiştirin
+- `Variable` (büyük V ile) `variable` ile aynı değildir: küçük harf kullanın
+
+---
+
+## Hata: eksik veya yinelenen SKU
+
+**Neden:** Basit veya değişken bir ürünün satırında `SKU` boş ya da aynı SKU iki farklı satırda geçiyor.
+
+WooCommerce, içe aktarılan satırları mevcut ürünlerle eşleştirmek için SKU'yu benzersiz tanımlayıcı olarak kullanır. SKU boşsa WooCommerce mevcut ürünü güncellemek yerine her içe aktarmada yeni bir ürün oluşturur.
+
+**Çözüm:**
+- Her ürün satırına (basit ürünler ve değişken ürünlerin ana satırları) benzersiz bir SKU verin
+- Varyasyon satırları ana ürünün SKU'sunu devralabilir veya kendi SKU'larına sahip olabilir, ancak başka bir ürünün SKU'sunu yinelememelidir
+- Yinelenen SKU'ları Excel'de `EĞERSAY` ile bulun: `=EĞERSAY($A:$A; A2)`; 1'den büyük her değer bir yinelemedir
+
+---
+
+## Hata: geçersiz normal fiyat
+
+**Neden:** `Regular price` bir para birimi simgesi (`€`, `$`) içeriyor, ondalık ayırıcı olarak virgül kullanıyor (`19,99`) veya basit ya da değişken bir üründe boş.
+
+**Çözüm:**
+- Para birimi simgelerini kaldırın: `$`, `€`, `£` simgelerini Bul ve Değiştir ile silin
+- Ondalık virgülü noktayla değiştirin: `19,99` → `19.99`
+- Her basit ve değişken ürünün bir fiyatı olduğundan emin olun; varyasyon satırları fiyatı ana üründen devralabilir
+
+---
+
+## Hata: geçersiz mantıksal alan
+
+**Neden:** WooCommerce'in mantıksal sütunları (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) `1` (doğru) veya `0` (yanlış) kabul eder. `yes`, `TRUE` veya `Y` gibi değerler doğrulama hatalarına yol açar.
+
+**Çözüm:** Tüm mantıksal değerleri değiştirin:
+
+| Değiştirin | Bununla |
+|---|---|
+| `yes`, `Yes`, `TRUE`, `true` | `1` |
+| `no`, `No`, `FALSE`, `false` | `0` |
+
+"Tüm hücre içeriği eşleşsin" seçeneği açıkken Bul ve Değiştir'i kullanın.
+
+---
+
+## Hata: varyasyonun ana ürünü bulunamadı
+
+**Neden:** `Type: variation` olan bir satır, ne içe aktarma dosyasında ne de veritabanında bulunan bir ana ürüne başvuruyor.
+
+WooCommerce varyasyon satırlarının bir ana ürüne ihtiyacı vardır. Bağlantı, `Parent` sütunuyla (ana ürünün veritabanındaki kimliğini içermelidir) ya da ana ürünü aynı içe aktarma dosyasına koyarak kurulur.
+
+**Çözüm:**
+- Ana ürün satırını aynı CSV dosyasına ekleyin
+- Varyasyon satırlarındaki `Parent` sütununu ana ürünün WooCommerce ürün kimliğiyle (WordPress yönetim panelindeki numara) doldurun
+- Ana satırın `Type: simple` değil `Type: variable` kullandığından emin olun
+
+---
+
+## Hata: nitelik sütunları tanınmıyor
+
+**Neden:** Nitelik sütunlarının adları WooCommerce'in adlandırma kalıbına tam olarak uymuyor.
+
+**WooCommerce nitelik sütunu biçimi:**
+
+- `Attribute 1 name`: ilk niteliğin adı (ör. `Color`)
+- `Attribute 1 value(s)`: bu satırın değeri veya değerleri (ör. `Blue` ya da birden çok için `Blue | Red`)
+- `Attribute 1 visible`: ürün sayfasında gösteriliyorsa `1`, gizliyse `0`
+- `Attribute 1 global`: genel bir nitelik kullanılıyorsa `1`, yerel ise `0`
+
+**Çözüm:**
+- Boşluklu tam biçimi kullanın: `attribute_1_name` veya `Attribute1Name` değil, `Attribute 1 name`
+- Nitelikleri 1'den başlayarak sırayla numaralandırın
+- Boşluk bırakmayın (Attribute 2'yi kullanmadıysanız Attribute 3'ü kullanmayın)
+
+---
+
+## Hata: görsel URL'sine erişilemiyor
+
+**Neden:** `Images` sütunundaki görsel URL'si herkese açık bir HTTPS URL'si değil, bir girişin arkasında ya da HTTPS dışında bir protokol kullanıyor.
+
+WooCommerce görselleri içe aktarma sırasında indirir ve ortam kitaplığınıza kaydeder.
+
+**Çözüm:**
+- Her görsel URL'sini tarayıcıda deneyin: görsel giriş yapmadan doğrudan yüklenmeli
+- HTTPS URL'leri kullanın (HTTP değil)
+- Google Drive veya Dropbox'taki görseller için paylaşım bağlantıları değil, doğrudan indirme bağlantıları kullanın
+- Görseller localhost'ta veya bir test sunucusundaysa önce herkese açık bir konuma taşıyın
+
+---
+
+## WooCommerce içe aktarma hata raporunu okuma
+
+İçe aktarmadan sonra WooCommerce şu bilgileri içeren bir özet gösterir:
+- "X ürün içe aktarıldı": başarıyla oluşturuldu veya güncellendi
+- "X ürün başarısız oldu": hangi satırların neden başarısız olduğunu görmek için "İçe aktarma günlüğünü görüntüle"ye tıklayın
+
+İçe aktarma günlüğü satır numarasını ve hatanın kendisini gösterir. Satırı CSV'nizde bulmak için satır numarasını kullanın (unutmayın: başlık 1. satırdır, veriler 2. satırdan başlar).
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+WooCommerce CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı ürün türlerini, SKU'ları, fiyatları, mantıksal değerleri, nitelik sütunlarını ve ana ürün–varyasyon ilişkilerini kontrol eder; güvenli sorunları otomatik olarak düzeltir.
+
+[WooCommerce CSV Düzelticisini açın](/app?preset=woocommerce_products) | [WooCommerce şablonunu görüntüleyin](/presets/woocommerce_products)

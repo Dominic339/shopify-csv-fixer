@@ -1,0 +1,146 @@
+---
+title: "Błędy importu CSV produktów WooCommerce: przyczyny i rozwiązania"
+description: "Napraw najczęstsze błędy importu CSV produktów WooCommerce: brakujące SKU, nieprawidłowe typy, problemy z wierszami wariantów, format cen i kolumny atrybutów."
+keywords: ["błąd importu csv woocommerce", "import produktów woocommerce nie działa", "błędy csv woocommerce", "naprawa csv woocommerce", "problemy z importem woocommerce", "sprawdzanie csv woocommerce", "błąd przesyłania produktów woocommerce"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Najczęstsze błędy importu CSV w WooCommerce i co oznaczają"
+  - "Jak kolumna Type steruje zachowaniem importu"
+  - "Jak naprawić błędy w relacji produkt nadrzędny–wariant"
+  - "Jak poprawnie formatować ceny, wartości logiczne i atrybuty"
+  - "Jak korzystać z raportu błędów wbudowanego importera WooCommerce"
+bestFor: "Właściciele sklepów WooCommerce i deweloperzy, którzy analizują nieudany lub niepełny import CSV z produktami"
+timeToComplete: "12 minut"
+---
+
+## Jak WooCommerce sprawdza import CSV
+
+Wbudowany importer produktów WooCommerce czyta plik CSV i dopasowuje kolumny po nazwie. Każdy wiersz jest sprawdzany według modelu danych produktu WooCommerce. Gdy walidacja się nie powiedzie, WooCommerce pomija wiersz i zapisuje błąd. Po imporcie widzisz podsumowanie: ile wierszy zaimportowano, ile pominięto i dlaczego.
+
+Jeśli WordPress działa po polsku, eksport używa polskich nazw kolumn (np. „Typ” zamiast `Type`); importer rozpoznaje obie wersje. W tym przewodniku używamy nazw angielskich.
+
+Znajomość zasad walidacji pozwala uniknąć większości błędów importu, zanim się pojawią.
+
+---
+
+## Błąd: nieprawidłowy lub brakujący typ produktu
+
+**Przyczyna:** Kolumna `Type` zawiera nieznaną wartość albo jej brakuje.
+
+**Dozwolone wartości:**
+
+| Type | Opis |
+|---|---|
+| `simple` | Prosty produkt bez wariantów |
+| `variable` | Produkt z wariantami (wiersz nadrzędny) |
+| `variation` | Konkretny wariant produktu zmiennego (wiersz podrzędny) |
+| `grouped` | Grupa powiązanych produktów |
+| `external` | Produkt z linkiem do zewnętrznej strony |
+
+**Rozwiązanie:**
+- Dodaj kolumnę `Type`, jeśli jej brakuje
+- Zamień własne lub błędnie zapisane wartości na jedną z powyższych
+- `Variable` (z wielkim V) to nie to samo co `variable` – używaj małych liter
+
+---
+
+## Błąd: brakujące lub zduplikowane SKU
+
+**Przyczyna:** `SKU` jest puste w wierszu produktu prostego lub zmiennego albo to samo SKU występuje w dwóch różnych wierszach.
+
+WooCommerce używa SKU jako unikalnego identyfikatora, żeby dopasować importowane wiersze do istniejących produktów. Jeśli SKU jest puste, WooCommerce przy każdym imporcie tworzy nowy produkt zamiast zaktualizować istniejący.
+
+**Rozwiązanie:**
+- Nadaj unikalne SKU każdemu wierszowi produktu (produktom prostym i wierszom nadrzędnym produktów zmiennych)
+- Wiersze wariantów mogą dziedziczyć SKU produktu nadrzędnego albo mieć własne, ale nie mogą powielać SKU innego produktu
+- Duplikaty SKU znajdziesz w Excelu funkcją `LICZ.JEŻELI`: `=LICZ.JEŻELI($A:$A; A2)` – każda wartość większa od 1 to duplikat
+
+---
+
+## Błąd: nieprawidłowa cena regularna
+
+**Przyczyna:** `Regular price` zawiera symbol waluty (`€`, `$`), używa przecinka jako separatora dziesiętnego (`19,99`) albo jest puste dla produktu prostego lub zmiennego.
+
+**Rozwiązanie:**
+- Usuń symbole walut: skasuj `$`, `€`, `£` za pomocą „Znajdź i zamień”
+- Zamień przecinek dziesiętny na kropkę: `19,99` → `19.99`
+- Upewnij się, że każdy produkt prosty i zmienny ma cenę; wiersze wariantów mogą dziedziczyć ją z produktu nadrzędnego
+
+---
+
+## Błąd: nieprawidłowe pole logiczne
+
+**Przyczyna:** Kolumny logiczne WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) przyjmują `1` (prawda) lub `0` (fałsz). Wartości takie jak `yes`, `TRUE` czy `Y` powodują błędy walidacji.
+
+**Rozwiązanie:** zamień wszystkie wartości logiczne:
+
+| Zamień | Na |
+|---|---|
+| `yes`, `Yes`, `TRUE`, `true` | `1` |
+| `no`, `No`, `FALSE`, `false` | `0` |
+
+Użyj „Znajdź i zamień” z włączoną opcją „Uwzględnij całą zawartość komórki”.
+
+---
+
+## Błąd: nie znaleziono produktu nadrzędnego wariantu
+
+**Przyczyna:** Wiersz z `Type: variation` odwołuje się do produktu nadrzędnego, którego nie ma ani w pliku importu, ani w bazie danych.
+
+Wiersze wariantów w WooCommerce potrzebują produktu nadrzędnego. Powiązanie odbywa się przez kolumnę `Parent` (która powinna zawierać ID produktu nadrzędnego z bazy danych) albo przez umieszczenie produktu nadrzędnego w tym samym pliku importu.
+
+**Rozwiązanie:**
+- Umieść wiersz produktu nadrzędnego w tym samym pliku CSV
+- W kolumnie `Parent` wierszy wariantów wpisz ID produktu nadrzędnego w WooCommerce (numer widoczny w panelu WordPress)
+- Upewnij się, że wiersz nadrzędny ma `Type: variable`, a nie `Type: simple`
+
+---
+
+## Błąd: kolumny atrybutów nie są rozpoznawane
+
+**Przyczyna:** Nazwy kolumn atrybutów nie są zgodne z dokładnym wzorcem nazewnictwa WooCommerce.
+
+**Format kolumn atrybutów w WooCommerce:**
+
+- `Attribute 1 name` – nazwa pierwszego atrybutu (np. `Color`)
+- `Attribute 1 value(s)` – wartość lub wartości w danym wierszu (np. `Blue` albo `Blue | Red` przy kilku)
+- `Attribute 1 visible` – `1`, jeśli jest widoczny na stronie produktu, `0`, jeśli ukryty
+- `Attribute 1 global` – `1` dla atrybutu globalnego, `0` dla lokalnego
+
+**Rozwiązanie:**
+- Używaj dokładnie tego formatu ze spacjami: `Attribute 1 name`, a nie `attribute_1_name` czy `Attribute1Name`
+- Numeruj atrybuty kolejno od 1
+- Nie zostawiaj luk (nie używaj Attribute 3, jeśli nie ma Attribute 2)
+
+---
+
+## Błąd: adres zdjęcia jest niedostępny
+
+**Przyczyna:** Adres zdjęcia w kolumnie `Images` nie jest publicznie dostępnym adresem HTTPS, jest chroniony logowaniem albo używa innego protokołu niż HTTPS.
+
+WooCommerce pobiera zdjęcia w trakcie importu i zapisuje je w bibliotece mediów.
+
+**Rozwiązanie:**
+- Sprawdź każdy adres zdjęcia w przeglądarce – zdjęcie powinno się wczytać od razu, bez logowania
+- Używaj adresów HTTPS (nie HTTP)
+- Dla zdjęć z Google Drive lub Dropboxa używaj bezpośrednich linków do pobrania (nie linków do udostępniania)
+- Jeśli zdjęcia są na localhoście lub serwerze testowym, najpierw przenieś je w publicznie dostępne miejsce
+
+---
+
+## Jak czytać raport błędów importu WooCommerce
+
+Po imporcie WooCommerce pokazuje podsumowanie:
+- „Zaimportowano X produktów” – utworzone lub zaktualizowane poprawnie
+- „X produktów nie udało się zaimportować” – kliknij „Zobacz dziennik importu”, żeby sprawdzić, które wiersze i dlaczego się nie udały
+
+Dziennik importu podaje numer wiersza i konkretny błąd. Po numerze znajdziesz wiersz w pliku CSV (pamiętaj: nagłówek to wiersz 1, więc dane zaczynają się od wiersza 2).
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij swój plik CSV z WooCommerce do StriveFormats. Walidator sprawdza typy produktów, SKU, ceny, wartości logiczne, kolumny atrybutów i relacje między produktami nadrzędnymi a wariantami, a bezpieczne problemy naprawia automatycznie.
+
+[Otwórz Naprawiacz CSV dla WooCommerce](/app?preset=woocommerce_products) | [Zobacz szablon WooCommerce](/presets/woocommerce_products)
