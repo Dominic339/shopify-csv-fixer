@@ -1,0 +1,145 @@
+---
+title: "Shopify 商品变体详解：CSV 结构与常见错误"
+description: "了解 Shopify 的 CSV 格式如何通过 Handle 分组、Option 列和父/子行来表示商品变体，避免导致商品被拆分、变体丢失和导入失败的常见错误。"
+keywords: ["shopify 变体 csv", "shopify 商品变体导入", "shopify handle 变体", "shopify option1 option2", "shopify csv 父行 子行", "shopify 变体价格 csv", "shopify csv 结构"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify 如何用 Handle 将父商品与其变体归为一组"
+  - "父行和变体行分别需要哪些列"
+  - "Option1 Name、Option1 Value 和 Variant 列如何配合使用"
+  - "最常见的变体结构错误及修复方法"
+  - "如何在不覆盖现有商品的情况下添加新变体"
+bestFor: "导入或更新带有尺码、颜色、材质等选项的商品的 Shopify 商家和开发者"
+timeToComplete: "12 分钟"
+---
+
+## Shopify 如何在 CSV 中表示变体
+
+在 Shopify 商品 CSV 中，有多个变体的商品由**共享同一个 Handle 的多行**表示。第一行是“父”行，包含商品级数据。之后每一个 Handle 相同的行都是变体行。
+
+### 最简示例：两个尺码的 T 恤
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+要点：
+- 两行都使用 Handle `blue-shirt`。
+- 第二行的 Title 和 Image Src 为空，只有 Option1 Value 是新值。
+- 每一行代表一个可购买的变体（一种选项值组合）。
+
+---
+
+## 父行
+
+某个 Handle 的第一行就是父行，用来设置商品级字段：
+
+| 列 | 父行是否必填 | 说明 |
+|---|---|---|
+| Handle | 是 | 该商品唯一的短名称；只能用小写字母和连字符 |
+| Title | 是 | 商品名称 |
+| Body HTML | 否 | 商品描述；只需在父行填写 |
+| Vendor | 否 | 品牌名称 |
+| Type | 否 | 商品类型（用于商品系列） |
+| Tags | 否 | 用逗号分隔的标签 |
+| Published | 否 | TRUE 或 FALSE |
+| Option1 Name | 是（如有选项） | 第一个选项的名称（例如“Size”） |
+| Option1 Value | 是（如有选项） | 第一个变体的值（例如“Small”） |
+| Image Src | 否 | 主图的 URL |
+
+**父行必须有 Title**。如果 Title 为空，Shopify 不会把它识别为父行，导入结果可能出错。
+
+---
+
+## 变体行
+
+同一 Handle 下第一行之后的每一行都是变体行。变体行：
+- 与父行使用相同的 Handle。
+- Title 留空（填相同的 Title 也可以，非父行的 Title 会被 Shopify 忽略）。
+- 有自己的 Option1 Value（如有，还有 Option2 Value、Option3 Value）。
+- 有自己的 Variant Price、Variant SKU、Variant Inventory Qty 等。
+
+### 变体专用列
+
+| 列 | 说明 |
+|---|---|
+| Variant Price | 每个变体必填；小数（不带货币符号） |
+| Variant SKU | 可选，但强烈建议填写；在整个店铺中必须唯一 |
+| Variant Grams | 以克为单位的重量 |
+| Variant Inventory Qty | 初始库存数量 |
+| Variant Inventory Policy | `deny` 或 `continue`（continue = 允许超卖） |
+| Variant Fulfillment Service | 通常为 `manual` |
+| Variant Requires Shipping | TRUE 或 FALSE |
+| Variant Taxable | TRUE 或 FALSE |
+| Variant Barcode | EAN、UPC 或其他条形码 |
+
+---
+
+## 多个选项（尺码和颜色）
+
+Shopify 通过 Option1、Option2 和 Option3 列最多支持三个选项。
+
+示例：带有尺码和颜色选项的 T 恤
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name 和 Option2 Name 只需出现在父行（每个 Handle 的第一行）。在变体行中重复也没有问题。
+- 每种选项组合都需要单独一行。
+- 一个有 3 个尺码、4 种颜色的商品需要 12 个变体行。
+
+---
+
+## 常见错误
+
+### 错误 1：同一商品使用了不同的 Handle
+
+**症状**：本应是一个带变体的商品，导入后却显示为多个独立商品。
+
+**解决方法**：同一商品的所有行必须使用完全相同的 Handle。一个小小的拼写差异（`blue-shirt` 与 `blue-shirt-`）就会让 Shopify 新建一个商品。
+
+### 错误 2：每一行都填写了 Title
+
+**症状**：导入成功，但 Shopify 创建了重复商品，或把变体行当作独立商品处理。
+
+**解决方法**：只有每个 Handle 的第一行才应填写 Title。所有变体行的 Title 都留空。
+
+### 错误 3：缺少 Option1 Name 列
+
+**症状**：出现导入错误“Option1 Name is required”，或所有变体都显示为一个名为“Default Title”的选项。
+
+**解决方法**：标题行中始终要包含 `Option1 Name`，并至少在父行中填写值。如果商品没有真正的选项，请将 Option1 Name 设为 `Title`，将 Option1 Value 设为 `Default Title`。
+
+### 错误 4：各行的选项值不一致
+
+**症状**：Shopify 创建的变体比预期多，或选项名称重复出现。
+
+**解决方法**：同一 Handle 下所有行的 Option1 Name 必须是完全相同的文字。如果父行写的是 `Size`，每个变体行也必须写 `Size`（或留空）。混用 `Size`、`size` 和 `Sizes` 会造成选项数据不一致。
+
+### 错误 5：Variant Price 为空
+
+**症状**：导入失败并提示“Variant Price is required”，或变体以 0.00 的价格创建。
+
+**解决方法**：每一行都必须填写 Variant Price。价格不会继承：即使所有变体价格相同，每一行也都要填写。
+
+### 错误 6：添加新变体后覆盖了现有变体
+
+**症状**：进行部分导入（只添加一个新变体）后，其他变体全部消失了。
+
+**解决方法**：通过 CSV 导入更新商品时，文件中必须包含**所有**现有变体，而不只是新变体。Shopify 的导入会替换某个 Handle 的整组变体，遗漏的现有变体会被删除。
+
+---
+
+## 大型商品目录的建议
+
+- **自动生成变体行**。对于组合很多的商品（3 个尺码 × 4 种颜色 × 2 种材质 = 24 行），请用表格公式或脚本展开组合，而不要手动输入。
+- **使用统一的 SKU 规则**。像 `基础-尺码-颜色` 这样的 SKU（例如 `SHIRT-SM-BLU`）便于识别和排序变体。
+- **先用一个商品测试**。在上传完整商品目录之前，先导入一个商品（父行及其所有变体），在 Shopify 后台确认变体结构无误后再继续。

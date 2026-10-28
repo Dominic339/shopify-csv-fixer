@@ -21,7 +21,7 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The Action column value is not one of eBay's accepted operations.",
     whyPlatformCares: "eBay File Exchange uses Action to decide whether to Add, Revise, Delete, or End a listing. An invalid value causes the entire row to be rejected.",
-    howToFix: "Use one of: Add, Revise, Delete, or End.",
+    howToFix: "Use one of: Add, Revise, Relist, End, VerifyAdd, or Status.",
   },
 
   "ebay/missing_title": {
@@ -87,7 +87,7 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The ConditionID value does not match a standard eBay condition code.",
     whyPlatformCares: "eBay uses ConditionID to display item condition to buyers. Unrecognized IDs may be rejected or cause incorrect condition display.",
-    howToFix: "Use a standard eBay ConditionID: 1000=New, 2000=Manufacturer Refurbished, 2500=Like New, 3000=Good, 4000=Acceptable, 5000=For parts or not working.",
+    howToFix: "Use a standard eBay ConditionID, for example 1000=New, 1500=New other, 2000=Certified refurbished, 2500=Seller refurbished, 3000=Used, 7000=For parts or not working. Allowed IDs vary by category.",
   },
 
   "ebay/invalid_duration": {
@@ -98,7 +98,7 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The Duration value does not match a recognized eBay listing duration format.",
     whyPlatformCares: "An unrecognized duration may default to a short auction window or cause the listing to be rejected.",
-    howToFix: "Use GTC (Good Till Cancelled) for fixed-price listings or Days_N (e.g., Days_7, Days_30) for auctions.",
+    howToFix: "Use GTC (Good 'Til Cancelled) for fixed-price listings, or Days_1, Days_3, Days_5, Days_7 or Days_10 for auctions.",
   },
 
   "ebay/invalid_format": {
@@ -109,7 +109,7 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "The Format value is not a recognized eBay listing type.",
     whyPlatformCares: "The Format field tells eBay how to present the listing. An invalid value may cause the row to fail.",
-    howToFix: "Use FixedPriceItem for Buy It Now listings or Chinese for auction-style listings.",
+    howToFix: "Use FixedPrice for Buy It Now listings or Auction for auction-style listings.",
   },
 
   "ebay/too_many_images": {
@@ -118,9 +118,9 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     category: "media",
     blocking: false,
     autoFixable: false,
-    explanation: "eBay allows a maximum of 12 images per listing.",
-    whyPlatformCares: "Extra images beyond the 12-image limit are silently dropped by eBay.",
-    howToFix: "Reduce the PictureURL list to 12 or fewer pipe-separated URLs.",
+    explanation: "eBay allows a maximum of 24 pictures per listing.",
+    whyPlatformCares: "eBay rejects or drops pictures beyond the 24-picture limit.",
+    howToFix: "Reduce the PictureURL list to 24 or fewer URLs separated by |.",
   },
 
   "ebay/invalid_picture_url": {
@@ -180,23 +180,122 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
 
   "ebay/missing_category_id": {
     code: "ebay/missing_category_id",
-    title: "CategoryID column is blank",
+    title: "Category is blank",
     category: "compliance",
     blocking: false,
     autoFixable: false,
-    explanation: "The CategoryID column is present in the file but all values are empty.",
-    whyPlatformCares: "Without a CategoryID, eBay may place listings in an incorrect or default category, reducing buyer visibility.",
-    howToFix: "Find the correct numeric CategoryID using the eBay category tree and populate it for each listing row.",
+    explanation: "A new listing has no eBay category number.",
+    whyPlatformCares: "eBay needs a category for every new listing; rows without one are rejected.",
+    howToFix: "Find the numeric category ID in eBay's category tree and fill it in on each new listing row.",
   },
 
   "ebay/invalid_category_id": {
     code: "ebay/invalid_category_id",
-    title: "Invalid CategoryID",
+    title: "Invalid Category",
     category: "compliance",
     blocking: false,
     autoFixable: false,
-    explanation: "The CategoryID value is not a numeric eBay category identifier.",
-    whyPlatformCares: "eBay CategoryIDs are always numeric. A non-numeric value will be rejected or ignored during upload.",
-    howToFix: "Use the numeric eBay CategoryID from the eBay category tree (e.g., 9355 for Cell Phones & Smartphones).",
+    explanation: "The Category value is not a numeric eBay category ID.",
+    whyPlatformCares: "eBay category IDs are always numeric. A category name is rejected during upload.",
+    howToFix: "Use the numeric category ID from eBay's category tree (e.g., 9355 for Cell Phones & Smartphones).",
+  },
+
+  "ebay/missing_action_column": {
+    code: "ebay/missing_action_column",
+    title: "No Action column",
+    category: "structure",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The file has no Action column.",
+    whyPlatformCares: "eBay uploads use the first column (Action, with the site and currency in its header) to decide what to do with each row.",
+    howToFix: "Start from a Seller Hub upload template and keep its first column.",
+  },
+
+  "ebay/missing_action": {
+    code: "ebay/missing_action",
+    title: "Missing Action",
+    category: "structure",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A listing row has no Action.",
+    whyPlatformCares: "Only variation rows may leave Action blank; other rows are skipped by eBay.",
+    howToFix: "Set Action to Add, Revise, Relist, or End.",
+  },
+
+  "ebay/missing_item_id": {
+    code: "ebay/missing_item_id",
+    title: "Missing ItemID",
+    category: "structure",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A Revise, Relist, or End row has no ItemID.",
+    whyPlatformCares: "eBay needs the item number to find the listing to change.",
+    howToFix: "Add the eBay item number in an ItemID column.",
+  },
+
+  "ebay/missing_end_code": {
+    code: "ebay/missing_end_code",
+    title: "Missing EndCode",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "An End row has no EndCode.",
+    whyPlatformCares: "eBay asks why a listing is ended early.",
+    howToFix: "Use NotAvailable, LostOrBroken, Incorrect, or OtherListingError.",
+  },
+
+  "ebay/missing_condition": {
+    code: "ebay/missing_condition",
+    title: "Missing condition",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A new listing has no ConditionID.",
+    whyPlatformCares: "Most eBay categories require the item condition.",
+    howToFix: "Set a ConditionID such as 1000 (New) or 3000 (Used).",
+  },
+
+  "ebay/fixed_price_not_gtc": {
+    code: "ebay/fixed_price_not_gtc",
+    title: "Fixed price not GTC",
+    category: "compliance",
+    blocking: false,
+    autoFixable: true,
+    explanation: "A fixed-price listing has a duration other than GTC.",
+    whyPlatformCares: "eBay runs all fixed-price listings Good 'Til Cancelled.",
+    howToFix: "Set Duration to GTC.",
+  },
+
+  "ebay/invalid_relationship_details": {
+    code: "ebay/invalid_relationship_details",
+    title: "Invalid RelationshipDetails",
+    category: "variant",
+    blocking: true,
+    autoFixable: false,
+    explanation: "RelationshipDetails is not in eBay's Name=Value format.",
+    whyPlatformCares: "eBay builds the variation picker from RelationshipDetails; a malformed value rejects the listing.",
+    howToFix: "Parent: Color=Blue;Red|Size=M;L. Variation: Color=Blue|Size=M.",
+  },
+
+  "ebay/variation_without_parent": {
+    code: "ebay/variation_without_parent",
+    title: "Variation without parent",
+    category: "variant",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A variation row does not follow a parent listing row.",
+    whyPlatformCares: "eBay attaches Relationship=Variation rows to the parent row directly above them.",
+    howToFix: "Move the variation rows directly below their parent row.",
+  },
+
+  "ebay/variation_value_not_in_parent": {
+    code: "ebay/variation_value_not_in_parent",
+    title: "Variation value not declared",
+    category: "variant",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A variation uses a value the parent row does not list.",
+    whyPlatformCares: "eBay only accepts variation values declared in the parent's RelationshipDetails.",
+    howToFix: "Add the value to the parent row, or correct the variation.",
   },
 };

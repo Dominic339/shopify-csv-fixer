@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "Le celle vuote sovrascrivono i dati reali",
+    "body": "Se importi con \"Sovrascrivi i prodotti con handle corrispondenti\", una cella vuota sostituisce il valore già presente nel negozio. Il correttore esporta solo le colonne che il tuo file usa davvero, quindi una colonna mancante non può cancellare nulla."
+   },
+   {
+    "title": "Le varianti sono righe con lo stesso handle",
+    "body": "Solo la prima riga di un prodotto contiene titolo e descrizione. Ogni riga successiva è una variante e ha bisogno dei propri valori di opzione. Due righe con le stesse opzioni vengono rifiutate, e il correttore te le mostra entrambe."
+   },
+   {
+    "title": "Prezzi e booleani nel formato Shopify",
+    "body": "\"$ 45\", \"45,00\" e \"yes\" sembrano a posto in un foglio di calcolo ma falliscono all'importazione. Vengono riscritti come 45.00 e true, e ogni modifica compare nel registro delle correzioni."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Funziona con le vecchie esportazioni di Shopify?",
+    "a": "Sì. I vecchi nomi di colonna come \"Variant Price\" e \"Body (HTML)\" vengono riconosciuti, e il file corretto usa i nomi del modello attuale, accettati da Shopify."
+   },
+   {
+    "q": "Elimina delle righe?",
+    "a": "No. Ogni riga con dati viene mantenuta (si saltano solo le righe completamente vuote), e ogni modifica automatica compare nel registro delle correzioni."
+   },
+   {
+    "q": "Perché vedo così tanti problemi in un file grande?",
+    "a": "Un solo problema di struttura, come una colonna di opzione mancante, si ripete su ogni riga di variante. Correggilo una volta nella tabella e il numero cala in fretta."
+   }
+  ],
+  "metaTitle": "Errore nell'importazione CSV dei prodotti Shopify: controlla gratis | StriveFormats",
+  "metaDescription": "Controlla un CSV di prodotti Shopify con il modello ufficiale prima di importarlo. Prezzi, handle e valori true/false vengono corretti automaticamente; i problemi di varianti e sovrascrittura sono indicati alla riga esatta.",
+  "kicker": "prodotti Shopify",
+  "title": "Correttore CSV per Shopify",
+  "intro": "L'importatore di Shopify è severo: un prodotto con un handle sbagliato o due varianti identiche possono bloccare l'intero file. Controlla prima qui il tuo CSV, ottieni gratis le correzioni sicure e vedi esattamente quali righe hanno ancora bisogno di te.",
+  "exportTip": "Nel pannello Shopify: Prodotti → Esporta → \"File CSV semplice\". Oppure parti dal modello ufficiale."
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "Le colonne sì/no sono 1 e 0",
+    "body": "Published, \"In stock?\" e colonne simili si aspettano 1 o 0 (Published accetta anche -1 per le bozze). Valori come \"yes\" o \"TRUE\" vengono convertiti per te."
+   },
+   {
+    "title": "Gli SKU devono essere univoci",
+    "body": "L'importatore trova i prodotti esistenti per ID o SKU. Due righe con lo stesso SKU significano che una fallisce o sovrascrive l'altra, quindi il correttore le segnala entrambe."
+   },
+   {
+    "title": "Il prezzo scontato deve essere più basso",
+    "body": "Un prezzo scontato uguale o superiore al prezzo normale viene accettato ma mostra uno \"sconto\" senza senso. Viene segnalato come avviso, così trovi i refusi prima dei clienti."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Cambia i nomi delle mie colonne?",
+    "a": "No. Il file corretto mantiene esattamente le colonne caricate, nello stesso ordine, quindi si reimporta con la stessa mappatura delle colonne."
+   },
+   {
+    "q": "E i prodotti variabili?",
+    "a": "Usa il correttore per prodotti variabili WooCommerce. Controlla anche che ogni variazione punti a un prodotto principale e abbia una combinazione di attributi univoca."
+   }
+  ],
+  "metaTitle": "Errore nell'importazione CSV di WooCommerce: controlla il file gratis | StriveFormats",
+  "metaDescription": "Controlla un CSV di prodotti WooCommerce prima di avviare l'importatore. Prezzi, booleani e valori di magazzino vengono normalizzati; SKU duplicati ed errori sul prezzo scontato sono indicati riga per riga.",
+  "kicker": "prodotti WooCommerce",
+  "title": "Correttore CSV per WooCommerce",
+  "intro": "L'importatore integrato di WooCommerce salta le righe che non capisce e non sempre ti dice perché. Controlla prima qui il file: il correttore legge le stesse colonne che WooCommerce esporta e indica le righe che verrebbero saltate.",
+  "exportTip": "In WordPress: Prodotti → Esporta. Lascia selezionato \"Esporta tutte le colonne\"."
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "Ogni variazione ha bisogno di un principale",
+    "body": "La colonna Parent contiene lo SKU del principale (o id:123). Se il principale non è nel file, deve già esistere nel tuo negozio; il correttore ti dice quali non ha trovato."
+   },
+   {
+    "title": "Una combinazione per variazione",
+    "body": "Due variazioni dello stesso prodotto con gli stessi valori di attributo non possono coesistere. Il correttore segnala la coppia, così puoi modificarne una."
+   },
+   {
+    "title": "I principali elencano tutti i valori",
+    "body": "La riga principale elenca tutti i valori di un attributo separati da virgole (\"S, M, L\"); ogni riga di variazione solo il proprio valore."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Principali e variazioni possono stare in file separati?",
+    "a": "Sì, purché i principali vengano importati prima. Una variazione il cui principale non è nel file viene segnalata come informazione, non come errore."
+   },
+   {
+    "q": "Gestisce più di un attributo?",
+    "a": "Sì. Attribute 1, Attribute 2 e così via vengono tutti confrontati nella ricerca delle combinazioni duplicate."
+   }
+  ],
+  "metaTitle": "Importare prodotti variabili WooCommerce tramite CSV senza errori | StriveFormats",
+  "metaDescription": "Controlla i prodotti variabili e le variazioni WooCommerce prima dell'importazione: riferimenti al prodotto principale, valori degli attributi e combinazioni di variazione duplicate, riga per riga.",
+  "kicker": "prodotti variabili WooCommerce",
+  "title": "Correttore per prodotti variabili WooCommerce",
+  "intro": "I prodotti variabili sono il punto in cui le importazioni WooCommerce di solito vanno storte: una variazione che punta al prodotto principale sbagliato, o due variazioni con gli stessi attributi. Il correttore controlla tutta la famiglia insieme, non solo una riga alla volta.",
+  "exportTip": "Esporta da Prodotti → Esporta, variazioni comprese. I principali hanno Type \"variable\", i figli \"variation\"."
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "13 tag, non di più",
+    "body": "Etsy tiene i primi 13 tag e scarta il resto. Il correttore li conta per ogni inserzione e normalizza i separatori."
+   },
+   {
+    "title": "Prezzi senza simboli",
+    "body": "I prezzi sono semplici numeri nella valuta del tuo negozio: \"$18\" diventa 18.00, e i codici valuta passano in maiuscolo (usd → USD)."
+   },
+   {
+    "title": "I link delle immagini devono essere URL completi",
+    "body": "\"example.com/mug.jpg\" non si carica; serve https://. I link delle immagini rotti vengono segnalati prima del caricamento."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Posso caricare il file corretto direttamente su Etsy?",
+    "a": "Etsy non ha un caricamento CSV nativo per le inserzioni, quindi la maggior parte dei venditori usa il file corretto con un'app di modifica in blocco o come copia master pulita del catalogo."
+   },
+   {
+    "q": "Controlla anche gli altri limiti di Etsy?",
+    "a": "Controlla tag, prezzi, quantità, codici valuta e URL delle immagini. Categoria e profilo di spedizione vanno comunque impostati su Etsy."
+   }
+  ],
+  "metaTitle": "Controllare e ripulire il CSV delle inserzioni Etsy gratis | StriveFormats",
+  "metaDescription": "Ripulisci un CSV di inserzioni Etsy: prezzi, codici valuta e tag vengono normalizzati, e i limiti dei tag, gli URL delle immagini e i dati mancanti sono segnalati riga per riga.",
+  "kicker": "inserzioni Etsy",
+  "title": "Correttore CSV per Etsy",
+  "intro": "L'esportazione delle inserzioni Etsy è comoda per le modifiche in blocco in un foglio di calcolo, e altrettanto facile da rovinare. Il correttore sistema prezzi, codici valuta e tag, e ti avvisa di tutto ciò che Etsy taglierebbe o rifiuterebbe.",
+  "exportTip": "In Shop Manager: Impostazioni → Opzioni → Scarica dati → \"Scarica CSV\" sotto Inserzioni."
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "Le condizioni sono numeri",
+    "body": "eBay vuole un ConditionID come 1000 (Nuovo) o 3000 (Usato). Parole come \"Used\" vengono convertite nel codice corrispondente."
+   },
+   {
+    "title": "Prezzo fisso significa GTC",
+    "body": "Le inserzioni a prezzo fisso durano sempre \"Good 'Til Cancelled\". Qualsiasi altra durata su una riga a prezzo fisso viene segnalata (eBay la cambierebbe in GTC), e valori come \"30\" che non sono durate valide sono errori."
+   },
+   {
+    "title": "Le nuove inserzioni hanno bisogno di una categoria",
+    "body": "Aggiungere un'inserzione senza numero di categoria non funziona. Le revisioni possono lasciarla vuota, quindi il correttore la segnala solo sulle righe Add."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Mantiene l'intestazione *Action(SiteID=...)?",
+    "a": "Sì. L'intestazione della prima colonna contiene le impostazioni di sito e valuta, e viene mantenuta esattamente come l'hai caricata."
+   },
+   {
+    "q": "E le inserzioni con più variazioni?",
+    "a": "Usa il correttore per variazioni eBay, che confronta anche tra loro le righe principali e secondarie di ogni inserzione."
+   }
+  ],
+  "metaTitle": "Errori CSV in eBay File Exchange e Seller Hub: controlla gratis | StriveFormats",
+  "metaDescription": "Controlla un file di inserzioni eBay prima di caricarlo nei report di Seller Hub o in File Exchange: azioni, ID condizione, durate, categorie, prezzi e quantità.",
+  "kicker": "inserzioni eBay",
+  "title": "Correttore CSV per eBay",
+  "intro": "I modelli di caricamento di eBay sono pignoli con i codici: la colonna Action, gli ID numerici di condizione e le durate delle inserzioni devono essere esatti. Il correttore converte per te i valori più comuni e ti indica il resto.",
+  "exportTip": "Seller Hub → Report → Caricamenti → \"Scarica modello\", oppure esporta le inserzioni attive."
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "La principale elenca ogni opzione",
+    "body": "Il RelationshipDetails della principale è così: Size=8;9|Color=Blue. Ogni secondaria può usare solo i valori che compaiono lì."
+   },
+   {
+    "title": "Le secondarie hanno prezzo e quantità",
+    "body": "Ogni riga Variation ha il proprio SKU, prezzo e quantità, mentre titolo e categoria stanno nella principale."
+   },
+   {
+    "title": "Niente combinazioni duplicate",
+    "body": "Due secondarie con Size=8|Color=Blue vengono rifiutate. Il correttore segnala la coppia, e anche gli SKU duplicati."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Posso mischiare inserzioni singole e con variazioni?",
+    "a": "Sì. Le righe senza Relationship sono trattate come inserzioni singole e controllate come con la preimpostazione Inserzioni eBay."
+   },
+   {
+    "q": "Cambia l'ordine delle mie righe?",
+    "a": "No. Ogni secondaria appartiene alla principale più vicina sopra di lei, quindi l'ordine caricato resta invariato."
+   }
+  ],
+  "metaTitle": "CSV delle variazioni eBay: controlla le inserzioni con varianti | StriveFormats",
+  "metaDescription": "Controlla le inserzioni eBay con più variazioni prima del caricamento: le opzioni di ogni variazione devono esistere nella riga principale, e due variazioni non possono avere la stessa combinazione.",
+  "kicker": "inserzioni eBay con variazioni",
+  "title": "Correttore per variazioni eBay",
+  "intro": "Un'inserzione con variazioni è una riga principale e una riga secondaria per ogni taglia o colore, collegate da RelationshipDetails. Il correttore legge l'intero gruppo e ti dice quale secondaria non corrisponde alla principale.",
+  "exportTip": "Scarica il modello per le variazioni da Seller Hub → Report → Caricamenti, oppure esporta le inserzioni con variazioni."
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "Codici, non parole",
+    "body": "product-id-type è 1 (ASIN), 2 (ISBN), 3 (UPC) o 4 (EAN), e item-condition è un numero, come 11 per Nuovo. Le parole vengono convertite automaticamente."
+   },
+   {
+    "title": "I fogli di calcolo rovinano i codici a barre",
+    "body": "Excel trasforma 012345678905 in 1.23457E+11 o elimina lo zero iniziale. Entrambi i casi vengono rilevati; per uno zero mancante viene suggerito il probabile numero originale."
+   },
+   {
+    "title": "Resta nella tua fascia di prezzo",
+    "body": "Se il prezzo esce dal minimo/massimo consentito dal venditore, Amazon disattiva l'offerta. Il correttore confronta tutti e tre."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Funziona con i modelli di categoria (file flat)?",
+    "a": "Accetta i loro nomi di colonna, come item_sku ed external_product_id_type, e li mantiene, ma i controlli sono pensati per i file di offerte."
+   },
+   {
+    "q": "Il mio file è un .txt separato da tabulazioni. Posso usarlo?",
+    "a": "Sì, caricalo così com'è. Il file corretto viene esportato in CSV; aprilo in un foglio di calcolo e salvalo come testo delimitato da tabulazioni se Seller Central chiede un .txt."
+   }
+  ],
+  "metaTitle": "Errori nel file Inventory Loader di Amazon: controlla gratis | StriveFormats",
+  "metaDescription": "Controlla un file Amazon Inventory Loader prima del caricamento: tipi di ID prodotto e codici di condizione vengono convertiti, e codici a barre rovinati, quantità e fasce di prezzo vengono segnalati.",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Correttore per Amazon Inventory Loader",
+  "intro": "L'Inventory Loader aggiunge o aggiorna offerte su prodotti già presenti su Amazon. È un file breve, ma si basa su codici e identificativi che i fogli di calcolo adorano rovinare. Il correttore converte i codici e scopre i danni.",
+  "exportTip": "Seller Central → Catalogo → Aggiungi prodotti tramite caricamento → Scarica un file di inventario (Inventory Loader)."
+ }
+}

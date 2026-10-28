@@ -15,6 +15,12 @@ import type { Plan } from "@/lib/quota";
 import { createClient } from "@/lib/supabase/browser";
 import { FileDropZone } from "@/components/FileDropZone";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { fmt } from "@/lib/i18n/fmt";
+import { localeHref } from "@/lib/i18n/locales";
+import { splitLocale } from "@/lib/i18n/paths";
+import { useValidationText } from "@/lib/i18n/useValidationText";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -35,10 +41,13 @@ type FileData = {
 };
 
 type Props = {
-  t?: Translations["merge"];
+  t: Translations["merge"];
 };
 
 export default function MergeClient({ t }: Props) {
+  const { locale } = splitLocale(usePathname() ?? "/");
+  const href = (p: string) => localeHref(locale, p);
+  const vt = useValidationText(locale);
   const { theme } = useTheme();
   const fileARef = useRef<HTMLInputElement>(null);
   const fileBRef = useRef<HTMLInputElement>(null);
@@ -104,7 +113,7 @@ export default function MergeClient({ t }: Props) {
 
   function handleMerge() {
     if (!fileA || !fileB) {
-      setError("Please upload both files.");
+      setError(t.errNeedBoth);
       return;
     }
     setBusy(true);
@@ -124,7 +133,8 @@ export default function MergeClient({ t }: Props) {
       );
       setResult(out);
     } catch (e: any) {
-      setError(e?.message ?? "Merge failed.");
+      console.error(e);
+      setError(t.errFailed);
     } finally {
       setBusy(false);
     }
@@ -142,24 +152,24 @@ export default function MergeClient({ t }: Props) {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="flex items-center gap-3 text-2xl font-semibold">
-        {t?.title ?? "CSV Merger & Deduplicator"}
-        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
+        {t.title}
+        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">{t.beta}</span>
       </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        {t?.description ?? "Combine two CSV files and optionally remove duplicates based on a shared column."}
+        {t.description}
       </p>
 
       <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
-        {t?.yourPlan ?? "Your plan"}: <span className="font-semibold capitalize">{plan}</span>
+        {t.yourPlan}: <span className="font-semibold">{t[`plan_${plan}`]}</span>
         {rowLimit !== null ? (
-          <> — {t?.upTo ?? "up to"}{" "}
-          <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t?.combinedRows ?? "combined rows"}</>
+          <> — {t.upTo}{" "}
+          <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t.combinedRows}</>
         ) : (
-          <> — <span className="font-semibold">{t?.planUnlimited ?? "Unlimited"}</span></>
+          <> — <span className="font-semibold">{t.planUnlimited}</span></>
         )}
         {plan === "free" && (
           <>{" "}<a href="/profile?upgrade=basic" className="underline hover:no-underline">
-            {t?.upgradeForLarger ?? "Upgrade for larger files."}
+            {t.upgradeForLarger}
           </a></>
         )}
       </div>
@@ -169,22 +179,22 @@ export default function MergeClient({ t }: Props) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FileDropZone onFile={(f) => void loadFileData(f, setFileA)}>
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h2 className="text-sm font-semibold">{t?.fileA ?? "File A"}</h2>
+            <h2 className="text-sm font-semibold">{t.fileA}</h2>
             <div className="mt-3 flex items-center gap-2">
               <button
                 type="button"
                 className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
                 onClick={() => fileARef.current?.click()}
               >
-                {t?.chooseFile ?? "Choose file"}
+                {t.chooseFile}
               </button>
               <span className="truncate text-xs text-[var(--muted)]">
-                {fileA ? fileA.name : (t?.noFile ?? "No file")}
+                {fileA ? fileA.name : t.noFile}
               </span>
             </div>
             {fileA && (
               <p className="mt-2 text-xs text-[var(--muted)]">
-                {fileA.rows.length} rows · {fileA.headers.length} columns
+                {fmt(t.fileStats, { rows: fileA.rows.length, columns: fileA.headers.length })}
               </p>
             )}
             <input
@@ -199,22 +209,22 @@ export default function MergeClient({ t }: Props) {
 
           <FileDropZone onFile={(f) => void loadFileData(f, setFileB)}>
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h2 className="text-sm font-semibold">{t?.fileB ?? "File B"}</h2>
+            <h2 className="text-sm font-semibold">{t.fileB}</h2>
             <div className="mt-3 flex items-center gap-2">
               <button
                 type="button"
                 className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
                 onClick={() => fileBRef.current?.click()}
               >
-                {t?.chooseFile ?? "Choose file"}
+                {t.chooseFile}
               </button>
               <span className="truncate text-xs text-[var(--muted)]">
-                {fileB ? fileB.name : (t?.noFile ?? "No file")}
+                {fileB ? fileB.name : t.noFile}
               </span>
             </div>
             {fileB && (
               <p className="mt-2 text-xs text-[var(--muted)]">
-                {fileB.rows.length} rows · {fileB.headers.length} columns
+                {fmt(t.fileStats, { rows: fileB.rows.length, columns: fileB.headers.length })}
               </p>
             )}
             <input
@@ -230,11 +240,11 @@ export default function MergeClient({ t }: Props) {
 
         {/* Options */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-sm font-semibold">{t?.mergeOptions ?? "Merge options"}</h2>
+          <h2 className="text-sm font-semibold">{t.mergeOptions}</h2>
 
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[var(--muted)] mb-2">{t?.mode ?? "Mode"}</label>
+              <label className="block text-xs font-medium text-[var(--muted)] mb-2">{t.mode}</label>
               <div className="flex gap-3">
                 <label className="flex items-center gap-2 cursor-pointer text-sm">
                   <input
@@ -244,7 +254,7 @@ export default function MergeClient({ t }: Props) {
                     checked={mode === "append"}
                     onChange={() => setMode("append")}
                   />
-                  {t?.appendMode ?? "Append (combine all rows)"}
+                  {t.appendMode}
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer text-sm">
                   <input
@@ -254,7 +264,7 @@ export default function MergeClient({ t }: Props) {
                     checked={mode === "dedupe"}
                     onChange={() => setMode("dedupe")}
                   />
-                  {t?.dedupeMode ?? "Dedupe (remove duplicates)"}
+                  {t.dedupeMode}
                 </label>
               </div>
             </div>
@@ -263,7 +273,7 @@ export default function MergeClient({ t }: Props) {
               <>
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)] mb-1">
-                    {t?.dedupeKey ?? "Dedupe key column"}
+                    {t.dedupeKey}
                   </label>
                   <select
                     className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -271,7 +281,7 @@ export default function MergeClient({ t }: Props) {
                     value={dedupeKey}
                     onChange={(e) => setDedupeKey(e.target.value)}
                   >
-                    <option value="">{t?.chooseColumn ?? "— choose a column —"}</option>
+                    <option value="">{t.chooseColumn}</option>
                     {sharedHeaders.map((h) => (
                       <option key={h} value={h}>
                         {h}
@@ -286,21 +296,21 @@ export default function MergeClient({ t }: Props) {
                   </select>
                   {fileA && fileB && sharedHeaders.length === 0 && (
                     <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                      {t?.noSharedColumns ?? "No shared columns found. All columns from both files will appear."}
+                      {t.noSharedColumns}
                     </p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)] mb-2">
-                    {t?.whenDuplicate ?? "When a duplicate is found"}
+                    {t.whenDuplicate}
                   </label>
                   <div className="space-y-2">
                     {(
                       [
-                        { value: "keep_first", label: t?.keepFirst ?? "Keep file A version" },
-                        { value: "keep_second", label: t?.keepSecond ?? "Keep file B version" },
-                        { value: "prefer_nonempty", label: t?.preferNonEmpty ?? "Prefer non-empty values (merge)" },
+                        { value: "keep_first", label: t.keepFirst },
+                        { value: "keep_second", label: t.keepSecond },
+                        { value: "prefer_nonempty", label: t.preferNonEmpty },
                       ] as const
                     ).map((opt) => (
                       <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -334,7 +344,7 @@ export default function MergeClient({ t }: Props) {
             onClick={handleMerge}
             disabled={busy || !fileA || !fileB}
           >
-            {busy ? (t?.merging ?? "Merging…") : (t?.mergeFiles ?? "Merge files")}
+            {busy ? t.merging : t.mergeFiles}
           </button>
         </div>
 
@@ -349,10 +359,9 @@ export default function MergeClient({ t }: Props) {
           if (pct < 0.25 && total > 2) {
             return (
               <div className="rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-800 dark:text-red-300">
-                <span className="font-semibold">Schema mismatch warning:</span> these files share only{" "}
-                {shared} of {total} unique columns ({Math.round(pct * 100)}%). Merging will produce many
-                empty cells. Consider using the{" "}
-                <a href="/convert" className="underline">Format Converter</a> to align schemas first.
+                <span className="font-semibold">{t.mismatchTitle}</span>{" "}
+                {fmt(t.mismatchBody, { shared, total, pct: Math.round(pct * 100) })}{" "}
+                <Link href={href("/convert")} className="underline">{t.linkConverter}</Link>
               </div>
             );
           }
@@ -362,25 +371,25 @@ export default function MergeClient({ t }: Props) {
         {/* Result */}
         {result && (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-            <h2 className="text-sm font-semibold">{t?.mergeSummary ?? "Merge summary"}</h2>
+            <h2 className="text-sm font-semibold">{t.mergeSummary}</h2>
 
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.rowsFromA ?? "Rows from A"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.rowsFromA}</div>
                 <div className="font-semibold">{result.rowsA.toLocaleString()}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.rowsFromB ?? "Rows from B"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.rowsFromB}</div>
                 <div className="font-semibold">{result.rowsB.toLocaleString()}</div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.duplicatesFound ?? "Duplicates found"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.duplicatesFound}</div>
                 <div className={`font-semibold ${result.duplicatesFound > 0 ? "text-amber-600 dark:text-amber-400" : ""}`}>
                   {result.duplicatesFound}
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-                <div className="text-[var(--muted)] text-xs">{t?.outputRows ?? "Output rows"}</div>
+                <div className="text-[var(--muted)] text-xs">{t.outputRows}</div>
                 <div className="font-semibold">{result.rowsOutput.toLocaleString()}</div>
               </div>
             </div>
@@ -388,14 +397,14 @@ export default function MergeClient({ t }: Props) {
             {result.warnings.length > 0 && (
               <div className="mt-4 space-y-2">
                 <p className="text-xs font-semibold text-[var(--muted)]">
-                  Merge completed with warnings — missing columns are blank-filled:
+                  {t.warningsIntro}
                 </p>
                 {result.warnings.map((w, i) => (
                   <div
                     key={i}
                     className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300"
                   >
-                    {w}
+                    {vt.msg(w)}
                   </div>
                 ))}
               </div>
@@ -407,7 +416,7 @@ export default function MergeClient({ t }: Props) {
                 className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
                 onClick={handleDownload}
               >
-                {t?.downloadMerged ?? "Download merged CSV"}
+                {t.downloadMerged}
               </button>
             </div>
           </div>
@@ -415,10 +424,10 @@ export default function MergeClient({ t }: Props) {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4 text-sm text-[var(--muted)]">
-        <a href="/app" className="hover:underline">CSV Fixer</a>
-        <a href="/convert" className="hover:underline">Format Converter</a>
-        <a href="/csv-inspector" className="hover:underline">CSV Inspector</a>
-        <a href="/presets" className="hover:underline">Templates</a>
+        <Link href={href("/app")} className="hover:underline">{t.linkFixer}</Link>
+        <Link href={href("/convert")} className="hover:underline">{t.linkConverter}</Link>
+        <Link href={href("/csv-inspector")} className="hover:underline">{t.linkInspector}</Link>
+        <Link href={href("/presets")} className="hover:underline">{t.linkTemplates}</Link>
       </div>
     </main>
   );

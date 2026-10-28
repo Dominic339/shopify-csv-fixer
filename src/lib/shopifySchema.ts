@@ -15,7 +15,6 @@ import type { CsvRow } from "./csv";
  *   (Title + URL handle are key requirements, and the modern naming is URL handle, Published on online store, etc.)
  */
 export const SHOPIFY_CANONICAL_HEADERS: string[] = [
-  // Product
   "Title",
   "URL handle",
   "Description",
@@ -25,90 +24,63 @@ export const SHOPIFY_CANONICAL_HEADERS: string[] = [
   "Tags",
   "Published on online store",
   "Status",
-
-  // Common product/variant boolean fields
-  "Charge tax",
-  "Requires shipping",
-  "Gift card",
-
-  // Variant identifiers + options
   "SKU",
   "Barcode",
   "Option1 name",
   "Option1 value",
+  "Option1 Linked To",
   "Option2 name",
   "Option2 value",
+  "Option2 Linked To",
   "Option3 name",
   "Option3 value",
-
-  // Pricing
+  "Option3 Linked To",
   "Price",
   "Compare-at price",
-
-  // Inventory (single-location quantity + key flags)
+  "Cost per item",
+  "Charge tax",
+  "Tax code",
+  "Unit price total measure",
+  "Unit price total measure unit",
+  "Unit price base measure",
+  "Unit price base measure unit",
   "Inventory tracker",
   "Inventory quantity",
   "Continue selling when out of stock",
-
-  // Shipping / weight
-  "Weight unit for display",
   "Weight value (grams)",
-
-  // Fulfillment
+  "Weight unit for display",
+  "Requires shipping",
   "Fulfillment service",
-
-  // Images
   "Product image URL",
-  "Variant image URL",
   "Image position",
   "Image alt text",
-
-  // SEO
+  "Variant image URL",
+  "Gift card",
   "SEO title",
   "SEO description",
+  "Color (product.metafields.shopify.color-pattern)",
+  "Google Shopping / Google product category",
+  "Google Shopping / Gender",
+  "Google Shopping / Age group",
+  "Google Shopping / Manufacturer part number (MPN)",
+  "Google Shopping / Ad group name",
+  "Google Shopping / Ads labels",
+  "Google Shopping / Condition",
+  "Google Shopping / Custom product",
+  "Google Shopping / Custom label 0",
+  "Google Shopping / Custom label 1",
+  "Google Shopping / Custom label 2",
+  "Google Shopping / Custom label 3",
+  "Google Shopping / Custom label 4",
 ];
 
-export type CanonKey =
-  | "Title"
-  | "URL handle"
-  | "Description"
-  | "Vendor"
-  | "Product category"
-  | "Type"
-  | "Tags"
-  | "Published on online store"
-  | "Status"
-  | "Charge tax"
-  | "Requires shipping"
-  | "Gift card"
-  | "SKU"
-  | "Barcode"
-  | "Option1 name"
-  | "Option1 value"
-  | "Option2 name"
-  | "Option2 value"
-  | "Option3 name"
-  | "Option3 value"
-  | "Price"
-  | "Compare-at price"
-  | "Inventory tracker"
-  | "Inventory quantity"
-  | "Continue selling when out of stock"
-  | "Weight unit for display"
-  | "Weight value (grams)"
-  | "Fulfillment service"
-  | "Product image URL"
-  | "Variant image URL"
-  | "Image position"
-  | "Image alt text"
-  | "SEO title"
-  | "SEO description";
+export type CanonKey = string;
 
 export type CanonicalizeResult = {
   fixedHeaders: string[]; // canonical headers first, unknown appended
   fixedRows: CsvRow[]; // every row has keys for every fixedHeader
   unknownHeaders: string[];
-  // Map of canonical header -> source header we copied from (useful for debugging)
+  // Map of canonical header -> source header we copied from (null = not in the input file)
   sourceMap: Record<string, string | null>;
 };
 
@@ -119,42 +91,42 @@ function normKey(h: string) {
   return normHeader(h).toLowerCase();
 }
 
-export const SHOPIFY_HEADER_ALIASES: Record<CanonKey, string[]> = {
-  "Title": ["Title"],
-  "URL handle": ["URL handle", "Handle"],
-  "Description": ["Description", "Body (HTML)", "Body HTML", "Body"],
-  "Vendor": ["Vendor"],
-  "Product category": ["Product category", "Google Shopping / Google Product Category", "Google Product Category"],
-  "Type": ["Type"],
-  "Tags": ["Tags"],
-  "Published on online store": ["Published on online store", "Published"],
-  "Status": ["Status"],
-  "Charge tax": ["Charge tax"],
-  "Requires shipping": ["Requires shipping"],
-  "Gift card": ["Gift card"],
-  "SKU": ["SKU", "Variant SKU"],
-  "Barcode": ["Barcode"],
-  "Option1 name": ["Option1 name", "Option1 Name"],
-  "Option1 value": ["Option1 value", "Option1 Value"],
-  "Option2 name": ["Option2 name", "Option2 Name"],
-  "Option2 value": ["Option2 value", "Option2 Value"],
-  "Option3 name": ["Option3 name", "Option3 Name"],
-  "Option3 value": ["Option3 value", "Option3 Value"],
-  "Price": ["Price", "Variant Price"],
-  "Compare-at price": ["Compare-at price", "Variant Compare At Price", "Compare at price"],
-  "Inventory tracker": ["Inventory tracker", "Variant Inventory Tracker", "Inventory Tracker"],
-  "Inventory quantity": ["Inventory quantity", "Variant Inventory Qty", "Inventory Qty"],
-  "Continue selling when out of stock": ["Continue selling when out of stock", "Variant Inventory Policy"],
-  "Weight unit for display": ["Weight unit for display", "Variant Weight Unit", "Weight Unit"],
-  "Weight value (grams)": ["Weight value (grams)", "Variant Grams", "Grams", "Weight (g)", "Weight (grams)"],
-  "Fulfillment service": ["Fulfillment service", "Variant Fulfillment Service", "Fulfillment Service"],
-  "Product image URL": ["Product image URL", "Image Src", "Image URL"],
-  "Variant image URL": ["Variant image URL", "Variant Image"],
-  "Image position": ["Image position", "Image Position"],
-  "Image alt text": ["Image alt text", "Image Alt Text"],
-  "SEO title": ["SEO title", "SEO Title"],
-  "SEO description": ["SEO description", "SEO Description"],
+/**
+ * Alternate header names Shopify (or older Shopify exports) use for each canonical column.
+ * Matching is case-insensitive. The canonical name itself always matches.
+ */
+export const SHOPIFY_HEADER_ALIASES: Record<string, string[]> = {
+  "URL handle": ["Handle"],
+  "Description": ["Body (HTML)", "Body HTML", "Body"],
+  "Published on online store": ["Published"],
+  "SKU": ["Variant SKU"],
+  // Shopify now exports "Barcodes"; a file may contain one or the other, never both.
+  "Barcode": ["Barcodes", "Variant Barcode"],
+  "Option1 Linked To": ["Option1 LinkedTo"],
+  "Option2 Linked To": ["Option2 LinkedTo"],
+  "Option3 Linked To": ["Option3 LinkedTo"],
+  "Price": ["Variant Price"],
+  "Compare-at price": ["Variant Compare At Price", "Compare at price"],
+  "Cost per item": ["Variant Cost"],
+  "Charge tax": ["Variant Taxable"],
+  "Tax code": ["Variant Tax Code"],
+  "Inventory tracker": ["Variant Inventory Tracker"],
+  "Inventory quantity": ["Variant Inventory Qty", "Inventory Qty"],
+  "Continue selling when out of stock": ["Variant Inventory Policy"],
+  "Weight value (grams)": ["Variant Grams", "Grams", "Weight (g)", "Weight (grams)"],
+  "Weight unit for display": ["Variant Weight Unit", "Weight Unit"],
+  "Requires shipping": ["Variant Requires Shipping"],
+  "Fulfillment service": ["Variant Fulfillment Service"],
+  "Product image URL": ["Image Src", "Image URL"],
+  "Variant image URL": ["Variant Image"],
+  // NOTE: Google's category is a separate column from Shopify's "Product category" taxonomy.
+  "Google Shopping / Google product category": ["Google Product Category"],
+  "Google Shopping / Manufacturer part number (MPN)": ["Google Shopping / MPN"],
+  "Google Shopping / Ad group name": ["Google Shopping / AdWords Grouping"],
+  "Google Shopping / Ads labels": ["Google Shopping / AdWords Labels"],
 };
+
+const LEGACY_WEIGHT_HEADER = "Variant Weight";
 
 function resolveSourceHeader(inputHeaders: string[], possible: string[]): string | null {
   const lookup = new Map<string, string>();
@@ -169,16 +141,26 @@ function resolveSourceHeader(inputHeaders: string[], possible: string[]): string
 export function canonicalizeShopifyProductCsv(headers: string[], rows: CsvRow[]): CanonicalizeResult {
   const inputHeaders = (headers ?? []).map(normHeader).filter((h) => h.length > 0);
 
-  // Determine unknown headers (preserve them exactly; appended after canonical)
-  const canonicalSet = new Set(SHOPIFY_CANONICAL_HEADERS.map(normKey));
-  const unknownHeaders = inputHeaders.filter((h) => !canonicalSet.has(normKey(h)));
-
-  // Build canonical -> source header mapping from aliases
+  // Build canonical -> source header mapping from aliases (canonical name preferred)
   const sourceMap: Record<string, string | null> = {};
+  const consumed = new Set<string>();
   for (const canon of SHOPIFY_CANONICAL_HEADERS) {
-    const key = canon as CanonKey;
-    sourceMap[canon] = resolveSourceHeader(inputHeaders, SHOPIFY_HEADER_ALIASES[key] ?? [canon]);
+    const src = resolveSourceHeader(inputHeaders, [canon, ...(SHOPIFY_HEADER_ALIASES[canon] ?? [])]);
+    sourceMap[canon] = src;
+    if (src) consumed.add(normKey(src));
   }
+
+  // Unknown headers (metafields, Collection, market prices, ...) are preserved exactly,
+  // appended after canonical. Alias columns that fed a canonical column are not repeated.
+  const legacyWeightSrc = sourceMap["Weight value (grams)"]
+    ? null
+    : resolveSourceHeader(inputHeaders, [LEGACY_WEIGHT_HEADER]);
+  if (legacyWeightSrc) {
+    consumed.add(normKey(legacyWeightSrc));
+    sourceMap["Weight value (grams)"] = legacyWeightSrc;
+  }
+
+  const unknownHeaders = inputHeaders.filter((h) => !consumed.has(normKey(h)));
 
   // Build fixed header order: canonical first, then unknown appended (stable)
   const fixedHeaders = [...SHOPIFY_CANONICAL_HEADERS, ...unknownHeaders];
@@ -194,16 +176,16 @@ export function canonicalizeShopifyProductCsv(headers: string[], rows: CsvRow[])
       out[canon] = typeof val === "string" ? val : String(val ?? "");
     }
 
+    // Legacy "Variant Weight" + "Variant Weight Unit" → grams
+    if (legacyWeightSrc) {
+      const grams = weightToGrams(r?.[legacyWeightSrc] ?? "", out["Weight unit for display"] ?? "");
+      if (grams != null) out["Weight value (grams)"] = String(grams);
+    }
+
     // 2) unknown fields appended, untouched
     for (const uh of unknownHeaders) {
       const val = r?.[uh] ?? "";
       out[uh] = typeof val === "string" ? val : String(val ?? "");
-    }
-
-    // 3) preserve any stray keys (shouldn’t happen often, but never drop)
-    for (const [k, v] of Object.entries(r ?? {})) {
-      const nk = normHeader(k);
-      if (!(nk in out)) out[nk] = typeof v === "string" ? v : String(v ?? "");
     }
 
     // Ensure every fixed header exists
@@ -215,19 +197,31 @@ export function canonicalizeShopifyProductCsv(headers: string[], rows: CsvRow[])
   return { fixedHeaders, fixedRows, unknownHeaders, sourceMap };
 }
 
+// Handle characters Shopify keeps: lowercase letters (any script), digits, single dashes.
+const HANDLE_RE = /^[\p{Ll}\p{Lo}\p{Lm}\p{N}]+(?:-[\p{Ll}\p{Lo}\p{Lm}\p{N}]+)*$/u;
+
+export function isValidShopifyHandle(input: string): boolean {
+  return HANDLE_RE.test(String(input ?? "").trim());
+}
+
+/**
+ * Turn arbitrary text into a Shopify-style handle.
+ * Keeps letters from every script (Japanese, Cyrillic, ...); strips accents only from
+ * Latin letters (café → cafe) so marks like Japanese dakuten are not destroyed.
+ */
 export function slugifyShopifyHandle(input: string): string {
-  // Shopify: letters, numbers, dashes; no spaces. We’ll be conservative and deterministic.
-  const s = String(input ?? "").trim().toLowerCase();
+  const s = String(input ?? "").trim();
   if (!s) return "";
-  const replaced = s
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "") // strip accents
+  return s
+    .normalize("NFD")
+    .replace(/([A-Za-z])\p{M}+/gu, "$1")
+    .normalize("NFC")
+    .toLowerCase()
     .replace(/&/g, " and ")
-    .replace(/[^a-z0-9\s-]/g, " ") // remove punctuation
-    .replace(/\s+/g, "-")
+    .replace(/['’]/g, "")
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-  return replaced;
 }
 
 export function normalizeShopifyBool(input: string): string {
@@ -267,12 +261,70 @@ export function isValidShopifyInventoryPolicy(input: string): boolean {
   return s === "deny" || s === "continue";
 }
 
+/**
+ * Parse a number written in US or European style, with optional currency symbols/codes.
+ *   "19.99"  "$1,234.56"  "€12,50"  "1.234,56 €"  "CHF 1'299.00"  "12 345,67"
+ * Returns null when the text is not a number.
+ */
+export function parseLocaleNumber(input: string): number | null {
+  let s = String(input ?? "").trim();
+  if (!s) return null;
+
+  // Currency symbols/codes at either end, and grouping spaces/apostrophes inside.
+  s = s
+    .replace(/^[^\d\-.,]+/, "")
+    .replace(/[^\d.,]+$/, "")
+    .replace(/[\s\u00a0\u202f\u2009'’]/g, "");
+
+  let negative = false;
+  if (s.startsWith("-")) {
+    negative = true;
+    s = s.slice(1);
+  }
+  if (!/^[\d.,]+$/.test(s) || !/\d/.test(s)) return null;
+
+  const lastDot = s.lastIndexOf(".");
+  const lastComma = s.lastIndexOf(",");
+  let normalized: string;
+
+  if (lastDot >= 0 && lastComma >= 0) {
+    // Both present: whichever comes last is the decimal separator.
+    const dec = lastDot > lastComma ? "." : ",";
+    const group = dec === "." ? "," : ".";
+    const [intPart, frac, ...rest] = s.split(dec);
+    if (rest.length) return null;
+    if (!isGrouped(intPart, group)) return null;
+    normalized = intPart.split(group).join("") + "." + frac;
+  } else if (lastComma >= 0) {
+    const parts = s.split(",");
+    if (parts.length > 2) {
+      if (!isGrouped(s, ",")) return null;
+      normalized = parts.join("");
+    } else if (parts[1].length === 3 && /^[1-9]\d{0,2}$/.test(parts[0])) {
+      normalized = parts.join(""); // "1,234" → 1234 (thousands)
+    } else {
+      normalized = parts[0] + "." + parts[1]; // "12,50" → 12.50 (decimal comma)
+    }
+  } else if (lastDot >= 0 && s.indexOf(".") !== lastDot) {
+    if (!isGrouped(s, ".")) return null;
+    normalized = s.split(".").join(""); // "1.234.567"
+  } else {
+    normalized = s;
+  }
+
+  const n = Number(normalized);
+  if (!Number.isFinite(n)) return null;
+  return negative ? -n : n;
+}
+
+function isGrouped(intPart: string, sep: string): boolean {
+  if (!intPart.includes(sep)) return /^\d+$/.test(intPart);
+  return new RegExp(`^\\d{1,3}(\\${sep}\\d{3})+$`).test(intPart);
+}
+
+/** @deprecated name kept for existing callers; parses US and European formats. */
 export function parseShopifyMoney(input: string): number | null {
-  const raw = String(input ?? "").trim();
-  if (!raw) return null;
-  const cleaned = raw.replace(/[$,]/g, "").trim();
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
+  return parseLocaleNumber(input);
 }
 
 export function formatShopifyMoney(n: number): string {
@@ -289,4 +341,15 @@ export function isHttpUrl(s: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function weightToGrams(valueRaw: string, unitRaw: string): number | null {
+  const n = parseLocaleNumber(valueRaw);
+  if (n == null) return null;
+  const u = String(unitRaw ?? "").trim().toLowerCase();
+  if (!u || u === "g" || u === "gram" || u === "grams") return Math.round(n);
+  if (u === "kg" || u === "kilogram" || u === "kilograms") return Math.round(n * 1000);
+  if (u === "lb" || u === "lbs" || u === "pound" || u === "pounds") return Math.round(n * 453.59237);
+  if (u === "oz" || u === "ounce" || u === "ounces") return Math.round(n * 28.349523125);
+  return null;
 }

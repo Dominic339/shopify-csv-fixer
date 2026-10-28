@@ -1,0 +1,153 @@
+---
+title: "Atributos de produto do WooCommerce no CSV: guia completo"
+description: "Como formatar corretamente os atributos de produto do WooCommerce num arquivo CSV: nomes de atributos, atributos globais e locais, atributos de variação e erros comuns."
+keywords: ["atributos woocommerce csv", "importar atributos de produto woocommerce", "colunas de atributos woocommerce csv", "atributos de variação woocommerce", "formato de atributos csv woocommerce", "atributos globais woocommerce csv", "erro ao importar atributos woocommerce"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Como as colunas de atributos do WooCommerce são nomeadas e numeradas no CSV"
+  - "A diferença entre atributos globais e locais nas importações CSV"
+  - "Como definir atributos para produtos variáveis e suas variações"
+  - "Como importar vários valores de atributo (por exemplo, um produto disponível em azul e vermelho)"
+  - "Como corrigir os erros de importação de atributos mais comuns"
+bestFor: "Lojistas do WooCommerce que importam produtos variáveis com tamanho, cor, material ou outras dimensões de atributo"
+timeToComplete: "10 minutos"
+---
+
+## Como funcionam os atributos do WooCommerce no CSV
+
+Os atributos de produto do WooCommerce definem as dimensões em que um produto varia, normalmente tamanho, cor ou material. Numa importação CSV, os atributos são representados por grupos de colunas numerados. Cada grupo de quatro colunas corresponde a um atributo.
+
+O padrão de nomes das colunas é:
+- `Attribute 1 name`
+- `Attribute 1 value(s)`
+- `Attribute 1 visible`
+- `Attribute 1 global`
+
+Para um segundo atributo, repita o padrão com `Attribute 2 name`, `Attribute 2 value(s)` etc.
+
+Se o seu WordPress está em português, a exportação usa nomes de coluna em português; o importador aceita esses nomes e também os ingleses. Este guia usa os nomes em inglês.
+
+---
+
+## Referência das colunas
+
+| Coluna | Formato | Descrição |
+|---|---|---|
+| `Attribute N name` | Texto | O nome do atributo (por exemplo, `Color`, `Size`) |
+| `Attribute N value(s)` | Texto, separado por barras verticais | O valor ou valores desta linha (por exemplo, `Blue` ou `Blue | Red`) |
+| `Attribute N visible` | `1` ou `0` | `1` = exibido na página do produto; `0` = oculto |
+| `Attribute N global` | `1` ou `0` | `1` = atributo global de taxonomia; `0` = atributo local |
+
+---
+
+## Produtos simples com vários valores de atributo
+
+Para um produto simples disponível em várias cores (mas não como variações separadas), liste todos os valores na coluna `Attribute 1 value(s)` separados por uma barra vertical `|`:
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+```
+
+Isso cria um produto com um atributo Color que mostra as três cores na página do produto.
+
+---
+
+## Produtos variáveis com variações
+
+Nos produtos variáveis, os atributos funcionam de outro jeito. A linha principal lista todos os valores possíveis do atributo. Cada linha de variação traz apenas o valor específico daquela variação.
+
+**Linha principal (Type: variable):**
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+```
+
+**Linhas de variação (Type: variation):**
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+,variation,TSHIRT-S,18.00,Size,S,1,1
+,variation,TSHIRT-M,18.00,Size,M,1,1
+,variation,TSHIRT-L,20.00,Size,L,1,1
+,variation,TSHIRT-XL,20.00,Size,XL,1,1
+```
+
+A coluna `Name` fica vazia nas linhas de variação: o WooCommerce gera o nome da variação a partir dos valores dos atributos.
+
+---
+
+## Dois atributos (tamanho + cor)
+
+Para um produto com duas dimensões de atributo:
+
+**Linha principal:**
+
+```
+Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
+Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+```
+
+**Linhas de variação:**
+
+```
+,variation,SHOE-7-BLK,Size,7,1,1,Color,Black,1,1
+,variation,SHOE-7-WHT,Size,7,1,1,Color,White,1,1
+,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
+```
+
+Cada linha de variação informa exatamente um valor por atributo (não uma lista separada por barras verticais).
+
+---
+
+## Atributos globais e locais
+
+### Atributos globais (`Attribute N global: 1`)
+
+Os atributos globais são definidos na taxonomia de atributos do WooCommerce (Produtos → Atributos no painel do WordPress). Use atributos globais quando:
+- Vários produtos compartilham os mesmos termos de atributo (as mesmas cores, os mesmos tamanhos)
+- Você quer filtrar produtos por atributo nas páginas da loja
+- Você usa o widget de navegação em camadas do WooCommerce
+
+Ao importar com `global: 1`, o WooCommerce cria o termo do atributo se ele ainda não existir. Os nomes dos atributos precisam ser exatamente iguais (diferenciando maiúsculas e minúsculas) para que o WooCommerce os associe à taxonomia existente.
+
+### Atributos locais (`Attribute N global: 0`)
+
+Os atributos locais pertencem a um único produto. Use-os para especificações próprias de um produto que não se aplicam a outros (por exemplo, `Material: 100% cashmere` num produto específico).
+
+Atributos locais não podem ser usados para filtrar variações nem na navegação em camadas.
+
+---
+
+## Erros comuns na importação de atributos
+
+### Colunas de atributos não reconhecidas
+
+**Causa:** os nomes das colunas não seguem exatamente o padrão: espaços errados, numeração errada ou nomes abreviados.
+
+Errado: `Attribute1 name`, `attribute 1 name`, `Attr 1 name`
+Certo: `Attribute 1 name`
+
+**Solução:** use os nomes de coluna exatos, com um espaço entre `Attribute` e o número.
+
+### Atributos da variação diferentes dos do principal
+
+**Causa:** o nome do atributo numa linha de variação não corresponde ao da linha principal, ou a variação traz um valor que não estava na lista de valores do principal.
+
+**Solução:** os nomes dos atributos devem ser idênticos nas linhas principal e de variação. Os valores das variações devem estar entre os valores listados na linha principal.
+
+### Barra vertical com espaços
+
+**Causa:** misturar ` | ` (com espaços em volta da barra) e `|` (sem espaços). O WooCommerce remove os espaços dos valores, mas inconsistências podem causar divergências.
+
+**Solução:** use `|`, com ou sem espaços em volta, de forma consistente em todo o arquivo. O WooCommerce remove os espaços em volta de cada valor.
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu CSV do WooCommerce para o StriveFormats. O validador verifica os nomes das colunas de atributos, a coerência dos atributos entre principal e variações e a formatação das barras verticais, e aponta os problemas com a linha e a coluna exatas.
+
+[Abrir o corretor de CSV do WooCommerce](/app?preset=woocommerce_products) | [Ver o modelo do WooCommerce](/presets/woocommerce_products)

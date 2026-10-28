@@ -1,0 +1,109 @@
+{
+  "about": {
+    "metaTitle": "Über StriveFormats",
+    "metaDescription": "StriveFormats prüft und korrigiert Produkt-CSVs für Shopify, WooCommerce, Etsy, eBay und Amazon direkt im Browser. Was es tut, was wo läuft und wie es gebaut ist.",
+    "title": "Über StriveFormats",
+    "intro": "StriveFormats prüft Produkt-CSV-Dateien, bevor du sie in einen Onlineshop importierst, behebt die Probleme, die sich gefahrlos beheben lassen, und zeigt bei allem anderen genau auf Zeile und Spalte. Es läuft in deinem Browser, dein Katalog verlässt also nie deinen Computer.",
+    "whyTitle": "Warum es das gibt",
+    "why": [
+      "Shop-Importer sind streng, und ihre Fehlermeldungen sagen selten, welche Zeile falsch ist. Eine Datei, die in der Tabelle gut aussieht, kann an einem als „45,00“ geschriebenen Preis scheitern, an einer Variantenzeile ohne Handle oder an einer leeren Zelle, die unbemerkt Daten im Shop löschen würde.",
+      "StriveFormats kennt die Regeln jeder Plattform, wendet die Korrekturen an, die die Bedeutung deiner Daten nicht ändern können, und überlässt dir jede Entscheidung, bei der das passieren könnte, mit einer Erklärung und einem Link zu einer Anleitung."
+    ],
+    "runTitle": "Wie es betrieben wird",
+    "run": [
+      { "lead": "Erst testen, dann anmelden.", "text": "Alle Prüfungen und Korrekturen funktionieren ohne Konto, und du bekommst {count} kostenlose Exporte pro Monat auf jedem Gerät." },
+      { "lead": "Nichts ändert sich heimlich.", "text": "Jede automatische Änderung steht in einem Korrekturprotokoll, das du zusammen mit der Datei herunterladen kannst." },
+      { "lead": "Klein und unabhängig.", "text": "Das Tool arbeitet in deinem Browser. Das hält es schnell, privat und günstig im Betrieb – und den kostenlosen Tarif kostenlos." }
+    ],
+    "whereTitle": "Was wo läuft",
+    "dataFlow": [
+      { "what": "Deine CSV-Datei und jede Änderung daran", "where": "Bleibt in deinem Browser. Sie wird nie hochgeladen." },
+      { "what": "Eigene Formate und Arbeitsbereiche", "where": "Im Browser gespeichert. Exportiere ein Format als Datei, um es mitzunehmen." },
+      { "what": "Zähler für kostenlose Exporte (abgemeldet)", "where": "Wird in deinem Browser für dieses Gerät gespeichert." },
+      { "what": "Exportzähler und Tarif (angemeldet)", "where": "Mit deinem Konto gespeichert, damit es auf jedem Gerät funktioniert." },
+      { "what": "Anonyme Nutzungsereignisse", "where": "Welche Tools genutzt werden, nie der Inhalt deiner Dateien." },
+      { "what": "Zahlungen", "where": "Werden von Stripe abgewickelt. Deine Kartendaten sehen wir nie." }
+    ],
+    "detailsBefore": "Details in der",
+    "detailsLink": "Datenschutzerklärung",
+    "detailsAfter": ".",
+    "platformsTitle": "Plattformen",
+    "toolsTitle": "Tools",
+    "tools": {
+      "app": { "name": "CSV-Reparateur", "desc": "Gegen die Regeln einer Plattform prüfen, Sicheres automatisch korrigieren, den Rest in einer Tabelle bearbeiten." },
+      "inspector": { "name": "CSV-Inspektor", "desc": "Die Struktur jeder CSV prüfen: Trennzeichen, Anführungszeichen, Kodierung, leere und doppelte Spalten." },
+      "convert": { "name": "Format-Konverter", "desc": "Produkte zwischen den Formaten von Shopify, WooCommerce, Etsy, eBay und Amazon übertragen." },
+      "merge": { "name": "CSV-Zusammenführung", "desc": "Zwei Dateien kombinieren und Duplikate anhand einer gemeinsamen Spalte entfernen." },
+      "formats": { "name": "Eigene Formate", "desc": "Spalten und Regeln jeder Datei speichern, mit der du regelmäßig arbeitest (Advanced-Tarif)." }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Datenschutzerklärung",
+    "metaDescription": "Was StriveFormats speichert, wo und warum. Deine CSV-Dateien werden im Browser verarbeitet und nie hochgeladen.",
+    "title": "Datenschutzerklärung",
+    "intro": "StriveFormats verarbeitet CSV-Dateien in deinem Browser. Diese Seite listet alles auf, was die Website speichert, wo und warum.",
+    "sections": [
+      {
+        "title": "Deine CSV-Dateien",
+        "paras": [
+          "Dateien, die du im CSV-Reparateur, Inspektor, Konverter oder in der Zusammenführung öffnest, werden vollständig in deinem Browser gelesen, geprüft und exportiert. Ihr Inhalt wird nie auf unsere Server hochgeladen oder an andere weitergegeben.",
+          "Eigene Formate und Arbeitsbereiche, die du anlegst, werden im lokalen Speicher deines Browsers auf diesem Gerät gespeichert."
+        ]
+      },
+      {
+        "title": "Wenn du ein Konto anlegst",
+        "paras": [
+          "Wir speichern deine E-Mail-Adresse (für die Anmeldung), deinen Tarif und Abostatus sowie die Zahl der Exporte, die du in diesem Monat genutzt hast. Die Konten werden von Supabase bereitgestellt."
+        ]
+      },
+      {
+        "title": "Ohne Konto",
+        "paras": ["Dein Zähler für kostenlose Exporte im laufenden Monat wird im lokalen Speicher deines Browsers gespeichert. Er wird nicht an uns gesendet."]
+      },
+      {
+        "title": "Nutzungsdaten",
+        "paras": [
+          "Wir erfassen anonyme Nutzungsereignisse, etwa welches Tool geöffnet oder dass eine Datei geprüft wurde, zusammen mit einer zufälligen Kennung, die in deinem Browser gespeichert ist. Diese Ereignisse enthalten nie Dateiinhalte.",
+          "Die Website kann Google Analytics und Vercel Analytics verwenden, um Seitenaufrufe zu zählen. Google Analytics setzt Cookies, Vercel Analytics nicht."
+        ]
+      },
+      {
+        "title": "E-Mail-Neuigkeiten",
+        "paras": [
+          "Wenn du deine E-Mail-Adresse in das Feld „Neue Formate und Funktionen“ einträgst, speichern wir sie, um gelegentlich Produktneuigkeiten zu senden. Du kannst jederzeit verlangen, dass wir sie löschen."
+        ]
+      },
+      {
+        "title": "Zahlungen",
+        "paras": ["Zahlungen werden von Stripe abgewickelt. Wir sehen oder speichern deine Kartendaten nie; wir erhalten von Stripe nur deinen Abostatus."]
+      },
+      {
+        "title": "Deine Möglichkeiten",
+        "paras": [
+          "Die in deinem Browser gespeicherten Daten kannst du jederzeit über die Browsereinstellungen löschen. Wenn dein Konto oder deine E-Mail-Adresse gelöscht werden soll, wende dich an den Betreiber der Website."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "metaTitle": "Nutzungsbedingungen",
+    "metaDescription": "Nutzungsbedingungen von StriveFormats.",
+    "title": "Nutzungsbedingungen",
+    "intro": "StriveFormats wird ohne Mängelgewähr und ohne Garantien bereitgestellt. Du bist dafür verantwortlich, die Richtigkeit deiner Exporte zu prüfen, bevor du sie in Dienste Dritter importierst.",
+    "sections": [
+      {
+        "title": "Zulässige Nutzung",
+        "paras": ["Nutze StriveFormats nicht, um rechtswidrige Inhalte hochzuladen oder zu verarbeiten. Versuche nicht, den Dienst zu stören oder Nutzungslimits zu umgehen."]
+      },
+      {
+        "title": "Abonnements",
+        "paras": ["Die Abrechnung von Abonnements erfolgt über Stripe. Du kannst dein Abo im Abrechnungsportal kündigen oder verwalten."]
+      },
+      {
+        "title": "Haftungsbeschränkung",
+        "paras": ["StriveFormats haftet nicht für Verluste im Zusammenhang mit Datenimporten, Geschäftsabläufen oder Problemen bei Plattformen Dritter."]
+      }
+    ]
+  },
+  "translationNote": "Diese Übersetzung dient nur der Orientierung. Bei Abweichungen gilt die englische Fassung:"
+}

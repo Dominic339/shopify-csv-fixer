@@ -1,0 +1,109 @@
+{
+  "about": {
+    "metaTitle": "About StriveFormats",
+    "metaDescription": "StriveFormats checks and fixes product CSVs for Shopify, WooCommerce, Etsy, eBay and Amazon in your browser. What it does, what runs where, and how it's built.",
+    "title": "About StriveFormats",
+    "intro": "StriveFormats checks product CSV files before you import them into an online store, fixes the problems that are safe to fix, and points at the exact row and column of everything else. It runs in your browser, so your catalogue never leaves your computer.",
+    "whyTitle": "Why it exists",
+    "why": [
+      "Store importers are strict, and their error messages rarely say which row is wrong. A file that looks fine in a spreadsheet can fail because of a price written as “45,00”, a variant row that lost its handle, or a blank cell that would quietly erase data already in the store.",
+      "StriveFormats knows each platform's rules, applies the fixes that can't change what your data means, and leaves every decision that could to you, with an explanation and a link to a guide."
+    ],
+    "runTitle": "How it's run",
+    "run": [
+      { "lead": "Try it before you sign up.", "text": "Every check and fix works without an account, and you get {count} free exports a month on each device." },
+      { "lead": "Nothing changes silently.", "text": "Every automatic change is listed in a fix log you can download with the file." },
+      { "lead": "Small and independent.", "text": "The tool does its work in your browser, which keeps it fast, private and cheap to run, and keeps the free tier free." }
+    ],
+    "whereTitle": "What runs where",
+    "dataFlow": [
+      { "what": "Your CSV file and every edit you make", "where": "Stays in your browser. It is never uploaded." },
+      { "what": "Custom formats and workspaces", "where": "Saved in your browser. Export a format as a file to move it." },
+      { "what": "Free export count (signed out)", "where": "Kept in your browser for this device." },
+      { "what": "Export count and plan (signed in)", "where": "Stored with your account so it works on every device." },
+      { "what": "Anonymous usage events", "where": "Which tools are used, never what's in your files." },
+      { "what": "Payments", "where": "Handled by Stripe. We never see your card details." }
+    ],
+    "detailsBefore": "Details in the",
+    "detailsLink": "privacy policy",
+    "detailsAfter": ".",
+    "platformsTitle": "Platforms",
+    "toolsTitle": "Tools",
+    "tools": {
+      "app": { "name": "CSV Fixer", "desc": "Validate against a platform's rules, auto-fix what's safe, edit the rest in a table." },
+      "inspector": { "name": "CSV Inspector", "desc": "Check any CSV's structure: delimiters, quoting, encoding, empty and duplicate columns." },
+      "convert": { "name": "Format Converter", "desc": "Move products between Shopify, WooCommerce, Etsy, eBay and Amazon layouts." },
+      "merge": { "name": "CSV Merger", "desc": "Combine two files and remove duplicates on a shared column." },
+      "formats": { "name": "Custom Formats", "desc": "Save the columns and rules of any file you handle regularly (Advanced plan)." }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Privacy Policy",
+    "metaDescription": "What StriveFormats stores, where, and why. Your CSV files are processed in your browser and never uploaded.",
+    "title": "Privacy Policy",
+    "intro": "StriveFormats processes CSV files in your browser. This page lists everything the site stores, where, and why.",
+    "sections": [
+      {
+        "title": "Your CSV files",
+        "paras": [
+          "Files you open in the CSV Fixer, Inspector, Converter or Merger are read, checked and exported entirely in your browser. Their contents are never uploaded to our servers or shared with anyone.",
+          "Custom formats and workspaces you create are saved in your browser's local storage on that device."
+        ]
+      },
+      {
+        "title": "If you create an account",
+        "paras": [
+          "We store your email address (for signing in), your plan and subscription status, and how many exports you have used this month. Accounts are provided by Supabase."
+        ]
+      },
+      {
+        "title": "Without an account",
+        "paras": ["Your free export count for the month is kept in your browser's local storage. It is not sent to us."]
+      },
+      {
+        "title": "Usage information",
+        "paras": [
+          "We record anonymous usage events, such as which tool was opened or that a file was checked, together with a random identifier kept in your browser. These events never contain file contents.",
+          "The site may use Google Analytics and Vercel Analytics to count page views. Google Analytics sets cookies; Vercel Analytics does not."
+        ]
+      },
+      {
+        "title": "Email updates",
+        "paras": [
+          "If you enter your email address in the “new formats and features” box, we store it to send occasional product updates. You can ask us to remove it at any time."
+        ]
+      },
+      {
+        "title": "Payments",
+        "paras": ["Payments are handled by Stripe. We never see or store your card details; we only receive your subscription status from Stripe."]
+      },
+      {
+        "title": "Your choices",
+        "paras": [
+          "You can clear the data saved in your browser at any time through your browser settings. To have your account or email address removed, contact the site owner."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "metaTitle": "Terms of Service",
+    "metaDescription": "Terms of service for StriveFormats.",
+    "title": "Terms of Service",
+    "intro": "StriveFormats is provided as-is without warranties. You are responsible for verifying the accuracy of your exports before importing into third-party services.",
+    "sections": [
+      {
+        "title": "Acceptable use",
+        "paras": ["Do not use StriveFormats to upload or process unlawful content. Do not attempt to disrupt the service or bypass usage limits."]
+      },
+      {
+        "title": "Subscriptions",
+        "paras": ["Subscription billing is managed through Stripe. You can cancel or manage your subscription through the billing portal."]
+      },
+      {
+        "title": "Limitation of liability",
+        "paras": ["StriveFormats is not liable for losses related to data imports, business operations, or third-party platform issues."]
+      }
+    ]
+  },
+  "translationNote": ""
+}

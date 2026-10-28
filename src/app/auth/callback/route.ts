@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { safeRedirectPath } from "@/lib/safeRedirect";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const redirectTo = url.searchParams.get("redirect") ?? "/app";
+  const redirectTo = safeRedirectPath(url.searchParams.get("redirect"));
 
   // If no code, just go back to login
   if (!code) {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, url.origin));
+    return NextResponse.redirect(new URL("/login?error=auth_failed", url.origin));
   }
 
   // Redirect to the specified page (default: /app)

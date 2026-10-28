@@ -15,7 +15,7 @@ type SubStatus = {
 
 type Props = {
   sub?: SubStatus | null;
-  tPricing?: Translations["pricing"];
+  tPricing: Translations["pricing"];
   onBillingUnavailable?: () => void;
 };
 
@@ -66,7 +66,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
     setBusy(null);
     if (!ok) {
       if (json?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
-      setMsg(json?.error ?? "Could not start checkout.");
+      setMsg(t.billingError);
       return;
     }
     if (json?.url) window.location.href = json.url;
@@ -80,7 +80,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
     setBusy(null);
     if (!ok) {
       if (json?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
-      setMsg(json?.error ?? "Could not open billing portal.");
+      setMsg(t.billingError);
       return;
     }
     if (json?.url) window.location.href = json.url;
@@ -97,7 +97,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
     <div className="mt-10">
       {billingUnavailable && (
         <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-          {t?.billingUnavailable ?? "Billing is temporarily unavailable. Please try again later."}
+          {t.billingUnavailable}
         </div>
       )}
       {msg && <div className="mb-4 text-sm text-red-400">{msg}</div>}
@@ -106,19 +106,19 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
         {/* Free */}
         {showFree && (
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-            <div className="text-sm text-[var(--muted)]">{t?.free ?? "Free"}</div>
+            <div className="text-sm text-[var(--muted)]">{t.free}</div>
             <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$0</div>
             <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-              <li>{t?.freeBullet1 ?? "Fix and export CSV files"}</li>
-              <li>{t?.freeBullet2 ?? "3 exports per month per device"}</li>
-              <li>{t?.freeBullet4 ?? "No account required"}</li>
+              <li>{t.freeBullet1}</li>
+              <li>{t.freeBullet2}</li>
+              <li>{t.freeBullet4}</li>
             </ul>
             <button
               className="rgb-btn mt-6 w-full px-5 py-3 text-sm font-semibold text-[var(--text)]"
               onClick={() => router.push("/app")}
               type="button"
             >
-              {t?.startFree ?? "Start free"}
+              {t.startFree}
             </button>
           </div>
         )}
@@ -127,18 +127,18 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
         {showBasic && (
           <div className={`rounded-3xl border p-6 shadow-sm ${activePlan === "basic" ? "border-[var(--accent)] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface)]"}`}>
             <div className="flex items-center justify-between">
-              <div className="text-sm text-[var(--muted)]">{t?.basic ?? "Basic"}</div>
+              <div className="text-sm text-[var(--muted)]">{t.basic}</div>
               {activePlan === "basic" && (
                 <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                  {t?.yourPlan ?? "Your plan"}
+                  {t.yourPlan}
                 </span>
               )}
             </div>
-            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$5 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
+            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$5 <span className="text-base font-normal text-[var(--muted)]">{t.perMonth}</span></div>
             <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-              <li>{t?.basicBullet1 ?? "100 exports per month"}</li>
-              <li>{t?.basicBullet3 ?? "Account required"}</li>
-              <li>{t?.basicBullet4 ?? "Manage billing in Profile"}</li>
+              <li>{t.basicBullet1}</li>
+              <li>{t.basicBullet3}</li>
+              <li>{t.basicBullet4}</li>
             </ul>
             {activePlan === "basic" ? (
               hasStripeCustomer ? (
@@ -148,7 +148,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                   disabled={busy !== null || billingUnavailable}
                   type="button"
                 >
-                  {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
+                  {busy === "portal" ? t.starting : t.manageBilling}
                 </button>
               ) : (
                 <button
@@ -156,7 +156,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                   disabled
                   type="button"
                 >
-                  Syncing billing info…
+                  {t.syncingBilling}
                 </button>
               )
             ) : (
@@ -166,7 +166,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 disabled={busy !== null || billingUnavailable}
                 type="button"
               >
-                {busy === "basic" ? (t?.starting ?? "Starting…") : sub?.signedIn ? (t?.subscribe ?? "Subscribe") : (t?.signInToSubscribe ?? "Sign in to subscribe")}
+                {busy === "basic" ? t.starting : sub?.signedIn ? t.subscribe : t.signInToSubscribe}
               </button>
             )}
           </div>
@@ -175,18 +175,18 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
         {/* Advanced */}
         <div className={`rounded-3xl border p-6 shadow-sm ${activePlan === "advanced" ? "border-[var(--accent)] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface)]"}`}>
           <div className="flex items-center justify-between">
-            <div className="text-sm text-[var(--muted)]">{t?.advanced ?? "Advanced"}</div>
+            <div className="text-sm text-[var(--muted)]">{t.advanced}</div>
             {activePlan === "advanced" && (
               <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                {t?.yourPlan ?? "Your plan"}
+                {t.yourPlan}
               </span>
             )}
           </div>
-          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$10 <span className="text-base font-normal text-[var(--muted)]">{t?.perMonth ?? "/ month"}</span></div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text)]">$10 <span className="text-base font-normal text-[var(--muted)]">{t.perMonth}</span></div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
-            <li>{t?.advancedBullet1 ?? "Unlimited exports"}</li>
-            <li>{t?.advancedBullet3 ?? "Custom Format Builder"}</li>
-            <li>{t?.advancedBullet4 ?? "Save, reuse, import, and export formats"}</li>
+            <li>{t.advancedBullet1}</li>
+            <li>{t.advancedBullet3}</li>
+            <li>{t.advancedBullet4}</li>
           </ul>
           {activePlan === "advanced" ? (
             hasStripeCustomer ? (
@@ -196,7 +196,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 disabled={busy !== null || billingUnavailable}
                 type="button"
               >
-                {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.manageBilling ?? "Manage billing")}
+                {busy === "portal" ? t.starting : t.manageBilling}
               </button>
             ) : (
               <button
@@ -204,7 +204,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 disabled
                 type="button"
               >
-                {t?.syncingBilling ?? "Syncing billing info…"}
+                {t.syncingBilling}
               </button>
             )
           ) : activePlan === "basic" ? (
@@ -215,7 +215,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 disabled={busy !== null || billingUnavailable}
                 type="button"
               >
-                {busy === "portal" ? (t?.starting ?? "Starting…") : (t?.upgradeToAdvanced ?? "Upgrade to Advanced")}
+                {busy === "portal" ? t.starting : t.upgradeToAdvanced}
               </button>
             ) : (
               <button
@@ -223,7 +223,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
                 disabled
                 type="button"
               >
-                {t?.syncingBilling ?? "Syncing billing info…"}
+                {t.syncingBilling}
               </button>
             )
           ) : (
@@ -233,15 +233,15 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
               disabled={busy !== null || billingUnavailable}
               type="button"
             >
-              {busy === "advanced" ? (t?.starting ?? "Starting…") : sub?.signedIn ? (t?.subscribe ?? "Subscribe") : (t?.signInToSubscribe ?? "Sign in to subscribe")}
+              {busy === "advanced" ? t.starting : sub?.signedIn ? t.subscribe : t.signInToSubscribe}
             </button>
           )}
         </div>
       </div>
 
       <div className="mt-4 space-y-1 text-xs text-[var(--muted)]">
-        <div>All plans include access to all built-in formats.</div>
-        <div>{t?.stripeNote ?? "Subscriptions are handled securely by Stripe. Cancel any time from your billing portal."}</div>
+        <div>{t.allPlansFormats}</div>
+        <div>{t.stripeNote}</div>
       </div>
     </div>
   );

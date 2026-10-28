@@ -1,0 +1,168 @@
+---
+title: "WooCommerce の可変商品を CSV で扱う：親行とバリエーション行"
+description: "WooCommerce の商品インポーターが可変商品を親行と子行（バリエーション）でどう表すかを解説します。属性の列、行の種類ごとの必須項目、よくあるインポートの落とし穴を紹介します。"
+keywords: ["woocommerce 可変商品 csv", "woocommerce バリエーション インポート", "woocommerce 親 子 csv", "woocommerce 属性 csv", "woocommerce csv インポート バリエーション", "可変商品 woocommerce", "woocommerce 商品インポーター"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "WooCommerce が可変商品を親行とバリエーション行でどう表すか"
+  - "親行とバリエーション行それぞれに必要な列"
+  - "属性の列（Attribute 1 name、Attribute 1 value(s)）の仕組み"
+  - "親のないバリエーションや重複した商品が生まれるよくあるミス"
+  - "インポート用に可変商品の CSV を一式組み立てる方法"
+bestFor: "可変商品（複数の選択肢がある衣料品、靴、電子機器など）をインポート・更新する WooCommerce のストア運営者、開発者、カタログ担当者"
+timeToComplete: "12分"
+---
+
+## WooCommerce は可変商品をどう表すか
+
+WooCommerce の**可変商品**とは、購入できるバリエーションを持つ商品のことです。たとえば S、M、L のサイズで売る T シャツがこれにあたります。CSV では2種類の行で表します。
+
+1. **親行**：商品の入れ物を表します。Type は `variable` です。
+2. **バリエーション行**：購入できる選択肢の組み合わせを1行に1つずつ表します。Type は `variation` です。
+
+バリエーションは、親の SKU または ID で親商品と紐づけられます。
+
+WordPress を日本語で使っている場合、エクスポートの列名は日本語になります（例：`Type` ではなく「タイプ」）。インポーターはどちらの列名も認識します。このガイドでは英語の列名で説明します。
+
+---
+
+## 親行
+
+親行は商品単位の項目を決め、その商品が使う属性を宣言します。
+
+### 親行の主な列
+
+| 列 | 値 | メモ |
+|---|---|---|
+| ID | （空欄または既存の ID） | 新しい商品では空欄にする |
+| Type | `variable` | 正確に `variable` と書く |
+| SKU | `SHIRT-BLUE` | 一意の親 SKU |
+| Name | `Blue Cotton T-Shirt` | 商品名 |
+| Published | `1` | 1 = 公開、0 = 下書き |
+| Attribute 1 name | `Size` | 軸の名前 |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | 使えるすべての値を縦線で区切った一覧 |
+| Attribute 1 visible | `1` | 商品ページに表示する |
+| Attribute 1 global | `1` | グローバル（共有）属性を使う |
+
+- 属性が複数ある場合は、連番の列を使います：`Attribute 1 name`、`Attribute 2 name` など。
+- 親行の `Regular price` は空欄にするか、バリエーションの最安値を入れます。各バリエーションの実際の価格はバリエーション行に入れます。
+
+---
+
+## バリエーション行
+
+バリエーション行は、購入できる選択肢の組み合わせを1つずつ表し、親商品と紐づいている必要があります。
+
+### バリエーション行の主な列
+
+| 列 | 値 | メモ |
+|---|---|---|
+| ID | （空欄または既存のバリエーション ID） | 新しいバリエーションでは空欄にする |
+| Type | `variation` | 正確に `variation` と書く |
+| SKU | `SHIRT-BLUE-SM` | バリエーションごとに一意 |
+| Name | `Blue Cotton T-Shirt` | 親の商品名と同じにする |
+| Parent | `id:123` または `sku:SHIRT-BLUE` | ID または SKU で親と紐づける |
+| Regular price | `19.99` | バリエーションごとに必須 |
+| Attribute 1 name | `Size` | 親の属性名と同じにする |
+| Attribute 1 value(s) | `Small` | このバリエーションの値を1つだけ |
+| Stock | `50` | バリエーションごとの在庫数 |
+| Weight | `0.3` | ストアで設定した単位 |
+
+### バリエーションを親と紐づける
+
+`Parent` 列には2つの書き方があります。
+- **データベースの ID で指定**：`id:123`。WooCommerce の商品 ID がわかっている場合に使います。
+- **SKU で指定**：`sku:SHIRT-BLUE`。ほかの環境にも持ち運びやすく、まだ ID が割り当てられていない新商品をインポートするときに使います。
+
+可変商品を一から作るときは `sku:PARENT_SKU` の形式を使ってください。親行を先にインポートするか、同じファイル内でバリエーションより上に置きます。
+
+---
+
+## 完全な例：可変商品の T シャツ
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> 注：ここでは簡潔にするため `Parent` 列を省いています。実際には、バリエーション行に `Parent: sku:SHIRT-BLUE` を入れてください。
+
+---
+
+## 2軸のバリエーション（サイズとカラー）
+
+2つ目の属性（カラー）を加えるには、親行に Attribute 2 の列を追加し、各バリエーションに両方の属性の列を入れます。
+
+**親行**：
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**バリエーション（Small、Blue**）：
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+2サイズ × 2色なら、バリエーション行は4行必要です。
+
+---
+
+## よくあるミス
+
+### ミス1：親の Type が `variable` ではなく `simple` になっている
+
+**症状**：バリエーションは作成されるが、商品ページに表示されない。商品がシンプル商品として表示される。
+
+**対処法**：親行の Type 列は `variable`（小文字）にします。正しいタイプでなければ、WooCommerce はインポート時にシンプル商品を可変商品に変換しません。
+
+### ミス2：バリエーションが親と紐づいていない
+
+**症状**：バリエーションが親に付かず、独立したシンプル商品として作成される。
+
+**対処法**：すべてのバリエーション行の `Parent` 列に、`sku:PARENT_SKU` または `id:123` の形式で値を入れます。親への参照がない、または形式が間違っていると、親のないバリエーションができます。
+
+### ミス3：親行の属性の値が縦線で区切られていない
+
+**症状**：商品ページのドロップダウンに選択肢が1つしか出ない、または「カートに追加」ボタンが表示されない。
+
+**対処法**：親行には、属性の取りうる値をすべて ` | `（スペース、縦線、スペース）で区切って並べます：`Small | Medium | Large`。WooCommerce はこの一覧でドロップダウンを作ります。
+
+### ミス4：親とバリエーションで属性名が一致していない
+
+**症状**：インポートは成功するが、バリエーションと属性が合わない、または違う選択肢が表示される。
+
+**対処法**：`Attribute 1 name` の値は、親行とすべてのバリエーション行で完全に同じにします。`Size` と ` Size`（先頭にスペース）は別の属性として扱われます。
+
+### ミス5：バリエーション行に Regular price がない
+
+**症状**：バリエーションが価格なしで作成され、商品が購入できない状態で表示される。
+
+**対処法**：`Regular price` はすべてのバリエーション行で必須です。親から引き継ぐことはできません。
+
+### ミス6：親より先にバリエーションをインポートしている
+
+**症状**：親の ID や SKU がまだ存在しないため、バリエーションが親のない商品として作成される。
+
+**対処法**：CSV の中で、親行がそのバリエーション行より前に来るようにします。WooCommerce は行を上から順に処理します。
+
+---
+
+## 更新時の動作
+
+すでにある可変商品を再インポートする場合：
+
+- **ID で照合**：もっとも安全な更新方法です。ID が一致すれば、WooCommerce は既存の商品を更新します。
+- **SKU で照合**：WooCommerce は SKU でも照合できます。ID を空欄にして SKU を入れてください。
+- **新しいバリエーションの追加**：既存のバリエーションも新しいものと一緒にインポートファイルに入れます。管理画面にはあるがインポートファイルにないバリエーションは削除**されません**。ただし、WooCommerce のバージョンやインポートプラグインの設定によって異なる場合があります。
+
+本番環境にインポートする前に、必ずステージング環境のストアかバックアップを取った状態で更新を試してください。

@@ -1,0 +1,168 @@
+---
+title: "Productos variables de WooCommerce en CSV: filas principales y de variación"
+description: "Entiende cómo el importador de productos de WooCommerce representa los productos variables con filas principales y secundarias (variaciones): columnas de atributos, campos obligatorios por tipo de fila y los errores de importación más comunes."
+keywords: ["csv producto variable woocommerce", "importar variaciones woocommerce", "csv padre hijo woocommerce", "atributos woocommerce csv", "importar variaciones csv woocommerce", "producto variable woocommerce", "importador de productos woocommerce"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Cómo representa WooCommerce los productos variables con filas principales y filas de variación"
+  - "Qué columnas son obligatorias en las filas principales y en las de variación"
+  - "Cómo funcionan las columnas de atributos (Attribute 1 name, Attribute 1 value(s))"
+  - "Errores comunes que crean variaciones huérfanas o productos duplicados"
+  - "Cómo estructurar un CSV completo de productos variables para importarlo"
+bestFor: "Propietarios de tiendas WooCommerce, desarrolladores y responsables de catálogo que importan o actualizan productos variables (ropa, calzado, electrónica con varias opciones)"
+timeToComplete: "12 minutos"
+---
+
+## Cómo modela WooCommerce los productos variables
+
+En WooCommerce, un **producto variable** es un producto con variaciones que se pueden comprar; por ejemplo, una camiseta que se vende en talla S, M y L. En el CSV se representa con dos tipos de filas:
+
+1. **Fila principal**: representa el contenedor del producto. Su Type es `variable`.
+2. **Filas de variación**: cada una representa una combinación de opciones que se puede comprar. Su Type es `variation`.
+
+Las variaciones se vinculan a su producto principal mediante el SKU o el ID de este.
+
+Si WordPress está en español, la exportación usa nombres de columna en español (por ejemplo, «Tipo» en lugar de `Type`); el importador acepta ambos. Esta guía usa los nombres en inglés.
+
+---
+
+## La fila principal
+
+La fila principal define los campos a nivel de producto y declara qué atributos usa el producto.
+
+### Columnas clave de las filas principales
+
+| Columna | Valor | Notas |
+|---|---|---|
+| ID | (vacío o ID existente) | Déjalo vacío para productos nuevos |
+| Type | `variable` | Debe ser exactamente `variable` |
+| SKU | `SHIRT-BLUE` | SKU principal único |
+| Name | `Blue Cotton T-Shirt` | Nombre del producto |
+| Published | `1` | 1 = publicado, 0 = borrador |
+| Attribute 1 name | `Size` | El nombre de la dimensión |
+| Attribute 1 value(s) | `Small \| Medium \| Large` | Lista de todos los valores disponibles separados por barras verticales |
+| Attribute 1 visible | `1` | Mostrar en la página del producto |
+| Attribute 1 global | `1` | Usar un atributo global (compartido) |
+
+- Varios atributos usan columnas numeradas de forma consecutiva: `Attribute 1 name`, `Attribute 2 name`, etc.
+- El `Regular price` de la fila principal puede quedar vacío o contener el precio más bajo de las variantes. Los precios reales de cada variación están en las filas de variación.
+
+---
+
+## Filas de variación
+
+Cada fila de variación representa una combinación de opciones que se puede comprar y debe vincularse a su producto principal.
+
+### Columnas clave de las filas de variación
+
+| Columna | Valor | Notas |
+|---|---|---|
+| ID | (vacío o ID de variación existente) | Déjalo vacío para variaciones nuevas |
+| Type | `variation` | Debe ser exactamente `variation` |
+| SKU | `SHIRT-BLUE-SM` | Único para cada variación |
+| Name | `Blue Cotton T-Shirt` | Debe coincidir con el nombre del principal |
+| Parent | `id:123` o `sku:SHIRT-BLUE` | Vincula al principal por ID o SKU |
+| Regular price | `19.99` | Obligatorio en cada variación |
+| Attribute 1 name | `Size` | Debe coincidir con el nombre del atributo del principal |
+| Attribute 1 value(s) | `Small` | Un único valor para esta variación concreta |
+| Stock | `50` | Inventario de cada variación |
+| Weight | `0.3` | En la unidad configurada en la tienda |
+
+### Vincular variaciones con su producto principal
+
+La columna `Parent` acepta dos formatos:
+- **Por ID de base de datos:** `id:123`. Úsalo cuando conozcas el ID del producto en WooCommerce.
+- **Por SKU:** `sku:SHIRT-BLUE`. Es más portable; úsalo al importar productos nuevos que aún no tienen ID asignado.
+
+Al crear productos variables nuevos desde cero, usa el formato `sku:PARENT_SKU`. Importa primero la fila principal (o inclúyela en el mismo archivo, por encima de las variaciones).
+
+---
+
+## Ejemplo completo: camiseta variable
+
+```
+ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+```
+
+> Nota: aquí se omite la columna `Parent` para abreviar. En la práctica, las filas de variación deberían incluir `Parent: sku:SHIRT-BLUE`.
+
+---
+
+## Variaciones en dos dimensiones (talla Y color)
+
+Para añadir un segundo atributo (color), incluye las columnas de Attribute 2 en la fila principal y ambas columnas de atributo en cada variación:
+
+**Principal:**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small | Medium
+Attribute 2 name: Color
+Attribute 2 value(s): Blue | Red
+```
+
+**Variación (Small, Blue):**
+```
+Attribute 1 name: Size
+Attribute 1 value(s): Small
+Attribute 2 name: Color
+Attribute 2 value(s): Blue
+```
+
+Necesitas 4 filas de variación para 2 tallas × 2 colores.
+
+---
+
+## Errores comunes
+
+### Error 1: el Type del principal es `simple` en lugar de `variable`
+
+**Síntoma:** se crean las variaciones, pero no aparecen en la página del producto. El producto se muestra como producto simple.
+
+**Solución:** la columna Type de la fila principal debe ser `variable` (en minúsculas). WooCommerce no convierte un producto simple en variable al importar si el tipo no es el correcto.
+
+### Error 2: la variación no está vinculada al principal
+
+**Síntoma:** las variaciones se crean como productos simples independientes en lugar de asociarse al principal.
+
+**Solución:** asegúrate de que cada fila de variación tenga un valor en la columna `Parent` con el formato `sku:PARENT_SKU` o `id:123`. Las referencias al principal que faltan o están mal formadas crean variaciones huérfanas.
+
+### Error 3: los valores del atributo no están separados por barras verticales en la fila principal
+
+**Síntoma:** la página del producto muestra solo una opción en el desplegable, o falta el botón «Añadir al carrito».
+
+**Solución:** en la fila principal, enumera todos los valores posibles del atributo separados por ` | ` (espacio, barra vertical, espacio): `Small | Medium | Large`. WooCommerce usa esta lista para rellenar el desplegable.
+
+### Error 4: el nombre del atributo no coincide entre el principal y la variación
+
+**Síntoma:** la importación se completa, pero las variaciones no corresponden a sus atributos o aparecen opciones equivocadas.
+
+**Solución:** el valor de `Attribute 1 name` debe ser idéntico en la fila principal y en cada fila de variación. `Size` y ` Size` (con un espacio) se tratan como atributos distintos.
+
+### Error 5: falta el Regular price en las filas de variación
+
+**Síntoma:** las variaciones se crean sin precio, por lo que el producto aparece como no disponible para la compra.
+
+**Solución:** `Regular price` es obligatorio en cada fila de variación. No se hereda del principal.
+
+### Error 6: importar las variaciones antes que su principal
+
+**Síntoma:** las variaciones se crean como productos huérfanos porque el ID o SKU del principal todavía no existe.
+
+**Solución:** asegúrate de que la fila principal aparezca antes que sus filas de variación en el CSV. WooCommerce procesa las filas de arriba abajo.
+
+---
+
+## Comportamiento al actualizar
+
+Al volver a importar un producto variable que ya existe:
+
+- **Coincidencia por ID:** el método de actualización más seguro. WooCommerce actualiza el producto existente si el ID coincide.
+- **Coincidencia por SKU:** WooCommerce también puede buscar coincidencias por SKU. Deja el ID vacío e indica el SKU.
+- **Añadir variaciones nuevas:** incluye las variaciones existentes en el archivo de importación junto con las nuevas. Las variaciones que están en el panel pero no en el archivo **no** se eliminan, aunque esto puede variar según la versión de WooCommerce y los ajustes del plugin de importación.
+
+Prueba siempre las actualizaciones en una tienda de pruebas o con una copia de seguridad antes de importar en producción.

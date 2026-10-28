@@ -1,34 +1,18 @@
-// src/app/[locale]/profile/page.tsx
-// Locale-prefixed Profile page (e.g. /es/profile, /de/profile).
-
-import { Suspense } from "react";
+// Localized /profile, e.g. /de/profile (shared body: src/views/toolPages.tsx)
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
 
-import ProfileClient from "@/app/profile/ProfileClient";
-import { getTranslations } from "@/lib/i18n/getTranslations";
-import { isValidLocale, DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n/locales";
+import { ToolView, toolMetadata } from "@/views/toolPages";
+import { localeParams, resolveLocale, type LocaleParams } from "@/views/localeRoute";
 
-type Props = { params: Promise<{ locale: string }> };
+export const generateStaticParams = localeParams;
 
-export async function generateStaticParams() {
-  return LOCALES.filter((l) => l !== DEFAULT_LOCALE).map((locale) => ({ locale }));
+export async function generateMetadata({ params }: LocaleParams) {
+  const locale = await resolveLocale(params);
+  return locale ? toolMetadata(locale, "profile") : {};
 }
 
-export const metadata: Metadata = {
-  title: "Profile",
-  robots: { index: false, follow: false },
-};
-
-export default async function LocaleProfilePage({ params }: Props) {
-  const { locale } = await params;
-  if (!isValidLocale(locale) || locale === DEFAULT_LOCALE) notFound();
-
-  const t = await getTranslations(locale as Locale);
-
-  return (
-    <Suspense fallback={null}>
-      <ProfileClient tProfile={t.profile} navT={t.nav} />
-    </Suspense>
-  );
+export default async function LocalizedProfilePage({ params }: LocaleParams) {
+  const locale = await resolveLocale(params);
+  if (!locale) notFound();
+  return <ToolView locale={locale} tool="profile" />;
 }

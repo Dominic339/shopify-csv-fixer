@@ -1,0 +1,169 @@
+---
+title: "Immagini prodotto Shopify nel CSV: Image Src, testo alternativo e posizioni"
+description: "Scopri come strutturare gli URL delle immagini nel CSV prodotti di Shopify: le colonne Image Src, Image Position e Image Alt Text, come aggiungere più immagini per prodotto ed evitare gli errori di importazione più comuni."
+keywords: ["immagini shopify csv", "shopify image src", "testo alternativo immagini shopify", "shopify image position csv", "importare immagini prodotti shopify", "shopify csv più immagini", "url immagine shopify"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Quali colonne per le immagini esistono nel CSV prodotti di Shopify"
+  - "Come aggiungere più immagini a un singolo prodotto"
+  - "Come Image Position controlla l'ordine di visualizzazione"
+  - "Perché le importazioni di immagini falliscono e come risolvere i problemi di URL"
+  - "Come aggiungere il testo alternativo per accessibilità e SEO"
+bestFor: "Commercianti Shopify che importano o aggiornano prodotti con più immagini, devono stabilirne l'ordine o cercano immagini mancanti dopo l'importazione"
+timeToComplete: "10 minuti"
+---
+
+## Le colonne delle immagini nel CSV di Shopify
+
+Il CSV prodotti di Shopify prevede tre colonne per le immagini:
+
+| Colonna | Obbligatoria | Note |
+|---|---|---|
+| Image Src | No | URL HTTPS pubblico del file immagine |
+| Image Position | No | Numero intero (1, 2, 3...) che stabilisce l'ordine |
+| Image Alt Text | No | Testo descrittivo dell'immagine |
+
+Queste colonne stanno nella stessa riga dei dati del prodotto o della variante. Ogni riga può contenere un URL di immagine.
+
+---
+
+## Un'immagine per prodotto
+
+Il caso più semplice: un'immagine per prodotto. Inserisci l'URL nella colonna `Image Src` della **riga principale** (la prima riga di quell'Handle):
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+Le righe di variante (la seconda e le successive con lo stesso Handle) hanno la colonna Image Src vuota.
+
+---
+
+## Più immagini per prodotto
+
+Per aggiungere più di un'immagine a un prodotto, aggiungi **altre righe con lo stesso Handle** che contengono solo i dati dell'immagine. Queste righe hanno Title e campi di variante vuoti: servono solo a portare URL di immagini aggiuntive.
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+Regole principali:
+- Sono supportate fino a **250 immagini** per prodotto.
+- Ogni URL di immagine va in una riga a sé, con lo stesso Handle.
+- Le righe con sola immagine hanno Variant Price, valori delle opzioni e Title vuoti.
+- Non usare la stessa riga per una variante e per un'immagine secondaria: una riga, uno scopo.
+
+---
+
+## Image Position
+
+`Image Position` stabilisce l'ordine con cui le immagini compaiono nella galleria del prodotto. È un numero intero che parte da 1.
+
+- `1` = immagine principale o in evidenza (mostrata per prima).
+- `2`, `3`, ecc. = immagini aggiuntive in quell'ordine.
+
+Se ometti Image Position, Shopify assegna le posizioni nell'ordine in cui le immagini compaiono nel CSV. Impostandole esplicitamente, vale il tuo ordine indipendentemente dall'ordine delle righe.
+
+**Esempio:** mostrare prima una foto ambientata, poi la foto del prodotto:
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## Requisiti degli URL delle immagini
+
+Shopify scarica le immagini dall'URL indicato al momento dell'importazione. L'URL deve rispettare questi requisiti:
+
+- **Deve essere HTTPS.** Gli URL HTTP semplici vengono rifiutati o possono generare avvisi di contenuti misti.
+- **Deve essere accessibile pubblicamente.** Gli URL protetti da login, verifiche Cloudflare o restrizioni IP non funzionano.
+- **Nessuno spazio nell'URL.** Gli spazi vanno codificati come `%20` oppure l'URL va ristrutturato.
+- **Deve puntare a un file immagine.** Shopify accetta JPEG, PNG, GIF, WEBP e SVG. L'URL non deve per forza terminare con un'estensione se il server restituisce il content-type corretto, ma la maggior parte dei flussi di importazione funziona meglio con URL che ce l'hanno.
+- **Nessun parametro che scade.** Se usi URL prefirmati (da S3, Cloudinary, ecc.) che scadono, assicurati che restino validi per tutta la durata dell'importazione.
+
+---
+
+## Errori comuni nell'importazione delle immagini
+
+### L'immagine non compare dopo l'importazione
+
+**Cause probabili:**
+1. L'URL ha restituito uno stato HTTP diverso da 200 (404, 403, 500). Shopify salta senza avvisare le immagini irraggiungibili.
+2. L'URL era HTTP e non HTTPS.
+3. L'URL conteneva uno spazio che ha interrotto la richiesta.
+
+**Come capirlo:** Incolla l'URL direttamente nel browser. Se l'immagine si carica, l'URL è valido. Se vedi una pagina di login, un 403 o un 404, l'immagine non è pubblica.
+
+### L'immagine principale è quella sbagliata
+
+**Causa:** Image Position non era indicato e le immagini erano nel CSV nell'ordine sbagliato.
+
+**Soluzione:** Imposta esplicitamente `Image Position` su `1` nella riga con l'URL dell'immagine principale.
+
+### Le immagini compaiono sul prodotto sbagliato
+
+**Causa:** Errore di battitura nell'Handle: la riga dell'immagine usava un Handle leggermente diverso da quello della riga del prodotto.
+
+**Soluzione:** Assicurati che gli Handle coincidano esattamente. Anche un solo spazio in più o una maiuscola diversa crea un nuovo prodotto.
+
+### Le vecchie immagini non vengono rimosse
+
+**Comportamento:** Quando reimporti, l'importazione CSV di Shopify **aggiunge** immagini al prodotto. Non rimuove quelle esistenti. Per eliminarle devi usare il pannello di Shopify o l'API.
+
+### Troppe immagini
+
+**Comportamento:** Se indichi più di 250 URL di immagini per lo stesso Handle, Shopify importa solo le prime 250 e ignora le altre senza avvisare.
+
+---
+
+## Buone pratiche per il testo alternativo
+
+Il testo alternativo (la colonna `Image Alt Text`) ha due scopi:
+1. **Accessibilità:** gli screen reader leggono il testo alternativo alle persone con disabilità visive.
+2. **SEO:** i motori di ricerca indicizzano il testo alternativo e lo usano per capire il contenuto dell'immagine.
+
+**Un buon testo alternativo:**
+- Descrive ciò che si vede nell'immagine: `"T-shirt blu in cotone, vista frontale, su sfondo bianco"`
+- Include il nome del prodotto e le caratteristiche principali
+- È diverso per ogni immagine (non ripetuto su tutte le immagini del prodotto)
+
+**Da evitare:**
+- Il keyword stuffing: `"comprare t-shirt blu magliette economiche magliette cotone"`
+- Testi generici: `"image1"`, `"foto"`, `""` (vuoto)
+- Lo stesso testo alternativo per tutte le immagini del prodotto
+
+---
+
+## Riferimento rapido: schemi di righe con immagini
+
+**Un'immagine, senza testo alternativo:**
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**Più immagini con posizioni:**
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**Immagine della variante (immagine associata a una riga di variante specifica):**
+Metti Image Src nella stessa riga della variante. Shopify associa quell'immagine a quella variante:
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

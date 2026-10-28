@@ -1,0 +1,151 @@
+---
+title: "Shopify-CSV-importfouten: veelvoorkomende oorzaken en oplossingen"
+description: "Een complete gids voor de meest voorkomende CSV-importfouten bij Shopify: ontbrekende kolommen, ongeldige booleaanse waarden, problemen met de variantstructuur, prijsfouten en handleconflicten."
+keywords: ["shopify csv importfout", "shopify csv import mislukt", "shopify csv fouten", "shopify producten importeren csv fout", "shopify csv repareren", "shopify csv controleren", "shopify uploadfout"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "De meest voorkomende CSV-importfouten bij Shopify en wat ze veroorzaakt"
+  - "Hoe Shopify producten, varianten, handles en verplichte velden controleert"
+  - "Hoe je ontbrekende kolommen, ongeldige booleaanse waarden en prijsfouten oplost"
+  - "Hoe je problemen in de variantstructuur vindt waardoor producten opsplitsen of verdwijnen"
+  - "Hoe de officiële Shopify-sjabloon mislukte imports voorkomt"
+bestFor: "Shopify-verkopers en -ontwikkelaars die een mislukte of onvolledige product-CSV-import onderzoeken"
+timeToComplete: "12 minuten"
+---
+
+## Hoe Shopify CSV-imports controleert
+
+Als je een product-CSV importeert, haalt Shopify elke rij door meerdere controlestappen:
+
+1. **Koppencontrole**: controleert of de verplichte kolommen aanwezig zijn
+2. **Groeperen op handle**: voegt rijen met dezelfde Handle samen tot één product
+3. **Veldcontrole**: controleert gegevenstypen, verplichte waarden en toegestane waarden
+4. **Conflictdetectie**: zoekt naar handle- en SKU-conflicten met bestaande producten
+
+Een fout in een van deze stappen laat rijen mislukken. Shopify importeert vaak de geldige rijen en slaat de foute over, dus als je niet eerst alle fouten oplost, kun je met een onvolledige import eindigen.
+
+---
+
+## Fout: verplichte kolom ontbreekt
+
+**Melding:** "Your CSV file is missing the following columns: Handle, Title..."
+
+**Oorzaak:** Een of meer verplichte kolommen ontbreken in de koprij, zijn verkeerd gespeld of hebben de verkeerde hoofdletters.
+
+**Verplichte Shopify-kolommen:**
+
+| Kolom | Opmerking |
+|---|---|
+| `Handle` | URL-geschikte korte naam; groepeert varianten |
+| `Title` | Productnaam |
+| `Variant Price` | Prijs voor elke variantrij |
+
+**Oplossing:**
+- Vergelijk je koprij met de [officiële Shopify-sjabloon voor product-CSV's](https://help.shopify.com/nl/manual/products/import-export/using-csv)
+- Let op hoofdletters: `Handle`, niet `handle`; `Variant Price`, niet `Variant price`
+- Zoek naar spaties aan het begin of eind van kolomnamen (open het bestand in een teksteditor, niet in Excel)
+- Verschijnt de eerste kolom als `﻿Handle` (met een BOM ervoor), sla het bestand dan opnieuw op als UTF-8 zonder BOM
+
+---
+
+## Fout: ongeldige booleaanse waarde
+
+**Melding:** De rijen worden geïmporteerd, maar Published, Gift Card of Requires Shipping tonen de verkeerde waarde
+
+**Oorzaak:** De booleaanse kolommen van Shopify verwachten `TRUE` of `FALSE` (hoofdletters). Waarden als `Yes`, `yes`, `1`, `true` of `True` worden niet in alle velden geaccepteerd.
+
+**Betrokken kolommen:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**Oplossing:** vervang alle varianten met Zoeken en vervangen:
+
+| Vervang dit | Door dit |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+In Excel: `Ctrl+H` (Zoeken en vervangen) en vink "Volledige celinhoud vergelijken" aan, zodat je geen tekst binnen langere waarden vervangt.
+
+---
+
+## Fout: lege of ongeldige variantprijs
+
+**Melding:** "Variant Price can't be blank" of de prijs wordt als 0.00 geïmporteerd
+
+**Oorzaak:** `Variant Price` is leeg, bevat een valutasymbool (`$19.99`), gebruikt een komma als decimaalteken (`19,99`) of is tekst.
+
+**Oplossing:**
+- Vul `Variant Price` in elke rij in (zowel hoofdrijen als variantrijen)
+- Verwijder valutasymbolen: wis `$` met Zoeken en vervangen
+- Vervang komma's als decimaalteken door punten: `19,99` → `19.99`
+- Geef de kolom in Excel vóór het opslaan de opmaak Getal (zodat de symbolen niet terugkomen)
+
+---
+
+## Fout: variantstructuur / ontbrekende optiekolommen
+
+**Melding:** Producten worden zonder varianten geïmporteerd, of varianten verschijnen als losse producten
+
+**Oorzaak:** De Handle wordt goed gebruikt (dezelfde waarde voor alle rijen van een productgroep), maar de optiekolommen kloppen niet:
+
+- `Option1 Name` of `Option1 Value` ontbreekt of is in sommige rijen leeg
+- De namen van de optiekolommen zijn binnen dezelfde groep niet gelijk
+- De handle verschilt in rijen die hetzelfde product zouden moeten zijn
+
+**Regels voor variantrijen:**
+- Alle rijen van hetzelfde product moeten precies dezelfde `Handle` hebben
+- Elke rij moet `Option1 Name` en `Option1 Value` hebben
+- Bij 3 opties moeten alle rijen de kolommen `Option1`, `Option2` en `Option3` hebben
+- `Option1 Name` (bijv. `Size`) moet in alle rijen van de groep gelijk zijn; alleen `Option1 Value` verandert
+
+**Voorbeeld van een correcte variantstructuur:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## Fout: dubbele handle
+
+**Melding:** Producten overschrijven elkaar of de groepering van varianten gaat mis
+
+**Oorzaak:** Twee producten die niets met elkaar te maken hebben, delen dezelfde Handle. Shopify voegt alle rijen met dezelfde Handle samen tot één product, dus een dubbele Handle smelt verschillende producten samen.
+
+**Oplossing:** Geef elk product een unieke Handle. Handles moeten URL-geschikt zijn: alleen kleine letters, cijfers en streepjes, geen spaties of speciale tekens.
+
+Werk je een bestaand product bij en bestaat de Handle al in Shopify, dan is dat de bedoeling: de import werkt dat product bij. Maar deelt een nieuw product per ongeluk de Handle van een bestaand product, dan worden de gegevens van dat bestaande product overschreven.
+
+---
+
+## Fout: SKU-conflicten
+
+**Melding:** De producten worden geïmporteerd, maar de voorraad klopt niet of SKU's worden als dubbel gemeld
+
+**Oorzaak:** Dezelfde SKU staat in twee verschillende rijen (of bij twee verschillende producten). Shopify gebruikt SKU's voor voorraadbeheer, en dubbele SKU's zorgen ervoor dat voorraden verkeerd worden samengevoegd.
+
+**Oplossing:** Zorg dat elke variantrij een unieke SKU heeft. Je mag de SKU leeg laten als je geen voorraadbeheer op SKU gebruikt, maar hij mag niet in meerdere rijen hetzelfde zijn.
+
+---
+
+## Fout: afbeelding wordt niet geïmporteerd
+
+**Melding:** De producten worden geïmporteerd, maar de afbeeldingen ontbreken
+
+**Oorzaak:**
+- De URL in `Image Src` is geen openbaar bereikbare HTTPS-URL
+- De URL bevat spaties of speciale tekens die gecodeerd zouden moeten worden
+- Het afbeeldingsformaat wordt niet ondersteund (Shopify accepteert JPG, JPEG, PNG, GIF en WEBP)
+
+**Oplossing:** Test elke afbeeldings-URL in de browser: de afbeelding moet direct laden. Afbeeldingen in Google Drive, Dropbox of op localhost moeten vóór de import naar een openbare hostingplek worden verplaatst.
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je Shopify-CSV naar StriveFormats. De validator controleert alle verplichte kolommen, booleaanse waarden, de variantstructuur, prijsvelden en of handles uniek zijn, en lost veilige problemen met één klik op.
+
+[Shopify CSV-hersteller openen](/app?preset=shopify_products) | [Shopify-sjabloon bekijken](/presets/shopify_products)

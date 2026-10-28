@@ -4,8 +4,9 @@ import type { CsvFixResult, CsvIssue, CsvRow } from "@/lib/formats/types";
 import { normalizeRowsSafe } from "@/lib/formats/engine";
 import { isHttpUrl, parseShopifyMoney, formatShopifyMoney } from "@/lib/shopifySchema";
 
-// Amazon Inventory Loader (flat-file) canonical headers.
-// This covers the standard Amazon flat-file inventory loader used for existing ASINs.
+// Amazon Inventory Loader (offer file) columns, used to add or update offers on existing ASINs.
+// Category listing templates use other names (item_sku, external_product_id, ...); those
+// are recognised too, and a file always keeps its own column names on export.
 export const AMAZON_INVENTORY_EXPECTED_HEADERS = [
   "sku",
   "product-id",
@@ -13,67 +14,70 @@ export const AMAZON_INVENTORY_EXPECTED_HEADERS = [
   "price",
   "minimum-seller-allowed-price",
   "maximum-seller-allowed-price",
+  "item-condition",
   "quantity",
   "add-delete",
   "will-ship-internationally",
   "expedited-shipping",
-  "standard-plus",
-  "item-name",
-  "item-description",
-  "image-url",
-  "category1",
-  "brand-name",
-  "item-condition",
   "item-note",
-  "fulfillment-channel",
+  "merchant-shipping-group-name",
+  "product_tax_code",
+  "fulfillment-center-id",
+  "handling-time",
 ];
 
 export const AMAZON_INVENTORY_EXAMPLE_ROW: CsvRow = {
   sku: "AMZN-SKU-12345",
   "product-id": "B08XYZABCD",
-  "product-id-type": "ASIN",
+  "product-id-type": "1",
   price: "29.99",
   "minimum-seller-allowed-price": "",
   "maximum-seller-allowed-price": "",
+  "item-condition": "11",
   quantity: "10",
   "add-delete": "a",
   "will-ship-internationally": "",
   "expedited-shipping": "",
-  "standard-plus": "",
-  "item-name": "Example Product Title for Amazon",
-  "item-description": "Full product description for the Amazon listing.",
-  "image-url": "https://example.com/images/product.jpg",
-  category1: "Electronics",
-  "brand-name": "ExampleBrand",
-  "item-condition": "11",
   "item-note": "",
-  "fulfillment-channel": "DEFAULT",
+  "merchant-shipping-group-name": "",
+  product_tax_code: "",
+  "fulfillment-center-id": "DEFAULT",
+  "handling-time": "2",
 };
 
-// Amazon product-id-type enum values
-const VALID_PRODUCT_ID_TYPES = new Set(["asin", "upc", "ean", "isbn", "jan", "gcid"]);
+// product-id-type: Inventory Loader uses numbers (1=ASIN, 2=ISBN, 3=UPC, 4=EAN);
+// category templates use names.
+const PRODUCT_ID_TYPE_NUMBERS: Record<string, string> = { "1": "asin", "2": "isbn", "3": "upc", "4": "ean" };
+const VALID_PRODUCT_ID_TYPES = new Set(["asin", "upc", "ean", "isbn", "jan", "gcid", "gtin"]);
 
 // Amazon item-condition codes (numeric)
 // 1=Used;Like New, 2=Used;Very Good, 3=Used;Good, 4=Used;Acceptable
 // 5=Collectible;Like New, 6=Collectible;Very Good, 7=Collectible;Good, 8=Collectible;Acceptable
 // 10=Refurbished, 11=New
-const VALID_ITEM_CONDITIONS = new Set(["1", "2", "3", "4", "5", "6", "7", "8", "10", "11"]);
+// 9=Club (legacy). Category templates use names (New, UsedLikeNew, Refurbished, ...).
+const VALID_ITEM_CONDITIONS = new Set(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]);
+const VALID_CONDITION_NAMES = new Set([
+  "new", "refurbished", "usedlikenew", "usedverygood", "usedgood", "usedacceptable",
+  "collectiblelikenew", "collectibleverygood", "collectiblegood", "collectibleacceptable", "club",
+]);
+
+// Inventory Loader files need the numeric codes; category templates use the names.
+const PRODUCT_ID_TYPE_CODES: Record<string, string> = { asin: "1", isbn: "2", upc: "3", ean: "4" };
+const CONDITION_CODES: Record<string, string> = {
+  usedlikenew: "1", usedverygood: "2", usedgood: "3", usedacceptable: "4",
+  collectiblelikenew: "5", collectibleverygood: "6", collectiblegood: "7", collectibleacceptable: "8",
+  club: "9", refurbished: "10", new: "11",
+};
 
 // Amazon add-delete values
-const VALID_ADD_DELETE = new Set(["a", "d"]);
+// a = add/update, d = delete the offer, x = delete the offer and product data
+const VALID_ADD_DELETE = new Set(["a", "d", "x"]);
 
 // Amazon fulfillment channel values
-const VALID_FULFILLMENT_CHANNELS = new Set(["default", "amazon_na", "amazon_eu", "amazon_fe"]);
+const VALID_FULFILLMENT_CHANNELS = new Set(["default", "amazon_na", "amazon_eu", "amazon_fe", "amazon_in"]);
 
 function isEmpty(v: string) {
   return !String(v ?? "").trim();
-}
-
-function parseIntSafe(v: string) {
-  if (!String(v ?? "").trim()) return { ok: true, value: "" };
-  const n = Number.parseInt(String(v).trim(), 10);
-  if (!Number.isFinite(n) || n < 0) return { ok: false, value: v };
-  return { ok: true, value: String(n) };
 }
 
 function canonicalAmazonInventoryHeaders(inputHeaders: string[]): string[] {
@@ -83,13 +87,17 @@ function canonicalAmazonInventoryHeaders(inputHeaders: string[]): string[] {
     // SKU
     "seller-sku": "sku",
     seller_sku: "sku",
+    item_sku: "sku",
     "asin-id": "product-id",
     asin: "product-id",
     upc: "product-id",
+    external_product_id: "product-id",
+    external_product_id_type: "product-id-type",
     // product-id-type
     "product-id type": "product-id-type",
     productidtype: "product-id-type",
     // Pricing
+    standard_price: "price",
     "regular-price": "price",
     "listing-price": "price",
     "your-price": "price",
@@ -103,24 +111,30 @@ function canonicalAmazonInventoryHeaders(inputHeaders: string[]): string[] {
     title: "item-name",
     name: "item-name",
     "product-name": "item-name",
+    item_name: "item-name",
     // Description
     description: "item-description",
     "product-description": "item-description",
+    product_description: "item-description",
     // Image
     "image-url": "image-url",
     imageurl: "image-url",
     image: "image-url",
     "picture-url": "image-url",
+    main_image_url: "image-url",
     // Brand
     brand: "brand-name",
+    brand_name: "brand-name",
     manufacturer: "brand-name",
     // Condition
     condition: "item-condition",
     "condition-type": "item-condition",
+    condition_type: "item-condition",
+    "condition-note": "item-note",
+    condition_note: "item-note",
     // Fulfillment
-    "fulfillment-center-id": "fulfillment-channel",
-    "fulfillment-network": "fulfillment-channel",
-    fba: "fulfillment-channel",
+    fulfillment_center_id: "fulfillment-center-id",
+    "fulfillment-channel": "fulfillment-center-id",
   };
 
   return inputHeaders.map((h) => {
@@ -134,9 +148,11 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
   const issues: CsvIssue[] = [];
 
   const canonHeaders = canonicalAmazonInventoryHeaders(headers);
+  // Columns only the Inventory Loader (offer file) has; category templates name them differently.
+  const isInventoryLoader = headers.some((h) => ["add-delete", "item-condition", "product-id-type"].includes(h.trim().toLowerCase()));
 
   // Required header checks
-  for (const h of ["sku", "price", "quantity", "item-name"]) {
+  for (const h of ["sku"]) {
     if (!canonHeaders.includes(h)) {
       issues.push({
         rowIndex: -1,
@@ -193,16 +209,9 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
 
     // item-name: required, max 500 chars
     const itemName = (out["item-name"] ?? "").trim();
-    if (!itemName) {
-      issues.push({
-        rowIndex,
-        column: "item-name",
-        severity: "error",
-        code: "amazon/missing_item_name",
-        message: "Missing item-name.",
-        suggestion: "Provide a product title in the item-name column.",
-      });
-    } else if (itemName.length > 500) {
+    const addDelete = (out["add-delete"] ?? "").trim().toLowerCase();
+    const isDelete = addDelete === "d" || addDelete === "x";
+    if (itemName.length > 500) {
       issues.push({
         rowIndex,
         column: "item-name",
@@ -227,14 +236,14 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
           message: `price should be a decimal number. Found '${priceRaw}'.`,
           suggestion: "Use a plain decimal like 19.99 (no currency symbols).",
         });
-      } else {
+      } else if ("price" in out && !isDelete) {
         issues.push({
           rowIndex,
           column: "price",
-          severity: "error",
+          severity: "warning",
           code: "amazon/missing_price",
-          message: "Missing price.",
-          suggestion: "Provide a listing price.",
+          message: "price is blank. Existing offers keep their price; new offers need one.",
+          suggestion: "Provide a price if this is a new offer.",
         });
       }
     } else {
@@ -270,9 +279,37 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
       }
     }
 
+    // The price has to sit inside the seller's own min/max range, or Amazon deactivates the offer.
+    {
+      const min = parseShopifyMoney(out["minimum-seller-allowed-price"] ?? "");
+      const max = parseShopifyMoney(out["maximum-seller-allowed-price"] ?? "");
+      const price = parseShopifyMoney(out["price"] ?? "");
+      if (min != null && max != null && min > max) {
+        issues.push({
+          rowIndex,
+          column: "minimum-seller-allowed-price",
+          severity: "error",
+          code: "amazon/min_above_max_price",
+          message: `minimum-seller-allowed-price (${formatShopifyMoney(min)}) is higher than maximum-seller-allowed-price (${formatShopifyMoney(max)}).`,
+          suggestion: "Swap the two values, or clear one of them.",
+        });
+      } else if (price != null && ((min != null && price < min) || (max != null && price > max))) {
+        issues.push({
+          rowIndex,
+          column: "price",
+          severity: "warning",
+          code: "amazon/price_outside_allowed_range",
+          message: `price (${formatShopifyMoney(price)}) is outside this SKU's allowed range (${min != null ? formatShopifyMoney(min) : "no minimum"} to ${max != null ? formatShopifyMoney(max) : "no maximum"}).`,
+          suggestion: "Amazon deactivates offers priced outside the seller-allowed range. Change the price or the range.",
+        });
+      }
+    }
+
     // quantity: required, non-negative integer
     const qRaw = out["quantity"] ?? "";
-    const qi = parseIntSafe(qRaw);
+    const qn = isEmpty(qRaw) ? null : parseShopifyMoney(qRaw);
+    const qi =
+      isEmpty(qRaw) ? { ok: true, value: "" } : qn != null && Number.isInteger(qn) && qn >= 0 ? { ok: true, value: String(qn) } : { ok: false, value: qRaw };
     if (!qi.ok) {
       issues.push({
         rowIndex,
@@ -287,31 +324,79 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
       if (!isEmpty(qRaw)) fixesApplied.push(`Normalized quantity to '${qi.value}' on row ${rowIndex + 1}`);
     }
 
-    // product-id-type: must be a known type if provided
+    // product-id-type: numeric codes (Inventory Loader) or names (category templates)
+    let idType = "";
     if ("product-id-type" in out) {
-      const pidType = (out["product-id-type"] ?? "").trim();
-      if (pidType && !VALID_PRODUCT_ID_TYPES.has(pidType.toLowerCase())) {
+      let pidType = (out["product-id-type"] ?? "").trim();
+      const code = PRODUCT_ID_TYPE_CODES[pidType.toLowerCase()];
+      if (isInventoryLoader && code) {
+        out["product-id-type"] = code;
+        fixesApplied.push(`Converted product-id-type '${pidType}' to Inventory Loader code ${code} on row ${rowIndex + 1}`);
+        pidType = code;
+      }
+      idType = PRODUCT_ID_TYPE_NUMBERS[pidType] ?? pidType.toLowerCase();
+      if (pidType && !VALID_PRODUCT_ID_TYPES.has(idType)) {
         issues.push({
           rowIndex,
           column: "product-id-type",
-          severity: "warning",
+          severity: "error",
           code: "amazon/invalid_product_id_type",
           message: `product-id-type '${pidType}' is not a recognized Amazon identifier type.`,
-          suggestion: "Use ASIN, UPC, EAN, ISBN, or JAN.",
+          suggestion: "Inventory Loader: 1 (ASIN), 2 (ISBN), 3 (UPC), 4 (EAN). Category templates: ASIN, UPC, EAN, ISBN, GTIN.",
         });
-      } else if (pidType) {
-        const normalized = pidType.toUpperCase();
-        if (normalized !== pidType) {
-          out["product-id-type"] = normalized;
-          fixesApplied.push(`Normalized product-id-type to '${normalized}' on row ${rowIndex + 1}`);
+      }
+    }
+
+    // product-id: catch barcodes Excel has mangled, and check length for the type
+    if ("product-id" in out) {
+      const pid = (out["product-id"] ?? "").trim();
+      if (/^\d+(\.\d+)?e\+?\d+$/i.test(pid)) {
+        issues.push({
+          rowIndex,
+          column: "product-id",
+          severity: "error",
+          code: "amazon/product_id_scientific_notation",
+          message: `product-id '${pid}' was turned into scientific notation by a spreadsheet, so digits are lost.`,
+          suggestion: "Re-export the product IDs as text (format the column as Text before pasting) and re-enter the full number.",
+        });
+      } else if (pid && idType) {
+        const digits = /^\d+$/.test(pid);
+        const expected: Record<string, number[]> = { upc: [12], ean: [13], isbn: [10, 13], gtin: [8, 12, 13, 14], jan: [8, 13] };
+        if (idType === "asin" && !/^[A-Z0-9]{10}$/i.test(pid)) {
+          issues.push({
+            rowIndex,
+            column: "product-id",
+            severity: "error",
+            code: "amazon/invalid_product_id",
+            message: `ASIN '${pid}' should be 10 letters and digits (e.g. B08XYZABCD).`,
+            suggestion: "Check the ASIN on the product's Amazon page.",
+          });
+        } else if (expected[idType] && !(digits && expected[idType].includes(pid.length))) {
+          const short = digits && expected[idType].some((n) => pid.length === n - 1);
+          issues.push({
+            rowIndex,
+            column: "product-id",
+            severity: "error",
+            code: "amazon/invalid_product_id",
+            message: short
+              ? `${idType.toUpperCase()} '${pid}' is one digit short; a spreadsheet may have dropped a leading zero.`
+              : `${idType.toUpperCase()} '${pid}' should be ${expected[idType].join(" or ")} digits.`,
+            suggestion: short ? `Try '0${pid}', and keep the column formatted as Text.` : "Check the barcode number.",
+          });
         }
       }
     }
 
     // item-condition: Amazon numeric condition codes
     if ("item-condition" in out) {
-      const cond = (out["item-condition"] ?? "").trim();
-      if (cond && !VALID_ITEM_CONDITIONS.has(cond)) {
+      let cond = (out["item-condition"] ?? "").trim();
+      const condCode = CONDITION_CODES[cond.toLowerCase().replace(/[\s_;-]/g, "")];
+      if (isInventoryLoader && condCode) {
+        out["item-condition"] = condCode;
+        fixesApplied.push(`Converted item-condition '${cond}' to code ${condCode} on row ${rowIndex + 1}`);
+        cond = condCode;
+      }
+      if (cond && !VALID_ITEM_CONDITIONS.has(cond) && !VALID_CONDITION_NAMES.has(cond.toLowerCase().replace(/[\s_-]/g, ""))) {
         issues.push({
           rowIndex,
           column: "item-condition",
@@ -334,7 +419,7 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
           severity: "warning",
           code: "amazon/invalid_add_delete",
           message: `add-delete value '${out["add-delete"]}' is not valid.`,
-          suggestion: "Use 'a' to add/update a listing or 'd' to delete it.",
+          suggestion: "Use 'a' to add/update, 'd' to delete the offer, or 'x' to delete the offer and its product data.",
         });
       } else if (ad && ad !== out["add-delete"].trim()) {
         out["add-delete"] = ad;
@@ -343,16 +428,16 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
     }
 
     // fulfillment-channel
-    if ("fulfillment-channel" in out) {
-      const fc = (out["fulfillment-channel"] ?? "").trim();
+    if ("fulfillment-center-id" in out) {
+      const fc = (out["fulfillment-center-id"] ?? "").trim();
       if (fc && !VALID_FULFILLMENT_CHANNELS.has(fc.toLowerCase())) {
         issues.push({
           rowIndex,
-          column: "fulfillment-channel",
+          column: "fulfillment-center-id",
           severity: "warning",
           code: "amazon/invalid_fulfillment_channel",
-          message: `fulfillment-channel '${fc}' is not a recognized value.`,
-          suggestion: "Use DEFAULT (Merchant Fulfilled) or AMAZON_NA (FBA).",
+          message: `fulfillment-center-id '${fc}' is not a recognized value.`,
+          suggestion: "Use DEFAULT (merchant fulfilled), or AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN for FBA.",
         });
       }
     }
@@ -442,19 +527,16 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
     }
   }
 
-  // Final header order: canonical Amazon columns first, then extra columns.
-  const extra = canonHeaders.filter((h) => !AMAZON_INVENTORY_EXPECTED_HEADERS.includes(h));
-  const fixedHeaders = [...AMAZON_INVENTORY_EXPECTED_HEADERS, ...extra];
-
+  // Output keeps the file's own column names and order: Inventory Loader and category
+  // templates are matched by exact header, so renaming a column breaks the upload.
+  const fixedHeaders = [...headers];
   const finalRows = outRows.map((r) => {
     const out: CsvRow = {};
-    for (const h of fixedHeaders) out[h] = r?.[h] ?? "";
+    headers.forEach((h, i) => (out[h] = r?.[canonHeaders[i]] ?? ""));
     return out;
   });
-
-  if (fixedHeaders.join("||") !== canonHeaders.join("||")) {
-    fixesApplied.push("Amazon: enforced canonical header names + preferred order");
-  }
+  const originalOf = new Map(canonHeaders.map((c, i) => [c, headers[i]] as const));
+  for (const it of issues) it.column = originalOf.get(it.column) ?? it.column;
 
   return { fixedHeaders, fixedRows: finalRows, issues, fixesApplied };
 }

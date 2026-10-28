@@ -1,0 +1,201 @@
+---
+title: "Shopify 商品 CSV 模板详解"
+description: "逐列讲解 Shopify 官方商品 CSV 模板中的每个字段：每列的作用、可接受的值以及哪些是必填项。"
+keywords: ["shopify 商品 csv 模板", "shopify csv 列说明", "shopify csv 模板指南", "shopify 导入模板", "shopify csv 字段", "shopify 商品导入列", "shopify csv 参考"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Shopify 商品 CSV 模板中每一列的作用"
+  - "哪些列是必填的，哪些是可选的"
+  - "每种字段类型可接受的值和格式"
+  - "商品级列与变体级列的区别"
+  - "如何为单一商品和多变体商品正确填写模板"
+bestFor: "准备首次导入的 Shopify 商家，或为 Shopify 搭建 CSV 导出流程的开发者"
+timeToComplete: "15 分钟"
+---
+
+## 模板概览
+
+Shopify 官方商品 CSV 模板的列分为两类：**商品级**（每个商品填写一次，填在第一行即父行）和**变体级**（该商品的每一行都要填写）。有多个变体的商品会在文件中占用多行，这些行都使用同一个 Handle。
+
+请在 Shopify 后台下载最新模板：产品 → 导入 → 下载示例 CSV。
+
+---
+
+## 标识列
+
+### Handle（必填）
+
+Handle 是商品可用于网址的唯一标识符。它必须：
+- 在店铺所有商品中唯一
+- 只使用小写英文字母、数字和连字符
+- 首次导入后不要更改（更改 Handle 会生成新的商品网址）
+
+**示例**：`blue-leather-wallet`
+
+同一商品的所有行必须使用相同的 Handle。Shopify 依靠它来对变体行分组。
+
+### Title（父行必填）
+
+店铺中显示的商品名称。在商品的第一行填写，变体行留空。
+
+**示例**：`Blue Leather Wallet`
+
+### Body (HTML)
+
+商品描述，可以包含 HTML。如果描述中有逗号或尖括号，请用双引号把整个值括起来。描述中的换行也必须位于用引号括起来的值之内。
+
+### Vendor
+
+品牌或供应商名称，纯文本。
+
+### Type
+
+您自定义的商品类型（用于整理）。它不是 Shopify 的商品分类，而是用于筛选的自由文本。
+
+### Tags
+
+用逗号分隔的标签列表。如果某个标签本身含有逗号，整个 Tags 单元格的值都必须用引号括起来。
+
+**示例**：`"summer, sale, leather"`
+
+---
+
+## 发布相关的列
+
+### Published（布尔值）
+
+商品是否对顾客可见，接受 `TRUE` 或 `FALSE`（大写）。
+
+- `TRUE`：商品已启用且可见
+- `FALSE`：商品为草稿（在店铺中隐藏）
+
+### Published Scope
+
+商品发布的位置。常用值：`web`（在线商店）、`global`（所有渠道）。
+
+---
+
+## 选项列
+
+这些列用于定义变体的维度（尺码、颜色、材质等）。
+
+### Option1 Name / Option1 Value
+
+`Option1 Name` 是维度名称（例如 `Size`、`Color`），`Option1 Value` 是每一行的具体值（例如 `Small`、`Medium`、`Blue`）。
+
+规则：
+- 同一商品每一行的 `Option1 Name` 应保持一致
+- `Option1 Value` 随变体行而变化
+- 如果只有一个选项，只使用 Option1；除非有第二、第三个选项，否则不要加入 Option2 和 Option3 列
+
+### Option2 Name / Option2 Value（可选）
+
+第二个维度（例如颜色）。仅当商品有两个维度时才需要。
+
+### Option3 Name / Option3 Value（可选）
+
+第三个维度。Shopify 每个商品最多支持 3 个选项。
+
+---
+
+## 变体列
+
+这些列适用于每一行（父行和变体行）。
+
+### Variant SKU
+
+该变体的唯一标识符。可选，但如果您跟踪库存，SKU 必须唯一。不按 SKU 跟踪库存时可以留空。
+
+### Variant Price（必填）
+
+该变体的售价。纯小数，不带货币符号，也不带千位分隔符。
+
+**示例**：`19.99`
+
+### Variant Compare At Price
+
+以删除线显示的“原价”。没有促销价时留空。
+
+### Variant Inventory Qty
+
+库存数量，整数。缺货时填 `0`。如果该变体未开启库存跟踪，则留空。
+
+### Variant Inventory Policy
+
+库存降到零时的处理方式。可接受的值：`deny`（禁止购买）或 `continue`（缺货时仍允许购买）。
+
+### Variant Fulfillment Service
+
+该变体的发货方式。标准发货用 `manual`，使用第三方服务时填写其 API 名称。
+
+### Variant Requires Shipping（布尔值）
+
+需要配送的实物商品填 `TRUE`；数字商品填 `FALSE`。
+
+### Variant Taxable（布尔值）
+
+该变体需要缴税填 `TRUE`；免税填 `FALSE`。
+
+### Variant Barcode
+
+UPC、EAN 或 ISBN 条形码，纯文本。Shopify 不会验证，只会保存。
+
+### Variant Weight / Variant Weight Unit
+
+变体的重量和单位。重量为小数，单位可以是 `kg`、`g`、`lb` 或 `oz`。
+
+---
+
+## 图片列
+
+### Image Src
+
+商品图片的网址，必须是可公开访问的 HTTPS 网址。支持的格式：JPG、JPEG、PNG、GIF、WEBP。
+
+- 父行中：商品的主图
+- 变体行中：与该变体选项组合对应的图片（例如蓝色色板）
+
+### Image Position
+
+该图片的显示顺序，从 1 开始的整数。主图应为 1。
+
+### Image Alt Text
+
+图片的替代文本，用于无障碍访问和 SEO。
+
+---
+
+## SEO 列
+
+### SEO Title
+
+页面的标题标签（显示在浏览器标签页和搜索结果中）。留空时使用商品的 Title。建议少于 70 个字符。
+
+### SEO Description
+
+商品页面的元描述。建议少于 160 个字符。
+
+---
+
+## 礼品卡列
+
+### Gift Card（布尔值）
+
+仅当该商品是礼品卡时填 `TRUE`。大多数商品应填 `FALSE` 或留空。
+
+---
+
+## 单一商品与多变体商品
+
+**单一商品（一个变体**）：每个商品一行。填写所有必填列，选项列可选。
+
+**多变体商品**：每个商品多行，都使用相同的 Handle。第一行是父行（包含 Title、Image Src、Body HTML 等），之后的行是变体行（Title 为空，通过 Handle 分组继承商品级数据）。
+
+---
+
+## 用 StriveFormats 自动修复
+
+将您的 Shopify 模板上传到 StriveFormats，即可逐列验证。它会检查必填字段、布尔值格式、变体结构和图片网址，然后导出一个干净、可直接导入的文件。
+
+[打开 Shopify CSV 修复工具](/app?preset=shopify_products) | [查看 Shopify 模板](/presets/shopify_products)

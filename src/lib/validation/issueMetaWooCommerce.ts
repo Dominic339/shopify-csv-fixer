@@ -15,6 +15,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/unknown_header": {
     code: "woocommerce/unknown_header",
+    checked: false,
     title: "Unknown column",
     category: "structure",
     blocking: false,
@@ -26,6 +27,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/missing_type": {
     code: "woocommerce/missing_type",
+    checked: false,
     title: "Missing product type",
     category: "structure",
     blocking: true,
@@ -76,7 +78,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
     autoFixable: false,
     explanation: "Variation rows need attribute name/value pairs to form a valid variation combination.",
     whyPlatformCares: "Without attributes, WooCommerce cannot build a distinct variation.",
-    howToFix: "Fill Attribute name and Attribute value for variation rows.",
+    howToFix: "Fill Attribute 1 name (e.g. Size) and Attribute 1 value(s) (e.g. M) on each variation row.",
   },
 
   "woocommerce/duplicate_variation_combo": {
@@ -92,6 +94,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/missing_sku": {
     code: "woocommerce/missing_sku",
+    checked: false,
     title: "Missing SKU",
     category: "sku",
     blocking: false,
@@ -114,6 +117,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/invalid_regular_price": {
     code: "woocommerce/invalid_regular_price",
+    checked: false,
     title: "Invalid regular price",
     category: "pricing",
     blocking: true,
@@ -125,6 +129,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/invalid_sale_price": {
     code: "woocommerce/invalid_sale_price",
+    checked: false,
     title: "Invalid sale price",
     category: "pricing",
     blocking: false,
@@ -136,6 +141,7 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
 
   "woocommerce/missing_image": {
     code: "woocommerce/missing_image",
+    checked: false,
     title: "Missing image",
     category: "media",
     blocking: false,
@@ -209,5 +215,38 @@ export const WOOCOMMERCE_ISSUE_META: IssueMetaMap = {
     explanation: "The Sale price should be less than the Regular price for the discount to be meaningful.",
     whyPlatformCares: "WooCommerce may display both prices as a crossed-out/sale pair. If sale price equals or exceeds regular price, it creates confusing or incorrect pricing display.",
     howToFix: "Set Sale price to a value lower than Regular price, or clear the Sale price field.",
+  },
+
+  "woocommerce/invalid_value": {
+    code: "woocommerce/invalid_value",
+    title: "Unrecognised value",
+    category: "structure",
+    blocking: true,
+    autoFixable: true,
+    explanation: "A status-type column has a value WooCommerce does not recognise.",
+    whyPlatformCares: "WooCommerce only accepts specific values for Published, In stock?, Backorders allowed?, and Tax status; others are ignored or rejected.",
+    howToFix: "Use one of the values listed in the issue.",
+  },
+
+  "woocommerce/variation_multiple_values": {
+    code: "woocommerce/variation_multiple_values",
+    title: "Variation has several values",
+    category: "attributes",
+    blocking: true,
+    autoFixable: false,
+    explanation: "A variation row lists more than one value for an attribute.",
+    whyPlatformCares: "Each WooCommerce variation is one specific combination, so it takes a single value per attribute.",
+    howToFix: "Keep all values on the parent row and one value on each variation row.",
+  },
+
+  "woocommerce/parent_not_in_file": {
+    code: "woocommerce/parent_not_in_file",
+    title: "Parent not in file",
+    category: "variant",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A variation points to a parent product that is not in this file.",
+    whyPlatformCares: "WooCommerce attaches variations to an existing variable product; if the parent does not exist yet, the variation is skipped.",
+    howToFix: "Import the parent first, or include its row in this file.",
   },
 };

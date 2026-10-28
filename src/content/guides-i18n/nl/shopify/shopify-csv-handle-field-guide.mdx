@@ -1,0 +1,138 @@
+---
+title: "Gids voor het Handle-veld in de Shopify-CSV"
+description: "Alles wat je moet weten over het Handle-veld in de product-CSV van Shopify: wat het doet, de regels voor een geldige handle, hoe het varianten groepeert en hoe je handlefouten oplost."
+keywords: ["shopify csv handle veld", "shopify handle", "shopify handle csv", "shopify product handle", "shopify handle varianten", "shopify handle regels", "shopify csv handle fouten"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Wat het Handle-veld van Shopify doet en waarom het de belangrijkste kolom is"
+  - "De precieze regels voor een geldige Shopify-handle"
+  - "Hoe de Handle variantrijen tot één product groepeert"
+  - "Hoe je ongeldige handles en handleconflicten oplost"
+  - "Wat een gewijzigde handle doet met de URL's van bestaande producten"
+bestFor: "Shopify-verkopers met fouten in de groepering van varianten, dubbele producten of importfouten rond de handle"
+timeToComplete: "10 minuten"
+---
+
+## Wat is de Shopify-handle?
+
+De Handle is de unieke ID van een product in de product-CSV van Shopify. Hij heeft twee taken:
+
+1. **Hij groepeert variantrijen**: alle rijen van hetzelfde product moeten dezelfde Handle hebben. Shopify leest de kolom Handle om te weten welke rijen bij elkaar horen.
+2. **Hij bepaalt de product-URL**: de Handle wordt het pad in de URL: `yourstore.com/products/<handle>`
+
+De Handle is de belangrijkste kolom van de Shopify-CSV. Fouten in de Handle veroorzaken meer mislukte imports dan enig ander veld.
+
+---
+
+## Regels voor een geldige Handle
+
+Een geldige Shopify-handle moet:
+
+- **uniek** zijn binnen alle producten in je winkel (ook bestaande producten)
+- alleen **kleine letters, cijfers en streepjes** bevatten
+- **geen spaties** bevatten (gebruik streepjes)
+- **geen speciale tekens** bevatten: geen `&`, `%`, `?`, `/`, `@` en geen Unicode-tekens
+- in elke rij **ingevuld** zijn: lege handles zijn niet toegestaan
+
+| Geldig | Ongeldig | Reden |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | Hoofdletters en spaties |
+| `product-123` | `product/123` | Bevat een schuine streep |
+| `mens-running-shoes` | `men's-running-shoes` | Bevat een apostrof |
+| `widget-v2` | `widget_v2` | Bevat een liggend streepje (technisch toegestaan, maar niet aanbevolen) |
+| `shirt-sm` | `` | Leeg (niet toegestaan) |
+
+---
+
+## Hoe de Handle varianten groepeert
+
+In het CSV-formaat van Shopify beslaat een product met meerdere varianten meerdere rijen. Alle rijen van hetzelfde product moeten dezelfde Handle hebben:
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+Als Shopify dit bestand leest:
+- ziet het 3 rijen met de Handle `blue-wallet`
+- maakt het één product aan met de naam "Blue Wallet"
+- maakt het 3 varianten aan: Small ($ 29,99), Medium ($ 31,99), Large ($ 31,99)
+- neemt het Title, Body HTML, Vendor en de andere productvelden over uit de eerste rij
+
+**Eerste rij (hoofdrij):** bevat de productgegevens (Title, Body HTML, Image Src, Vendor enz.)
+**Volgende rijen (variantrijen):** hebben dezelfde Handle, een lege Title en alleen variantgegevens
+
+---
+
+## Veelvoorkomende handlefouten
+
+### Twee producten met dezelfde Handle
+
+**Symptoom:** Bij de import overschrijven de gegevens van het ene product die van een ander, of varianten van verschillende producten smelten samen tot één product.
+
+**Oorzaak:** Twee verschillende producten hebben in je CSV dezelfde Handle.
+
+**Oplossing:** Geef elk product een unieke Handle. Hebben producten vergelijkbare namen, voeg dan een onderscheidend kenmerk toe:
+
+- `blue-wallet` en `red-wallet` (in plaats van twee keer `wallet`)
+- `mens-shirt-v1` en `mens-shirt-v2`
+
+### De Handle komt niet overeen met een bestaand product (onbedoelde update)
+
+**Symptoom:** De import maakt een nieuw, dubbel product aan in plaats van een bestaand product bij te werken.
+
+**Oorzaak:** De Handle in je CSV komt niet precies overeen met de Handle van het bestaande Shopify-product (andere hoofdletters, andere spelling, een streepje meer of minder).
+
+**Oplossing:** Exporteer eerst de huidige producten uit Shopify. Het exportbestand bevat de exacte huidige Handles. Gebruik precies die Handles in je importbestand.
+
+### Spaties of hoofdletters in de Handle
+
+**Symptoom:** De import mislukt met een fout bij de handlecontrole, of Shopify zet de handle automatisch om (waardoor een onverwachte URL ontstaat).
+
+**Oplossing:** Shopify zet handles soms automatisch om naar kleine letters en vervangt spaties door streepjes, maar bij CSV-imports kun je handles beter vooraf zelf opmaken om onvoorspelbare omzettingen te voorkomen.
+
+**Python: handles normaliseren:**
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### Variantrijen met verschillende Handles
+
+**Symptoom:** Shopify importeert elke variantrij als een apart product (elk met 0 of 1 variant).
+
+**Oorzaak:** De Handle verschilt in rijen die bij hetzelfde product zouden moeten horen, vaak door een typfout of een extra spatie.
+
+**Oplossing:** Sorteer je CSV op Handle en zoek naar rijen die dezelfde Handle zouden moeten hebben maar dat niet doen. Een spatie aan het eind (`blue-wallet ` in plaats van `blue-wallet`) is de meest voorkomende boosdoener.
+
+---
+
+## Handle en SEO: waarom het wijzigen van een Handle ertoe doet
+
+De Handle wordt de product-URL: `yourstore.com/products/<handle>`. Een Handle wijzigen terwijl producten al online staan, heeft gevolgen voor SEO:
+
+- De oude URL geeft een 404-fout (tenzij je een doorverwijzing instelt)
+- Links en bladwijzers naar de oude URL werken niet meer
+- Zoekmachines die de oude URL hadden geïndexeerd, verliezen het rankingsignaal
+
+**Advies:** Stel je Handles meteen goed in. Moet je de Handle van een bestaand product wijzigen, stel dan direct na de import een URL-doorverwijzing in Shopify in (Webwinkel → Navigatie → URL-omleidingen).
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+StriveFormats controleert elke Handle in je bestand op lege waarden, ongeldige tekens en dubbele Handles binnen het bestand. Rijen waarvan de groepering op Handle niet aan de variantregels van Shopify voldoet, worden gemarkeerd.
+
+[Shopify CSV-hersteller openen](/app?preset=shopify_products) | [Shopify-sjabloon bekijken](/presets/shopify_products)

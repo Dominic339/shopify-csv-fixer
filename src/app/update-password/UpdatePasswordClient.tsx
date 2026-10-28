@@ -3,8 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
+import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
+import type { Locale } from "@/lib/i18n/locales";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
-export default function UpdatePasswordClient() {
+type Props = { authByLocale: Record<Locale, Translations["auth"]> };
+
+export default function UpdatePasswordClient({ authByLocale }: Props) {
+  const t = authByLocale[useCookieLocale()];
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -29,11 +35,11 @@ export default function UpdatePasswordClient() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (password !== confirm) {
-      setMsg({ text: "Passwords do not match.", ok: false });
+      setMsg({ text: t.passwordsMismatch, ok: false });
       return;
     }
     if (password.length < 6) {
-      setMsg({ text: "Password must be at least 6 characters.", ok: false });
+      setMsg({ text: t.passwordTooShort, ok: false });
       return;
     }
     setMsg(null);
@@ -43,10 +49,10 @@ export default function UpdatePasswordClient() {
       const supabase = createClient();
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      setMsg({ text: "Password updated successfully. Redirecting to login…", ok: true });
+      setMsg({ text: t.passwordUpdated, ok: true });
       setTimeout(() => router.push("/login"), 2000);
     } catch (err: any) {
-      setMsg({ text: err?.message ?? "Failed to update password.", ok: false });
+      setMsg({ text: err?.message || t.updateFailed, ok: false });
     } finally {
       setBusy(false);
     }
@@ -56,7 +62,7 @@ export default function UpdatePasswordClient() {
     return (
       <main className="mx-auto max-w-lg px-6 py-16">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 text-sm text-[var(--muted)]">
-          Verifying reset link…
+          {t.verifyingLink}
         </div>
       </main>
     );
@@ -66,15 +72,15 @@ export default function UpdatePasswordClient() {
     return (
       <main className="mx-auto max-w-lg px-6 py-16">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-          <h1 className="text-2xl font-semibold">Link expired or invalid</h1>
+          <h1 className="text-2xl font-semibold">{t.linkExpiredTitle}</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            This password reset link is invalid or has expired. Please request a new one.
+            {t.linkExpiredDesc}
           </p>
           <a
             href="/reset-password"
             className="rgb-btn mt-6 inline-block bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white"
           >
-            Request new link
+            {t.requestNewLink}
           </a>
         </div>
       </main>
@@ -84,9 +90,9 @@ export default function UpdatePasswordClient() {
   return (
     <main className="mx-auto max-w-lg px-6 py-16">
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8">
-        <h1 className="text-2xl font-semibold">Set new password</h1>
+        <h1 className="text-2xl font-semibold">{t.setNewTitle}</h1>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Enter and confirm your new password below.
+          {t.setNewDesc}
         </p>
 
         {msg ? (
@@ -103,7 +109,7 @@ export default function UpdatePasswordClient() {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-3">
           <div>
-            <label className="text-sm font-semibold">New password</label>
+            <label className="text-sm font-semibold">{t.newPassword}</label>
             <input
               className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm"
               value={password}
@@ -117,7 +123,7 @@ export default function UpdatePasswordClient() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold">Confirm password</label>
+            <label className="text-sm font-semibold">{t.confirmPassword}</label>
             <input
               className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm"
               value={confirm}
@@ -134,7 +140,7 @@ export default function UpdatePasswordClient() {
             disabled={busy || (msg?.ok ?? false)}
             className="rgb-btn w-full bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {busy ? "Updating…" : "Update Password"}
+            {busy ? t.updating : t.updatePassword}
           </button>
         </form>
       </div>

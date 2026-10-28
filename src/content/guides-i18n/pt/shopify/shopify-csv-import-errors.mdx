@@ -1,0 +1,151 @@
+---
+title: "Erros de importação de CSV do Shopify: causas comuns e soluções"
+description: "Um guia completo dos erros de importação de CSV mais comuns do Shopify: colunas ausentes, booleanos inválidos, problemas de estrutura de variantes, erros de preço e conflitos de handle."
+keywords: ["erro ao importar csv shopify", "erros de importação csv shopify", "shopify importar produtos csv erro", "csv shopify não importa", "corrigir csv shopify", "validar csv shopify", "erro upload csv shopify"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Os erros de importação de CSV mais comuns do Shopify e o que causa cada um"
+  - "Como o Shopify valida produtos, variantes, handles e campos obrigatórios"
+  - "Como corrigir colunas ausentes, booleanos inválidos e erros de preço"
+  - "Como diagnosticar problemas de estrutura de variantes que dividem ou somem com produtos"
+  - "Como usar o modelo oficial do Shopify para evitar falhas na importação"
+bestFor: "Lojistas e desenvolvedores Shopify investigando importações de CSV de produtos que falharam ou ficaram incompletas"
+timeToComplete: "12 minutos"
+---
+
+## Como o Shopify valida importações de CSV
+
+Quando você importa um CSV de produtos, o Shopify passa cada linha por várias etapas de validação:
+
+1. **Verificação do cabeçalho**: confere se as colunas obrigatórias estão presentes
+2. **Agrupamento por handle**: junta em um único produto as linhas com o mesmo Handle
+3. **Validação dos campos**: confere tipos de dados, valores obrigatórios e valores permitidos
+4. **Detecção de conflitos**: procura conflitos de handle e SKU com produtos existentes
+
+Um erro em qualquer etapa faz linhas falharem. O Shopify muitas vezes importa as linhas válidas e pula as que falharam, então, se você não corrigir todos os erros antes, pode acabar com uma importação parcial.
+
+---
+
+## Erro: coluna obrigatória ausente
+
+**Mensagem:** "Your CSV file is missing the following columns: Handle, Title..."
+
+**Causa:** Uma ou mais colunas obrigatórias não estão na linha de cabeçalho, estão escritas errado ou com maiúsculas e minúsculas incorretas.
+
+**Colunas obrigatórias do Shopify:**
+
+| Coluna | Observações |
+|---|---|
+| `Handle` | Identificador próprio para URL; agrupa as variantes |
+| `Title` | Nome do produto |
+| `Variant Price` | Preço de cada linha de variante |
+
+**Solução:**
+- Compare sua linha de cabeçalho com o [modelo oficial de CSV de produtos do Shopify](https://help.shopify.com/pt-BR/manual/products/import-export/using-csv)
+- Confira maiúsculas e minúsculas: `Handle`, não `handle`; `Variant Price`, não `Variant price`
+- Procure espaços no início ou no fim dos nomes de coluna (abra o arquivo em um editor de texto, não no Excel)
+- Se a primeira coluna aparecer como `﻿Handle` (com um BOM na frente), salve o arquivo de novo como UTF-8 sem BOM
+
+---
+
+## Erro: valor booleano inválido
+
+**Mensagem:** As linhas são importadas, mas Published, Gift Card ou Requires Shipping mostram o valor errado
+
+**Causa:** As colunas booleanas do Shopify esperam `TRUE` ou `FALSE` (em maiúsculas). Valores como `Yes`, `yes`, `1`, `true` ou `True` não são aceitos em todos os campos.
+
+**Colunas afetadas:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**Solução:** substitua todas as variações com Localizar e substituir:
+
+| Substitua isto | Por isto |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+No Excel, abra "Localizar e substituir" e marque "Coincidir conteúdo da célula inteira" para não substituir texto dentro de valores maiores.
+
+---
+
+## Erro: preço da variante vazio ou inválido
+
+**Mensagem:** "Variant Price can't be blank" ou o preço é importado como 0.00
+
+**Causa:** `Variant Price` está vazio, tem símbolo de moeda (`$19.99`), usa vírgula decimal (`19,99`) ou é um texto.
+
+**Solução:**
+- Preencha `Variant Price` em todas as linhas (principais e de variante)
+- Remova os símbolos de moeda: apague `$` com Localizar e substituir
+- Troque a vírgula decimal por ponto: `19,99` → `19.99`
+- Formate a coluna como Número no Excel antes de salvar (para os símbolos não voltarem)
+
+---
+
+## Erro: estrutura de variantes / colunas de opção ausentes
+
+**Mensagem:** Os produtos são importados sem variantes, ou as variantes aparecem como produtos separados
+
+**Causa:** O Handle está sendo usado corretamente (mesmo valor em todas as linhas de um produto), mas as colunas de opção estão erradas:
+
+- `Option1 Name` ou `Option1 Value` está faltando ou vazio em algumas linhas
+- Os nomes das colunas de opção não são iguais entre as linhas do mesmo grupo
+- O handle é diferente em linhas que deveriam ser o mesmo produto
+
+**Regras para linhas de variante:**
+- Todas as linhas do mesmo produto precisam ter exatamente o mesmo `Handle`
+- Toda linha precisa ter `Option1 Name` e `Option1 Value`
+- Se você tem 3 opções, todas as linhas precisam ter as colunas `Option1`, `Option2` e `Option3`
+- `Option1 Name` (ex.: `Size`) deve ser igual em todas as linhas do grupo; só `Option1 Value` muda
+
+**Exemplo de estrutura de variantes correta:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## Erro: handle duplicado
+
+**Mensagem:** Produtos sobrescrevem uns aos outros ou o agrupamento de variantes quebra
+
+**Causa:** Dois produtos sem relação compartilham o mesmo Handle. O Shopify agrupa todas as linhas com o mesmo Handle em um único produto, então um Handle duplicado junta produtos diferentes.
+
+**Solução:** Deixe o Handle de cada produto único. Handles precisam ser próprios para URL: só letras minúsculas, números e hifens, sem espaços nem caracteres especiais.
+
+Se você está atualizando um produto existente e o Handle já existe no Shopify, isso é intencional: a importação vai atualizar esse produto. Mas, se um produto novo compartilhar por engano o Handle de um existente, os dados do existente serão sobrescritos.
+
+---
+
+## Erro: conflitos de SKU
+
+**Mensagem:** Os produtos são importados, mas o estoque fica errado ou SKUs aparecem como duplicados
+
+**Causa:** O mesmo SKU aparece em duas linhas diferentes (ou em dois produtos diferentes). O Shopify usa SKUs para controlar o estoque, e SKUs duplicados fazem o estoque se misturar de forma errada.
+
+**Solução:** Garanta que cada linha de variante tenha um SKU único. Você pode deixar o SKU vazio se não controla estoque por SKU, mas ele não pode se repetir entre as linhas.
+
+---
+
+## Erro: imagem não importada
+
+**Mensagem:** Os produtos são importados, mas as imagens não aparecem
+
+**Causa:**
+- A URL de `Image Src` não é uma URL HTTPS de acesso público
+- A URL tem espaços ou caracteres especiais que precisariam ser codificados
+- O formato da imagem não é aceito (o Shopify aceita JPG, JPEG, PNG, GIF e WEBP)
+
+**Solução:** Teste cada URL de imagem no navegador: a imagem deve abrir diretamente. Imagens no Google Drive, Dropbox ou em localhost precisam ir para uma hospedagem pública antes da importação.
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu CSV do Shopify para o StriveFormats. O validador confere todas as colunas obrigatórias, os formatos booleanos, a estrutura de variantes, os campos de preço e se os handles são únicos, e corrige com um clique os problemas seguros.
+
+[Abrir o Corretor de CSV do Shopify](/app?preset=shopify_products) | [Ver o modelo do Shopify](/presets/shopify_products)

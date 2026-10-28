@@ -2,381 +2,67 @@
 // Server-side translation loader. Reads locale JSON files at build time.
 // Falls back to English for any missing locale.
 
+import type en from "@/i18n/en.json";
 import type { Locale } from "./locales";
-import { DEFAULT_LOCALE } from "./locales";
+import { DEFAULT_LOCALE, LOCALES } from "./locales";
+import { PLATFORM_LABEL, type GuidePlatform } from "@/lib/guidesConstants";
 
-export type Translations = {
-  nav: {
-    csvFixer: string;
-    templates: string;
-    guides: string;
-    customFormats: string;
-    darkMode: string;
-    lightMode: string;
-    signIn: string;
-    signOut: string;
-    pricing: string;
-    home: string;
-    profile: string;
-    upgrade: string;
-    notSignedIn: string;
-    plan: string;
-    active: string;
-    tools: string;
-    formatConverter: string;
-    csvMerger: string;
-    csvInspector: string;
-  };
-  guide: {
-    whatYouLearn: string;
-    bestFor: string;
-    timeToComplete: string;
-    lastUpdated: string;
-    openCsvFixer: string;
-    viewTemplates: string;
-    needHelp: string;
-    uploadDescription: string;
-    relatedGuides: string;
-    autoFix: string;
-    importBlocker: string;
-    importBlockerNote: string;
-    autoFixable: string;
-    updated: string;
-    // Issue guide section headings
-    whatIsThisIssue: string;
-    affectedField: string;
-    whyRejects: string;
-    platformSpecificNote: string;
-    validValues: string;
-    examples: string;
-    badValue: string;
-    goodValue: string;
-    noteCol: string;
-    fixInStrive: string;
-    wooVariablePreset: string;
-    fixerGuide: string;
-    fixInExcel: string;
-    fixInSheets: string;
-    preventNextTime: string;
-    howDetects: string;
-    technicalDetail: string;
-  };
-  guides: {
-    title: string;
-    description: string;
-    browseByPlatform: string;
-    featuredGuides: string;
-    searchResults: string;
-    noResults: string;
-    results: string;
-    result: string;
-    guideLabel: string;
-    includesFixer: string;
-    guidesCount: string;
-    guideCount: string;
-    needHelp: string;
-    needHelpDesc: string;
-    browseTemplates: string;
-    searchPlaceholder: string;
-    allGuides: string;
-    platformsLabel: string;
-    // Platform guide category page strings
-    csvImportGuides: string;
-    generalGuidesDesc: string;
-    platformGuidesDesc: string;
-    csvFixerBtn: string;
-  };
-  common: {
-    openWithPreset: string;
-    viewInformation: string;
-    downloadSample: string;
-    browseAllGuides: string;
-    popularGuides: string;
-    popularGuidesDesc: string;
-    platformFixers: string;
-    platformFixersDesc: string;
-  };
-  toc: {
-    onThisPage: string;
-  };
-  pricing: {
-    free: string;
-    basic: string;
-    advanced: string;
-    perMonth: string;
-    yourPlan: string;
-    startFree: string;
-    subscribe: string;
-    signInToSubscribe: string;
-    upgradeToAdvanced: string;
-    manageBilling: string;
-    openFixer: string;
-    yourMembership: string;
-    subscribedDesc: string;
-    stripeNote: string;
-    billingUnavailable: string;
-    starting: string;
-    freeBullet1: string;
-    freeBullet2: string;
-    freeBullet3: string;
-    freeBullet4: string;
-    basicBullet1: string;
-    basicBullet2: string;
-    basicBullet3: string;
-    basicBullet4: string;
-    advancedBullet1: string;
-    advancedBullet2: string;
-    advancedBullet3: string;
-    advancedBullet4: string;
-    viewPricing: string;
-    goToAccount: string;
-    signInToUpgrade: string;
-    close: string;
-    syncingBilling: string;
-  };
-  home: {
-    title: string;
-    description: string;
-    headline: string;
-    heroSubtitle: string;
-    openEcommerceFixer: string;
-    browseTemplates: string;
-    customFormatsAdvanced: string;
-    openCustomFormats: string;
-    filesLocally: string;
-    noSignup: string;
-    cancelAnytime: string;
-    whatItDoes: string;
-    whatItDoesBullet1: string;
-    whatItDoesBullet2: string;
-    whatItDoesBullet3: string;
-    csvFixerLabel: string;
-    fixInSeconds: string;
-    fixInSecondsDesc: string;
-    customFormatsLabel: string;
-    saveReuse: string;
-    saveReuseDesc: string;
-    upgradeToAdvanced: string;
-    advancedRequired: string;
-    faqLabel: string;
-    faqTitle: string;
-    faq1Q: string;
-    faq1A: string;
-    faq2Q: string;
-    faq2A: string;
-    faq3Q: string;
-    faq3A: string;
-    faq4Q: string;
-    faq4A: string;
-    upgradeModalTitle: string;
-    upgradeModalMessage: string;
-  };
-  presets: {
-    title: string;
-    description: string;
-    expectedColumns: string;
-    exampleRow: string;
-    noColumns: string;
-    showingColumns: string;
-    aboutFormat: string;
-    howItWorks: string;
-    examplesOfFixes: string;
-    faq: string;
-    presetFormats: string;
-    // Optional per-preset localized names and descriptions
-    name_shopify_products?: string;
-    desc_shopify_products?: string;
-    name_woocommerce_products?: string;
-    desc_woocommerce_products?: string;
-    name_woocommerce_variable_products?: string;
-    desc_woocommerce_variable_products?: string;
-    name_etsy_listings?: string;
-    desc_etsy_listings?: string;
-    name_amazon_inventory_loader?: string;
-    desc_amazon_inventory_loader?: string;
-    name_ebay_listings?: string;
-    desc_ebay_listings?: string;
-    name_ebay_variations?: string;
-    desc_ebay_variations?: string;
-  };
-  convert: {
-    title: string;
-    description: string;
-    uploadStep: string;
-    uploadDesc: string;
-    chooseFile: string;
-    noFileChosen: string;
-    selectFormats: string;
-    sourceFormat: string;
-    targetFormat: string;
-    convert: string;
-    converting: string;
-    conversionSummary: string;
-    rowsProcessed: string;
-    totalRows: string;
-    outputColumns: string;
-    warnings: string;
-    allMapped: string;
-    convertedWithWarnings: string;
-    droppedColumns: string;
-    downloadConverted: string;
-    upgradeForLarger: string;
-    yourPlan: string;
-    upTo: string;
-    rowsPerConversion: string;
-    planUnlimited: string;
-  };
-  merge: {
-    title: string;
-    description: string;
-    fileA: string;
-    fileB: string;
-    chooseFile: string;
-    noFile: string;
-    mergeOptions: string;
-    mode: string;
-    appendMode: string;
-    dedupeMode: string;
-    dedupeKey: string;
-    chooseColumn: string;
-    noSharedColumns: string;
-    whenDuplicate: string;
-    keepFirst: string;
-    keepSecond: string;
-    preferNonEmpty: string;
-    mergeFiles: string;
-    merging: string;
-    mergeSummary: string;
-    rowsFromA: string;
-    rowsFromB: string;
-    duplicatesFound: string;
-    outputRows: string;
-    downloadMerged: string;
-    upgradeForLarger: string;
-    yourPlan: string;
-    upTo: string;
-    combinedRows: string;
-    planUnlimited: string;
-  };
-  app: {
-    monthlyExports: string;
-    unlimited: string;
-    used: string;
-    left: string;
-    title: string;
-    subtitle: string;
-    uploadCsv: string;
-    chooseFile: string;
-    noFile: string;
-    selectFormat: string;
-    exportFixed: string;
-    exportAnyway: string;
-    working: string;
-    uploadFirst: string;
-    limitReached: string;
-    validationScore: string;
-    importConfidence: string;
-    simulateImport: string;
-    simulateImportOn: string;
-    strictModeOn: string;
-    strictModeOff: string;
-    addFile: string;
-    errors: string;
-    warnings: string;
-    blocking: string;
-    fixAll: string;
-    fixAllIssues: string;
-    jumpToIssues: string;
-    downloadReport: string;
-    preview: string;
-    issues: string;
-    autoFixes: string;
-    noIssues: string;
-    signInToExport: string;
-    presetFormats: string;
-    pricing: string;
-    formatConverter: string;
-    csvMerger: string;
-    csvInspector: string;
-    // Upload + edit helper text
-    autoFixHelp: string;
-    editHelp: string;
-    // Format selector notes
-    builtInFormats: string;
-    customFormatsHere: string;
-    customFormatsAdvancedOnly: string;
-    // Issue filter buttons
-    filterAll: string;
-    filterErrors: string;
-    filterWarnings: string;
-    filterInfo: string;
-    // Table & count labels
-    showingIssues: string;
-    pinCol: string;
-    rowCol: string;
-    pinRow: string;
-    unpinRow: string;
-    noAutoFixes: string;
-  };
-  profile: {
-    verifySubscription: string;
-    billingUnavailable: string;
-    subscription: string;
-    signedIn: string;
-    yes: string;
-    no: string;
-    status: string;
-    periodEnd: string;
-    opening: string;
-    manageStripe: string;
-    backToEcommerce: string;
-    upgradeToBasic: string;
-    upgradeToAdvanced: string;
-    youreSignedIn: string;
-    loading: string;
-    language: string;
-    languageDesc: string;
-    current: string;
-    billingSyncing: string;
-  };
-  inspector: {
-    title: string;
-    description: string;
-    chooseFile: string;
-    noFileChosen: string;
-    inspecting: string;
-    summary: string;
-    rows: string;
-    columns: string;
-    blankRows: string;
-    duplicateHeaders: string;
-    emptyColumns: string;
-    inconsistentColumns: string;
-    encoding: string;
-    delimiter: string;
-    issues: string;
-    noIssues: string;
-    downloadReport: string;
-  };
-};
+/** Shape of every locale file; en.json is the source of truth (other locales fall back to it). */
+export type Translations = typeof en;
+
+/** Optional per-preset localized names/descriptions: presets.name_<id> / presets.desc_<id>. */
+export function presetText(t: Translations, presetId: string, field: "name" | "desc"): string | undefined {
+  const value = (t.presets as Record<string, string>)[`${field}_${presetId}`];
+  return typeof value === "string" && value ? value : undefined;
+}
+
+/** Platform names are brands, except "general", which is translated. */
+export function platformLabel(t: Translations, platform: GuidePlatform): string;
+export function platformLabel(t: Translations, platform: GuidePlatform | undefined): string | undefined;
+export function platformLabel(t: Translations, platform: GuidePlatform | undefined): string | undefined {
+  if (!platform) return undefined;
+  return platform === "general" ? t.guides.categories.general : PLATFORM_LABEL[platform];
+}
 
 // Cache translations in memory across requests (module-level, server only)
 const cache = new Map<string, Translations>();
 
-export async function getTranslations(locale: Locale): Promise<Translations> {
-  if (cache.has(locale)) return cache.get(locale)!;
+async function load(locale: Locale): Promise<Translations | null> {
   try {
-    // Dynamic import — bundled at build time since locales are known
     const mod = await import(`@/i18n/${locale}.json`);
-    const t = mod.default as Translations;
-    cache.set(locale, t);
-    return t;
+    return mod.default as Translations;
   } catch {
-    if (locale !== DEFAULT_LOCALE) {
-      const fallback = await getTranslations(DEFAULT_LOCALE);
-      cache.set(locale, fallback);
-      return fallback;
-    }
-    throw new Error(`[i18n] Failed to load translations for default locale "${DEFAULT_LOCALE}"`);
+    return null;
   }
 }
+
+/** Fill any key missing from `partial` with the English value, at every depth. */
+function withFallback<T>(partial: unknown, english: T): T {
+  if (typeof english !== "object" || english === null) {
+    return (typeof partial === typeof english ? partial : english) as T;
+  }
+  const src = (typeof partial === "object" && partial !== null ? partial : {}) as Record<string, unknown>;
+  const out: Record<string, unknown> = { ...src };
+  for (const [k, v] of Object.entries(english as Record<string, unknown>)) out[k] = withFallback(src[k], v);
+  return out as T;
+}
+
+export async function getTranslations(locale: Locale): Promise<Translations> {
+  const hit = cache.get(locale);
+  if (hit) return hit;
+
+  const english = await load(DEFAULT_LOCALE);
+  if (!english) throw new Error(`[i18n] Failed to load translations for default locale "${DEFAULT_LOCALE}"`);
+
+  const t = locale === DEFAULT_LOCALE ? english : withFallback(await load(locale), english);
+  cache.set(locale, t);
+  return t;
+}
+
+/** One section in every language, for client components on pages that pick the language at runtime. */
+export async function sectionByLocale<K extends keyof Translations>(key: K): Promise<Record<Locale, Translations[K]>> {
+  const entries = await Promise.all(LOCALES.map(async (l) => [l, (await getTranslations(l))[key]] as const));
+  return Object.fromEntries(entries) as Record<Locale, Translations[K]>;
+}
+
+export { fmt } from "./fmt";

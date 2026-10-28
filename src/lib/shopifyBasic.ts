@@ -7,10 +7,27 @@ import {
   isValidShopifyBool,
   normalizeShopifyInventoryPolicy,
   isValidShopifyInventoryPolicy,
-  parseShopifyMoney,
+  isValidShopifyHandle,
+  parseLocaleNumber,
   formatShopifyMoney,
   isHttpUrl,
+  weightToGrams,
 } from "./shopifySchema";
+
+const INVENTORY_TRACKERS = new Set(["shopify", "shipwire", "amazon_marketplace_web"]);
+const WEIGHT_UNITS: Record<string, string> = {
+  g: "g", gram: "g", grams: "g", gr: "g",
+  kg: "kg", kgs: "kg", kilogram: "kg", kilograms: "kg",
+  lb: "lb", lbs: "lb", pound: "lb", pounds: "lb",
+  oz: "oz", ounce: "oz", ounces: "oz",
+};
+const MAX_TAGS_PER_PRODUCT = 250;
+const BOOLEAN_CODES: Record<string, string> = {
+  "Charge tax": "shopify/invalid_charge_tax",
+  "Requires shipping": "shopify/invalid_requires_shipping",
+  "Gift card": "shopify/invalid_gift_card",
+};
+const MAX_IMAGE_ALT = 512;
 
 export type IssueSeverity = "error" | "warning" | "info";
 
@@ -162,7 +179,10 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     );
   });
 
-  if (!fixedHeaders.includes(cTitle)) {
+  // Canonicalization adds every Shopify column; these say which ones the user's file really had.
+  const present = (c: string) => canon.sourceMap[c] != null;
+
+  if (!present(cTitle)) {
     issues.push({
       severity: "error",
       code: "shopify/missing_required_header",
@@ -172,18 +192,44 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     });
   }
 
-  if (!fixedHeaders.includes(cHandle)) {
+  if (!present(cHandle)) {
     issues.push({
-      severity: "error",
-      code: "shopify/missing_required_header",
-      message: `Missing required Shopify column: "URL handle".`,
+      severity: "info",
+      code: "shopify/handle_generated_column",
+      message: `No "URL handle" column found, so handles were generated from Title.`,
       column: "URL handle",
-      suggestion: `Add the "URL handle" column (even if blank). Shopify requires it when updating products and when importing variants.`,
+      suggestion: `If you are updating existing products, add their URL handles; otherwise Shopify will create new products.`,
     });
   }
 
+  // Shopify groups rows by URL handle: the first row of a handle carries product-level
+  // fields (Title, Status, option names, ...); later rows only carry variant/image values.
+  const groupKey = (r: CsvRow) => {
+    const raw = get(r, cHandle).trim();
+    const lower = raw.toLowerCase();
+    return isValidShopifyHandle(lower) ? lower : slugifyShopifyHandle(raw);
+  };
+  const productRowOf = new Map<string, number>();
+  const titledHandles = new Set<string>();
+  const optionNamesOf = new Map<string, string[]>();
+  for (let i = 0; i < fixedRows.length; i++) {
+    const k = groupKey(fixedRows[i]);
+    if (!k) continue;
+    if (!productRowOf.has(k)) productRowOf.set(k, i);
+    if (get(fixedRows[i], cTitle).trim()) titledHandles.add(k);
+    if (!optionNamesOf.has(k) && get(fixedRows[i], optNames[0]).trim()) {
+      optionNamesOf.set(k, optNames.map((c) => get(fixedRows[i], c).trim()));
+    }
+  }
+  const isProductRow = (i: number) => {
+    const k = groupKey(fixedRows[i]);
+    return !k || productRowOf.get(k) === i;
+  };
+
   // 3) Per-row validation + deterministic fixes
   const byHandle = new Map<string, number[]>();
+  const handleChangeWarned = new Set<string>();
+  const missingOption1Rows: number[] = [];
 
   // NEW: file-wide SKU duplicate tracking (variant rows only; image-only excluded)
   const bySku = new Map<string, number[]>();
@@ -203,10 +249,13 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
 
     const title = get(r, cTitle).trim();
+    const productKey = groupKey(r);
+    const productRow = isProductRow(i);
+    const inheritedNames = optionNamesOf.get(productKey) ?? ["", "", ""];
 
-    // Allow Shopify image-only rows to have blank Title
+    // Variant and image rows may leave Title blank when another row of the same handle has it.
     const imageOnly = isImageOnlyRow(r, cTitle, cHandle, cImgUrl, cSku, cPrice, cInvQty, optNames, optVals);
-    if (!title && !imageOnly) {
+    if (!title && !imageOnly && !(productKey && titledHandles.has(productKey))) {
       issues.push({
         severity: "error",
         code: "shopify/blank_title",
@@ -245,20 +294,32 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           suggestion: "Fill URL handle. Shopify requires it for variants, updates, and image rows.",
         });
       }
-    } else {
-      const slug = slugifyShopifyHandle(rawHandle);
-      if (slug && slug !== rawHandle) {
+    } else if (!isValidShopifyHandle(rawHandle)) {
+      // Only rewrite handles Shopify would reject. Valid handles (any script) are left alone:
+      // Shopify matches existing products by handle, so a changed handle creates a new product.
+      const lower = rawHandle.toLowerCase();
+      const slug = isValidShopifyHandle(lower) ? lower : slugifyShopifyHandle(rawHandle);
+      if (slug) {
         set(r, cHandle, slug);
-        fixesApplied.push(`Normalized URL handle on row ${row}`);
-      }
-      const after = get(r, cHandle).trim();
-      if (after.includes(" ")) {
+        fixesApplied.push(`Normalized URL handle "${rawHandle}" to "${slug}" on row ${row}`);
+        if (slug !== lower && !handleChangeWarned.has(rawHandle)) {
+          handleChangeWarned.add(rawHandle);
+          issues.push({
+            severity: "info",
+            code: "shopify/handle_rewritten",
+            row,
+            column: cHandle,
+            message: `Row ${row}: URL handle "${rawHandle}" was changed to "${slug}".`,
+            suggestion: "If this file updates existing products, make sure the new handle matches the product in Shopify, or it will be imported as a new product.",
+          });
+        }
+      } else {
         issues.push({
           severity: "error",
           code: "shopify/invalid_handle",
           row,
           column: cHandle,
-          message: `Row ${row}: URL handle contains spaces ("${after}").`,
+          message: `Row ${row}: URL handle "${rawHandle}" has no usable letters or numbers.`,
           suggestion: "Use only letters, numbers, and dashes (no spaces).",
         });
       }
@@ -286,7 +347,8 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
 
     // --- Status normalization/fix (NEW)
     const statusRaw = get(r, cStatus);
-    if (fixedHeaders.includes(cStatus)) {
+    // Status is product-level: only the product row needs a value.
+    if (present(cStatus) && (productRow || statusRaw.trim())) {
       const st = normalizeStatus(statusRaw);
       const pubNorm = get(r, cPublished).trim().toLowerCase();
 
@@ -345,7 +407,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     // --- Price normalization/validation (already present)
     const priceRaw = get(r, cPrice).trim();
     if (priceRaw) {
-      const n = parseShopifyMoney(priceRaw);
+      const n = parseLocaleNumber(priceRaw);
       if (n == null) {
         issues.push({
           severity: "error",
@@ -366,7 +428,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
 
     const compareRaw = get(r, cCompare).trim();
     if (compareRaw) {
-      const n = parseShopifyMoney(compareRaw);
+      const n = parseLocaleNumber(compareRaw);
       if (n == null) {
         issues.push({
           severity: "error",
@@ -385,8 +447,8 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    const p = priceRaw ? parseShopifyMoney(get(r, cPrice)) : null;
-    const c = compareRaw ? parseShopifyMoney(get(r, cCompare)) : null;
+    const p = priceRaw ? parseLocaleNumber(get(r, cPrice)) : null;
+    const c = compareRaw ? parseLocaleNumber(get(r, cCompare)) : null;
     if (p != null && c != null && c > 0 && p > 0 && c < p) {
       issues.push({
         severity: "warning",
@@ -400,7 +462,12 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
 
     const invRaw = get(r, cInvQty).trim();
     if (invRaw) {
-      const n = Number(invRaw);
+      const parsedInv = parseLocaleNumber(invRaw);
+      const n = parsedInv ?? NaN;
+      if (Number.isInteger(n) && String(n) !== invRaw) {
+        set(r, cInvQty, String(n));
+        fixesApplied.push(`Normalized Inventory quantity to "${n}" on row ${row}`);
+      }
       if (!Number.isInteger(n)) {
         issues.push({
           severity: "error",
@@ -433,6 +500,15 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
           message: `Row ${row}: Product image URL is not a valid http(s) URL ("${img}").`,
           suggestion: "Use a publicly accessible image URL starting with https://",
         });
+      } else if (img.toLowerCase().startsWith("http://")) {
+        issues.push({
+          severity: "warning",
+          code: "shopify/image_url_not_https",
+          row,
+          column: cImgUrl,
+          message: `Row ${row}: Product image URL uses http:// ("${img}").`,
+          suggestion: "Shopify fetches images from public https:// URLs. Use the https:// version if your host supports it.",
+        });
       }
     }
     const pos = get(r, cImgPos).trim();
@@ -450,9 +526,12 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    const n1 = get(r, optNames[0]).trim();
-    const n2 = get(r, optNames[1]).trim();
-    const n3 = get(r, optNames[2]).trim();
+    validateExtendedRow(r, row, present, issues, fixesApplied);
+
+    // Option names may be given only on the product row; later rows inherit them.
+    const n1 = get(r, optNames[0]).trim() || inheritedNames[0];
+    const n2 = get(r, optNames[1]).trim() || inheritedNames[1];
+    const n3 = get(r, optNames[2]).trim() || inheritedNames[2];
     const v1 = get(r, optVals[0]).trim();
     const v2 = get(r, optVals[1]).trim();
     const v3 = get(r, optVals[2]).trim();
@@ -467,27 +546,15 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
         !!get(r, cInvQty).trim() ||
         !!get(r, cContinue).trim());
 
-    // If variant columns are used, Option1 name + value must be present.
-    // Otherwise Shopify may treat the row as a product-only row and drop variants.
-    if (hasVariantFields && (!n1 || !v1)) {
-      issues.push({
-        severity: "error",
-        code: "shopify/missing_option1_for_variant_data",
-        row,
-        column: !n1 ? optNames[0] : optVals[0],
-        message:
-          !n1
-            ? "Variant data exists on a row but Option1 name is missing (risk: Shopify may drop variants)."
-            : "Variant data exists on a row but Option1 value is missing (risk: Shopify may drop variants).",
-        suggestion:
-          "If this row represents a variant, set Option1 name (e.g., Size/Color) and Option1 value (e.g., M/Blue). If this product is single-variant, clear variant-specific columns (Variant SKU/Price/Inventory/etc.) so Shopify treats it as one variant.",
-      });
-    }
+    // Variant data without Option1: decided per handle after the loop (single-variant
+    // products get "Default Title"; multi-variant products need real option values).
+    if (hasVariantFields && (!n1 || !v1)) missingOption1Rows.push(i);
 
     // --- Default Title normalization (NEW, safe)
     if (v1.toLowerCase() === "default title" && !v2 && !v3) {
       const n1Lower = n1.toLowerCase();
-      if (!n1 || n1Lower === "title" || n1Lower === "default title") {
+      // Shopify exports use "Title"; the docs use "Default Title". Both import fine, so only fill blanks.
+      if ((!n1 && productRow) || (n1Lower === "default title" && n1 !== "Default Title" && get(r, optNames[0]).trim())) {
         if (n1 !== "Default Title") {
           set(r, optNames[0], "Default Title");
           fixesApplied.push(`Normalized Option1 name to "Default Title" on row ${row}`);
@@ -571,6 +638,57 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     }
   }
 
+  // 3b) Variant data without Option1 values
+  if (missingOption1Rows.length) {
+    const variantRowsByHandle = new Map<string, number>();
+    for (const [h, idxs] of byHandle.entries()) {
+      variantRowsByHandle.set(
+        h,
+        idxs.filter((idx) => !isImageOnlyRow(fixedRows[idx], cTitle, cHandle, cImgUrl, cSku, cPrice, cInvQty, optNames, optVals)).length
+      );
+    }
+    for (const idx of missingOption1Rows) {
+      const r = fixedRows[idx];
+      const row = idx + 1;
+      const h = get(r, cHandle).trim();
+      const n1 = get(r, optNames[0]).trim() || (optionNamesOf.get(h.toLowerCase()) ?? [""])[0];
+      const v1 = get(r, optVals[0]).trim();
+      if ((variantRowsByHandle.get(h) ?? 1) <= 1) {
+        // Single-variant product: Shopify's convention is a "Default Title" option.
+        if (!n1) set(r, optNames[0], "Default Title");
+        if (!v1) set(r, optVals[0], "Default Title");
+        fixesApplied.push(`Set Option1 to "Default Title" for single-variant product on row ${row}`);
+      } else {
+        issues.push({
+          severity: "error",
+          code: "shopify/missing_option1_for_variant_data",
+          row,
+          column: !n1 ? optNames[0] : optVals[0],
+          message: `Row ${row}: Product "${h}" has several variant rows, but this one has no Option1 ${!n1 ? "name" : "value"}.`,
+          suggestion: "Give every variant an Option1 name (e.g. Size) and a distinct Option1 value (e.g. M).",
+        });
+      }
+    }
+  }
+
+  // 3c) Tags limit per product
+  for (const [h, idxs] of byHandle.entries()) {
+    const tags = new Set<string>();
+    for (const idx of idxs) {
+      for (const t of get(fixedRows[idx], cTags).split(",")) if (t.trim()) tags.add(t.trim().toLowerCase());
+    }
+    if (tags.size > MAX_TAGS_PER_PRODUCT) {
+      issues.push({
+        severity: "error",
+        code: "shopify/too_many_tags",
+        row: idxs[0] + 1,
+        column: cTags,
+        message: `Product "${h}" has ${tags.size} tags (Shopify allows ${MAX_TAGS_PER_PRODUCT}).`,
+        suggestion: "Remove tags until there are 250 or fewer per product.",
+      });
+    }
+  }
+
   // 4) Variant grouping + duplicate handle sanity (FIXED + EXTENDED)
   for (const [handle, idxs] of byHandle.entries()) {
     if (idxs.length <= 1) continue;
@@ -630,51 +748,26 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       }
     }
 
-    // 4a) Option name consistency per handle (warn)
+    // 4a) Option name consistency per handle (warn). Blank names on later rows inherit
+    // from the product row, so only explicit, differing names are flagged.
     if (variantIdxs.length >= 2) {
-      const base = fixedRows[variantIdxs[0]];
-      const baseN1 = get(base, optNames[0]).trim();
-      const baseN2 = get(base, optNames[1]).trim();
-      const baseN3 = get(base, optNames[2]).trim();
-
-      for (const idx of variantIdxs.slice(1)) {
+      const baseNames = optionNamesOf.get(handle.toLowerCase()) ?? ["", "", ""];
+      for (const idx of variantIdxs) {
         const r = fixedRows[idx];
         const row = idx + 1;
-
-        const n1 = get(r, optNames[0]).trim();
-        const n2 = get(r, optNames[1]).trim();
-        const n3 = get(r, optNames[2]).trim();
-
-        if ((baseN1 || n1) && n1 !== baseN1) {
-          issues.push({
-            severity: "warning",
-            code: "shopify/option_name_inconsistent",
-            row,
-            column: optNames[0],
-            message: `Row ${row}: Option1 name "${n1 || "(blank)"}" differs from other rows for handle "${handle}" ("${baseN1 || "(blank)"}").`,
-            suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
-          });
-        }
-        if ((baseN2 || n2) && n2 !== baseN2) {
-          issues.push({
-            severity: "warning",
-            code: "shopify/option_name_inconsistent",
-            row,
-            column: optNames[1],
-            message: `Row ${row}: Option2 name "${n2 || "(blank)"}" differs from other rows for handle "${handle}" ("${baseN2 || "(blank)"}").`,
-            suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
-          });
-        }
-        if ((baseN3 || n3) && n3 !== baseN3) {
-          issues.push({
-            severity: "warning",
-            code: "shopify/option_name_inconsistent",
-            row,
-            column: optNames[2],
-            message: `Row ${row}: Option3 name "${n3 || "(blank)"}" differs from other rows for handle "${handle}" ("${baseN3 || "(blank)"}").`,
-            suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
-          });
-        }
+        optNames.forEach((col, k) => {
+          const n = get(r, col).trim();
+          if (n && baseNames[k] && n !== baseNames[k]) {
+            issues.push({
+              severity: "warning",
+              code: "shopify/option_name_inconsistent",
+              row,
+              column: col,
+              message: `Row ${row}: Option${k + 1} name "${n}" differs from other rows for handle "${handle}" ("${baseNames[k]}").`,
+              suggestion: "Use consistent Option1/Option2/Option3 names across all variants for the same handle.",
+            });
+          }
+        });
       }
     }
 
@@ -901,10 +994,211 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
     issueDeduped.push(it);
   }
 
+  // Report only columns the file really has (plus Title/URL handle) so later checks that
+  // ask "is this column present?" see the user's file, not every canonical column.
+  const reportedHeaders = fixedHeaders.filter(
+    (h) => !(h in canon.sourceMap) || present(h) || h === cTitle || h === cHandle
+  );
+
   return {
-    fixedHeaders,
+    fixedHeaders: reportedHeaders,
     fixedRows,
     issues: issueDeduped,
     fixesApplied: dedupe(fixesApplied),
   };
+}
+
+/**
+ * Rules from Shopify's product CSV reference that the core pass above does not cover:
+ * booleans, weight, inventory tracker / fulfillment dependencies, cost, alt text, gift cards,
+ * product category format, and packed product dimensions.
+ */
+function validateExtendedRow(
+  r: CsvRow,
+  row: number,
+  present: (c: string) => boolean,
+  issues: Issue[],
+  fixesApplied: string[]
+) {
+  // Booleans
+  for (const col of ["Charge tax", "Requires shipping", "Gift card"]) {
+    const raw = get(r, col).trim();
+    if (!raw) continue;
+    const norm = normalizeShopifyBool(raw);
+    if (norm !== raw) {
+      set(r, col, norm);
+      fixesApplied.push(`Normalized ${col} to "${norm}" on row ${row}`);
+    }
+    if (!isValidShopifyBool(norm)) {
+      issues.push({
+        severity: "error",
+        code: BOOLEAN_CODES[col],
+        row,
+        column: col,
+        message: `Row ${row}: ${col} must be true or false (got "${raw}").`,
+        suggestion: `Change to "true" or "false".`,
+      });
+    }
+  }
+
+  if (get(r, "Gift card").trim() === "true") {
+    issues.push({
+      severity: "warning",
+      code: "shopify/gift_card_import",
+      row,
+      column: "Gift card",
+      message: `Row ${row}: Gift card is true, but Shopify cannot create gift cards by CSV import.`,
+      suggestion: "Create gift card products in the Shopify admin instead.",
+    });
+  }
+
+  // Cost per item: number only
+  const costRaw = get(r, "Cost per item").trim();
+  if (costRaw) {
+    const n = parseLocaleNumber(costRaw);
+    if (n == null) {
+      issues.push({
+        severity: "error",
+        code: "shopify/invalid_numeric_cost",
+        row,
+        column: "Cost per item",
+        message: `Row ${row}: Cost per item is not a valid number ("${costRaw}").`,
+        suggestion: "Use numbers like 7.50 (no currency symbols).",
+      });
+    } else if (formatShopifyMoney(n) !== costRaw) {
+      set(r, "Cost per item", formatShopifyMoney(n));
+      fixesApplied.push(`Normalized Cost per item to "${formatShopifyMoney(n)}" on row ${row}`);
+    }
+  }
+
+  // Weight unit for display: g | kg | lb | oz
+  const unitRaw = get(r, "Weight unit for display").trim();
+  if (unitRaw) {
+    const unit = WEIGHT_UNITS[unitRaw.toLowerCase()];
+    if (unit && unit !== unitRaw) {
+      set(r, "Weight unit for display", unit);
+      fixesApplied.push(`Normalized Weight unit for display to "${unit}" on row ${row}`);
+    } else if (!unit) {
+      issues.push({
+        severity: "error",
+        code: "shopify/invalid_weight_unit",
+        row,
+        column: "Weight unit for display",
+        message: `Row ${row}: Weight unit for display must be g, kg, lb, or oz (got "${unitRaw}").`,
+        suggestion: `Use "g", "kg", "lb", or "oz".`,
+      });
+    }
+  }
+
+  // Weight value (grams): whole number of grams. Accept "500 g" / "1.2 kg" / "2,5" and convert.
+  const wRaw = get(r, "Weight value (grams)").trim();
+  if (wRaw) {
+    const m = wRaw.match(/^(.*?)\s*(g|gr|grams?|kg|kgs|kilograms?|lbs?|pounds?|oz|ounces?)$/i);
+    const grams = m ? weightToGrams(m[1], WEIGHT_UNITS[m[2].toLowerCase()] ?? m[2]) : weightToGrams(wRaw, "g");
+    if (grams == null || grams < 0) {
+      issues.push({
+        severity: "error",
+        code: "shopify/invalid_weight",
+        row,
+        column: "Weight value (grams)",
+        message: `Row ${row}: Weight value (grams) must be a whole number of grams (got "${wRaw}").`,
+        suggestion: "Enter grams without units or decimals, e.g. 5.125 kg → 5125.",
+      });
+    } else if (String(grams) !== wRaw) {
+      set(r, "Weight value (grams)", String(grams));
+      fixesApplied.push(`Converted Weight value (grams) "${wRaw}" to "${grams}" on row ${row}`);
+    }
+  }
+
+  // Inventory tracker: shopify | shipwire | amazon_marketplace_web | blank
+  const trackerRaw = get(r, "Inventory tracker").trim();
+  if (trackerRaw) {
+    const tracker = trackerRaw.toLowerCase();
+    if (tracker !== trackerRaw && INVENTORY_TRACKERS.has(tracker)) {
+      set(r, "Inventory tracker", tracker);
+      fixesApplied.push(`Normalized Inventory tracker to "${tracker}" on row ${row}`);
+    }
+    if (!INVENTORY_TRACKERS.has(tracker)) {
+      issues.push({
+        severity: "error",
+        code: "shopify/invalid_inventory_tracker",
+        row,
+        column: "Inventory tracker",
+        message: `Row ${row}: Inventory tracker must be shopify, shipwire, amazon_marketplace_web, or blank (got "${trackerRaw}").`,
+        suggestion: `Use "shopify" to track inventory in Shopify, or leave blank for untracked.`,
+      });
+    } else if (tracker === "shopify") {
+      // Shopify: with tracker = shopify, these two can't be blank. Fill Shopify's defaults.
+      if (present("Continue selling when out of stock") && !get(r, "Continue selling when out of stock").trim()) {
+        set(r, "Continue selling when out of stock", "deny");
+        fixesApplied.push(`Filled blank Continue selling when out of stock with "deny" on row ${row}`);
+      }
+      if (present("Fulfillment service") && !get(r, "Fulfillment service").trim()) {
+        set(r, "Fulfillment service", "manual");
+        fixesApplied.push(`Filled blank Fulfillment service with "manual" on row ${row}`);
+      }
+    }
+  }
+
+  // Fulfillment service: lowercase handle-style names (manual, or a custom service handle)
+  const fsRaw = get(r, "Fulfillment service").trim();
+  if (fsRaw) {
+    const fs = fsRaw.toLowerCase().replace(/\s+/g, "-");
+    if (fs !== fsRaw && /^[a-z0-9_-]+$/.test(fs)) {
+      set(r, "Fulfillment service", fs);
+      fixesApplied.push(`Normalized Fulfillment service to "${fs}" on row ${row}`);
+    }
+    if (!/^[a-z0-9_-]+$/.test(get(r, "Fulfillment service"))) {
+      issues.push({
+        severity: "error",
+        code: "shopify/invalid_fulfillment_service",
+        row,
+        column: "Fulfillment service",
+        message: `Row ${row}: Fulfillment service "${fsRaw}" must use lowercase letters, numbers, and dashes.`,
+        suggestion: `Use "manual", or the handle of a fulfillment service set up in your Shopify admin.`,
+      });
+    }
+  }
+
+  // Image alt text limit
+  const alt = get(r, "Image alt text");
+  if (alt.length > MAX_IMAGE_ALT) {
+    issues.push({
+      severity: "error",
+      code: "shopify/image_alt_text_too_long",
+      row,
+      column: "Image alt text",
+      message: `Row ${row}: Image alt text is ${alt.length} characters (max ${MAX_IMAGE_ALT}).`,
+      suggestion: "Shorten alt text; under 125 characters works best.",
+    });
+  }
+
+  // Product category is Shopify's taxonomy (breadcrumb or id like "hg-15-1-2"), not Google's numeric id.
+  const cat = get(r, "Product category").trim();
+  if (/^\d+$/.test(cat)) {
+    issues.push({
+      severity: "warning",
+      code: "shopify/product_category_looks_like_google",
+      row,
+      column: "Product category",
+      message: `Row ${row}: Product category "${cat}" looks like a Google product category id.`,
+      suggestion: `Use a Shopify taxonomy path (e.g. "Apparel & Accessories > Clothing > Shirts & Tops") or id; put Google ids in "Google Shopping / Google product category".`,
+    });
+  }
+
+  // Packed product dimensions: all four or none (ignored when Requires shipping is false).
+  const packed = Object.keys(r).filter((k) => /^packed product (length|width|height|dimension unit)/i.test(k));
+  if (packed.length && get(r, "Requires shipping").trim() !== "false") {
+    const filled = packed.filter((k) => get(r, k).trim());
+    if (filled.length && filled.length < 4) {
+      issues.push({
+        severity: "error",
+        code: "shopify/packed_dimensions_incomplete",
+        row,
+        column: packed.find((k) => !get(r, k).trim()) ?? packed[0],
+        message: `Row ${row}: Packed product length, width, height, and dimension unit must all be filled or all be blank.`,
+        suggestion: "Fill the missing packed product fields, or clear all four.",
+      });
+    }
+  }
 }

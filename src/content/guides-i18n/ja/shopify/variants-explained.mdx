@@ -1,0 +1,145 @@
+---
+title: "Shopify の商品バリエーション解説：CSV の構造とよくあるミス"
+description: "Shopify の CSV 形式が Handle によるまとまり、Option 列、親子の行でバリエーションをどう表すかを学びましょう。商品が分かれる、バリエーションが消える、インポートが失敗するといったよくあるミスを防げます。"
+keywords: ["shopify バリエーション csv", "shopify 商品 バリエーション インポート", "shopify handle バリエーション", "shopify option1 option2", "shopify csv 親 子", "shopify バリエーション 価格 csv", "shopify csv 構造"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify が Handle で親商品とバリエーションをまとめる仕組み"
+  - "親行とバリエーション行それぞれに必要な列"
+  - "Option1 Name、Option1 Value、Variant 列の連携の仕方"
+  - "バリエーション構造でよくあるミスとその直し方"
+  - "既存の商品を上書きせずに新しいバリエーションを追加する方法"
+bestFor: "サイズ、色、素材などのバリエーションがある商品をインポート・更新する Shopify の販売者・開発者"
+timeToComplete: "12分"
+---
+
+## Shopify は CSV でバリエーションをどう表すか
+
+Shopify の商品 CSV では、複数のバリエーションを持つ商品は**同じ Handle を共有する複数の行**で表します。最初の行が「親」行で、商品レベルのデータを持ちます。同じ Handle を持つ2行目以降はバリエーション行です。
+
+### 最小の例：2サイズの T シャツ
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+ポイント：
+- 2行とも Handle は `blue-shirt` です。
+- 2行目は Title と Image Src が空で、Option1 Value だけが新しい値です。
+- 各行は購入できる1つのバリエーション（オプション値の1つの組み合わせ）を表します。
+
+---
+
+## 親行
+
+ある Handle の最初の行が親行です。商品レベルのフィールドを設定します。
+
+| 列 | 親行で必須か | 補足 |
+|---|---|---|
+| Handle | 必須 | この商品の一意な短い名前。英小文字とハイフンのみ |
+| Title | 必須 | 商品名 |
+| Body HTML | 任意 | 商品説明。親行にだけ必要 |
+| Vendor | 任意 | ブランド名 |
+| Type | 任意 | 商品タイプ（コレクション用） |
+| Tags | 任意 | カンマ区切りのタグ |
+| Published | 任意 | TRUE または FALSE |
+| Option1 Name | 必須（オプションがある場合） | 1つ目のオプションの名前（例：「Size」） |
+| Option1 Value | 必須（オプションがある場合） | 最初のバリエーションの値（例：「Small」） |
+| Image Src | 任意 | メイン画像の URL |
+
+**親行には Title が必要です**。Title が空だと Shopify は親行として認識せず、インポート結果がおかしくなることがあります。
+
+---
+
+## バリエーション行
+
+同じ Handle の2行目以降はバリエーション行です。バリエーション行は次のようになります。
+- 親行と同じ Handle を使う。
+- Title は空にする（同じ Title でも構いません。親行以外では Shopify は無視します）。
+- それぞれ独自の Option1 Value（あれば Option2 Value、Option3 Value も）を持つ。
+- それぞれ独自の Variant Price、Variant SKU、Variant Inventory Qty などを持つ。
+
+### バリエーションごとの列
+
+| 列 | 補足 |
+|---|---|
+| Variant Price | バリエーションごとに必須。小数（通貨記号なし） |
+| Variant SKU | 任意だが強く推奨。ストア全体で一意にする |
+| Variant Grams | グラム単位の重さ |
+| Variant Inventory Qty | 初期の在庫数 |
+| Variant Inventory Policy | `deny` または `continue`（continue＝在庫切れでも販売を許可） |
+| Variant Fulfillment Service | 通常は `manual` |
+| Variant Requires Shipping | TRUE または FALSE |
+| Variant Taxable | TRUE または FALSE |
+| Variant Barcode | EAN、UPC などのバーコード |
+
+---
+
+## 複数のオプション（サイズと色）
+
+Shopify は Option1、Option2、Option3 の列で最大3つのオプションに対応しています。
+
+例：サイズと色のオプションがある T シャツ
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name と Option2 Name は親行（各 Handle の最初の行）にあれば十分です。バリエーション行で繰り返しても問題ありません。
+- オプションの組み合わせごとに1行が必要です。
+- 3サイズ・4色の商品なら、バリエーション行は12行必要です。
+
+---
+
+## よくあるミス
+
+### ミス1：同じ商品で Handle が違う
+
+**症状**：バリエーションのある1つの商品になるはずが、インポート後に別々の商品として表示される。
+
+**対処法**：1つの商品に属する行はすべて、まったく同じ Handle にします。`blue-shirt` と `blue-shirt-` のようなわずかな違いでも、Shopify は新しい商品を作成します。
+
+### ミス2：すべての行に Title がある
+
+**症状**：インポートは成功するが、Shopify が重複した商品を作ったり、バリエーション行を独立した商品として扱ったりする。
+
+**対処法**：Title を入れるのは各 Handle の最初の行だけにします。バリエーション行の Title はすべて空にしてください。
+
+### ミス3：Option1 Name 列がない
+
+**症状**：「Option1 Name is required」というインポートエラーが出る、またはすべてのバリエーションが「Default Title」という1つのオプションとして表示される。
+
+**対処法**：見出し行には必ず `Option1 Name` を入れ、少なくとも親行には値を入れます。商品に実際のオプションがない場合は、Option1 Name を `Title`、Option1 Value を `Default Title` にします。
+
+### ミス4：行によってオプションの値がそろっていない
+
+**症状**：想定より多くのバリエーションが作られる、またはオプション名が重複して表示される。
+
+**対処法**：Option1 Name は、同じ Handle のすべての行でまったく同じ文字列にします。親行が `Size` なら、バリエーション行もすべて `Size`（または空）にしてください。`Size`、`size`、`Sizes` が混在すると、オプションのデータが不整合になります。
+
+### ミス5：Variant Price が空
+
+**症状**：「Variant Price is required」でインポートが失敗する、または価格 0.00 のバリエーションが作られる。
+
+**対処法**：Variant Price はすべての行で必須です。親行の値は引き継がれないため、すべてのバリエーションが同じ価格でも、各行に入力する必要があります。
+
+### ミス6：バリエーションを追加すると既存のものが上書きされる
+
+**症状**：新しいバリエーションを1つだけ追加する部分的なインポートをしたら、ほかのバリエーションがすべて消えた。
+
+**対処法**：CSV のインポートで商品を更新するときは、新しいものだけでなく既存の**すべての**バリエーションをファイルに含める必要があります。Shopify のインポートは、Handle のバリエーション一式をまるごと置き換えます。含めなかった既存のバリエーションは削除されます。
+
+---
+
+## 大きなカタログのためのヒント
+
+- **バリエーション行は自動で作る**。組み合わせが多い商品（3サイズ×4色×2素材＝24行）では、手入力ではなく表計算の数式やスクリプトで組み合わせを展開しましょう。
+- **SKU のパターンをそろえる**。`ベース-サイズ-色` のような SKU（例：`SHIRT-SM-BLU`）にすると、バリエーションを見分けたり並べ替えたりしやすくなります。
+- **まず1商品で試す**。カタログ全体をアップロードする前に、1つの商品（親行とすべてのバリエーション）をインポートし、Shopify の管理画面でバリエーション構造を確認してから進めましょう。

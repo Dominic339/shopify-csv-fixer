@@ -1,0 +1,169 @@
+---
+title: "Shopify 商品 CSV の画像：Image Src、代替テキスト、表示順"
+description: "Shopify の商品 CSV で画像 URL を構成する方法を解説します。Image Src、Image Position、Image Alt Text の列、1 商品に複数の画像を追加する方法、よくある画像インポートの失敗の防ぎ方を紹介します。"
+keywords: ["shopify 画像 csv", "shopify image src", "shopify 画像 代替テキスト", "shopify image position csv", "shopify 商品画像 インポート", "shopify csv 複数画像", "shopify 画像 url"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify の商品 CSV にある画像関連の列"
+  - "1つの商品に複数の画像を追加する方法"
+  - "Image Position で表示順を決める方法"
+  - "画像のインポートが失敗する理由と URL の問題の直し方"
+  - "アクセシビリティと SEO のための代替テキストの付け方"
+bestFor: "複数の画像がある商品をインポート・更新する、画像の表示順を決めたい、インポート後に画像が見つからない Shopify の販売者"
+timeToComplete: "10分"
+---
+
+## Shopify CSV の画像列
+
+Shopify の商品 CSV には、画像に関する列が3つあります。
+
+| 列 | 必須か | 補足 |
+|---|---|---|
+| Image Src | 任意 | 画像ファイルの一般公開された HTTPS URL |
+| Image Position | 任意 | 表示順を決める整数（1、2、3…） |
+| Image Alt Text | 任意 | 画像を説明するテキスト |
+
+これらの列は、商品やバリエーションのデータと同じ行に入れます。1行に入れられる画像 URL は1つです。
+
+---
+
+## 1商品に1枚の画像
+
+いちばん簡単なのは、1つの商品に画像1枚のケースです。**親行**（その Handle の最初の行）の `Image Src` 列に URL を入れます。
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+バリエーション行（同じ Handle の2行目以降）の Image Src 列は空にします。
+
+---
+
+## 1商品に複数の画像
+
+1つの商品に2枚以上の画像を付けるには、画像のデータだけを入れた**同じ Handle の行を追加**します。これらの行は Title もバリエーションのフィールドも空で、追加の画像 URL を渡すためだけに使います。
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+主なルール：
+- 1つの商品につき最大**250枚**の画像に対応しています。
+- 画像 URL は、同じ Handle の行に1つずつ入れます。
+- 画像だけの行は、Variant Price、オプション値、Title をすべて空にします。
+- 1つの行をバリエーションと追加画像の両方に使わないでください。1行につき1つの役割です。
+
+---
+
+## Image Position
+
+`Image Position` は、商品ギャラリーで画像を表示する順番を決めます。1から始まる整数です。
+
+- `1`＝メイン画像（最初に表示される）
+- `2`、`3` など＝その順番で表示される追加画像
+
+Image Position を省略すると、Shopify は CSV に画像が出てくる順に表示順を割り当てます。明示的に指定すれば、行の順番に関係なく指定した順番で表示されます。
+
+**例**：イメージ写真を先に、商品写真を後に表示する場合
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## 画像 URL の要件
+
+Shopify はインポート時に、指定された URL から画像をダウンロードします。URL は次の要件を満たす必要があります。
+
+- **HTTPS であること**。HTTP の URL は拒否されるか、混在コンテンツの警告が出ることがあります。
+- **一般公開されていること**。ログインが必要な URL、Cloudflare のチェックがかかる URL、IP 制限のある URL は使えません。
+- **URL にスペースを含まないこと**。スペースは `%20` にエンコードするか、URL 自体を変更してください。
+- **画像ファイルを指していること**。Shopify は JPEG、PNG、GIF、WEBP、SVG に対応しています。サーバーが正しい Content-Type を返すなら URL の末尾に拡張子がなくても構いませんが、拡張子付きの URL のほうがほとんどのインポート処理で安定して動きます。
+- **期限切れになるパラメータを含まないこと**。S3 や Cloudinary などの期限付き署名 URL を使う場合は、インポートが終わるまで有効であることを確認してください。
+
+---
+
+## 画像インポートのよくある失敗
+
+### インポート後に画像が表示されない
+
+**考えられる原因**：
+1. URL が 200 以外の HTTP ステータス（404、403、500）を返した。Shopify は取得できない画像を通知なしでスキップします。
+2. URL が HTTPS ではなく HTTP だった。
+3. URL にスペースが含まれていて、リクエストが失敗した。
+
+**確認方法**：URL をそのままブラウザに貼り付けます。画像が表示されれば URL は有効です。ログインページ、403、404 が表示される場合、その画像は一般公開されていません。
+
+### 違う画像がメイン画像になっている
+
+**原因**：Image Position が指定されておらず、CSV 内の画像の順番が違っていた。
+
+**対処法**：メイン画像の URL がある行の `Image Position` を明示的に `1` にします。
+
+### 画像が別の商品に付いてしまう
+
+**原因**：Handle の入力ミスです。画像の行の Handle が、商品の行とわずかに違っていました。
+
+**対処法**：Handle を完全に一致させてください。余分なスペースが1つあるだけでも、大文字・小文字が違うだけでも、新しい商品が作られます。
+
+### 古い画像が削除されない
+
+**動作**：Shopify の CSV インポートは、再インポート時に画像を**追加**します。既存の画像は削除しません。画像を削除したい場合は、Shopify の管理画面か API から行う必要があります。
+
+### 画像が多すぎる
+
+**動作**：1つの Handle に250を超える画像 URL を指定すると、Shopify は最初の250枚だけを取り込み、残りは通知なしで無視します。
+
+---
+
+## 代替テキストのベストプラクティス
+
+代替テキスト（`Image Alt Text` 列）には2つの役割があります。
+1. **アクセシビリティ**：スクリーンリーダーが、視覚に障がいのある方に代替テキストを読み上げます。
+2. **SEO**：検索エンジンは代替テキストをインデックスし、画像の内容を理解するのに使います。
+
+**良い代替テキスト**：
+- 画像に写っているものを説明する：`"青いコットンの T シャツ、正面、白背景"`
+- 商品名と主な特徴を含める
+- 画像ごとに異なる内容にする（商品のすべての画像で同じにしない）
+
+**避けるべきもの**：
+- キーワードの詰め込み：`"青いシャツ 購入 安いシャツ コットンシャツ"`
+- 中身のないテキスト：`"image1"`、`"写真"`、`""`（空）
+- 商品のすべての画像に同じ代替テキストを使うこと
+
+---
+
+## 早見表：画像行のパターン
+
+**画像1枚、代替テキストなし**：
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**表示順付きの複数画像**：
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**バリエーション画像（特定のバリエーション行に紐づく画像**）：
+バリエーションと同じ行に Image Src を入れます。Shopify はその画像をそのバリエーションに紐づけます。
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

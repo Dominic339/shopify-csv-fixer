@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "Boş hücreler gerçek verilerin üzerine yazar",
+    "body": "\"Eşleşen handle'lara sahip ürünlerin üzerine yaz\" seçeneğiyle içe aktarırsanız, boş bir hücre mağazanızdaki mevcut değerin yerini alır. Düzeltici yalnızca dosyanızın gerçekten kullandığı sütunları dışa aktarır; böylece eksik bir sütun hiçbir şeyi silemez."
+   },
+   {
+    "title": "Varyantlar aynı handle'ı paylaşan satırlardır",
+    "body": "Bir ürünün yalnızca ilk satırı başlığını ve açıklamasını taşır. Sonraki her satır bir varyanttır ve kendi seçenek değerlerine ihtiyaç duyar. Aynı seçeneklere sahip iki satır reddedilir ve düzeltici ikisini de gösterir."
+   },
+   {
+    "title": "Shopify biçiminde fiyatlar ve mantıksal değerler",
+    "body": "\"$ 45\", \"45,00\" ve \"yes\" bir elektronik tabloda düzgün görünür ama içe aktarmada başarısız olur. Bunlar 45.00 ve true olarak yeniden yazılır ve her değişiklik düzeltme günlüğünde listelenir."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Eski Shopify dışa aktarımlarıyla çalışır mı?",
+    "a": "Evet. \"Variant Price\" ve \"Body (HTML)\" gibi eski sütun adları tanınır ve düzeltilmiş dosya, Shopify'ın kabul ettiği güncel şablon adlarını kullanır."
+   },
+   {
+    "q": "Satır siler mi?",
+    "a": "Hayır. Veri içeren her satır korunur (yalnızca tamamen boş satırlar atlanır) ve her otomatik değişiklik düzeltme günlüğünde listelenir."
+   },
+   {
+    "q": "Büyük bir dosyada neden bu kadar çok sorun görüyorum?",
+    "a": "Eksik bir seçenek sütunu gibi tek bir yapısal sorun her varyant satırında tekrarlanır. Tabloda bir kez düzeltin, sayı hızla düşer."
+   }
+  ],
+  "metaTitle": "Shopify CSV içe aktarma hatası çözümü – ürün CSV'nizi ücretsiz kontrol edin | StriveFormats",
+  "metaDescription": "Bir Shopify ürün CSV'sini içe aktarmadan önce resmi şablona göre kontrol edin. Fiyatlar, handle'lar ve true/false değerleri otomatik düzeltilir; varyant ve üzerine yazma sorunları tam satırıyla gösterilir.",
+  "kicker": "Shopify ürünleri",
+  "title": "Shopify için CSV Düzeltici",
+  "intro": "Shopify'ın içe aktarıcısı katıdır: hatalı handle'a sahip tek bir ürün veya iki aynı varyant tüm dosyayı durdurabilir. CSV'nizi önce burada kontrol edin, güvenli düzeltmeleri ücretsiz alın ve hangi satırların hâlâ size ihtiyaç duyduğunu tam olarak görün.",
+  "exportTip": "Shopify yönetim panelinde: Ürünler → Dışa aktar → \"Düz CSV dosyası\". Ya da resmi şablonla başlayın."
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "Evet/hayır sütunları 1 ve 0'dır",
+    "body": "Published, \"In stock?\" ve benzeri sütunlar 1 veya 0 bekler (Published taslaklar için -1'e de izin verir). \"yes\" veya \"TRUE\" gibi değerler sizin için dönüştürülür."
+   },
+   {
+    "title": "SKU'lar benzersiz olmalıdır",
+    "body": "İçe aktarıcı mevcut ürünleri ID veya SKU ile eşleştirir. Aynı SKU'ya sahip iki satır, birinin başarısız olması veya diğerinin üzerine yazması demektir; bu yüzden düzeltici ikisini de işaretler."
+   },
+   {
+    "title": "İndirimli fiyat daha düşük olmalıdır",
+    "body": "Normal fiyata eşit veya ondan yüksek bir indirimli fiyat kabul edilir ama anlamsız bir \"indirim\" gösterir. Yazım hatalarını müşterilerinizden önce yakalayabilmeniz için uyarı olarak işaretlenir."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Sütun adlarımı değiştirir mi?",
+    "a": "Hayır. Düzeltilmiş dosya, yüklediğiniz sütunları aynı sırayla aynen korur; böylece aynı sütun eşlemesiyle yeniden içe aktarılır."
+   },
+   {
+    "q": "Peki değişken ürünler?",
+    "a": "WooCommerce değişken ürün düzelticisini kullanın. O da her varyasyonun bir ana ürüne işaret ettiğini ve benzersiz bir nitelik kombinasyonu olduğunu kontrol eder."
+   }
+  ],
+  "metaTitle": "WooCommerce CSV içe aktarma hatası çözümü – ücretsiz kontrol | StriveFormats",
+  "metaDescription": "İçe aktarıcıyı çalıştırmadan önce bir WooCommerce ürün CSV'sini kontrol edin. Fiyatlar, mantıksal değerler ve stok değerleri normalleştirilir; yinelenen SKU'lar ve indirimli fiyat hataları satır satır işaretlenir.",
+  "kicker": "WooCommerce ürünleri",
+  "title": "WooCommerce için CSV Düzeltici",
+  "intro": "WooCommerce'in yerleşik içe aktarıcısı anlamadığı satırları atlar ve nedenini her zaman söylemez. Dosyayı önce burada kontrol edin: düzeltici, WooCommerce'in dışa aktardığı sütunların aynısını okur ve atlanacak satırları gösterir.",
+  "exportTip": "WordPress'te: Ürünler → Dışa aktar. \"Tüm sütunları dışa aktar\" seçili kalsın."
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "Her varyasyonun bir ana ürünü olmalıdır",
+    "body": "Parent sütunu ana ürünün SKU'sunu (veya id:123) içerir. Ana ürün dosyada yoksa mağazanızda zaten bulunmalıdır; düzeltici hangilerini bulamadığını söyler."
+   },
+   {
+    "title": "Varyasyon başına bir kombinasyon",
+    "body": "Aynı ana ürünün aynı nitelik değerlerine sahip iki varyasyonu birlikte var olamaz. Düzeltici birini değiştirebilmeniz için çifti işaretler."
+   },
+   {
+    "title": "Ana ürünler tüm değerleri listeler",
+    "body": "Ana satır bir niteliğin tüm değerlerini virgülle ayırarak listeler (\"S, M, L\"); her varyasyon satırı yalnızca kendi değerini listeler."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Ana ürünler ve varyasyonlar ayrı dosyalarda olabilir mi?",
+    "a": "Evet, ana ürünler önce içe aktarıldığı sürece. Ana ürünü dosyada olmayan bir varyasyon hata olarak değil, bilgi olarak bildirilir."
+   },
+   {
+    "q": "Birden fazla nitelikle çalışır mı?",
+    "a": "Evet. Yinelenen kombinasyonlar aranırken Attribute 1, Attribute 2 vb. hepsi karşılaştırılır."
+   }
+  ],
+  "metaTitle": "WooCommerce değişken ürünleri CSV ile hatasız içe aktarın | StriveFormats",
+  "metaDescription": "İçe aktarmadan önce WooCommerce değişken ürünlerini ve varyasyonlarını kontrol edin: ana ürün referansları, nitelik değerleri ve yinelenen varyasyon kombinasyonları, satır satır.",
+  "kicker": "WooCommerce değişken ürünleri",
+  "title": "WooCommerce Değişken Ürün Düzeltici",
+  "intro": "WooCommerce içe aktarmaları genellikle değişken ürünlerde ters gider: yanlış ana ürüne işaret eden bir varyasyon ya da aynı niteliklere sahip iki varyasyon. Düzeltici tek tek satırlara değil, tüm ürün ailesine birlikte bakar.",
+  "exportTip": "Ürünler → Dışa aktar ile varyasyonlar dahil dışa aktarın. Ana ürünlerin Type değeri \"variable\", alt ürünlerinki \"variation\"dır."
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "13 etiket, daha fazla değil",
+    "body": "Etsy ilk 13 etiketi tutar ve gerisini atar. Düzeltici her ilan için etiketleri sayar ve ayırıcıları normalleştirir."
+   },
+   {
+    "title": "Simgesiz fiyatlar",
+    "body": "Fiyatlar mağaza para biriminizde düz sayılardır: \"$18\" 18.00 olur ve para birimi kodları büyük harfe çevrilir (usd → USD)."
+   },
+   {
+    "title": "Görsel bağlantıları tam URL olmalıdır",
+    "body": "\"example.com/mug.jpg\" yüklenmez; https:// gerekir. Bozuk görsel bağlantıları yüklemeden önce işaretlenir."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Düzeltilmiş dosyayı doğrudan Etsy'ye yükleyebilir miyim?",
+    "a": "Etsy'nin ilanlar için yerleşik bir CSV yüklemesi yoktur; bu yüzden çoğu satıcı düzeltilmiş dosyayı bir toplu düzenleme uygulamasıyla ya da kataloğunun temiz ana kopyası olarak kullanır."
+   },
+   {
+    "q": "Etsy'nin diğer sınırlarını da kontrol eder mi?",
+    "a": "Etiketleri, fiyatları, miktarları, para birimi kodlarını ve görsel URL'lerini kontrol eder. Kategori ve kargo profili seçimlerini yine Etsy'de yapmanız gerekir."
+   }
+  ],
+  "metaTitle": "Etsy CSV dosyanızı ücretsiz kontrol edin ve temizleyin | StriveFormats",
+  "metaDescription": "Bir Etsy ilan CSV'sini temizleyin: fiyatlar, para birimi kodları ve etiketler normalleştirilir; etiket sınırları, görsel URL'leri ve eksik bilgiler satır satır işaretlenir.",
+  "kicker": "Etsy ilanları",
+  "title": "Etsy için CSV Düzeltici",
+  "intro": "Etsy'nin ilan dışa aktarımı, bir elektronik tabloda toplu düzenleme için kullanışlıdır ve bozulması da o kadar kolaydır. Düzeltici fiyatları, para birimi kodlarını ve etiketleri düzene sokar; Etsy'nin keseceği veya reddedeceği her şey için uyarır.",
+  "exportTip": "Shop Manager'da: Ayarlar → Seçenekler → Verileri indir → İlanlar altında \"CSV indir\"."
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "Durumlar sayıdır",
+    "body": "eBay 1000 (Yeni) veya 3000 (Kullanılmış) gibi bir ConditionID ister. \"Used\" gibi kelimeler karşılık gelen koda dönüştürülür."
+   },
+   {
+    "title": "Sabit fiyat GTC demektir",
+    "body": "Sabit fiyatlı ilanlar her zaman \"Good 'Til Cancelled\" olarak yayınlanır. Sabit fiyatlı bir satırdaki başka her süre işaretlenir (eBay onu GTC'ye çevirirdi), \"30\" gibi geçerli süre bile olmayan değerler ise hatadır."
+   },
+   {
+    "title": "Yeni ilanlar kategori ister",
+    "body": "Kategori numarası olmadan ilan eklemek başarısız olur. Düzeltmelerde boş bırakılabilir; bu yüzden düzeltici bunu yalnızca Add satırlarında işaretler."
+   }
+  ],
+  "faq": [
+   {
+    "q": "*Action(SiteID=...) başlığını korur mu?",
+    "a": "Evet. İlk sütunun başlığı site ve para birimi ayarlarınızı taşır ve yüklediğiniz gibi korunur."
+   },
+   {
+    "q": "Peki çok varyasyonlu ilanlar?",
+    "a": "eBay Varyasyon düzelticisini kullanın; her ilanın ana ve alt satırlarını birbiriyle de karşılaştırır."
+   }
+  ],
+  "metaTitle": "eBay File Exchange ve Seller Hub CSV hataları – ücretsiz kontrol | StriveFormats",
+  "metaDescription": "Bir eBay ilan dosyasını Seller Hub raporlarına veya File Exchange'e yüklemeden önce kontrol edin: işlemler, durum kimlikleri, süreler, kategoriler, fiyatlar ve miktarlar.",
+  "kicker": "eBay ilanları",
+  "title": "eBay için CSV Düzeltici",
+  "intro": "eBay'in yükleme şablonları kodlar konusunda titizdir: Action sütunu, sayısal durum kimlikleri ve ilan süreleri tam doğru olmalıdır. Düzeltici yaygın olanları sizin için dönüştürür ve geri kalanını gösterir.",
+  "exportTip": "Seller Hub → Raporlar → Yüklemeler → \"Şablonu indir\" ya da etkin ilanlarınızı dışa aktarın."
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "Ana satır her seçeneği listeler",
+    "body": "Ana satırın RelationshipDetails değeri Size=8;9|Color=Blue şeklindedir. Her alt satır yalnızca orada görünen değerleri kullanabilir."
+   },
+   {
+    "title": "Fiyat ve miktar alt satırlardadır",
+    "body": "Her Variation satırının kendi SKU'su, fiyatı ve miktarı vardır; başlık ve kategori ise ana satırdadır."
+   },
+   {
+    "title": "Yinelenen kombinasyon yok",
+    "body": "Size=8|Color=Blue değerine sahip iki alt satır reddedilir. Düzeltici çifti ve yinelenen SKU'ları işaretler."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Tekli ilanları ve varyasyonlu ilanları karıştırabilir miyim?",
+    "a": "Evet. Relationship içermeyen satırlar tekli ilan olarak ele alınır ve eBay İlanları ön ayarındaki gibi kontrol edilir."
+   },
+   {
+    "q": "Satırlarımın sırasını değiştirir mi?",
+    "a": "Hayır. Her alt satır, üstündeki en yakın ana satıra aittir; bu yüzden yüklediğiniz sıra korunur."
+   }
+  ],
+  "metaTitle": "eBay varyasyon CSV'si – varyasyonlu ilanları kontrol edin | StriveFormats",
+  "metaDescription": "Çok varyasyonlu eBay ilanlarını yüklemeden önce kontrol edin: her varyasyonun seçenekleri ana satırda bulunmalı ve hiçbir iki varyasyon aynı kombinasyonu paylaşmamalıdır.",
+  "kicker": "eBay çok varyasyonlu ilanlar",
+  "title": "eBay Varyasyon Düzeltici",
+  "intro": "Çok varyasyonlu bir ilan, bir ana satır ve her beden veya renk için bir alt satırdan oluşur; bunlar RelationshipDetails ile birbirine bağlanır. Düzeltici tüm grubu okur ve hangi alt satırın ana satırla eşleşmediğini söyler.",
+  "exportTip": "Varyasyon şablonunu Seller Hub → Raporlar → Yüklemeler bölümünden indirin ya da ilanları varyasyonlarıyla dışa aktarın."
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "Kelimeler değil, kodlar",
+    "body": "product-id-type 1 (ASIN), 2 (ISBN), 3 (UPC) veya 4 (EAN) olur; item-condition ise Yeni için 11 gibi bir sayıdır. Kelimeler otomatik olarak dönüştürülür."
+   },
+   {
+    "title": "Elektronik tablolar barkodları bozar",
+    "body": "Excel 012345678905'i 1.23457E+11'e çevirir ya da baştaki sıfırı siler. İki durum da tespit edilir; silinen sıfırda muhtemel orijinal numara önerilir."
+   },
+   {
+    "title": "Fiyat aralığınızın içinde kalın",
+    "body": "Fiyat, satıcının izin verdiği asgari/azami fiyatın dışına çıkarsa Amazon teklifi devre dışı bırakır. Düzeltici üçünü de karşılaştırır."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kategori (düz dosya) şablonlarıyla çalışır mı?",
+    "a": "item_sku ve external_product_id_type gibi sütun adlarını kabul eder ve korur, ancak kontroller teklif dosyaları için tasarlanmıştır."
+   },
+   {
+    "q": "Dosyam sekmeyle ayrılmış bir .txt. Kullanabilir miyim?",
+    "a": "Evet, olduğu gibi yükleyin. Düzeltilmiş dosya CSV olarak dışa aktarılır; Seller Central .txt isterse bir elektronik tabloda açıp sekmeyle ayrılmış metin olarak kaydedin."
+   }
+  ],
+  "metaTitle": "Amazon Inventory Loader dosyası hataları – ücretsiz kontrol | StriveFormats",
+  "metaDescription": "Bir Amazon Inventory Loader dosyasını yüklemeden önce kontrol edin: ürün kimliği türleri ve durum kodları dönüştürülür; bozuk barkodlar, miktarlar ve fiyat aralıkları işaretlenir.",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Amazon Inventory Loader Düzeltici",
+  "intro": "Inventory Loader, Amazon'da zaten bulunan ürünlere teklif ekler veya teklifleri günceller. Kısa bir dosyadır ama elektronik tabloların bozmayı çok sevdiği kodlara ve tanımlayıcılara dayanır. Düzeltici kodları dönüştürür ve hasarı yakalar.",
+  "exportTip": "Seller Central → Katalog → Yükleme ile ürün ekle → Envanter dosyası indir (Inventory Loader)."
+ }
+}

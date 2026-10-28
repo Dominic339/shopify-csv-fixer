@@ -28,6 +28,11 @@ export type IssueMeta = {
   explanation: string;
   whyPlatformCares: string;
   howToFix: string;
+  /**
+   * false when no validator currently emits this code. The entry still powers its guide
+   * page, but the site must not claim StriveFormats detects or fixes it.
+   */
+  checked?: false;
 };
 
 export type IssueMetaMap = Record<string, IssueMeta>;

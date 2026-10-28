@@ -31,7 +31,7 @@ export const PRESET_FORMATS: PresetFormat[] = [
     formatId: "woocommerce_variable_products",
     name: "WooCommerce Variable Products",
     category: "Ecommerce",
-    description: "WooCommerce variable products + variations (auto-creates missing parent rows and validates variation structure).",
+    description: "WooCommerce variable products and variations: checks parent references, attribute values, and duplicate variation combinations.",
   },
   {
     id: "etsy_listings",
@@ -47,7 +47,7 @@ export const PRESET_FORMATS: PresetFormat[] = [
     name: "Amazon Inventory Loader",
     category: "Ecommerce",
     description:
-      "Normalize Amazon inventory loader style templates by validating essentials like SKU, item name, quantity, and price.",
+      "Amazon Inventory Loader files for offers on existing ASINs: SKUs, product IDs and their type codes, prices, quantities, and condition.",
   },
   {
     id: "ebay_listings",

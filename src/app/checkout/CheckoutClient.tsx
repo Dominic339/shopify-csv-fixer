@@ -4,17 +4,16 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
-import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
+import { localeHref, type Locale } from "@/lib/i18n/locales";
+import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
+import { fmt } from "@/lib/i18n/fmt";
+import type { Translations } from "@/lib/i18n/getTranslations";
 
-/** Derive locale from NEXT_LOCALE cookie (client-side only). */
-function getCookieLocale(): Locale {
-  if (typeof document === "undefined") return DEFAULT_LOCALE;
-  const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
-  const val = match?.[1] ?? "";
-  return isValidLocale(val) ? val : DEFAULT_LOCALE;
-}
+type Props = { authByLocale: Record<Locale, Translations["auth"]> };
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ authByLocale }: Props) {
+  const locale = useCookieLocale();
+  const t = authByLocale[locale];
   const sp = useSearchParams();
   const router = useRouter();
   const status = sp.get("status"); // success/canceled
@@ -45,7 +44,6 @@ export default function CheckoutClient() {
               if (!cancelled && !redirected.current) {
                 redirected.current = true;
                 setSynced(true);
-                const locale = getCookieLocale();
                 router.replace(localeHref(locale, "/profile"));
               }
               return;
@@ -61,7 +59,6 @@ export default function CheckoutClient() {
       if (!cancelled && !redirected.current) {
         redirected.current = true;
         setSynced(true);
-        const locale = getCookieLocale();
         router.replace(localeHref(locale, "/profile"));
       }
     }
@@ -75,36 +72,36 @@ export default function CheckoutClient() {
     return () => {
       cancelled = true;
     };
-  }, [status, router]);
+  }, [status, router, locale]);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="text-2xl font-semibold">Checkout</h1>
+      <h1 className="text-2xl font-semibold">{t.checkoutTitle}</h1>
 
       {status === "success" ? (
         <p className="mt-3 text-sm text-[var(--muted)]">
           {synced
-            ? "Subscription activated! Redirecting to your profile…"
-            : "Syncing your subscription… you will be redirected shortly."}
+            ? t.checkoutActivated
+            : t.checkoutSyncing}
         </p>
       ) : status === "canceled" ? (
-        <p className="mt-3 text-sm text-[var(--muted)]">Checkout was cancelled. No charge was made.</p>
+        <p className="mt-3 text-sm text-[var(--muted)]">{t.checkoutCanceled}</p>
       ) : (
-        <p className="mt-3 text-sm text-[var(--muted)]">Preparing your checkout…</p>
+        <p className="mt-3 text-sm text-[var(--muted)]">{t.checkoutPreparing}</p>
       )}
 
       {plan && status !== "success" ? (
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Plan: <span className="font-semibold text-[var(--text)]">{plan}</span>
+          {fmt(t.planName, { plan })}
         </p>
       ) : null}
 
       <div className="mt-6 flex gap-3">
         <Link
           className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold hover:bg-[var(--surface-2)]"
-          href="/profile"
+          href={localeHref(locale, "/profile")}
         >
-          View profile
+          {t.viewProfile}
         </Link>
       </div>
     </main>

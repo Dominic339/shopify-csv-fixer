@@ -1,4 +1,5 @@
 import { getMonthKey } from "@/lib/month";
+import { FREE_EXPORTS_PER_MONTH, getPlanLimit, type Plan } from "@/lib/plans";
 
 const KEY = "striveformats_free_quota_v1";
 
@@ -7,7 +8,7 @@ type LocalQuotaState = {
   used: number;
 };
 
-export type Plan = "free" | "basic" | "advanced";
+export type { Plan };
 
 export type PlanLimits = {
   exportsPerMonth: number;
@@ -15,13 +16,11 @@ export type PlanLimits = {
 };
 
 export function getPlanLimits(plan: string): PlanLimits {
-  const p = (plan || "free").toLowerCase();
-  if (p === "advanced") return { exportsPerMonth: 0, unlimited: true };
-  if (p === "basic") return { exportsPerMonth: 100 };
-  return { exportsPerMonth: 3 };
+  const { limit, unlimited } = getPlanLimit(plan);
+  return unlimited ? { exportsPerMonth: 0, unlimited: true } : { exportsPerMonth: limit };
 }
 
-function getLocalQuota(limitPerMonth = 3) {
+function getLocalQuota(limitPerMonth = FREE_EXPORTS_PER_MONTH) {
   const key = getMonthKey();
   const raw = typeof window === "undefined" ? null : window.localStorage.getItem(KEY);
 
@@ -53,7 +52,7 @@ function getLocalQuota(limitPerMonth = 3) {
   };
 }
 
-function consumeLocalExport(limitPerMonth = 3) {
+function consumeLocalExport(limitPerMonth = FREE_EXPORTS_PER_MONTH) {
   const q = getLocalQuota(limitPerMonth);
 
   if (q.remaining <= 0) return { ok: false as const, ...q };
@@ -72,8 +71,8 @@ export async function getQuota() {
     if (!r || !r.ok) {
       return {
         used: 0,
-        limit: 3,
-        remaining: 3,
+        limit: FREE_EXPORTS_PER_MONTH,
+        remaining: FREE_EXPORTS_PER_MONTH,
         signedIn: false,
         plan: "free" as Plan,
         monthKey: getMonthKey(),
@@ -86,8 +85,8 @@ export async function getQuota() {
       plan: (j?.plan ?? "free") as Plan,
       monthKey: String(j?.monthKey ?? getMonthKey()),
       used: Number(j?.used ?? 0),
-      limit: Number(j?.limit ?? 3),
-      remaining: Number(j?.remaining ?? 3),
+      limit: Number(j?.limit ?? FREE_EXPORTS_PER_MONTH),
+      remaining: Number(j?.remaining ?? FREE_EXPORTS_PER_MONTH),
       unlimited: Boolean(j?.unlimited ?? false),
     };
   }
@@ -95,11 +94,11 @@ export async function getQuota() {
   // browser: prefer API, fallback to local ONLY if not signed in / error
   try {
     const r = await fetch("/api/quota/status", { cache: "no-store" });
-    if (!r.ok) return getLocalQuota(3);
+    if (!r.ok) return getLocalQuota();
 
     const j = await r.json();
 
-    if (!j?.signedIn) return getLocalQuota(3);
+    if (!j?.signedIn) return getLocalQuota();
 
     return {
       signedIn: true as const,
@@ -111,7 +110,7 @@ export async function getQuota() {
       unlimited: Boolean(j?.unlimited ?? false),
     };
   } catch {
-    return getLocalQuota(3);
+    return getLocalQuota();
   }
 }
 
@@ -121,26 +120,36 @@ export async function consumeExport(): Promise<void> {
   // signed in + advanced => unlimited
   if (q?.signedIn && q?.plan === "advanced") return;
 
+  let r: Response;
   try {
-    const r = await fetch("/api/quota/consume", {
+    r = await fetch("/api/quota/consume", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ amount: 1 }),
     });
-
-    // If not signed in, use local free quota
-    if (r.status === 401) {
-      const local = consumeLocalExport(3);
-      if (!local.ok) throw new Error("Free tier limit reached (3 exports this month for this device).");
-      return;
-    }
-
-    const j = await r.json().catch(() => ({}));
-
-    if (!r.ok) throw new Error(j?.message ?? "Monthly export limit reached.");
-    return;
   } catch {
-    const local = consumeLocalExport(3);
-    if (!local.ok) throw new Error("Free tier limit reached (3 exports this month for this device).");
+    // Offline / network failure: fall back to the device allowance.
+    return consumeLocalOrThrow();
+  }
+
+  // Not signed in: use the local free quota (no sign-up required to try the tool).
+  if (r.status === 401) return consumeLocalOrThrow();
+
+  if (r.ok) return;
+
+  const j = await r.json().catch(() => ({}));
+
+  // A server-side limit is authoritative for signed-in users; never top it up
+  // from the device allowance.
+  if (r.status === 403) throw new Error(j?.message ?? "Monthly export limit reached.");
+
+  // Server error: don't block the user on our own outage.
+  return consumeLocalOrThrow();
+}
+
+function consumeLocalOrThrow() {
+  const local = consumeLocalExport();
+  if (!local.ok) {
+    throw new Error(`Free tier limit reached (${FREE_EXPORTS_PER_MONTH} exports this month for this device).`);
   }
 }

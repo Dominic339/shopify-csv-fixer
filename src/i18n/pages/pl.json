@@ -1,0 +1,109 @@
+{
+  "about": {
+    "metaTitle": "O StriveFormats",
+    "metaDescription": "StriveFormats sprawdza i poprawia pliki CSV produktów dla Shopify, WooCommerce, Etsy, eBay i Amazon w przeglądarce. Co robi, co gdzie działa i jak jest zbudowany.",
+    "title": "O StriveFormats",
+    "intro": "StriveFormats sprawdza pliki CSV z produktami, zanim zaimportujesz je do sklepu internetowego, poprawia problemy, które można bezpiecznie poprawić, i wskazuje dokładny wiersz i kolumnę wszystkich pozostałych. Działa w przeglądarce, więc twój katalog nigdy nie opuszcza komputera.",
+    "whyTitle": "Po co powstał",
+    "why": [
+      "Importery sklepów są surowe, a ich komunikaty o błędach rzadko mówią, który wiersz jest zły. Plik, który w arkuszu wygląda dobrze, może się nie zaimportować przez cenę zapisaną jako „45,00”, wiersz wariantu, który zgubił handle, albo pustą komórkę, która po cichu skasowałaby dane już zapisane w sklepie.",
+      "StriveFormats zna zasady każdej platformy, stosuje poprawki, które nie mogą zmienić znaczenia twoich danych, a każdą decyzję, która mogłaby to zrobić, zostawia tobie – z wyjaśnieniem i linkiem do poradnika."
+    ],
+    "runTitle": "Jak działa",
+    "run": [
+      { "lead": "Wypróbuj przed rejestracją.", "text": "Wszystkie sprawdzenia i poprawki działają bez konta, a na każdym urządzeniu masz {count} darmowych eksportów miesięcznie." },
+      { "lead": "Nic nie zmienia się po cichu.", "text": "Każda automatyczna zmiana trafia do dziennika poprawek, który możesz pobrać razem z plikiem." },
+      { "lead": "Mały i niezależny.", "text": "Narzędzie pracuje w przeglądarce, dzięki czemu jest szybkie, prywatne i tanie w utrzymaniu, a darmowy plan może pozostać darmowy." }
+    ],
+    "whereTitle": "Co gdzie działa",
+    "dataFlow": [
+      { "what": "Twój plik CSV i każda wprowadzona zmiana", "where": "Zostaje w przeglądarce. Nigdy nie jest wysyłany." },
+      { "what": "Własne formaty i obszary robocze", "where": "Zapisane w przeglądarce. Wyeksportuj format do pliku, aby go przenieść." },
+      { "what": "Licznik darmowych eksportów (bez logowania)", "where": "Przechowywany w przeglądarce na tym urządzeniu." },
+      { "what": "Licznik eksportów i plan (po zalogowaniu)", "where": "Zapisane z twoim kontem, więc działają na każdym urządzeniu." },
+      { "what": "Anonimowe zdarzenia użycia", "where": "Które narzędzia są używane, nigdy zawartość twoich plików." },
+      { "what": "Płatności", "where": "Obsługuje je Stripe. Nigdy nie widzimy danych twojej karty." }
+    ],
+    "detailsBefore": "Szczegóły w",
+    "detailsLink": "polityce prywatności",
+    "detailsAfter": ".",
+    "platformsTitle": "Platformy",
+    "toolsTitle": "Narzędzia",
+    "tools": {
+      "app": { "name": "Naprawiacz CSV", "desc": "Sprawdzaj według zasad platformy, automatycznie poprawiaj to, co bezpieczne, a resztę edytuj w tabeli." },
+      "inspector": { "name": "Inspektor CSV", "desc": "Sprawdź strukturę dowolnego CSV: separatory, cudzysłowy, kodowanie, puste i zduplikowane kolumny." },
+      "convert": { "name": "Konwerter formatów", "desc": "Przenoś produkty między formatami Shopify, WooCommerce, Etsy, eBay i Amazon." },
+      "merge": { "name": "Łącznik CSV", "desc": "Połącz dwa pliki i usuń duplikaty według wspólnej kolumny." },
+      "formats": { "name": "Własne formaty", "desc": "Zapisz kolumny i reguły każdego pliku, z którym regularnie pracujesz (plan Advanced)." }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Polityka prywatności",
+    "metaDescription": "Co StriveFormats przechowuje, gdzie i dlaczego. Twoje pliki CSV są przetwarzane w przeglądarce i nigdy nie są wysyłane.",
+    "title": "Polityka prywatności",
+    "intro": "StriveFormats przetwarza pliki CSV w twojej przeglądarce. Na tej stronie znajdziesz wszystko, co serwis przechowuje, gdzie i dlaczego.",
+    "sections": [
+      {
+        "title": "Twoje pliki CSV",
+        "paras": [
+          "Pliki otwierane w Naprawiaczu CSV, Inspektorze, Konwerterze lub Łączniku są w całości odczytywane, sprawdzane i eksportowane w przeglądarce. Ich zawartość nigdy nie trafia na nasze serwery ani do nikogo innego.",
+          "Własne formaty i obszary robocze, które tworzysz, są zapisywane w pamięci lokalnej przeglądarki na danym urządzeniu."
+        ]
+      },
+      {
+        "title": "Jeśli założysz konto",
+        "paras": [
+          "Przechowujemy twój adres e-mail (do logowania), plan i status subskrypcji oraz liczbę eksportów wykorzystanych w tym miesiącu. Konta zapewnia Supabase."
+        ]
+      },
+      {
+        "title": "Bez konta",
+        "paras": ["Licznik darmowych eksportów w danym miesiącu jest przechowywany w pamięci lokalnej przeglądarki. Nie jest do nas wysyłany."]
+      },
+      {
+        "title": "Informacje o użyciu",
+        "paras": [
+          "Zapisujemy anonimowe zdarzenia użycia, np. które narzędzie zostało otwarte albo że sprawdzono plik, razem z losowym identyfikatorem przechowywanym w przeglądarce. Te zdarzenia nigdy nie zawierają zawartości plików.",
+          "Serwis może używać Google Analytics i Vercel Analytics do zliczania odsłon. Google Analytics zapisuje pliki cookie, Vercel Analytics nie."
+        ]
+      },
+      {
+        "title": "Wiadomości e-mail",
+        "paras": [
+          "Jeśli wpiszesz adres e-mail w polu „nowe formaty i funkcje”, zapiszemy go, aby od czasu do czasu wysyłać informacje o produkcie. W każdej chwili możesz poprosić o jego usunięcie."
+        ]
+      },
+      {
+        "title": "Płatności",
+        "paras": ["Płatności obsługuje Stripe. Nigdy nie widzimy ani nie przechowujemy danych twojej karty; od Stripe otrzymujemy tylko status subskrypcji."]
+      },
+      {
+        "title": "Twoje wybory",
+        "paras": [
+          "Dane zapisane w przeglądarce możesz w każdej chwili usunąć w jej ustawieniach. Aby usunąć konto lub adres e-mail, skontaktuj się z właścicielem serwisu."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "metaTitle": "Regulamin",
+    "metaDescription": "Regulamin serwisu StriveFormats.",
+    "title": "Regulamin",
+    "intro": "StriveFormats jest udostępniany w obecnej postaci, bez żadnych gwarancji. To ty odpowiadasz za sprawdzenie poprawności eksportów przed zaimportowaniem ich do usług zewnętrznych.",
+    "sections": [
+      {
+        "title": "Dozwolone korzystanie",
+        "paras": ["Nie używaj StriveFormats do wysyłania ani przetwarzania treści niezgodnych z prawem. Nie próbuj zakłócać działania usługi ani obchodzić limitów użycia."]
+      },
+      {
+        "title": "Subskrypcje",
+        "paras": ["Rozliczenia subskrypcji obsługuje Stripe. Subskrypcję możesz anulować lub zmienić w portalu rozliczeń."]
+      },
+      {
+        "title": "Ograniczenie odpowiedzialności",
+        "paras": ["StriveFormats nie odpowiada za straty związane z importem danych, działalnością firmy ani problemami platform zewnętrznych."]
+      }
+    ]
+  },
+  "translationNote": "To tłumaczenie ma charakter pomocniczy. W razie rozbieżności obowiązuje wersja angielska:"
+}

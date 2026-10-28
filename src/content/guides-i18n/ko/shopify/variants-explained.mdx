@@ -1,0 +1,145 @@
+---
+title: "Shopify 상품 변형 해설: CSV 구조와 흔한 실수"
+description: "Shopify CSV 형식이 Handle 묶음, Option 열, 상위/하위 행으로 변형을 어떻게 표현하는지 알아보세요. 상품이 나뉘거나, 변형이 사라지거나, 가져오기가 실패하는 흔한 실수를 피할 수 있습니다."
+keywords: ["shopify 변형 csv", "shopify 제품 변형 가져오기", "shopify handle 변형", "shopify option1 option2", "shopify csv 상위 하위 행", "shopify 변형 가격 csv", "shopify csv 구조"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Shopify가 Handle로 상위 상품과 그 변형을 묶는 방식"
+  - "상위 행과 변형 행에 각각 필요한 열"
+  - "Option1 Name, Option1 Value, Variant 열이 함께 작동하는 방식"
+  - "가장 흔한 변형 구조 실수와 해결 방법"
+  - "기존 상품을 덮어쓰지 않고 새 변형을 추가하는 방법"
+bestFor: "사이즈, 색상, 소재 등 옵션이 있는 상품을 가져오거나 업데이트하는 Shopify 판매자와 개발자"
+timeToComplete: "12분"
+---
+
+## Shopify가 CSV에서 변형을 표현하는 방식
+
+Shopify 제품 CSV에서 변형이 여러 개인 상품은 **같은 Handle을 공유하는 여러 행**으로 표현됩니다. 첫 번째 행이 "상위" 행이며 상품 수준의 데이터를 담습니다. 같은 Handle을 가진 이후의 각 행은 변형 행입니다.
+
+### 최소 예시: 두 가지 사이즈의 티셔츠
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+핵심:
+- 두 행 모두 Handle이 `blue-shirt`입니다.
+- 두 번째 행은 Title과 Image Src가 비어 있고 Option1 Value만 새 값입니다.
+- 각 행은 구매할 수 있는 변형 하나(옵션 값의 조합 하나)를 나타냅니다.
+
+---
+
+## 상위 행
+
+Handle의 첫 번째 행이 상위 행입니다. 상품 수준의 필드를 설정합니다.
+
+| 열 | 상위 행 필수 여부 | 참고 |
+|---|---|---|
+| Handle | 필수 | 이 상품의 고유한 짧은 이름, 영문 소문자와 하이픈만 |
+| Title | 필수 | 상품명 |
+| Body HTML | 선택 | 상품 설명, 상위 행에만 필요 |
+| Vendor | 선택 | 브랜드명 |
+| Type | 선택 | 상품 유형(컬렉션용) |
+| Tags | 선택 | 쉼표로 구분한 태그 |
+| Published | 선택 | TRUE 또는 FALSE |
+| Option1 Name | 필수(옵션이 있는 경우) | 첫 번째 옵션의 이름(예: "Size") |
+| Option1 Value | 필수(옵션이 있는 경우) | 첫 번째 변형의 값(예: "Small") |
+| Image Src | 선택 | 대표 이미지 URL |
+
+**상위 행에는 Title이 있어야 합니다.** Title이 비어 있으면 Shopify가 상위 행으로 인식하지 못해 가져오기 결과가 잘못될 수 있습니다.
+
+---
+
+## 변형 행
+
+같은 Handle의 첫 행 이후 각 행이 변형 행입니다. 변형 행은 다음과 같습니다.
+- 상위 행과 같은 Handle을 씁니다.
+- Title은 비워 둡니다(같은 Title이어도 되며, 상위 행이 아니면 Shopify가 무시합니다).
+- 각자 고유한 Option1 Value(있다면 Option2 Value, Option3 Value도)를 가집니다.
+- 각자 고유한 Variant Price, Variant SKU, Variant Inventory Qty 등을 가집니다.
+
+### 변형별 열
+
+| 열 | 참고 |
+|---|---|
+| Variant Price | 변형마다 필수, 소수(통화 기호 없이) |
+| Variant SKU | 선택이지만 강력히 권장, 스토어 전체에서 고유해야 함 |
+| Variant Grams | 그램 단위 무게 |
+| Variant Inventory Qty | 초기 재고 수량 |
+| Variant Inventory Policy | `deny` 또는 `continue`(continue = 재고 없이도 판매 허용) |
+| Variant Fulfillment Service | 보통 `manual` |
+| Variant Requires Shipping | TRUE 또는 FALSE |
+| Variant Taxable | TRUE 또는 FALSE |
+| Variant Barcode | EAN, UPC 등 바코드 |
+
+---
+
+## 여러 옵션(사이즈와 색상)
+
+Shopify는 Option1, Option2, Option3 열로 최대 3개의 옵션을 지원합니다.
+
+예시: 사이즈와 색상 옵션이 있는 티셔츠
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name과 Option2 Name은 상위 행(각 Handle의 첫 행)에만 있으면 됩니다. 변형 행에 반복해도 문제없습니다.
+- 옵션 조합마다 한 행이 필요합니다.
+- 사이즈 3개와 색상 4개인 상품에는 변형 행이 12개 필요합니다.
+
+---
+
+## 흔한 실수
+
+### 실수 1: 같은 상품에 다른 Handle 사용
+
+**증상:** 변형이 있는 하나의 상품이어야 하는데 가져온 뒤 여러 개의 별도 상품으로 나타납니다.
+
+**해결 방법:** 한 상품에 속한 모든 행은 정확히 같은 Handle 값을 써야 합니다. 오타 하나(`blue-shirt`와 `blue-shirt-`)만으로도 Shopify가 새 상품을 만듭니다.
+
+### 실수 2: 모든 행에 Title 입력
+
+**증상:** 가져오기는 성공하지만 Shopify가 중복 상품을 만들거나 변형 행을 별도 상품으로 처리합니다.
+
+**해결 방법:** Title은 각 Handle의 첫 행에만 입력하세요. 모든 변형 행에서는 Title을 비워 두세요.
+
+### 실수 3: Option1 Name 열 없음
+
+**증상:** "Option1 Name is required" 가져오기 오류가 나거나, 모든 변형이 "Default Title"이라는 옵션 하나로 표시됩니다.
+
+**해결 방법:** 머리글에 항상 `Option1 Name`을 넣고, 최소한 상위 행에는 값을 입력하세요. 실제 옵션이 없는 상품이라면 Option1 Name을 `Title`, Option1 Value를 `Default Title`로 설정하세요.
+
+### 실수 4: 행마다 옵션 값이 다름
+
+**증상:** 예상보다 많은 변형이 만들어지거나 옵션 이름이 중복으로 표시됩니다.
+
+**해결 방법:** Option1 Name은 같은 Handle의 모든 행에서 정확히 같은 문자열이어야 합니다. 상위 행이 `Size`라면 모든 변형 행도 `Size`(또는 빈칸)여야 합니다. `Size`, `size`, `Sizes`를 섞어 쓰면 옵션 데이터가 일관되지 않게 됩니다.
+
+### 실수 5: Variant Price가 비어 있음
+
+**증상:** "Variant Price is required"로 가져오기가 실패하거나, 가격이 0.00인 변형이 만들어집니다.
+
+**해결 방법:** Variant Price는 모든 행에 필수입니다. 값이 상속되지 않으므로, 모든 변형의 가격이 같더라도 각 행에 입력해야 합니다.
+
+### 실수 6: 새 변형을 추가했더니 기존 변형이 덮어써짐
+
+**증상:** 새 변형 하나만 추가하는 부분 가져오기를 했더니 다른 변형이 모두 사라졌습니다.
+
+**해결 방법:** CSV 가져오기로 상품을 업데이트할 때는 새 변형만이 아니라 기존 **모든** 변형을 파일에 넣어야 합니다. Shopify 가져오기는 Handle의 변형 전체를 교체합니다. 빠뜨린 기존 변형은 삭제됩니다.
+
+---
+
+## 대규모 카탈로그를 위한 팁
+
+- **변형 행은 자동으로 만드세요.** 조합이 많은 상품(사이즈 3 × 색상 4 × 소재 2 = 24행)은 직접 입력하지 말고 스프레드시트 수식이나 스크립트로 조합을 펼치세요.
+- **SKU 패턴을 통일하세요.** `기본-사이즈-색상` 형태의 SKU(예: `SHIRT-SM-BLU`)를 쓰면 변형을 구분하고 정렬하기 쉽습니다.
+- **먼저 상품 하나로 테스트하세요.** 전체 카탈로그를 올리기 전에 상품 하나(상위 행과 모든 변형)를 가져와 Shopify 관리자에서 변형 구조를 확인한 뒤 진행하세요.

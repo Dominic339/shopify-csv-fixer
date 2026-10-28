@@ -1,0 +1,860 @@
+{
+"shopify/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Je CSV mist een verplichte Shopify-kolomkop.",
+"whyPlatformCares": "Shopify controleert de kolomkoppen tijdens het importeren. Ontbrekende verplichte koppen kunnen voorkomen dat Shopify producten aanmaakt of bijwerkt.",
+"howToFix": "Voeg de ontbrekende verplichte kolomkop toe (ook als de waarden leeg zijn)."
+},
+"shopify/blank_title": {
+"title": "Title ontbreekt",
+"explanation": "Title is leeg op minstens één rij.",
+"whyPlatformCares": "Shopify heeft een Title nodig om een product aan te maken. Rijen zonder Title kunnen mislukken of onvolledige producten opleveren.",
+"howToFix": "Vul Title in met de productnaam op elke productrij."
+},
+"shopify/blank_handle": {
+"title": "URL handle ontbreekt",
+"explanation": "URL handle is leeg op minstens één rij.",
+"whyPlatformCares": "Shopify groepeert varianten en afbeeldingen op URL handle en gebruikt die om bestaande producten bij te werken. Zonder handle werken groeperen en bijwerken niet meer.",
+"howToFix": "Vul URL handle in met kleine letters, cijfers en streepjes (geen spaties)."
+},
+"shopify/invalid_handle": {
+"title": "Ongeldige URL handle",
+"explanation": "URL handle bevat tekens die Shopify kan weigeren.",
+"whyPlatformCares": "Ongeldige handles kunnen importfouten en kapotte product-URL's veroorzaken.",
+"howToFix": "Gebruik alleen kleine letters, cijfers en streepjes."
+},
+"shopify/invalid_boolean_published": {
+"title": "Ongeldige waarde voor Published",
+"explanation": "Published on online store heeft een waarde die geen booleaanse waarde is.",
+"whyPlatformCares": "Shopify verwacht TRUE/FALSE (of leeg). Ongeldige waarden kunnen de import blokkeren.",
+"howToFix": "Gebruik TRUE, FALSE of laat leeg."
+},
+"shopify/invalid_status": {
+"title": "Ongeldige waarde voor Status",
+"explanation": "Status is niet Active, Draft of Archived.",
+"whyPlatformCares": "Bij een onverwachte status kan Shopify een rij negeren of verkeerd interpreteren.",
+"howToFix": "Gebruik \"Active\", \"Draft\" of \"Archived\" (of laat leeg)."
+},
+"shopify/option_order_invalid": {
+"title": "Optiekolommen in de verkeerde volgorde",
+"explanation": "Option2/Option3 heeft waarden terwijl Option1 leeg is.",
+"whyPlatformCares": "Shopify verwacht dat opties op volgorde worden ingevuld (eerst Option1, dan Option2, dan Option3).",
+"howToFix": "Vul Option1 in vóór Option2, en Option2 vóór Option3."
+},
+"shopify/variant_option_missing_value": {
+"title": "Optienaam zonder waarde",
+"explanation": "Er is een optienaam, maar de bijbehorende optiewaarde is leeg.",
+"whyPlatformCares": "Ontbrekende optiewaarden kunnen ongeldige of verwarrende varianten opleveren.",
+"howToFix": "Vul de optiewaarde in (bijv. Size = Small) of maak de optienaam leeg."
+},
+"shopify/option_name_inconsistent": {
+"title": "Optienamen verschillen tussen varianten",
+"explanation": "De namen van Option1/2/3 moeten gelijk zijn op rijen met dezelfde handle.",
+"whyPlatformCares": "Inconsistente optienamen kunnen ervoor zorgen dat varianten verkeerd worden geïmporteerd of verkeerd gegroepeerd.",
+"howToFix": "Gebruik dezelfde namen voor Option1/Option2/Option3 op alle variantrijen van dezelfde handle."
+},
+"shopify/options_not_unique": {
+"title": "Variantopties niet uniek",
+"explanation": "Twee of meer varianten van dezelfde handle hebben identieke optiewaarden.",
+"whyPlatformCares": "Shopify voegt varianten met identieke optiecombinaties samen. Dat kan gegevensverlies of overschreven varianten veroorzaken.",
+"howToFix": "Maak elke combinatie van variantopties uniek (of verwijder de dubbele)."
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "Option1 value ontbreekt bij variant",
+"explanation": "Deze rij lijkt variantgegevens te bevatten, maar Option1 value is leeg.",
+"whyPlatformCares": "Shopify gebruikt optiewaarden om variantcombinaties te maken. Zonder optiewaarde kan de rij worden geweigerd of verkeerd worden geïmporteerd.",
+"howToFix": "Vul Option1 value in (of haal de variantvelden uit deze rij)."
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\" gemengd met echte opties",
+"explanation": "Een handle bevat zowel \"Default Title\"-rijen als variantrijen met opties.",
+"whyPlatformCares": "Dit wijst meestal op het per ongeluk mengen van een productstructuur met één variant en een met meerdere varianten.",
+"howToFix": "Gebruik \"Default Title\" alleen als het product één variant heeft. Gebruik bij producten met meerdere varianten echte optiewaarden op elke variantrij."
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "Dubbele rijen met identieke variantgegevens",
+"explanation": "Rijen delen dezelfde handle en lijken dubbel zonder echte varianten te zijn.",
+"whyPlatformCares": "Dubbele rijen kunnen de import verwarren en onverwacht gegevens overschrijven.",
+"howToFix": "Als het varianten zijn, zorg dan dat de optiewaarden (of SKU's) per rij verschillen. Als het extra afbeeldingen zijn, houd op die rijen alleen de handle en de afbeeldingsvelden over."
+},
+"shopify/handle_title_mismatch": {
+"title": "Dezelfde handle met verschillende Titles",
+"explanation": "Er worden meerdere Titles gebruikt op rijen met dezelfde URL handle.",
+"whyPlatformCares": "Shopify groepeert rijen op handle. Tegenstrijdige titels kunnen gegevens overschrijven of de import verwarren.",
+"howToFix": "Gebruik één consistente Title op alle rijen van dezelfde handle."
+},
+"shopify/product_missing_variant_row": {
+"title": "Product met afbeeldingen maar zonder variantrij",
+"explanation": "Een handle lijkt alleen afbeeldingsrijen te bevatten.",
+"whyPlatformCares": "Shopify heeft minstens één hoofdrij voor product/variant nodig (Title + variantvelden) om het product aan te maken. Alleen afbeeldingsrijen zijn niet genoeg.",
+"howToFix": "Voeg voor de handle een hoofdrij toe met Title en variantvelden (Price/SKU/Options). Zet extra afbeeldingsrijen na de hoofdrij."
+},
+"shopify/blank_price": {
+"title": "Price ontbreekt",
+"explanation": "Price is leeg op een variantrij.",
+"whyPlatformCares": "Shopify importeert een lege prijs als 0.00, dus de variant zou gratis worden verkocht.",
+"howToFix": "Vul Price in met een getal zoals 19.99, tenzij de variant echt gratis is."
+},
+"shopify/invalid_numeric_price": {
+"title": "Ongeldige Price",
+"explanation": "Price is geen geldig getal.",
+"whyPlatformCares": "Shopify vereist numerieke waarden in prijsvelden.",
+"howToFix": "Gebruik een getal zoals 19.99."
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "Ongeldige Compare-at price",
+"explanation": "Compare-at price is geen geldig getal.",
+"whyPlatformCares": "Shopify vereist numerieke waarden in prijsvelden.",
+"howToFix": "Gebruik een getal zoals 24.99 of laat leeg."
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price lager dan Price",
+"explanation": "Compare-at price is lager dan Price.",
+"whyPlatformCares": "Compare-at price hoort een hogere oorspronkelijke prijs weer te geven.",
+"howToFix": "Zorg dat Compare-at price ≥ Price is, of laat hem leeg."
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "Ongeldige voorraadhoeveelheid",
+"explanation": "Inventory quantity is geen geldig geheel getal.",
+"whyPlatformCares": "Voorraadhoeveelheden moeten gehele getallen zijn.",
+"howToFix": "Gebruik een geheel getal zoals 0, 5, 100."
+},
+"shopify/negative_inventory": {
+"title": "Negatieve voorraad",
+"explanation": "Inventory quantity is negatief.",
+"whyPlatformCares": "Negatieve voorraad is meestal een gegevensfout en kan problemen bij de verzending veroorzaken.",
+"howToFix": "Gebruik 0 of een positieve hoeveelheid."
+},
+"shopify/invalid_inventory_policy": {
+"title": "Ongeldig voorraadbeleid",
+"explanation": "Continue selling when out of stock is niet DENY/CONTINUE.",
+"whyPlatformCares": "Het voorraadbeleid bepaalt of je kunt doorverkopen zonder voorraad.",
+"howToFix": "Gebruik \"DENY\" of \"CONTINUE\" (of laat leeg)."
+},
+"shopify/invalid_image_url": {
+"title": "Ongeldige afbeeldings-URL",
+"explanation": "De URL van de productafbeelding is geen geldige http(s)-URL.",
+"whyPlatformCares": "Shopify moet afbeeldingen via een geldige URL kunnen ophalen.",
+"howToFix": "Gebruik een volledige http(s)-URL naar een openbaar toegankelijke afbeelding."
+},
+"shopify/invalid_image_position": {
+"title": "Ongeldige afbeeldingspositie",
+"explanation": "Image position is geen geldig geheel getal.",
+"whyPlatformCares": "Image position bepaalt de volgorde van de afbeeldingen.",
+"howToFix": "Gebruik 1, 2, 3… of laat leeg."
+},
+"shopify/image_row_has_variant_fields": {
+"title": "Afbeeldingsrij bevat variantvelden",
+"explanation": "Een rij lijkt alleen een afbeelding te bevatten, maar heeft SKU/Price/Options/Inventory-velden.",
+"whyPlatformCares": "Dit kan het groeperen van varianten verstoren en de import verwarren.",
+"howToFix": "Houd op extra afbeeldingsrijen alleen de handle en de afbeeldingsvelden over. Verplaats variantvelden naar de hoofdrij."
+},
+"shopify/duplicate_image_position": {
+"title": "Dubbele afbeeldingspositie",
+"explanation": "Twee rijen hebben dezelfde Image position voor dezelfde handle.",
+"whyPlatformCares": "Dubbele posities kunnen de volgorde van de afbeeldingen onvoorspelbaar maken.",
+"howToFix": "Gebruik per handle unieke Image position-waarden (1, 2, 3…)."
+},
+"shopify/image_alt_text_too_long": {
+"title": "Alt-tekst te lang",
+"explanation": "De alt-tekst van de afbeelding overschrijdt de door Shopify aanbevolen limiet.",
+"whyPlatformCares": "Te lange alt-tekst kan worden afgekapt of opmaakproblemen geven.",
+"howToFix": "Kort de alt-tekst in tot 512 tekens of minder."
+},
+"shopify/duplicate_sku": {
+"title": "Dubbele SKU",
+"explanation": "Dezelfde SKU staat op meerdere variantrijen.",
+"whyPlatformCares": "Veel voorraad- en verzendprocessen verwachten een unieke SKU per variant.",
+"howToFix": "Maak SKU's uniek per variant (of laat ze leeg als je geen SKU's gebruikt)."
+},
+"shopify/duplicate_sku_across_products": {
+"title": "Dubbele SKU bij verschillende producten",
+"explanation": "Dezelfde SKU staat bij verschillende URL handles (verschillende producten).",
+"whyPlatformCares": "SKU's hergebruiken bij verschillende producten kan voorraadsystemen, verzendtools en rapportages in de war brengen.",
+"howToFix": "Maak SKU's uniek in je hele catalogus (aanbevolen) of bevestig dat het hergebruik bewust is."
+},
+"shopify/seo_title_too_long": {
+"title": "SEO-titel te lang",
+"explanation": "De SEO-titel is langer dan aanbevolen.",
+"whyPlatformCares": "Lange titels kunnen in zoekresultaten worden afgekapt.",
+"howToFix": "Kort de SEO-titel in tot 70 tekens of minder."
+},
+"shopify/seo_description_too_long": {
+"title": "SEO-beschrijving te lang",
+"explanation": "De SEO-beschrijving is langer dan aanbevolen.",
+"whyPlatformCares": "Lange beschrijvingen kunnen in zoekfragmenten worden afgekapt.",
+"howToFix": "Kort de SEO-beschrijving in tot 320 tekens of minder."
+},
+"shopify/seo_title_missing": {
+"title": "SEO-titel ontbreekt",
+"explanation": "De SEO-titel is leeg (Shopify gebruikt dan Title).",
+"whyPlatformCares": "Een eigen SEO-titel kan de doorklikratio verbeteren.",
+"howToFix": "Optioneel: geef een eigen SEO-titel op."
+},
+"shopify/seo_description_missing": {
+"title": "SEO-beschrijving ontbreekt",
+"explanation": "De SEO-beschrijving is leeg (Shopify gebruikt dan Description).",
+"whyPlatformCares": "Een eigen beschrijving kan de doorklikratio en de duidelijkheid in zoekresultaten verbeteren.",
+"howToFix": "Optioneel: geef een eigen SEO-beschrijving op."
+},
+"shopify/vendor_missing": {
+"title": "Vendor ontbreekt",
+"explanation": "Vendor is leeg op de hoofdrij van het product.",
+"whyPlatformCares": "Vendor helpt producten te ordenen en verbetert het filteren in de winkel.",
+"howToFix": "Voeg een Vendor/merk toe."
+},
+"shopify/product_category_missing": {
+"title": "Productcategorie ontbreekt",
+"explanation": "Product category is leeg op de hoofdrij van het product.",
+"whyPlatformCares": "Categorieën verbeteren de vindbaarheid en rapportages.",
+"howToFix": "Voeg een Product category toe."
+},
+"shopify/tags_missing": {
+"title": "Tags ontbreken",
+"explanation": "Tags is leeg op de hoofdrij van het product.",
+"whyPlatformCares": "Tags kunnen collecties vullen en helpen bij het zoeken in de winkel.",
+"howToFix": "Voeg tags toe (gescheiden door komma's)."
+},
+"shopify/description_too_short": {
+"title": "Beschrijving erg kort",
+"explanation": "Er is een beschrijving, maar die is extreem kort.",
+"whyPlatformCares": "Uitgebreidere beschrijvingen kunnen conversie en SEO verbeteren.",
+"howToFix": "Overweeg de beschrijving uit te breiden."
+},
+"shopify/status_unrecognized": {
+"title": "Ongebruikelijke Status-waarde",
+"explanation": "Status heeft een waarde buiten de gebruikelijke waarden van Shopify.",
+"whyPlatformCares": "Onverwachte waarden kunnen worden genegeerd of verwarrende resultaten geven.",
+"howToFix": "Gebruik \"Active\", \"Draft\" of \"Archived\" (of laat leeg)."
+},
+"shopify/missing_status_value": {
+"title": "Status ontbreekt",
+"explanation": "De kolom Status is aanwezig, maar de productrij heeft geen waarde.",
+"whyPlatformCares": "Shopify vereist een Status-waarde op elke productrij als de kolom is opgenomen.",
+"howToFix": "Zet Status op active, draft of archived."
+},
+"shopify/handle_generated_column": {
+"title": "URL handles gegenereerd",
+"explanation": "Het bestand had geen URL handle-kolom, dus de handles zijn gemaakt op basis van elke Title.",
+"whyPlatformCares": "Shopify herkent bestaande producten aan hun URL handle. Zonder de echte handles maakt een update nieuwe producten aan.",
+"howToFix": "Als je producten bijwerkt, voeg dan een URL handle-kolom toe met hun bestaande handles."
+},
+"shopify/handle_rewritten": {
+"title": "URL handle gewijzigd",
+"explanation": "Een URL handle bevatte tekens die Shopify niet toestaat en is herschreven.",
+"whyPlatformCares": "Shopify herkent bestaande producten aan hun URL handle, dus een gewijzigde handle wordt als nieuw product geïmporteerd.",
+"howToFix": "Controleer of de nieuwe handle overeenkomt met het product in Shopify als je het bijwerkt."
+},
+"shopify/image_url_not_https": {
+"title": "Afbeeldings-URL gebruikt http",
+"explanation": "Een afbeeldings-URL begint met http:// in plaats van https://.",
+"whyPlatformCares": "Shopify downloadt afbeeldingen van openbare https://-URL's; gewone http-links kunnen mislukken.",
+"howToFix": "Gebruik het https://-adres van de afbeelding als je host dat ondersteunt."
+},
+"shopify/invalid_charge_tax": {
+"title": "Ongeldige Charge tax",
+"explanation": "Charge tax is niet true of false.",
+"whyPlatformCares": "Shopify accepteert alleen true of false voor Charge tax.",
+"howToFix": "Wijzig de waarde in true of false."
+},
+"shopify/invalid_requires_shipping": {
+"title": "Ongeldige Requires shipping",
+"explanation": "Requires shipping is niet true of false.",
+"whyPlatformCares": "Shopify accepteert alleen true of false voor Requires shipping.",
+"howToFix": "Wijzig de waarde in true of false."
+},
+"shopify/invalid_gift_card": {
+"title": "Ongeldige Gift card",
+"explanation": "Gift card is niet true of false.",
+"whyPlatformCares": "Shopify accepteert alleen true of false voor Gift card.",
+"howToFix": "Wijzig de waarde in true of false."
+},
+"shopify/gift_card_import": {
+"title": "Cadeaubon in CSV",
+"explanation": "Een rij is gemarkeerd als cadeaubon.",
+"whyPlatformCares": "Shopify kan geen cadeaubonnen aanmaken via een CSV-import.",
+"howToFix": "Maak cadeaubonnen in plaats daarvan aan in de Shopify-beheeromgeving."
+},
+"shopify/invalid_numeric_cost": {
+"title": "Ongeldige Cost per item",
+"explanation": "Cost per item is geen geldig getal.",
+"whyPlatformCares": "Shopify heeft voor de kosten een gewoon getal nodig (zonder valutasymbool).",
+"howToFix": "Gebruik een getal zoals 7.50."
+},
+"shopify/invalid_weight": {
+"title": "Ongeldig gewicht",
+"explanation": "Weight value (grams) is geen geheel aantal grammen.",
+"whyPlatformCares": "Shopify slaat het gewicht op in grammen, zonder decimalen of eenheden.",
+"howToFix": "Vul alleen grammen in, bijv. 1,5 kg = 1500."
+},
+"shopify/invalid_weight_unit": {
+"title": "Ongeldige gewichtseenheid",
+"explanation": "Weight unit for display is niet g, kg, lb of oz.",
+"whyPlatformCares": "Shopify accepteert alleen g, kg, lb of oz als weergave-eenheid.",
+"howToFix": "Gebruik g, kg, lb of oz."
+},
+"shopify/invalid_inventory_tracker": {
+"title": "Ongeldige voorraadregistratie",
+"explanation": "Inventory tracker heeft een waarde die Shopify niet herkent.",
+"whyPlatformCares": "Shopify accepteert shopify, shipwire, amazon_marketplace_web of leeg voor voorraad die niet wordt bijgehouden.",
+"howToFix": "Gebruik shopify om de voorraad bij te houden, of laat leeg."
+},
+"shopify/invalid_fulfillment_service": {
+"title": "Ongeldige fulfillmentdienst",
+"explanation": "Fulfillment service is geen geldige dienst-handle.",
+"whyPlatformCares": "Shopify verwacht manual of de handle van een fulfillmentdienst die in je beheeromgeving is ingesteld (kleine letters, streepjes).",
+"howToFix": "Gebruik manual, of de handle van je eigen dienst."
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category lijkt op een Google-ID",
+"explanation": "Product category bevat alleen cijfers, zoals een Google-productcategorie-ID.",
+"whyPlatformCares": "Product category van Shopify gebruikt de eigen taxonomie van Shopify; Google-categorie-ID's horen in een aparte kolom.",
+"howToFix": "Gebruik een pad of ID uit de Shopify-taxonomie en verplaats Google-ID's naar „Google Shopping / Google product category”."
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "Verpakkingsafmetingen onvolledig",
+"explanation": "Slechts een deel van lengte, breedte, hoogte en eenheid van de verpakking is ingevuld.",
+"whyPlatformCares": "Shopify weigert een rij waarin de verpakkingsafmetingen maar gedeeltelijk zijn ingevuld.",
+"howToFix": "Vul alle vier verpakkingsvelden in, of maak alle vier leeg."
+},
+"shopify/too_many_tags": {
+"title": "Te veel tags",
+"explanation": "Een product heeft meer dan 250 tags.",
+"whyPlatformCares": "Shopify staat maximaal 250 tags per product toe.",
+"howToFix": "Verwijder tags tot er 250 of minder over zijn."
+},
+"woocommerce/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Een of meer verplichte WooCommerce-importkolommen ontbreken in de koprij.",
+"whyPlatformCares": "WooCommerce is afhankelijk van specifieke kolomnamen om velden bij het importeren te koppelen.",
+"howToFix": "Exporteer een nieuwe voorbeeld-CSV uit WooCommerce en controleer of alle verplichte kolommen aanwezig en exact gespeld zijn."
+},
+"woocommerce/unknown_header": {
+"title": "Onbekende kolom",
+"explanation": "Deze kolom wordt niet herkend door de WooCommerce-importer.",
+"whyPlatformCares": "Onbekende kolommen worden genegeerd en kunnen gegevensproblemen verbergen.",
+"howToFix": "Verwijder de kolom of hernoem hem naar een ondersteunde WooCommerce-importkop."
+},
+"woocommerce/missing_type": {
+"title": "Producttype ontbreekt",
+"explanation": "De kolom Type is verplicht en bepaalt hoe de rij wordt gelezen.",
+"whyPlatformCares": "WooCommerce gebruikt Type om te bepalen of een rij een product, een variatie of een hoofdgroepering is.",
+"howToFix": "Zet Type op elke rij op simple, variable, variation, grouped of external."
+},
+"woocommerce/invalid_type": {
+"title": "Ongeldig producttype",
+"explanation": "De waarde van Type is geen van de door WooCommerce ondersteunde typen.",
+"whyPlatformCares": "Ongeldige typen kunnen ervoor zorgen dat rijen verkeerd worden geïmporteerd of worden geweigerd.",
+"howToFix": "Gebruik een van: simple, variable, variation, grouped, external."
+},
+"woocommerce/missing_name": {
+"title": "Productnaam ontbreekt",
+"explanation": "Productrijen die geen variatie zijn, moeten een Name hebben.",
+"whyPlatformCares": "Producten zonder naam zijn onbruikbaar in de winkel.",
+"howToFix": "Geef alle rijen die geen variatie zijn een Name."
+},
+"woocommerce/variation_missing_parent": {
+"title": "Variatie zonder koppeling aan hoofdproduct",
+"explanation": "Variatierijen moeten via het Parent-veld aan een variabel hoofdproduct zijn gekoppeld.",
+"whyPlatformCares": "Losse variaties kunnen niet goed worden geïmporteerd.",
+"howToFix": "Zet Parent op de ID van het hoofdproduct (of schakel het automatisch aanmaken van hoofdproducten in bij de importvoorinstelling voor variabele producten)."
+},
+"woocommerce/variation_missing_attributes": {
+"title": "Variatie zonder attributen",
+"explanation": "Variatierijen hebben naam/waarde-paren van attributen nodig om een geldige variatiecombinatie te vormen.",
+"whyPlatformCares": "Zonder attributen kan WooCommerce geen aparte variatie opbouwen.",
+"howToFix": "Vul op elke variatierij Attribute 1 name (bijv. Size) en Attribute 1 value(s) (bijv. M) in."
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "Dubbele variatiecombinatie",
+"explanation": "Twee of meer variaties onder dezelfde Parent hebben dezelfde attribuutcombinatie.",
+"whyPlatformCares": "Dubbele combinaties kunnen elkaar overschrijven of onverwacht samenvoegen.",
+"howToFix": "Zorg dat elke variatie onder haar hoofdproduct een unieke combinatie van attribuutwaarden heeft."
+},
+"woocommerce/missing_sku": {
+"title": "SKU ontbreekt",
+"explanation": "Een ontbrekende SKU maakt updates minder betrouwbaar en kan het bijhouden van voorraad verstoren.",
+"whyPlatformCares": "SKU's worden gebruikt om producten te herkennen, bij te werken en voor koppelingen.",
+"howToFix": "Geef waar mogelijk elk product/elke variatie een unieke SKU."
+},
+"woocommerce/duplicate_sku": {
+"title": "Risico op dubbele SKU",
+"explanation": "Twee of meer rijen hebben dezelfde SKU.",
+"whyPlatformCares": "Bij het importeren kunnen dubbele SKU's bestaande producten overschrijven of gegevens aan het verkeerde artikel koppelen.",
+"howToFix": "Maak SKU's uniek. Heb je bewust dubbele nodig, splits dan de catalogi of gebruik een consistente hoofd/sub-structuur."
+},
+"woocommerce/invalid_regular_price": {
+"title": "Ongeldige normale prijs",
+"explanation": "Regular price moet een geldig getal zijn.",
+"whyPlatformCares": "Ongeldige prijzen laten de import mislukken of tonen verkeerde prijzen in de winkel.",
+"howToFix": "Gebruik numerieke waarden zoals 19.99 (zonder valutasymbolen)."
+},
+"woocommerce/invalid_sale_price": {
+"title": "Ongeldige actieprijs",
+"explanation": "Sale price moet een geldig getal zijn.",
+"whyPlatformCares": "Een ongeldige actieprijs kan worden genegeerd of prijsproblemen veroorzaken.",
+"howToFix": "Gebruik numerieke waarden zoals 14.99 (zonder valutasymbolen)."
+},
+"woocommerce/missing_image": {
+"title": "Afbeelding ontbreekt",
+"explanation": "Deze productrij heeft geen afbeeldings-URL.",
+"whyPlatformCares": "De import kan zonder afbeeldingen slagen, maar zonder afbeeldingen dalen de kwaliteit van de listing en de conversie.",
+"howToFix": "Geef voor producten een URL op in Images (of meerdere URL's gescheiden door komma's)."
+},
+"woocommerce/invalid_bool": {
+"title": "Ongeldige booleaanse waarde",
+"explanation": "Booleaanse velden zoals Published, In stock? en Is featured? verwachten 1/0 of true/false.",
+"whyPlatformCares": "De WooCommerce-importer kan onverwachte waarden verkeerd lezen, waardoor producten verborgen of verkeerd ingesteld raken.",
+"howToFix": "Gebruik 1 (ja/waar) of 0 (nee/onwaar). Gangbare varianten (yes, no, true, false) kunnen we automatisch normaliseren."
+},
+"woocommerce/invalid_price": {
+"title": "Ongeldige prijswaarde",
+"explanation": "Een prijsveld bevat een niet-numerieke waarde.",
+"whyPlatformCares": "WooCommerce verwacht gewone decimale prijzen. Valutasymbolen of tekst laten de import mislukken of zetten prijzen op nul.",
+"howToFix": "Gebruik gewone decimale getallen zoals 19.99 (zonder valutasymbolen, komma's of tekst)."
+},
+"woocommerce/invalid_int": {
+"title": "Ongeldig geheel getal",
+"explanation": "Een veld voor gehele getallen (zoals Stock) bevat een waarde die geen geheel getal is.",
+"whyPlatformCares": "WooCommerce verwacht gehele getallen voor voorraadaantallen. Decimalen kunnen worden afgekapt of geweigerd.",
+"howToFix": "Gebruik een geheel getal zoals 0, 5 of 12."
+},
+"woocommerce/invalid_visibility": {
+"title": "Ongeldige zichtbaarheidswaarde",
+"explanation": "Visibility in catalog moet een van de vier geaccepteerde waarden hebben.",
+"whyPlatformCares": "Een onbekende zichtbaarheidswaarde kan het product standaard zichtbaar maken of de import laten mislukken.",
+"howToFix": "Gebruik een van: visible, catalog, search of hidden."
+},
+"woocommerce/invalid_image_url": {
+"title": "Ongeldige afbeeldings-URL",
+"explanation": "Een of meer URL's in de kolom Images zijn geen geldige http(s)-URL's.",
+"whyPlatformCares": "WooCommerce haalt afbeeldingen tijdens het importeren op via de opgegeven URL's. Ongeldige URL's leveren producten zonder afbeeldingen op.",
+"howToFix": "Gebruik volledige https://-URL's gescheiden door komma's. Zorg dat de afbeeldingen openbaar toegankelijk zijn."
+},
+"woocommerce/sale_price_not_lower": {
+"title": "Actieprijs niet lager dan normale prijs",
+"explanation": "Sale price moet lager zijn dan Regular price om de korting zinvol te maken.",
+"whyPlatformCares": "WooCommerce kan beide prijzen als doorgestreepte/actieprijs tonen. Is de actieprijs gelijk aan of hoger dan de normale prijs, dan is de weergave verwarrend of onjuist.",
+"howToFix": "Zet Sale price op een waarde lager dan Regular price, of maak het veld Sale price leeg."
+},
+"woocommerce/invalid_value": {
+"title": "Onbekende waarde",
+"explanation": "Een statuskolom heeft een waarde die WooCommerce niet herkent.",
+"whyPlatformCares": "WooCommerce accepteert alleen bepaalde waarden voor Published, In stock?, Backorders allowed? en Tax status; andere worden genegeerd of geweigerd.",
+"howToFix": "Gebruik een van de waarden die in het probleem worden genoemd."
+},
+"woocommerce/variation_multiple_values": {
+"title": "Variatie met meerdere waarden",
+"explanation": "Een variatierij bevat meer dan één waarde voor een attribuut.",
+"whyPlatformCares": "Elke WooCommerce-variatie is één specifieke combinatie en heeft dus één waarde per attribuut.",
+"howToFix": "Zet alle waarden op de hoofdrij en één waarde op elke variatierij."
+},
+"woocommerce/parent_not_in_file": {
+"title": "Hoofdproduct niet in bestand",
+"explanation": "Een variatie verwijst naar een hoofdproduct dat niet in dit bestand staat.",
+"whyPlatformCares": "WooCommerce koppelt variaties aan een bestaand variabel product; bestaat het hoofdproduct nog niet, dan wordt de variatie overgeslagen.",
+"howToFix": "Importeer eerst het hoofdproduct, of neem de rij ervan op in dit bestand."
+},
+"etsy/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Een of meer verplichte kolommen voor het bulkuploaden van Etsy-listings ontbreken.",
+"whyPlatformCares": "De Etsy-importer heeft exacte koppen nodig om listingvelden goed te koppelen.",
+"howToFix": "Exporteer een nieuwe Etsy-listing-CSV en controleer of de verplichte koppen aanwezig en ongewijzigd zijn."
+},
+"etsy/invalid_price": {
+"title": "Ongeldige prijs",
+"explanation": "De prijs moet een geldig getal zijn.",
+"whyPlatformCares": "Ongeldige prijzen kunnen ervoor zorgen dat de listing wordt afgewezen.",
+"howToFix": "Gebruik numerieke waarden zoals 19.99 (zonder valutasymbolen)."
+},
+"etsy/title_too_long": {
+"title": "Titel te lang",
+"explanation": "Etsy-titels hebben een maximale lengte.",
+"whyPlatformCares": "Te lange titels kunnen, afhankelijk van de importer, worden afgekapt of geweigerd.",
+"howToFix": "Kort de titel in (we kunnen hem veilig inkorten tot de maximale lengte)."
+},
+"etsy/tags_too_many": {
+"title": "Te veel tags",
+"explanation": "Etsy-listings ondersteunen maximaal 13 tags.",
+"whyPlatformCares": "Tags boven de limiet worden genegeerd en verslechteren de zoekoptimalisatie.",
+"howToFix": "Houd de 13 beste tags over (we kunnen automatisch tot 13 beperken)."
+},
+"etsy/too_many_tags": {
+"title": "Te veel tags",
+"explanation": "Etsy-listings ondersteunen maximaal 13 tags.",
+"whyPlatformCares": "Tags boven de limiet worden genegeerd en verslechteren de zoekoptimalisatie.",
+"howToFix": "Houd de 13 beste tags over (we kunnen automatisch tot 13 beperken)."
+},
+"etsy/tag_too_long": {
+"title": "Tag langer dan 20 tekens",
+"explanation": "Etsy beperkt elke tag tot maximaal 20 tekens.",
+"whyPlatformCares": "Etsy weigert tags die langer zijn dan 20 tekens.",
+"howToFix": "Kort de betreffende tags in tot 20 tekens of minder."
+},
+"etsy/missing_title": {
+"title": "Listingtitel ontbreekt",
+"explanation": "Elke Etsy-listing heeft een titel nodig.",
+"whyPlatformCares": "Listings zonder titel kunnen niet worden gepubliceerd of geïmporteerd.",
+"howToFix": "Geef een beschrijvende titel op (maximaal 140 tekens)."
+},
+"etsy/missing_price": {
+"title": "Prijs ontbreekt",
+"explanation": "Elke Etsy-listing heeft een prijs nodig.",
+"whyPlatformCares": "Listings zonder prijs kunnen niet worden gepubliceerd.",
+"howToFix": "Geef de listingprijs op als gewoon decimaal getal (bijv. 19.99)."
+},
+"etsy/invalid_quantity": {
+"title": "Ongeldig aantal",
+"explanation": "Het aantal moet een niet-negatief geheel getal zijn.",
+"whyPlatformCares": "Ongeldige aantallen laten het importeren of publiceren van listings mislukken.",
+"howToFix": "Gebruik een geheel getal zoals 0, 1 of 10."
+},
+"etsy/invalid_currency": {
+"title": "Ongeldige valutacode",
+"explanation": "De valuta moet een geldige ISO 4217-code van 3 letters zijn (bijv. USD, GBP, EUR).",
+"whyPlatformCares": "Een ongeldige valutacode kan de import laten mislukken of prijzen verkeerd weergeven.",
+"howToFix": "Gebruik een standaard valutacode van 3 letters (we kunnen die automatisch in hoofdletters zetten)."
+},
+"etsy/invalid_image_url": {
+"title": "Ongeldige afbeeldings-URL",
+"explanation": "Een of meer afbeeldings-URL's zijn geen geldige http(s)-URL's.",
+"whyPlatformCares": "Etsy kan geen afbeeldingen ophalen van ongeldige URL's, waardoor listings zonder foto's blijven.",
+"howToFix": "Gebruik volledige https://-URL's naar openbaar toegankelijke afbeeldingen, gescheiden door komma's."
+},
+"etsy/duplicate_tags": {
+"title": "Dubbele tags",
+"explanation": "Dubbele tags verspillen beperkte tagplekken.",
+"whyPlatformCares": "Herhaalde tags verkleinen de vindbaarheid.",
+"howToFix": "Verwijder de dubbele (we kunnen automatisch ontdubbelen met behoud van volgorde)."
+},
+"etsy/missing_shipping_profile": {
+"title": "Verzendprofiel ontbreekt",
+"explanation": "Om te publiceren is een verzendprofiel (of gelijkwaardige verzendvelden) vereist.",
+"whyPlatformCares": "Listings zonder verzendinstellingen kunnen niet worden gepubliceerd.",
+"howToFix": "Geef een geldige ID/naam van een verzendprofiel op, of de verzendvelden die je export vereist."
+},
+"etsy/duplicate_listing_id": {
+"title": "Risico op dubbele Listing ID",
+"explanation": "Twee of meer rijen hebben dezelfde Listing ID.",
+"whyPlatformCares": "Dubbele ID's kunnen bestaande listings overschrijven in plaats van nieuwe te maken.",
+"howToFix": "Zorg voor een unieke Listing ID bij nieuwe listings, of stel hem bewust in bij het bijwerken van bestaande listings."
+},
+"etsy/duplicate_sku": {
+"title": "Risico op dubbele SKU",
+"explanation": "Twee of meer listings hebben dezelfde SKU.",
+"whyPlatformCares": "Dubbele SKU's kunnen verwarring veroorzaken in de voorraad en koppelingen.",
+"howToFix": "Maak SKU's waar mogelijk uniek."
+},
+"etsy/missing_required_field": {
+"title": "Verplicht veld ontbreekt",
+"explanation": "Een verplicht Etsy-veld ontbreekt.",
+"whyPlatformCares": "Ontbrekende verplichte velden zorgen ervoor dat de listing wordt afgewezen.",
+"howToFix": "Vul het ontbrekende verplichte veld in zoals aangegeven in de details van het probleem."
+},
+"etsy/unknown_header": {
+"title": "Onbekende kolom",
+"explanation": "Deze kolom wordt niet herkend door de Etsy-importer.",
+"whyPlatformCares": "Onbekende kolommen worden genegeerd en kunnen gegevensproblemen verbergen.",
+"howToFix": "Verwijder de kolom of hernoem hem naar een ondersteunde Etsy-kop."
+},
+"etsy/too_many_materials": {
+"title": "Te veel materialen",
+"explanation": "Een listing heeft meer dan 13 materialen.",
+"whyPlatformCares": "Etsy staat maximaal 13 materialen per listing toe; de rest wordt bij bulkbewerking geweigerd.",
+"howToFix": "Houd de 13 belangrijkste materialen over."
+},
+"etsy/quantity_too_high": {
+"title": "Aantal boven 999",
+"explanation": "Het aantal is hoger dan 999.",
+"whyPlatformCares": "Etsy beperkt het aantal per listing tot 999.",
+"howToFix": "Zet Quantity op 999 of minder."
+},
+"ebay/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Een of meer verplichte eBay File Exchange-kolommen ontbreken in de koprij.",
+"whyPlatformCares": "eBay File Exchange heeft specifieke kolomnamen nodig om de velden bij het uploaden goed te koppelen.",
+"howToFix": "Gebruik een eBay File Exchange-sjabloon en controleer of de verplichte kolommen (Title, StartPrice, Quantity) aanwezig zijn."
+},
+"ebay/invalid_action": {
+"title": "Ongeldige Action-waarde",
+"explanation": "De waarde in de kolom Action is geen van de bewerkingen die eBay accepteert.",
+"whyPlatformCares": "eBay File Exchange gebruikt Action om te bepalen of een listing wordt toegevoegd (Add), herzien (Revise), verwijderd of beëindigd (End). Een ongeldige waarde zorgt ervoor dat de hele rij wordt geweigerd.",
+"howToFix": "Gebruik een van: Add, Revise, Relist, End, VerifyAdd of Status."
+},
+"ebay/missing_title": {
+"title": "Listingtitel ontbreekt",
+"explanation": "Het veld Title is verplicht voor alle eBay-listings.",
+"whyPlatformCares": "Listings zonder titel kunnen niet op eBay worden gepubliceerd.",
+"howToFix": "Geef een beschrijvende listingtitel op van maximaal 80 tekens."
+},
+"ebay/title_too_long": {
+"title": "Titel langer dan 80 tekens",
+"explanation": "eBay hanteert een harde limiet van 80 tekens voor listingtitels.",
+"whyPlatformCares": "Titels van meer dan 80 tekens worden door eBay File Exchange geweigerd en kunnen niet worden geüpload.",
+"howToFix": "Kort de titel in tot 80 tekens of minder. Richt je op de zoekwoorden die kopers gebruiken."
+},
+"ebay/missing_price": {
+"title": "StartPrice ontbreekt",
+"explanation": "StartPrice is verplicht voor alle eBay-listings.",
+"whyPlatformCares": "Listings zonder prijs worden bij het uploaden geweigerd.",
+"howToFix": "Geef een StartPrice op in decimale notatie (bijv. 19.99)."
+},
+"ebay/invalid_price": {
+"title": "Ongeldige StartPrice",
+"explanation": "StartPrice moet een geldig decimaal getal zijn.",
+"whyPlatformCares": "Ongeldige prijzen laten het uploaden van listingrijen mislukken.",
+"howToFix": "Gebruik een gewoon decimaal getal zoals 19.99, zonder valutasymbolen of komma's."
+},
+"ebay/invalid_quantity": {
+"title": "Ongeldige Quantity",
+"explanation": "Quantity moet een niet-negatief geheel getal zijn.",
+"whyPlatformCares": "eBay vereist voor alle listings een numeriek aantal. Ongeldige waarden laten het uploaden mislukken.",
+"howToFix": "Gebruik een geheel getal zoals 0, 1 of 10."
+},
+"ebay/invalid_condition_id": {
+"title": "Onbekende ConditionID",
+"explanation": "De waarde van ConditionID komt niet overeen met een standaard eBay-staatcode.",
+"whyPlatformCares": "eBay gebruikt ConditionID om de staat van het object aan kopers te tonen. Onbekende ID's kunnen worden geweigerd of een verkeerde staat tonen.",
+"howToFix": "Gebruik een standaard eBay-ConditionID, bijvoorbeeld 1000=Nieuw, 1500=Nieuw (overig), 2000=Gecertificeerd gereviseerd, 2500=Gereviseerd door verkoper, 3000=Gebruikt, 7000=Voor onderdelen of werkt niet. Welke ID's zijn toegestaan, verschilt per categorie."
+},
+"ebay/invalid_duration": {
+"title": "Ongeldige Duration",
+"explanation": "De waarde van Duration komt niet overeen met een bekende eBay-looptijd.",
+"whyPlatformCares": "Een onbekende looptijd kan standaard een korte veiling opleveren of de listing laten weigeren.",
+"howToFix": "Gebruik GTC (Good 'Til Cancelled) voor listings met vaste prijs, of Days_1, Days_3, Days_5, Days_7 of Days_10 voor veilingen."
+},
+"ebay/invalid_format": {
+"title": "Ongeldig listingformaat",
+"explanation": "De waarde van Format is geen bekend eBay-listingtype.",
+"whyPlatformCares": "Het veld Format vertelt eBay hoe de listing moet worden weergegeven. Een ongeldige waarde kan de rij laten mislukken.",
+"howToFix": "Gebruik FixedPrice voor Nu kopen-listings of Auction voor veilingen."
+},
+"ebay/too_many_images": {
+"title": "Te veel afbeeldingen",
+"explanation": "eBay staat maximaal 24 foto's per listing toe.",
+"whyPlatformCares": "eBay weigert of laat foto's boven de limiet van 24 weg.",
+"howToFix": "Breng de PictureURL-lijst terug tot 24 URL's of minder, gescheiden door |."
+},
+"ebay/invalid_picture_url": {
+"title": "Ongeldige foto-URL",
+"explanation": "Een of meer foto-URL's zijn geen geldige http(s)-URL's.",
+"whyPlatformCares": "eBay haalt afbeeldingen bij het plaatsen op via de opgegeven URL's. Ongeldige URL's leveren listings zonder afbeeldingen op.",
+"howToFix": "Gebruik volledige https://-URL's naar openbaar toegankelijke afbeeldingen. Scheid meerdere URL's met verticale streepjes (|)."
+},
+"ebay/invalid_dispatch_time": {
+"title": "Ongeldige DispatchTimeMax",
+"explanation": "DispatchTimeMax moet een niet-negatief geheel getal zijn dat je verwerkingstijd in dagen aangeeft.",
+"whyPlatformCares": "eBay toont de verwerkingstijd aan kopers. Een ongeldige waarde kan het uploaden van de listing verhinderen.",
+"howToFix": "Gebruik een geheel getal zoals 1, 2 of 3 (dagen tot verzending)."
+},
+"ebay/duplicate_sku": {
+"title": "Dubbele CustomLabel (SKU)",
+"explanation": "Twee of meer rijen hebben dezelfde CustomLabel-waarde.",
+"whyPlatformCares": "Dubbele CustomLabels in een Add-actie kunnen tegenstrijdige listings opleveren. Gebruik de actie Revise om bestaande listings bij te werken.",
+"howToFix": "Zorg dat elke listing een unieke CustomLabel heeft, of gebruik Action=Revise om bestaande listings bij te werken."
+},
+"ebay/variation_specifics_mismatch": {
+"title": "Variatiekenmerken komen niet overeen",
+"explanation": "VariationSpecificsName en VariationSpecificsValue moeten allebei ingevuld of allebei leeg zijn.",
+"whyPlatformCares": "eBay heeft overeenkomende naam/waarde-paren nodig om variatieattributen op te bouwen. Een mismatch voorkomt dat de variatie wordt aangemaakt.",
+"howToFix": "Geef op elke variatierij zowel VariationSpecificsName (bijv. 'Color|Size') als VariationSpecificsValue (bijv. 'Blue|Medium') op."
+},
+"ebay/duplicate_variation_combo": {
+"title": "Dubbele variatiecombinatie",
+"explanation": "Twee of meer variatierijen hebben binnen dezelfde listing dezelfde VariationSpecifics-combinatie.",
+"whyPlatformCares": "Dubbele variatiecombinaties overschrijven elkaar bij het uploaden, met gegevensverlies als gevolg.",
+"howToFix": "Zorg dat elke variatierij een unieke combinatie van VariationSpecificsName en VariationSpecificsValue heeft."
+},
+"ebay/missing_category_id": {
+"title": "Category is leeg",
+"explanation": "Een nieuwe listing heeft geen eBay-categorienummer.",
+"whyPlatformCares": "eBay heeft voor elke nieuwe listing een categorie nodig; rijen zonder categorie worden geweigerd.",
+"howToFix": "Zoek de numerieke categorie-ID op in de categorieboom van eBay en vul die in op elke rij met een nieuwe listing."
+},
+"ebay/invalid_category_id": {
+"title": "Ongeldige Category",
+"explanation": "De waarde van Category is geen numerieke eBay-categorie-ID.",
+"whyPlatformCares": "eBay-categorie-ID's zijn altijd numeriek. Een categorienaam wordt bij het uploaden geweigerd.",
+"howToFix": "Gebruik de numerieke ID uit de categorieboom van eBay (bijv. 9355 voor Mobiele telefoons en smartphones)."
+},
+"ebay/missing_action_column": {
+"title": "Geen Action-kolom",
+"explanation": "Het bestand heeft geen Action-kolom.",
+"whyPlatformCares": "eBay-uploads gebruiken de eerste kolom (Action, met site en valuta in de kop) om te bepalen wat er met elke rij moet gebeuren.",
+"howToFix": "Begin met een uploadsjabloon uit Seller Hub en behoud de eerste kolom."
+},
+"ebay/missing_action": {
+"title": "Action ontbreekt",
+"explanation": "Een listingrij heeft geen Action.",
+"whyPlatformCares": "Alleen variatierijen mogen Action leeg laten; andere rijen worden door eBay overgeslagen.",
+"howToFix": "Zet Action op Add, Revise, Relist of End."
+},
+"ebay/missing_item_id": {
+"title": "ItemID ontbreekt",
+"explanation": "Een Revise-, Relist- of End-rij heeft geen ItemID.",
+"whyPlatformCares": "eBay heeft het objectnummer nodig om de listing te vinden die moet worden gewijzigd.",
+"howToFix": "Voeg het eBay-objectnummer toe in een ItemID-kolom."
+},
+"ebay/missing_end_code": {
+"title": "EndCode ontbreekt",
+"explanation": "Een End-rij heeft geen EndCode.",
+"whyPlatformCares": "eBay vraagt waarom een listing voortijdig wordt beëindigd.",
+"howToFix": "Gebruik NotAvailable, LostOrBroken, Incorrect of OtherListingError."
+},
+"ebay/missing_condition": {
+"title": "Staat ontbreekt",
+"explanation": "Een nieuwe listing heeft geen ConditionID.",
+"whyPlatformCares": "De meeste eBay-categorieën vereisen de staat van het object.",
+"howToFix": "Geef een ConditionID op, zoals 1000 (Nieuw) of 3000 (Gebruikt)."
+},
+"ebay/fixed_price_not_gtc": {
+"title": "Vaste prijs niet GTC",
+"explanation": "Een listing met vaste prijs heeft een andere looptijd dan GTC.",
+"whyPlatformCares": "eBay laat alle listings met vaste prijs Good 'Til Cancelled lopen.",
+"howToFix": "Zet Duration op GTC."
+},
+"ebay/invalid_relationship_details": {
+"title": "Ongeldige RelationshipDetails",
+"explanation": "RelationshipDetails heeft niet de Name=Value-notatie van eBay.",
+"whyPlatformCares": "eBay bouwt de variatiekeuze op uit RelationshipDetails; een verkeerd opgemaakte waarde zorgt ervoor dat de listing wordt geweigerd.",
+"howToFix": "Hoofdrij: Color=Blue;Red|Size=M;L. Variatie: Color=Blue|Size=M."
+},
+"ebay/variation_without_parent": {
+"title": "Variatie zonder hoofdrij",
+"explanation": "Een variatierij volgt niet op een hoofdrij van een listing.",
+"whyPlatformCares": "eBay koppelt Relationship=Variation-rijen aan de hoofdrij direct erboven.",
+"howToFix": "Zet de variatierijen direct onder hun hoofdrij."
+},
+"ebay/variation_value_not_in_parent": {
+"title": "Variatiewaarde niet opgegeven",
+"explanation": "Een variatie gebruikt een waarde die niet in de hoofdrij staat.",
+"whyPlatformCares": "eBay accepteert alleen variatiewaarden die in de RelationshipDetails van de hoofdrij zijn opgegeven.",
+"howToFix": "Voeg de waarde toe aan de hoofdrij of corrigeer de variatie."
+},
+"amazon/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Een of meer verplichte kolommen uit het Amazon-flatfile ontbreken in de koprij.",
+"whyPlatformCares": "De flatfileverwerking van Amazon heeft exacte kolomnamen nodig. Bij ontbrekende kolommen wordt het bestand geweigerd.",
+"howToFix": "Gebruik een Inventory Loader- of categoriesjabloon van Amazon; elk bestand heeft een sku-kolom nodig."
+},
+"amazon/missing_sku": {
+"title": "SKU ontbreekt",
+"explanation": "Het veld sku is verplicht op elke Amazon-voorraadrij.",
+"whyPlatformCares": "Amazon gebruikt de SKU om je listings uniek te herkennen. Rijen zonder SKU worden geweigerd.",
+"howToFix": "Geef elke productrij een unieke SKU (maximaal 40 tekens)."
+},
+"amazon/sku_too_long": {
+"title": "SKU langer dan 40 tekens",
+"explanation": "Amazon beperkt SKU's tot maximaal 40 tekens.",
+"whyPlatformCares": "SKU's van meer dan 40 tekens worden door de flatfileverwerking geweigerd.",
+"howToFix": "Kort de SKU in tot 40 tekens of minder en houd hem uniek."
+},
+"amazon/duplicate_sku": {
+"title": "Dubbele SKU",
+"explanation": "Twee of meer rijen in dit bestand hebben dezelfde SKU.",
+"whyPlatformCares": "Bij dubbele SKU's overschrijft de ene rij de andere tijdens de verwerking, waardoor voorraad- of prijsgegevens verloren kunnen gaan.",
+"howToFix": "Zorg dat elke SKU maar één keer per bestand voorkomt. Gebruik add-delete='d' om een listing expliciet te verwijderen."
+},
+"amazon/missing_item_name": {
+"title": "item-name ontbreekt",
+"explanation": "Het veld item-name (producttitel) is verplicht voor Amazon-listings.",
+"whyPlatformCares": "Amazon heeft een producttitel nodig om listings in zoekresultaten en op productpagina's te tonen.",
+"howToFix": "Geef een beschrijvende producttitel op in de kolom item-name (maximaal 500 tekens)."
+},
+"amazon/item_name_too_long": {
+"title": "item-name te lang",
+"explanation": "Amazon staat meestal maximaal 500 tekens toe voor item-name.",
+"whyPlatformCares": "Titels boven de limiet kunnen, afhankelijk van het categoriesjabloon, worden afgekapt of geweigerd.",
+"howToFix": "Kort item-name in tot 500 tekens of minder. Richt je op merk, producttype en belangrijkste kenmerken."
+},
+"amazon/missing_price": {
+"title": "Prijs ontbreekt",
+"explanation": "price is leeg op een rij die een aanbieding toevoegt of bijwerkt.",
+"whyPlatformCares": "Bestaande aanbiedingen houden hun huidige prijs, maar een nieuwe aanbieding zonder prijs kan niet live gaan.",
+"howToFix": "Geef een geldige prijs op in decimale notatie (bijv. 29.99)."
+},
+"amazon/invalid_price": {
+"title": "Ongeldige prijs",
+"explanation": "De waarde van price is geen geldig decimaal getal.",
+"whyPlatformCares": "Bij ongeldige prijzen weigert de flatfileverwerking van Amazon de rij.",
+"howToFix": "Gebruik een gewoon decimaal getal zoals 29.99 (zonder dollarteken, komma's of tekst)."
+},
+"amazon/invalid_quantity": {
+"title": "Ongeldig aantal",
+"explanation": "De waarde van quantity moet een niet-negatief geheel getal zijn.",
+"whyPlatformCares": "Amazon weigert rijen waarvan het aantal geen geldig getal is. Negatieve aantallen worden niet geaccepteerd.",
+"howToFix": "Gebruik een geheel getal zoals 0, 5 of 100."
+},
+"amazon/invalid_product_id_type": {
+"title": "Ongeldig product-id-type",
+"explanation": "De waarde van product-id-type is geen bekend Amazon-ID-type.",
+"whyPlatformCares": "Amazon gebruikt product-id-type om het veld product-id te interpreteren (bijv. als ASIN of UPC). Een ongeldig type laat de productkoppeling mislukken.",
+"howToFix": "Inventory Loader: 1 (ASIN), 2 (ISBN), 3 (UPC), 4 (EAN). Categoriesjablonen: ASIN, UPC, EAN, ISBN of GTIN."
+},
+"amazon/invalid_item_condition": {
+"title": "Ongeldige item-condition",
+"explanation": "De item-condition-code is geen bekende Amazon-staatwaarde.",
+"whyPlatformCares": "Amazon toont de staat aan kopers en gebruikt hem om listings in te delen. Een onbekende code kan worden geweigerd.",
+"howToFix": "Gebruik een numerieke Amazon-staatcode: 11=Nieuw, 10=Gereviseerd, 1=Gebruikt - Zo goed als nieuw, 2=Gebruikt - Zeer goed, 3=Gebruikt - Goed, 4=Gebruikt - Acceptabel."
+},
+"amazon/min_above_max_price": {
+"title": "Minimumprijs hoger dan maximum",
+"explanation": "minimum-seller-allowed-price is hoger dan maximum-seller-allowed-price, dus geen enkele prijs voldoet aan beide.",
+"whyPlatformCares": "Amazon weigert het prijsbereik en deactiveert elke aanbieding die erbuiten valt.",
+"howToFix": "Wissel de twee waarden om, of maak er een leeg."
+},
+"amazon/price_outside_allowed_range": {
+"title": "Prijs buiten toegestaan bereik",
+"explanation": "De prijs ligt onder minimum-seller-allowed-price of boven maximum-seller-allowed-price.",
+"whyPlatformCares": "Amazon deactiveert aanbiedingen met een prijs buiten het bereik dat je hebt ingesteld, waardoor het artikel niet meer wordt verkocht.",
+"howToFix": "Pas de prijs aan, of verruim het minimum-/maximumbereik."
+},
+"amazon/invalid_add_delete": {
+"title": "Ongeldige add-delete-waarde",
+"explanation": "Het veld add-delete moet 'a' (toevoegen of bijwerken), 'd' (aanbieding verwijderen) of 'x' (aanbieding en productgegevens verwijderen) zijn.",
+"whyPlatformCares": "Bij een ongeldige add-delete-waarde slaat de verwerking van Amazon de rij over.",
+"howToFix": "Gebruik 'a' om een aanbieding toe te voegen of bij te werken, 'd' om de aanbieding te verwijderen of 'x' om hem samen met de productgegevens te verwijderen."
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "Ongeldige fulfillment-center-id",
+"explanation": "De waarde van fulfillment-center-id is geen bekend Amazon-fulfillmenttype.",
+"whyPlatformCares": "Het fulfillmentkanaal bepaalt of Amazon (FBA) of jij (MFN) de bestelling verzendt. Een ongeldige waarde kan een verkeerde standaard opleveren.",
+"howToFix": "Gebruik DEFAULT voor verzending door de verkoper (je verzendt zelf), of AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN voor FBA in die regio."
+},
+"amazon/invalid_image_url": {
+"title": "Ongeldige afbeeldings-URL",
+"explanation": "image-url is geen geldige http(s)-URL.",
+"whyPlatformCares": "Amazon haalt productafbeeldingen op via de opgegeven URL. Een ongeldige URL levert een listing zonder afbeeldingen op, wat de conversie verlaagt.",
+"howToFix": "Gebruik een volledige https://-URL naar een openbaar toegankelijke productafbeelding (JPEG of PNG, minimaal 500×500 px aanbevolen)."
+},
+"amazon/description_too_long": {
+"title": "item-description te lang",
+"explanation": "item-description overschrijdt de gebruikelijke Amazon-limiet van 2000 tekens.",
+"whyPlatformCares": "Beschrijvingen boven de limiet kunnen, afhankelijk van het categoriesjabloon, worden afgekapt of geweigerd.",
+"howToFix": "Kort item-description in tot 2000 tekens of minder."
+},
+"amazon/brand_name_too_long": {
+"title": "brand-name te lang",
+"explanation": "brand-name overschrijdt de Amazon-limiet van 50 tekens.",
+"whyPlatformCares": "Merknamen boven de limiet kunnen worden afgekapt of geweigerd.",
+"howToFix": "Kort brand-name in tot 50 tekens of minder."
+},
+"amazon/invalid_boolean_field": {
+"title": "Ongeldige waarde in booleaans veld",
+"explanation": "Een booleaans verzendveld (will-ship-internationally of expedited-shipping) bevat een andere waarde dan 'y' of 'n'.",
+"whyPlatformCares": "De flatfileverwerking van Amazon verwacht in deze velden precies 'y', 'n' of leeg. Ongeldige waarden worden zonder melding genegeerd of zorgen dat de rij wordt geweigerd.",
+"howToFix": "Gebruik 'y' om de verzendoptie in te schakelen of 'n' om hem uit te schakelen, of laat het veld leeg om je accountinstellingen te gebruiken."
+},
+"amazon/product_id_scientific_notation": {
+"title": "Barcode verminkt door een spreadsheet",
+"explanation": "Een product-id ziet eruit als 1.23457E+11: een spreadsheet heeft de barcode omgezet naar wetenschappelijke notatie.",
+"whyPlatformCares": "De cijfers na de eerste paar gaan verloren, dus Amazon kan het product niet vinden.",
+"howToFix": "Zet de kolom op Tekst en vul de volledige barcode opnieuw in."
+},
+"amazon/invalid_product_id": {
+"title": "Ongeldige product-id",
+"explanation": "De product-id heeft niet de juiste lengte of tekens voor het type.",
+"whyPlatformCares": "Amazon koppelt aanbiedingen aan producten via deze ID; een verkeerde ID veroorzaakt fouten of koppelt de aanbieding aan het verkeerde product.",
+"howToFix": "Controleer de barcode of ASIN: UPC heeft 12 cijfers, EAN 13, ISBN 10 of 13, en ASIN 10 letters en cijfers."
+}
+}

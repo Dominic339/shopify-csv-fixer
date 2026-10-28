@@ -1,0 +1,860 @@
+{
+"shopify/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "CSV に Shopify の必須列ヘッダーがありません。",
+"whyPlatformCares": "Shopify はインポート時に列ヘッダーをチェックします。必須ヘッダーがないと、商品を作成・更新できない場合があります。",
+"howToFix": "不足している必須列ヘッダーを追加してください（値は空欄でも構いません）。"
+},
+"shopify/blank_title": {
+"title": "Title がありません",
+"explanation": "Title が空欄の行があります。",
+"whyPlatformCares": "Shopify で商品を作成するには Title が必要です。Title のない行はインポートに失敗するか、不完全な商品になることがあります。",
+"howToFix": "各商品行の Title に商品名を入力してください。"
+},
+"shopify/blank_handle": {
+"title": "URL handle がありません",
+"explanation": "URL handle が空欄の行があります。",
+"whyPlatformCares": "Shopify はバリエーションや画像を URL handle でまとめ、既存商品の更新にも使います。handle がないとまとめや更新ができなくなります。",
+"howToFix": "URL handle を英小文字、数字、ハイフンで入力してください（スペース不可）。"
+},
+"shopify/invalid_handle": {
+"title": "無効な URL handle",
+"explanation": "URL handle に Shopify が受け付けない可能性のある文字が含まれています。",
+"whyPlatformCares": "無効な handle はインポートエラーや商品 URL の不具合の原因になります。",
+"howToFix": "英小文字、数字、ハイフンのみを使ってください。"
+},
+"shopify/invalid_boolean_published": {
+"title": "Published の値が無効です",
+"explanation": "Published on online store に真偽値以外の値が入っています。",
+"whyPlatformCares": "Shopify は TRUE/FALSE（または空欄）を想定しています。無効な値があるとインポートできない場合があります。",
+"howToFix": "TRUE、FALSE を使うか、空欄にしてください。"
+},
+"shopify/invalid_status": {
+"title": "Status の値が無効です",
+"explanation": "Status が Active、Draft、Archived のいずれでもありません。",
+"whyPlatformCares": "想定外のステータスがあると、Shopify がその行を無視したり誤って解釈したりすることがあります。",
+"howToFix": "\"Active\"、\"Draft\"、\"Archived\" のいずれかを使ってください（または空欄）。"
+},
+"shopify/option_order_invalid": {
+"title": "オプション列の順序が正しくありません",
+"explanation": "Option1 が空欄なのに Option2/Option3 に値があります。",
+"whyPlatformCares": "Shopify はオプションが順番に入力されていること（Option1、Option2、Option3 の順）を前提としています。",
+"howToFix": "Option2 より先に Option1 を、Option3 より先に Option2 を入力してください。"
+},
+"shopify/variant_option_missing_value": {
+"title": "オプション名はあるが値がありません",
+"explanation": "オプション名はありますが、対応するオプション値が空欄です。",
+"whyPlatformCares": "オプション値がないと、無効なバリエーションやわかりにくいバリエーションができることがあります。",
+"howToFix": "オプション値を入力する（例：Size = Small）か、オプション名を空欄にしてください。"
+},
+"shopify/option_name_inconsistent": {
+"title": "バリエーション間でオプション名が異なります",
+"explanation": "同じ handle の行では Option1/2/3 の名前をそろえる必要があります。",
+"whyPlatformCares": "オプション名がそろっていないと、バリエーションが正しくインポートされなかったり、まとめ方がおかしくなったりします。",
+"howToFix": "同じ handle のすべてのバリエーション行で、同じ Option1/Option2/Option3 の名前を使ってください。"
+},
+"shopify/options_not_unique": {
+"title": "バリエーションのオプションが重複しています",
+"explanation": "同じ handle の 2 つ以上のバリエーションでオプション値が同じです。",
+"whyPlatformCares": "Shopify はオプションの組み合わせが同じバリエーションを統合します。データが失われたり、バリエーションが上書きされたりする可能性があります。",
+"howToFix": "バリエーションのオプションの組み合わせをそれぞれ一意にしてください（または重複を削除）。"
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "バリエーションの Option1 value がありません",
+"explanation": "この行はバリエーションのデータのようですが、Option1 value が空欄です。",
+"whyPlatformCares": "Shopify はオプション値からバリエーションの組み合わせを作ります。値がないと、行が拒否されたり正しくインポートされなかったりします。",
+"howToFix": "Option1 value を入力してください（またはこの行からバリエーション専用の項目を削除してください）。"
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\" と実際のオプションが混在しています",
+"explanation": "1 つの handle に \"Default Title\" の行とオプション付きのバリエーション行の両方があります。",
+"whyPlatformCares": "通常、単一バリエーションの商品構成と複数バリエーションの商品構成をうっかり混ぜてしまったことを示します。",
+"howToFix": "\"Default Title\" は商品のバリエーションが 1 つだけの場合に使ってください。複数のバリエーションがある商品では、各バリエーション行に実際のオプション値を入力してください。"
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "バリエーション内容が同じ重複行",
+"explanation": "同じ handle の行が、実際のバリエーションではなく重複しているように見えます。",
+"whyPlatformCares": "重複行があるとインポートが混乱し、思わぬ上書きが起こることがあります。",
+"howToFix": "バリエーションの場合は、行ごとにオプション値（または SKU）が異なることを確認してください。追加画像の場合は、その行に handle と画像の項目だけを残してください。"
+},
+"shopify/handle_title_mismatch": {
+"title": "同じ handle で Title が異なります",
+"explanation": "同じ URL handle の行で複数の Title が使われています。",
+"whyPlatformCares": "Shopify は handle で行をまとめます。タイトルが食い違っていると、上書きやわかりにくいインポートの原因になります。",
+"howToFix": "同じ handle のすべての行で、統一した Title を 1 つ使ってください。"
+},
+"shopify/product_missing_variant_row": {
+"title": "画像はあるがバリエーション行がない商品",
+"explanation": "handle に画像の行しかないようです。",
+"whyPlatformCares": "商品を作成するには、メインの商品／バリエーション行（Title とバリエーションの項目）が少なくとも 1 行必要です。画像だけの行では商品を作成できません。",
+"howToFix": "handle に Title とバリエーションの項目（Price/SKU/Options）を含むメイン行を追加し、追加の画像行はその後ろに置いてください。"
+},
+"shopify/blank_price": {
+"title": "Price がありません",
+"explanation": "バリエーション行の Price が空欄です。",
+"whyPlatformCares": "Shopify は空欄の価格を 0.00 としてインポートするため、そのバリエーションは無料で販売されてしまいます。",
+"howToFix": "バリエーションが本当に無料でない限り、Price に 19.99 のような数値を入力してください。"
+},
+"shopify/invalid_numeric_price": {
+"title": "Price が無効です",
+"explanation": "Price が有効な数値ではありません。",
+"whyPlatformCares": "Shopify の価格項目には数値が必要です。",
+"howToFix": "19.99 のような数値を使ってください。"
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "Compare-at price が無効です",
+"explanation": "Compare-at price が有効な数値ではありません。",
+"whyPlatformCares": "Shopify の価格項目には数値が必要です。",
+"howToFix": "24.99 のような数値を使うか、空欄にしてください。"
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price が Price より低い",
+"explanation": "Compare-at price が Price より低くなっています。",
+"whyPlatformCares": "Compare-at price は、より高い元の価格を表すためのものです。",
+"howToFix": "Compare-at price を Price 以上にするか、空欄にしてください。"
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "在庫数が無効です",
+"explanation": "Inventory quantity が有効な整数ではありません。",
+"whyPlatformCares": "在庫数は整数である必要があります。",
+"howToFix": "0、5、100 のような整数を使ってください。"
+},
+"shopify/negative_inventory": {
+"title": "在庫がマイナスです",
+"explanation": "Inventory quantity がマイナスです。",
+"whyPlatformCares": "マイナスの在庫は通常データの誤りで、出荷時に問題が起こることがあります。",
+"howToFix": "0 以上の数量を使ってください。"
+},
+"shopify/invalid_inventory_policy": {
+"title": "在庫ポリシーが無効です",
+"explanation": "Continue selling when out of stock が DENY/CONTINUE ではありません。",
+"whyPlatformCares": "在庫ポリシーは、在庫切れ時の販売（取り寄せ）の可否を決めます。",
+"howToFix": "\"DENY\" または \"CONTINUE\" を使ってください（または空欄）。"
+},
+"shopify/invalid_image_url": {
+"title": "画像 URL が無効です",
+"explanation": "商品画像の URL が有効な http(s) URL ではありません。",
+"whyPlatformCares": "Shopify が有効な URL から画像を取得できる必要があります。",
+"howToFix": "公開されている画像を指す完全な http(s) URL を使ってください。"
+},
+"shopify/invalid_image_position": {
+"title": "画像の表示順が無効です",
+"explanation": "Image position が有効な整数ではありません。",
+"whyPlatformCares": "Image position は画像の表示順を決めます。",
+"howToFix": "1、2、3… を使うか、空欄にしてください。"
+},
+"shopify/image_row_has_variant_fields": {
+"title": "画像行にバリエーションの項目があります",
+"explanation": "画像だけの行に見えますが、SKU/Price/Options/Inventory の項目が含まれています。",
+"whyPlatformCares": "バリエーションのまとまりが崩れ、インポートが混乱する原因になります。",
+"howToFix": "追加の画像行には handle と画像の項目だけを残し、バリエーションの項目はメイン行に移してください。"
+},
+"shopify/duplicate_image_position": {
+"title": "画像の表示順が重複しています",
+"explanation": "同じ handle の 2 つの行で Image position が同じです。",
+"whyPlatformCares": "重複していると、画像の表示順が予測できなくなります。",
+"howToFix": "handle ごとに一意の Image position の値（1、2、3…）を使ってください。"
+},
+"shopify/image_alt_text_too_long": {
+"title": "代替テキストが長すぎます",
+"explanation": "画像の代替テキストが Shopify の推奨上限を超えています。",
+"whyPlatformCares": "代替テキストが長すぎると、切り詰められたり表示が崩れたりすることがあります。",
+"howToFix": "代替テキストを 512 文字以下にしてください。"
+},
+"shopify/duplicate_sku": {
+"title": "SKU が重複しています",
+"explanation": "同じ SKU が複数のバリエーション行にあります。",
+"whyPlatformCares": "多くの在庫・配送の仕組みは、バリエーションごとに一意の SKU を前提としています。",
+"howToFix": "SKU はバリエーションごとに一意にしてください（SKU を使わない場合は空欄で構いません）。"
+},
+"shopify/duplicate_sku_across_products": {
+"title": "商品間で SKU が重複しています",
+"explanation": "同じ SKU が異なる URL handle（別の商品）で使われています。",
+"whyPlatformCares": "商品間で SKU を使い回すと、在庫システム、配送ツール、分析が混乱することがあります。",
+"howToFix": "カタログ全体で SKU を一意にする（推奨）か、使い回しが意図的なものか確認してください。"
+},
+"shopify/seo_title_too_long": {
+"title": "SEO タイトルが長すぎます",
+"explanation": "SEO タイトルが推奨の長さを超えています。",
+"whyPlatformCares": "長いタイトルは検索結果で切り詰められることがあります。",
+"howToFix": "SEO タイトルを 70 文字以下にしてください。"
+},
+"shopify/seo_description_too_long": {
+"title": "SEO 説明文が長すぎます",
+"explanation": "SEO 説明文が推奨の長さを超えています。",
+"whyPlatformCares": "長い説明文は検索結果のスニペットで切り詰められることがあります。",
+"howToFix": "SEO 説明文を 320 文字以下にしてください。"
+},
+"shopify/seo_title_missing": {
+"title": "SEO タイトルがありません",
+"explanation": "SEO タイトルが空欄です（Shopify は Title を代わりに使います）。",
+"whyPlatformCares": "独自の SEO タイトルを設定すると、クリック率が上がることがあります。",
+"howToFix": "任意：独自の SEO タイトルを入力してください。"
+},
+"shopify/seo_description_missing": {
+"title": "SEO 説明文がありません",
+"explanation": "SEO 説明文が空欄です（Shopify は Description を代わりに使います）。",
+"whyPlatformCares": "独自の説明文は、検索結果でのクリック率やわかりやすさを高めます。",
+"howToFix": "任意：独自の SEO 説明文を入力してください。"
+},
+"shopify/vendor_missing": {
+"title": "Vendor がありません",
+"explanation": "メインの商品行の Vendor が空欄です。",
+"whyPlatformCares": "Vendor は商品の整理に役立ち、ストアでの絞り込みを改善します。",
+"howToFix": "Vendor（ブランド）の値を追加してください。"
+},
+"shopify/product_category_missing": {
+"title": "商品カテゴリがありません",
+"explanation": "メインの商品行の Product category が空欄です。",
+"whyPlatformCares": "カテゴリは商品の見つけやすさとレポートを改善します。",
+"howToFix": "Product category を追加してください。"
+},
+"shopify/tags_missing": {
+"title": "タグがありません",
+"explanation": "メインの商品行の Tags が空欄です。",
+"whyPlatformCares": "タグはコレクションの作成やストア内検索に役立ちます。",
+"howToFix": "タグを追加してください（カンマ区切り）。"
+},
+"shopify/description_too_short": {
+"title": "説明文が非常に短い",
+"explanation": "説明文はありますが、非常に短いです。",
+"whyPlatformCares": "充実した説明文は、コンバージョンや SEO の改善につながります。",
+"howToFix": "説明文を充実させることを検討してください。"
+},
+"shopify/status_unrecognized": {
+"title": "見慣れない Status の値",
+"explanation": "Status に Shopify の一般的な値以外が入っています。",
+"whyPlatformCares": "想定外の値は無視されたり、わかりにくい結果になったりすることがあります。",
+"howToFix": "\"Active\"、\"Draft\"、\"Archived\" のいずれかを使ってください（または空欄）。"
+},
+"shopify/missing_status_value": {
+"title": "Status がありません",
+"explanation": "Status 列はありますが、商品行に値がありません。",
+"whyPlatformCares": "この列を含める場合、Shopify はすべての商品行に Status の値を求めます。",
+"howToFix": "Status を active、draft、archived のいずれかにしてください。"
+},
+"shopify/handle_generated_column": {
+"title": "URL handle を生成しました",
+"explanation": "ファイルに URL handle 列がなかったため、各 Title から handle を作成しました。",
+"whyPlatformCares": "Shopify は URL handle で既存の商品を照合します。本来の handle がないと、更新のつもりが新しい商品として作成されます。",
+"howToFix": "商品を更新する場合は、既存の handle を入れた URL handle 列を追加してください。"
+},
+"shopify/handle_rewritten": {
+"title": "URL handle を変更しました",
+"explanation": "URL handle に Shopify で使えない文字が含まれていたため、書き換えました。",
+"whyPlatformCares": "Shopify は URL handle で既存の商品を照合するため、handle が変わると新しい商品としてインポートされます。",
+"howToFix": "商品を更新する場合は、新しい handle が Shopify 上の商品と一致しているか確認してください。"
+},
+"shopify/image_url_not_https": {
+"title": "画像 URL が http を使っています",
+"explanation": "画像 URL が https:// ではなく http:// で始まっています。",
+"whyPlatformCares": "Shopify は公開されている https:// の URL から画像をダウンロードします。http のリンクでは失敗することがあります。",
+"howToFix": "ホスティング先が対応していれば、画像の https:// のアドレスを使ってください。"
+},
+"shopify/invalid_charge_tax": {
+"title": "Charge tax が無効です",
+"explanation": "Charge tax が true でも false でもありません。",
+"whyPlatformCares": "Shopify の Charge tax には true または false しか使えません。",
+"howToFix": "値を true または false に変更してください。"
+},
+"shopify/invalid_requires_shipping": {
+"title": "Requires shipping が無効です",
+"explanation": "Requires shipping が true でも false でもありません。",
+"whyPlatformCares": "Shopify の Requires shipping には true または false しか使えません。",
+"howToFix": "値を true または false に変更してください。"
+},
+"shopify/invalid_gift_card": {
+"title": "Gift card が無効です",
+"explanation": "Gift card が true でも false でもありません。",
+"whyPlatformCares": "Shopify の Gift card には true または false しか使えません。",
+"howToFix": "値を true または false に変更してください。"
+},
+"shopify/gift_card_import": {
+"title": "CSV にギフトカードがあります",
+"explanation": "ギフトカードとしてマークされた行があります。",
+"whyPlatformCares": "Shopify は CSV インポートでギフトカードの商品を作成できません。",
+"howToFix": "ギフトカードは Shopify の管理画面で作成してください。"
+},
+"shopify/invalid_numeric_cost": {
+"title": "Cost per item が無効です",
+"explanation": "Cost per item が有効な数値ではありません。",
+"whyPlatformCares": "Shopify の原価には、通貨記号のないシンプルな数値が必要です。",
+"howToFix": "7.50 のような数値を使ってください。"
+},
+"shopify/invalid_weight": {
+"title": "重量が無効です",
+"explanation": "Weight value (grams) がグラム単位の整数ではありません。",
+"whyPlatformCares": "Shopify は重量を小数点や単位なしのグラムで保存します。",
+"howToFix": "グラムだけを入力してください（例：1.5 kg = 1500）。"
+},
+"shopify/invalid_weight_unit": {
+"title": "重量の単位が無効です",
+"explanation": "Weight unit for display が g、kg、lb、oz のいずれでもありません。",
+"whyPlatformCares": "Shopify の表示単位には g、kg、lb、oz しか使えません。",
+"howToFix": "g、kg、lb、oz のいずれかを使ってください。"
+},
+"shopify/invalid_inventory_tracker": {
+"title": "在庫管理の設定が無効です",
+"explanation": "Inventory tracker に Shopify が認識できない値があります。",
+"whyPlatformCares": "Shopify が受け付けるのは shopify、shipwire、amazon_marketplace_web、または在庫を管理しない場合の空欄です。",
+"howToFix": "在庫を管理する場合は shopify を使い、管理しない場合は空欄にしてください。"
+},
+"shopify/invalid_fulfillment_service": {
+"title": "フルフィルメントサービスが無効です",
+"explanation": "Fulfillment service が有効なサービスの handle ではありません。",
+"whyPlatformCares": "Shopify は manual か、管理画面で設定したフルフィルメントサービスの handle（英小文字、ハイフン）を想定しています。",
+"howToFix": "manual か、独自サービスの handle を使ってください。"
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category が Google の ID のようです",
+"explanation": "Product category が Google の商品カテゴリ ID のように数字だけになっています。",
+"whyPlatformCares": "Shopify の Product category は Shopify 独自の分類を使います。Google のカテゴリ ID は別の列に入力します。",
+"howToFix": "Shopify の分類パスまたは ID を使い、Google の ID は「Google Shopping / Google product category」に移してください。"
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "梱包サイズが不完全です",
+"explanation": "梱包時の長さ、幅、高さ、単位の一部しか入力されていません。",
+"whyPlatformCares": "梱包サイズが一部しか設定されていない行は Shopify に拒否されます。",
+"howToFix": "梱包情報の 4 項目をすべて入力するか、4 つとも空欄にしてください。"
+},
+"shopify/too_many_tags": {
+"title": "タグが多すぎます",
+"explanation": "商品のタグが 250 件を超えています。",
+"whyPlatformCares": "Shopify では 1 商品あたり最大 250 件のタグを付けられます。",
+"howToFix": "タグが 250 件以下になるまで削除してください。"
+},
+"woocommerce/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "ヘッダー行に WooCommerce のインポートに必要な列が 1 つ以上ありません。",
+"whyPlatformCares": "WooCommerce はインポート時、決まった列名で項目を対応付けます。",
+"howToFix": "WooCommerce から新しいサンプル CSV をエクスポートし、必須列がすべてあり、正確に綴られているか確認してください。"
+},
+"woocommerce/unknown_header": {
+"title": "不明な列",
+"explanation": "この列は WooCommerce のインポーターで認識されません。",
+"whyPlatformCares": "不明な列は無視され、データの問題が隠れてしまうことがあります。",
+"howToFix": "列を削除するか、WooCommerce のインポートに対応した列名に変更してください。"
+},
+"woocommerce/missing_type": {
+"title": "商品タイプがありません",
+"explanation": "Type 列は必須で、その行の扱い方を決めます。",
+"whyPlatformCares": "WooCommerce は Type を見て、行が商品、バリエーション、親グループのどれなのかを判断します。",
+"howToFix": "各行の Type を simple、variable、variation、grouped、external のいずれかにしてください。"
+},
+"woocommerce/invalid_type": {
+"title": "商品タイプが無効です",
+"explanation": "Type の値が WooCommerce で対応しているタイプではありません。",
+"whyPlatformCares": "無効なタイプがあると、行が正しくインポートされなかったり拒否されたりします。",
+"howToFix": "simple、variable、variation、grouped、external のいずれかを使ってください。"
+},
+"woocommerce/missing_name": {
+"title": "商品名がありません",
+"explanation": "バリエーション以外の商品行には Name が必要です。",
+"whyPlatformCares": "名前のない商品はストアで使えません。",
+"howToFix": "バリエーション以外のすべての行に Name を入力してください。"
+},
+"woocommerce/variation_missing_parent": {
+"title": "バリエーションと親商品のつながりがありません",
+"explanation": "バリエーション行は Parent 項目で親の可変商品と結び付ける必要があります。",
+"whyPlatformCares": "親のないバリエーションは正しくインポートできません。",
+"howToFix": "Parent に親商品の ID を指定してください（または可変商品インポートのプリセットで親の自動作成を有効にしてください）。"
+},
+"woocommerce/variation_missing_attributes": {
+"title": "バリエーションに属性がありません",
+"explanation": "有効なバリエーションの組み合わせを作るには、バリエーション行に属性の名前と値の組が必要です。",
+"whyPlatformCares": "属性がないと、WooCommerce は個別のバリエーションを作成できません。",
+"howToFix": "各バリエーション行に Attribute 1 name（例：Size）と Attribute 1 value(s)（例：M）を入力してください。"
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "バリエーションの組み合わせが重複しています",
+"explanation": "同じ親の 2 つ以上のバリエーションで、属性の組み合わせが同じです。",
+"whyPlatformCares": "組み合わせが重複していると、互いに上書きされたり、予期せず統合されたりします。",
+"howToFix": "親ごとに、各バリエーションの属性値の組み合わせを一意にしてください。"
+},
+"woocommerce/missing_sku": {
+"title": "SKU がありません",
+"explanation": "SKU がないと更新の信頼性が下がり、在庫管理がうまくいかなくなることがあります。",
+"whyPlatformCares": "SKU は照合、更新、外部連携に使われます。",
+"howToFix": "できるだけ、商品／バリエーションごとに一意の SKU を入力してください。"
+},
+"woocommerce/duplicate_sku": {
+"title": "SKU 重複のおそれ",
+"explanation": "2 つ以上の行で SKU が同じです。",
+"whyPlatformCares": "インポート時、重複した SKU によって既存の商品が上書きされたり、データが別の商品に紐付いたりすることがあります。",
+"howToFix": "SKU を一意にしてください。意図的に重複させる場合は、カタログを分けるか、親子関係の扱いを統一してください。"
+},
+"woocommerce/invalid_regular_price": {
+"title": "通常価格が無効です",
+"explanation": "Regular price は有効な数値にしてください。",
+"whyPlatformCares": "価格が無効だと、インポートに失敗したり、ストアで誤った価格が表示されたりします。",
+"howToFix": "19.99 のような数値を使ってください（通貨記号なし）。"
+},
+"woocommerce/invalid_sale_price": {
+"title": "セール価格が無効です",
+"explanation": "Sale price は有効な数値にしてください。",
+"whyPlatformCares": "無効なセール価格は無視されたり、価格の問題を引き起こしたりします。",
+"howToFix": "14.99 のような数値を使ってください（通貨記号なし）。"
+},
+"woocommerce/missing_image": {
+"title": "画像がありません",
+"explanation": "この商品行に画像 URL がありません。",
+"whyPlatformCares": "画像がなくてもインポートはできますが、商品ページの質とコンバージョンが下がります。",
+"howToFix": "商品の Images に URL を入力してください（複数ある場合はカンマ区切り）。"
+},
+"woocommerce/invalid_bool": {
+"title": "真偽値が無効です",
+"explanation": "Published、In stock?、Is featured? などの真偽値の項目には 1/0 または true/false が必要です。",
+"whyPlatformCares": "WooCommerce のインポーターが想定外の値を誤って解釈し、商品が非表示になったり設定が崩れたりすることがあります。",
+"howToFix": "1（はい／true）または 0（いいえ／false）を使ってください。よくある表記（yes、no、true、false）は自動で正規化できます。"
+},
+"woocommerce/invalid_price": {
+"title": "価格の値が無効です",
+"explanation": "価格の項目に数値以外の値が入っています。",
+"whyPlatformCares": "WooCommerce はシンプルな小数の価格を想定しています。通貨記号や文字があると、インポートに失敗したり価格が 0 になったりします。",
+"howToFix": "19.99 のようなシンプルな小数を使ってください（通貨記号、カンマ、文字なし）。"
+},
+"woocommerce/invalid_int": {
+"title": "整数の値が無効です",
+"explanation": "整数の項目（Stock など）に整数以外の値が入っています。",
+"whyPlatformCares": "WooCommerce は在庫数に整数を想定しています。小数は切り捨てられたり拒否されたりします。",
+"howToFix": "0、5、12 のような整数を使ってください。"
+},
+"woocommerce/invalid_visibility": {
+"title": "表示設定の値が無効です",
+"explanation": "Visibility in catalog は 4 つの有効な値のいずれかにする必要があります。",
+"whyPlatformCares": "認識できない値があると、商品が既定で表示になったり、インポートに失敗したりします。",
+"howToFix": "visible、catalog、search、hidden のいずれかを使ってください。"
+},
+"woocommerce/invalid_image_url": {
+"title": "画像 URL が無効です",
+"explanation": "Images 列に有効な http(s) URL ではないものがあります。",
+"whyPlatformCares": "WooCommerce はインポート時に指定された URL から画像を取得します。URL が無効だと商品に画像が付きません。",
+"howToFix": "完全な https:// URL をカンマ区切りで指定してください。画像が公開されていることも確認してください。"
+},
+"woocommerce/sale_price_not_lower": {
+"title": "セール価格が通常価格より低くありません",
+"explanation": "割引として意味を持たせるには、Sale price を Regular price より低くする必要があります。",
+"whyPlatformCares": "WooCommerce は 2 つの価格を打ち消し線付きの価格とセール価格として表示することがあります。セール価格が通常価格以上だと、表示がわかりにくくなったり誤ったりします。",
+"howToFix": "Sale price を Regular price より低い値にするか、Sale price を空欄にしてください。"
+},
+"woocommerce/invalid_value": {
+"title": "認識できない値",
+"explanation": "ステータス系の列に WooCommerce が認識できない値があります。",
+"whyPlatformCares": "WooCommerce の Published、In stock?、Backorders allowed?、Tax status は決まった値しか受け付けず、それ以外は無視または拒否されます。",
+"howToFix": "問題の説明に記載された値のいずれかを使ってください。"
+},
+"woocommerce/variation_multiple_values": {
+"title": "バリエーションに複数の値があります",
+"explanation": "バリエーション行に、1 つの属性に対して複数の値が記載されています。",
+"whyPlatformCares": "WooCommerce のバリエーションは 1 つの決まった組み合わせなので、属性ごとに値は 1 つだけです。",
+"howToFix": "すべての値は親行に記載し、各バリエーション行には値を 1 つだけ記載してください。"
+},
+"woocommerce/parent_not_in_file": {
+"title": "親商品がファイルにありません",
+"explanation": "バリエーションが、このファイルにない親商品を参照しています。",
+"whyPlatformCares": "WooCommerce はバリエーションを既存の可変商品に紐付けます。親がまだ存在しないと、そのバリエーションはスキップされます。",
+"howToFix": "先に親商品をインポートするか、親の行をこのファイルに含めてください。"
+},
+"etsy/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "Etsy の一括出品に必要な列が 1 つ以上ありません。",
+"whyPlatformCares": "Etsy のインポーターが出品項目を正しく対応付けるには、正確なヘッダーが必要です。",
+"howToFix": "Etsy から一括出品用の CSV を新たにエクスポートし、必須ヘッダーがそのまま残っているか確認してください。"
+},
+"etsy/invalid_price": {
+"title": "価格が無効です",
+"explanation": "価格は有効な数値にしてください。",
+"whyPlatformCares": "価格が無効だと、出品が却下されることがあります。",
+"howToFix": "19.99 のような数値を使ってください（通貨記号なし）。"
+},
+"etsy/title_too_long": {
+"title": "タイトルが長すぎます",
+"explanation": "Etsy のタイトルには文字数の上限があります。",
+"whyPlatformCares": "長すぎるタイトルは、インポーターによって切り詰められたり拒否されたりします。",
+"howToFix": "タイトルを短くしてください（上限の長さまで安全に切り詰めることもできます）。"
+},
+"etsy/tags_too_many": {
+"title": "タグが多すぎます",
+"explanation": "Etsy の出品に付けられるタグは 13 件までです。",
+"whyPlatformCares": "上限を超えたタグは無視され、検索での最適化に悪影響があります。",
+"howToFix": "効果的なタグ 13 件を残してください（自動で 13 件に絞ることもできます）。"
+},
+"etsy/too_many_tags": {
+"title": "タグが多すぎます",
+"explanation": "Etsy の出品に付けられるタグは 13 件までです。",
+"whyPlatformCares": "上限を超えたタグは無視され、検索での最適化に悪影響があります。",
+"howToFix": "効果的なタグ 13 件を残してください（自動で 13 件に絞ることもできます）。"
+},
+"etsy/tag_too_long": {
+"title": "20 文字を超えるタグ",
+"explanation": "Etsy のタグは 1 件あたり最大 20 文字です。",
+"whyPlatformCares": "20 文字を超えるタグは Etsy で受け付けられません。",
+"howToFix": "該当するタグを 20 文字以下にしてください。"
+},
+"etsy/missing_title": {
+"title": "出品タイトルがありません",
+"explanation": "Etsy のすべての出品にタイトルが必要です。",
+"whyPlatformCares": "タイトルのない出品は公開もインポートもできません。",
+"howToFix": "内容がわかるタイトルを入力してください（140 文字まで）。"
+},
+"etsy/missing_price": {
+"title": "価格がありません",
+"explanation": "Etsy のすべての出品に価格が必要です。",
+"whyPlatformCares": "価格のない出品は公開できません。",
+"howToFix": "出品価格をシンプルな小数で入力してください（例：19.99）。"
+},
+"etsy/invalid_quantity": {
+"title": "数量が無効です",
+"explanation": "数量は 0 以上の整数にしてください。",
+"whyPlatformCares": "数量が無効だと、出品のインポートや公開に失敗します。",
+"howToFix": "0、1、10 のような整数を使ってください。"
+},
+"etsy/invalid_currency": {
+"title": "通貨コードが無効です",
+"explanation": "通貨は有効な 3 文字の ISO 4217 コードにしてください（例：USD、GBP、EUR）。",
+"whyPlatformCares": "通貨コードが無効だと、インポートに失敗したり価格が正しく表示されなかったりします。",
+"howToFix": "標準的な 3 文字の通貨コードを使ってください（大文字への変換は自動でできます）。"
+},
+"etsy/invalid_image_url": {
+"title": "画像 URL が無効です",
+"explanation": "有効な http(s) URL ではない画像 URL があります。",
+"whyPlatformCares": "Etsy は無効な URL から画像を取得できないため、写真のない出品になってしまいます。",
+"howToFix": "公開されている画像を指す完全な https:// URL をカンマ区切りで指定してください。"
+},
+"etsy/duplicate_tags": {
+"title": "タグが重複しています",
+"explanation": "重複したタグは、限られたタグ枠を無駄にします。",
+"whyPlatformCares": "タグが重複すると見つけてもらいにくくなります。",
+"howToFix": "重複を削除してください（順序を保ったまま自動で重複を除くこともできます）。"
+},
+"etsy/missing_shipping_profile": {
+"title": "配送プロファイルがありません",
+"explanation": "公開には配送プロファイル（または同等の配送項目）が必要です。",
+"whyPlatformCares": "配送設定のない出品は公開できません。",
+"howToFix": "有効な配送プロファイルの ID／名前、またはエクスポートで必要な配送項目を入力してください。"
+},
+"etsy/duplicate_listing_id": {
+"title": "Listing ID 重複のおそれ",
+"explanation": "2 つ以上の行で Listing ID が同じです。",
+"whyPlatformCares": "ID が重複していると、新しい出品を作成する代わりに既存の出品が上書きされることがあります。",
+"howToFix": "新規出品を作成するときは Listing ID を一意にし、既存の出品を更新するときは意図的に設定してください。"
+},
+"etsy/duplicate_sku": {
+"title": "SKU 重複のおそれ",
+"explanation": "2 つ以上の出品で SKU が同じです。",
+"whyPlatformCares": "SKU が重複していると、在庫管理や外部連携が混乱することがあります。",
+"howToFix": "できるだけ SKU を一意にしてください。"
+},
+"etsy/missing_required_field": {
+"title": "必須項目がありません",
+"explanation": "Etsy の必須項目が入力されていません。",
+"whyPlatformCares": "必須項目がないと出品が却下されます。",
+"howToFix": "問題の詳細に従って、不足している必須項目を入力してください。"
+},
+"etsy/unknown_header": {
+"title": "不明な列",
+"explanation": "この列は Etsy のインポーターで認識されません。",
+"whyPlatformCares": "不明な列は無視され、データの問題が隠れてしまうことがあります。",
+"howToFix": "列を削除するか、Etsy で使える列名に変更してください。"
+},
+"etsy/too_many_materials": {
+"title": "素材が多すぎます",
+"explanation": "出品の素材が 13 件を超えています。",
+"whyPlatformCares": "Etsy では 1 出品あたり最大 13 件の素材を登録でき、超えた分は一括編集時に拒否されます。",
+"howToFix": "重要な素材 13 件だけを残してください。"
+},
+"etsy/quantity_too_high": {
+"title": "数量が 999 を超えています",
+"explanation": "数量が 999 より大きくなっています。",
+"whyPlatformCares": "Etsy では各出品の数量の上限は 999 です。",
+"howToFix": "Quantity を 999 以下にしてください。"
+},
+"ebay/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "ヘッダー行に eBay File Exchange の必須列が 1 つ以上ありません。",
+"whyPlatformCares": "eBay File Exchange がアップロード時に項目を正しく対応付けるには、決まった列名が必要です。",
+"howToFix": "eBay File Exchange のテンプレートを使い、必須列（Title、StartPrice、Quantity）があるか確認してください。"
+},
+"ebay/invalid_action": {
+"title": "Action の値が無効です",
+"explanation": "Action 列の値が eBay で受け付けられる操作ではありません。",
+"whyPlatformCares": "eBay File Exchange は Action を見て、出品の追加（Add）、修正（Revise）、削除、終了（End）を判断します。値が無効だと行全体が拒否されます。",
+"howToFix": "Add、Revise、Relist、End、VerifyAdd、Status のいずれかを使ってください。"
+},
+"ebay/missing_title": {
+"title": "出品タイトルがありません",
+"explanation": "eBay のすべての出品で Title 項目は必須です。",
+"whyPlatformCares": "タイトルのない出品は eBay に掲載できません。",
+"howToFix": "内容がわかる 80 文字以内の出品タイトルを入力してください。"
+},
+"ebay/title_too_long": {
+"title": "タイトルが 80 文字を超えています",
+"explanation": "eBay の出品タイトルには 80 文字の厳格な上限があります。",
+"whyPlatformCares": "80 文字を超えるタイトルは eBay File Exchange に拒否され、アップロードできません。",
+"howToFix": "タイトルを 80 文字以下にしてください。購入者が検索するキーワードを優先しましょう。"
+},
+"ebay/missing_price": {
+"title": "StartPrice がありません",
+"explanation": "eBay のすべての出品で StartPrice は必須です。",
+"whyPlatformCares": "価格のない出品はアップロード時に拒否されます。",
+"howToFix": "StartPrice を小数で入力してください（例：19.99）。"
+},
+"ebay/invalid_price": {
+"title": "StartPrice が無効です",
+"explanation": "StartPrice は有効な小数にしてください。",
+"whyPlatformCares": "価格が無効だと、その出品行のアップロードに失敗します。",
+"howToFix": "通貨記号やカンマなしの 19.99 のようなシンプルな小数を使ってください。"
+},
+"ebay/invalid_quantity": {
+"title": "Quantity が無効です",
+"explanation": "Quantity は 0 以上の整数にしてください。",
+"whyPlatformCares": "eBay ではすべての出品に数値の数量が必要です。無効な値があるとアップロードに失敗します。",
+"howToFix": "0、1、10 のような整数を使ってください。"
+},
+"ebay/invalid_condition_id": {
+"title": "認識できない ConditionID",
+"explanation": "ConditionID の値が eBay の標準的な状態コードと一致しません。",
+"whyPlatformCares": "eBay は ConditionID で商品の状態を購入者に表示します。認識できない ID は拒否されたり、誤った状態が表示されたりします。",
+"howToFix": "eBay の標準的な ConditionID を使ってください。例：1000=新品、1500=新品（その他）、2000=認定整備済み、2500=出品者による整備済み、3000=中古、7000=部品取り・ジャンク。使える ID はカテゴリによって異なります。"
+},
+"ebay/invalid_duration": {
+"title": "Duration が無効です",
+"explanation": "Duration の値が、eBay で認識される出品期間の形式と一致しません。",
+"whyPlatformCares": "認識できない期間は、既定で短いオークションになったり、出品が拒否されたりすることがあります。",
+"howToFix": "固定価格の出品には GTC（Good 'Til Cancelled）を、オークションには Days_1、Days_3、Days_5、Days_7、Days_10 のいずれかを使ってください。"
+},
+"ebay/invalid_format": {
+"title": "出品の Format が無効です",
+"explanation": "Format の値が eBay で認識される出品形式ではありません。",
+"whyPlatformCares": "Format 項目は eBay に出品の見せ方を伝えます。値が無効だと、その行が失敗することがあります。",
+"howToFix": "即決価格の出品には FixedPrice、オークション形式には Auction を使ってください。"
+},
+"ebay/too_many_images": {
+"title": "画像が多すぎます",
+"explanation": "eBay では 1 出品あたり最大 24 枚の写真を掲載できます。",
+"whyPlatformCares": "24 枚を超えた写真は eBay に拒否されるか、削除されます。",
+"howToFix": "PictureURL のリストを | 区切りで 24 件以下にしてください。"
+},
+"ebay/invalid_picture_url": {
+"title": "写真 URL が無効です",
+"explanation": "有効な http(s) URL ではない写真 URL があります。",
+"whyPlatformCares": "eBay は出品時に指定された URL から画像を取得します。URL が無効だと出品に画像が表示されません。",
+"howToFix": "公開されている画像を指す完全な https:// URL を使い、複数ある場合は縦線（|）で区切ってください。"
+},
+"ebay/invalid_dispatch_time": {
+"title": "DispatchTimeMax が無効です",
+"explanation": "DispatchTimeMax は、発送までの日数を表す 0 以上の整数にしてください。",
+"whyPlatformCares": "eBay は発送までの日数を購入者に表示します。値が無効だと出品をアップロードできないことがあります。",
+"howToFix": "1、2、3 のような整数を使ってください（発送までの日数）。"
+},
+"ebay/duplicate_sku": {
+"title": "CustomLabel (SKU) が重複しています",
+"explanation": "2 つ以上の行で CustomLabel の値が同じです。",
+"whyPlatformCares": "Add 操作で CustomLabel が重複していると、出品が競合することがあります。既存の出品を更新するには Revise 操作を使ってください。",
+"howToFix": "各出品の CustomLabel を一意にするか、既存の出品を更新する場合は Action=Revise を使ってください。"
+},
+"ebay/variation_specifics_mismatch": {
+"title": "バリエーション仕様が一致しません",
+"explanation": "VariationSpecificsName と VariationSpecificsValue は、両方入力するか両方空欄にしてください。",
+"whyPlatformCares": "eBay がバリエーションの属性を作るには、対応する名前と値の組が必要です。一致しないとバリエーションを作成できません。",
+"howToFix": "各バリエーション行に VariationSpecificsName（例：'Color|Size'）と VariationSpecificsValue（例：'Blue|Medium'）の両方を入力してください。"
+},
+"ebay/duplicate_variation_combo": {
+"title": "バリエーションの組み合わせが重複しています",
+"explanation": "同じ出品内の 2 つ以上のバリエーション行で、VariationSpecifics の組み合わせが同じです。",
+"whyPlatformCares": "バリエーションの組み合わせが重複していると、アップロード時に互いに上書きされ、データが失われます。",
+"howToFix": "各バリエーション行の VariationSpecificsName と VariationSpecificsValue の組み合わせを一意にしてください。"
+},
+"ebay/missing_category_id": {
+"title": "Category が空欄です",
+"explanation": "新規出品に eBay のカテゴリ番号がありません。",
+"whyPlatformCares": "eBay ではすべての新規出品にカテゴリが必要で、カテゴリのない行は拒否されます。",
+"howToFix": "eBay のカテゴリツリーで数値のカテゴリ ID を調べ、各新規出品の行に入力してください。"
+},
+"ebay/invalid_category_id": {
+"title": "Category が無効です",
+"explanation": "Category の値が数値の eBay カテゴリ ID ではありません。",
+"whyPlatformCares": "eBay のカテゴリ ID は常に数値です。カテゴリ名はアップロード時に拒否されます。",
+"howToFix": "eBay のカテゴリツリーにある数値 ID を使ってください（例：携帯電話・スマートフォンは 9355）。"
+},
+"ebay/missing_action_column": {
+"title": "Action 列がありません",
+"explanation": "ファイルに Action 列がありません。",
+"whyPlatformCares": "eBay のアップロードでは、1 列目（ヘッダーにサイトと通貨を含む Action 列）を見て各行の処理を決めます。",
+"howToFix": "セラーハブのアップロード用テンプレートを使い、1 列目はそのまま残してください。"
+},
+"ebay/missing_action": {
+"title": "Action がありません",
+"explanation": "出品行に Action がありません。",
+"whyPlatformCares": "Action を空欄にできるのはバリエーション行だけで、それ以外の行は eBay にスキップされます。",
+"howToFix": "Action を Add、Revise、Relist、End のいずれかにしてください。"
+},
+"ebay/missing_item_id": {
+"title": "ItemID がありません",
+"explanation": "Revise、Relist、End の行に ItemID がありません。",
+"whyPlatformCares": "eBay は変更する出品を見つけるために商品番号を必要とします。",
+"howToFix": "ItemID 列に eBay の商品番号を追加してください。"
+},
+"ebay/missing_end_code": {
+"title": "EndCode がありません",
+"explanation": "End の行に EndCode がありません。",
+"whyPlatformCares": "eBay は出品を早期終了する理由を求めます。",
+"howToFix": "NotAvailable、LostOrBroken、Incorrect、OtherListingError のいずれかを使ってください。"
+},
+"ebay/missing_condition": {
+"title": "商品の状態がありません",
+"explanation": "新規出品に ConditionID がありません。",
+"whyPlatformCares": "ほとんどの eBay カテゴリでは商品の状態が必須です。",
+"howToFix": "1000（新品）や 3000（中古）などの ConditionID を指定してください。"
+},
+"ebay/fixed_price_not_gtc": {
+"title": "固定価格が GTC ではありません",
+"explanation": "固定価格の出品の期間が GTC 以外になっています。",
+"whyPlatformCares": "eBay ではすべての固定価格の出品が Good 'Til Cancelled で掲載されます。",
+"howToFix": "Duration を GTC にしてください。"
+},
+"ebay/invalid_relationship_details": {
+"title": "RelationshipDetails が無効です",
+"explanation": "RelationshipDetails が eBay の Name=Value 形式になっていません。",
+"whyPlatformCares": "eBay は RelationshipDetails からバリエーションの選択肢を作ります。形式が正しくないと出品が拒否されます。",
+"howToFix": "親行：Color=Blue;Red|Size=M;L。バリエーション：Color=Blue|Size=M。"
+},
+"ebay/variation_without_parent": {
+"title": "親のないバリエーション",
+"explanation": "バリエーション行が親の出品行の後に続いていません。",
+"whyPlatformCares": "eBay は Relationship=Variation の行を、すぐ上にある親行に紐付けます。",
+"howToFix": "バリエーション行を親行のすぐ下に移動してください。"
+},
+"ebay/variation_value_not_in_parent": {
+"title": "宣言されていないバリエーションの値",
+"explanation": "バリエーションが、親行に記載されていない値を使っています。",
+"whyPlatformCares": "eBay が受け付けるのは、親の RelationshipDetails で宣言されたバリエーションの値だけです。",
+"howToFix": "値を親行に追加するか、バリエーションを修正してください。"
+},
+"amazon/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "ヘッダー行に Amazon フラットファイルの必須列が 1 つ以上ありません。",
+"whyPlatformCares": "Amazon のフラットファイル処理では、項目を正しく対応付けるために正確な列名が必要です。列が不足しているとファイルが拒否されます。",
+"howToFix": "Amazon の Inventory Loader またはカテゴリテンプレートを使ってください。どのファイルにも sku 列が必要です。"
+},
+"amazon/missing_sku": {
+"title": "SKU がありません",
+"explanation": "Amazon の在庫行にはすべて sku 項目が必要です。",
+"whyPlatformCares": "Amazon は SKU で出品を一意に識別します。SKU のない行は拒否されます。",
+"howToFix": "各商品行に一意の SKU（40 文字まで）を入力してください。"
+},
+"amazon/sku_too_long": {
+"title": "SKU が 40 文字を超えています",
+"explanation": "Amazon の SKU は最大 40 文字です。",
+"whyPlatformCares": "40 文字を超える SKU はフラットファイル処理で拒否されます。",
+"howToFix": "一意性を保ったまま、SKU を 40 文字以下にしてください。"
+},
+"amazon/duplicate_sku": {
+"title": "SKU が重複しています",
+"explanation": "このファイル内の 2 つ以上の行で SKU が同じです。",
+"whyPlatformCares": "SKU が重複していると処理中に一方の行がもう一方を上書きし、在庫や価格のデータが消える可能性があります。",
+"howToFix": "各 SKU がファイル内に 1 回だけ出てくるようにしてください。出品を明示的に削除するには add-delete='d' を使います。"
+},
+"amazon/missing_item_name": {
+"title": "item-name がありません",
+"explanation": "Amazon の出品では item-name（商品タイトル）が必須です。",
+"whyPlatformCares": "Amazon が検索結果や商品ページに出品を表示するには、商品タイトルが必要です。",
+"howToFix": "item-name 列に内容がわかる商品タイトルを入力してください（500 文字まで）。"
+},
+"amazon/item_name_too_long": {
+"title": "item-name が長すぎます",
+"explanation": "Amazon の item-name は通常 500 文字までです。",
+"whyPlatformCares": "上限を超えるタイトルは、カテゴリテンプレートによって切り詰められたり拒否されたりします。",
+"howToFix": "item-name を 500 文字以下にしてください。ブランド、商品タイプ、主な特徴を優先しましょう。"
+},
+"amazon/missing_price": {
+"title": "価格がありません",
+"explanation": "出品を追加・更新する行の price が空欄です。",
+"whyPlatformCares": "既存の出品は現在の価格が維持されますが、価格のない新規出品は公開できません。",
+"howToFix": "有効な価格を小数で入力してください（例：29.99）。"
+},
+"amazon/invalid_price": {
+"title": "価格が無効です",
+"explanation": "price の値が有効な小数ではありません。",
+"whyPlatformCares": "価格が無効だと、Amazon のフラットファイル処理でその行が拒否されます。",
+"howToFix": "29.99 のようなシンプルな小数を使ってください（ドル記号、カンマ、文字なし）。"
+},
+"amazon/invalid_quantity": {
+"title": "数量が無効です",
+"explanation": "quantity の値は 0 以上の整数にしてください。",
+"whyPlatformCares": "数量が有効な数値でない行は Amazon に拒否されます。マイナスの数量は使えません。",
+"howToFix": "0、5、100 のような整数を使ってください。"
+},
+"amazon/invalid_product_id_type": {
+"title": "product-id-type が無効です",
+"explanation": "product-id-type の値が Amazon で認識される識別子の種類ではありません。",
+"whyPlatformCares": "Amazon は product-id-type を見て、product-id 項目を ASIN や UPC などとして解釈します。種類が無効だと商品を照合できません。",
+"howToFix": "Inventory Loader：1（ASIN）、2（ISBN）、3（UPC）、4（EAN）。カテゴリテンプレート：ASIN、UPC、EAN、ISBN、GTIN。"
+},
+"amazon/invalid_item_condition": {
+"title": "item-condition が無効です",
+"explanation": "item-condition のコードが Amazon で認識される状態の値ではありません。",
+"whyPlatformCares": "Amazon は状態を購入者に表示し、出品の分類にも使います。認識できないコードは拒否されることがあります。",
+"howToFix": "Amazon の数値の状態コードを使ってください：11=新品、10=整備済み、1=中古・ほぼ新品、2=中古・非常に良い、3=中古・良い、4=中古・可。"
+},
+"amazon/min_above_max_price": {
+"title": "最低価格が最高価格を上回っています",
+"explanation": "minimum-seller-allowed-price が maximum-seller-allowed-price より高いため、両方を満たす価格がありません。",
+"whyPlatformCares": "Amazon はこの価格範囲を受け付けず、範囲外の出品はすべて無効になります。",
+"howToFix": "2 つの値を入れ替えるか、どちらかを空欄にしてください。"
+},
+"amazon/price_outside_allowed_range": {
+"title": "価格が許容範囲外です",
+"explanation": "価格が minimum-seller-allowed-price を下回っているか、maximum-seller-allowed-price を上回っています。",
+"whyPlatformCares": "設定した範囲から価格が外れている出品は Amazon で無効になり、販売が止まります。",
+"howToFix": "価格を変更するか、最低／最高価格の範囲を広げてください。"
+},
+"amazon/invalid_add_delete": {
+"title": "add-delete の値が無効です",
+"explanation": "add-delete 項目は 'a'（追加または更新）、'd'（出品の削除）、'x'（出品と商品データの削除）のいずれかにしてください。",
+"whyPlatformCares": "add-delete の値が無効だと、Amazon の処理でその行がスキップされます。",
+"howToFix": "出品の追加・更新には 'a'、出品の削除には 'd'、商品データごと削除するには 'x' を使ってください。"
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "fulfillment-center-id が無効です",
+"explanation": "fulfillment-center-id の値が Amazon で認識される出荷方法ではありません。",
+"whyPlatformCares": "出荷チャネルによって、注文を Amazon（FBA）と出品者（MFN）のどちらが出荷するかが決まります。値が無効だと誤った既定値になることがあります。",
+"howToFix": "出品者出荷（自分で出荷）の場合は DEFAULT、各地域の FBA の場合は AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN を使ってください。"
+},
+"amazon/invalid_image_url": {
+"title": "画像 URL が無効です",
+"explanation": "image-url が有効な http(s) URL ではありません。",
+"whyPlatformCares": "Amazon は指定された URL から商品画像を取得します。URL が無効だと画像のない出品になり、コンバージョンが下がります。",
+"howToFix": "公開されている商品画像を指す完全な https:// URL を使ってください（JPEG または PNG、500×500 px 以上を推奨）。"
+},
+"amazon/description_too_long": {
+"title": "item-description が長すぎます",
+"explanation": "item-description が Amazon の一般的な上限である 2000 文字を超えています。",
+"whyPlatformCares": "上限を超える説明文は、カテゴリテンプレートによって切り詰められたり拒否されたりします。",
+"howToFix": "item-description を 2000 文字以下にしてください。"
+},
+"amazon/brand_name_too_long": {
+"title": "brand-name が長すぎます",
+"explanation": "brand-name が Amazon の上限である 50 文字を超えています。",
+"whyPlatformCares": "上限を超えるブランド名は、切り詰められたり拒否されたりします。",
+"howToFix": "brand-name を 50 文字以下にしてください。"
+},
+"amazon/invalid_boolean_field": {
+"title": "真偽値の項目の値が無効です",
+"explanation": "配送に関する真偽値の項目（will-ship-internationally または expedited-shipping）に 'y' と 'n' 以外の値があります。",
+"whyPlatformCares": "Amazon のフラットファイル処理では、これらの項目は 'y'、'n'、または空欄である必要があります。無効な値は黙って無視されるか、行が拒否されます。",
+"howToFix": "配送オプションを有効にするには 'y'、無効にするには 'n' を使うか、アカウントの既定を使う場合は空欄にしてください。"
+},
+"amazon/product_id_scientific_notation": {
+"title": "表計算ソフトでバーコードが壊れています",
+"explanation": "product-id が 1.23457E+11 のようになっています。表計算ソフトがバーコードを指数表記に変換しました。",
+"whyPlatformCares": "先頭の数桁以降の数字が失われるため、Amazon は商品を照合できません。",
+"howToFix": "列の書式を「テキスト」にして、バーコード全体を入力し直してください。"
+},
+"amazon/invalid_product_id": {
+"title": "product-id が無効です",
+"explanation": "product-id の長さや文字が、その種類に合っていません。",
+"whyPlatformCares": "Amazon はこの ID で出品と商品を照合します。ID が間違っていると、エラーになったり別の商品に紐付いたりします。",
+"howToFix": "バーコードまたは ASIN を確認してください。UPC は 12 桁、EAN は 13 桁、ISBN は 10 桁か 13 桁、ASIN は英数字 10 文字です。"
+}
+}

@@ -1,0 +1,317 @@
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Amazon フラットファイルのインポートエラー：原因と対処法",
+"description": "Amazon フラットファイル CSV でよくあるインポートエラーを解決します。SKU の問題、無効な状態コード、価格の書式、出荷チャネルの値、テンプレートの不一致などを扱います。"
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Amazon フラットファイルの真偽値項目：y/n、TRUE/FALSE とよくある落とし穴",
+"description": "Seller Central のフラットファイルで 'y' か 'n'（TRUE/FALSE や 1/0 ではなく）を求める真偽値項目、無効な値を一括で直す方法、列を壊してしまう表計算ソフトの自動書式設定を避ける方法を解説します。"
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "eBay の CategoryID と File Exchange：概要と設定方法",
+"description": "eBay の CategoryID 項目とは何か、File Exchange のアップロードでなぜ必須なのか、商品に合ったカテゴリ ID の見つけ方、カタログ全体に一括で入力する方法を解説します。"
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "eBay File Exchange の CSV エラー：原因と対処法",
+"description": "eBay File Exchange の CSV でよくあるエラーを解決します。無効な Action の値、カテゴリ ID の問題、タイトルの文字数超過、状態コード、価格の書式、画像 URL の問題などを扱います。"
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Etsy CSV テンプレートガイド：項目、書式、よくあるエラー",
+"description": "Etsy の出品用 CSV テンプレートの完全ガイドです。各項目の説明、選択肢で使える値、必須列と任意列、よくあるインポートエラーの直し方をまとめています。"
+},
+"general/append-vs-merge-join-csv": {
+"title": "追加・マージ・結合：CSV ファイルを正しく組み合わせる方法",
+"description": "行の追加、同じ構造のファイルのマージ、関連データを持つファイルの結合の違いを理解し、EC カタログの作業に合った方法を選びましょう。"
+},
+"general/csv-basics-for-imports": {
+"title": "EC サイトへのインポートに必要な CSV の基礎",
+"description": "初めてアップロードする前に、ヘッダー、UTF-8 エンコーディング、引用符、改行コード、CSV インポートを失敗させるよくあるミスを理解しましょう。"
+},
+"general/csv-column-mismatch-fix": {
+"title": "CSV の列の不一致エラーを直す",
+"description": "CSV インポートの列の不一致エラーを診断して直す方法です。列名の誤り、大文字・小文字の違い、余分なスペース、プラットフォームごとの列の順序の問題を扱います。"
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "EC サイトへのインポート用 CSV の書式ルール",
+"description": "EC プラットフォームのインポートを通過するために CSV が守るべき書式ルールです。区切り文字、引用符、改行コード、エンコーディング、ヘッダーの要件をまとめています。"
+},
+"general/csv-import-checklist": {
+"title": "EC プラットフォーム向け CSV インポートチェックリスト",
+"description": "Shopify、WooCommerce、Etsy、eBay、Amazon の CSV ファイルをインポートする前の完全なチェックリストです。エンコーディング、ヘッダー、データ型、各プラットフォーム固有のルールを確認できます。"
+},
+"general/csv-import-errors-explained": {
+"title": "CSV インポートエラーをわかりやすく解説",
+"description": "Shopify、WooCommerce、Etsy、eBay、Amazon でよく出る CSV インポートのエラーメッセージをわかりやすく解説し、それぞれの直し方を紹介します。"
+},
+"general/fix-blank-rows-in-csv": {
+"title": "CSV ファイルの空白行を削除する",
+"description": "Shopify、WooCommerce、Etsy、eBay、Amazon にインポートする前に、Excel、Google スプレッドシート、Python で CSV ファイルの空白行を見つけて削除する方法です。"
+},
+"general/fix-csv-encoding-errors": {
+"title": "CSV のエンコーディングエラーを直す",
+"description": "CSV ファイルの UTF-8 エンコーディングの問題を診断して直します。文字化け、BOM、mojibake、インポートを失敗させる ANSI ファイルなどを扱います。"
+},
+"general/fix-extra-columns-in-csv": {
+"title": "CSV ファイルの余分な列を削除する",
+"description": "Shopify、WooCommerce、Etsy、eBay、Amazon にインポートする前に、CSV ファイルの余分な列や想定外の列を見つけて削除する方法です。"
+},
+"general/fix-mojibake-encoding": {
+"title": "CSV ファイルの文字化け（mojibake）とエンコーディングエラーを直す",
+"description": "エンコーディングの不一致による文字化けを解消します。UTF-8 と Latin-1 の衝突の見分け方、BOM の削除、ファイルを正しく保存し直す方法を学びましょう。"
+},
+"general/merge-two-csv-files": {
+"title": "2 つの CSV ファイルを結合する方法",
+"description": "Excel の Power Query、Google スプレッドシート、簡単なコマンドラインを使って、2 つの CSV ファイルを 1 つにまとめる手順を解説します。プログラミングの知識は不要です。"
+},
+"general/prevent-excel-scientific-notation": {
+"title": "Excel が SKU やバーコードを指数表記に変換するのを防ぐ",
+"description": "Excel が SKU、EAN コード、UPC を 1.23456E+11 のような指数表記に変えてしまうのを防ぎます。貼り付け前に列を文字列にする方法、インポートウィザードの使い方、既存ファイルの修復方法を紹介します。"
+},
+"general/remove-duplicate-header-rows": {
+"title": "CSV ファイルの重複したヘッダー行を削除する",
+"description": "CSV エクスポートの途中に繰り返し現れるヘッダー行を見つけて削除します。よくある原因、Excel や Google スプレッドシートのフィルタでの見つけ方、今後のエクスポートでの防ぎ方を解説します。"
+},
+"general/validate-csv-before-import": {
+"title": "EC プラットフォームにアップロードする前に CSV を検証する",
+"description": "エンコーディングエラー、ヘッダーの欠落、行の長さの不一致、引用符の問題などを、インポートが失敗する前に見つけるための実用的なチェックリストです。Shopify、WooCommerce、eBay、Amazon、Etsy に対応しています。"
+},
+"shopify/images-in-product-csv": {
+"title": "Shopify 商品 CSV の画像：Image Src、代替テキスト、表示順",
+"description": "Shopify の商品 CSV で画像 URL を構成する方法を解説します。Image Src、Image Position、Image Alt Text の列、1 商品に複数の画像を追加する方法、よくある画像インポートの失敗の防ぎ方を紹介します。"
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Shopify CSV の Handle 項目ガイド",
+"description": "Shopify 商品 CSV の Handle 項目について知っておくべきことをすべて解説します。役割、有効な handle のルール、バリエーションのまとめ方、handle のエラーの直し方を紹介します。"
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Shopify の CSV インポートエラー：よくある原因と対処法",
+"description": "Shopify の CSV インポートでよくあるエラーの完全ガイドです。列の欠落、無効な真偽値、バリエーション構造の問題、価格のエラー、handle の衝突を扱います。"
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Shopify 商品 CSV テンプレートの解説",
+"description": "Shopify 公式の商品 CSV テンプレートの全項目を列ごとに解説します。各列の役割、使える値、必須の列がわかります。"
+},
+"shopify/variants-explained": {
+"title": "Shopify の商品バリエーション解説：CSV の構造とよくあるミス",
+"description": "Shopify の CSV 形式が Handle によるまとまり、Option 列、親子の行でバリエーションをどう表すかを学びましょう。商品が分かれる、バリエーションが消える、インポートが失敗するといったよくあるミスを防げます。"
+},
+"woocommerce/variable-products-parent-child": {
+"title": "WooCommerce の可変商品を CSV で扱う：親行とバリエーション行",
+"description": "WooCommerce の商品インポーターが可変商品を親行と子行（バリエーション）でどう表すかを解説します。属性の列、行の種類ごとの必須項目、よくあるインポートの落とし穴を紹介します。"
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "WooCommerce の商品属性を CSV で扱う：完全ガイド",
+"description": "WooCommerce の商品属性を CSV ファイルで正しく書く方法です。属性名の付け方、グローバル属性とローカル属性、バリエーション属性、よくあるミスを解説します。"
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "WooCommerce 商品 CSV のインポートエラー：原因と対処法",
+"description": "WooCommerce の商品 CSV でよくあるインポートエラーを解決します。SKU の欠落、無効なタイプ、バリエーション行の問題、価格の書式、属性の列を扱います。"
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Shopify の商品インポートは厳格です。価格の書式が 1 つ崩れている、オプション値が欠けている、画像行の位置が違う、といった小さな問題でインポート全体が失敗することがあります。",
+"このプリセットは CSV を Shopify の公式テンプレートと照らし合わせて検証し、安全な自動修正を適用するので、安心してアップロードできます。データは常にあなたが管理できます。すべての修正は記録され、エクスポートした CSV はそのまま Shopify にインポートできる状態に保たれます。"
+],
+"howItWorks": [
+"Shopify からエクスポートした CSV か公式テンプレートをアップロードします。",
+"ヘッダーと一般的な書式（真偽値、金額、在庫の値）を正規化し、必須項目を検証します。",
+"安全な問題（空白の削除、TRUE/FALSE の統一、価格項目の正規化など）は自動で修正し、リスクのある問題は確認用に表示します。",
+"Shopify が想定するスキーマに合ったきれいな CSV をエクスポートします。"
+],
+"commonFixes": [
+"真偽値（TRUE/FALSE）とステータスの値（active/draft/archived）を統一します。",
+"金額の項目（Price、Compare-at price、Cost per item）を正規化し、紛れ込んだ通貨記号を取り除きます。",
+"インポートを失敗させる SKU の重複やバリエーションの衝突を検出します。",
+"オプションの構造（Option1/2/3 の名前と値）を検証し、不完全なバリエーション行を表示します。",
+"画像の行（Product image URL、Image position）を検証し、欠けている URL や無効な URL を表示します。",
+"一貫性を保つため、空白、タグ、handle の書式を整えて正規化します。"
+],
+"faq": [
+{
+"q": "商品データは変更されますか？",
+"a": "自動で適用されるのは、空白の削除や TRUE/FALSE の正規化など、安全で元に戻せる書式の修正だけです。リスクのある項目は表示されるので、エクスポート前にご自身で判断できます。"
+},
+{
+"q": "ほかのアプリからのエクスポートにも使えますか？",
+"a": "はい。多くの Shopify アプリは独自の列を追加します。StriveFormats は不明な列をそのまま残し、Shopify の必須項目をインポートできる状態にすることに注力します。"
+},
+{
+"q": "Shopify の公式テンプレートを使えますか？",
+"a": "はい。このページから公式テンプレートのサンプルをダウンロードし、そのまま修正ツールにアップロードできます。"
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"WooCommerce に標準搭載されている商品 CSV インポーターは、列名、データ型、バリエーションの構造に厳格です。このプリセットはファイルをインポーターの標準項目と照らし合わせて検証し、安全な正規化を適用してインポートがスムーズに進むようにします。",
+"移行、価格の一括更新、カテゴリやタグの追加、バリエーション付きの可変商品のインポートに使えます。リスクのあるものはすべて問題リストに残るので、手動で確認できます。"
+],
+"howItWorks": [
+"WooCommerce の商品 CSV（エクスポートまたはインポート用テンプレート）をアップロードします。",
+"ヘッダーと一般的な値を正規化し、不足している必須項目を表示します。",
+"安全な修正（真偽値、価格、URL の整理）は自動で適用されます。",
+"残りの問題を確認し、インポートできる CSV をエクスポートします。"
+],
+"commonFixes": [
+"Published / In stock? / Backorders allowed? / Sold individually? を正規化します",
+"Regular price / Sale price をシンプルな小数に正規化します（通貨記号なし）",
+"すべての空白を整理し、カテゴリやタグの区切り文字を正規化します",
+"画像 URL を検証し、空の項目を取り除きます",
+"同じ親の下で重複しているバリエーション属性の組み合わせを検出します"
+],
+"faq": [
+{
+"q": "WooCommerce 標準のインポーターで使えますか？",
+"a": "はい。このプリセットは WooCommerce の商品 CSV インポーターの項目と、インポート画面で対応付ける一般的なエクスポートのヘッダーに基づいて作られています。"
+},
+{
+"q": "バリエーションにも対応していますか？",
+"a": "バリエーションの構造（Parent と属性）を検証し、重複したバリエーションの組み合わせを検出します。安全な修正は自動で適用され、構造上の誤りはブロッカーとして残ります。"
+},
+{
+"q": "プラグイン独自の列はどうなりますか？",
+"a": "追加の列はそのまま残ります。修正後のファイルは、アップロードしたファイルと同じ列を同じ順序で保持します。"
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"Etsy の出品者は、一括編集、見直し、移行の準備のために出品データを表計算ソフトにエクスポートすることがよくあります。このプリセットは Etsy の出品 CSV の一般的な項目を検証し、データの一貫性を保つために安全な整理を行います。",
+"タイトル、価格、数量、タグ、画像 URL を中心に扱います。出品の意味が変わるおそれのあるものは、問題として表示されたままになります。"
+],
+"howItWorks": [
+"Etsy の出品 CSV をアップロードします。",
+"必須項目と Etsy の一般的な項目の上限を検証します。",
+"安全な修正（整理と正規化、URL の整理、数値の書式）は自動で適用されます。",
+"残りの問題を確認し、きれいなファイルをエクスポートします。"
+],
+"commonFixes": [
+"空白を整理し、タグの区切り文字を正規化します",
+"Price が有効な小数で、Quantity が整数であることを確認します",
+"画像 URL のリストを検証して整理します",
+"タイトルやタグが Etsy の上限を超えている場合に警告します"
+],
+"faq": [
+{
+"q": "Etsy 公式の出品インポーターですか？",
+"a": "このプリセットは Etsy の出品 CSV を使う一般的な作業（エクスポートや一括編集用のスプレッドシート）を対象としており、Etsy が公開している上限内に項目を収めます。"
+},
+{
+"q": "何を検証しますか？",
+"a": "タイトル、価格、数量、タグ（件数と長さ）、画像 URL を検証します。一括編集をよく失敗させる無効な値や空の値を表示します。"
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"eBay の一括アップロード（セラーハブ › レポート › アップロード、旧 File Exchange）を使うと、1 つの CSV で数千件の出品を追加・更新できます。このプリセットは、各行を Action ごとに eBay が求める内容と照らし合わせます。新規出品にはタイトル、数値のカテゴリ、価格、数量、状態が必要で、Revise、Relist、End の行には出品の ItemID が必要です。",
+"ファイルの列とヘッダーの文言はそのまま保たれます。1 列目のサイトと通貨（例：*Action(SiteID=UK|Country=GB|Currency=GBP|...)）も維持されるので、正しい eBay マーケットプレイスにアップロードされます。"
+],
+"howItWorks": [
+"eBay に送る予定の CSV をアップロードします（どの eBay サイトでも可）。",
+"必須項目を示す * の有無にかかわらず、eBay の列名を認識します。",
+"各行を Action ごとにチェックします：タイトル、カテゴリ ID、価格、数量、状態 ID、期間、写真 URL。",
+"重複した CustomLabel（SKU）は、互いに上書きされる前に表示されます。",
+"元の列をそのまま残した修正済みファイルをダウンロードします。"
+],
+"commonFixes": [
+"Action の大文字・小文字を正規化します（Add、Revise、Relist、End）",
+"12,50 や $12.50 のような価格をシンプルな小数に変換します",
+"\"New\" や \"Used\" などの状態名を ConditionID に変換します",
+"| 区切りの写真 URL リストを整理します（最大 24 枚）",
+"eBay の上限である 80 文字を超えるタイトルを表示します",
+"GTC になっていない固定価格の出品を表示します"
+],
+"faq": [
+{
+"q": "どの eBay サイトで使えますか？",
+"a": "すべてのサイトで使えます。サイトと通貨は 1 列目のヘッダー（SiteID、Country、Currency）から取得され、アップロードしたままの形で保たれます。"
+},
+{
+"q": "ConditionID とは何ですか？",
+"a": "ConditionID は eBay の商品の状態を表す数値です。例：1000 = 新品、1500 = 新品（その他）、2750 = 新品同様、3000 = 中古、7000 = 部品取り・ジャンク。使える ID はカテゴリによって異なります。ファイル内の状態名は、あいまいでない場合に ID に変換されます。"
+},
+{
+"q": "どの期間の値に対応していますか？",
+"a": "固定価格の出品は GTC（Good 'Til Cancelled）で掲載されます。オークションの期間は Days_1、Days_3、Days_5、Days_7、Days_10 です。"
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"eBay のバリエーション出品では、複数のサイズや色のシャツのような関連商品を 1 つの出品にまとめます。eBay のアップロードファイルでは、親行（タイトル、カテゴリ、すべての値を記載した RelationshipDetails。例：Color=Blue;Red|Size=M;L）の後に、バリエーションごとに SKU、価格、数量を持つ Relationship=Variation の行が 1 行ずつ続きます。",
+"このプリセットはその構造をチェックします。各バリエーションが親の後に続いているか、親が宣言した値だけを使っているか、組み合わせ・価格・数量がそれぞれ正しく設定されているかを確認します。"
+],
+"howItWorks": [
+"eBay のバリエーション CSV をアップロードします。",
+"各親行と、その下にあるバリエーション行を見つけます。",
+"各バリエーションの RelationshipDetails を親と照合し、重複した組み合わせを表示します。",
+"すべての行の価格、数量、写真 URL を整理します。",
+"元の列をそのまま残した修正済みファイルをダウンロードします。"
+],
+"commonFixes": [
+"親の RelationshipDetails にない値を使っているバリエーションを表示します",
+"1 つの出品内で重複しているサイズと色の組み合わせを表示します",
+"価格または数量がないバリエーション行を表示します",
+"12,50 のような価格をシンプルな小数に変換します",
+"古いスプレッドシートの VariationSpecificsName / VariationSpecificsValue の組を検証します"
+],
+"faq": [
+{
+"q": "RelationshipDetails はどのように使いますか？",
+"a": "親行には、各バリエーション名とそのすべての値を記載します：Color=Blue;Red|Size=M;L。各バリエーション行には、そのバリエーションの値を記載します：Color=Blue|Size=M。バリエーション行の Action と Title は空欄にします。"
+},
+{
+"q": "私のスプレッドシートは VariationSpecificsName 列を使っています。対応していますか？",
+"a": "はい。| で区切られた名前と値（Color|Size と Blue|M）について、件数が一致しているか、組み合わせが重複していないかをチェックします。"
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"Amazon の Inventory Loader は、既に ASIN がある商品の出品（価格、数量、状態、出荷方法）を追加・更新するための Seller Central のアップロード機能です。このプリセットは各行を Amazon のルールと照らし合わせ、列名はそのまま残します。Amazon は列名の完全一致で列を対応付けるためです。",
+"Amazon が行を拒否したり、出品を別の商品に紐付けたりする原因となる問題を見つけます。表計算ソフトによって 1.23457E+11 に変わったバーコード、先頭の 0 が消えた UPC、誤った product-id-type コード、40 文字を超える SKU、重複した SKU などです。"
+],
+"howItWorks": [
+"Inventory Loader のファイルをアップロードします（item_sku や external_product_id などのカテゴリテンプレートの列も認識します）。",
+"各行をチェックします：SKU、商品 ID とその種類、価格、数量、状態、add-delete、フルフィルメントセンター。",
+"12,50 や $12.50 のように書かれた価格は、シンプルな小数に変換されます。",
+"重複した SKU は、互いに上書きされる前に表示されます。",
+"元の列をそのまま残したファイルをダウンロードします。"
+],
+"commonFixes": [
+"価格と最低／最高価格をシンプルな小数に変換します",
+"指数表記（1.23457E+11）のバーコードや先頭の 0 の欠落を表示します",
+"product-id-type に応じて UPC/EAN/ISBN/ASIN の桁数をチェックします",
+"Amazon の上限である 40 文字を超える SKU を表示します",
+"add-delete（a、d、x）を検証します",
+"重複した SKU を検出します"
+],
+"faq": [
+{
+"q": "どの形式を対象としていますか？",
+"a": "Amazon の Inventory Loader（出品ファイル）です。sku、product-id、product-id-type、price、quantity、add-delete など、英小文字とハイフンの列名を使います。"
+},
+{
+"q": "product-id-type のコードは何ですか？",
+"a": "Inventory Loader では product-id-type は数値です：1 = ASIN、2 = ISBN、3 = UPC、4 = EAN。カテゴリテンプレートでは代わりに名前を使います。"
+},
+{
+"q": "有効な item-condition のコードは何ですか？",
+"a": "11 = 新品、10 = 整備済み、1～4 = 中古（ほぼ新品、非常に良い、良い、可）、5～8 = コレクター商品の各グレードです。"
+},
+{
+"q": "add-delete は何をしますか？",
+"a": "a は出品を追加・更新し、d は出品を削除し、x は出品と、あなたが提供した商品データを削除します。"
+},
+{
+"q": "fulfillment-center-id とは何ですか？",
+"a": "DEFAULT は注文を自分で出荷することを意味します。AMAZON_NA、AMAZON_EU、AMAZON_FE、AMAZON_IN は、その地域でのフルフィルメント by Amazon（FBA）を意味します。"
+}
+]
+}
+}
+}

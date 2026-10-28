@@ -1,0 +1,151 @@
+---
+title: "Błędy importu CSV w Shopify: najczęstsze przyczyny i rozwiązania"
+description: "Kompletny przewodnik po najczęstszych błędach importu CSV w Shopify: brakujące kolumny, nieprawidłowe wartości logiczne, problemy ze strukturą wariantów, błędy cen i konflikty handle."
+keywords: ["błąd importu csv shopify", "shopify import csv nie działa", "błędy csv shopify", "shopify import produktów błąd", "naprawa csv shopify", "sprawdzanie csv shopify", "błąd przesyłania csv shopify"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Najczęstsze błędy importu CSV w Shopify i ich przyczyny"
+  - "Jak Shopify sprawdza produkty, warianty, handle i pola wymagane"
+  - "Jak naprawić brakujące kolumny, nieprawidłowe wartości logiczne i błędy cen"
+  - "Jak wykryć problemy ze strukturą wariantów, przez które produkty się dzielą lub znikają"
+  - "Jak oficjalny szablon Shopify chroni przed nieudanym importem"
+bestFor: "Sprzedawcy i deweloperzy Shopify, którzy analizują nieudany lub niepełny import CSV z produktami"
+timeToComplete: "12 minut"
+---
+
+## Jak Shopify sprawdza import CSV
+
+Gdy importujesz plik CSV z produktami, Shopify przepuszcza każdy wiersz przez kilka etapów walidacji:
+
+1. **Kontrola nagłówków** – sprawdza, czy są wymagane kolumny
+2. **Grupowanie po handle** – łączy wiersze z tym samym Handle w jeden produkt
+3. **Walidacja pól** – sprawdza typy danych, wartości wymagane i dozwolone
+4. **Wykrywanie konfliktów** – szuka konfliktów handle i SKU z istniejącymi produktami
+
+Błąd na dowolnym etapie powoduje odrzucenie wierszy. Shopify często importuje poprawne wiersze i pomija błędne, więc jeśli nie poprawisz wcześniej wszystkich błędów, import może być niepełny.
+
+---
+
+## Błąd: brak wymaganej kolumny
+
+**Komunikat:** „Your CSV file is missing the following columns: Handle, Title...”
+
+**Przyczyna:** W wierszu nagłówka brakuje jednej lub kilku wymaganych kolumn, są źle napisane albo mają złą wielkość liter.
+
+**Wymagane kolumny Shopify:**
+
+| Kolumna | Uwagi |
+|---|---|
+| `Handle` | Identyfikator przyjazny dla URL; grupuje warianty |
+| `Title` | Nazwa produktu |
+| `Variant Price` | Cena każdego wiersza wariantu |
+
+**Rozwiązanie:**
+- Porównaj swój wiersz nagłówka z [oficjalnym szablonem CSV produktów Shopify](https://help.shopify.com/pl/manual/products/import-export/using-csv)
+- Sprawdź wielkość liter: `Handle`, nie `handle`; `Variant Price`, nie `Variant price`
+- Poszukaj spacji na początku lub końcu nazw kolumn (otwórz plik w edytorze tekstu, nie w Excelu)
+- Jeśli pierwsza kolumna wygląda jak `﻿Handle` (z BOM na początku), zapisz plik ponownie jako UTF-8 bez BOM
+
+---
+
+## Błąd: nieprawidłowa wartość logiczna
+
+**Komunikat:** Wiersze są importowane, ale Published, Gift Card lub Requires Shipping mają złą wartość
+
+**Przyczyna:** Kolumny logiczne Shopify oczekują `TRUE` lub `FALSE` (wielkimi literami). Wartości takie jak `Yes`, `yes`, `1`, `true` czy `True` nie są akceptowane we wszystkich polach.
+
+**Dotyczy kolumn:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**Rozwiązanie:** zamień wszystkie warianty za pomocą „Znajdź i zamień”:
+
+| Zamień to | Na to |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+W Excelu: `Ctrl+H` („Znajdź i zamień”) i zaznacz „Uwzględnij całą zawartość komórki”, żeby nie zamieniać tekstu wewnątrz dłuższych wartości.
+
+---
+
+## Błąd: pusta lub nieprawidłowa cena wariantu
+
+**Komunikat:** „Variant Price can't be blank” albo cena zostaje zaimportowana jako 0.00
+
+**Przyczyna:** `Variant Price` jest puste, zawiera symbol waluty (`$19.99`), używa przecinka dziesiętnego (`19,99`) albo jest tekstem.
+
+**Rozwiązanie:**
+- Wypełnij `Variant Price` w każdym wierszu (nadrzędnym i wariantów)
+- Usuń symbole walut: skasuj `$` za pomocą „Znajdź i zamień”
+- Zamień przecinek dziesiętny na kropkę: `19,99` → `19.99`
+- Przed zapisaniem ustaw w Excelu format kolumny na Liczbowe (żeby symbole nie wróciły)
+
+---
+
+## Błąd: struktura wariantów / brak kolumn opcji
+
+**Komunikat:** Produkty importują się bez wariantów albo warianty pojawiają się jako osobne produkty
+
+**Przyczyna:** Handle jest użyty poprawnie (ta sama wartość we wszystkich wierszach produktu), ale kolumny opcji są błędne:
+
+- W niektórych wierszach brakuje `Option1 Name` lub `Option1 Value` albo są puste
+- Nazwy kolumn opcji różnią się między wierszami tej samej grupy
+- Handle jest inny w wierszach, które powinny tworzyć ten sam produkt
+
+**Zasady dla wierszy wariantów:**
+- Wszystkie wiersze tego samego produktu muszą mieć dokładnie ten sam `Handle`
+- Każdy wiersz musi mieć `Option1 Name` i `Option1 Value`
+- Przy 3 opcjach wszystkie wiersze muszą mieć kolumny `Option1`, `Option2` i `Option3`
+- `Option1 Name` (np. `Size`) powinno być takie samo we wszystkich wierszach grupy; zmienia się tylko `Option1 Value`
+
+**Przykład poprawnej struktury wariantów:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## Błąd: zduplikowany handle
+
+**Komunikat:** Produkty nadpisują się nawzajem albo psuje się grupowanie wariantów
+
+**Przyczyna:** Dwa niepowiązane produkty mają ten sam Handle. Shopify łączy wszystkie wiersze z tym samym Handle w jeden produkt, więc zduplikowany Handle scala różne produkty.
+
+**Rozwiązanie:** Nadaj każdemu produktowi unikalny Handle. Handle musi być przyjazny dla URL: tylko małe litery, cyfry i myślniki, bez spacji i znaków specjalnych.
+
+Jeśli aktualizujesz istniejący produkt, a Handle już jest w Shopify, to jest zamierzone – import zaktualizuje ten produkt. Ale jeśli nowy produkt przypadkiem ma Handle istniejącego, dane istniejącego zostaną nadpisane.
+
+---
+
+## Błąd: konflikty SKU
+
+**Komunikat:** Produkty są importowane, ale stany magazynowe się nie zgadzają albo SKU są zgłaszane jako duplikaty
+
+**Przyczyna:** To samo SKU występuje w dwóch różnych wierszach (lub w dwóch różnych produktach). Shopify używa SKU do śledzenia stanów, a zduplikowane SKU powodują błędne łączenie stanów.
+
+**Rozwiązanie:** Upewnij się, że każdy wiersz wariantu ma unikalne SKU. Możesz zostawić SKU puste, jeśli nie śledzisz stanów po SKU, ale nie może się powtarzać między wierszami.
+
+---
+
+## Błąd: obraz nie został zaimportowany
+
+**Komunikat:** Produkty są importowane, ale brakuje obrazów
+
+**Przyczyna:**
+- Adres w `Image Src` nie jest publicznie dostępnym adresem HTTPS
+- Adres zawiera spacje lub znaki specjalne, które trzeba zakodować
+- Format obrazu nie jest obsługiwany (Shopify akceptuje JPG, JPEG, PNG, GIF i WEBP)
+
+**Rozwiązanie:** Sprawdź każdy adres obrazu w przeglądarce – obraz powinien od razu się wyświetlić. Obrazy z Google Drive, Dropboxa lub localhosta trzeba przed importem przenieść na publiczny hosting.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij swój plik CSV z Shopify do StriveFormats. Walidator sprawdza wszystkie wymagane kolumny, formaty wartości logicznych, strukturę wariantów, pola cen i unikalność handle, a bezpieczne problemy naprawia jednym kliknięciem.
+
+[Otwórz Naprawiacz CSV dla Shopify](/app?preset=shopify_products) | [Zobacz szablon Shopify](/presets/shopify_products)

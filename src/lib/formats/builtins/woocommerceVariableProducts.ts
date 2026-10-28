@@ -6,7 +6,7 @@ export const woocommerceVariableProductsFormat: CsvFormat = {
   id: "woocommerce_variable_products",
   name: "WooCommerce Variable Products",
   description:
-    "Optimized for WooCommerce variable products + variations (auto-creates missing parent rows and validates variation structure).",
+    "Optimized for WooCommerce variable products + variations (checks parent references and validates variation structure).",
   category: "Ecommerce",
   source: "builtin",
   expectedHeaders: [
@@ -57,7 +57,7 @@ export const woocommerceVariableProductsFormat: CsvFormat = {
     "Attribute 1 global",
   ],
   apply(headers, rows) {
-    // Variable preset enables parent auto-create and stricter variation handling.
-    return validateAndFixWooCommerceProducts(headers, rows, { mode: "variable", autoCreateMissingParents: true });
+    // Variable preset also reports variations whose parent is not in the file.
+    return validateAndFixWooCommerceProducts(headers, rows, { mode: "variable" });
   },
 };

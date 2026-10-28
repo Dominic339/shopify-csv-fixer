@@ -1,0 +1,153 @@
+---
+title: "Atrybuty produktów WooCommerce w CSV: kompletny przewodnik"
+description: "Jak poprawnie formatować atrybuty produktów WooCommerce w pliku CSV: nazwy atrybutów, atrybuty globalne i lokalne, atrybuty wariantów i typowe błędy."
+keywords: ["atrybuty woocommerce csv", "import atrybutów produktów woocommerce", "kolumny atrybutów woocommerce csv", "atrybuty wariantów woocommerce", "format atrybutów csv woocommerce", "atrybuty globalne woocommerce csv", "błąd importu atrybutów woocommerce"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Jak nazywa się i numeruje kolumny atrybutów WooCommerce w CSV"
+  - "Czym różnią się atrybuty globalne od lokalnych przy imporcie CSV"
+  - "Jak ustawić atrybuty produktów zmiennych i ich wariantów"
+  - "Jak zaimportować kilka wartości atrybutu (np. produkt dostępny w kolorze niebieskim i czerwonym)"
+  - "Jak naprawić najczęstsze błędy importu atrybutów"
+bestFor: "Właściciele sklepów WooCommerce importujący produkty zmienne z rozmiarem, kolorem, materiałem lub innymi wymiarami atrybutów"
+timeToComplete: "10 minut"
+---
+
+## Jak działają atrybuty WooCommerce w CSV
+
+Atrybuty produktów WooCommerce określają wymiary, w których produkt się różni — zwykle rozmiar, kolor lub materiał. Przy imporcie CSV atrybuty zapisuje się jako numerowane grupy kolumn. Każda grupa czterech kolumn odpowiada jednemu atrybutowi.
+
+Wzór nazw kolumn wygląda tak:
+- `Attribute 1 name`
+- `Attribute 1 value(s)`
+- `Attribute 1 visible`
+- `Attribute 1 global`
+
+Dla drugiego atrybutu powtórz wzór z `Attribute 2 name`, `Attribute 2 value(s)` itd.
+
+Jeśli WordPress działa po polsku, eksport używa polskich nazw kolumn; importer akceptuje zarówno je, jak i nazwy angielskie. W tym przewodniku używamy nazw angielskich.
+
+---
+
+## Opis kolumn
+
+| Kolumna | Format | Opis |
+|---|---|---|
+| `Attribute N name` | Tekst | Nazwa atrybutu (np. `Color`, `Size`) |
+| `Attribute N value(s)` | Tekst rozdzielony pionowymi kreskami | Wartość lub wartości dla tego wiersza (np. `Blue` albo `Blue | Red`) |
+| `Attribute N visible` | `1` lub `0` | `1` = widoczny na stronie produktu; `0` = ukryty |
+| `Attribute N global` | `1` lub `0` | `1` = globalny atrybut taksonomii; `0` = atrybut lokalny |
+
+---
+
+## Produkty proste z kilkoma wartościami atrybutu
+
+Dla produktu prostego dostępnego w kilku kolorach (ale nie jako osobne warianty) wypisz wszystkie wartości w kolumnie `Attribute 1 value(s)`, rozdzielając je pionową kreską `|`:
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+```
+
+Powstaje jeden produkt z atrybutem Color, który pokazuje wszystkie trzy kolory na stronie produktu.
+
+---
+
+## Produkty zmienne z wariantami
+
+W produktach zmiennych atrybuty działają inaczej. Wiersz nadrzędny zawiera wszystkie możliwe wartości atrybutu. Każdy wiersz wariantu podaje tylko konkretną wartość tego wariantu.
+
+**Wiersz nadrzędny (Type: variable):**
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+```
+
+**Wiersze wariantów (Type: variation):**
+
+```
+Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
+,variation,TSHIRT-S,18.00,Size,S,1,1
+,variation,TSHIRT-M,18.00,Size,M,1,1
+,variation,TSHIRT-L,20.00,Size,L,1,1
+,variation,TSHIRT-XL,20.00,Size,XL,1,1
+```
+
+Kolumna `Name` pozostaje pusta w wierszach wariantów — WooCommerce tworzy nazwę wariantu z wartości atrybutów.
+
+---
+
+## Dwa atrybuty (rozmiar + kolor)
+
+Dla produktu z dwoma wymiarami atrybutów:
+
+**Wiersz nadrzędny:**
+
+```
+Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
+Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+```
+
+**Wiersze wariantów:**
+
+```
+,variation,SHOE-7-BLK,Size,7,1,1,Color,Black,1,1
+,variation,SHOE-7-WHT,Size,7,1,1,Color,White,1,1
+,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
+```
+
+Każdy wiersz wariantu podaje dokładnie jedną wartość na atrybut (a nie listę rozdzieloną pionowymi kreskami).
+
+---
+
+## Atrybuty globalne i lokalne
+
+### Atrybuty globalne (`Attribute N global: 1`)
+
+Atrybuty globalne są zdefiniowane w taksonomii atrybutów WooCommerce (Produkty → Atrybuty w panelu WordPressa). Używaj atrybutów globalnych, gdy:
+- kilka produktów ma te same wartości atrybutu (te same kolory, te same rozmiary)
+- chcesz filtrować produkty według atrybutu na stronach sklepu
+- korzystasz z widżetu nawigacji warstwowej WooCommerce
+
+Przy imporcie z `global: 1` WooCommerce tworzy wartość atrybutu, jeśli jeszcze nie istnieje. Nazwy atrybutów muszą się dokładnie zgadzać (z rozróżnieniem wielkości liter), żeby WooCommerce dopasował je do istniejącej taksonomii.
+
+### Atrybuty lokalne (`Attribute N global: 0`)
+
+Atrybuty lokalne należą do jednego produktu. Używaj ich do cech właściwych tylko dla danego produktu (np. `Material: 100% cashmere` w jednym konkretnym produkcie).
+
+Atrybutów lokalnych nie można używać do filtrowania wariantów ani w nawigacji warstwowej.
+
+---
+
+## Częste błędy importu atrybutów
+
+### Kolumny atrybutów nie są rozpoznawane
+
+**Przyczyna:** nazwy kolumn nie odpowiadają dokładnie wzorowi — złe spacje, zła numeracja lub skrócone nazwy.
+
+Źle: `Attribute1 name`, `attribute 1 name`, `Attr 1 name`
+Dobrze: `Attribute 1 name`
+
+**Rozwiązanie:** używaj dokładnych nazw kolumn, ze spacją między `Attribute` a numerem.
+
+### Atrybuty wariantu nie pasują do produktu nadrzędnego
+
+**Przyczyna:** nazwa atrybutu w wierszu wariantu różni się od nazwy w wierszu nadrzędnym albo wariant podaje wartość, której nie było na liście wartości produktu nadrzędnego.
+
+**Rozwiązanie:** nazwy atrybutów muszą być identyczne w wierszach nadrzędnych i wariantów. Wartości wariantów muszą należeć do wartości wymienionych w wierszu nadrzędnym.
+
+### Pionowa kreska ze spacjami
+
+**Przyczyna:** mieszanie ` | ` (ze spacjami wokół kreski) i `|` (bez spacji). WooCommerce usuwa spacje z wartości, ale niespójności mogą powodować niedopasowania.
+
+**Rozwiązanie:** używaj `|` ze spacjami lub bez nich, ale konsekwentnie w całym pliku. WooCommerce usuwa spacje wokół każdej wartości.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV WooCommerce do StriveFormats. Walidator sprawdza nazwy kolumn atrybutów, zgodność atrybutów między produktem nadrzędnym a wariantami oraz formatowanie separatorów i wskazuje problemy z dokładnym wierszem i kolumną.
+
+[Otwórz narzędzie do naprawy CSV WooCommerce](/app?preset=woocommerce_products) | [Zobacz szablon WooCommerce](/presets/woocommerce_products)

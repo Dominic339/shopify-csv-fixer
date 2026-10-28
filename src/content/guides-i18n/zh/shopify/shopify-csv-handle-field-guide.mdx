@@ -1,0 +1,138 @@
+---
+title: "Shopify CSV Handle 字段指南"
+description: "关于 Shopify 商品 CSV 中 Handle 字段的一切：它的作用、有效 handle 的规则、如何对变体分组，以及如何修复 handle 错误。"
+keywords: ["shopify csv handle 字段", "shopify handle", "shopify handle csv", "shopify 商品 handle", "shopify handle 变体", "shopify handle 规则", "shopify csv handle 错误"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Shopify Handle 字段的作用，以及它为何是最重要的列"
+  - "有效 Shopify handle 的确切规则"
+  - "Handle 如何把变体行归为一个商品"
+  - "如何修复无效的 handle 和 handle 冲突"
+  - "修改 handle 会如何影响现有商品的网址"
+bestFor: "遇到变体分组错误、商品重复或因 handle 导致导入失败的 Shopify 商家"
+timeToComplete: "10 分钟"
+---
+
+## 什么是 Shopify Handle？
+
+Handle 是 Shopify 商品 CSV 中商品的唯一标识符，有两个作用：
+
+1. **对变体行分组**：同一商品的所有行必须使用相同的 Handle。Shopify 会读取 Handle 列来判断哪些行属于同一商品。
+2. **决定商品网址**：Handle 会成为网址路径：`yourstore.com/products/<handle>`
+
+Handle 是 Shopify CSV 中最重要的列。Handle 错误导致的导入失败比其他任何字段都多。
+
+---
+
+## 有效 Handle 的规则
+
+有效的 Shopify handle 必须：
+
+- 在店铺所有商品（包括现有商品）中**唯一**
+- 只包含**小写英文字母、数字和连字符**
+- **不含空格**（用连字符代替）
+- **不含特殊字符**：不能有 `&`、`%`、`?`、`/`、`@` 或 Unicode 字符
+- 每一行都**不能为空**：不允许空的 handle
+
+| 有效 | 无效 | 原因 |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | 有大写字母和空格 |
+| `product-123` | `product/123` | 含有斜杠 |
+| `mens-running-shoes` | `men's-running-shoes` | 含有撇号 |
+| `widget-v2` | `widget_v2` | 含有下划线（技术上允许，但不推荐） |
+| `shirt-sm` | `` | 为空（不允许） |
+
+---
+
+## Handle 如何对变体分组
+
+在 Shopify 的 CSV 格式中，有多个变体的商品会占用多行。同一商品的所有行必须使用相同的 Handle：
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+Shopify 读取这个文件时会：
+- 识别出 3 行 Handle 为 `blue-wallet` 的数据
+- 创建一个名为“Blue Wallet”的商品
+- 创建 3 个变体：Small（29.99 美元）、Medium（31.99 美元）、Large（31.99 美元）
+- 从第一行读取 Title、Body HTML、Vendor 等商品级字段
+
+**第一行（父行**）：包含商品级数据（Title、Body HTML、Image Src、Vendor 等）
+**之后的行（变体行**）：使用相同的 Handle，Title 为空，只包含变体专属数据
+
+---
+
+## 常见的 Handle 错误
+
+### 两个商品使用了相同的 Handle
+
+**症状**：导入时一个商品的数据覆盖了另一个商品，或不同商品的变体被合并成一个商品。
+
+**原因**：CSV 中两个不同的商品使用了相同的 Handle。
+
+**解决方法**：为每个商品设置唯一的 Handle。如果商品名称相似，请加上用于区分的部分：
+
+- `blue-wallet` 和 `red-wallet`（而不是都叫 `wallet`）
+- `mens-shirt-v1` 和 `mens-shirt-v2`
+
+### Handle 与现有商品不一致（意外新建商品）
+
+**症状**：导入没有更新现有商品，而是新建了一个重复的商品。
+
+**原因**：CSV 中的 Handle 与 Shopify 上现有商品的 Handle 不完全一致（大小写、拼写不同，或多了、少了一个连字符）。
+
+**解决方法**：先从 Shopify 导出当前商品。导出的文件中包含准确的现有 Handle，请在导入文件中使用这些 Handle。
+
+### Handle 中含有空格或大写字母
+
+**症状**：导入因 handle 验证错误而失败，或 Shopify 自动转换了 handle（生成了意料之外的网址）。
+
+**解决方法**：在某些情况下，Shopify 会自动把 handle 转为小写并把空格换成连字符，但对于 CSV 导入，最好事先自行规范 handle，以免出现无法预料的转换。
+
+**用 Python 规范 handle**：
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### 变体行的 Handle 不一致
+
+**症状**：Shopify 把每个变体行都当作单独的商品导入（每个商品只有 0 或 1 个变体）。
+
+**原因**：本应属于同一商品的行，其 Handle 值不同，通常是拼写错误或多了一个空格。
+
+**解决方法**：按 Handle 对 CSV 排序，找出本应共用一个 Handle 却不一致的行。末尾多出的空格（`blue-wallet ` 与 `blue-wallet`）是最常见的原因。
+
+---
+
+## Handle 与 SEO：为什么修改 Handle 需要谨慎
+
+Handle 会成为商品网址：`yourstore.com/products/<handle>`。商品上线后再修改 Handle，会对 SEO 产生影响：
+
+- 旧网址会返回 404（除非设置了重定向）
+- 指向旧网址的链接和书签都会失效
+- 已收录旧网址的搜索引擎会失去排名信号
+
+**最佳做法**：一开始就设置好 Handle。如果必须修改现有商品的 Handle，请在导入后立即在 Shopify 中设置网址重定向（在线商店 → 导航 → 网址重定向）。
+
+---
+
+## 用 StriveFormats 自动修复
+
+StriveFormats 会验证文件中的每个 Handle：检查空值、无效字符以及文件内重复的 Handle，并标出 Handle 分组不符合 Shopify 变体规则的行。
+
+[打开 Shopify CSV 修复工具](/app?preset=shopify_products) | [查看 Shopify 模板](/presets/shopify_products)

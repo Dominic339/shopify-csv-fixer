@@ -1,7 +1,6 @@
 // src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import TopBar from "@/components/TopBar";
@@ -11,8 +10,7 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import { getTranslations } from "@/lib/i18n/getTranslations";
-import { isValidLocale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { sectionByLocale } from "@/lib/i18n/getTranslations";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://striveformats.com"),
@@ -24,7 +22,6 @@ export const metadata: Metadata = {
     "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
   applicationName: "StriveFormats",
 
-  // ✅ ADD THIS SECTION
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -32,10 +29,6 @@ export const metadata: Metadata = {
     ],
     shortcut: ["/favicon.ico"],
     apple: ["/apple-icon.png"],
-  },
-
-  alternates: {
-    canonical: "/",
   },
 
   openGraph: {
@@ -72,19 +65,18 @@ export const metadata: Metadata = {
   ],
 };
 
+// No cookies or headers here: every page stays statically renderable. The top bar and
+// footer pick their language from the URL, so they receive the strings for every locale.
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
-  const locale = localeCookie && isValidLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;
-  const t = await getTranslations(locale);
+  const navByLocale = await sectionByLocale("nav");
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <TopBar navT={t.nav} />
+          <TopBar navByLocale={navByLocale} />
           {children}
-          <Footer />
+          <Footer navByLocale={navByLocale} />
         </ThemeProvider>
 
         <GoogleAnalytics />

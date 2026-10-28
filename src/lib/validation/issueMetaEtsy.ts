@@ -37,6 +37,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/tags_too_many": {
     code: "etsy/tags_too_many",
+    checked: false,
     title: "Too many tags",
     category: "tags",
     blocking: false,
@@ -126,6 +127,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/duplicate_tags": {
     code: "etsy/duplicate_tags",
+    checked: false,
     title: "Duplicate tags",
     category: "tags",
     blocking: false,
@@ -137,6 +139,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/missing_shipping_profile": {
     code: "etsy/missing_shipping_profile",
+    checked: false,
     title: "Missing shipping profile",
     category: "shipping",
     blocking: true,
@@ -170,6 +173,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/missing_required_field": {
     code: "etsy/missing_required_field",
+    checked: false,
     title: "Missing required field",
     category: "compliance",
     blocking: true,
@@ -181,6 +185,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
 
   "etsy/unknown_header": {
     code: "etsy/unknown_header",
+    checked: false,
     title: "Unknown column",
     category: "structure",
     blocking: false,
@@ -188,5 +193,27 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
     explanation: "This column is not recognized by the Etsy importer.",
     whyPlatformCares: "Unknown columns are ignored and can hide data issues.",
     howToFix: "Remove the column or rename it to a supported Etsy header.",
+  },
+
+  "etsy/too_many_materials": {
+    code: "etsy/too_many_materials",
+    title: "Too many materials",
+    category: "attributes",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A listing has more than 13 materials.",
+    whyPlatformCares: "Etsy allows at most 13 materials per listing; extras are rejected when you bulk edit.",
+    howToFix: "Keep the 13 most important materials.",
+  },
+
+  "etsy/quantity_too_high": {
+    code: "etsy/quantity_too_high",
+    title: "Quantity above 999",
+    category: "inventory",
+    blocking: true,
+    autoFixable: false,
+    explanation: "Quantity is higher than 999.",
+    whyPlatformCares: "Etsy caps each listing's quantity at 999.",
+    howToFix: "Set Quantity to 999 or less.",
   },
 };

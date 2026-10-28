@@ -1,0 +1,145 @@
+---
+title: "Shopify-productvarianten uitgelegd: CSV-structuur en veelgemaakte fouten"
+description: "Lees hoe het CSV-formaat van Shopify varianten weergeeft met groepering op Handle, de Option-kolommen en hoofd-/subrijen. Voorkom de fouten waardoor producten worden opgesplitst, varianten verdwijnen en imports mislukken."
+keywords: ["shopify varianten csv", "shopify productvarianten importeren", "shopify handle varianten", "shopify option1 option2", "shopify csv hoofdproduct variant", "shopify variantprijs csv", "shopify csv structuur"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Hoe Shopify met de Handle een hoofdproduct en zijn varianten groepeert"
+  - "Welke kolommen hoofdrijen en welke variantrijen nodig hebben"
+  - "Hoe Option1 Name, Option1 Value en de Variant-kolommen samenwerken"
+  - "De meest voorkomende fouten in de variantstructuur en hoe je ze oplost"
+  - "Hoe je nieuwe varianten aan een bestaand product toevoegt zonder het te overschrijven"
+bestFor: "Shopify-verkopers en -ontwikkelaars die producten met maten, kleuren, materialen of andere opties importeren of bijwerken"
+timeToComplete: "12 minuten"
+---
+
+## Hoe Shopify varianten in de CSV weergeeft
+
+In de product-CSV van Shopify bestaat een product met meerdere varianten uit **meerdere rijen met dezelfde Handle**. De eerste rij is de "hoofdrij": die bevat de productgegevens. Elke volgende rij met dezelfde Handle is een variantrij.
+
+### Minimaal voorbeeld: T-shirt in twee maten
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+Wat opvalt:
+- Beide rijen hebben de Handle `blue-shirt`.
+- De tweede rij heeft een lege Title, een lege Image Src en een nieuwe Option1 Value.
+- Elke rij staat voor één koopbare variant (één combinatie van optiewaarden).
+
+---
+
+## De hoofdrij
+
+De eerste rij van een Handle is de hoofdrij. Die legt de productvelden vast:
+
+| Kolom | Verplicht in de hoofdrij | Opmerking |
+|---|---|---|
+| Handle | Ja | Unieke korte naam voor dit product; kleine letters, alleen streepjes |
+| Title | Ja | De productnaam |
+| Body HTML | Nee | Productbeschrijving; alleen nodig in de hoofdrij |
+| Vendor | Nee | Merknaam |
+| Type | Nee | Producttype (voor collecties) |
+| Tags | Nee | Tags gescheiden door komma's |
+| Published | Nee | TRUE of FALSE |
+| Option1 Name | Ja (bij opties) | Naam van de eerste optie (bijv. "Size") |
+| Option1 Value | Ja (bij opties) | Waarde voor de eerste variant (bijv. "Small") |
+| Image Src | Nee | URL van de hoofdafbeelding |
+
+**Een hoofdrij moet een Title hebben.** Is de Title leeg, dan herkent Shopify de rij niet als hoofdrij en kan de import verkeerde resultaten opleveren.
+
+---
+
+## Variantrijen
+
+Elke rij na de eerste met dezelfde Handle is een variantrij. Variantrijen:
+- Hebben dezelfde Handle als de hoofdrij.
+- Hebben een lege Title (of dezelfde Title: Shopify negeert die buiten de hoofdrij).
+- Hebben een eigen Option1 Value (en Option2 Value, Option3 Value indien van toepassing).
+- Hebben een eigen Variant Price, Variant SKU, Variant Inventory Qty enz.
+
+### Kolommen per variant
+
+| Kolom | Opmerking |
+|---|---|
+| Variant Price | Verplicht per variant; decimaal getal (zonder valutasymbool) |
+| Variant SKU | Optioneel maar sterk aanbevolen; moet in de hele winkel uniek zijn |
+| Variant Grams | Gewicht in grammen |
+| Variant Inventory Qty | Beginvoorraad |
+| Variant Inventory Policy | `deny` of `continue` (continue = verkopen zonder voorraad toestaan) |
+| Variant Fulfillment Service | Meestal `manual` |
+| Variant Requires Shipping | TRUE of FALSE |
+| Variant Taxable | TRUE of FALSE |
+| Variant Barcode | EAN, UPC of andere barcode |
+
+---
+
+## Meerdere opties (maat EN kleur)
+
+Shopify ondersteunt tot drie opties via de kolommen Option1, Option2 en Option3.
+
+Voorbeeld: T-shirt met maat en kleur
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name en Option2 Name hoeven alleen in de hoofdrij te staan (de eerste rij per Handle). Ze herhalen in variantrijen kan geen kwaad.
+- Elke combinatie van opties heeft een eigen rij nodig.
+- Een product met 3 maten en 4 kleuren heeft 12 variantrijen nodig.
+
+---
+
+## Veelgemaakte fouten
+
+### Fout 1: verschillende Handles voor hetzelfde product
+
+**Symptoom:** Wat één product met varianten zou moeten zijn, verschijnt na de import als meerdere losse producten.
+
+**Oplossing:** Alle rijen van één product moeten precies dezelfde Handle hebben. Een typfout (`blue-shirt` in plaats van `blue-shirt-`) laat Shopify een nieuw product aanmaken.
+
+### Fout 2: een Title in elke rij
+
+**Symptoom:** De import lukt, maar Shopify maakt dubbele producten aan of behandelt variantrijen als losse producten.
+
+**Oplossing:** Alleen de eerste rij per Handle hoort een Title te hebben. Laat de Title in alle variantrijen leeg.
+
+### Fout 3: kolom Option1 Name ontbreekt
+
+**Symptoom:** Importfout "Option1 Name is required" of alle varianten verschijnen als één optie met de naam "Default Title".
+
+**Oplossing:** Neem `Option1 Name` altijd op in de koprij, met een waarde in ten minste de hoofdrij. Heeft je product geen echte opties, zet Option1 Name dan op `Title` en Option1 Value op `Default Title`.
+
+### Fout 4: optiewaarden komen tussen rijen niet overeen
+
+**Symptoom:** Shopify maakt meer varianten aan dan verwacht of optienamen verschijnen dubbel.
+
+**Oplossing:** Option1 Name moet in alle rijen van een Handle precies dezelfde tekst zijn. Staat in de hoofdrij `Size`, dan moet elke variantrij ook `Size` bevatten (of leeg blijven). Een mix van `Size`, `size` en `Sizes` levert inconsistente optiegegevens op.
+
+### Fout 5: Variant Price is leeg
+
+**Symptoom:** De import mislukt met "Variant Price is required" of varianten worden aangemaakt met een prijs van 0.00.
+
+**Oplossing:** Variant Price is in elke rij verplicht. Er wordt niets overgenomen: ook als alle varianten dezelfde prijs hebben, moet elke rij die vermelden.
+
+### Fout 6: een nieuwe variant overschrijft bestaande varianten
+
+**Symptoom:** Na een gedeeltelijke import (één nieuwe variant toegevoegd) zijn alle andere varianten verdwenen.
+
+**Oplossing:** Als je een product via een CSV-import bijwerkt, moet je **alle** bestaande varianten in het bestand opnemen, niet alleen de nieuwe. De import van Shopify vervangt alle varianten van een Handle. Varianten die je weglaat, worden verwijderd.
+
+---
+
+## Tips voor grote catalogi
+
+- **Laat variantrijen automatisch maken.** Bij producten met veel combinaties (3 maten × 4 kleuren × 2 materialen = 24 rijen) laat je de combinaties door een spreadsheetformule of script genereren in plaats van ze met de hand in te voeren.
+- **Gebruik vaste SKU-patronen.** Een SKU als `BASIS-MAAT-KLEUR` (bijv. `SHIRT-SM-BLU`) maakt varianten makkelijk te herkennen en te sorteren.
+- **Test eerst met één product.** Importeer één product (hoofdrij en alle varianten) voordat je de hele catalogus uploadt. Controleer de variantstructuur in de Shopify-beheeromgeving voordat je verdergaat.

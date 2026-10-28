@@ -1,0 +1,151 @@
+---
+title: "Shopify CSV 导入错误：常见原因与解决方法"
+description: "最常见的 Shopify CSV 导入错误完整指南：缺少列、布尔值无效、变体结构问题、价格错误和 handle 冲突。"
+keywords: ["shopify csv 导入错误", "shopify 产品 csv 导入失败", "shopify csv 报错", "shopify 商品导入错误", "修复 shopify csv", "检查 shopify csv", "shopify csv 上传错误"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "最常见的 Shopify CSV 导入错误及其原因"
+  - "Shopify 如何验证商品、变体、handle 和必填字段"
+  - "如何修复缺少列、布尔值无效和价格错误"
+  - "如何诊断导致商品被拆分或丢失的变体结构问题"
+  - "如何使用 Shopify 官方模板避免导入失败"
+bestFor: "排查商品 CSV 导入失败或只导入了一部分的 Shopify 商家和开发者"
+timeToComplete: "12 分钟"
+---
+
+## Shopify 如何验证 CSV 导入
+
+导入商品 CSV 时，Shopify 会让每一行都经过多个验证步骤：
+
+1. **检查标题**：确认必填列是否存在
+2. **按 handle 分组**：把 Handle 相同的行合并为一个商品
+3. **验证字段**：检查数据类型、必填值和允许值
+4. **检测冲突**：检查与现有商品是否存在 handle 或 SKU 冲突
+
+任何一步出错都会导致该行失败。Shopify 通常会导入有效的行并跳过失败的行，所以如果不先修复所有错误，最后可能只导入了一部分。
+
+---
+
+## 错误：缺少必填列
+
+**提示信息**："Your CSV file is missing the following columns: Handle, Title..."
+
+**原因**：标题行中缺少一个或多个必填列，或者列名拼写错误、大小写不对。
+
+**Shopify 必填列**：
+
+| 列 | 说明 |
+|---|---|
+| `Handle` | 可用于 URL 的短名称；用于对变体分组 |
+| `Title` | 商品名称 |
+| `Variant Price` | 每个变体行的价格 |
+
+**解决方法**：
+- 将标题行与 [Shopify 官方商品 CSV 模板](https://help.shopify.com/zh-CN/manual/products/import-export/using-csv) 进行对比
+- 检查大小写：是 `Handle` 而不是 `handle`，是 `Variant Price` 而不是 `Variant price`
+- 检查列名前后是否有空格（用文本编辑器而不是 Excel 打开文件）
+- 如果第一列显示为 `﻿Handle`（前面带有 BOM），请将文件重新保存为不带 BOM 的 UTF-8
+
+---
+
+## 错误：布尔值无效
+
+**提示信息**：行已导入，但 Published、Gift Card 或 Requires Shipping 显示的值不对
+
+**原因**：Shopify 的布尔列要求填写 `TRUE` 或 `FALSE`（大写）。`Yes`、`yes`、`1`、`true` 或 `True` 等值并非所有字段都接受。
+
+**涉及的列**：`Published`、`Gift Card`、`Requires Shipping`、`Taxable`
+
+**解决方法**：用查找和替换统一所有写法：
+
+| 替换前 | 替换后 |
+|---|---|
+| `Yes`、`yes`、`Y`、`true`、`1` | `TRUE` |
+| `No`、`no`、`N`、`false`、`0` | `FALSE` |
+
+在 Excel 中按 `Ctrl+H`（查找和替换），并勾选“单元格匹配”，以免替换掉较长值中的文字。
+
+---
+
+## 错误：变体价格为空或无效
+
+**提示信息**："Variant Price can't be blank"，或价格被导入为 0.00
+
+**原因**：`Variant Price` 为空、带有货币符号（`$19.99`）、用逗号作小数点（`19,99`），或者是文本。
+
+**解决方法**：
+- 在每一行（父行和变体行）都填写 `Variant Price`
+- 去掉货币符号：用查找和替换删除 `$`
+- 把小数点逗号换成句点：`19,99` → `19.99`
+- 保存前在 Excel 中把该列设为数值格式（防止再次加上符号）
+
+---
+
+## 错误：变体结构 / 缺少选项列
+
+**提示信息**：商品导入后没有变体，或变体显示为单独的商品
+
+**原因**：Handle 用法正确（同一商品的所有行使用相同的值），但选项列有误：
+
+- 部分行缺少 `Option1 Name` 或 `Option1 Value`，或者为空
+- 同一组内各行的选项列名称不一致
+- 本应属于同一商品的行使用了不同的 handle
+
+**变体行规则**：
+- 同一商品的所有行必须使用完全相同的 `Handle`
+- 每一行都必须有 `Option1 Name` 和 `Option1 Value`
+- 如果有 3 个选项，所有行都必须有 `Option1`、`Option2` 和 `Option3` 列
+- `Option1 Name`（例如 `Size`）在组内所有行中应保持一致，只有 `Option1 Value` 会变化
+
+**正确的变体结构示例**：
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## 错误：handle 重复
+
+**提示信息**：商品互相覆盖，或变体分组被打乱
+
+**原因**：两个毫无关系的商品使用了相同的 Handle。Shopify 会把 Handle 相同的所有行合并为一个商品，因此重复的 Handle 会把不同的商品合并在一起。
+
+**解决方法**：为每个商品设置唯一的 Handle。Handle 必须可用于 URL：只能使用小写英文字母、数字和连字符，不能有空格或特殊字符。
+
+如果您是在更新现有商品，而该 Handle 已存在于 Shopify 中，这是正常的：导入会更新该商品。但如果新商品意外地与现有商品使用了相同的 Handle，现有商品的数据就会被覆盖。
+
+---
+
+## 错误：SKU 冲突
+
+**提示信息**：商品已导入，但库存不对，或提示 SKU 重复
+
+**原因**：同一个 SKU 出现在两行（或两个不同的商品）中。Shopify 用 SKU 跟踪库存，重复的 SKU 会导致库存被错误合并。
+
+**解决方法**：确保每个变体行都有唯一的 SKU。如果您不按 SKU 管理库存，可以让 SKU 留空，但各行之间不能重复。
+
+---
+
+## 错误：图片未导入
+
+**提示信息**：商品已导入，但缺少图片
+
+**原因**：
+- `Image Src` 中的 URL 不是可公开访问的 HTTPS 地址
+- URL 中含有需要编码的空格或特殊字符
+- 图片格式不受支持（Shopify 支持 JPG、JPEG、PNG、GIF 和 WEBP）
+
+**解决方法**：在浏览器中逐一打开图片 URL，应能直接显示图片。存放在 Google 云端硬盘、Dropbox 或 localhost 上的图片，必须在导入前移到可公开访问的托管地址。
+
+---
+
+## 用 StriveFormats 自动修复
+
+将您的 Shopify CSV 上传到 StriveFormats。验证器会检查所有必填列、布尔值格式、变体结构、价格字段以及 handle 是否唯一，并一键自动修复安全的问题。
+
+[打开 Shopify CSV 修复工具](/app?preset=shopify_products) | [查看 Shopify 模板](/presets/shopify_products)

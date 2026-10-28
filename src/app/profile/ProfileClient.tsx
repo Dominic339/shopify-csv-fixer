@@ -28,11 +28,15 @@ async function safeReadJson(res: Response) {
 }
 
 type Props = {
-  tProfile?: Translations["profile"];
-  navT?: Translations["nav"];
+  tProfile: Translations["profile"];
+  navT: Translations["nav"];
 };
 
 export default function ProfileClient({ tProfile, navT }: Props) {
+  const statusLabel = (status: string) => {
+    const key = `status_${status}` as keyof typeof tProfile;
+    return key in tProfile ? tProfile[key] : status;
+  };
   const { theme } = useTheme();
   const sp = useSearchParams();
   const router = useRouter();
@@ -135,22 +139,20 @@ export default function ProfileClient({ tProfile, navT }: Props) {
 
       if (!r.ok) {
         if (j?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
-        const errMsg =
-          j?.error ||
-          `Billing portal failed (${r.status}). Check STRIPE_SECRET_KEY + NEXT_PUBLIC_SITE_URL env vars.`;
-        const details = j?.details ? ` ${j.details}` : "";
-        setMsg(errMsg + details);
+        console.error("billing portal failed", r.status, j);
+        setMsg(tProfile.billingError);
         return;
       }
 
       if (!j?.url) {
-        setMsg("Billing portal response missing URL.");
+        setMsg(tProfile.billingError);
         return;
       }
 
       window.location.href = j.url;
     } catch (e: any) {
-      setMsg(e?.message ?? "Failed to open portal");
+      console.error(e);
+      setMsg(tProfile.billingError);
     } finally {
       setBusy(false);
     }
@@ -164,9 +166,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
     try {
       if (!sub?.signedIn) {
         router.push(
-          `/login?redirect=${encodeURIComponent(`/profile?upgrade=${plan}`)}&msg=${encodeURIComponent(
-            "Sign in to upgrade your plan."
-          )}`
+          `/login?redirect=${encodeURIComponent(`/profile?upgrade=${plan}`)}&msg=upgrade`
         );
         return;
       }
@@ -188,18 +188,20 @@ export default function ProfileClient({ tProfile, navT }: Props) {
 
       if (!r.ok) {
         if (j?.error === "stripe_not_configured") { setStripeEnabled(false); return; }
-        setMsg(j?.error ?? "Could not start checkout.");
+        console.error("checkout failed", r.status, j);
+        setMsg(tProfile.billingError);
         return;
       }
 
       if (!j?.url) {
-        setMsg("Checkout response missing URL.");
+        setMsg(tProfile.billingError);
         return;
       }
 
       window.location.href = j.url;
     } catch (e: any) {
-      setMsg(e?.message ?? "Could not start checkout.");
+      console.error(e);
+      setMsg(tProfile.billingError);
     } finally {
       setBusy(false);
     }
@@ -207,31 +209,31 @@ export default function ProfileClient({ tProfile, navT }: Props) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">{navT?.profile ?? "Profile"}</h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">{tProfile?.verifySubscription ?? "Verify your subscription and manage billing."}</p>
+      <h1 className="text-2xl font-semibold">{navT.profile}</h1>
+      <p className="mt-2 text-sm text-[var(--muted)]">{tProfile.verifySubscription}</p>
 
       {billingUnavailable ? (
         <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-          {tProfile?.billingUnavailable ?? "Billing is temporarily unavailable. Please try again later."}
+          {tProfile.billingUnavailable}
         </div>
       ) : null}
 
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         {sub ? (
           <>
-            <div className="text-sm text-[var(--muted)]">{tProfile?.subscription ?? "Subscription"}</div>
+            <div className="text-sm text-[var(--muted)]">{tProfile.subscription}</div>
             <div className="mt-2 space-y-2 text-sm">
               <div>
-                {tProfile?.signedIn ?? "Signed in"}: <span className="font-semibold">{sub.signedIn ? (tProfile?.yes ?? "Yes") : (tProfile?.no ?? "No")}</span>
+                {tProfile.signedIn}: <span className="font-semibold">{sub.signedIn ? tProfile.yes : tProfile.no}</span>
               </div>
               <div>
-                {navT?.plan ?? "Plan"}: <span className="font-semibold">{sub.plan}</span>
+                {navT.plan}: <span className="font-semibold">{tProfile[`plan_${sub.plan}`]}</span>
               </div>
               <div>
-                {tProfile?.status ?? "Status"}: <span className="font-semibold">{sub.status}</span>
+                {tProfile.status}: <span className="font-semibold">{statusLabel(sub.status)}</span>
               </div>
               <div>
-                {tProfile?.periodEnd ?? "Period end"}: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>
+                {tProfile.periodEnd}: <span className="font-semibold">{sub.current_period_end ?? "—"}</span>
               </div>
             </div>
 
@@ -244,11 +246,11 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                     disabled={busy || billingUnavailable}
                     type="button"
                   >
-                    {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.manageStripe ?? "Manage in Stripe (upgrade/cancel)")}
+                    {busy ? tProfile.opening : tProfile.manageStripe}
                   </button>
                 ) : (
                   <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--muted)]">
-                    {tProfile?.billingSyncing ?? "Billing portal syncing… please check back in a moment."}
+                    {tProfile.billingSyncing}
                   </div>
                 )
               ) : null}
@@ -261,7 +263,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                     disabled={busy || billingUnavailable}
                     type="button"
                   >
-                    {tProfile?.upgradeToBasic ?? "Upgrade to Basic"}
+                    {tProfile.upgradeToBasic}
                   </button>
 
                   <button
@@ -270,7 +272,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                     disabled={busy || billingUnavailable}
                     type="button"
                   >
-                    {tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced"}
+                    {tProfile.upgradeToAdvanced}
                   </button>
                 </div>
               ) : null}
@@ -282,7 +284,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                   disabled={busy || billingUnavailable}
                   type="button"
                 >
-                  {busy ? (tProfile?.opening ?? "Opening…") : (tProfile?.upgradeToAdvanced ?? "Upgrade to Advanced")}
+                  {busy ? tProfile.opening : tProfile.upgradeToAdvanced}
                 </button>
               ) : null}
 
@@ -290,46 +292,42 @@ export default function ProfileClient({ tProfile, navT }: Props) {
                 <Link
                   href={
                     upgradeIntent
-                      ? `/login?redirect=${encodeURIComponent(
-                          `/profile?upgrade=${upgradeIntent}`
-                        )}&msg=${encodeURIComponent("Sign in to upgrade your plan.")}`
+                      ? `/login?redirect=${encodeURIComponent(`/profile?upgrade=${upgradeIntent}`)}&msg=upgrade`
                       : "/login?redirect=%2Fprofile"
                   }
                   className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white"
                 >
-                  {navT?.signIn ?? "Sign in"}
+                  {navT.signIn}
                 </Link>
               ) : null}
 
               <Link
-                href="/ecommerce-csv-fixer"
+                href={localeHref(currentLocale, "/app")}
                 className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold"
               >
-                {tProfile?.backToEcommerce ?? "Back to Ecommerce"}
+                {navT.csvFixer}
               </Link>
             </div>
 
             {upgradeIntent ? (
               <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm">
-                {tProfile?.youreSignedIn ?? "You’re signed in. Choose a plan above to upgrade."}
+                {tProfile.youreSignedIn}
               </div>
             ) : null}
 
             {msg ? <div className="mt-3 text-sm text-[var(--muted)]">{msg}</div> : null}
           </>
         ) : (
-          <div className="text-sm text-[var(--muted)]">{tProfile?.loading ?? "Loading…"}</div>
+          <div className="text-sm text-[var(--muted)]">{tProfile.loading}</div>
         )}
       </div>
       {/* Language selector */}
       <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        <h2 className="text-sm font-semibold">{tProfile?.language ?? "Language"}</h2>
+        <h2 className="text-sm font-semibold">{tProfile.language}</h2>
         <p className="mt-1 text-xs text-[var(--muted)]">
-          {tProfile?.languageDesc ?? "Choose your preferred display language. This overrides browser detection."}
+          {tProfile.languageDesc}
         </p>
-        <p className="mt-2 text-xs text-amber-300">
-          Language support is currently in beta. Some pages and tool content may still appear in English while localization is being completed.
-        </p>
+        <p className="mt-2 text-xs text-[var(--muted)]">{tProfile.languageNote}</p>
         <div className="mt-4">
           <select
             className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
@@ -337,7 +335,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
             value={currentLocale}
             disabled={localeBusy}
             onChange={(e) => handleLocaleChange(e.target.value as Locale)}
-            aria-label="Select language"
+            aria-label={tProfile.language}
           >
             {LOCALES.map((locale) => (
               <option key={locale} value={locale}>
@@ -346,7 +344,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
             ))}
           </select>
           <p className="mt-2 text-xs text-[var(--muted)]">
-            {tProfile?.current ?? "Current"}: <span className="font-semibold">{LOCALE_NAMES[currentLocale]}</span>
+            {tProfile.current}: <span className="font-semibold">{LOCALE_NAMES[currentLocale]}</span>
           </p>
         </div>
       </div>

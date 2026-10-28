@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 import { getMonthKey } from "@/lib/month";
+import { FREE_EXPORTS_PER_MONTH, getPlanLimit } from "@/lib/plans";
+import { loadEffectivePlan, loadExportsUsed } from "@/lib/quotaServer";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-
-type Plan = "free" | "basic" | "advanced";
-
-function getPlanLimit(plan: Plan) {
-  if (plan === "advanced") return { unlimited: true as const, limit: 0 };
-  if (plan === "basic") return { unlimited: false as const, limit: 100 };
-  return { unlimited: false as const, limit: 3 };
-}
 
 export async function GET() {
   const supabase = await createSupabaseServerClient();
@@ -24,57 +18,43 @@ export async function GET() {
       unlimited: false,
       monthKey: getMonthKey(),
       used: 0,
-      limit: 3,
-      remaining: 3,
+      limit: FREE_EXPORTS_PER_MONTH,
+      remaining: FREE_EXPORTS_PER_MONTH,
     });
   }
 
   const admin = createSupabaseAdminClient();
   const monthKey = getMonthKey();
 
-  const { data: subRow } = await admin
-    .from("user_subscriptions")
-    .select("plan,status")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  try {
+    const plan = await loadEffectivePlan(admin, user.id);
+    const { unlimited, limit } = getPlanLimit(plan);
 
-  const status = String(subRow?.status ?? "").toLowerCase();
-  const rawPlan = String(subRow?.plan ?? "free").toLowerCase();
-  const plan: Plan = rawPlan === "advanced" ? "advanced" : rawPlan === "basic" ? "basic" : "free";
+    if (unlimited) {
+      return NextResponse.json({
+        signedIn: true,
+        plan,
+        unlimited: true,
+        monthKey,
+        used: 0,
+        limit: 0,
+        remaining: 0,
+      });
+    }
 
-  // Only treat as paid if status is active
-  const effectivePlan: Plan = status === "active" ? plan : "free";
-  const { unlimited, limit } = getPlanLimit(effectivePlan);
+    const used = await loadExportsUsed(admin, user.id, monthKey);
 
-  if (unlimited) {
     return NextResponse.json({
       signedIn: true,
-      plan: effectivePlan,
-      unlimited: true,
+      plan,
+      unlimited: false,
       monthKey,
-      used: 0,
-      limit: 0,
-      remaining: 0,
+      used,
+      limit,
+      remaining: Math.max(0, limit - used),
     });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Quota status failed.";
+    return NextResponse.json({ signedIn: true, message }, { status: 500 });
   }
-
-  const { data: usageRow } = await admin
-    .from("export_usage")
-    .select("exports_used")
-    .eq("user_id", user.id)
-    .eq("month_key", monthKey)
-    .maybeSingle();
-
-  const used = Number(usageRow?.exports_used ?? 0);
-  const remaining = Math.max(0, limit - used);
-
-  return NextResponse.json({
-    signedIn: true,
-    plan: effectivePlan,
-    unlimited: false,
-    monthKey,
-    used,
-    limit,
-    remaining,
-  });
 }

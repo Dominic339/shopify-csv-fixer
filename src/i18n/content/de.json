@@ -1,0 +1,317 @@
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Amazon-Flatfile-Importfehler: Ursachen und Lösungen",
+"description": "Behebe die häufigsten Importfehler in Amazon-Flatfile-CSVs: SKU-Probleme, ungültige Zustandscodes, Preisformate, Werte für den Versandkanal und nicht passende Vorlagen."
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Ja/Nein-Felder in Amazon-Flatfiles: y/n, TRUE/FALSE und typische Fallen",
+"description": "Welche Ja/Nein-Felder in Amazon-Flatfiles 'y' oder 'n' erwarten (nicht TRUE/FALSE oder 1/0), wie du ungültige Werte in großen Mengen korrigierst und wie du verhinderst, dass Tabellenkalkulationen diese Spalten verfälschen."
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "eBay CategoryID und File Exchange: was es ist und wie du es setzt",
+"description": "Was das eBay-Feld CategoryID ist, warum es bei File-Exchange-Uploads Pflicht ist, wie du die richtige Kategorie-ID für deine Produkte findest und wie du sie für den ganzen Katalog einträgst."
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "eBay-File-Exchange-CSV-Fehler: Ursachen und Lösungen",
+"description": "Behebe häufige Fehler in eBay-File-Exchange-CSVs: ungültige Action-Werte, Probleme mit Kategorie-IDs, zu lange Titel, Zustandscodes, Preisformate und Bild-URLs."
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Leitfaden zur Etsy-CSV-Vorlage: Felder, Formate und häufige Fehler",
+"description": "Die Etsy-Angebots-CSV vollständig erklärt: jedes Feld, zulässige Werte für Auswahllisten, Pflicht- und optionale Spalten und wie du häufige Importfehler behebst."
+},
+"general/append-vs-merge-join-csv": {
+"title": "Anhängen, Zusammenführen oder Verknüpfen: CSV-Dateien richtig kombinieren",
+"description": "Der Unterschied zwischen dem Anhängen von Zeilen, dem Zusammenführen gleich aufgebauter Dateien und dem Verknüpfen verwandter Daten, und welcher Weg zu deinem Katalog passt."
+},
+"general/csv-basics-for-imports": {
+"title": "CSV-Grundlagen für E-Commerce-Importe",
+"description": "Spaltenköpfe, UTF-8-Kodierung, Anführungszeichen, Zeilenenden und die häufigsten Fehler, die E-Commerce-CSV-Importe scheitern lassen, verständlich erklärt, bevor du das erste Mal hochlädst."
+},
+"general/csv-column-mismatch-fix": {
+"title": "Nicht passende CSV-Spalten beheben",
+"description": "So findest und behebst du Spaltenfehler in CSV-Importen: falsche Spaltennamen, Groß- und Kleinschreibung, zusätzliche Leerzeichen und falsche Reihenfolge auf allen E-Commerce-Plattformen."
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "CSV-Formatregeln für E-Commerce-Importe",
+"description": "Die genauen Formatregeln, die deine CSV für Importe in E-Commerce-Plattformen erfüllen muss: Trennzeichen, Anführungszeichen, Zeilenenden, Kodierung und Spaltenköpfe."
+},
+"general/csv-import-checklist": {
+"title": "CSV-Import-Checkliste für E-Commerce-Plattformen",
+"description": "Eine vollständige Checkliste vor dem Import für CSV-Dateien von Shopify, WooCommerce, Etsy, eBay und Amazon: Kodierung, Spaltenköpfe, Datentypen und plattformspezifische Regeln."
+},
+"general/csv-import-errors-explained": {
+"title": "CSV-Importfehler erklärt",
+"description": "Die häufigsten Fehlermeldungen beim CSV-Import von Shopify, WooCommerce, Etsy, eBay und Amazon in einfachen Worten, und wie du jede behebst."
+},
+"general/fix-blank-rows-in-csv": {
+"title": "Leere Zeilen in einer CSV entfernen",
+"description": "So findest und löschst du leere Zeilen in einer CSV, bevor du sie zu Shopify, WooCommerce, Etsy, eBay oder Amazon importierst, mit Excel, Google Sheets oder Python."
+},
+"general/fix-csv-encoding-errors": {
+"title": "Kodierungsfehler in CSV-Dateien beheben",
+"description": "UTF-8-Probleme in CSV-Dateien erkennen und beheben: verstümmelte Zeichen, BOM-Markierungen, Mojibake und ANSI-Dateien, die E-Commerce-Importe stören."
+},
+"general/fix-extra-columns-in-csv": {
+"title": "Überzählige Spalten in einer CSV entfernen",
+"description": "So findest und entfernst du zusätzliche oder unerwartete Spalten aus einer CSV, bevor du sie zu Shopify, WooCommerce, Etsy, eBay oder Amazon importierst."
+},
+"general/fix-mojibake-encoding": {
+"title": "Mojibake und Kodierungsfehler in CSV-Dateien beheben",
+"description": "Behebe verstümmelten Text durch falsche Kodierung: Erkenne Konflikte zwischen UTF-8 und Latin-1, entferne die BOM und speichere die Datei für E-Commerce-Importe richtig."
+},
+"general/merge-two-csv-files": {
+"title": "Zwei CSV-Dateien zusammenführen",
+"description": "Schritt für Schritt zwei CSV-Dateien zu einer zusammenführen, mit Excel Power Query, Google Sheets oder einem einfachen Befehl, ganz ohne Programmierkenntnisse."
+},
+"general/prevent-excel-scientific-notation": {
+"title": "Verhindern, dass Excel SKUs und Barcodes in wissenschaftliche Schreibweise umwandelt",
+"description": "So verhinderst du, dass Excel SKUs, EAN- und UPC-Codes in 1.23456E+11 verwandelt: Spalten vor dem Einfügen als Text formatieren, den Importassistenten nutzen und bestehende Dateien reparieren."
+},
+"general/remove-duplicate-header-rows": {
+"title": "Doppelte Kopfzeilen aus CSV-Dateien entfernen",
+"description": "Finde und lösche wiederholte Kopfzeilen mitten in CSV-Exporten: typische Ursachen, Erkennung mit Filtern in Excel und Google Sheets und wie du sie künftig vermeidest."
+},
+"general/validate-csv-before-import": {
+"title": "CSV vor dem Hochladen auf eine E-Commerce-Plattform prüfen",
+"description": "Eine praktische Checkliste, mit der du Kodierungsfehler, fehlende Spaltenköpfe, unterschiedliche Zeilenlängen, Anführungszeichenprobleme und mehr findest, bevor dein Import scheitert. Für Shopify, WooCommerce, eBay, Amazon und Etsy."
+},
+"shopify/images-in-product-csv": {
+"title": "Produktbilder in der Shopify-CSV: Image Src, Alt-Text und Positionen",
+"description": "So legst du Bild-URLs in der Shopify-Produkt-CSV an: die Spalten Image Src, Image Position und Image Alt Text, mehrere Bilder pro Produkt und die häufigsten Fehler beim Bildimport."
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Das Feld Handle in der Shopify-CSV",
+"description": "Alles über das Feld Handle in Shopifys Produkt-CSV: wozu es dient, die Regeln für gültige Handles, wie es Varianten gruppiert und wie du Handle-Fehler behebst."
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Shopify-CSV-Importfehler: häufige Ursachen und Lösungen",
+"description": "Ein vollständiger Leitfaden zu den häufigsten Fehlern beim Shopify-CSV-Import: fehlende Spalten, ungültige Wahr/Falsch-Werte, Probleme mit der Variantenstruktur, Preisfehler und Handle-Konflikte."
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Die Shopify-Produkt-CSV-Vorlage erklärt",
+"description": "Spalte für Spalte jedes Feld der offiziellen Shopify-Produkt-CSV: was es bewirkt, welche Werte es akzeptiert und welche Felder Pflicht sind."
+},
+"shopify/variants-explained": {
+"title": "Shopify-Produktvarianten erklärt: CSV-Struktur und häufige Fehler",
+"description": "Wie Shopifys CSV-Format Varianten über Handle-Gruppierung, Optionsspalten und Eltern- und Kindzeilen abbildet, und wie du Fehler vermeidest, die Produkte aufteilen, Varianten verlieren oder den Import scheitern lassen."
+},
+"woocommerce/variable-products-parent-child": {
+"title": "Variable WooCommerce-Produkte in der CSV: Eltern- und Variationszeilen",
+"description": "Wie der WooCommerce-Produktimporter variable Produkte mit Eltern- und Variationszeilen abbildet: Attributspalten, Pflichtfelder pro Zeilentyp und die häufigsten Fallen beim Import."
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "WooCommerce-Produktattribute in der CSV: vollständiger Leitfaden",
+"description": "So formatierst du WooCommerce-Produktattribute richtig in einer CSV: Benennung, globale und lokale Attribute, Variationsattribute und häufige Fehler."
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "WooCommerce-Produkt-CSV-Importfehler: Ursachen und Lösungen",
+"description": "Behebe die häufigsten Fehler beim WooCommerce-Produktimport: fehlende SKUs, ungültige Typen, Probleme mit Variationszeilen, Preisformate und Attributspalten."
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Shopify-Produktimporte sind pingelig: ein einziger fehlerhafter Preis, ein fehlender Optionswert oder eine Bildzeile an der falschen Stelle kann den ganzen Import scheitern lassen.",
+"Diese Vorlage prüft deine CSV gegen Shopifys offizielle Vorlage und wendet sichere automatische Korrekturen an, damit du beruhigt hochladen kannst. Du behältst die volle Kontrolle über deine Daten: Jede Korrektur wird protokolliert, und die exportierte CSV bleibt für den Shopify-Import bereit."
+],
+"howItWorks": [
+"Lade deinen Shopify-CSV-Export oder die offizielle Vorlage hoch.",
+"Wir vereinheitlichen Spaltenköpfe und übliche Formate (Wahr/Falsch-Werte, Geldbeträge, Bestandswerte) und prüfen die Pflichtfelder.",
+"Sichere Probleme werden automatisch behoben (z. B. Leerzeichen entfernen, TRUE/FALSE vereinheitlichen, Preisfelder normalisieren); riskante werden zur Prüfung markiert.",
+"Exportiere eine saubere CSV, die dem erwarteten Shopify-Schema entspricht."
+],
+"commonFixes": [
+"Wahr/Falsch-Werte (TRUE/FALSE) und Statuswerte (active/draft/archived) vereinheitlichen.",
+"Geldfelder (Price, Compare-at price, Cost per item) normalisieren und verirrte Währungssymbole entfernen.",
+"Doppelte SKUs und Variantenkonflikte erkennen, die Importe scheitern lassen.",
+"Die Optionsstruktur (Option1/2/3 name/value) prüfen und unvollständige Variantenzeilen markieren.",
+"Bildzeilen (Product image URL, Image position) prüfen und fehlende oder ungültige URLs markieren.",
+"Leerzeichen, Tags und Handles einheitlich formatieren."
+],
+"faq": [
+{
+"q": "Ändert das meine Produktdaten?",
+"a": "Automatisch werden nur sichere, umkehrbare Formatkorrekturen angewendet (z. B. Leerzeichen entfernen oder TRUE/FALSE vereinheitlichen). Riskante Punkte werden markiert, damit du vor dem Export entscheidest."
+},
+{
+"q": "Funktioniert es mit Exporten aus anderen Apps?",
+"a": "Ja. Viele Shopify-Apps fügen zusätzliche Spalten hinzu. StriveFormats behält unbekannte Spalten bei und sorgt dafür, dass die Shopify-Pflichtfelder importbereit sind."
+},
+{
+"q": "Kann ich die offizielle Shopify-Vorlage verwenden?",
+"a": "Ja. Du kannst die offizielle Beispielvorlage auf dieser Seite herunterladen und direkt im Fixer hochladen."
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"Der integrierte Produkt-CSV-Importer von WooCommerce ist streng bei Spaltennamen, Datentypen und der Variationsstruktur. Diese Vorlage prüft deine Datei gegen die Felder des Importers und wendet sichere Normalisierungen an, damit der Import sauber durchläuft.",
+"Nutze sie für Umzüge, Preisänderungen in großen Mengen, das Hinzufügen von Kategorien und Tags und den Import variabler Produkte mit Variationen. Alles Riskante bleibt zur manuellen Prüfung in der Problemliste."
+],
+"howItWorks": [
+"Lade deine WooCommerce-Produkt-CSV hoch (Export oder Importvorlage).",
+"Wir erkennen die Spaltenköpfe, vereinheitlichen übliche Werte und markieren fehlende Pflichtfelder.",
+"Sichere Korrekturen werden automatisch angewendet (Wahr/Falsch-Werte, Preise, URL-Bereinigung).",
+"Prüfe die restlichen Probleme und exportiere eine importbereite CSV."
+],
+"commonFixes": [
+"Published / In stock? / Backorders allowed? / Sold individually? vereinheitlichen",
+"Regular price / Sale price in einfache Dezimalzahlen umwandeln (ohne Währungssymbol)",
+"Überall Leerzeichen entfernen und Trennzeichen für Kategorien und Tags vereinheitlichen",
+"Bild-URLs prüfen und leere Einträge entfernen",
+"Doppelte Attributkombinationen bei Variationen desselben Elternprodukts erkennen"
+],
+"faq": [
+{
+"q": "Funktioniert das mit dem integrierten WooCommerce-Importer?",
+"a": "Ja. Diese Vorlage baut auf den Feldern des WooCommerce-Produkt-CSV-Importers und den üblichen Export-Spaltenköpfen auf, die du in der Import-Oberfläche zuordnest."
+},
+{
+"q": "Kommt es mit Variationen zurecht?",
+"a": "Es prüft die Variationsstruktur (Parent + Attribute) und erkennt doppelte Variationskombinationen. Sichere Korrekturen werden automatisch angewendet; strukturelle Fehler bleiben als Blocker bestehen."
+},
+{
+"q": "Was ist mit Spalten von Plugins?",
+"a": "Zusätzliche Spalten bleiben, wie sie sind: Die korrigierte Datei hat dieselben Spalten in derselben Reihenfolge wie die hochgeladene."
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"Etsy-Verkäufer exportieren Angebotsdaten oft in Tabellen, um sie in großen Mengen zu bearbeiten, zu prüfen oder einen Umzug vorzubereiten. Diese Vorlage prüft die üblichen Felder einer Etsy-Angebots-CSV und bereinigt sie sicher, damit deine Daten einheitlich bleiben.",
+"Der Schwerpunkt liegt auf Titeln, Preisen, Mengen, Tags und Bild-URLs. Alles, was die Bedeutung eines Angebots ändern könnte, bleibt als sichtbares Problem stehen."
+],
+"howItWorks": [
+"Lade deine Etsy-Angebots-CSV hoch.",
+"Wir prüfen Pflichtfelder und die üblichen Etsy-Grenzwerte.",
+"Sichere Korrekturen werden automatisch angewendet (Bereinigen, URL-Bereinigung, Zahlenformate).",
+"Prüfe die restlichen Probleme und exportiere eine saubere Datei."
+],
+"commonFixes": [
+"Leerzeichen entfernen und Trennzeichen für Tags vereinheitlichen",
+"Sicherstellen, dass Price eine gültige Dezimalzahl und Quantity eine ganze Zahl ist",
+"Listen von Bild-URLs prüfen und bereinigen",
+"Warnen, wenn Titel oder Tags die Etsy-Grenzen überschreiten"
+],
+"faq": [
+{
+"q": "Ist das ein offizieller Etsy-Angebotsimporter?",
+"a": "Diese Vorlage zielt auf übliche Abläufe mit Etsy-Angebots-CSVs (Exporte und Tabellen zur Massenbearbeitung) und hält die Felder innerhalb der von Etsy dokumentierten Grenzen."
+},
+{
+"q": "Was wird geprüft?",
+"a": "Titel, Preise, Mengen, Tags (Anzahl und Länge) und Bild-URLs. Ungültige oder leere Werte, die Massenbearbeitungen häufig scheitern lassen, werden markiert."
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"Mit dem Massen-Upload von eBay (Seller Hub › Berichte › Uploads, früher File Exchange) fügen Verkäufer Tausende Angebote aus einer CSV hinzu oder aktualisieren sie. Diese Vorlage prüft jede Zeile auf das, was eBay für ihre Action braucht: Neue Angebote brauchen Titel, numerische Kategorie, Preis, Menge und Zustand; Zeilen mit Revise, Relist und End brauchen die ItemID des Angebots.",
+"Deine Datei behält ihre eigenen Spalten und Spaltenköpfe, einschließlich Website und Währung in der ersten Spalte (zum Beispiel *Action(SiteID=UK|Country=GB|Currency=GBP|...)), damit sie auf den richtigen eBay-Marktplatz hochgeladen wird."
+],
+"howItWorks": [
+"Lade die CSV hoch, die du an eBay senden willst (für jede eBay-Website).",
+"Wir erkennen eBays Spaltennamen, mit oder ohne das Pflichtfeld-Zeichen *.",
+"Jede Zeile wird für ihre Action geprüft: Titel, Kategorie-IDs, Preise, Mengen, Zustands-IDs, Laufzeiten und Bild-URLs.",
+"Doppelte CustomLabels (SKUs) werden markiert, bevor sie sich gegenseitig überschreiben.",
+"Lade die korrigierte Datei mit deinen ursprünglichen Spalten herunter."
+],
+"commonFixes": [
+"Groß- und Kleinschreibung von Action vereinheitlichen (Add, Revise, Relist, End)",
+"Preise wie 12,50 oder $12.50 in einfache Dezimalzahlen umwandeln",
+"Zustandsnamen wie \"New\" oder \"Used\" in ConditionIDs umwandeln",
+"Durch | getrennte Listen von Bild-URLs bereinigen (bis zu 24 Bilder)",
+"Titel über eBays Grenze von 80 Zeichen markieren",
+"Festpreisangebote markieren, die nicht GTC sind"
+],
+"faq": [
+{
+"q": "Mit welchen eBay-Websites funktioniert das?",
+"a": "Mit allen. Website und Währung stehen im Spaltenkopf der ersten Spalte (SiteID, Country, Currency), der genau so beibehalten wird, wie du ihn hochgeladen hast."
+},
+{
+"q": "Was ist die ConditionID?",
+"a": "Die ConditionID ist eBays numerischer Artikelzustand, z. B. 1000 = Neu, 1500 = Neu: Sonstige, 2750 = Neuwertig, 3000 = Gebraucht, 7000 = Als Ersatzteil / defekt. Welche IDs erlaubt sind, hängt von der Kategorie ab. Zustandsnamen in deiner Datei werden in IDs umgewandelt, wo sie eindeutig sind."
+},
+{
+"q": "Welche Laufzeiten werden unterstützt?",
+"a": "Festpreisangebote laufen GTC (bis auf Widerruf). Auktionen laufen Days_1, Days_3, Days_5, Days_7 oder Days_10."
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"Ein eBay-Variationsangebot fasst verwandte Artikel, etwa ein Shirt in mehreren Größen und Farben, unter einem Angebot zusammen. In eBays Upload-Datei ist das eine Elternzeile (Titel, Kategorie und RelationshipDetails mit allen Werten, z. B. Color=Blue;Red|Size=M;L), gefolgt von einer Zeile mit Relationship=Variation pro Variante, jeweils mit eigener SKU, eigenem Preis und eigener Menge.",
+"Diese Vorlage prüft diese Struktur: Jede Variation folgt ihrer Elternzeile, verwendet nur Werte, die die Elternzeile deklariert, und hat eine eigene Kombination, einen Preis und eine Menge."
+],
+"howItWorks": [
+"Lade deine eBay-Variations-CSV hoch.",
+"Wir finden jede Elternzeile und die Variationszeilen darunter.",
+"Die RelationshipDetails jeder Variation werden mit ihrer Elternzeile abgeglichen, doppelte Kombinationen werden markiert.",
+"Preise, Mengen und Bild-URLs werden in jeder Zeile bereinigt.",
+"Lade die korrigierte Datei mit deinen ursprünglichen Spalten herunter."
+],
+"commonFixes": [
+"Variationen markieren, deren Werte in den RelationshipDetails der Elternzeile fehlen",
+"Doppelte Kombinationen aus Größe und Farbe innerhalb eines Angebots markieren",
+"Variationszeilen ohne Preis oder Menge markieren",
+"Preise wie 12,50 in einfache Dezimalzahlen umwandeln",
+"Paare aus VariationSpecificsName / VariationSpecificsValue in älteren Tabellen prüfen"
+],
+"faq": [
+{
+"q": "Wie funktionieren die RelationshipDetails?",
+"a": "In der Elternzeile führst du jeden Variationsnamen mit allen Werten auf: Color=Blue;Red|Size=M;L. In jeder Variationszeile gibst du die Werte dieser Variante an: Color=Blue|Size=M. Variationszeilen lassen Action und Title leer."
+},
+{
+"q": "Meine Tabelle nutzt Spalten VariationSpecificsName. Wird das unterstützt?",
+"a": "Ja. Durch | getrennte Namen und Werte (Color|Size und Blue|M) werden auf passende Anzahl und doppelte Kombinationen geprüft."
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"Der Inventory Loader ist der Upload in Seller Central, mit dem du Angebote zu Produkten hinzufügst oder aktualisierst, die bereits eine ASIN haben: Preis, Menge, Zustand und Versand. Diese Vorlage prüft jede Zeile gegen Amazons Regeln und lässt deine Spaltennamen genau so, wie sie sind, denn Amazon ordnet Spalten über den exakten Namen zu.",
+"Sie findet die Probleme, durch die Amazon Zeilen ablehnt oder Angebote dem falschen Produkt zuordnet: Barcodes, die eine Tabellenkalkulation in 1.23457E+11 verwandelt hat, UPCs ohne führende Null, falsche product-id-type-Codes, SKUs mit mehr als 40 Zeichen und doppelte SKUs."
+],
+"howItWorks": [
+"Lade deine Inventory-Loader-Datei hoch (Spalten aus Kategorievorlagen wie item_sku und external_product_id werden ebenfalls erkannt).",
+"Jede Zeile wird geprüft: SKU, Produkt-ID und ihr Typ, Preis, Menge, Zustand, add-delete und Versandzentrum.",
+"Preise wie 12,50 oder $12.50 werden in einfache Dezimalzahlen umgewandelt.",
+"Doppelte SKUs werden markiert, bevor sie sich gegenseitig überschreiben.",
+"Lade die Datei mit deinen ursprünglichen Spalten herunter."
+],
+"commonFixes": [
+"Preise sowie Mindest- und Höchstpreise in einfache Dezimalzahlen umwandeln",
+"Barcodes in wissenschaftlicher Schreibweise (1.23457E+11) und fehlende führende Nullen markieren",
+"Länge von UPC/EAN/ISBN/ASIN passend zum product-id-type prüfen",
+"SKUs über Amazons Grenze von 40 Zeichen markieren",
+"add-delete prüfen (a, d oder x)",
+"Doppelte SKUs erkennen"
+],
+"faq": [
+{
+"q": "Für welches Format ist das gedacht?",
+"a": "Für Amazons Inventory Loader (Angebotsdatei) mit kleingeschriebenen, durch Bindestriche verbundenen Spalten wie sku, product-id, product-id-type, price, quantity und add-delete."
+},
+{
+"q": "Was bedeuten die product-id-type-Codes?",
+"a": "Im Inventory Loader ist product-id-type eine Zahl: 1 = ASIN, 2 = ISBN, 3 = UPC, 4 = EAN. Kategorievorlagen verwenden stattdessen die Namen."
+},
+{
+"q": "Welche item-condition-Codes sind gültig?",
+"a": "11 = Neu, 10 = Generalüberholt, 1–4 = Gebraucht (wie neu, sehr gut, gut, akzeptabel), 5–8 = Sammlerstücke."
+},
+{
+"q": "Was macht add-delete?",
+"a": "a fügt das Angebot hinzu oder aktualisiert es, d löscht das Angebot und x löscht das Angebot samt den Produktdaten, die du beigesteuert hast."
+},
+{
+"q": "Was ist die fulfillment-center-id?",
+"a": "DEFAULT bedeutet, dass du die Bestellung selbst verschickst. AMAZON_NA, AMAZON_EU, AMAZON_FE oder AMAZON_IN bedeutet Versand durch Amazon in dieser Region."
+}
+]
+}
+}
+}

@@ -3,6 +3,11 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
+import { ENGLISH_VALIDATION_TEXT, type ValidationText } from "@/lib/i18n/validationText";
+import { fmt, plural } from "@/lib/i18n/fmt";
+import type { Translations } from "@/lib/i18n/getTranslations";
+
+type Strings = Translations["app"];
 
 type CsvRow = Record<string, string>;
 
@@ -47,11 +52,22 @@ export function EditableIssuesTable(props: {
   // Optional: let parent lock pinned rows while the user is editing.
   onRowEditStart?: (rowIndex: number) => void;
   onRowEditEnd?: (rowIndex: number) => void;
+
+  t: Strings;
+  /** Translates validator messages and issue text (English when omitted). */
+  vt?: ValidationText;
 }) {
+  const { t } = props;
+  const vt = props.vt ?? ENGLISH_VALIDATION_TEXT;
   const { headers, issues, rows, onUpdateRow, resetKey, formatId, pinnedRows, onUnpinRow, cellSeverityMap } = props;
 
   // Expand state for pinned rows
   const [open, setOpen] = useState<Set<number>>(() => new Set());
+
+  // Render the worklist in pages; thousands of pinned rows would freeze the page.
+  const PAGE = 25;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const visiblePinned = pinnedRows.slice(0, visibleCount);
 
   // Expand state for "Why is this blocking?" panels per issue instance
   const [openWhy, setOpenWhy] = useState<Record<string, boolean>>({});
@@ -64,6 +80,7 @@ export function EditableIssuesTable(props: {
   useEffect(() => {
     setOpen(new Set());
     setOpenWhy({});
+    setVisibleCount(PAGE);
   }, [resetKey]);
 
   const issuesByRow = useMemo(() => {
@@ -131,18 +148,18 @@ export function EditableIssuesTable(props: {
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-semibold text-[var(--text)]">Manual fixes</div>
-        <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">Pinned rows stay here until you unpin them.</div>
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm font-semibold text-[var(--text)]">{t.manualFixes}</div>
+        <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{t.manualFixesHint}</div>
       </div>
 
       {pinnedRows.length === 0 ? (
         <div className="mt-3 text-sm text-[color:rgba(var(--muted-rgb),1)]">
-          No rows pinned yet. Rows with issues are pinned automatically. You can also pin a row from the preview table.
+          {t.noPinnedRows}
         </div>
       ) : (
         <div className="mt-4 space-y-3">
-          {pinnedRows.map((rowIndex) => {
+          {visiblePinned.map((rowIndex) => {
             const counts = rowCounts.get(rowIndex) ?? { errors: 0, warnings: 0, tips: 0, hasEW: false };
             const isOpen = open.has(rowIndex);
             const row = rows[rowIndex] ?? {};
@@ -163,42 +180,42 @@ export function EditableIssuesTable(props: {
                     type="button"
                     className="text-left"
                     onClick={() => toggleOpen(rowIndex)}
-                    title="Click to expand and edit this row"
+                    aria-expanded={isOpen}
                     style={{ flex: 1 }}
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="text-sm font-semibold text-[var(--text)]">Row {rowIndex + 1}</div>
+                      <div className="text-sm font-semibold text-[var(--text)]">{fmt(t.rowNumber, { row: rowIndex + 1 })}</div>
 
                       {counts.errors > 0 ? (
                         <span className="rounded-full border border-[color:rgba(255,80,80,0.35)] bg-[color:rgba(255,80,80,0.10)] px-2 py-0.5 text-xs font-semibold text-[var(--text)]">
-                          {counts.errors} errors
+                          {plural(counts.errors, t.errorCountOne, t.errorCount)}
                         </span>
                       ) : null}
 
                       {counts.warnings > 0 ? (
                         <span className="rounded-full border border-[color:rgba(255,200,0,0.35)] bg-[color:rgba(255,200,0,0.10)] px-2 py-0.5 text-xs font-semibold text-[var(--text)]">
-                          {counts.warnings} warnings
+                          {plural(counts.warnings, t.warningCountOne, t.warningCount)}
                         </span>
                       ) : null}
 
                       {counts.tips > 0 ? (
                         <span className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">
-                          {counts.tips} tips
+                          {plural(counts.tips, t.tipCountOne, t.tipCount)}
                         </span>
                       ) : null}
 
                       {!counts.hasEW && counts.tips === 0 ? (
                         <span className="rounded-full border border-[color:rgba(var(--accent-rgb),0.35)] bg-[color:rgba(var(--accent-rgb),0.10)] px-2 py-0.5 text-xs font-semibold text-[var(--text)]">
-                          Clear
+                          {t.rowClear}
                         </span>
                       ) : null}
 
-                      <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{isOpen ? "Click to collapse" : "Click to expand and fix"}</span>
+                      <span className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{isOpen ? t.collapseRow : t.expandRow}</span>
                     </div>
                   </button>
 
-                  <button type="button" className="pill-btn" onClick={() => onUnpinRow(rowIndex)} title="Remove this row from Manual fixes">
-                    Unpin
+                  <button type="button" className="pill-btn" onClick={() => onUnpinRow(rowIndex)}>
+                    {t.unpinRow}
                   </button>
                 </div>
 
@@ -206,7 +223,7 @@ export function EditableIssuesTable(props: {
                   <div className="border-t border-[var(--border)] px-4 py-4">
                     {list.length ? (
                       <div className="mb-4 space-y-2">
-                        <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">Issues in this row</div>
+                        <div className="text-xs font-semibold text-[color:rgba(var(--muted-rgb),1)]">{t.issuesInRow}</div>
 
                         {list.slice(0, 6).map((it, idx) => {
                           const sev = normalizeSeverity(it);
@@ -215,7 +232,7 @@ export function EditableIssuesTable(props: {
                           const code = (it as any).code as string | undefined;
 
                           const meta = code ? getIssueMeta(formatId, code) : undefined;
-                          const why = meta?.whyPlatformCares;
+                          const why = vt.issue(code, "whyPlatformCares", meta?.whyPlatformCares);
                           const isBlocking = Boolean(meta?.blocking);
 
                           const whyKey = `${rowIndex}:${idx}:${code ?? title}`;
@@ -236,10 +253,10 @@ export function EditableIssuesTable(props: {
                             >
                               <div className="flex items-center justify-between gap-3">
                                 <div className="font-semibold text-[var(--text)]">{title}</div>
-                                <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{sev}</div>
+                                <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{sev === "error" ? t.filterErrors : sev === "warning" ? t.filterWarnings : t.filterInfo}</div>
                               </div>
 
-                              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{it.message}</div>
+                              <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">{vt.msg(it.message)}</div>
 
                               {isBlocking && why ? (
                                 <div className="mt-2">
@@ -248,7 +265,7 @@ export function EditableIssuesTable(props: {
                                     onClick={() => toggleWhy(whyKey)}
                                     className="text-xs font-semibold underline decoration-[color:rgba(var(--muted-rgb),0.6)] underline-offset-4 hover:opacity-90"
                                   >
-                                    Why is this blocking?
+                                    {t.whyBlocking}
                                   </button>
                                   {showWhy ? (
                                     <div className="mt-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-2 text-xs text-[color:rgba(var(--muted-rgb),1)]">
@@ -261,24 +278,22 @@ export function EditableIssuesTable(props: {
                               {code === "shopify/options_not_unique" &&
                               (Array.isArray(details?.duplicateCombos) ? details.duplicateCombos.length > 0 : Boolean(details?.duplicateCombo)) ? (
                                 <div className="mt-2 rounded-lg border border-[color:rgba(255,200,0,0.25)] bg-[color:rgba(255,200,0,0.06)] p-2 text-xs">
-                                  <div className="font-semibold">Show duplicate combinations</div>
+                                  <div className="font-semibold">{t.duplicateCombos}</div>
                                   <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">
                                     {(Array.isArray(details?.duplicateCombos) ? details.duplicateCombos : [{ options: details?.duplicateCombo, rows: details?.rows }])
                                       .slice(0, 3)
                                       .map((c: any, i: number) => (
                                         <div key={i} className={i ? "mt-2 pt-2 border-t border-[color:rgba(255,200,0,0.2)]" : ""}>
-                                          <div>Duplicate combo:</div>
+                                          <div>{t.duplicateCombo}</div>
                                           <div className="mt-1 space-y-0.5">
                                             {Object.entries((c?.options ?? c ?? {}) as Record<string, string>).map(([k, v]) => (
                                               <div key={k}>
-                                                <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>
-                                                  {k}:
-                                                </span>{" "}
+                                                <span className="font-semibold text-[var(--text)]">{k}:</span>{" "}
                                                 {String(v)}
                                               </div>
                                             ))}
                                           </div>
-                                          {Array.isArray(c?.rows) ? <div className="mt-1">Rows: {(c.rows as number[]).join(", ")}</div> : null}
+                                          {Array.isArray(c?.rows) ? <div className="mt-1">{fmt(t.rowsList, { rows: (c.rows as number[]).join(", ") })}</div> : null}
                                         </div>
                                       ))}
                                   </div>
@@ -287,9 +302,9 @@ export function EditableIssuesTable(props: {
 
                               {suggestion ? (
                                 <div className="mt-1 text-xs text-[color:rgba(var(--muted-rgb),1)]">
-                                  Suggestion:{" "}
-                                  <span className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>
-                                    {suggestion}
+                                  {t.suggestion}{" "}
+                                  <span className="font-semibold text-[var(--text)]">
+                                    {vt.msg(suggestion)}
                                   </span>
                                 </div>
                               ) : null}
@@ -297,10 +312,10 @@ export function EditableIssuesTable(props: {
                           );
                         })}
 
-                        {list.length > 6 ? <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">…and {list.length - 6} more</div> : null}
+                        {list.length > 6 ? <div className="text-xs text-[color:rgba(var(--muted-rgb),1)]">{fmt(t.andMore, { count: list.length - 6 })}</div> : null}
                       </div>
                     ) : (
-                      <div className="mb-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">No active issues on this row. You can still edit, then unpin when done.</div>
+                      <div className="mb-4 text-sm text-[color:rgba(var(--muted-rgb),1)]">{t.noRowIssues}</div>
                     )}
 
                     {/* ✅ FIELD-LEVEL highlighting happens here */}
@@ -314,7 +329,7 @@ export function EditableIssuesTable(props: {
                               className={inputClassFor(sev)}
                               value={row[h] ?? ""}
                               onChange={(e) => onUpdateRow(rowIndex, { [h]: e.target.value })}
-                              title={sev ? `${sev}: this field has an active issue` : undefined}
+                              aria-invalid={sev === "error" || undefined}
                             />
                           </label>
                         );
@@ -322,13 +337,24 @@ export function EditableIssuesTable(props: {
                     </div>
 
                     {headers.length > visibleHeaders.length ? (
-                      <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">Showing first {visibleHeaders.length} fields for performance.</div>
+                      <div className="mt-3 text-xs text-[color:rgba(var(--muted-rgb),1)]">{fmt(t.showingFields, { count: visibleHeaders.length })}</div>
                     ) : null}
                   </div>
                 ) : null}
               </div>
             );
           })}
+
+          {pinnedRows.length > visiblePinned.length ? (
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-sm text-[color:rgba(var(--muted-rgb),1)]">
+              <span>
+                {fmt(t.showingPinned, { shown: visiblePinned.length, total: pinnedRows.length })}
+              </span>
+              <button type="button" className="pill-btn" onClick={() => setVisibleCount((n) => n + PAGE)}>
+                {fmt(t.showMore, { count: Math.min(PAGE, pinnedRows.length - visiblePinned.length) })}
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

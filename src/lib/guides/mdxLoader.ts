@@ -22,6 +22,8 @@ export type CuratedGuideEntry = CuratedGuideFrontmatter & {
 };
 
 const GUIDES_CONTENT_DIR = path.join(process.cwd(), "src", "content", "guides");
+// Translated articles: src/content/guides-i18n/<locale>/<platform>/<slug>.mdx
+const GUIDES_I18N_DIR = path.join(process.cwd(), "src", "content", "guides-i18n");
 
 function listMdxFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -60,13 +62,20 @@ export function listCuratedGuides(): CuratedGuideEntry[] {
   });
 }
 
+/**
+ * A curated guide's article, in `locale` when a translation exists (`translated` says
+ * which one was found), otherwise in English.
+ */
 export function readCuratedGuide(
   platform: string,
   slug: string,
-): { frontmatter: CuratedGuideFrontmatter; rawMdx: string } | null {
-  const filePath = path.join(GUIDES_CONTENT_DIR, platform, `${slug}.mdx`);
+  locale = "en",
+): { frontmatter: CuratedGuideFrontmatter; rawMdx: string; translated: boolean } | null {
+  const localized = locale === "en" ? null : path.join(GUIDES_I18N_DIR, locale, platform, `${slug}.mdx`);
+  const translated = !!localized && fs.existsSync(localized);
+  const filePath = translated ? localized! : path.join(GUIDES_CONTENT_DIR, platform, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
   const raw = stripBom(fs.readFileSync(filePath, "utf-8"));
   const { data, content } = matter(raw);
-  return { frontmatter: data as CuratedGuideFrontmatter, rawMdx: content };
+  return { frontmatter: data as CuratedGuideFrontmatter, rawMdx: content, translated: locale === "en" || translated };
 }

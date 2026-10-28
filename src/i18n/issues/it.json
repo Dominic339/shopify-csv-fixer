@@ -1,0 +1,860 @@
+{
+"shopify/missing_required_header": {
+"title": "Colonna obbligatoria mancante",
+"explanation": "Nel tuo CSV manca un'intestazione di colonna obbligatoria per Shopify.",
+"whyPlatformCares": "Shopify convalida le intestazioni delle colonne durante l'importazione. Se mancano intestazioni obbligatorie, Shopify potrebbe non creare o aggiornare i prodotti.",
+"howToFix": "Aggiungi l'intestazione di colonna obbligatoria mancante (anche se i valori sono vuoti)."
+},
+"shopify/blank_title": {
+"title": "Title mancante",
+"explanation": "Title è vuoto in almeno una riga.",
+"whyPlatformCares": "Shopify richiede un Title per creare un prodotto. Le righe senza Title possono non essere importate o creare prodotti incompleti.",
+"howToFix": "Compila Title con il nome del prodotto in ogni riga di prodotto."
+},
+"shopify/blank_handle": {
+"title": "URL handle mancante",
+"explanation": "URL handle è vuoto in almeno una riga.",
+"whyPlatformCares": "Shopify raggruppa varianti e immagini per URL handle e lo usa per aggiornare i prodotti esistenti. Senza handle, raggruppamento e aggiornamenti non funzionano.",
+"howToFix": "Compila URL handle con lettere minuscole, numeri e trattini (niente spazi)."
+},
+"shopify/invalid_handle": {
+"title": "URL handle non valido",
+"explanation": "URL handle contiene caratteri che Shopify potrebbe rifiutare.",
+"whyPlatformCares": "Handle non validi possono causare errori di importazione e URL dei prodotti non funzionanti.",
+"howToFix": "Usa solo lettere minuscole, numeri e trattini."
+},
+"shopify/invalid_boolean_published": {
+"title": "Valore Published non valido",
+"explanation": "Published on online store ha un valore non booleano.",
+"whyPlatformCares": "Shopify si aspetta TRUE/FALSE (o vuoto). Valori non validi possono bloccare l'importazione.",
+"howToFix": "Usa TRUE, FALSE o lascia vuoto."
+},
+"shopify/invalid_status": {
+"title": "Valore Status non valido",
+"explanation": "Status non è Active, Draft o Archived.",
+"whyPlatformCares": "Con uno stato inatteso, Shopify può ignorare o interpretare male una riga.",
+"howToFix": "Usa \"Active\", \"Draft\" o \"Archived\" (o lascia vuoto)."
+},
+"shopify/option_order_invalid": {
+"title": "Colonne delle opzioni fuori ordine",
+"explanation": "Option2/Option3 ha valori mentre Option1 è vuoto.",
+"whyPlatformCares": "Shopify si aspetta che le opzioni siano compilate in sequenza (Option1, poi Option2, poi Option3).",
+"howToFix": "Compila Option1 prima di Option2, e Option2 prima di Option3."
+},
+"shopify/variant_option_missing_value": {
+"title": "Nome opzione senza valore",
+"explanation": "Esiste un nome di opzione, ma il valore corrispondente è vuoto.",
+"whyPlatformCares": "Valori di opzione mancanti possono creare varianti non valide o confuse.",
+"howToFix": "Compila il valore dell'opzione (es. Size = Small) o svuota il nome dell'opzione."
+},
+"shopify/option_name_inconsistent": {
+"title": "Nomi delle opzioni diversi tra varianti",
+"explanation": "I nomi Option1/2/3 devono coincidere nelle righe che condividono un handle.",
+"whyPlatformCares": "Nomi di opzione incoerenti possono far importare male le varianti o raggrupparle in modo errato.",
+"howToFix": "Usa gli stessi nomi Option1/Option2/Option3 in tutte le righe di variante dello stesso handle."
+},
+"shopify/options_not_unique": {
+"title": "Opzioni di variante non univoche",
+"explanation": "Due o più varianti dello stesso handle hanno valori di opzione identici.",
+"whyPlatformCares": "Shopify unisce le varianti con combinazioni di opzioni identiche. Questo può causare perdita di dati o varianti sovrascritte.",
+"howToFix": "Rendi univoca ogni combinazione di opzioni delle varianti (o rimuovi i duplicati)."
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "Option1 value mancante per la variante",
+"explanation": "Questa riga sembra contenere dati di variante, ma Option1 value è vuoto.",
+"whyPlatformCares": "Shopify usa i valori delle opzioni per creare le combinazioni di varianti. Se mancano, la riga può essere rifiutata o importata male.",
+"howToFix": "Compila Option1 value (o rimuovi da questa riga i campi propri delle varianti)."
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\" mescolato con opzioni reali",
+"explanation": "Un handle include sia righe \"Default Title\" sia righe di varianti con opzioni.",
+"whyPlatformCares": "Di solito indica che si sono mescolate per errore strutture di prodotto a variante singola e a più varianti.",
+"howToFix": "Usa \"Default Title\" solo quando il prodotto ha una sola variante. Per i prodotti con più varianti, usa valori di opzione reali in ogni riga di variante."
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "Righe duplicate con dettagli di variante identici",
+"explanation": "Alcune righe condividono lo stesso handle e sembrano duplicate senza essere vere varianti.",
+"whyPlatformCares": "Le righe duplicate possono confondere l'importazione e causare sovrascritture inattese.",
+"howToFix": "Se sono varianti, assicurati che i valori delle opzioni (o gli SKU) cambino da riga a riga. Se sono immagini aggiuntive, lascia solo l'handle e i campi immagine in quelle righe."
+},
+"shopify/handle_title_mismatch": {
+"title": "Stesso handle con Title diversi",
+"explanation": "Più Title sono usati in righe che condividono lo stesso URL handle.",
+"whyPlatformCares": "Shopify raggruppa le righe per handle. Titoli contrastanti possono causare sovrascritture o importazioni confuse.",
+"howToFix": "Usa un unico Title coerente in tutte le righe dello stesso handle."
+},
+"shopify/product_missing_variant_row": {
+"title": "Prodotto con immagini ma senza riga di variante",
+"explanation": "Un handle sembra contenere solo righe di immagini.",
+"whyPlatformCares": "Shopify ha bisogno di almeno una riga principale di prodotto/variante (Title + campi variante) per creare il prodotto. Le sole righe di immagini non bastano.",
+"howToFix": "Aggiungi una riga principale per l'handle con Title e i campi variante (Price/SKU/Options). Metti le righe di immagini aggiuntive dopo la riga principale."
+},
+"shopify/blank_price": {
+"title": "Price mancante",
+"explanation": "Price è vuoto in una riga di variante.",
+"whyPlatformCares": "Shopify importa un prezzo vuoto come 0.00, quindi la variante verrebbe venduta gratis.",
+"howToFix": "Compila Price con un numero come 19.99, a meno che la variante non sia davvero gratuita."
+},
+"shopify/invalid_numeric_price": {
+"title": "Price non valido",
+"explanation": "Price non è un numero valido.",
+"whyPlatformCares": "Shopify richiede valori numerici nei campi dei prezzi.",
+"howToFix": "Usa un numero come 19.99."
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "Compare-at price non valido",
+"explanation": "Compare-at price non è un numero valido.",
+"whyPlatformCares": "Shopify richiede valori numerici nei campi dei prezzi.",
+"howToFix": "Usa un numero come 24.99 o lascia vuoto."
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price inferiore a Price",
+"explanation": "Compare-at price è inferiore a Price.",
+"whyPlatformCares": "Compare-at price dovrebbe rappresentare un prezzo originale più alto.",
+"howToFix": "Assicurati che Compare-at price sia ≥ Price, oppure lascialo vuoto."
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "Quantità di inventario non valida",
+"explanation": "Inventory quantity non è un intero valido.",
+"whyPlatformCares": "Le quantità di inventario devono essere numeri interi.",
+"howToFix": "Usa un intero come 0, 5, 100."
+},
+"shopify/negative_inventory": {
+"title": "Inventario negativo",
+"explanation": "Inventory quantity è negativo.",
+"whyPlatformCares": "Un inventario negativo di solito è un errore nei dati e può creare problemi di evasione.",
+"howToFix": "Usa 0 o una quantità positiva."
+},
+"shopify/invalid_inventory_policy": {
+"title": "Politica di inventario non valida",
+"explanation": "Continue selling when out of stock non è DENY/CONTINUE.",
+"whyPlatformCares": "La politica di inventario controlla la vendita senza scorte.",
+"howToFix": "Usa \"DENY\" o \"CONTINUE\" (o lascia vuoto)."
+},
+"shopify/invalid_image_url": {
+"title": "URL immagine non valido",
+"explanation": "L'URL dell'immagine del prodotto non è un URL http(s) valido.",
+"whyPlatformCares": "Shopify deve poter scaricare le immagini tramite un URL valido.",
+"howToFix": "Usa un URL http(s) completo verso un'immagine accessibile pubblicamente."
+},
+"shopify/invalid_image_position": {
+"title": "Posizione immagine non valida",
+"explanation": "Image position non è un intero valido.",
+"whyPlatformCares": "Image position definisce l'ordine delle immagini.",
+"howToFix": "Usa 1, 2, 3… o lascia vuoto."
+},
+"shopify/image_row_has_variant_fields": {
+"title": "Riga immagine con campi variante",
+"explanation": "Una riga sembra di sola immagine ma include campi SKU/Price/Options/Inventory.",
+"whyPlatformCares": "Questo può rompere il raggruppamento delle varianti e confondere l'importazione.",
+"howToFix": "Nelle righe di immagini aggiuntive, lascia solo l'handle e i campi immagine. Sposta i campi variante nella riga principale."
+},
+"shopify/duplicate_image_position": {
+"title": "Posizione immagine duplicata",
+"explanation": "Due righe hanno la stessa Image position per lo stesso handle.",
+"whyPlatformCares": "I duplicati possono rendere imprevedibile l'ordine delle immagini.",
+"howToFix": "Usa valori Image position univoci per handle (1, 2, 3…)."
+},
+"shopify/image_alt_text_too_long": {
+"title": "Testo alternativo troppo lungo",
+"explanation": "Il testo alternativo dell'immagine supera il limite consigliato da Shopify.",
+"whyPlatformCares": "Un testo alternativo troppo lungo può essere troncato o causare problemi di formattazione.",
+"howToFix": "Accorcia il testo alternativo a 512 caratteri o meno."
+},
+"shopify/duplicate_sku": {
+"title": "SKU duplicato",
+"explanation": "Lo stesso SKU compare in più righe di variante.",
+"whyPlatformCares": "Molti flussi di inventario e spedizione si aspettano uno SKU univoco per variante.",
+"howToFix": "Rendi gli SKU univoci per variante (o lasciali vuoti se non usi gli SKU)."
+},
+"shopify/duplicate_sku_across_products": {
+"title": "SKU duplicato tra prodotti",
+"explanation": "Lo stesso SKU compare in URL handle diversi (prodotti diversi).",
+"whyPlatformCares": "Riutilizzare gli SKU tra prodotti può confondere sistemi di inventario, strumenti di spedizione e statistiche.",
+"howToFix": "Rendi gli SKU univoci in tutto il catalogo (consigliato) o conferma che il riutilizzo è voluto."
+},
+"shopify/seo_title_too_long": {
+"title": "Titolo SEO troppo lungo",
+"explanation": "Il titolo SEO supera la lunghezza consigliata.",
+"whyPlatformCares": "I titoli lunghi possono essere troncati nei risultati di ricerca.",
+"howToFix": "Accorcia il titolo SEO a 70 caratteri o meno."
+},
+"shopify/seo_description_too_long": {
+"title": "Descrizione SEO troppo lunga",
+"explanation": "La descrizione SEO supera la lunghezza consigliata.",
+"whyPlatformCares": "Le descrizioni lunghe possono essere troncate negli snippet di ricerca.",
+"howToFix": "Accorcia la descrizione SEO a 320 caratteri o meno."
+},
+"shopify/seo_title_missing": {
+"title": "Titolo SEO mancante",
+"explanation": "Il titolo SEO è vuoto (Shopify userà Title).",
+"whyPlatformCares": "Un titolo SEO personalizzato può migliorare la percentuale di clic.",
+"howToFix": "Facoltativo: inserisci un titolo SEO personalizzato."
+},
+"shopify/seo_description_missing": {
+"title": "Descrizione SEO mancante",
+"explanation": "La descrizione SEO è vuota (Shopify userà Description).",
+"whyPlatformCares": "Una descrizione personalizzata può migliorare la percentuale di clic e la chiarezza nei risultati di ricerca.",
+"howToFix": "Facoltativo: inserisci una descrizione SEO personalizzata."
+},
+"shopify/vendor_missing": {
+"title": "Vendor mancante",
+"explanation": "Vendor è vuoto nella riga principale del prodotto.",
+"whyPlatformCares": "Vendor aiuta a organizzare i prodotti e migliora i filtri del negozio.",
+"howToFix": "Aggiungi un valore Vendor/marca."
+},
+"shopify/product_category_missing": {
+"title": "Categoria prodotto mancante",
+"explanation": "Product category è vuoto nella riga principale del prodotto.",
+"whyPlatformCares": "Le categorie migliorano la reperibilità dei prodotti e i report.",
+"howToFix": "Aggiungi una Product category."
+},
+"shopify/tags_missing": {
+"title": "Tag mancanti",
+"explanation": "Tags è vuoto nella riga principale del prodotto.",
+"whyPlatformCares": "I tag possono alimentare le collezioni e aiutare la ricerca nel negozio.",
+"howToFix": "Aggiungi i tag (separati da virgole)."
+},
+"shopify/description_too_short": {
+"title": "Descrizione molto breve",
+"explanation": "La descrizione c'è ma è estremamente breve.",
+"whyPlatformCares": "Descrizioni più ricche possono migliorare conversioni e SEO.",
+"howToFix": "Valuta di ampliare la descrizione."
+},
+"shopify/status_unrecognized": {
+"title": "Valore Status insolito",
+"explanation": "Status ha un valore fuori da quelli comuni di Shopify.",
+"whyPlatformCares": "Valori inattesi possono essere ignorati o dare risultati confusi.",
+"howToFix": "Usa \"Active\", \"Draft\" o \"Archived\" (o lascia vuoto)."
+},
+"shopify/missing_status_value": {
+"title": "Status mancante",
+"explanation": "La colonna Status è presente ma la riga del prodotto non ha un valore.",
+"whyPlatformCares": "Shopify richiede un valore Status in ogni riga di prodotto quando la colonna è inclusa.",
+"howToFix": "Imposta Status su active, draft o archived."
+},
+"shopify/handle_generated_column": {
+"title": "URL handle generati",
+"explanation": "Il file non aveva una colonna URL handle, quindi gli handle sono stati creati da ogni Title.",
+"whyPlatformCares": "Shopify riconosce i prodotti esistenti dall'URL handle. Senza gli handle reali, un aggiornamento crea nuovi prodotti.",
+"howToFix": "Se stai aggiornando prodotti, aggiungi una colonna URL handle con i loro handle attuali."
+},
+"shopify/handle_rewritten": {
+"title": "URL handle modificato",
+"explanation": "Un URL handle conteneva caratteri non consentiti da Shopify ed è stato riscritto.",
+"whyPlatformCares": "Shopify riconosce i prodotti esistenti dall'URL handle, quindi un handle modificato viene importato come nuovo prodotto.",
+"howToFix": "Se stai aggiornando il prodotto, verifica che il nuovo handle corrisponda a quello in Shopify."
+},
+"shopify/image_url_not_https": {
+"title": "URL immagine con http",
+"explanation": "Un URL immagine inizia con http:// invece di https://.",
+"whyPlatformCares": "Shopify scarica le immagini da URL https:// pubblici; i link http semplici possono non funzionare.",
+"howToFix": "Usa l'indirizzo https:// dell'immagine se il tuo hosting lo supporta."
+},
+"shopify/invalid_charge_tax": {
+"title": "Charge tax non valido",
+"explanation": "Charge tax non è true o false.",
+"whyPlatformCares": "Shopify accetta solo true o false per Charge tax.",
+"howToFix": "Cambia il valore in true o false."
+},
+"shopify/invalid_requires_shipping": {
+"title": "Requires shipping non valido",
+"explanation": "Requires shipping non è true o false.",
+"whyPlatformCares": "Shopify accetta solo true o false per Requires shipping.",
+"howToFix": "Cambia il valore in true o false."
+},
+"shopify/invalid_gift_card": {
+"title": "Gift card non valido",
+"explanation": "Gift card non è true o false.",
+"whyPlatformCares": "Shopify accetta solo true o false per Gift card.",
+"howToFix": "Cambia il valore in true o false."
+},
+"shopify/gift_card_import": {
+"title": "Carta regalo nel CSV",
+"explanation": "Una riga è contrassegnata come carta regalo.",
+"whyPlatformCares": "Shopify non può creare carte regalo tramite importazione CSV.",
+"howToFix": "Crea invece le carte regalo nel pannello di amministrazione di Shopify."
+},
+"shopify/invalid_numeric_cost": {
+"title": "Cost per item non valido",
+"explanation": "Cost per item non è un numero valido.",
+"whyPlatformCares": "Shopify ha bisogno di un numero semplice (senza simbolo di valuta) per il costo.",
+"howToFix": "Usa un numero come 7.50."
+},
+"shopify/invalid_weight": {
+"title": "Peso non valido",
+"explanation": "Weight value (grams) non è un numero intero di grammi.",
+"whyPlatformCares": "Shopify memorizza il peso in grammi, senza decimali né unità.",
+"howToFix": "Inserisci solo grammi, es. 1,5 kg = 1500."
+},
+"shopify/invalid_weight_unit": {
+"title": "Unità di peso non valida",
+"explanation": "Weight unit for display non è g, kg, lb o oz.",
+"whyPlatformCares": "Shopify accetta solo g, kg, lb o oz come unità di visualizzazione.",
+"howToFix": "Usa g, kg, lb o oz."
+},
+"shopify/invalid_inventory_tracker": {
+"title": "Monitoraggio inventario non valido",
+"explanation": "Inventory tracker ha un valore che Shopify non riconosce.",
+"whyPlatformCares": "Shopify accetta shopify, shipwire, amazon_marketplace_web o vuoto per l'inventario non monitorato.",
+"howToFix": "Usa shopify per monitorare l'inventario, o lascia vuoto."
+},
+"shopify/invalid_fulfillment_service": {
+"title": "Servizio di evasione non valido",
+"explanation": "Fulfillment service non è un handle di servizio valido.",
+"whyPlatformCares": "Shopify si aspetta manual o l'handle di un servizio di evasione configurato nel pannello (minuscole, trattini).",
+"howToFix": "Usa manual o l'handle del tuo servizio personalizzato."
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category sembra un ID Google",
+"explanation": "Product category contiene solo cifre, come un ID di categoria prodotto Google.",
+"whyPlatformCares": "Product category di Shopify usa la tassonomia di Shopify; gli ID di categoria Google vanno in una colonna separata.",
+"howToFix": "Usa un percorso o un ID della tassonomia Shopify e sposta gli ID Google in “Google Shopping / Google product category”."
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "Dimensioni del pacco incomplete",
+"explanation": "Sono compilati solo alcuni tra lunghezza, larghezza, altezza e unità del pacco.",
+"whyPlatformCares": "Shopify rifiuta una riga in cui le dimensioni del pacco sono impostate solo in parte.",
+"howToFix": "Compila tutti e quattro i campi del pacco, oppure svuotali tutti e quattro."
+},
+"shopify/too_many_tags": {
+"title": "Troppi tag",
+"explanation": "Un prodotto ha più di 250 tag.",
+"whyPlatformCares": "Shopify consente al massimo 250 tag per prodotto.",
+"howToFix": "Rimuovi tag fino ad averne 250 o meno."
+},
+"woocommerce/missing_required_header": {
+"title": "Colonna obbligatoria mancante",
+"explanation": "Nella riga di intestazione mancano una o più colonne di importazione obbligatorie di WooCommerce.",
+"whyPlatformCares": "WooCommerce si basa su nomi di colonna precisi per mappare i campi durante l'importazione.",
+"howToFix": "Esporta un nuovo CSV di esempio da WooCommerce e verifica che tutte le colonne obbligatorie siano presenti e scritte esattamente."
+},
+"woocommerce/unknown_header": {
+"title": "Colonna sconosciuta",
+"explanation": "Questa colonna non è riconosciuta dall'importatore di WooCommerce.",
+"whyPlatformCares": "Le colonne sconosciute vengono ignorate e possono nascondere problemi nei dati.",
+"howToFix": "Rimuovi la colonna o rinominala con un'intestazione di importazione supportata da WooCommerce."
+},
+"woocommerce/missing_type": {
+"title": "Tipo di prodotto mancante",
+"explanation": "La colonna Type è obbligatoria e determina come viene interpretata la riga.",
+"whyPlatformCares": "WooCommerce usa Type per capire se una riga è un prodotto, una variazione o un raggruppamento principale.",
+"howToFix": "Imposta Type su simple, variable, variation, grouped o external in ogni riga."
+},
+"woocommerce/invalid_type": {
+"title": "Tipo di prodotto non valido",
+"explanation": "Il valore di Type non è tra i tipi supportati da WooCommerce.",
+"whyPlatformCares": "Tipi non validi possono far importare male le righe o farle rifiutare.",
+"howToFix": "Usa uno tra: simple, variable, variation, grouped, external."
+},
+"woocommerce/missing_name": {
+"title": "Nome prodotto mancante",
+"explanation": "Le righe di prodotto che non sono variazioni devono avere un Name.",
+"whyPlatformCares": "I prodotti senza nome non sono utilizzabili nel negozio.",
+"howToFix": "Inserisci un Name in tutte le righe che non sono variazioni."
+},
+"woocommerce/variation_missing_parent": {
+"title": "Variazione senza collegamento al prodotto principale",
+"explanation": "Le righe di variazione devono collegarsi a un prodotto variabile principale tramite il campo Parent.",
+"whyPlatformCares": "Le variazioni orfane non possono essere importate correttamente.",
+"howToFix": "Imposta Parent sull'ID del prodotto principale (o attiva la creazione automatica dei principali nella preimpostazione di importazione dei prodotti variabili)."
+},
+"woocommerce/variation_missing_attributes": {
+"title": "Variazione senza attributi",
+"explanation": "Le righe di variazione hanno bisogno di coppie nome/valore di attributo per formare una combinazione valida.",
+"whyPlatformCares": "Senza attributi, WooCommerce non può costruire una variazione distinta.",
+"howToFix": "Compila Attribute 1 name (es. Size) e Attribute 1 value(s) (es. M) in ogni riga di variazione."
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "Combinazione di variazione duplicata",
+"explanation": "Due o più variazioni dello stesso prodotto principale hanno la stessa combinazione di attributi.",
+"whyPlatformCares": "Le combinazioni duplicate possono sovrascriversi a vicenda o causare unioni inattese.",
+"howToFix": "Assicurati che ogni variazione abbia una combinazione di valori di attributo univoca all'interno del suo prodotto principale."
+},
+"woocommerce/missing_sku": {
+"title": "SKU mancante",
+"explanation": "Uno SKU mancante rende gli aggiornamenti meno affidabili e può compromettere il monitoraggio dell'inventario.",
+"whyPlatformCares": "Gli SKU servono per abbinare i prodotti, aggiornarli e per le integrazioni.",
+"howToFix": "Inserisci uno SKU univoco per ogni prodotto/variazione quando possibile."
+},
+"woocommerce/duplicate_sku": {
+"title": "Rischio di SKU duplicato",
+"explanation": "Due o più righe hanno lo stesso SKU.",
+"whyPlatformCares": "Durante l'importazione, gli SKU duplicati possono sovrascrivere prodotti esistenti o associare dati all'articolo sbagliato.",
+"howToFix": "Rendi gli SKU univoci. Se ti servono duplicati di proposito, dividi i cataloghi o usa una strategia principale/figlio coerente."
+},
+"woocommerce/invalid_regular_price": {
+"title": "Prezzo normale non valido",
+"explanation": "Regular price deve essere un numero valido.",
+"whyPlatformCares": "Prezzi non validi fanno fallire l'importazione o mostrano prezzi errati nel negozio.",
+"howToFix": "Usa valori numerici come 19.99 (senza simboli di valuta)."
+},
+"woocommerce/invalid_sale_price": {
+"title": "Prezzo scontato non valido",
+"explanation": "Sale price deve essere un numero valido.",
+"whyPlatformCares": "Un prezzo scontato non valido può essere ignorato o causare problemi di prezzo.",
+"howToFix": "Usa valori numerici come 14.99 (senza simboli di valuta)."
+},
+"woocommerce/missing_image": {
+"title": "Immagine mancante",
+"explanation": "Questa riga di prodotto non ha un URL immagine.",
+"whyPlatformCares": "L'importazione può riuscire senza immagini, ma la loro mancanza riduce qualità dell'inserzione e conversioni.",
+"howToFix": "Inserisci un URL in Images (o più URL separati da virgole) per i prodotti."
+},
+"woocommerce/invalid_bool": {
+"title": "Valore booleano non valido",
+"explanation": "I campi booleani come Published, In stock? e Is featured? si aspettano 1/0 o true/false.",
+"whyPlatformCares": "L'importatore di WooCommerce può interpretare male i valori inattesi, nascondendo o configurando male i prodotti.",
+"howToFix": "Usa 1 (sì/vero) o 0 (no/falso). Possiamo normalizzare automaticamente le varianti comuni (yes, no, true, false)."
+},
+"woocommerce/invalid_price": {
+"title": "Valore di prezzo non valido",
+"explanation": "Un campo prezzo contiene un valore non numerico.",
+"whyPlatformCares": "WooCommerce si aspetta prezzi decimali semplici. Simboli di valuta o testo fanno fallire l'importazione o azzerano i prezzi.",
+"howToFix": "Usa decimali semplici come 19.99 (senza simboli di valuta, virgole o testo)."
+},
+"woocommerce/invalid_int": {
+"title": "Valore intero non valido",
+"explanation": "Un campo intero (come Stock) contiene un valore non intero.",
+"whyPlatformCares": "WooCommerce si aspetta numeri interi per le quantità in magazzino. I decimali possono essere troncati o rifiutati.",
+"howToFix": "Usa un numero intero come 0, 5 o 12."
+},
+"woocommerce/invalid_visibility": {
+"title": "Valore di visibilità non valido",
+"explanation": "Visibility in catalog deve avere uno dei quattro valori accettati.",
+"whyPlatformCares": "Un valore di visibilità non riconosciuto può rendere il prodotto visibile per impostazione predefinita o far fallire l'importazione.",
+"howToFix": "Usa uno tra: visible, catalog, search o hidden."
+},
+"woocommerce/invalid_image_url": {
+"title": "URL immagine non valido",
+"explanation": "Uno o più URL nella colonna Images non sono URL http(s) validi.",
+"whyPlatformCares": "WooCommerce scarica le immagini dagli URL indicati durante l'importazione. URL non validi danno prodotti senza immagini.",
+"howToFix": "Usa URL https:// completi separati da virgole. Assicurati che le immagini siano accessibili pubblicamente."
+},
+"woocommerce/sale_price_not_lower": {
+"title": "Prezzo scontato non inferiore al prezzo normale",
+"explanation": "Sale price deve essere inferiore a Regular price perché lo sconto abbia senso.",
+"whyPlatformCares": "WooCommerce può mostrare i due prezzi come coppia barrato/scontato. Se il prezzo scontato è uguale o superiore a quello normale, la visualizzazione è confusa o errata.",
+"howToFix": "Imposta Sale price su un valore inferiore a Regular price, oppure svuota il campo Sale price."
+},
+"woocommerce/invalid_value": {
+"title": "Valore non riconosciuto",
+"explanation": "Una colonna di tipo stato ha un valore che WooCommerce non riconosce.",
+"whyPlatformCares": "WooCommerce accetta solo valori specifici per Published, In stock?, Backorders allowed? e Tax status; gli altri vengono ignorati o rifiutati.",
+"howToFix": "Usa uno dei valori indicati nel problema."
+},
+"woocommerce/variation_multiple_values": {
+"title": "Variazione con più valori",
+"explanation": "Una riga di variazione elenca più di un valore per un attributo.",
+"whyPlatformCares": "Ogni variazione WooCommerce è una combinazione specifica, quindi accetta un solo valore per attributo.",
+"howToFix": "Tieni tutti i valori nella riga principale e un solo valore in ogni riga di variazione."
+},
+"woocommerce/parent_not_in_file": {
+"title": "Prodotto principale non nel file",
+"explanation": "Una variazione punta a un prodotto principale che non è in questo file.",
+"whyPlatformCares": "WooCommerce collega le variazioni a un prodotto variabile esistente; se il principale non esiste ancora, la variazione viene saltata.",
+"howToFix": "Importa prima il prodotto principale, oppure includi la sua riga in questo file."
+},
+"etsy/missing_required_header": {
+"title": "Colonna obbligatoria mancante",
+"explanation": "Mancano una o più colonne obbligatorie del caricamento in blocco delle inserzioni Etsy.",
+"whyPlatformCares": "L'importatore di Etsy ha bisogno di intestazioni esatte per mappare correttamente i campi delle inserzioni.",
+"howToFix": "Esporta un nuovo CSV di inserzioni da Etsy e verifica che le intestazioni obbligatorie siano presenti e invariate."
+},
+"etsy/invalid_price": {
+"title": "Prezzo non valido",
+"explanation": "Il prezzo deve essere un numero valido.",
+"whyPlatformCares": "Prezzi non validi possono far rifiutare l'inserzione.",
+"howToFix": "Usa valori numerici come 19.99 (senza simboli di valuta)."
+},
+"etsy/title_too_long": {
+"title": "Titolo troppo lungo",
+"explanation": "I titoli Etsy hanno una lunghezza massima.",
+"whyPlatformCares": "I titoli troppo lunghi possono essere troncati o rifiutati a seconda dell'importatore.",
+"howToFix": "Accorcia il titolo (possiamo tagliarlo in sicurezza alla lunghezza massima)."
+},
+"etsy/tags_too_many": {
+"title": "Troppi tag",
+"explanation": "Le inserzioni Etsy supportano fino a 13 tag.",
+"whyPlatformCares": "I tag oltre il limite vengono ignorati e peggiorano l'ottimizzazione per la ricerca.",
+"howToFix": "Tieni i 13 tag migliori (possiamo limitarli automaticamente a 13)."
+},
+"etsy/too_many_tags": {
+"title": "Troppi tag",
+"explanation": "Le inserzioni Etsy supportano fino a 13 tag.",
+"whyPlatformCares": "I tag oltre il limite vengono ignorati e peggiorano l'ottimizzazione per la ricerca.",
+"howToFix": "Tieni i 13 tag migliori (possiamo limitarli automaticamente a 13)."
+},
+"etsy/tag_too_long": {
+"title": "Tag oltre i 20 caratteri",
+"explanation": "Etsy limita ogni tag a un massimo di 20 caratteri.",
+"whyPlatformCares": "Etsy rifiuta i tag più lunghi di 20 caratteri.",
+"howToFix": "Accorcia i tag interessati a 20 caratteri o meno."
+},
+"etsy/missing_title": {
+"title": "Titolo dell'inserzione mancante",
+"explanation": "Ogni inserzione Etsy richiede un titolo.",
+"whyPlatformCares": "Le inserzioni senza titolo non possono essere pubblicate né importate.",
+"howToFix": "Inserisci un titolo descrittivo (fino a 140 caratteri)."
+},
+"etsy/missing_price": {
+"title": "Prezzo mancante",
+"explanation": "Ogni inserzione Etsy richiede un prezzo.",
+"whyPlatformCares": "Le inserzioni senza prezzo non possono essere pubblicate.",
+"howToFix": "Inserisci il prezzo dell'inserzione come decimale semplice (es. 19.99)."
+},
+"etsy/invalid_quantity": {
+"title": "Quantità non valida",
+"explanation": "La quantità deve essere un numero intero non negativo.",
+"whyPlatformCares": "Quantità non valide fanno fallire l'importazione o la pubblicazione delle inserzioni.",
+"howToFix": "Usa un numero intero come 0, 1 o 10."
+},
+"etsy/invalid_currency": {
+"title": "Codice valuta non valido",
+"explanation": "La valuta deve essere un codice ISO 4217 valido di 3 lettere (es. USD, GBP, EUR).",
+"whyPlatformCares": "Un codice valuta non valido può far fallire l'importazione o mostrare i prezzi in modo errato.",
+"howToFix": "Usa un codice valuta standard di 3 lettere (possiamo convertirlo automaticamente in maiuscolo)."
+},
+"etsy/invalid_image_url": {
+"title": "URL immagine non valido",
+"explanation": "Uno o più URL immagine non sono URL http(s) validi.",
+"whyPlatformCares": "Etsy non può scaricare immagini da URL non validi, e le inserzioni restano senza foto.",
+"howToFix": "Usa URL https:// completi verso immagini accessibili pubblicamente, separati da virgole."
+},
+"etsy/duplicate_tags": {
+"title": "Tag duplicati",
+"explanation": "I tag duplicati sprecano spazi limitati.",
+"whyPlatformCares": "I tag ripetuti riducono la visibilità.",
+"howToFix": "Rimuovi i duplicati (possiamo farlo automaticamente mantenendo l'ordine)."
+},
+"etsy/missing_shipping_profile": {
+"title": "Profilo di spedizione mancante",
+"explanation": "Per pubblicare serve un profilo di spedizione (o campi di spedizione equivalenti).",
+"whyPlatformCares": "Le inserzioni senza configurazione di spedizione non possono essere pubblicate.",
+"howToFix": "Inserisci un ID/nome di profilo di spedizione valido o i campi di spedizione richiesti dalla tua esportazione."
+},
+"etsy/duplicate_listing_id": {
+"title": "Rischio di Listing ID duplicato",
+"explanation": "Due o più righe hanno lo stesso Listing ID.",
+"whyPlatformCares": "ID duplicati possono sovrascrivere inserzioni esistenti invece di crearne di nuove.",
+"howToFix": "Assicurati che il Listing ID sia univoco quando crei inserzioni, oppure impostalo di proposito quando aggiorni quelle esistenti."
+},
+"etsy/duplicate_sku": {
+"title": "Rischio di SKU duplicato",
+"explanation": "Due o più inserzioni hanno lo stesso SKU.",
+"whyPlatformCares": "Gli SKU duplicati possono creare confusione nell'inventario e nelle integrazioni.",
+"howToFix": "Rendi gli SKU univoci quando possibile."
+},
+"etsy/missing_required_field": {
+"title": "Campo obbligatorio mancante",
+"explanation": "Manca un campo obbligatorio di Etsy.",
+"whyPlatformCares": "I campi obbligatori mancanti fanno rifiutare l'inserzione.",
+"howToFix": "Compila il campo obbligatorio mancante come indicato nei dettagli del problema."
+},
+"etsy/unknown_header": {
+"title": "Colonna sconosciuta",
+"explanation": "Questa colonna non è riconosciuta dall'importatore di Etsy.",
+"whyPlatformCares": "Le colonne sconosciute vengono ignorate e possono nascondere problemi nei dati.",
+"howToFix": "Rimuovi la colonna o rinominala con un'intestazione supportata da Etsy."
+},
+"etsy/too_many_materials": {
+"title": "Troppi materiali",
+"explanation": "Un'inserzione ha più di 13 materiali.",
+"whyPlatformCares": "Etsy consente al massimo 13 materiali per inserzione; quelli in più vengono rifiutati nella modifica in blocco.",
+"howToFix": "Mantieni i 13 materiali più importanti."
+},
+"etsy/quantity_too_high": {
+"title": "Quantità superiore a 999",
+"explanation": "La quantità è superiore a 999.",
+"whyPlatformCares": "Etsy limita la quantità di ogni inserzione a 999.",
+"howToFix": "Imposta Quantity su 999 o meno."
+},
+"ebay/missing_required_header": {
+"title": "Colonna obbligatoria mancante",
+"explanation": "Nella riga di intestazione mancano una o più colonne obbligatorie di eBay File Exchange.",
+"whyPlatformCares": "eBay File Exchange ha bisogno di nomi di colonna precisi per mappare correttamente i campi durante il caricamento.",
+"howToFix": "Usa un modello eBay File Exchange e verifica che le colonne obbligatorie (Title, StartPrice, Quantity) siano presenti."
+},
+"ebay/invalid_action": {
+"title": "Valore Action non valido",
+"explanation": "Il valore della colonna Action non è tra le operazioni accettate da eBay.",
+"whyPlatformCares": "eBay File Exchange usa Action per decidere se aggiungere (Add), modificare (Revise), eliminare o chiudere (End) un'inserzione. Un valore non valido fa rifiutare l'intera riga.",
+"howToFix": "Usa uno tra: Add, Revise, Relist, End, VerifyAdd o Status."
+},
+"ebay/missing_title": {
+"title": "Titolo dell'inserzione mancante",
+"explanation": "Il campo Title è obbligatorio per tutte le inserzioni eBay.",
+"whyPlatformCares": "Le inserzioni senza titolo non possono essere pubblicate su eBay.",
+"howToFix": "Inserisci un titolo descrittivo di massimo 80 caratteri."
+},
+"ebay/title_too_long": {
+"title": "Titolo oltre gli 80 caratteri",
+"explanation": "eBay impone un limite rigido di 80 caratteri sui titoli delle inserzioni.",
+"whyPlatformCares": "eBay File Exchange rifiuta i titoli oltre gli 80 caratteri, che quindi non possono essere caricati.",
+"howToFix": "Accorcia il titolo a 80 caratteri o meno. Concentrati sulle parole chiave che cercano gli acquirenti."
+},
+"ebay/missing_price": {
+"title": "StartPrice mancante",
+"explanation": "StartPrice è obbligatorio per tutte le inserzioni eBay.",
+"whyPlatformCares": "Le inserzioni senza prezzo vengono rifiutate al caricamento.",
+"howToFix": "Inserisci uno StartPrice in formato decimale (es. 19.99)."
+},
+"ebay/invalid_price": {
+"title": "StartPrice non valido",
+"explanation": "StartPrice deve essere un numero decimale valido.",
+"whyPlatformCares": "Prezzi non validi fanno fallire il caricamento delle righe dell'inserzione.",
+"howToFix": "Usa un decimale semplice come 19.99, senza simboli di valuta né virgole."
+},
+"ebay/invalid_quantity": {
+"title": "Quantity non valido",
+"explanation": "Quantity deve essere un intero non negativo.",
+"whyPlatformCares": "eBay richiede una quantità numerica per tutte le inserzioni. Valori non validi fanno fallire il caricamento.",
+"howToFix": "Usa un numero intero come 0, 1 o 10."
+},
+"ebay/invalid_condition_id": {
+"title": "ConditionID non riconosciuto",
+"explanation": "Il valore di ConditionID non corrisponde a un codice di condizione eBay standard.",
+"whyPlatformCares": "eBay usa ConditionID per mostrare la condizione dell'oggetto agli acquirenti. ID non riconosciuti possono essere rifiutati o mostrare una condizione errata.",
+"howToFix": "Usa un ConditionID eBay standard, ad esempio 1000=Nuovo, 1500=Nuovo (altro), 2000=Ricondizionato certificato, 2500=Ricondizionato dal venditore, 3000=Usato, 7000=Per ricambi o non funzionante. Gli ID consentiti variano in base alla categoria."
+},
+"ebay/invalid_duration": {
+"title": "Duration non valido",
+"explanation": "Il valore di Duration non corrisponde a un formato di durata eBay riconosciuto.",
+"whyPlatformCares": "Una durata non riconosciuta può dare per impostazione predefinita un'asta breve o far rifiutare l'inserzione.",
+"howToFix": "Usa GTC (Good 'Til Cancelled) per le inserzioni a prezzo fisso, oppure Days_1, Days_3, Days_5, Days_7 o Days_10 per le aste."
+},
+"ebay/invalid_format": {
+"title": "Format dell'inserzione non valido",
+"explanation": "Il valore di Format non è un tipo di inserzione eBay riconosciuto.",
+"whyPlatformCares": "Il campo Format dice a eBay come presentare l'inserzione. Un valore non valido può far fallire la riga.",
+"howToFix": "Usa FixedPrice per le inserzioni Compralo Subito o Auction per le aste."
+},
+"ebay/too_many_images": {
+"title": "Troppe immagini",
+"explanation": "eBay consente un massimo di 24 foto per inserzione.",
+"whyPlatformCares": "eBay rifiuta o scarta le foto oltre il limite di 24.",
+"howToFix": "Riduci l'elenco PictureURL a 24 URL o meno, separati da |."
+},
+"ebay/invalid_picture_url": {
+"title": "URL foto non valido",
+"explanation": "Uno o più URL di foto non sono URL http(s) validi.",
+"whyPlatformCares": "eBay scarica le immagini dagli URL indicati al momento della pubblicazione. URL non validi danno inserzioni senza immagini.",
+"howToFix": "Usa URL https:// completi verso immagini accessibili pubblicamente. Separa più URL con barre verticali (|)."
+},
+"ebay/invalid_dispatch_time": {
+"title": "DispatchTimeMax non valido",
+"explanation": "DispatchTimeMax deve essere un intero non negativo che indica i tuoi tempi di preparazione in giorni.",
+"whyPlatformCares": "eBay mostra i tempi di preparazione agli acquirenti. Un valore non valido può impedire il caricamento dell'inserzione.",
+"howToFix": "Usa un numero intero come 1, 2 o 3 (giorni prima della spedizione)."
+},
+"ebay/duplicate_sku": {
+"title": "CustomLabel (SKU) duplicato",
+"explanation": "Due o più righe hanno lo stesso valore CustomLabel.",
+"whyPlatformCares": "CustomLabel duplicati in un'azione Add possono creare inserzioni in conflitto. Usa l'azione Revise per aggiornare le inserzioni esistenti.",
+"howToFix": "Assicurati che ogni inserzione abbia un CustomLabel univoco, oppure usa Action=Revise per aggiornare le inserzioni esistenti."
+},
+"ebay/variation_specifics_mismatch": {
+"title": "Specifiche di variazione incoerenti",
+"explanation": "VariationSpecificsName e VariationSpecificsValue devono essere entrambi compilati o entrambi vuoti.",
+"whyPlatformCares": "eBay ha bisogno di coppie nome/valore corrispondenti per costruire gli attributi della variazione. Una discrepanza impedisce di creare la variazione.",
+"howToFix": "Inserisci sia VariationSpecificsName (es. 'Color|Size') sia VariationSpecificsValue (es. 'Blue|Medium') in ogni riga di variazione."
+},
+"ebay/duplicate_variation_combo": {
+"title": "Combinazione di variazione duplicata",
+"explanation": "Due o più righe di variazione hanno la stessa combinazione VariationSpecifics nella stessa inserzione.",
+"whyPlatformCares": "Le combinazioni di variazione duplicate si sovrascrivono durante il caricamento, con perdita di dati.",
+"howToFix": "Assicurati che ogni riga di variazione abbia una combinazione univoca di VariationSpecificsName e VariationSpecificsValue."
+},
+"ebay/missing_category_id": {
+"title": "Category è vuoto",
+"explanation": "Una nuova inserzione non ha un numero di categoria eBay.",
+"whyPlatformCares": "eBay richiede una categoria per ogni nuova inserzione; le righe senza categoria vengono rifiutate.",
+"howToFix": "Trova l'ID numerico della categoria nell'albero delle categorie eBay e inseriscilo in ogni riga di nuova inserzione."
+},
+"ebay/invalid_category_id": {
+"title": "Category non valido",
+"explanation": "Il valore di Category non è un ID di categoria eBay numerico.",
+"whyPlatformCares": "Gli ID di categoria eBay sono sempre numerici. Un nome di categoria viene rifiutato al caricamento.",
+"howToFix": "Usa l'ID numerico dall'albero delle categorie eBay (es. 9355 per Cellulari e smartphone)."
+},
+"ebay/missing_action_column": {
+"title": "Nessuna colonna Action",
+"explanation": "Il file non ha una colonna Action.",
+"whyPlatformCares": "I caricamenti eBay usano la prima colonna (Action, con sito e valuta nell'intestazione) per decidere cosa fare con ogni riga.",
+"howToFix": "Parti da un modello di caricamento di Seller Hub e mantieni la sua prima colonna."
+},
+"ebay/missing_action": {
+"title": "Action mancante",
+"explanation": "Una riga di inserzione non ha una Action.",
+"whyPlatformCares": "Solo le righe di variazione possono lasciare Action vuoto; eBay salta le altre righe.",
+"howToFix": "Imposta Action su Add, Revise, Relist o End."
+},
+"ebay/missing_item_id": {
+"title": "ItemID mancante",
+"explanation": "Una riga Revise, Relist o End non ha ItemID.",
+"whyPlatformCares": "eBay ha bisogno del numero dell'oggetto per trovare l'inserzione da modificare.",
+"howToFix": "Aggiungi il numero dell'oggetto eBay in una colonna ItemID."
+},
+"ebay/missing_end_code": {
+"title": "EndCode mancante",
+"explanation": "Una riga End non ha EndCode.",
+"whyPlatformCares": "eBay chiede perché un'inserzione viene chiusa in anticipo.",
+"howToFix": "Usa NotAvailable, LostOrBroken, Incorrect o OtherListingError."
+},
+"ebay/missing_condition": {
+"title": "Condizione mancante",
+"explanation": "Una nuova inserzione non ha ConditionID.",
+"whyPlatformCares": "La maggior parte delle categorie eBay richiede la condizione dell'oggetto.",
+"howToFix": "Imposta un ConditionID come 1000 (Nuovo) o 3000 (Usato)."
+},
+"ebay/fixed_price_not_gtc": {
+"title": "Prezzo fisso non GTC",
+"explanation": "Un'inserzione a prezzo fisso ha una durata diversa da GTC.",
+"whyPlatformCares": "eBay mantiene tutte le inserzioni a prezzo fisso come Good 'Til Cancelled.",
+"howToFix": "Imposta Duration su GTC."
+},
+"ebay/invalid_relationship_details": {
+"title": "RelationshipDetails non valido",
+"explanation": "RelationshipDetails non è nel formato Name=Value di eBay.",
+"whyPlatformCares": "eBay costruisce il selettore delle variazioni da RelationshipDetails; un valore malformato fa rifiutare l'inserzione.",
+"howToFix": "Principale: Color=Blue;Red|Size=M;L. Variazione: Color=Blue|Size=M."
+},
+"ebay/variation_without_parent": {
+"title": "Variazione senza principale",
+"explanation": "Una riga di variazione non segue una riga di inserzione principale.",
+"whyPlatformCares": "eBay collega le righe Relationship=Variation alla riga principale subito sopra.",
+"howToFix": "Sposta le righe di variazione subito sotto la loro riga principale."
+},
+"ebay/variation_value_not_in_parent": {
+"title": "Valore di variazione non dichiarato",
+"explanation": "Una variazione usa un valore che la riga principale non elenca.",
+"whyPlatformCares": "eBay accetta solo i valori di variazione dichiarati nel RelationshipDetails del principale.",
+"howToFix": "Aggiungi il valore alla riga principale o correggi la variazione."
+},
+"amazon/missing_required_header": {
+"title": "Colonna obbligatoria mancante",
+"explanation": "Nella riga di intestazione mancano una o più colonne obbligatorie del file flat di Amazon.",
+"whyPlatformCares": "Il processore dei file flat di Amazon ha bisogno di nomi di colonna esatti. Le colonne mancanti fanno rifiutare il file.",
+"howToFix": "Usa un modello Inventory Loader o di categoria di Amazon; ogni file ha bisogno di una colonna sku."
+},
+"amazon/missing_sku": {
+"title": "SKU mancante",
+"explanation": "Il campo sku è obbligatorio in ogni riga di inventario Amazon.",
+"whyPlatformCares": "Amazon usa lo SKU per identificare in modo univoco le tue inserzioni. Le righe senza SKU vengono rifiutate.",
+"howToFix": "Inserisci uno SKU univoco (fino a 40 caratteri) in ogni riga di prodotto."
+},
+"amazon/sku_too_long": {
+"title": "SKU oltre i 40 caratteri",
+"explanation": "Amazon limita gli SKU a un massimo di 40 caratteri.",
+"whyPlatformCares": "Il processore dei file flat rifiuta gli SKU oltre i 40 caratteri.",
+"howToFix": "Accorcia lo SKU a 40 caratteri o meno mantenendolo univoco."
+},
+"amazon/duplicate_sku": {
+"title": "SKU duplicato",
+"explanation": "Due o più righe hanno lo stesso SKU in questo file.",
+"whyPlatformCares": "Con SKU duplicati, una riga sovrascrive l'altra durante l'elaborazione, e si possono perdere dati di scorte o prezzo.",
+"howToFix": "Assicurati che ogni SKU compaia una sola volta per file. Usa add-delete='d' per rimuovere esplicitamente un'inserzione."
+},
+"amazon/missing_item_name": {
+"title": "item-name mancante",
+"explanation": "Il campo item-name (titolo del prodotto) è obbligatorio per le inserzioni Amazon.",
+"whyPlatformCares": "Amazon ha bisogno di un titolo per mostrare le inserzioni nei risultati di ricerca e nelle pagine prodotto.",
+"howToFix": "Inserisci un titolo di prodotto descrittivo nella colonna item-name (fino a 500 caratteri)."
+},
+"amazon/item_name_too_long": {
+"title": "item-name troppo lungo",
+"explanation": "Amazon in genere consente fino a 500 caratteri per item-name.",
+"whyPlatformCares": "I titoli oltre il limite possono essere troncati o rifiutati a seconda del modello di categoria.",
+"howToFix": "Accorcia item-name a 500 caratteri o meno. Concentrati su marca, tipo di prodotto e attributi principali."
+},
+"amazon/missing_price": {
+"title": "Prezzo mancante",
+"explanation": "price è vuoto in una riga che aggiunge o aggiorna un'offerta.",
+"whyPlatformCares": "Le offerte esistenti mantengono il prezzo attuale, ma una nuova offerta senza prezzo non può andare online.",
+"howToFix": "Inserisci un prezzo valido in formato decimale (es. 29.99)."
+},
+"amazon/invalid_price": {
+"title": "Prezzo non valido",
+"explanation": "Il valore di price non è un numero decimale valido.",
+"whyPlatformCares": "Prezzi non validi fanno rifiutare la riga dal processore dei file flat di Amazon.",
+"howToFix": "Usa un decimale semplice come 29.99 (senza simbolo del dollaro, virgole o testo)."
+},
+"amazon/invalid_quantity": {
+"title": "Quantità non valida",
+"explanation": "Il valore di quantity deve essere un intero non negativo.",
+"whyPlatformCares": "Amazon rifiuta le righe in cui la quantità non è un numero valido. Le quantità negative non sono accettate.",
+"howToFix": "Usa un numero intero come 0, 5 o 100."
+},
+"amazon/invalid_product_id_type": {
+"title": "product-id-type non valido",
+"explanation": "Il valore di product-id-type non è un tipo di identificatore Amazon riconosciuto.",
+"whyPlatformCares": "Amazon usa product-id-type per interpretare il campo product-id (es. come ASIN o UPC). Un tipo non valido fa fallire l'abbinamento del prodotto.",
+"howToFix": "Inventory Loader: 1 (ASIN), 2 (ISBN), 3 (UPC), 4 (EAN). Modelli di categoria: ASIN, UPC, EAN, ISBN o GTIN."
+},
+"amazon/invalid_item_condition": {
+"title": "item-condition non valido",
+"explanation": "Il codice item-condition non è un valore di condizione Amazon riconosciuto.",
+"whyPlatformCares": "Amazon mostra la condizione agli acquirenti e la usa per classificare le inserzioni. Un codice non riconosciuto può essere rifiutato.",
+"howToFix": "Usa un codice di condizione Amazon numerico: 11=Nuovo, 10=Ricondizionato, 1=Usato - Come nuovo, 2=Usato - Ottime condizioni, 3=Usato - Buone condizioni, 4=Usato - Accettabile."
+},
+"amazon/min_above_max_price": {
+"title": "Prezzo minimo superiore al massimo",
+"explanation": "minimum-seller-allowed-price è superiore a maximum-seller-allowed-price, quindi nessun prezzo può rispettarli entrambi.",
+"whyPlatformCares": "Amazon rifiuta l'intervallo di prezzo e disattiva qualsiasi offerta al di fuori.",
+"howToFix": "Scambia i due valori oppure svuotane uno."
+},
+"amazon/price_outside_allowed_range": {
+"title": "Prezzo fuori dall'intervallo consentito",
+"explanation": "Il prezzo è inferiore a minimum-seller-allowed-price o superiore a maximum-seller-allowed-price.",
+"whyPlatformCares": "Amazon disattiva le offerte con un prezzo fuori dall'intervallo impostato, e l'articolo smette di essere venduto.",
+"howToFix": "Modifica il prezzo o amplia l'intervallo minimo/massimo."
+},
+"amazon/invalid_add_delete": {
+"title": "Valore add-delete non valido",
+"explanation": "Il campo add-delete deve essere 'a' (aggiungi o aggiorna), 'd' (elimina l'offerta) o 'x' (elimina l'offerta e i dati del prodotto).",
+"whyPlatformCares": "Un valore add-delete non valido fa saltare la riga al processore di Amazon.",
+"howToFix": "Usa 'a' per aggiungere o aggiornare un'offerta, 'd' per eliminare l'offerta o 'x' per eliminarla insieme ai dati del prodotto."
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "fulfillment-center-id non valido",
+"explanation": "Il valore di fulfillment-center-id non è un tipo di evasione Amazon riconosciuto.",
+"whyPlatformCares": "Il canale di evasione determina se l'ordine lo spedisce Amazon (FBA) o tu (MFN). Un valore non valido può dare un'impostazione predefinita errata.",
+"howToFix": "Usa DEFAULT per la spedizione da parte del venditore (spedisci tu), oppure AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN per FBA in quella regione."
+},
+"amazon/invalid_image_url": {
+"title": "URL immagine non valido",
+"explanation": "image-url non è un URL http(s) valido.",
+"whyPlatformCares": "Amazon scarica le immagini del prodotto dall'URL indicato. Un URL non valido dà un'inserzione senza immagini, con meno conversioni.",
+"howToFix": "Usa un URL https:// completo verso un'immagine di prodotto accessibile pubblicamente (JPEG o PNG, consigliati almeno 500×500 px)."
+},
+"amazon/description_too_long": {
+"title": "item-description troppo lungo",
+"explanation": "item-description supera il limite abituale di 2000 caratteri di Amazon.",
+"whyPlatformCares": "Le descrizioni oltre il limite possono essere troncate o rifiutate a seconda del modello di categoria.",
+"howToFix": "Accorcia item-description a 2000 caratteri o meno."
+},
+"amazon/brand_name_too_long": {
+"title": "brand-name troppo lungo",
+"explanation": "brand-name supera il limite di 50 caratteri di Amazon.",
+"whyPlatformCares": "I nomi di marca oltre il limite possono essere troncati o rifiutati.",
+"howToFix": "Accorcia brand-name a 50 caratteri o meno."
+},
+"amazon/invalid_boolean_field": {
+"title": "Valore di campo booleano non valido",
+"explanation": "Un campo di spedizione booleano (will-ship-internationally o expedited-shipping) contiene un valore diverso da 'y' o 'n'.",
+"whyPlatformCares": "Il processore dei file flat di Amazon si aspetta esattamente 'y', 'n' o vuoto in questi campi. I valori non validi vengono ignorati senza avviso o fanno rifiutare la riga.",
+"howToFix": "Usa 'y' per attivare o 'n' per disattivare l'opzione di spedizione, oppure lascia il campo vuoto per usare le impostazioni predefinite del tuo account."
+},
+"amazon/product_id_scientific_notation": {
+"title": "Codice a barre rovinato da un foglio di calcolo",
+"explanation": "Un product-id ha la forma 1.23457E+11: un foglio di calcolo ha convertito il codice a barre in notazione scientifica.",
+"whyPlatformCares": "Le cifre dopo le prime vanno perse, quindi Amazon non riesce ad abbinare il prodotto.",
+"howToFix": "Formatta la colonna come Testo e reinserisci il codice a barre completo."
+},
+"amazon/invalid_product_id": {
+"title": "product-id non valido",
+"explanation": "Il product-id non ha la lunghezza o i caratteri corretti per il suo tipo.",
+"whyPlatformCares": "Amazon abbina le offerte ai prodotti tramite questo ID; un ID sbagliato genera errori o collega l'offerta al prodotto sbagliato.",
+"howToFix": "Controlla il codice a barre o l'ASIN: UPC ha 12 cifre, EAN 13, ISBN 10 o 13, ASIN 10 lettere e cifre."
+}
+}

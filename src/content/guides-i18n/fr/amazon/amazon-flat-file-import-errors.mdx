@@ -1,0 +1,163 @@
+---
+title: "Erreurs d'import de fichier plat Amazon : causes et solutions"
+description: "Corrigez les erreurs d'import de fichier plat Amazon les plus courantes : problèmes de SKU, codes d'état non valides, format des prix, valeurs de canal d'expédition et modèles incompatibles."
+keywords: ["erreurs fichier plat amazon", "erreur import csv amazon", "erreur fichier d'inventaire amazon", "corriger csv amazon", "erreurs inventory loader amazon", "validation fichier plat amazon", "erreur chargement groupé amazon"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Comment Amazon valide les fichiers plats CSV envoyés et ce qui provoque les échecs"
+  - "Les champs obligatoires de l'Inventory Loader et des modèles de fichier plat courants"
+  - "Comment corriger les erreurs de SKU, d'état, de prix, de canal d'expédition et d'ASIN"
+  - "Comment lire le rapport de traitement d'Amazon pour trouver précisément les lignes en échec"
+  - "Comment choisir le bon modèle Amazon pour la catégorie de votre produit"
+bestFor: "Vendeurs Amazon qui envoient des fichiers plats dans Seller Central et rencontrent des erreurs de traitement ou des imports partiels"
+timeToComplete: "12 minutes"
+---
+
+## Comment Amazon valide les fichiers plats
+
+Les fichiers plats Amazon sont des fichiers CSV délimités par des tabulations ou des virgules, qui suivent des schémas de colonnes stricts définis pour chaque catégorie de produits. Quand vous envoyez un fichier plat, Amazon le fait passer par plusieurs étapes de validation :
+
+1. **Correspondance du modèle** : vérifie que vos en-têtes de colonnes correspondent au modèle attendu pour ce type de fichier
+2. **Validation des champs obligatoires** : vérifie que toutes les colonnes obligatoires ont une valeur
+3. **Validation des types de données** : contrôle les nombres, les booléens et les valeurs issues de listes fermées
+4. **Règles métier** : vérifie les ASIN, valide les SKU, contrôle les codes d'état et les fourchettes de prix
+5. **Vérification du catalogue** : rapproche les identifiants produit du catalogue Amazon
+
+Après le traitement, Amazon génère un **rapport de traitement** (accessible dans Seller Central, sous Stock → Ajouter des produits via un chargement). Consultez toujours le rapport de traitement : il liste chaque ligne en échec avec l'erreur précise.
+
+---
+
+## Erreur : seller_sku non valide ou manquant
+
+**Cause :** `seller_sku` est vide, dépasse 40 caractères, contient des caractères non valides ou reprend un SKU qui existe déjà dans votre catalogue.
+
+**Règles pour seller_sku :**
+- 40 caractères maximum
+- Pas d'espaces (utilisez des tirets ou des traits de soulignement)
+- Lettres et chiffres, plus `-`, `_`, `.`
+- Doit être unique dans tout votre compte vendeur Amazon
+
+**Solution :** vérifiez que chaque ligne a un SKU unique. Utilisez une formule comme `=NB.SI($A:$A; A2)` pour trouver les doublons. Raccourcissez les SKU de plus de 40 caractères.
+
+---
+
+## Erreur : item_name manquant ou titre trop long
+
+**Cause :** `item_name` est vide ou dépasse la longueur de titre autorisée par Amazon (variable selon la catégorie, généralement entre 200 et 500 caractères).
+
+**Solution :**
+- Renseignez `item_name` sur chaque ligne de produit
+- Utilisez `=NBCAR(B2)` dans Excel pour repérer les titres qui dépassent la limite de votre catégorie
+- Consultez votre modèle pour connaître la limite exacte de caractères
+
+---
+
+## Erreur : condition_type non valide
+
+**Cause :** la colonne `condition_type` contient une valeur absente de la liste autorisée par Amazon.
+
+**Valeurs acceptées :**
+
+| Valeur | Description |
+|---|---|
+| `New` | Neuf, sous emballage d'origine |
+| `UsedLikeNew` | D'occasion – comme neuf |
+| `UsedVeryGood` | D'occasion – très bon état |
+| `UsedGood` | D'occasion – bon état |
+| `UsedAcceptable` | D'occasion – état acceptable |
+| `CollectibleLikeNew` | De collection – comme neuf |
+| `CollectibleVeryGood` | De collection – très bon état |
+| `CollectibleGood` | De collection – bon état |
+| `CollectibleAcceptable` | De collection – état acceptable |
+| `Refurbished` | Reconditionné par le vendeur |
+| `Club` | Club (catégorie médias) |
+
+**Solution :** remplacez toute valeur d'état non standard par une valeur de la liste ci-dessus. `New` doit commencer par une majuscule ; `new` (en minuscules) est refusé.
+
+---
+
+## Erreur : prix non valide
+
+**Cause :** la colonne `price` contient un symbole monétaire (`$`), utilise une virgule décimale, vaut zéro, est négative ou est vide.
+
+**Règles de prix d'Amazon :**
+- Nombre décimal simple : `19.99`
+- Aucun symbole monétaire
+- Doit être positif (supérieur à 0)
+- Point comme séparateur décimal
+
+**Solution :** supprimez les symboles monétaires et remplacez les virgules décimales par des points. Mettez la colonne des prix au format Nombre dans Excel avant d'enregistrer.
+
+---
+
+## Erreur : fulfillment_center_id ou canal d'expédition non valide
+
+**Cause :** la colonne du canal d'expédition contient une valeur non reconnue.
+
+**Valeurs acceptées :**
+
+| Valeur | Description |
+|---|---|
+| `DEFAULT` | Expédié par le vendeur (FBM) |
+| `AMAZON_NA` (ou `AMAZON`) | Expédié par Amazon (FBA) |
+
+Le nom exact de la colonne et les valeurs acceptées varient légèrement selon le modèle de fichier plat. Vérifiez votre modèle.
+
+**Solution :** utilisez `DEFAULT` pour FBM et `AMAZON_NA` ou `AMAZON` pour FBA. N'utilisez pas `FBA`, `FBM` ni d'autres abréviations.
+
+---
+
+## Erreur : product_id ou ASIN introuvable
+
+**Cause :** le `product_id` (ASIN, UPC, EAN ou ISBN) ne correspond à aucun produit du catalogue Amazon, ou `product_id_type` ne correspond pas au type d'identifiant fourni.
+
+**Valeurs de product_id_type :**
+
+| Valeur | Type d'identifiant |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Solution :**
+- Vérifiez que l'identifiant produit est correct et actif dans le catalogue Amazon
+- Faites correspondre `product_id_type` au type d'identifiant présent dans `product_id`
+- Pour les nouveaux produits qui n'ont pas encore d'ASIN, vous devrez peut-être créer une nouvelle fiche plutôt qu'ajouter du stock à une fiche existante
+
+---
+
+## Erreur : mauvais modèle pour la catégorie du produit
+
+**Cause :** vous avez utilisé un modèle Inventory Loader général pour une catégorie qui exige un fichier plat spécifique (par exemple vêtements, chaussures, bijoux).
+
+Amazon propose des modèles par catégorie avec des champs obligatoires supplémentaires. Avec le mauvais modèle, tous les champs obligatoires propres à la catégorie manquent.
+
+**Solution :**
+- Dans Seller Central, allez dans Stock → Ajouter des produits via un chargement → Télécharger un modèle de fichier d'inventaire
+- Sélectionnez la catégorie de votre produit pour obtenir le bon modèle
+- Téléchargez le fichier plat de la catégorie et transférez-y vos données
+
+Catégories courantes avec leur propre modèle : vêtements, chaussures, bijoux, électronique, livres, musique, vidéo, sports et loisirs.
+
+---
+
+## Lire le rapport de traitement
+
+Après l'envoi, téléchargez le rapport de traitement depuis Seller Central (Stock → Ajouter des produits via un chargement → Suivre l'état du chargement → Afficher le rapport de traitement).
+
+Le rapport comporte trois onglets :
+- **Summary** : nombre total de lignes, de réussites et d'échecs
+- **Results** : une ligne par enregistrement de votre fichier, avec son statut et le message d'erreur
+- **Original** : les données que vous avez envoyées
+
+Pour trouver les lignes en échec, filtrez l'onglet Results sur la colonne `status`. Les lignes `FAILURE` comportent un `error-code` et un `error-message` qui expliquent précisément le problème.
+
+---
+
+## Corrigez automatiquement avec StriveFormats
+
+Importez votre fichier plat Amazon dans StriveFormats. Le validateur vérifie les SKU, les codes d'état, les prix, les valeurs de canal d'expédition et les champs obligatoires, puis signale les lignes et cellules exactes qui posent problème.
+
+[Ouvrir le correcteur CSV Amazon](/app?preset=amazon_inventory_loader) | [Voir le modèle Amazon](/presets/amazon_inventory_loader)

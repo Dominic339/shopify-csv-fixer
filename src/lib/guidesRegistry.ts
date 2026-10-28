@@ -36,6 +36,8 @@ export type Guide = {
   lastUpdated?: string;
   // issue only
   issueCode?: string;
+  /** Issue guides: whether the fixer actually detects this issue. */
+  checkedByFixer?: boolean;
   blocking?: boolean;
   autoFixable?: boolean;
   howToFix?: string;
@@ -69,7 +71,8 @@ function issueMetaToGuides(platform: GuidePlatform, metaMap: IssueMetaMap): Guid
     category: m.category,
     issueCode: m.code,
     blocking: m.blocking,
-    autoFixable: m.autoFixable,
+    autoFixable: m.checked !== false && m.autoFixable,
+    checkedByFixer: m.checked !== false,
     howToFix: m.howToFix,
     explanation: m.explanation,
     whyPlatformCares: m.whyPlatformCares,

@@ -1,19 +1,10 @@
-// src/app/app/page.tsx
-import { Suspense } from "react";
-import { cookies } from "next/headers";
-import AppClient from "./AppClient";
-import { getTranslations } from "@/lib/i18n/getTranslations";
-import { isValidLocale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+// English /app (shared body: src/views/toolPages.tsx)
+import { ToolView, toolMetadata } from "@/views/toolPages";
 
-export default async function Page() {
-  const cookieStore = await cookies();
-  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
-  const locale = localeCookie && isValidLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;
-  const t = await getTranslations(locale);
+export function generateMetadata() {
+  return toolMetadata("en", "app");
+}
 
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-6xl px-6 py-10">Loading…</div>}>
-      <AppClient tApp={t.app} />
-    </Suspense>
-  );
+export default function AppPage() {
+  return <ToolView locale="en" tool="app" />;
 }

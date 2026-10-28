@@ -1,0 +1,201 @@
+---
+title: "Shopify ürün CSV şablonu açıklandı"
+description: "Resmi Shopify ürün CSV şablonundaki her alanın sütun sütun açıklaması: her sütunun ne yaptığı, hangi değerleri kabul ettiği ve hangilerinin zorunlu olduğu."
+keywords: ["shopify ürün csv şablonu", "shopify csv sütunları açıklaması", "shopify csv şablon rehberi", "shopify içe aktarma şablonu", "shopify csv alanları", "shopify ürün içe aktarma sütunları", "shopify csv başvuru"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Shopify ürün CSV şablonundaki her sütunun ne yaptığı"
+  - "Hangi sütunların zorunlu, hangilerinin isteğe bağlı olduğu"
+  - "Her alan türü için kabul edilen değerler ve biçimler"
+  - "Ürün düzeyi ve varyant düzeyi sütunların nasıl çalıştığı"
+  - "Şablonun basit ve varyantlı ürünler için nasıl doğru doldurulacağı"
+bestFor: "İlk içe aktarmasına hazırlanan Shopify satıcıları veya Shopify için CSV dışa aktarma süreci kuran geliştiriciler"
+timeToComplete: "15 dakika"
+---
+
+## Şablona genel bakış
+
+Resmi Shopify ürün CSV şablonunda iki tür sütun vardır: **ürün düzeyi** (ürün başına bir kez, ilk/ana satırda doldurulur) ve **varyant düzeyi** (o ürünün her satırında doldurulur). Birden fazla varyantı olan bir ürün dosyada birden fazla satır kaplar ve bu satırların hepsi aynı Handle'ı paylaşır.
+
+Güncel şablonu Shopify yönetim panelinden indirin: Ürünler → İçe aktar → Örnek CSV indir.
+
+---
+
+## Kimlik sütunları
+
+### Handle (zorunlu)
+
+Handle, ürünün URL'ye uygun benzersiz tanımlayıcısıdır. Şunları sağlamalıdır:
+- Mağazanızdaki tüm ürünler arasında benzersiz olmalı
+- Yalnızca küçük harf, rakam ve tire içermeli
+- İlk içe aktarmadan sonra değişmemeli (Handle'ı değiştirmek yeni bir ürün URL'si oluşturur)
+
+**Örnek:** `blue-leather-wallet`
+
+Aynı ürüne ait tüm satırlar aynı Handle'ı paylaşmalıdır. Shopify varyant satırlarını bununla gruplar.
+
+### Title (ana satırda zorunlu)
+
+Mağazada görünen ürün adı. Ürünün ilk satırına yazın, varyant satırlarında boş bırakın.
+
+**Örnek:** `Blue Leather Wallet`
+
+### Body (HTML)
+
+Ürün açıklaması. HTML içerebilir. Açıklamada virgül veya açılı ayraç varsa değerin tamamını çift tırnak içine alın. Açıklamadaki satır sonları da tırnak içindeki bir değerin içinde olmalıdır.
+
+### Vendor
+
+Marka veya tedarikçi adı. Düz metin.
+
+### Type
+
+Kendi ürün türünüz (düzenleme amaçlı). Bu, Shopify'ın ürün kategorisi değil; filtreleme için kullanılan serbest bir metindir.
+
+### Tags
+
+Virgülle ayrılmış etiket listesi. Bir etiket virgül içeriyorsa Tags hücresinin tüm içeriği tırnak içine alınmalıdır.
+
+**Örnek:** `"summer, sale, leather"`
+
+---
+
+## Yayınlama sütunları
+
+### Published (mantıksal)
+
+Ürünün müşterilere görünür olup olmadığı. `TRUE` veya `FALSE` (büyük harf) kabul eder.
+
+- `TRUE`: ürün etkin ve görünür
+- `FALSE`: ürün taslaktır (mağazada gizli)
+
+### Published Scope
+
+Ürünün nerede yayınlandığı. Yaygın değerler: `web` (online mağaza), `global` (tüm kanallar).
+
+---
+
+## Seçenek sütunları
+
+Bu sütunlar varyant boyutlarını (beden, renk, malzeme vb.) tanımlar.
+
+### Option1 Name / Option1 Value
+
+`Option1 Name` boyutun adıdır (ör. `Size`, `Color`). `Option1 Value` her satırın kendi değeridir (ör. `Small`, `Medium`, `Blue`).
+
+Kurallar:
+- `Option1 Name` aynı ürünün her satırında aynı olmalıdır
+- `Option1 Value` her varyant satırında değişir
+- Tek bir seçeneğiniz varsa yalnızca Option1'i kullanın; ikinci veya üçüncü bir seçeneğiniz yoksa Option2 ve Option3 sütunlarını eklemeyin
+
+### Option2 Name / Option2 Value (isteğe bağlı)
+
+İkinci bir boyut (ör. renk). Yalnızca ürününüzün iki boyutu varsa gerekir.
+
+### Option3 Name / Option3 Value (isteğe bağlı)
+
+Üçüncü bir boyut. Shopify ürün başına en fazla 3 seçeneği destekler.
+
+---
+
+## Varyant sütunları
+
+Bu sütunlar her satır için geçerlidir (hem ana hem varyant satırları).
+
+### Variant SKU
+
+Bu varyantın benzersiz tanımlayıcısı. İsteğe bağlıdır, ancak stok takibi yapıyorsanız SKU'lar benzersiz olmalıdır. SKU tabanlı takip yapmıyorsanız boş bırakın.
+
+### Variant Price (zorunlu)
+
+Bu varyantın satış fiyatı. Para birimi simgesi ve binlik ayırıcı olmadan düz bir ondalık sayı.
+
+**Örnek:** `19.99`
+
+### Variant Compare At Price
+
+Üstü çizili gösterilen "eski" fiyat. İndirimli fiyat yoksa boş bırakın.
+
+### Variant Inventory Qty
+
+Stoktaki adet. Tam sayı. Stok yoksa `0` kullanın. Bu varyant için stok takibi kapalıysa boş bırakın.
+
+### Variant Inventory Policy
+
+Stok sıfıra indiğinde ne olacağı. Kabul edilen değerler: `deny` (satın almayı engelle) veya `continue` (stok olmasa da satın almaya izin ver).
+
+### Variant Fulfillment Service
+
+Varyantın nasıl gönderileceği. Standart gönderim için `manual` veya üçüncü taraf bir hizmetin API adı.
+
+### Variant Requires Shipping (mantıksal)
+
+Gönderim gerektiren fiziksel ürünler için `TRUE`; dijital ürünler için `FALSE`.
+
+### Variant Taxable (mantıksal)
+
+Varyant vergiye tabiyse `TRUE`; vergiden muafsa `FALSE`.
+
+### Variant Barcode
+
+UPC, EAN veya ISBN barkodu. Düz metin. Shopify bunu doğrulamaz, yalnızca saklar.
+
+### Variant Weight / Variant Weight Unit
+
+Varyantın ağırlığı ve birimi. Ağırlık ondalık bir sayıdır. Birim olarak `kg`, `g`, `lb` veya `oz` kabul edilir.
+
+---
+
+## Görsel sütunları
+
+### Image Src
+
+Ürün görselinin URL'si. Herkese açık bir HTTPS URL'si olmalıdır. Desteklenen biçimler: JPG, JPEG, PNG, GIF, WEBP.
+
+- Ana satırda: ürünün ana görseli
+- Varyant satırlarında: o varyantın seçenek kombinasyonuna özgü görsel (ör. mavi renk örneği)
+
+### Image Position
+
+Görselin görüntülenme sırası. 1'den başlayan tam sayı. Ana görsel 1 olmalıdır.
+
+### Image Alt Text
+
+Görselin alternatif metni; erişilebilirlik ve SEO için kullanılır.
+
+---
+
+## SEO sütunları
+
+### SEO Title
+
+Sayfa başlığı etiketi (tarayıcı sekmelerinde ve arama sonuçlarında görünür). Boş bırakılırsa ürünün Title değeri kullanılır. 70 karakterin altı önerilir.
+
+### SEO Description
+
+Ürün sayfasının meta açıklaması. 160 karakterin altı önerilir.
+
+---
+
+## Hediye kartı sütunu
+
+### Gift Card (mantıksal)
+
+Yalnızca ürün bir hediye kartıysa `TRUE`. Çoğu ürün için `FALSE` olmalı veya boş bırakılmalıdır.
+
+---
+
+## Basit ürün ve varyantlı ürün
+
+**Basit ürün (tek varyant):** ürün başına bir satır. Tüm zorunlu sütunları doldurun. Seçenek sütunları isteğe bağlıdır.
+
+**Varyantlı ürün:** ürün başına birden fazla satır; hepsi aynı Handle'ı paylaşır. İlk satır ana satırdır (Title, Image Src, Body HTML vb. içerir). Sonraki satırlar varyant satırlarıdır (Title boş; ürün düzeyi verileri Handle gruplamasıyla devralırlar).
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+Shopify şablonunuzu sütun sütun doğrulamak için StriveFormats'a yükleyin. Zorunlu alanları, mantıksal değer biçimlerini, varyant yapısını ve görsel URL'lerini kontrol eder, ardından temiz ve içe aktarmaya hazır bir dosya dışa aktarır.
+
+[Shopify CSV Düzelticisini açın](/app?preset=shopify_products) | [Shopify şablonunu görüntüleyin](/presets/shopify_products)

@@ -1,0 +1,169 @@
+---
+title: "Shopify-productafbeeldingen in CSV: Image Src, alt-tekst en posities"
+description: "Leer hoe je afbeeldings-URL's in de Shopify-product-CSV opbouwt: de kolommen Image Src, Image Position en Image Alt Text, meerdere afbeeldingen per product toevoegen en de meest voorkomende importfouten bij afbeeldingen voorkomen."
+keywords: ["shopify afbeeldingen csv", "shopify image src", "shopify alt-tekst afbeelding", "shopify image position csv", "shopify productafbeeldingen importeren", "shopify csv meerdere afbeeldingen", "shopify afbeelding url"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Welke afbeeldingskolommen de Shopify-product-CSV heeft"
+  - "Hoe je meerdere afbeeldingen aan één product toevoegt"
+  - "Hoe Image Position de volgorde van weergave bepaalt"
+  - "Waarom afbeeldingsimports mislukken en hoe je URL-problemen oplost"
+  - "Hoe je alt-tekst toevoegt voor toegankelijkheid en SEO"
+bestFor: "Shopify-verkopers die producten met meerdere afbeeldingen importeren of bijwerken, de volgorde willen bepalen of na een import ontbrekende afbeeldingen zoeken"
+timeToComplete: "10 minuten"
+---
+
+## Afbeeldingskolommen in de Shopify-CSV
+
+De Shopify-product-CSV kent drie kolommen voor afbeeldingen:
+
+| Kolom | Verplicht | Opmerking |
+|---|---|---|
+| Image Src | Nee | Openbaar bereikbare HTTPS-URL van het afbeeldingsbestand |
+| Image Position | Nee | Geheel getal (1, 2, 3...) dat de volgorde bepaalt |
+| Image Alt Text | Nee | Beschrijvende tekst bij de afbeelding |
+
+Deze kolommen staan in dezelfde rij als de product- of variantgegevens. Elke rij kan één afbeeldings-URL bevatten.
+
+---
+
+## Eén afbeelding per product
+
+Het eenvoudigste geval: één afbeelding per product. Zet de URL in de kolom `Image Src` van de **hoofdrij** (de eerste rij van die Handle):
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+De variantrijen (de tweede en volgende rijen met dezelfde Handle) hebben een lege kolom Image Src.
+
+---
+
+## Meerdere afbeeldingen per product
+
+Wil je meer dan één afbeelding bij een product, voeg dan **extra rijen met dezelfde Handle** toe die alleen de afbeeldingsgegevens bevatten. Die rijen hebben een lege Title en lege variantvelden: ze dienen alleen om extra afbeeldings-URL's mee te geven.
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+De belangrijkste regels:
+- Per product worden tot **250 afbeeldingen** ondersteund.
+- Elke afbeeldings-URL staat in een eigen rij met dezelfde Handle.
+- Rijen met alleen een afbeelding hebben een lege Variant Price, lege optiewaarden en een lege Title.
+- Gebruik niet dezelfde rij voor een variant en een extra afbeelding: één rij, één doel.
+
+---
+
+## Image Position
+
+`Image Position` bepaalt de volgorde van de afbeeldingen in de productgalerij. Het is een geheel getal vanaf 1.
+
+- `1` = hoofdafbeelding (wordt als eerste getoond).
+- `2`, `3` enz. = extra afbeeldingen in die volgorde.
+
+Laat je Image Position weg, dan kent Shopify de posities toe in de volgorde waarin de afbeeldingen in de CSV staan. Geef je de posities expliciet op, dan geldt jouw volgorde, ongeacht de rijvolgorde.
+
+**Voorbeeld:** eerst een sfeerfoto, dan de productfoto:
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## Eisen aan afbeeldings-URL's
+
+Shopify downloadt de afbeeldingen tijdens de import van de URL die je opgeeft. De URL moet aan deze eisen voldoen:
+
+- **Hij moet HTTPS gebruiken.** Gewone HTTP-URL's worden geweigerd of kunnen waarschuwingen over gemengde inhoud geven.
+- **Hij moet openbaar bereikbaar zijn.** URL's achter een login, Cloudflare-controles of IP-beperkingen werken niet.
+- **Geen spaties in de URL.** Spaties moeten als `%20` worden gecodeerd of de URL moet worden aangepast.
+- **Hij moet naar een afbeeldingsbestand wijzen.** Shopify accepteert JPEG, PNG, GIF, WEBP en SVG. De URL hoeft niet op een extensie te eindigen als de server het juiste content-type teruggeeft, maar de meeste importprocessen werken betrouwbaarder met URL's met een extensie.
+- **Geen parameters die verlopen.** Gebruik je vooraf ondertekende URL's (van S3, Cloudinary enz.) die na een tijd verlopen, zorg dan dat ze tijdens de hele import geldig blijven.
+
+---
+
+## Veelvoorkomende fouten bij het importeren van afbeeldingen
+
+### De afbeelding verschijnt niet na de import
+
+**Waarschijnlijke oorzaken:**
+1. De URL gaf een andere HTTP-status dan 200 terug (404, 403, 500). Shopify slaat onbereikbare afbeeldingen zonder melding over.
+2. De URL gebruikte HTTP in plaats van HTTPS.
+3. De URL bevatte een spatie waardoor het verzoek mislukte.
+
+**Zo ontdek je het:** Plak de URL direct in de browser. Laadt de afbeelding, dan is de URL geldig. Zie je een inlogpagina, 403 of 404, dan is de afbeelding niet openbaar bereikbaar.
+
+### De verkeerde afbeelding is de hoofdafbeelding
+
+**Oorzaak:** Image Position was niet opgegeven en de afbeeldingen stonden in de verkeerde volgorde in de CSV.
+
+**Oplossing:** Zet `Image Position` expliciet op `1` in de rij met de URL van de hoofdafbeelding.
+
+### Afbeeldingen komen bij het verkeerde product terecht
+
+**Oorzaak:** Typfout in de Handle: de afbeeldingsrij gebruikte een iets andere Handle dan de productrij.
+
+**Oplossing:** Zorg dat de Handles precies gelijk zijn. Eén extra spatie of een andere hoofdletter maakt al een nieuw product aan.
+
+### Oude afbeeldingen worden niet verwijderd
+
+**Gedrag:** Bij een nieuwe import **voegt** de CSV-import van Shopify afbeeldingen aan een product toe. Bestaande afbeeldingen worden niet verwijderd. Wil je afbeeldingen verwijderen, doe dat dan in de Shopify-beheeromgeving of via de API.
+
+### Te veel afbeeldingen
+
+**Gedrag:** Geef je meer dan 250 afbeeldings-URL's op voor één Handle, dan importeert Shopify alleen de eerste 250 en negeert de rest zonder melding.
+
+---
+
+## Tips voor goede alt-tekst
+
+Alt-tekst (de kolom `Image Alt Text`) heeft twee doelen:
+1. **Toegankelijkheid:** schermlezers lezen de alt-tekst voor aan mensen met een visuele beperking.
+2. **SEO:** zoekmachines indexeren alt-tekst en gebruiken die om te begrijpen wat er op de afbeelding staat.
+
+**Goede alt-tekst:**
+- Beschrijft wat er op de afbeelding staat: `"Blauw katoenen T-shirt, vooraanzicht, op witte achtergrond"`
+- Bevat de productnaam en belangrijke kenmerken
+- Is per afbeelding uniek (niet voor alle productafbeeldingen hetzelfde)
+
+**Vermijd:**
+- Keyword stuffing: `"blauw shirt kopen goedkope shirts katoenen shirts"`
+- Algemene tekst: `"image1"`, `"foto"`, `""` (leeg)
+- Dezelfde alt-tekst voor elke afbeelding van het product
+
+---
+
+## Snel overzicht: patronen voor afbeeldingsrijen
+
+**Eén afbeelding, zonder alt-tekst:**
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**Meerdere afbeeldingen met posities:**
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**Variantafbeelding (afbeelding die bij een bepaalde variantrij hoort):**
+Zet Image Src in dezelfde rij als de variant. Shopify koppelt die afbeelding dan aan die variant:
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

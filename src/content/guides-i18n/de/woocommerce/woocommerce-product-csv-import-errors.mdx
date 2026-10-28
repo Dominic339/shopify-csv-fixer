@@ -1,0 +1,146 @@
+---
+title: "WooCommerce-Produkt-CSV-Importfehler: Ursachen und Lösungen"
+description: "Behebe die häufigsten Fehler beim WooCommerce-Produktimport: fehlende SKUs, ungültige Typen, Probleme mit Variationszeilen, Preisformate und Attributspalten."
+keywords: ["woocommerce csv import fehler", "woocommerce produktimport fehlgeschlagen", "woocommerce csv fehler", "woocommerce csv reparieren", "woocommerce import probleme", "woocommerce csv prüfen", "woocommerce produkt upload fehler"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Die häufigsten WooCommerce-CSV-Importfehler und was sie bedeuten"
+  - "Wie die Spalte Type das Importverhalten von WooCommerce steuert"
+  - "Wie du Fehler in der Beziehung zwischen übergeordnetem Produkt und Variation behebst"
+  - "Wie du Preise, Wahrheitswerte und Attribute richtig formatierst"
+  - "Wie du den Fehlerbericht des eingebauten WooCommerce-Importers nutzt"
+bestFor: "WooCommerce-Shopbetreiber und Entwickler, die fehlgeschlagene oder unvollständige Produkt-CSV-Importe untersuchen"
+timeToComplete: "12 Minuten"
+---
+
+## Wie WooCommerce CSV-Importe prüft
+
+Der eingebaute Produktimporter von WooCommerce liest deine CSV-Datei und ordnet die Spalten nach ihrem Namen zu. Jede Zeile wird gegen das Produktdatenmodell von WooCommerce geprüft. Schlägt die Prüfung fehl, überspringt WooCommerce die Zeile und protokolliert einen Fehler. Nach dem Import siehst du eine Übersicht, wie viele Zeilen importiert und übersprungen wurden und warum.
+
+Ist WordPress auf Deutsch eingestellt, nutzt der Export deutsche Spaltennamen (z. B. „Artikelnummer“ statt `SKU`); der Importer erkennt beide Schreibweisen. In dieser Anleitung stehen die englischen Namen.
+
+Wer die Prüfregeln kennt, verhindert die meisten Importfehler, bevor sie entstehen.
+
+---
+
+## Fehler: Ungültiger oder fehlender Produkttyp
+
+**Ursache:** Die Spalte `Type` enthält einen unbekannten Wert oder fehlt ganz.
+
+**Zulässige Werte:**
+
+| Type | Beschreibung |
+|---|---|
+| `simple` | Ein einfaches Produkt ohne Variationen |
+| `variable` | Ein Produkt mit Variationen (übergeordnete Zeile) |
+| `variation` | Eine bestimmte Variation eines variablen Produkts (Kindzeile) |
+| `grouped` | Eine Gruppe zusammengehöriger Produkte |
+| `external` | Ein Produkt, das auf eine externe Website verlinkt |
+
+**Lösung:**
+- Füge eine Spalte `Type` hinzu, falls sie fehlt
+- Ersetze eigene oder falsch geschriebene Werte durch einen der obigen
+- `Variable` (mit großem V) ist nicht dasselbe wie `variable` – nutze Kleinbuchstaben
+
+---
+
+## Fehler: Fehlende oder doppelte SKU
+
+**Ursache:** `SKU` ist in der Zeile eines einfachen oder variablen Produkts leer, oder dieselbe SKU steht in zwei verschiedenen Zeilen.
+
+WooCommerce nutzt die SKU als eindeutige Kennung, um importierte Zeilen bestehenden Produkten zuzuordnen. Ist die SKU leer, legt WooCommerce bei jedem Import ein neues Produkt an, statt das bestehende zu aktualisieren.
+
+**Lösung:**
+- Gib jeder Produktzeile eine eindeutige SKU (einfachen Produkten und übergeordneten Zeilen variabler Produkte)
+- Variationszeilen können die SKU des übergeordneten Produkts übernehmen oder eine eigene haben – dürfen aber nicht die SKU eines anderen Produkts doppeln
+- Doppelte SKUs findest du in Excel mit `ZÄHLENWENN`: `=ZÄHLENWENN($A:$A; A2)` – jeder Wert über 1 ist ein Duplikat
+
+---
+
+## Fehler: Ungültiger regulärer Preis
+
+**Ursache:** `Regular price` enthält ein Währungssymbol (`€`, `$`), nutzt ein Komma als Dezimaltrennzeichen (`19,99`) oder ist bei einem einfachen oder variablen Produkt leer.
+
+**Lösung:**
+- Entferne Währungssymbole: lösche `$`, `€`, `£` per Suchen und Ersetzen
+- Ersetze Kommas als Dezimaltrennzeichen durch Punkte: `19,99` → `19.99`
+- Sorge dafür, dass jedes einfache und variable Produkt einen Preis hat; Variationszeilen können ihn vom übergeordneten Produkt übernehmen
+
+---
+
+## Fehler: Ungültiges Wahr/Falsch-Feld
+
+**Ursache:** Die Wahr/Falsch-Spalten von WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) akzeptieren `1` (wahr) oder `0` (falsch). Werte wie `yes`, `TRUE` oder `Y` führen zu Prüffehlern.
+
+**Lösung:** Ersetze alle Wahrheitswerte:
+
+| Ersetzen | Durch |
+|---|---|
+| `yes`, `Yes`, `TRUE`, `true` | `1` |
+| `no`, `No`, `FALSE`, `false` | `0` |
+
+Nutze Suchen und Ersetzen mit aktiviertem „Gesamten Zellinhalt vergleichen“.
+
+---
+
+## Fehler: Übergeordnetes Produkt der Variation nicht gefunden
+
+**Ursache:** Eine Zeile mit `Type: variation` verweist auf ein übergeordnetes Produkt, das weder in der Importdatei noch in der Datenbank existiert.
+
+Variationszeilen in WooCommerce brauchen ein übergeordnetes Produkt. Die Verknüpfung erfolgt über die Spalte `Parent` (die die ID des übergeordneten Produkts aus der Datenbank enthalten sollte) oder dadurch, dass das übergeordnete Produkt in derselben Importdatei steht.
+
+**Lösung:**
+- Nimm die Zeile des übergeordneten Produkts in dieselbe CSV-Datei auf
+- Setze die Spalte `Parent` in Variationszeilen auf die WooCommerce-Produkt-ID des übergeordneten Produkts (die Nummer im WordPress-Adminbereich)
+- Achte darauf, dass die übergeordnete Zeile `Type: variable` nutzt, nicht `Type: simple`
+
+---
+
+## Fehler: Attributspalten werden nicht erkannt
+
+**Ursache:** Die Namen der Attributspalten folgen nicht genau dem Namensmuster von WooCommerce.
+
+**Format der Attributspalten in WooCommerce:**
+
+- `Attribute 1 name` – der Name des ersten Attributs (z. B. `Color`)
+- `Attribute 1 value(s)` – der Wert bzw. die Werte dieser Zeile (z. B. `Blue` oder `Blue | Red` bei mehreren)
+- `Attribute 1 visible` – `1`, wenn auf der Produktseite angezeigt, `0`, wenn ausgeblendet
+- `Attribute 1 global` – `1` bei einem globalen Attribut, `0` bei einem lokalen
+
+**Lösung:**
+- Nutze genau dieses Format mit Leerzeichen: `Attribute 1 name`, nicht `attribute_1_name` oder `Attribute1Name`
+- Nummeriere Attribute fortlaufend ab 1
+- Lass keine Lücken (nutze Attribute 3 nicht, wenn es kein Attribute 2 gibt)
+
+---
+
+## Fehler: Bild-URL nicht erreichbar
+
+**Ursache:** Die Bild-URL in der Spalte `Images` ist keine öffentlich erreichbare HTTPS-URL, liegt hinter einer Anmeldung oder nutzt ein anderes Protokoll als HTTPS.
+
+WooCommerce lädt Bilder während des Imports herunter und speichert sie in deiner Mediathek.
+
+**Lösung:**
+- Öffne jede Bild-URL im Browser – das Bild sollte direkt und ohne Anmeldung laden
+- Nutze HTTPS-URLs (nicht HTTP)
+- Für Bilder in Google Drive oder Dropbox nutze direkte Download-Links (keine Freigabelinks)
+- Liegen die Bilder auf localhost oder einem Staging-Server, verschiebe sie zuerst an einen öffentlich erreichbaren Ort
+
+---
+
+## Den Fehlerbericht des WooCommerce-Imports lesen
+
+Nach einem Import zeigt WooCommerce eine Übersicht mit:
+- „X Produkte importiert“ – erfolgreich angelegt oder aktualisiert
+- „X Produkte fehlgeschlagen“ – klicke auf „Importprotokoll anzeigen“, um zu sehen, welche Zeilen warum gescheitert sind
+
+Das Importprotokoll nennt die Zeilennummer und den genauen Fehler. Mit der Zeilennummer findest du die Zeile in deiner CSV (Achtung: Die Kopfzeile ist Zeile 1, die Daten beginnen in Zeile 2).
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine WooCommerce-CSV in StriveFormats hoch. Der Validator prüft Produkttypen, SKUs, Preise, Wahrheitswerte, Attributspalten und die Beziehungen zwischen übergeordneten Produkten und Variationen – und behebt sichere Probleme automatisch.
+
+[WooCommerce-CSV-Reparateur öffnen](/app?preset=woocommerce_products) | [WooCommerce-Vorlage ansehen](/presets/woocommerce_products)

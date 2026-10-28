@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "Leere Zellen überschreiben echte Daten",
+    "body": "Wenn du mit „Produkte mit übereinstimmenden Handles überschreiben“ importierst, ersetzt eine leere Zelle den Wert in deinem Shop. Der Reparateur exportiert nur die Spalten, die deine Datei wirklich nutzt, damit eine fehlende Spalte nichts löschen kann."
+   },
+   {
+    "title": "Varianten sind Zeilen mit demselben Handle",
+    "body": "Nur die erste Zeile eines Produkts enthält Titel und Beschreibung. Jede weitere Zeile ist eine Variante und braucht eigene Optionswerte. Zwei Zeilen mit denselben Optionen werden abgelehnt, und der Reparateur zeigt dir beide."
+   },
+   {
+    "title": "Preise und Wahrheitswerte im Shopify-Format",
+    "body": "„$ 45“, „45,00“ und „yes“ sehen in einer Tabelle gut aus, scheitern aber beim Import. Sie werden zu 45.00 und true umgeschrieben, und jede Änderung steht im Korrekturprotokoll."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Funktioniert es mit alten Shopify-Exporten?",
+    "a": "Ja. Ältere Spaltennamen wie „Variant Price“ und „Body (HTML)“ werden erkannt, und die korrigierte Datei nutzt die Namen der aktuellen Vorlage, die Shopify akzeptiert."
+   },
+   {
+    "q": "Werden Zeilen gelöscht?",
+    "a": "Nein. Jede Zeile mit Daten bleibt erhalten (nur komplett leere Zeilen werden übersprungen), und jede automatische Änderung steht im Korrekturprotokoll."
+   },
+   {
+    "q": "Warum sehe ich bei einer großen Datei so viele Probleme?",
+    "a": "Ein einziges Strukturproblem, etwa eine fehlende Optionsspalte, wiederholt sich in jeder Variantenzeile. Behebe es einmal in der Tabelle, und die Zahl sinkt schnell."
+   }
+  ],
+  "metaTitle": "Shopify CSV-Import-Fehler beheben – Produkt-CSV kostenlos prüfen | StriveFormats",
+  "metaDescription": "Prüfe eine Shopify-Produkt-CSV vor dem Import gegen die offizielle Vorlage. Preise, Handles und true/false-Werte werden automatisch korrigiert; Varianten- und Überschreibprobleme werden genau der Zeile zugeordnet.",
+  "kicker": "Shopify-Produkte",
+  "title": "CSV-Reparateur für Shopify",
+  "intro": "Der Shopify-Import ist streng: Ein Produkt mit fehlerhaftem Handle oder zwei identische Varianten können die ganze Datei stoppen. Prüfe deine CSV zuerst hier, erhalte die sicheren Korrekturen kostenlos und sieh genau, welche Zeilen noch deine Hilfe brauchen.",
+  "exportTip": "Im Shopify-Adminbereich: Produkte → Exportieren → „Reine CSV-Datei“. Oder starte mit der offiziellen Vorlage."
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "Ja/Nein-Spalten sind 1 und 0",
+    "body": "Published, „In stock?“ und ähnliche Spalten erwarten 1 oder 0 (Published erlaubt auch -1 für Entwürfe). Werte wie „yes“ oder „TRUE“ werden für dich umgewandelt."
+   },
+   {
+    "title": "SKUs müssen eindeutig sein",
+    "body": "Der Importer findet bestehende Produkte über ID oder SKU. Zwei Zeilen mit derselben SKU bedeuten, dass eine scheitert oder die andere überschreibt, deshalb markiert der Reparateur beide."
+   },
+   {
+    "title": "Der Angebotspreis muss niedriger sein",
+    "body": "Ein Angebotspreis gleich oder über dem regulären Preis wird akzeptiert, zeigt aber ein sinnloses „Angebot“. Er wird als Warnung markiert, damit du Tippfehler vor deinen Kunden bemerkst."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Ändert es meine Spaltennamen?",
+    "a": "Nein. Die korrigierte Datei behält genau die hochgeladenen Spalten in derselben Reihenfolge, sodass sie mit derselben Spaltenzuordnung wieder importiert wird."
+   },
+   {
+    "q": "Und variable Produkte?",
+    "a": "Nutze den Reparateur für variable WooCommerce-Produkte. Er prüft zusätzlich, dass jede Variation auf ein übergeordnetes Produkt zeigt und eine eindeutige Attributkombination hat."
+   }
+  ],
+  "metaTitle": "WooCommerce CSV-Import-Fehler beheben – kostenlos prüfen | StriveFormats",
+  "metaDescription": "Prüfe eine WooCommerce-Produkt-CSV, bevor du den Importer startest. Preise, Wahrheitswerte und Lagerwerte werden vereinheitlicht; doppelte SKUs und Fehler beim Angebotspreis werden je Zeile markiert.",
+  "kicker": "WooCommerce-Produkte",
+  "title": "CSV-Reparateur für WooCommerce",
+  "intro": "Der eingebaute WooCommerce-Importer überspringt Zeilen, die er nicht versteht, und sagt nicht immer warum. Prüfe die Datei zuerst hier: Der Reparateur liest dieselben Spalten, die WooCommerce exportiert, und zeigt die Zeilen, die übersprungen würden.",
+  "exportTip": "In WordPress: Produkte → Exportieren. Lass „Alle Spalten exportieren“ ausgewählt."
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "Jede Variation braucht ein übergeordnetes Produkt",
+    "body": "Die Spalte Parent enthält die SKU des übergeordneten Produkts (oder id:123). Ist es nicht in der Datei, muss es bereits in deinem Shop existieren; der Reparateur sagt dir, welche er nicht finden konnte."
+   },
+   {
+    "title": "Eine Kombination pro Variation",
+    "body": "Zwei Variationen desselben Produkts mit denselben Attributwerten können nicht beide existieren. Der Reparateur markiert das Paar, damit du eine davon ändern kannst."
+   },
+   {
+    "title": "Übergeordnete Produkte listen alle Werte",
+    "body": "Die Zeile des übergeordneten Produkts listet alle Werte eines Attributs durch Kommas getrennt („S, M, L“); jede Variationszeile nur ihren eigenen Wert."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Können übergeordnete Produkte und Variationen in getrennten Dateien sein?",
+    "a": "Ja, solange die übergeordneten Produkte zuerst importiert werden. Eine Variation, deren übergeordnetes Produkt nicht in der Datei ist, wird als Hinweis gemeldet, nicht als Fehler."
+   },
+   {
+    "q": "Funktioniert es mit mehreren Attributen?",
+    "a": "Ja. Attribute 1, Attribute 2 usw. werden alle verglichen, wenn nach doppelten Kombinationen gesucht wird."
+   }
+  ],
+  "metaTitle": "Variable Produkte in WooCommerce per CSV importieren – ohne Fehler | StriveFormats",
+  "metaDescription": "Prüfe variable WooCommerce-Produkte und Variationen vor dem Import: Verweise auf übergeordnete Produkte, Attributwerte und doppelte Variationskombinationen, Zeile für Zeile.",
+  "kicker": "Variable WooCommerce-Produkte",
+  "title": "Reparateur für variable WooCommerce-Produkte",
+  "intro": "Bei variablen Produkten geht der WooCommerce-Import meistens schief: eine Variation, die auf das falsche übergeordnete Produkt zeigt, oder zwei Variationen mit denselben Attributen. Der Reparateur prüft die ganze Produktfamilie zusammen, nicht nur einzelne Zeilen.",
+  "exportTip": "Exportiere über Produkte → Exportieren, einschließlich Variationen. Übergeordnete Produkte haben den Type „variable“, Kinder „variation“."
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "13 Tags, nicht mehr",
+    "body": "Etsy behält die ersten 13 Tags und verwirft den Rest. Der Reparateur zählt sie für jedes Angebot und vereinheitlicht die Trennzeichen."
+   },
+   {
+    "title": "Preise ohne Symbole",
+    "body": "Preise sind einfache Zahlen in deiner Shop-Währung: „$18“ wird zu 18.00, und Währungscodes werden großgeschrieben (usd → USD)."
+   },
+   {
+    "title": "Bildlinks müssen vollständige URLs sein",
+    "body": "„example.com/mug.jpg“ lädt nicht; es braucht https://. Kaputte Bildlinks werden vor dem Hochladen markiert."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kann ich die korrigierte Datei direkt bei Etsy hochladen?",
+    "a": "Etsy hat keinen eigenen CSV-Upload für Angebote, daher nutzen die meisten Verkäufer die korrigierte Datei mit einer Massenbearbeitungs-App oder als saubere Masterkopie ihres Katalogs."
+   },
+   {
+    "q": "Prüft es auch andere Etsy-Limits?",
+    "a": "Es prüft Tags, Preise, Mengen, Währungscodes und Bild-URLs. Kategorie und Versandprofil musst du weiterhin bei Etsy festlegen."
+   }
+  ],
+  "metaTitle": "Etsy-CSV prüfen und bereinigen – kostenlos | StriveFormats",
+  "metaDescription": "Bereinige eine Etsy-Angebots-CSV: Preise, Währungscodes und Tags werden vereinheitlicht, und Tag-Limits, Bild-URLs und fehlende Angaben werden je Zeile markiert.",
+  "kicker": "Etsy-Angebote",
+  "title": "CSV-Reparateur für Etsy",
+  "intro": "Der Etsy-Angebotsexport ist praktisch für Massenbearbeitung in einer Tabelle und genauso leicht kaputtzumachen. Der Reparateur bringt Preise, Währungscodes und Tags in Ordnung und warnt vor allem, was Etsy abschneiden oder ablehnen würde.",
+  "exportTip": "Im Shop-Manager: Einstellungen → Optionen → Daten herunterladen → „CSV herunterladen“ unter Angebote."
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "Zustände sind Zahlen",
+    "body": "eBay erwartet eine ConditionID wie 1000 (Neu) oder 3000 (Gebraucht). Wörter wie „Used“ werden in den passenden Code umgewandelt."
+   },
+   {
+    "title": "Festpreis heißt GTC",
+    "body": "Festpreisangebote laufen immer „Good 'Til Cancelled“. Jede andere Laufzeit in einer Festpreiszeile wird markiert (eBay würde sie auf GTC umstellen), und Werte wie „30“, die gar keine gültige Laufzeit sind, sind Fehler."
+   },
+   {
+    "title": "Neue Angebote brauchen eine Kategorie",
+    "body": "Ein Angebot ohne Kategorienummer hinzuzufügen scheitert. Überarbeitungen dürfen sie leer lassen, deshalb markiert der Reparateur sie nur in Add-Zeilen."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Bleibt die Kopfzeile *Action(SiteID=...) erhalten?",
+    "a": "Ja. Die Kopfzeile der ersten Spalte enthält deine Website- und Währungseinstellungen und bleibt genau so, wie du sie hochgeladen hast."
+   },
+   {
+    "q": "Und Angebote mit mehreren Varianten?",
+    "a": "Nutze den Reparateur für eBay-Variationen. Er prüft zusätzlich die übergeordneten und untergeordneten Zeilen jedes Angebots gegeneinander."
+   }
+  ],
+  "metaTitle": "eBay CSV-Upload-Fehler beheben – File Exchange & Seller Hub | StriveFormats",
+  "metaDescription": "Prüfe eine eBay-Angebotsdatei, bevor du sie in die Seller-Hub-Berichte oder File Exchange hochlädst: Aktionen, Zustands-IDs, Laufzeiten, Kategorien, Preise und Mengen.",
+  "kicker": "eBay-Angebote",
+  "title": "CSV-Reparateur für eBay",
+  "intro": "Die Upload-Vorlagen von eBay sind wählerisch bei Codes: Die Action-Spalte, numerische Zustands-IDs und Angebotslaufzeiten müssen genau stimmen. Der Reparateur wandelt die üblichen Werte für dich um und zeigt auf den Rest.",
+  "exportTip": "Seller Hub → Berichte → Uploads → „Vorlage herunterladen“, oder exportiere deine aktiven Angebote."
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "Die übergeordnete Zeile listet jede Option",
+    "body": "Das RelationshipDetails der übergeordneten Zeile sieht so aus: Size=8;9|Color=Blue. Jede Kindzeile darf nur Werte verwenden, die dort stehen."
+   },
+   {
+    "title": "Kindzeilen tragen Preis und Menge",
+    "body": "Jede Variation-Zeile hat ihre eigene SKU, ihren Preis und ihre Menge, während Titel und Kategorie in der übergeordneten Zeile stehen."
+   },
+   {
+    "title": "Keine doppelten Kombinationen",
+    "body": "Zwei Kindzeilen mit Size=8|Color=Blue werden abgelehnt. Der Reparateur markiert das Paar und ebenso doppelte SKUs."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kann ich Einzelangebote und Angebote mit Varianten mischen?",
+    "a": "Ja. Zeilen ohne Relationship werden als Einzelangebote behandelt und wie mit der Vorlage für eBay-Angebote geprüft."
+   },
+   {
+    "q": "Ändert es die Reihenfolge meiner Zeilen?",
+    "a": "Nein. Jede Kindzeile gehört zur nächsten übergeordneten Zeile darüber, daher bleibt die hochgeladene Reihenfolge erhalten."
+   }
+  ],
+  "metaTitle": "eBay-Variationen per CSV hochladen – Datei kostenlos prüfen | StriveFormats",
+  "metaDescription": "Prüfe eBay-Angebote mit mehreren Varianten vor dem Hochladen: Die Optionen jeder Variation müssen in der übergeordneten Zeile stehen, und keine zwei Variationen dürfen dieselbe Kombination haben.",
+  "kicker": "eBay-Angebote mit Varianten",
+  "title": "Reparateur für eBay-Variationen",
+  "intro": "Ein Angebot mit Varianten besteht aus einer übergeordneten Zeile und einer Kindzeile pro Größe oder Farbe, verbunden über RelationshipDetails. Der Reparateur liest die ganze Gruppe und sagt dir, welche Kindzeile nicht zu ihrer übergeordneten Zeile passt.",
+  "exportTip": "Lade die Variationsvorlage über Seller Hub → Berichte → Uploads herunter, oder exportiere Angebote mit Variationen."
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "Codes statt Wörter",
+    "body": "product-id-type ist 1 (ASIN), 2 (ISBN), 3 (UPC) oder 4 (EAN), und item-condition ist eine Zahl wie 11 für Neu. Wörter werden automatisch umgewandelt."
+   },
+   {
+    "title": "Tabellenprogramme beschädigen Barcodes",
+    "body": "Excel macht aus 012345678905 die Zahl 1.23457E+11 oder entfernt die führende Null. Beides wird erkannt; bei einer fehlenden Null wird die wahrscheinliche Originalnummer vorgeschlagen."
+   },
+   {
+    "title": "Bleib in deiner Preisspanne",
+    "body": "Liegt der Preis außerhalb deines minimal/maximal erlaubten Verkaufspreises, deaktiviert Amazon das Angebot. Der Reparateur vergleicht alle drei."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Funktioniert es mit Kategorievorlagen (Flat Files)?",
+    "a": "Es akzeptiert deren Spaltennamen wie item_sku und external_product_id_type und behält sie bei, aber die Prüfungen sind für Angebotsdateien gedacht."
+   },
+   {
+    "q": "Meine Datei ist eine tabgetrennte .txt-Datei. Kann ich sie nutzen?",
+    "a": "Ja, lade sie einfach hoch. Die korrigierte Datei wird als CSV exportiert; öffne sie in einer Tabelle und speichere sie als tabgetrennten Text, wenn Seller Central eine .txt verlangt."
+   }
+  ],
+  "metaTitle": "Amazon Inventory Loader: Fehler in der Lagerbestandsdatei beheben | StriveFormats",
+  "metaDescription": "Prüfe eine Amazon-Inventory-Loader-Datei vor dem Hochladen: Produkt-ID-Typen und Zustandscodes werden umgewandelt, und beschädigte Barcodes, Mengen und Preisspannen werden markiert.",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Reparateur für den Amazon Inventory Loader",
+  "intro": "Der Inventory Loader fügt Angebote für Produkte hinzu, die bereits bei Amazon existieren, oder aktualisiert sie. Die Datei ist kurz, hängt aber von Codes und Kennungen ab, die Tabellenprogramme gern beschädigen. Der Reparateur wandelt die Codes um und erkennt die Schäden.",
+  "exportTip": "Seller Central → Katalog → Produkte per Upload hinzufügen → Lagerbestandsdatei herunterladen (Inventory Loader)."
+ }
+}

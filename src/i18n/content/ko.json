@@ -1,0 +1,317 @@
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Amazon 플랫 파일 가져오기 오류: 원인과 해결 방법",
+"description": "Amazon 플랫 파일 CSV에서 가장 흔한 가져오기 오류를 해결하세요. SKU 문제, 잘못된 상태 코드, 가격 형식, 주문 처리 채널 값, 템플릿 불일치를 다룹니다."
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Amazon 플랫 파일의 참/거짓 필드: y/n, TRUE/FALSE와 흔한 실수",
+"description": "Seller Central 플랫 파일에서 'y' 또는 'n'(TRUE/FALSE나 1/0이 아님)을 요구하는 참/거짓 필드, 잘못된 값을 한꺼번에 고치는 방법, 이 열을 망가뜨리는 스프레드시트 자동 서식을 피하는 방법을 알아보세요."
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "eBay CategoryID와 File Exchange: 개념과 설정 방법",
+"description": "eBay CategoryID 필드가 무엇인지, File Exchange 업로드에서 왜 필수인지, 상품에 맞는 카테고리 ID를 찾는 방법, 카탈로그 전체에 한꺼번에 입력하는 방법을 알아보세요."
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "eBay File Exchange CSV 오류: 원인과 해결 방법",
+"description": "eBay File Exchange CSV에서 흔한 오류를 해결하세요. 잘못된 Action 값, 카테고리 ID 문제, 제목 길이 초과, 상태 코드, 가격 형식, 이미지 URL 문제를 다룹니다."
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Etsy CSV 템플릿 가이드: 필드, 형식, 흔한 오류",
+"description": "Etsy 상품 CSV 템플릿의 완전한 가이드입니다. 각 필드 설명, 선택 목록에서 허용되는 값, 필수 열과 선택 열, 흔한 가져오기 오류 해결 방법을 담았습니다."
+},
+"general/append-vs-merge-join-csv": {
+"title": "추가, 병합, 조인: CSV 파일을 올바르게 합치는 방법",
+"description": "행 추가, 같은 구조의 파일 병합, 관련 데이터가 있는 파일 조인의 차이를 이해하고, 쇼핑몰 카탈로그 작업에 맞는 방법을 고르세요."
+},
+"general/csv-basics-for-imports": {
+"title": "쇼핑몰 가져오기를 위한 CSV 기초",
+"description": "첫 업로드 전에 헤더, UTF-8 인코딩, 따옴표, 줄바꿈, 그리고 CSV 가져오기를 망가뜨리는 흔한 실수를 이해하세요."
+},
+"general/csv-column-mismatch-fix": {
+"title": "CSV 열 불일치 오류 해결",
+"description": "CSV 가져오기의 열 불일치 오류를 진단하고 해결하는 방법입니다. 잘못된 열 이름, 대소문자 차이, 불필요한 공백, 플랫폼별 열 순서 문제를 다룹니다."
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "쇼핑몰 가져오기를 위한 CSV 서식 규칙",
+"description": "쇼핑몰 플랫폼 가져오기를 통과하려면 CSV가 지켜야 하는 정확한 서식 규칙입니다. 구분자, 따옴표, 줄바꿈, 인코딩, 헤더 요건을 다룹니다."
+},
+"general/csv-import-checklist": {
+"title": "쇼핑몰 플랫폼용 CSV 가져오기 체크리스트",
+"description": "Shopify, WooCommerce, Etsy, eBay, Amazon CSV 파일을 가져오기 전에 확인할 완전한 체크리스트입니다. 인코딩, 헤더, 데이터 유형, 플랫폼별 규칙을 점검하세요."
+},
+"general/csv-import-errors-explained": {
+"title": "CSV 가져오기 오류 쉽게 이해하기",
+"description": "Shopify, WooCommerce, Etsy, eBay, Amazon에서 자주 보는 CSV 가져오기 오류 메시지를 쉬운 말로 풀어 설명하고, 각각의 해결 방법을 알려 드립니다."
+},
+"general/fix-blank-rows-in-csv": {
+"title": "CSV 파일의 빈 행 삭제하기",
+"description": "Shopify, WooCommerce, Etsy, eBay, Amazon에 가져오기 전에 Excel, Google Sheets, Python으로 CSV 파일의 빈 행을 찾아 삭제하는 방법입니다."
+},
+"general/fix-csv-encoding-errors": {
+"title": "CSV 인코딩 오류 해결",
+"description": "CSV 파일의 UTF-8 인코딩 문제를 진단하고 해결하세요. 깨진 문자, BOM 표시, mojibake, 가져오기를 망가뜨리는 ANSI 파일을 다룹니다."
+},
+"general/fix-extra-columns-in-csv": {
+"title": "CSV 파일의 불필요한 열 삭제하기",
+"description": "Shopify, WooCommerce, Etsy, eBay, Amazon에 가져오기 전에 CSV 파일의 불필요하거나 예상치 못한 열을 찾아 삭제하는 방법입니다."
+},
+"general/fix-mojibake-encoding": {
+"title": "CSV 파일의 글자 깨짐(mojibake)과 인코딩 오류 해결",
+"description": "인코딩 불일치로 깨진 텍스트를 바로잡으세요. UTF-8과 Latin-1 충돌을 알아보는 법, BOM을 제거하는 법, 파일을 올바르게 다시 저장하는 법을 배웁니다."
+},
+"general/merge-two-csv-files": {
+"title": "두 CSV 파일을 합치는 방법",
+"description": "Excel Power Query, Google Sheets, 간단한 명령줄로 두 CSV 파일을 하나로 합치는 단계별 안내입니다. 프로그래밍 경험이 없어도 됩니다."
+},
+"general/prevent-excel-scientific-notation": {
+"title": "Excel이 SKU와 바코드를 지수 표기로 바꾸지 않게 하기",
+"description": "Excel이 SKU, EAN 코드, UPC를 1.23456E+11 같은 지수 표기로 바꾸지 않게 하세요. 붙여넣기 전에 열을 텍스트로 지정하고, 가져오기 마법사를 쓰고, 기존 파일을 고치는 방법을 알려 드립니다."
+},
+"general/remove-duplicate-header-rows": {
+"title": "CSV 파일의 중복 헤더 행 삭제하기",
+"description": "CSV 내보내기 중간에 반복되는 헤더 행을 찾아 삭제하세요. 흔한 원인을 이해하고, Excel과 Google Sheets 필터로 찾아내고, 다음 내보내기에서 예방하는 방법을 알아보세요."
+},
+"general/validate-csv-before-import": {
+"title": "쇼핑몰 플랫폼에 업로드하기 전에 CSV 검증하기",
+"description": "가져오기가 실패하기 전에 인코딩 오류, 빠진 헤더, 행 길이 불일치, 따옴표 문제 등을 잡아내는 실용적인 체크리스트입니다. Shopify, WooCommerce, eBay, Amazon, Etsy를 다룹니다."
+},
+"shopify/images-in-product-csv": {
+"title": "Shopify 상품 CSV의 이미지: Image Src, 대체 텍스트, 순서",
+"description": "Shopify 상품 CSV에서 이미지 URL을 구성하는 방법을 알아보세요. Image Src, Image Position, Image Alt Text 열, 상품에 여러 이미지를 넣는 방법, 흔한 이미지 가져오기 실패를 피하는 방법을 다룹니다."
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Shopify CSV Handle 필드 가이드",
+"description": "Shopify 상품 CSV의 Handle 필드에 대해 알아야 할 모든 것. 역할, 올바른 handle 규칙, 변형을 묶는 방식, handle 오류 해결 방법을 다룹니다."
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Shopify CSV 가져오기 오류: 흔한 원인과 해결 방법",
+"description": "Shopify CSV에서 가장 흔한 가져오기 오류에 대한 완전한 가이드입니다. 빠진 열, 잘못된 참/거짓 값, 변형 구조 문제, 가격 오류, handle 충돌을 다룹니다."
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Shopify 상품 CSV 템플릿 해설",
+"description": "Shopify 공식 상품 CSV 템플릿의 모든 필드를 열별로 설명합니다. 각 열의 역할, 허용되는 값, 필수 열을 알 수 있습니다."
+},
+"shopify/variants-explained": {
+"title": "Shopify 상품 변형 해설: CSV 구조와 흔한 실수",
+"description": "Shopify CSV 형식이 Handle 묶음, Option 열, 상위/하위 행으로 변형을 어떻게 표현하는지 알아보세요. 상품이 나뉘거나, 변형이 사라지거나, 가져오기가 실패하는 흔한 실수를 피할 수 있습니다."
+},
+"woocommerce/variable-products-parent-child": {
+"title": "CSV로 다루는 WooCommerce 가변 상품: 상위 행과 변형 행",
+"description": "WooCommerce 상품 가져오기 도구가 가변 상품을 상위 행과 하위(변형) 행으로 어떻게 표현하는지 알아보세요. 속성 열, 행 유형별 필수 필드, 흔한 가져오기 함정을 다룹니다."
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "CSV로 다루는 WooCommerce 상품 속성: 완전 가이드",
+"description": "CSV 파일에서 WooCommerce 상품 속성을 올바르게 작성하는 방법입니다. 속성 이름 짓기, 전역 속성과 로컬 속성, 변형 속성, 흔한 실수를 다룹니다."
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "WooCommerce 상품 CSV 가져오기 오류: 원인과 해결 방법",
+"description": "WooCommerce 상품 CSV에서 가장 흔한 가져오기 오류를 해결하세요. SKU 누락, 잘못된 유형, 변형 행 문제, 가격 형식, 속성 열을 다룹니다."
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Shopify 상품 가져오기는 까다롭습니다. 형식이 잘못된 가격 하나, 빠진 옵션 값 하나, 위치가 잘못된 이미지 행 하나 때문에 전체 가져오기가 실패할 수 있습니다.",
+"이 프리셋은 CSV를 Shopify 공식 템플릿과 대조해 검증하고 안전한 자동 수정을 적용하므로, 안심하고 업로드할 수 있습니다. 데이터는 언제나 직접 관리할 수 있습니다. 모든 수정은 기록되며, 내보낸 CSV는 그대로 Shopify에 가져올 수 있는 상태로 유지됩니다."
+],
+"howItWorks": [
+"Shopify에서 내보낸 CSV나 공식 템플릿을 업로드하세요.",
+"헤더와 흔한 형식(참/거짓, 금액, 재고 값)을 정규화하고 필수 필드를 검증합니다.",
+"안전한 문제(공백 제거, TRUE/FALSE 통일, 가격 필드 정규화 등)는 자동으로 고치고, 위험한 문제는 검토할 수 있게 표시합니다.",
+"Shopify가 기대하는 구조에 맞는 깔끔한 CSV를 내보내세요."
+],
+"commonFixes": [
+"참/거짓 값(TRUE/FALSE)과 상태 값(active/draft/archived)을 통일합니다.",
+"금액 필드(Price, Compare-at price, Cost per item)를 정규화하고 불필요한 통화 기호를 제거합니다.",
+"가져오기를 망가뜨리는 SKU 중복과 변형 충돌을 찾아냅니다.",
+"옵션 구조(Option1/2/3 이름/값)를 검증하고 불완전한 변형 행을 표시합니다.",
+"이미지 행(Product image URL, Image position)을 검증하고 빠졌거나 잘못된 URL을 표시합니다.",
+"일관성을 위해 공백, 태그, handle 형식을 정리하고 정규화합니다."
+],
+"faq": [
+{
+"q": "상품 데이터가 바뀌나요?",
+"a": "자동으로 적용되는 것은 공백 제거나 TRUE/FALSE 정규화처럼 안전하고 되돌릴 수 있는 형식 수정뿐입니다. 위험한 항목은 표시되므로 내보내기 전에 직접 결정할 수 있습니다."
+},
+{
+"q": "다른 앱에서 내보낸 파일도 되나요?",
+"a": "네. 많은 Shopify 앱이 열을 추가합니다. StriveFormats는 알 수 없는 열을 그대로 두고 Shopify 필수 필드를 가져오기 가능한 상태로 만드는 데 집중합니다."
+},
+{
+"q": "Shopify 공식 템플릿을 사용할 수 있나요?",
+"a": "네. 이 페이지에서 공식 템플릿 샘플을 내려받아 수정 도구에 바로 업로드할 수 있습니다."
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"WooCommerce에 기본으로 들어 있는 상품 CSV 가져오기 도구는 열 이름, 데이터 유형, 변형 구조에 엄격합니다. 이 프리셋은 파일을 가져오기 도구의 표준 필드와 대조해 검증하고 안전한 정규화를 적용해 가져오기가 매끄럽게 진행되도록 합니다.",
+"이전 작업, 가격 일괄 업데이트, 카테고리/태그 추가, 변형이 있는 가변 상품 가져오기에 사용하세요. 위험한 항목은 모두 문제 목록에 남아 직접 검토할 수 있습니다."
+],
+"howItWorks": [
+"WooCommerce 상품 CSV(내보내기 파일 또는 가져오기 템플릿)를 업로드하세요.",
+"헤더와 흔한 값을 정규화하고, 빠진 필수 필드를 표시합니다.",
+"안전한 수정(참/거짓 값, 가격, URL 정리)은 자동으로 적용됩니다.",
+"남은 문제를 검토한 뒤 가져오기용 CSV를 내보내세요."
+],
+"commonFixes": [
+"Published / In stock? / Backorders allowed? / Sold individually?를 정규화합니다",
+"Regular price / Sale price를 일반 소수로 정규화합니다(통화 기호 없이)",
+"모든 공백을 정리하고 카테고리/태그 구분자를 정규화합니다",
+"이미지 URL을 검증하고 빈 항목을 제거합니다",
+"같은 상위 상품 아래의 중복된 변형 속성 조합을 찾아냅니다"
+],
+"faq": [
+{
+"q": "WooCommerce 기본 가져오기 도구와 함께 쓸 수 있나요?",
+"a": "네. 이 프리셋은 WooCommerce 핵심 상품 CSV 가져오기 도구의 필드와, 가져오기 화면에서 연결하는 일반적인 내보내기 헤더를 바탕으로 만들어졌습니다."
+},
+{
+"q": "변형도 처리하나요?",
+"a": "변형 구조(Parent와 속성)를 검증하고 중복된 변형 조합을 찾아냅니다. 안전한 수정은 자동으로 적용되며, 구조적 오류는 차단 문제로 남습니다."
+},
+{
+"q": "플러그인 전용 열은 어떻게 되나요?",
+"a": "추가 열은 그대로 유지됩니다. 수정된 파일은 업로드한 파일과 같은 열을 같은 순서로 가집니다."
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"Etsy 판매자는 대량 편집, 점검, 이전 준비를 위해 상품 데이터를 스프레드시트로 내보내는 경우가 많습니다. 이 프리셋은 Etsy 상품 CSV의 일반적인 필드를 검증하고 안전하게 정리해 데이터를 일관되게 유지합니다.",
+"제목, 가격, 수량, 태그, 이미지 URL에 집중합니다. 상품의 의미를 바꿀 수 있는 내용은 모두 문제로 표시된 채 남습니다."
+],
+"howItWorks": [
+"Etsy 상품 CSV를 업로드하세요.",
+"필수 필드와 일반적인 Etsy 필드 한도를 검증합니다.",
+"안전한 수정(정리/정규화, URL 정리, 숫자 형식)은 자동으로 적용됩니다.",
+"남은 문제를 검토한 뒤 깔끔한 파일을 내보내세요."
+],
+"commonFixes": [
+"공백을 정리하고 태그 구분자를 정규화합니다",
+"Price가 올바른 소수이고 Quantity가 정수인지 확인합니다",
+"이미지 URL 목록을 검증하고 정리합니다",
+"제목이나 태그가 Etsy 한도를 넘으면 경고합니다"
+],
+"faq": [
+{
+"q": "Etsy 공식 상품 가져오기 도구인가요?",
+"a": "이 프리셋은 Etsy 상품 CSV를 다루는 일반적인 작업(내보내기 파일과 대량 편집 스프레드시트)을 대상으로 하며, 필드를 Etsy가 공개한 한도 안으로 맞춥니다."
+},
+{
+"q": "무엇을 검증하나요?",
+"a": "제목, 가격, 수량, 태그(개수/길이), 이미지 URL을 검증합니다. 대량 편집을 자주 망가뜨리는 잘못된 값이나 빈 값을 표시합니다."
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"eBay 대량 업로드(Seller Hub › 보고서 › 업로드, 이전 이름 File Exchange)를 사용하면 CSV 하나로 수천 개의 상품을 추가하고 업데이트할 수 있습니다. 이 프리셋은 각 행을 Action별로 eBay가 요구하는 내용과 대조합니다. 새 상품에는 제목, 숫자 카테고리, 가격, 수량, 상태가 필요하고, Revise, Relist, End 행에는 상품의 ItemID가 필요합니다.",
+"파일은 자체 열과 헤더 문구를 그대로 유지합니다. 첫 번째 열의 사이트와 통화(예: *Action(SiteID=UK|Country=GB|Currency=GBP|...))도 유지되므로 올바른 eBay 마켓플레이스에 업로드됩니다."
+],
+"howItWorks": [
+"eBay에 보낼 CSV를 업로드하세요(모든 eBay 사이트 가능).",
+"필수 필드 표시 *가 있든 없든 eBay 열 이름을 인식합니다.",
+"각 행을 Action별로 검사합니다: 제목, 카테고리 ID, 가격, 수량, 상태 ID, 기간, 사진 URL.",
+"중복된 CustomLabel(SKU)은 서로 덮어쓰기 전에 표시됩니다.",
+"원래 열을 그대로 유지한 수정 파일을 내려받으세요."
+],
+"commonFixes": [
+"Action의 대소문자를 정규화합니다(Add, Revise, Relist, End)",
+"12,50이나 $12.50 같은 가격을 일반 소수로 변환합니다",
+"\"New\"나 \"Used\" 같은 상태 이름을 ConditionID로 변환합니다",
+"|로 구분된 사진 URL 목록을 정리합니다(최대 24장)",
+"eBay의 80자 한도를 넘는 제목을 표시합니다",
+"GTC가 아닌 고정가 상품을 표시합니다"
+],
+"faq": [
+{
+"q": "어떤 eBay 사이트에서 쓸 수 있나요?",
+"a": "모든 사이트에서 쓸 수 있습니다. 사이트와 통화는 첫 번째 열의 헤더(SiteID, Country, Currency)에서 가져오며, 업로드한 그대로 유지됩니다."
+},
+{
+"q": "ConditionID는 무엇인가요?",
+"a": "ConditionID는 eBay의 숫자 상품 상태입니다. 예: 1000 = 새 상품, 1500 = 새 상품(기타), 2750 = 새것 같음, 3000 = 중고, 7000 = 부품용 또는 작동 불가. 사용할 수 있는 ID는 카테고리마다 다릅니다. 파일의 상태 이름은 모호하지 않은 경우 ID로 변환됩니다."
+},
+{
+"q": "어떤 기간 값을 지원하나요?",
+"a": "고정가 상품은 GTC(Good 'Til Cancelled)로 게시됩니다. 경매 기간은 Days_1, Days_3, Days_5, Days_7, Days_10 중 하나입니다."
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"eBay 변형 상품은 여러 사이즈와 색상의 셔츠처럼 관련 상품을 하나의 상품으로 묶습니다. eBay 업로드 파일에서는 상위 행(제목, 카테고리, 모든 값을 나열한 RelationshipDetails, 예: Color=Blue;Red|Size=M;L) 다음에 변형마다 고유한 SKU, 가격, 수량을 가진 Relationship=Variation 행이 하나씩 이어집니다.",
+"이 프리셋은 그 구조를 검사합니다. 각 변형이 상위 행 다음에 오는지, 상위 행에 선언된 값만 쓰는지, 조합·가격·수량이 제대로 있는지 확인합니다."
+],
+"howItWorks": [
+"eBay 변형 CSV를 업로드하세요.",
+"각 상위 행과 그 아래의 변형 행을 찾습니다.",
+"각 변형의 RelationshipDetails를 상위 행과 대조하고, 중복된 조합을 표시합니다.",
+"모든 행의 가격, 수량, 사진 URL을 정리합니다.",
+"원래 열을 그대로 유지한 수정 파일을 내려받으세요."
+],
+"commonFixes": [
+"상위 행의 RelationshipDetails에 없는 값을 쓰는 변형을 표시합니다",
+"한 상품 안에서 중복된 사이즈/색상 조합을 표시합니다",
+"가격이나 수량이 없는 변형 행을 표시합니다",
+"12,50 같은 가격을 일반 소수로 변환합니다",
+"예전 스프레드시트의 VariationSpecificsName / VariationSpecificsValue 쌍을 검증합니다"
+],
+"faq": [
+{
+"q": "RelationshipDetails는 어떻게 작동하나요?",
+"a": "상위 행에는 각 변형 이름과 모든 값을 적습니다: Color=Blue;Red|Size=M;L. 각 변형 행에는 그 변형의 값을 적습니다: Color=Blue|Size=M. 변형 행의 Action과 Title은 비워 둡니다."
+},
+{
+"q": "제 스프레드시트는 VariationSpecificsName 열을 사용합니다. 지원되나요?",
+"a": "네. |로 구분된 이름과 값(Color|Size와 Blue|M)의 개수가 맞는지, 조합이 중복되지 않는지 검사합니다."
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"Amazon Inventory Loader는 이미 ASIN이 있는 상품의 판매 정보(가격, 수량, 상태, 주문 처리)를 추가하거나 업데이트하는 Seller Central 업로드 기능입니다. 이 프리셋은 각 행을 Amazon 규칙과 대조하고 열 이름은 그대로 유지합니다. Amazon은 정확한 열 이름으로 열을 연결하기 때문입니다.",
+"Amazon이 행을 거부하거나 판매 정보를 엉뚱한 상품에 연결하게 만드는 문제를 찾아냅니다. 스프레드시트가 1.23457E+11로 바꾼 바코드, 앞자리 0이 사라진 UPC, 잘못된 product-id-type 코드, 40자를 넘는 SKU, 중복된 SKU 등입니다."
+],
+"howItWorks": [
+"Inventory Loader 파일을 업로드하세요(item_sku, external_product_id 같은 카테고리 템플릿 열도 인식합니다).",
+"각 행을 검사합니다: SKU, 상품 ID와 유형, 가격, 수량, 상태, add-delete, 주문 처리 센터.",
+"12,50이나 $12.50처럼 쓴 가격은 일반 소수로 변환됩니다.",
+"중복된 SKU는 서로 덮어쓰기 전에 표시됩니다.",
+"원래 열을 그대로 유지한 파일을 내려받으세요."
+],
+"commonFixes": [
+"가격과 최저/최고 가격을 일반 소수로 변환합니다",
+"지수 표기(1.23457E+11) 바코드와 빠진 앞자리 0을 표시합니다",
+"product-id-type에 맞게 UPC/EAN/ISBN/ASIN 길이를 확인합니다",
+"Amazon의 40자 한도를 넘는 SKU를 표시합니다",
+"add-delete(a, d, x)를 검증합니다",
+"중복된 SKU를 찾아냅니다"
+],
+"faq": [
+{
+"q": "어떤 형식을 대상으로 하나요?",
+"a": "Amazon Inventory Loader(판매 정보 파일)입니다. sku, product-id, product-id-type, price, quantity, add-delete처럼 영문 소문자와 하이픈으로 된 열을 사용합니다."
+},
+{
+"q": "product-id-type 코드는 무엇인가요?",
+"a": "Inventory Loader에서 product-id-type은 숫자입니다: 1 = ASIN, 2 = ISBN, 3 = UPC, 4 = EAN. 카테고리 템플릿에서는 대신 이름을 사용합니다."
+},
+{
+"q": "올바른 item-condition 코드는 무엇인가요?",
+"a": "11 = 새 상품, 10 = 리퍼비시, 1~4 = 중고(새것 같음, 매우 좋음, 좋음, 양호), 5~8 = 수집품 등급입니다."
+},
+{
+"q": "add-delete는 무엇을 하나요?",
+"a": "a는 판매 정보를 추가하거나 업데이트하고, d는 판매 정보를 삭제하며, x는 판매 정보와 직접 제공한 상품 데이터를 함께 삭제합니다."
+},
+{
+"q": "fulfillment-center-id는 무엇인가요?",
+"a": "DEFAULT는 주문을 직접 배송한다는 뜻입니다. AMAZON_NA, AMAZON_EU, AMAZON_FE, AMAZON_IN은 해당 지역의 FBA(Fulfillment by Amazon)를 뜻합니다."
+}
+]
+}
+}
+}

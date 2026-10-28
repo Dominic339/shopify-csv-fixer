@@ -34,9 +34,7 @@ export function UpgradeModal(props: {
 
   const plan = upgradePlan ?? "advanced";
   const redirect = `/profile?upgrade=${encodeURIComponent(plan)}`;
-  const loginHref = `/login?redirect=${encodeURIComponent(redirect)}&msg=${encodeURIComponent(
-    "Sign in to upgrade your plan."
-  )}`;
+  const loginHref = `/login?redirect=${encodeURIComponent(redirect)}&msg=upgrade`;
 
   return (
     <div

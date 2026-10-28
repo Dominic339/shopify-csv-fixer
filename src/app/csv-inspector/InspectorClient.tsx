@@ -2,22 +2,38 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { inspectCsv, type InspectorResult } from "@/lib/csvInspector";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { inspectCsv, type DetectedPlatform, type EncodingHint, type InspectorResult } from "@/lib/csvInspector";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { fmt } from "@/lib/i18n/fmt";
+import { localeHref } from "@/lib/i18n/locales";
+import { splitLocale } from "@/lib/i18n/paths";
 import { FileDropZone } from "@/components/FileDropZone";
 
-const DELIMITER_LABELS: Record<string, string> = {
-  ",": "Comma (,)",
-  ";": "Semicolon (;)",
-  "\t": "Tab",
-  "|": "Pipe (|)",
+type T = Translations["inspector"];
+
+const PLATFORM_NAMES: Record<DetectedPlatform, string> = {
+  shopify_products: "Shopify",
+  woocommerce_products: "WooCommerce",
+  etsy_listings: "Etsy",
+  ebay_listings: "eBay",
+  amazon_inventory_loader: "Amazon",
 };
 
-type Props = {
-  t?: Translations["inspector"];
-};
+function delimiterLabel(t: T, d: string) {
+  return { ",": t.delimComma, ";": t.delimSemicolon, "\t": t.delimTab, "|": t.delimPipe }[d] ?? d;
+}
+
+function hintText(t: T, h: EncodingHint) {
+  return { bom: t.hintBom, replacement: t.hintReplacement, mojibake: t.hintMojibake, cp1252: t.hintCp1252 }[h];
+}
+
+type Props = { t: T };
 
 export default function InspectorClient({ t }: Props) {
+  const { locale } = splitLocale(usePathname() ?? "/");
+  const href = (p: string) => localeHref(locale, p);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [result, setResult] = useState<InspectorResult | null>(null);
@@ -34,50 +50,58 @@ export default function InspectorClient({ t }: Props) {
     setFileName(file.name);
     setError(null);
     try {
-      const text = await file.text();
-      const res = inspectCsv(text);
-      setResult(res);
-    } catch (err: any) {
-      setError(err?.message ?? "Failed to inspect file.");
+      setResult(inspectCsv(await file.text()));
+    } catch {
+      setError(t.readFailed);
       setResult(null);
     }
   }
 
+  const issueCount = result
+    ? (result.unclosedQuote ? 1 : 0) +
+      result.suspiciousEncodingHints.filter((h) => h !== "bom").length +
+      result.duplicateHeaders.length +
+      result.emptyHeaderColumns.length +
+      result.paddedHeaders.length +
+      result.emptyColumns.length +
+      result.blankRowCount +
+      result.inconsistentRowCount
+    : 0;
+  const clean = result !== null && issueCount === 0 && result.suspiciousEncodingHints.length === 0;
+
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="flex items-center gap-3 text-2xl font-semibold">
-        {t?.title ?? "CSV Inspector"}
-        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Beta</span>
+    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
+      <h1 className="flex flex-wrap items-center gap-3 text-2xl font-semibold">
+        {t.title}
+        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          {t.beta}
+        </span>
       </h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">
-        {t?.description ?? "Upload a CSV file to get an instant analysis of its structure, headers, and potential issues."}
-      </p>
+      <p className="mt-2 text-sm text-[var(--muted)]">{t.description}</p>
 
       <FileDropZone onFile={(f) => void loadFile(f)}>
-      <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        <h2 className="text-sm font-semibold">Upload a CSV file</h2>
-        <p className="mt-1 text-xs text-[var(--muted)]">
-          Your file is processed entirely in your browser — it is never uploaded to a server.
-        </p>
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            type="button"
-            className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {t?.chooseFile ?? "Choose file"}
-          </button>
-          <span className="text-sm text-[var(--muted)]">{fileName ?? (t?.noFileChosen ?? "No file chosen")}</span>
+        <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+          <h2 className="text-sm font-semibold">{t.uploadTitle}</h2>
+          <p className="mt-1 text-xs text-[var(--muted)]">{t.privacyNote}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {t.chooseFile}
+            </button>
+            <span className="min-w-0 break-all text-sm text-[var(--muted)]">{fileName ?? t.noFileChosen}</span>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.tsv,.txt,text/csv"
+            className="hidden"
+            data-testid="csv-inspector-input"
+            onChange={handleFileChange}
+          />
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="hidden"
-          data-testid="csv-inspector-input"
-          onChange={handleFileChange}
-        />
-      </div>
       </FileDropZone>
 
       {error && (
@@ -87,120 +111,47 @@ export default function InspectorClient({ t }: Props) {
       )}
 
       {result && (
-        <div
-          className="mt-6 space-y-6"
-          data-testid="inspector-results"
-        >
-          {/* Summary stats */}
+        <div className="mt-6 space-y-4" data-testid="inspector-results">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label={t?.rows ?? "Rows"} value={result.rowCount.toLocaleString()} />
-            <Stat label={t?.columns ?? "Columns"} value={result.columnCount.toLocaleString()} />
-            <Stat
-              label={t?.delimiter ?? "Delimiter"}
-              value={DELIMITER_LABELS[result.delimiterGuess] ?? result.delimiterGuess}
-            />
-            <Stat
-              label={t?.issues ?? "Issues"}
-              value={result.warnings.length.toString()}
-              highlight={result.warnings.length > 0}
-            />
+            <Stat label={t.rows} value={result.rowCount.toLocaleString(locale)} />
+            <Stat label={t.columns} value={result.columnCount.toLocaleString(locale)} />
+            <Stat label={t.delimiter} value={delimiterLabel(t, result.delimiterGuess)} />
+            <Stat label={t.issues} value={issueCount.toLocaleString(locale)} highlight={issueCount > 0} />
           </div>
 
-          {/* Warnings */}
-          {result.warnings.length > 0 && (
-            <Section title={t?.issues ?? "Issues detected"}>
-              <ul className="space-y-2">
-                {result.warnings.map((w, i) => (
-                  <li
-                    key={i}
-                    className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300"
-                  >
-                    {w}
-                  </li>
-                ))}
-              </ul>
+          {result.detectedPlatform && (
+            <div className="flex flex-col gap-3 rounded-2xl border border-[var(--accent)]/40 bg-[var(--surface)] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm">{fmt(t.looksLike, { platform: PLATFORM_NAMES[result.detectedPlatform] })}</p>
+              <Link
+                href={`${href("/app")}?preset=${result.detectedPlatform}`}
+                className="rg-btn shrink-0 text-center"
+              >
+                {fmt(t.checkInFixer, { platform: PLATFORM_NAMES[result.detectedPlatform] })}
+              </Link>
+            </div>
+          )}
+
+          {result.unclosedQuote && (
+            <Section title={t.unclosedQuoteTitle} tone="error">
+              <p>{t.unclosedQuoteDesc}</p>
             </Section>
           )}
 
-          {/* Encoding hints */}
-          {result.suspiciousEncodingHints.length > 0 && (
-            <Section title={t?.encoding ?? "Encoding hints"}>
-              <ul className="space-y-2">
-                {result.suspiciousEncodingHints.map((h, i) => (
-                  <li
-                    key={i}
-                    className="rounded-xl border border-blue-400/40 bg-blue-400/10 px-3 py-2 text-sm text-blue-800 dark:text-blue-300"
-                  >
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </Section>
-          )}
-
-          {/* Duplicate headers */}
-          {result.duplicateHeaders.length > 0 && (
-            <Section title={`${t?.duplicateHeaders ?? "Duplicate headers"} (${result.duplicateHeaders.length})`}>
-              <div className="flex flex-wrap gap-2">
-                {result.duplicateHeaders.map((h) => (
-                  <span
-                    key={h}
-                    className="rounded-lg border border-red-400/40 bg-red-400/10 px-2 py-1 font-mono text-xs text-red-700 dark:text-red-300"
-                  >
-                    {h}
-                  </span>
-                ))}
-              </div>
-            </Section>
-          )}
-
-          {/* Empty columns */}
-          {result.emptyColumns.length > 0 && (
-            <Section title={`${t?.emptyColumns ?? "Completely empty columns"} (${result.emptyColumns.length})`}>
-              <div className="flex flex-wrap gap-2">
-                {result.emptyColumns.map((h) => (
-                  <span
-                    key={h}
-                    className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 font-mono text-xs text-[var(--muted)]"
-                  >
-                    {h}
-                  </span>
-                ))}
-              </div>
-            </Section>
-          )}
-
-          {/* Blank rows */}
-          {result.blankRows.length > 0 && (
-            <Section title={`${t?.blankRows ?? "Blank rows"} (${result.blankRows.length}${result.blankRows.length === 50 ? "+" : ""})`}>
-              <p className="text-xs text-[var(--muted)]">
-                Row numbers:{" "}
-                {result.blankRows.join(", ")}
-                {result.blankRows.length === 50 && "…"}
-              </p>
-            </Section>
-          )}
-
-          {/* Inconsistent column counts */}
-          {result.inconsistentColumnCounts.length > 0 && (
-            <Section
-              title={`${t?.inconsistentColumns ?? "Inconsistent column counts"} (${result.inconsistentColumnCounts.length} rows)`}
-            >
-              <div className="max-h-40 overflow-auto rounded-xl border border-[var(--border)]">
+          {result.inconsistentRowCount > 0 && (
+            <Section title={`${t.inconsistentColumns} (${result.inconsistentRowCount})`} tone="error">
+              <p>{t.inconsistentDesc}</p>
+              <div className="mt-3 max-h-48 overflow-auto rounded-xl border border-[var(--border)]">
                 <table className="w-full text-xs">
                   <thead className="border-b border-[var(--border)] bg-[var(--surface-2)]">
                     <tr>
-                      <th className="px-3 py-2 text-left">Row</th>
-                      <th className="px-3 py-2 text-left">Expected</th>
-                      <th className="px-3 py-2 text-left">Found</th>
+                      <th className="px-3 py-2 text-left">{t.rowCol}</th>
+                      <th className="px-3 py-2 text-left">{t.expectedCol}</th>
+                      <th className="px-3 py-2 text-left">{t.foundCol}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {result.inconsistentColumnCounts.map((r, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-[var(--border)] last:border-b-0"
-                      >
+                    {result.inconsistentColumnCounts.map((r) => (
+                      <tr key={r.row} className="border-b border-[var(--border)] last:border-b-0">
                         <td className="px-3 py-1">{r.row}</td>
                         <td className="px-3 py-1">{r.expected}</td>
                         <td className="px-3 py-1 text-amber-600 dark:text-amber-400">{r.found}</td>
@@ -209,65 +160,122 @@ export default function InspectorClient({ t }: Props) {
                   </tbody>
                 </table>
               </div>
+              {result.inconsistentRowCount > result.inconsistentColumnCounts.length && (
+                <p className="mt-2 text-xs">
+                  {fmt(t.inconsistentMore, { shown: result.inconsistentColumnCounts.length, total: result.inconsistentRowCount })}
+                </p>
+              )}
             </Section>
           )}
 
-          {result.warnings.length === 0 &&
-            result.suspiciousEncodingHints.length === 0 &&
-            result.duplicateHeaders.length === 0 &&
-            result.blankRows.length === 0 &&
-            result.emptyColumns.length === 0 &&
-            result.inconsistentColumnCounts.length === 0 && (
-              <div className="rounded-2xl border border-green-400/40 bg-green-400/10 px-4 py-3 text-sm text-green-800 dark:text-green-300">
-                {t?.noIssues ?? "No issues detected. Your CSV looks clean."}
-              </div>
-            )}
+          {result.duplicateHeaders.length > 0 && (
+            <Section title={`${t.duplicateHeaders} (${result.duplicateHeaders.length})`} tone="error">
+              <p>{t.duplicateHeadersDesc}</p>
+              <Chips items={result.duplicateHeaders} />
+            </Section>
+          )}
+
+          {result.emptyHeaderColumns.length > 0 && (
+            <Section title={`${t.emptyHeadersTitle} (${result.emptyHeaderColumns.length})`} tone="warn">
+              <p>{fmt(t.emptyHeadersDesc, { cols: result.emptyHeaderColumns.join(", ") })}</p>
+            </Section>
+          )}
+
+          {result.paddedHeaders.length > 0 && (
+            <Section title={`${t.paddedHeadersTitle} (${result.paddedHeaders.length})`} tone="warn">
+              <p>{t.paddedHeadersDesc}</p>
+              <Chips items={result.paddedHeaders} />
+            </Section>
+          )}
+
+          {result.suspiciousEncodingHints.length > 0 && (
+            <Section title={t.encoding} tone="info">
+              <ul className="list-disc space-y-1 pl-5">
+                {result.suspiciousEncodingHints.map((h) => (
+                  <li key={h}>{hintText(t, h)}</li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+          {result.emptyColumns.length > 0 && (
+            <Section title={`${t.emptyColumns} (${result.emptyColumns.length})`} tone="warn">
+              <p>{t.emptyColumnsDesc}</p>
+              <Chips items={result.emptyColumns} />
+            </Section>
+          )}
+
+          {result.blankRowCount > 0 && (
+            <Section title={`${t.blankRows} (${result.blankRowCount})`} tone="warn">
+              <p>
+                {fmt(t.blankRowsDesc, { rows: result.blankRows.join(", ") })}
+                {result.blankRowCount > result.blankRows.length &&
+                  ` ${fmt(t.blankRowsMore, { count: result.blankRowCount - result.blankRows.length })}`}
+              </p>
+            </Section>
+          )}
+
+          {clean && (
+            <div className="rounded-2xl border border-green-400/40 bg-green-400/10 px-4 py-3 text-sm text-green-800 dark:text-green-300">
+              {t.noIssues}
+            </div>
+          )}
         </div>
       )}
 
       <div className="mt-10 space-y-3 text-sm text-[var(--muted)]">
         <p>
-          Want to fix issues?{" "}
-          <a href="/app" className="underline hover:no-underline">
-            Open the CSV Fixer
-          </a>{" "}
-          for automatic validation and fixes.
+          {t.nextSteps}{" "}
+          <Link href={href("/app")} className="font-semibold text-[var(--text)] underline hover:no-underline">
+            {t.openFixer}
+          </Link>
         </p>
         <div className="flex flex-wrap gap-4">
-          <a href="/convert" className="hover:underline">Format Converter</a>
-          <a href="/merge" className="hover:underline">CSV Merger</a>
-          <a href="/presets" className="hover:underline">Templates</a>
-          <a href="/guides" className="hover:underline">Guides</a>
+          <Link href={href("/convert")} className="hover:underline">{t.converterLink}</Link>
+          <Link href={href("/merge")} className="hover:underline">{t.mergerLink}</Link>
+          <Link href={href("/presets")} className="hover:underline">{t.templatesLink}</Link>
+          <Link href={href("/guides")} className="hover:underline">{t.guidesLink}</Link>
         </div>
       </div>
     </main>
   );
 }
 
-function Stat({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
+function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+    <div className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
       <div className="text-xs text-[var(--muted)]">{label}</div>
-      <div className={`mt-1 text-lg font-semibold ${highlight ? "text-amber-600 dark:text-amber-400" : ""}`}>
-        {value}
-      </div>
+      <div className={`mt-1 truncate text-lg font-semibold ${highlight ? "text-amber-600 dark:text-amber-400" : ""}`}>{value}</div>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+const TONES = {
+  error: "border-red-400/40",
+  warn: "border-amber-400/40",
+  info: "border-blue-400/40",
+};
+
+function Section({ title, tone, children }: { title: string; tone: keyof typeof TONES; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <h3 className="text-sm font-semibold mb-3">{title}</h3>
-      {children}
+    <div className={`rounded-2xl border bg-[var(--surface)] p-5 ${TONES[tone]}`}>
+      <h3 className="mb-2 text-sm font-semibold">{title}</h3>
+      <div className="text-sm text-[var(--muted)]">{children}</div>
+    </div>
+  );
+}
+
+function Chips({ items }: { items: string[] }) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {items.map((h, i) => (
+        <span
+          key={`${h}-${i}`}
+          className="max-w-full break-all rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 font-mono text-xs text-[var(--text)]"
+        >
+          {h}
+        </span>
+      ))}
     </div>
   );
 }

@@ -1,0 +1,138 @@
+---
+title: "Shopify CSV の Handle 項目ガイド"
+description: "Shopify 商品 CSV の Handle 項目について知っておくべきことをすべて解説します。役割、有効な handle のルール、バリエーションのまとめ方、handle のエラーの直し方を紹介します。"
+keywords: ["shopify csv handle 項目", "shopify handle", "shopify handle csv", "shopify 商品 handle", "shopify handle バリエーション", "shopify handle ルール", "shopify csv handle エラー"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Shopify の Handle 項目の役割と、それが最も重要な列である理由"
+  - "有効な Shopify の handle の正確なルール"
+  - "Handle がバリエーション行を1つの商品にまとめる仕組み"
+  - "無効な handle や handle の衝突の直し方"
+  - "handle を変えると既存の商品 URL にどう影響するか"
+bestFor: "バリエーションのまとまりのエラー、商品の重複、handle が原因のインポート失敗に悩む Shopify の販売者"
+timeToComplete: "10分"
+---
+
+## Shopify の Handle とは
+
+Handle は、Shopify の商品 CSV における商品の一意な識別子です。役割は2つあります。
+
+1. **バリエーション行をまとめる**：同じ商品の行はすべて同じ Handle にする必要があります。Shopify は Handle 列を読んで、どの行が同じ商品かを判断します。
+2. **商品の URL を決める**：Handle は URL の一部になります：`yourstore.com/products/<handle>`
+
+Handle は Shopify CSV で最も重要な列です。Handle のエラーは、ほかのどの項目よりも多くのインポート失敗の原因になっています。
+
+---
+
+## 有効な Handle のルール
+
+有効な Shopify の handle は次の条件を満たす必要があります。
+
+- ストア内のすべての商品（既存の商品を含む）の中で**一意**である
+- 使えるのは**半角英小文字、数字、ハイフン**だけ
+- **スペースを含まない**（代わりにハイフンを使う）
+- **特殊文字を含まない**：`&`、`%`、`?`、`/`、`@`、Unicode 文字は使えない
+- すべての行で**空欄にしない**：空の handle は使えない
+
+| 有効 | 無効 | 理由 |
+|---|---|---|
+| `blue-leather-wallet` | `Blue Leather Wallet` | 大文字とスペース |
+| `product-123` | `product/123` | スラッシュを含む |
+| `mens-running-shoes` | `men's-running-shoes` | アポストロフィを含む |
+| `widget-v2` | `widget_v2` | アンダースコアを含む（技術的には可能だが非推奨） |
+| `shirt-sm` | `` | 空欄（不可） |
+
+---
+
+## Handle がバリエーションをまとめる仕組み
+
+Shopify の CSV 形式では、複数のバリエーションを持つ商品は複数の行を使います。同じ商品の行はすべて同じ Handle にする必要があります。
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU
+blue-wallet,Blue Wallet,Size,Small,29.99,BW-SM
+blue-wallet,,Size,Medium,31.99,BW-MD
+blue-wallet,,Size,Large,31.99,BW-LG
+```
+
+Shopify がこのファイルを読むと、次のように処理します。
+- Handle が `blue-wallet` の行が3行あると認識する
+- 「Blue Wallet」という商品を1つ作成する
+- Small（29.99ドル）、Medium（31.99ドル）、Large（31.99ドル）の3つのバリエーションを作成する
+- Title、Body HTML、Vendor などの商品レベルのフィールドは最初の行から取得する
+
+**最初の行（親行**）：商品レベルのデータ（Title、Body HTML、Image Src、Vendor など）を持つ
+**2行目以降（バリエーション行**）：同じ Handle、空の Title、バリエーション固有のデータだけを持つ
+
+---
+
+## よくある Handle のエラー
+
+### 2つの商品が同じ Handle を使っている
+
+**症状**：インポート時にある商品のデータが別の商品を上書きする、または別々の商品のバリエーションが1つの商品にまとめられてしまう。
+
+**原因**：CSV 内で、異なる2つの商品が同じ Handle を使っています。
+
+**対処法**：商品ごとに一意の Handle を付けます。名前が似た商品がある場合は、区別できる要素を加えてください。
+
+- `blue-wallet` と `red-wallet`（両方を `wallet` にしない）
+- `mens-shirt-v1` と `mens-shirt-v2`
+
+### Handle が既存の商品と一致しない（意図しない新規作成）
+
+**症状**：既存の商品が更新されず、重複した新しい商品が作られてしまう。
+
+**原因**：CSV の Handle が、Shopify 上の既存商品の Handle と完全には一致していません（大文字・小文字、綴り、ハイフンの有無の違いなど）。
+
+**対処法**：まず Shopify から現在の商品をエクスポートします。エクスポートしたファイルには、正確な現在の Handle が入っています。インポートファイルではその Handle を使ってください。
+
+### Handle にスペースや大文字がある
+
+**症状**：handle の検証エラーでインポートが失敗する、または Shopify が handle を自動で変換して想定外の URL になる。
+
+**対処法**：Shopify は場合によって handle を自動で小文字にし、スペースをハイフンに置き換えますが、CSV のインポートでは予測できない変換を避けるため、事前に自分で handle を整えておくのが最善です。
+
+**Python で handle を整える**：
+
+```python
+import re
+
+def to_shopify_handle(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text
+
+print(to_shopify_handle("Blue Leather Wallet!"))
+# blue-leather-wallet
+```
+
+### バリエーション行で Handle が違う
+
+**症状**：Shopify がバリエーション行を1行ずつ別々の商品として取り込む（バリエーションが0〜1個の商品がいくつもできる）。
+
+**原因**：同じ商品になるはずの行で Handle の値が違います。多くは入力ミスか余分なスペースが原因です。
+
+**対処法**：CSV を Handle で並べ替え、同じ Handle になるべきなのにそうなっていない行を探します。最もよくある原因は末尾のスペース（`blue-wallet` ではなく `blue-wallet `）です。
+
+---
+
+## Handle と SEO：Handle を変更するときの注意
+
+Handle は商品の URL になります：`yourstore.com/products/<handle>`。公開済みの商品の Handle を変えると、SEO に影響が出ます。
+
+- 古い URL は 404 になる（リダイレクトを設定しない限り）
+- 古い URL へのリンクやブックマークが使えなくなる
+- 古い URL をインデックスしていた検索エンジンで、検索順位の評価が失われる
+
+**ベストプラクティス**：Handle は最初から正しく設定しましょう。既存の商品の Handle をどうしても変える場合は、インポート直後に Shopify で URL リダイレクトを設定してください（オンラインストア → メニュー → URL リダイレクト）。
+
+---
+
+## StriveFormats で自動修正
+
+StriveFormats は、ファイル内のすべての Handle について、空欄、無効な文字、ファイル内での重複をチェックします。Handle のまとまりが Shopify のバリエーションのルールに沿っていない行も指摘します。
+
+[Shopify の CSV 修正ツールを開く](/app?preset=shopify_products) | [Shopify のテンプレートを見る](/presets/shopify_products)

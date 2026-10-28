@@ -1,0 +1,317 @@
+{
+"guides": {
+"amazon/amazon-flat-file-import-errors": {
+"title": "Amazon 平面文件导入错误：原因与解决方法",
+"description": "解决最常见的 Amazon 平面文件 CSV 导入错误：SKU 问题、无效的状况代码、价格格式、配送渠道值和模板不匹配。"
+},
+"amazon/flat-file-boolean-fields": {
+"title": "Amazon 平面文件布尔字段：y/n、TRUE/FALSE 与常见误区",
+"description": "了解 Seller Central 平面文件中哪些布尔字段需要 'y' 或 'n'（而不是 TRUE/FALSE 或 1/0），如何批量修正无效值，以及如何避免电子表格自动格式化破坏这些列。"
+},
+"ebay/categoryid-and-file-exchange": {
+"title": "eBay CategoryID 与 File Exchange：含义与设置方法",
+"description": "了解 eBay CategoryID 字段是什么、为什么在 File Exchange 上传中必填、如何为商品找到正确的类目 ID，以及如何在整个目录中批量填写。"
+},
+"ebay/ebay-file-exchange-csv-errors": {
+"title": "eBay File Exchange CSV 错误：原因与解决方法",
+"description": "解决常见的 eBay File Exchange CSV 错误：无效的 Action 值、类目 ID 问题、标题超长、状况代码、价格格式和图片网址问题。"
+},
+"etsy/etsy-csv-template-guide": {
+"title": "Etsy CSV 模板指南：字段、格式与常见错误",
+"description": "Etsy 刊登 CSV 模板的完整指南：逐一说明每个字段、下拉选项允许的值、必填与选填列，以及如何修复常见的导入错误。"
+},
+"general/append-vs-merge-join-csv": {
+"title": "追加、合并与连接：正确组合 CSV 文件",
+"description": "了解追加行、合并结构相同的文件以及连接含关联数据的文件之间的区别，为您的电商目录工作流程选择合适的方法。"
+},
+"general/csv-basics-for-imports": {
+"title": "电商导入的 CSV 基础知识",
+"description": "在首次上传之前，了解表头、UTF-8 编码、引号、换行符，以及导致 CSV 导入失败的最常见错误。"
+},
+"general/csv-column-mismatch-fix": {
+"title": "修复 CSV 列不匹配错误",
+"description": "如何诊断和修复 CSV 导入中的列不匹配错误：列名错误、大小写不同、多余空格，以及不同平台的列顺序问题。"
+},
+"general/csv-formatting-rules-for-imports": {
+"title": "电商导入的 CSV 格式规则",
+"description": "CSV 要通过电商平台导入必须遵守的格式规则：分隔符、引号、换行符、编码和表头要求。"
+},
+"general/csv-import-checklist": {
+"title": "电商平台 CSV 导入检查清单",
+"description": "适用于 Shopify、WooCommerce、Etsy、eBay 和 Amazon CSV 文件的完整导入前检查清单：编码、表头、数据类型和各平台的特定规则。"
+},
+"general/csv-import-errors-explained": {
+"title": "CSV 导入错误详解",
+"description": "用通俗的语言解释 Shopify、WooCommerce、Etsy、eBay 和 Amazon 最常见的 CSV 导入错误信息，以及每种错误的修复方法。"
+},
+"general/fix-blank-rows-in-csv": {
+"title": "删除 CSV 文件中的空行",
+"description": "在导入 Shopify、WooCommerce、Etsy、eBay 或 Amazon 之前，如何用 Excel、Google 表格或 Python 查找并删除 CSV 文件中的空行。"
+},
+"general/fix-csv-encoding-errors": {
+"title": "修复 CSV 编码错误",
+"description": "诊断并修复 CSV 文件中的 UTF-8 编码问题：乱码字符、BOM 标记、mojibake，以及导致导入失败的 ANSI 文件。"
+},
+"general/fix-extra-columns-in-csv": {
+"title": "删除 CSV 文件中多余的列",
+"description": "在导入 Shopify、WooCommerce、Etsy、eBay 或 Amazon 之前，如何查找并删除 CSV 文件中多余或意外的列。"
+},
+"general/fix-mojibake-encoding": {
+"title": "修复 CSV 文件中的乱码（mojibake）和编码错误",
+"description": "解决编码不匹配导致的乱码。学习识别 UTF-8 与 Latin-1 的冲突、去除 BOM，并正确地重新保存文件。"
+},
+"general/merge-two-csv-files": {
+"title": "如何合并两个 CSV 文件",
+"description": "使用 Excel Power Query、Google 表格或简单的命令行将两个 CSV 文件合并为一个的分步指南，无需编程经验。"
+},
+"general/prevent-excel-scientific-notation": {
+"title": "防止 Excel 将 SKU 和条形码转换为科学计数法",
+"description": "阻止 Excel 把 SKU、EAN 码和 UPC 变成 1.23456E+11 这样的科学计数法。粘贴前将列设为文本格式，使用导入向导，并修复已有文件。"
+},
+"general/remove-duplicate-header-rows": {
+"title": "删除 CSV 文件中重复的表头行",
+"description": "查找并删除 CSV 导出文件中间重复出现的表头行。了解常见原因，用 Excel 和 Google 表格的筛选功能找出它们，并在今后的导出中避免。"
+},
+"general/validate-csv-before-import": {
+"title": "上传到任何电商平台之前先校验 CSV",
+"description": "一份实用的检查清单，帮助您在导入失败前发现编码错误、缺少表头、行长度不一致、引号问题等。适用于 Shopify、WooCommerce、eBay、Amazon 和 Etsy。"
+},
+"shopify/images-in-product-csv": {
+"title": "Shopify 商品 CSV 中的图片：Image Src、替代文本和位置",
+"description": "了解如何在 Shopify 商品 CSV 中组织图片网址：Image Src、Image Position 和 Image Alt Text 列，如何为一个商品添加多张图片，以及如何避免最常见的图片导入失败。"
+},
+"shopify/shopify-csv-handle-field-guide": {
+"title": "Shopify CSV Handle 字段指南",
+"description": "关于 Shopify 商品 CSV 中 Handle 字段的一切：它的作用、有效 handle 的规则、如何对变体分组，以及如何修复 handle 错误。"
+},
+"shopify/shopify-csv-import-errors": {
+"title": "Shopify CSV 导入错误：常见原因与解决方法",
+"description": "最常见的 Shopify CSV 导入错误完整指南：缺少列、布尔值无效、变体结构问题、价格错误和 handle 冲突。"
+},
+"shopify/shopify-product-csv-template-explained": {
+"title": "Shopify 商品 CSV 模板详解",
+"description": "逐列讲解 Shopify 官方商品 CSV 模板中的每个字段：每列的作用、可接受的值以及哪些是必填项。"
+},
+"shopify/variants-explained": {
+"title": "Shopify 商品变体详解：CSV 结构与常见错误",
+"description": "了解 Shopify 的 CSV 格式如何通过 Handle 分组、Option 列和父/子行来表示商品变体，避免导致商品被拆分、变体丢失和导入失败的常见错误。"
+},
+"woocommerce/variable-products-parent-child": {
+"title": "CSV 中的 WooCommerce 可变商品：父行与变体行",
+"description": "了解 WooCommerce 商品导入器如何用父行和子行（变体）表示可变商品：属性列、各类行的必填字段，以及最常见的导入陷阱。"
+},
+"woocommerce/woocommerce-attributes-in-csv": {
+"title": "CSV 中的 WooCommerce 商品属性：完整指南",
+"description": "如何在 CSV 文件中正确设置 WooCommerce 商品属性：属性命名、全局属性与本地属性、变体属性以及常见错误。"
+},
+"woocommerce/woocommerce-product-csv-import-errors": {
+"title": "WooCommerce 商品 CSV 导入错误：原因与解决方法",
+"description": "解决最常见的 WooCommerce 商品 CSV 导入错误：缺少 SKU、类型无效、变体行问题、价格格式和属性列问题。"
+}
+},
+"presets": {
+"shopify_products": {
+"longDescription": [
+"Shopify 的商品导入要求很严格：一个格式错误的价格、一个缺失的选项值，或者一行放错位置的图片，都可能导致整个导入失败。",
+"此预设会根据 Shopify 官方模板校验您的 CSV，并应用安全的自动修复，让您可以放心上传。数据始终由您掌控：每项修复都有记录，导出的 CSV 仍可直接导入 Shopify。"
+],
+"howItWorks": [
+"上传您从 Shopify 导出的 CSV 或官方模板。",
+"我们会规范表头和常见格式（布尔值、金额、库存值），并校验必填字段。",
+"自动修复安全的问题（例如去除空格、统一 TRUE/FALSE、规范价格字段），并标出有风险的问题供您检查。",
+"导出一份符合 Shopify 预期结构的干净 CSV。"
+],
+"commonFixes": [
+"统一布尔值（TRUE/FALSE）和状态值（active/draft/archived）。",
+"规范金额字段（Price、Compare-at price、Cost per item），并去除多余的货币符号。",
+"检测会导致导入失败的重复 SKU 和变体冲突。",
+"校验选项结构（Option1/2/3 的名称/值），并标出不完整的变体行。",
+"校验图片行（Product image URL、Image position），并标出缺失或无效的网址。",
+"清理并规范空格、标签和 handle 格式，保持一致。"
+],
+"faq": [
+{
+"q": "这会更改我的商品数据吗？",
+"a": "只会自动应用安全、可撤销的格式修复（例如去除空格或规范 TRUE/FALSE）。有风险的项目会被标出，由您在导出前决定。"
+},
+{
+"q": "能处理其他应用导出的文件吗？",
+"a": "可以。许多 Shopify 应用会添加额外的列。StriveFormats 会保留未知的列，专注于让 Shopify 必填字段达到可导入的状态。"
+},
+{
+"q": "可以使用 Shopify 官方模板吗？",
+"a": "可以。您可以在本页下载官方模板示例，并直接上传到修复工具中。"
+}
+]
+},
+"woocommerce_products": {
+"longDescription": [
+"WooCommerce 内置的商品 CSV 导入器对列名、数据类型和变体结构要求严格。此预设会根据导入器的标准字段校验您的文件，并应用安全的规范化处理，让导入顺利完成。",
+"可用于迁移、批量更新价格、添加类目/标签，以及导入带变体的可变商品。所有有风险的内容都会留在问题列表中，供您手动检查。"
+],
+"howItWorks": [
+"上传您的 WooCommerce 商品 CSV（导出文件或导入模板）。",
+"我们会规范表头和常见值，并标出缺少的必填字段。",
+"安全的修复会自动应用（布尔值、价格、网址清理）。",
+"检查剩余的问题，然后导出可直接导入的 CSV。"
+],
+"commonFixes": [
+"规范 Published / In stock? / Backorders allowed? / Sold individually?",
+"将 Regular price / Sale price 规范为普通小数（不带货币符号）",
+"去除所有多余空格，并规范类目/标签分隔符",
+"校验图片网址，并删除空项",
+"检测同一父商品下重复的变体属性组合"
+],
+"faq": [
+{
+"q": "这能配合 WooCommerce 内置导入器使用吗？",
+"a": "可以。此预设基于 WooCommerce 核心商品 CSV 导入器的字段，以及您在导入界面中对应的常见导出表头构建。"
+},
+{
+"q": "能处理变体吗？",
+"a": "它会校验变体结构（Parent + 属性），并检测重复的变体组合。安全的修复会自动应用；结构性错误仍会作为阻断问题保留。"
+},
+{
+"q": "插件专用的列怎么办？",
+"a": "额外的列会原样保留：修复后的文件与您上传的文件拥有相同的列，顺序也相同。"
+}
+]
+},
+"etsy_listings": {
+"longDescription": [
+"Etsy 卖家经常将刊登数据导出到电子表格中，用于批量编辑、核查和迁移准备。此预设会校验 Etsy 刊登 CSV 的常见字段，并进行安全的清理，保持数据一致。",
+"它主要关注标题、价格、数量、标签和图片网址。任何可能改变刊登含义的内容都会作为问题显示出来。"
+],
+"howItWorks": [
+"上传您的 Etsy 刊登 CSV。",
+"我们会校验必填字段和 Etsy 常见的字段限制。",
+"安全的修复会自动应用（清理/规范、网址清理、数字格式）。",
+"检查剩余的问题，然后导出一份干净的文件。"
+],
+"commonFixes": [
+"去除空格并规范标签分隔符",
+"确保 Price 是有效小数、Quantity 是整数",
+"校验并清理图片网址列表",
+"标题或标签超出 Etsy 限制时发出警告"
+],
+"faq": [
+{
+"q": "这是 Etsy 官方的刊登导入工具吗？",
+"a": "此预设面向常见的 Etsy 刊登 CSV 工作流程（导出文件和批量编辑表格），并让字段保持在 Etsy 公布的限制范围内。"
+},
+{
+"q": "它会校验哪些内容？",
+"a": "标题、价格、数量、标签（数量/长度）和图片网址。它会标出经常导致批量编辑出错的无效值或空值。"
+}
+]
+},
+"ebay_listings": {
+"longDescription": [
+"eBay 的批量上传功能（Seller Hub › 报告 › 上传，原 File Exchange）可让卖家通过一个 CSV 添加和更新成千上万个刊登。此预设会根据 eBay 对每种 Action 的要求检查每一行：新刊登需要标题、数字类目、价格、数量和物品状况；Revise、Relist 和 End 行需要刊登的 ItemID。",
+"您的文件会保留自己的列和表头文字，包括第一列中的站点和币种（例如 *Action(SiteID=UK|Country=GB|Currency=GBP|...)），因此会上传到正确的 eBay 站点。"
+],
+"howItWorks": [
+"上传您准备发送到 eBay 的 CSV（任意 eBay 站点）。",
+"无论是否带有必填标记 *，我们都能识别 eBay 的列名。",
+"根据每行的 Action 进行检查：标题、类目 ID、价格、数量、状况 ID、时长和照片网址。",
+"重复的 CustomLabel（SKU）会在相互覆盖之前被标出。",
+"下载保留原始列的修复后文件。"
+],
+"commonFixes": [
+"规范 Action 的大小写（Add、Revise、Relist、End）",
+"将 12,50 或 $12.50 这样的价格转换为普通小数",
+"将 \"New\" 或 \"Used\" 等状况名称转换为 ConditionID",
+"清理以 | 分隔的照片网址列表（最多 24 张）",
+"标出超过 eBay 80 个字符上限的标题",
+"标出未使用 GTC 的一口价刊登"
+],
+"faq": [
+{
+"q": "适用于哪些 eBay 站点？",
+"a": "所有站点。站点和币种来自第一列的表头（SiteID、Country、Currency），并会按上传时的原样保留。"
+},
+{
+"q": "什么是 ConditionID？",
+"a": "ConditionID 是 eBay 用数字表示的物品状况，例如 1000 = 全新，1500 = 全新（其他），2750 = 近乎全新，3000 = 二手，7000 = 零件或无法使用。可用的 ID 因类目而异。文件中的状况名称在没有歧义时会被转换为 ID。"
+},
+{
+"q": "支持哪些时长值？",
+"a": "一口价刊登按 GTC（Good 'Til Cancelled）刊登。拍卖时长为 Days_1、Days_3、Days_5、Days_7 或 Days_10。"
+}
+]
+},
+"ebay_variations": {
+"longDescription": [
+"eBay 多属性刊登会把相关商品（例如多种尺码和颜色的衬衫）放在同一个刊登下。在 eBay 上传文件中，这表现为一个父行（标题、类目以及列出所有值的 RelationshipDetails，例如 Color=Blue;Red|Size=M;L），后面跟着每个变体一行 Relationship=Variation，各自带有 SKU、价格和数量。",
+"此预设会检查这种结构：每个变体都跟在其父行之后，只使用父行声明的值，并且组合、价格和数量各自齐全。"
+],
+"howItWorks": [
+"上传您的 eBay 变体 CSV。",
+"我们会找到每个父行及其下方的变体行。",
+"将每个变体的 RelationshipDetails 与父行对照，并标出重复的组合。",
+"清理每一行的价格、数量和照片网址。",
+"下载保留原始列的修复后文件。"
+],
+"commonFixes": [
+"标出使用了父行 RelationshipDetails 中没有的值的变体",
+"标出同一刊登中重复的尺码/颜色组合",
+"标出缺少价格或数量的变体行",
+"将 12,50 这样的价格转换为普通小数",
+"校验旧版表格中的 VariationSpecificsName / VariationSpecificsValue 对"
+],
+"faq": [
+{
+"q": "RelationshipDetails 如何使用？",
+"a": "在父行中列出每个变体名称及其所有值：Color=Blue;Red|Size=M;L。在每个变体行中给出该变体的值：Color=Blue|Size=M。变体行的 Action 和 Title 留空。"
+},
+{
+"q": "我的表格使用 VariationSpecificsName 列，支持吗？",
+"a": "支持。以 | 分隔的名称和值（Color|Size 和 Blue|M）会被检查数量是否一致以及是否有重复组合。"
+}
+]
+},
+"amazon_inventory_loader": {
+"longDescription": [
+"Amazon 的 Inventory Loader 是 Seller Central 中用于为已有 ASIN 的商品添加或更新报价（价格、数量、状况和配送方式）的上传功能。此预设会按照 Amazon 的规则检查每一行，并完全保留您的列名，因为 Amazon 按精确的列名来对应列。",
+"它能发现导致 Amazon 拒绝行或把报价关联到错误商品的问题：被电子表格转成 1.23457E+11 的条形码、丢失开头 0 的 UPC、错误的 product-id-type 代码、超过 40 个字符的 SKU，以及重复的 SKU。"
+],
+"howItWorks": [
+"上传您的 Inventory Loader 文件（也能识别 item_sku、external_product_id 等类目模板列）。",
+"检查每一行：SKU、商品 ID 及其类型、价格、数量、状况、add-delete 和配送中心。",
+"写成 12,50 或 $12.50 的价格会被转换为普通小数。",
+"重复的 SKU 会在相互覆盖之前被标出。",
+"下载保留原始列的文件。"
+],
+"commonFixes": [
+"将价格和最低/最高价格转换为普通小数",
+"标出科学计数法形式（1.23457E+11）的条形码和丢失的开头 0",
+"根据 product-id-type 检查 UPC/EAN/ISBN/ASIN 的长度",
+"标出超过 Amazon 40 个字符上限的 SKU",
+"校验 add-delete（a、d 或 x）",
+"检测重复的 SKU"
+],
+"faq": [
+{
+"q": "针对的是哪种格式？",
+"a": "Amazon 的 Inventory Loader（报价文件），使用 sku、product-id、product-id-type、price、quantity 和 add-delete 等小写加连字符的列名。"
+},
+{
+"q": "product-id-type 代码有哪些？",
+"a": "在 Inventory Loader 中，product-id-type 是数字：1 = ASIN，2 = ISBN，3 = UPC，4 = EAN。类目模板则使用名称。"
+},
+{
+"q": "有效的 item-condition 代码有哪些？",
+"a": "11 = 全新，10 = 翻新，1–4 = 二手（近乎全新、非常好、良好、可接受），5–8 = 收藏品等级。"
+},
+{
+"q": "add-delete 有什么作用？",
+"a": "a 添加或更新报价，d 删除报价，x 删除报价以及您提供的商品数据。"
+},
+{
+"q": "什么是 fulfillment-center-id？",
+"a": "DEFAULT 表示由您自己发货。AMAZON_NA、AMAZON_EU、AMAZON_FE 或 AMAZON_IN 表示在该地区由亚马逊配送（FBA）。"
+}
+]
+}
+}
+}

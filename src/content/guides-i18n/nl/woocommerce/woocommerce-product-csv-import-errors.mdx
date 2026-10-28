@@ -1,0 +1,146 @@
+---
+title: "Importfouten in WooCommerce-product-CSV's: oorzaken en oplossingen"
+description: "Los de meest voorkomende importfouten in WooCommerce-product-CSV's op: ontbrekende SKU's, ongeldige typen, problemen met variatierijen, prijsnotatie en attribuutkolommen."
+keywords: ["woocommerce csv importfout", "woocommerce productimport mislukt", "woocommerce csv fouten", "woocommerce csv repareren", "woocommerce import problemen", "woocommerce csv controleren", "woocommerce product uploadfout"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "De meest voorkomende CSV-importfouten in WooCommerce en wat ze betekenen"
+  - "Hoe de kolom Type het importgedrag van WooCommerce bepaalt"
+  - "Hoe je fouten in de koppeling tussen hoofdproduct en variatie oplost"
+  - "Hoe je prijzen, booleaanse waarden en attributen goed opmaakt"
+  - "Hoe je het foutenrapport van de ingebouwde WooCommerce-importer gebruikt"
+bestFor: "WooCommerce-winkeliers en -ontwikkelaars die een mislukte of onvolledige product-CSV-import onderzoeken"
+timeToComplete: "12 minuten"
+---
+
+## Hoe WooCommerce CSV-imports controleert
+
+De ingebouwde productimporter van WooCommerce leest je CSV-bestand en koppelt de kolommen op naam. Elke rij wordt gecontroleerd aan de hand van het productgegevensmodel van WooCommerce. Mislukt de controle, dan slaat WooCommerce de rij over en registreert een fout. Na de import zie je een overzicht van hoeveel rijen zijn geïmporteerd en overgeslagen, en waarom.
+
+Staat WordPress in het Nederlands, dan gebruikt de export Nederlandse kolomnamen (bijvoorbeeld "Type" en "Artikelnummer"); de importer herkent beide. In deze handleiding staan de Engelse namen.
+
+Wie de controleregels kent, voorkomt de meeste importfouten voordat ze ontstaan.
+
+---
+
+## Fout: ongeldig of ontbrekend producttype
+
+**Oorzaak:** De kolom `Type` bevat een onbekende waarde of ontbreekt.
+
+**Toegestane waarden:**
+
+| Type | Beschrijving |
+|---|---|
+| `simple` | Een eenvoudig product zonder variaties |
+| `variable` | Een product met variaties (hoofdrij) |
+| `variation` | Een specifieke variatie van een variabel product (subrij) |
+| `grouped` | Een groep samenhangende producten |
+| `external` | Een product dat naar een externe website linkt |
+
+**Oplossing:**
+- Voeg een kolom `Type` toe als die ontbreekt
+- Vervang eigen of verkeerd gespelde waarden door een van de bovenstaande
+- `Variable` (met hoofdletter V) is niet hetzelfde als `variable`: gebruik kleine letters
+
+---
+
+## Fout: ontbrekende of dubbele SKU
+
+**Oorzaak:** `SKU` is leeg in de rij van een eenvoudig of variabel product, of dezelfde SKU staat in twee verschillende rijen.
+
+WooCommerce gebruikt de SKU als unieke ID om geïmporteerde rijen aan bestaande producten te koppelen. Is de SKU leeg, dan maakt WooCommerce bij elke import een nieuw product aan in plaats van het bestaande bij te werken.
+
+**Oplossing:**
+- Geef elke productrij een unieke SKU (eenvoudige producten en hoofdrijen van variabele producten)
+- Variatierijen kunnen de SKU van het hoofdproduct overnemen of een eigen hebben, maar mogen de SKU van een ander product niet dupliceren
+- Zoek dubbele SKU's in Excel met `AANTAL.ALS`: `=AANTAL.ALS($A:$A; A2)`; elke waarde boven 1 is een duplicaat
+
+---
+
+## Fout: ongeldige normale prijs
+
+**Oorzaak:** `Regular price` bevat een valutasymbool (`€`, `$`), gebruikt een komma als decimaalteken (`19,99`) of is leeg bij een eenvoudig of variabel product.
+
+**Oplossing:**
+- Verwijder valutasymbolen: wis `$`, `€` en `£` met Zoeken en vervangen
+- Vervang komma's als decimaalteken door punten: `19,99` → `19.99`
+- Zorg dat elk eenvoudig en variabel product een prijs heeft; variatierijen kunnen die van het hoofdproduct overnemen
+
+---
+
+## Fout: ongeldig booleaans veld
+
+**Oorzaak:** De booleaanse kolommen van WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) accepteren `1` (waar) of `0` (onwaar). Waarden als `yes`, `TRUE` of `Y` geven controlefouten.
+
+**Oplossing:** vervang alle booleaanse waarden:
+
+| Vervang | Door |
+|---|---|
+| `yes`, `Yes`, `TRUE`, `true` | `1` |
+| `no`, `No`, `FALSE`, `false` | `0` |
+
+Gebruik Zoeken en vervangen met "Volledige celinhoud vergelijken" ingeschakeld.
+
+---
+
+## Fout: hoofdproduct van de variatie niet gevonden
+
+**Oorzaak:** Een rij met `Type: variation` verwijst naar een hoofdproduct dat niet in het importbestand en niet in de database bestaat.
+
+Variatierijen in WooCommerce hebben een hoofdproduct nodig. De koppeling loopt via de kolom `Parent` (die de ID van het hoofdproduct uit de database moet bevatten) of doordat het hoofdproduct in hetzelfde importbestand staat.
+
+**Oplossing:**
+- Neem de rij van het hoofdproduct op in hetzelfde CSV-bestand
+- Zet in de kolom `Parent` van variatierijen de WooCommerce-product-ID van het hoofdproduct (het nummer in de WordPress-beheeromgeving)
+- Zorg dat de hoofdrij `Type: variable` gebruikt, niet `Type: simple`
+
+---
+
+## Fout: attribuutkolommen worden niet herkend
+
+**Oorzaak:** De namen van de attribuutkolommen volgen niet precies het naamgevingspatroon van WooCommerce.
+
+**Opmaak van attribuutkolommen in WooCommerce:**
+
+- `Attribute 1 name`: de naam van het eerste attribuut (bijv. `Color`)
+- `Attribute 1 value(s)`: de waarde(n) voor deze rij (bijv. `Blue`, of `Blue | Red` bij meerdere)
+- `Attribute 1 visible`: `1` als het op de productpagina wordt getoond, `0` als het verborgen is
+- `Attribute 1 global`: `1` bij een globaal attribuut, `0` bij een lokaal
+
+**Oplossing:**
+- Gebruik precies deze opmaak met spaties: `Attribute 1 name`, niet `attribute_1_name` of `Attribute1Name`
+- Nummer attributen doorlopend vanaf 1
+- Laat geen gaten (gebruik Attribute 3 niet als er geen Attribute 2 is)
+
+---
+
+## Fout: afbeeldings-URL niet bereikbaar
+
+**Oorzaak:** De afbeeldings-URL in de kolom `Images` is geen openbaar bereikbare HTTPS-URL, zit achter een login of gebruikt een ander protocol dan HTTPS.
+
+WooCommerce downloadt afbeeldingen tijdens de import en slaat ze op in je mediabibliotheek.
+
+**Oplossing:**
+- Test elke afbeeldings-URL in de browser: de afbeelding moet direct laden, zonder in te loggen
+- Gebruik HTTPS-URL's (geen HTTP)
+- Gebruik voor afbeeldingen in Google Drive of Dropbox directe downloadlinks (geen deellinks)
+- Staan de afbeeldingen op localhost of een testserver, verplaats ze dan eerst naar een openbaar bereikbare plek
+
+---
+
+## Het foutenrapport van de WooCommerce-import lezen
+
+Na een import toont WooCommerce een overzicht met:
+- "X producten geïmporteerd": met succes aangemaakt of bijgewerkt
+- "X producten mislukt": klik op "Importlogboek bekijken" om te zien welke rijen mislukten en waarom
+
+Het importlogboek vermeldt het rijnummer en de precieze fout. Met het rijnummer vind je de rij in je CSV (let op: de koprij is rij 1, dus de gegevens beginnen op rij 2).
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je WooCommerce-CSV naar StriveFormats. De validator controleert producttypen, SKU's, prijzen, booleaanse waarden, attribuutkolommen en de koppelingen tussen hoofdproducten en variaties, en lost veilige problemen automatisch op.
+
+[WooCommerce CSV-hersteller openen](/app?preset=woocommerce_products) | [WooCommerce-sjabloon bekijken](/presets/woocommerce_products)

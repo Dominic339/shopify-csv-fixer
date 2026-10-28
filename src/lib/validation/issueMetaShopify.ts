@@ -179,6 +179,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/product_missing_variant_row": {
     code: "shopify/product_missing_variant_row",
+    checked: false,
     title: "Product has images but no variant row",
     explanation: "A handle appears to contain only image rows.",
     whyPlatformCares:
@@ -195,10 +196,10 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     code: "shopify/blank_price",
     title: "Missing Price",
     explanation: "Price is blank on a variant row.",
-    whyPlatformCares: "Shopify requires a numeric price to create variants.",
-    howToFix: "Fill Price with a number like 19.99.",
+    whyPlatformCares: "Shopify imports a blank price as 0.00, so the variant would be sold for free.",
+    howToFix: "Fill Price with a number like 19.99, unless the variant really is free.",
     category: "pricing",
-    blocking: true,
+    blocking: false,
     autoFixable: false,
   },
 
@@ -397,6 +398,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
   // Strict-mode informational checks
   "shopify/vendor_missing": {
     code: "shopify/vendor_missing",
+    checked: false,
     title: "Vendor missing",
     explanation: "Vendor is blank on the main product row.",
     whyPlatformCares: "Vendor helps organize products and improves storefront filtering.",
@@ -408,6 +410,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/product_category_missing": {
     code: "shopify/product_category_missing",
+    checked: false,
     title: "Product category missing",
     explanation: "Product category is blank on the main product row.",
     whyPlatformCares: "Categories improve discovery and reporting.",
@@ -419,6 +422,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/tags_missing": {
     code: "shopify/tags_missing",
+    checked: false,
     title: "Tags missing",
     explanation: "Tags are blank on the main product row.",
     whyPlatformCares: "Tags can drive collections and help store search.",
@@ -430,6 +434,7 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/description_too_short": {
     code: "shopify/description_too_short",
+    checked: false,
     title: "Description is very short",
     explanation: "Description is present but extremely short.",
     whyPlatformCares: "Richer descriptions can improve conversion and SEO.",
@@ -441,12 +446,205 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
 
   "shopify/status_unrecognized": {
     code: "shopify/status_unrecognized",
+    checked: false,
     title: "Unusual Status value",
     explanation: "Status has a value outside Shopify's common values.",
     whyPlatformCares: "Unexpected values may be ignored or produce confusing results.",
     howToFix: 'Use "Active", "Draft", or "Archived" (or leave blank).',
     category: "compliance",
     blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/missing_status_value": {
+    code: "shopify/missing_status_value",
+    title: "Missing Status",
+    explanation: "The Status column is present but the product row has no value.",
+    whyPlatformCares:
+      "Shopify requires a Status value on every product row when the column is included.",
+    howToFix: "Set Status to active, draft, or archived.",
+    category: "structure",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/handle_generated_column": {
+    code: "shopify/handle_generated_column",
+    title: "URL handles generated",
+    explanation: "The file had no URL handle column, so handles were created from each Title.",
+    whyPlatformCares:
+      "Shopify matches existing products by URL handle. Without the real handles, an update creates new products instead.",
+    howToFix: "If you are updating products, add a URL handle column with their existing handles.",
+    category: "structure",
+    blocking: false,
+    autoFixable: true,
+  },
+
+  "shopify/handle_rewritten": {
+    code: "shopify/handle_rewritten",
+    title: "URL handle changed",
+    explanation: "A URL handle contained characters Shopify does not allow and was rewritten.",
+    whyPlatformCares:
+      "Shopify matches existing products by URL handle, so a changed handle is imported as a new product.",
+    howToFix: "Check that the new handle matches the product in Shopify if you are updating it.",
+    category: "structure",
+    blocking: false,
+    autoFixable: true,
+  },
+
+  "shopify/image_url_not_https": {
+    code: "shopify/image_url_not_https",
+    title: "Image URL uses http",
+    explanation: "An image URL starts with http:// instead of https://.",
+    whyPlatformCares:
+      "Shopify downloads images from publicly accessible https:// URLs; plain http links can fail.",
+    howToFix: "Use the https:// address of the image if your host supports it.",
+    category: "images",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/invalid_charge_tax": {
+    code: "shopify/invalid_charge_tax",
+    title: "Invalid Charge tax",
+    explanation: "Charge tax is not true or false.",
+    whyPlatformCares:
+      "Shopify only accepts true or false for Charge tax.",
+    howToFix: "Change the value to true or false.",
+    category: "structure",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/invalid_requires_shipping": {
+    code: "shopify/invalid_requires_shipping",
+    title: "Invalid Requires shipping",
+    explanation: "Requires shipping is not true or false.",
+    whyPlatformCares:
+      "Shopify only accepts true or false for Requires shipping.",
+    howToFix: "Change the value to true or false.",
+    category: "structure",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/invalid_gift_card": {
+    code: "shopify/invalid_gift_card",
+    title: "Invalid Gift card",
+    explanation: "Gift card is not true or false.",
+    whyPlatformCares:
+      "Shopify only accepts true or false for Gift card.",
+    howToFix: "Change the value to true or false.",
+    category: "structure",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/gift_card_import": {
+    code: "shopify/gift_card_import",
+    title: "Gift card in CSV",
+    explanation: "A row is marked as a gift card.",
+    whyPlatformCares:
+      "Shopify cannot create gift card products from a CSV import.",
+    howToFix: "Create gift card products in the Shopify admin instead.",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/invalid_numeric_cost": {
+    code: "shopify/invalid_numeric_cost",
+    title: "Invalid Cost per item",
+    explanation: "Cost per item is not a valid number.",
+    whyPlatformCares:
+      "Shopify needs a plain number (no currency symbol) for cost.",
+    howToFix: "Use a number like 7.50.",
+    category: "pricing",
+    blocking: true,
+    autoFixable: false,
+  },
+
+  "shopify/invalid_weight": {
+    code: "shopify/invalid_weight",
+    title: "Invalid weight",
+    explanation: "Weight value (grams) is not a whole number of grams.",
+    whyPlatformCares:
+      "Shopify stores weight in grams without decimals or units.",
+    howToFix: "Enter grams only, e.g. 1.5 kg = 1500.",
+    category: "inventory",
+    blocking: true,
+    autoFixable: false,
+  },
+
+  "shopify/invalid_weight_unit": {
+    code: "shopify/invalid_weight_unit",
+    title: "Invalid weight unit",
+    explanation: "Weight unit for display is not g, kg, lb, or oz.",
+    whyPlatformCares:
+      "Shopify only accepts g, kg, lb, or oz as the display unit.",
+    howToFix: "Use g, kg, lb, or oz.",
+    category: "inventory",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/invalid_inventory_tracker": {
+    code: "shopify/invalid_inventory_tracker",
+    title: "Invalid inventory tracker",
+    explanation: "Inventory tracker has a value Shopify does not recognise.",
+    whyPlatformCares:
+      "Shopify accepts shopify, shipwire, amazon_marketplace_web, or blank for untracked inventory.",
+    howToFix: "Use shopify to track inventory, or leave it blank.",
+    category: "inventory",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/invalid_fulfillment_service": {
+    code: "shopify/invalid_fulfillment_service",
+    title: "Invalid fulfillment service",
+    explanation: "Fulfillment service is not a valid service handle.",
+    whyPlatformCares:
+      "Shopify expects manual or the handle of a fulfillment service set up in your admin (lowercase, dashes).",
+    howToFix: "Use manual, or your custom service's handle.",
+    category: "inventory",
+    blocking: true,
+    autoFixable: true,
+  },
+
+  "shopify/product_category_looks_like_google": {
+    code: "shopify/product_category_looks_like_google",
+    title: "Product category looks like a Google id",
+    explanation: "Product category contains only digits, like a Google product category id.",
+    whyPlatformCares:
+      "Shopify's Product category uses Shopify's own taxonomy; Google category ids belong in a separate column.",
+    howToFix: "Use a Shopify taxonomy path or id, and move Google ids to “Google Shopping / Google product category”.",
+    category: "structure",
+    blocking: false,
+    autoFixable: false,
+  },
+
+  "shopify/packed_dimensions_incomplete": {
+    code: "shopify/packed_dimensions_incomplete",
+    title: "Packed dimensions incomplete",
+    explanation: "Only some of the packed product length, width, height, and unit are filled in.",
+    whyPlatformCares:
+      "Shopify rejects a row where only part of the packed dimensions are set.",
+    howToFix: "Fill all four packed product fields, or clear all four.",
+    category: "inventory",
+    blocking: true,
+    autoFixable: false,
+  },
+
+  "shopify/too_many_tags": {
+    code: "shopify/too_many_tags",
+    title: "Too many tags",
+    explanation: "A product has more than 250 tags.",
+    whyPlatformCares:
+      "Shopify allows at most 250 tags per product.",
+    howToFix: "Remove tags until there are 250 or fewer.",
+    category: "seo",
+    blocking: true,
     autoFixable: false,
   },
 };

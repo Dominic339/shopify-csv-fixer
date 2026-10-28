@@ -35,7 +35,7 @@ export function computeReadinessSummary(issues: CsvIssue[], formatId?: string): 
     if (autoFixable) autoFixableBlockingErrors++;
 
     const code = issue.code ?? "unknown";
-    const title = meta?.title ?? (code === "unknown" ? issue.message : code);
+    const title = meta?.title ?? issue.message;
 
     const prev = groups.get(code);
     const rowIndex = typeof issue.rowIndex === "number" ? issue.rowIndex : -1;

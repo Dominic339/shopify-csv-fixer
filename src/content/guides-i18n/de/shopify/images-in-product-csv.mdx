@@ -1,0 +1,169 @@
+---
+title: "Produktbilder in der Shopify-CSV: Image Src, Alt-Text und Positionen"
+description: "So legst du Bild-URLs in der Shopify-Produkt-CSV an: die Spalten Image Src, Image Position und Image Alt Text, mehrere Bilder pro Produkt und die häufigsten Fehler beim Bildimport."
+keywords: ["shopify bilder csv", "shopify image src", "shopify alt text bilder", "shopify image position csv", "shopify produktbilder importieren", "shopify csv mehrere bilder", "shopify bild url"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Welche Bildspalten es in der Shopify-Produkt-CSV gibt"
+  - "Wie du einem Produkt mehrere Bilder hinzufügst"
+  - "Wie Image Position die Reihenfolge der Anzeige steuert"
+  - "Warum Bildimporte scheitern und wie du URL-Probleme behebst"
+  - "Wie du Alt-Texte für Barrierefreiheit und SEO ergänzt"
+bestFor: "Shopify-Händler, die Produkte mit mehreren Bildern importieren oder aktualisieren, die Bildreihenfolge festlegen wollen oder nach dem Import fehlende Bilder suchen"
+timeToComplete: "10 Minuten"
+---
+
+## Bildspalten in der Shopify-CSV
+
+Die Shopify-Produkt-CSV kennt drei Spalten für Bilder:
+
+| Spalte | Pflicht | Hinweis |
+|---|---|---|
+| Image Src | Nein | Öffentlich erreichbare HTTPS-URL der Bilddatei |
+| Image Position | Nein | Ganze Zahl (1, 2, 3 …), die die Reihenfolge festlegt |
+| Image Alt Text | Nein | Beschreibender Text zum Bild |
+
+Diese Spalten stehen in derselben Zeile wie die Produkt- oder Variantendaten. Jede Zeile kann eine Bild-URL enthalten.
+
+---
+
+## Ein Bild pro Produkt
+
+Der einfachste Fall: ein Bild pro Produkt. Trage die URL in der Spalte `Image Src` der **übergeordneten Zeile** ein (der ersten Zeile dieses Handles):
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt.jpg,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,
+```
+
+Die Variantenzeilen (zweite und weitere Zeilen mit demselben Handle) haben eine leere Spalte Image Src.
+
+---
+
+## Mehrere Bilder pro Produkt
+
+Für mehr als ein Bild fügst du **weitere Zeilen mit demselben Handle** hinzu, die nur die Bilddaten enthalten. Diese Zeilen haben einen leeren Title und leere Variantenfelder – sie dienen nur dazu, zusätzliche Bild-URLs zu transportieren.
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
+blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
+blue-shirt,,Size,Medium,21.99,,,
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+```
+
+Die wichtigsten Regeln:
+- Pro Produkt werden bis zu **250 Bilder** unterstützt.
+- Jede Bild-URL steht in einer eigenen Zeile mit demselben Handle.
+- Reine Bildzeilen haben einen leeren Variant Price, leere Optionswerte und einen leeren Title.
+- Nutze nicht dieselbe Zeile für eine Variante und ein weiteres Bild – eine Zeile, ein Zweck.
+
+---
+
+## Image Position
+
+`Image Position` legt die Reihenfolge der Bilder in der Produktgalerie fest. Es ist eine ganze Zahl ab 1.
+
+- `1` = Haupt- bzw. Titelbild (wird zuerst gezeigt).
+- `2`, `3` usw. = weitere Bilder in dieser Reihenfolge.
+
+Lässt du Image Position weg, vergibt Shopify die Positionen in der Reihenfolge, in der die Bilder in der CSV stehen. Setzt du die Positionen ausdrücklich, gilt deine Reihenfolge unabhängig von der Zeilenreihenfolge.
+
+**Beispiel:** zuerst ein Stimmungsbild, dann das Produktfoto:
+
+```
+Handle,Image Src,Image Position,Image Alt Text
+blue-shirt,https://cdn.example.com/lifestyle.jpg,1,Model wearing blue shirt
+blue-shirt,https://cdn.example.com/product.jpg,2,Blue shirt on white background
+```
+
+---
+
+## Anforderungen an Bild-URLs
+
+Shopify lädt die Bilder beim Import von der angegebenen URL herunter. Die URL muss diese Anforderungen erfüllen:
+
+- **Sie muss HTTPS verwenden.** Reine HTTP-URLs werden abgelehnt oder können Warnungen wegen gemischter Inhalte auslösen.
+- **Sie muss öffentlich erreichbar sein.** URLs hinter einer Anmeldung, Cloudflare-Prüfungen oder IP-Sperren funktionieren nicht.
+- **Keine Leerzeichen in der URL.** Leerzeichen müssen als `%20` kodiert oder die URL muss umgebaut werden.
+- **Sie muss auf eine Bilddatei zeigen.** Shopify akzeptiert JPEG, PNG, GIF, WEBP und SVG. Die URL muss nicht auf eine Dateiendung enden, wenn der Server den richtigen Content-Type liefert, aber die meisten Importabläufe funktionieren mit URLs mit Endung zuverlässiger.
+- **Keine ablaufenden Parameter.** Nutzt du vorsignierte URLs (von S3, Cloudinary usw.), die nach einer Zeit ablaufen, müssen sie während des gesamten Imports gültig sein.
+
+---
+
+## Häufige Fehler beim Bildimport
+
+### Das Bild erscheint nach dem Import nicht
+
+**Wahrscheinliche Ursachen:**
+1. Die URL lieferte keinen HTTP-Status 200 (sondern 404, 403, 500). Shopify überspringt nicht erreichbare Bilder ohne Meldung.
+2. Die URL nutzte HTTP statt HTTPS.
+3. Die URL enthielt ein Leerzeichen, das die Anfrage kaputt gemacht hat.
+
+**So findest du es heraus:** Füge die URL direkt in den Browser ein. Lädt das Bild, ist die URL gültig. Siehst du eine Anmeldeseite, 403 oder 404, ist das Bild nicht öffentlich erreichbar.
+
+### Das falsche Bild ist das Hauptbild
+
+**Ursache:** Image Position wurde nicht angegeben und die Bilder standen in der CSV in der falschen Reihenfolge.
+
+**Lösung:** Setze `Image Position` in der Zeile mit der URL des Hauptbilds ausdrücklich auf `1`.
+
+### Bilder landen beim falschen Produkt
+
+**Ursache:** Tippfehler im Handle – die Bildzeile nutzte einen etwas anderen Handle als die Produktzeile.
+
+**Lösung:** Achte auf exakt gleiche Handles. Schon ein zusätzliches Leerzeichen oder eine andere Großschreibung erzeugt ein neues Produkt.
+
+### Alte Bilder werden nicht entfernt
+
+**Verhalten:** Beim erneuten Import **fügt** Shopifys CSV-Import einem Produkt Bilder hinzu. Bestehende Bilder entfernt er nicht. Willst du Bilder entfernen, musst du das im Shopify-Adminbereich oder über die API tun.
+
+### Zu viele Bilder
+
+**Verhalten:** Gibst du für einen Handle mehr als 250 Bild-URLs an, importiert Shopify nur die ersten 250 und ignoriert den Rest ohne Meldung.
+
+---
+
+## Tipps für gute Alt-Texte
+
+Alt-Text (die Spalte `Image Alt Text`) erfüllt zwei Aufgaben:
+1. **Barrierefreiheit:** Screenreader lesen den Alt-Text sehbehinderten Menschen vor.
+2. **SEO:** Suchmaschinen indexieren Alt-Texte und verstehen dadurch, was auf dem Bild zu sehen ist.
+
+**Guter Alt-Text:**
+- beschreibt, was auf dem Bild ist: `"Blaues Baumwoll-T-Shirt, Vorderansicht, auf weißem Hintergrund"`
+- enthält den Produktnamen und wichtige Merkmale
+- ist für jedes Bild einzigartig (nicht für alle Produktbilder gleich)
+
+**Vermeide:**
+- Keyword-Stuffing: `"blaues shirt kaufen günstige shirts baumwollshirts"`
+- Nichtssagende Texte: `"image1"`, `"Foto"`, `""` (leer)
+- Denselben Alt-Text für jedes Bild des Produkts
+
+---
+
+## Kurzübersicht: Muster für Bildzeilen
+
+**Ein Bild, ohne Alt-Text:**
+```
+Handle,Title,...,Image Src
+my-product,My Product,...,https://example.com/img1.jpg
+```
+
+**Mehrere Bilder mit Positionen:**
+```
+Handle,Title,...,Image Src,Image Position,Image Alt Text
+my-product,My Product,...,https://example.com/img1.jpg,1,Front view
+my-product,,,...,https://example.com/img2.jpg,2,Side view
+my-product,,,...,https://example.com/img3.jpg,3,Detail view
+```
+
+**Variantenbild (ein Bild, das zu einer bestimmten Variantenzeile gehört):**
+Setze Image Src in dieselbe Zeile wie die Variante. Shopify ordnet das Bild dann dieser Variante zu:
+```
+Handle,Option1 Value,Variant Price,Image Src
+my-product,Blue,19.99,https://example.com/blue.jpg
+my-product,Red,19.99,https://example.com/red.jpg
+```

@@ -1,0 +1,201 @@
+---
+title: "Het Shopify-product-CSV-sjabloon uitgelegd"
+description: "Een uitleg per kolom van elk veld in het officiële product-CSV-sjabloon van Shopify: wat elke kolom doet, welke waarden hij accepteert en welke verplicht zijn."
+keywords: ["shopify product csv sjabloon", "shopify csv kolommen uitgelegd", "shopify csv sjabloon handleiding", "shopify importsjabloon", "shopify csv velden", "shopify productimport kolommen", "shopify csv referentie"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Wat elke kolom in het product-CSV-sjabloon van Shopify doet"
+  - "Welke kolommen verplicht en welke optioneel zijn"
+  - "Toegestane waarden en formaten per veldtype"
+  - "Hoe kolommen op product- en op variantniveau werken"
+  - "Hoe je het sjabloon goed invult voor eenvoudige en variabele producten"
+bestFor: "Shopify-verkopers die hun eerste import voorbereiden en ontwikkelaars die een CSV-export voor Shopify bouwen"
+timeToComplete: "15 minuten"
+---
+
+## Overzicht van het sjabloon
+
+Het officiële product-CSV-sjabloon van Shopify heeft twee soorten kolommen: **productniveau** (één keer per product ingevuld, in de eerste rij of hoofdrij) en **variantniveau** (in elke rij van dat product ingevuld). Heeft een product meerdere varianten, dan beslaat het meerdere rijen in het bestand, allemaal met dezelfde Handle.
+
+Download het actuele sjabloon in de Shopify-beheeromgeving: Producten → Importeren → Voorbeeld-CSV downloaden.
+
+---
+
+## Kolommen voor identificatie
+
+### Handle (verplicht)
+
+De Handle is de unieke, URL-geschikte ID van het product. Hij moet:
+- uniek zijn binnen alle producten in je winkel
+- alleen kleine letters, cijfers en streepjes gebruiken
+- na de eerste import niet meer veranderen (een gewijzigde Handle maakt een nieuwe product-URL)
+
+**Voorbeeld:** `blue-leather-wallet`
+
+Alle rijen van hetzelfde product moeten dezelfde Handle hebben. Shopify groepeert daarmee de variantrijen.
+
+### Title (verplicht in de hoofdrij)
+
+De productnaam zoals die in de winkel staat. Vul hem in de eerste rij van een product in en laat hem leeg in de variantrijen.
+
+**Voorbeeld:** `Blue Leather Wallet`
+
+### Body (HTML)
+
+De productbeschrijving. Die mag HTML bevatten. Bevat de beschrijving komma's of punthaken, zet dan de hele waarde tussen dubbele aanhalingstekens. Ook regeleinden in een beschrijving moeten binnen een waarde tussen aanhalingstekens staan.
+
+### Vendor
+
+De merk- of leveranciersnaam. Gewone tekst.
+
+### Type
+
+Je eigen producttype (voor de organisatie). Dit is niet de productcategorie van Shopify, maar vrije tekst om op te filteren.
+
+### Tags
+
+Een lijst met tags, gescheiden door komma's. Bevat een tag een komma, dan moet de hele inhoud van de cel Tags tussen aanhalingstekens staan.
+
+**Voorbeeld:** `"summer, sale, leather"`
+
+---
+
+## Kolommen voor publicatie
+
+### Published (booleaans)
+
+Of het product zichtbaar is voor klanten. Accepteert `TRUE` of `FALSE` (hoofdletters).
+
+- `TRUE`: het product is actief en zichtbaar
+- `FALSE`: het product is een concept (verborgen in de winkel)
+
+### Published Scope
+
+Waar het product wordt gepubliceerd. Gangbare waarden: `web` (webwinkel), `global` (alle kanalen).
+
+---
+
+## Optiekolommen
+
+Deze kolommen leggen de variantdimensies vast (maat, kleur, materiaal enz.).
+
+### Option1 Name / Option1 Value
+
+`Option1 Name` is de naam van de dimensie (bijv. `Size`, `Color`). `Option1 Value` is de specifieke waarde per rij (bijv. `Small`, `Medium`, `Blue`).
+
+Regels:
+- `Option1 Name` moet in elke rij van hetzelfde product gelijk zijn
+- `Option1 Value` verandert per variantrij
+- Heb je maar één optie, gebruik dan alleen Option1: neem de kolommen Option2 en Option3 alleen op als je een tweede of derde optie hebt
+
+### Option2 Name / Option2 Value (optioneel)
+
+Een tweede dimensie (bijv. kleur). Alleen nodig als je product twee dimensies heeft.
+
+### Option3 Name / Option3 Value (optioneel)
+
+Een derde dimensie. Shopify ondersteunt tot 3 opties per product.
+
+---
+
+## Variantkolommen
+
+Deze kolommen gelden voor elke rij (hoofdrijen en variantrijen).
+
+### Variant SKU
+
+Een unieke ID voor deze specifieke variant. Optioneel, maar als je voorraad bijhoudt, moeten SKU's uniek zijn. Laat leeg als je geen voorraadbeheer op SKU gebruikt.
+
+### Variant Price (verplicht)
+
+De verkoopprijs van deze variant. Een gewoon decimaal getal, zonder valutasymbolen en zonder scheidingstekens voor duizendtallen.
+
+**Voorbeeld:** `19.99`
+
+### Variant Compare At Price
+
+De "van"-prijs die doorgestreept wordt getoond. Laat leeg als er geen kortingsprijs geldt.
+
+### Variant Inventory Qty
+
+Het aantal stuks op voorraad. Geheel getal. Gebruik `0` als het product uitverkocht is. Laat leeg als voorraadbeheer voor deze variant uit staat.
+
+### Variant Inventory Policy
+
+Wat er gebeurt als de voorraad op nul staat. Toegestane waarden: `deny` (aankoop blokkeren) of `continue` (aankoop toestaan, ook zonder voorraad).
+
+### Variant Fulfillment Service
+
+Hoe de variant wordt afgehandeld. `manual` voor standaardafhandeling, of de API-naam van een externe dienst.
+
+### Variant Requires Shipping (booleaans)
+
+`TRUE` voor fysieke producten die verzonden worden; `FALSE` voor digitale producten.
+
+### Variant Taxable (booleaans)
+
+`TRUE` als deze variant belast is; `FALSE` als hij vrijgesteld is.
+
+### Variant Barcode
+
+UPC-, EAN- of ISBN-barcode. Gewone tekst. Shopify controleert hem niet, maar slaat hem alleen op.
+
+### Variant Weight / Variant Weight Unit
+
+Het gewicht van de variant en de eenheid. Het gewicht is een decimaal getal. Als eenheid zijn `kg`, `g`, `lb` of `oz` toegestaan.
+
+---
+
+## Afbeeldingskolommen
+
+### Image Src
+
+De URL van de productafbeelding. Die moet een openbaar bereikbare HTTPS-URL zijn. Ondersteunde formaten: JPG, JPEG, PNG, GIF, WEBP.
+
+- In de hoofdrij: de hoofdafbeelding van het product
+- In variantrijen: de afbeelding bij de optiecombinatie van die variant (bijv. het blauwe kleurstaal)
+
+### Image Position
+
+De weergavevolgorde van deze afbeelding. Geheel getal vanaf 1. De hoofdafbeelding hoort 1 te zijn.
+
+### Image Alt Text
+
+De alt-tekst van deze afbeelding, voor toegankelijkheid en SEO.
+
+---
+
+## SEO-kolommen
+
+### SEO Title
+
+De paginatitel (zichtbaar in browsertabbladen en zoekresultaten). Is hij leeg, dan wordt de Title van het product gebruikt. Aanbevolen: minder dan 70 tekens.
+
+### SEO Description
+
+De metabeschrijving van de productpagina. Aanbevolen: minder dan 160 tekens.
+
+---
+
+## Kolom voor cadeaubonnen
+
+### Gift Card (booleaans)
+
+Alleen `TRUE` als dit product een cadeaubon is. Bij de meeste producten hoort hier `FALSE` te staan of blijft het veld leeg.
+
+---
+
+## Eenvoudig product of variabel product
+
+**Eenvoudig product (één variant):** één rij per product. Vul alle verplichte kolommen in. Optiekolommen zijn optioneel.
+
+**Variabel product (meerdere varianten):** meerdere rijen per product, allemaal met dezelfde Handle. De eerste rij is de hoofdrij (met Title, Image Src, Body HTML enz.). De volgende rijen zijn variantrijen (Title leeg; ze nemen de productgegevens over via de groepering op Handle).
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je Shopify-sjabloon naar StriveFormats voor een controle per kolom. Verplichte velden, booleaanse waarden, de variantstructuur en afbeeldings-URL's worden gecontroleerd, waarna je een schoon, importklaar bestand exporteert.
+
+[Shopify CSV-hersteller openen](/app?preset=shopify_products) | [Shopify-sjabloon bekijken](/presets/shopify_products)

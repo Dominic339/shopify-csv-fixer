@@ -1,0 +1,860 @@
+{
+"shopify/missing_required_header": {
+"title": "Нет обязательного столбца",
+"explanation": "В вашем CSV нет обязательного заголовка столбца Shopify.",
+"whyPlatformCares": "Shopify проверяет заголовки столбцов при импорте. Без обязательных заголовков Shopify может не создать или не обновить товары.",
+"howToFix": "Добавьте недостающий обязательный заголовок столбца (даже если значения пусты)."
+},
+"shopify/blank_title": {
+"title": "Нет Title",
+"explanation": "Title пусто как минимум в одной строке.",
+"whyPlatformCares": "Shopify требует Title для создания товара. Строки без Title могут не импортироваться или создать неполные товары.",
+"howToFix": "Укажите в Title название товара в каждой строке товара."
+},
+"shopify/blank_handle": {
+"title": "Нет URL handle",
+"explanation": "URL handle пусто как минимум в одной строке.",
+"whyPlatformCares": "Shopify группирует варианты и изображения по URL handle и использует его для обновления существующих товаров. Без handle группировка и обновления не работают.",
+"howToFix": "Заполните URL handle строчными буквами, цифрами и дефисами (без пробелов)."
+},
+"shopify/invalid_handle": {
+"title": "Недопустимый URL handle",
+"explanation": "URL handle содержит символы, которые Shopify может отклонить.",
+"whyPlatformCares": "Недопустимые handle могут вызывать ошибки импорта и ломать URL товаров.",
+"howToFix": "Используйте только строчные буквы, цифры и дефисы."
+},
+"shopify/invalid_boolean_published": {
+"title": "Недопустимое значение Published",
+"explanation": "В Published on online store указано не логическое значение.",
+"whyPlatformCares": "Shopify ожидает TRUE/FALSE (или пустое значение). Недопустимые значения могут заблокировать импорт.",
+"howToFix": "Используйте TRUE, FALSE или оставьте пустым."
+},
+"shopify/invalid_status": {
+"title": "Недопустимое значение Status",
+"explanation": "Status не равно Active, Draft или Archived.",
+"whyPlatformCares": "При неожиданном статусе Shopify может проигнорировать строку или понять её неправильно.",
+"howToFix": "Используйте \"Active\", \"Draft\" или \"Archived\" (или оставьте пустым)."
+},
+"shopify/option_order_invalid": {
+"title": "Столбцы опций заполнены не по порядку",
+"explanation": "В Option2/Option3 есть значения, а Option1 пусто.",
+"whyPlatformCares": "Shopify ожидает, что опции заполняются по порядку (сначала Option1, затем Option2, затем Option3).",
+"howToFix": "Заполните Option1 раньше Option2, а Option2 раньше Option3."
+},
+"shopify/variant_option_missing_value": {
+"title": "Название опции без значения",
+"explanation": "Название опции указано, но соответствующее значение пусто.",
+"whyPlatformCares": "Пропущенные значения опций могут создать некорректные или запутанные варианты.",
+"howToFix": "Заполните значение опции (например, Size = Small) или очистите название опции."
+},
+"shopify/option_name_inconsistent": {
+"title": "Названия опций различаются у вариантов",
+"explanation": "Названия Option1/2/3 должны совпадать в строках с одним handle.",
+"whyPlatformCares": "Несогласованные названия опций могут привести к неверному импорту или неправильной группировке вариантов.",
+"howToFix": "Используйте одинаковые названия Option1/Option2/Option3 во всех строках вариантов одного handle."
+},
+"shopify/options_not_unique": {
+"title": "Опции вариантов не уникальны",
+"explanation": "У двух или более вариантов одного handle одинаковые значения опций.",
+"whyPlatformCares": "Shopify объединяет варианты с одинаковыми сочетаниями опций. Это может привести к потере данных или перезаписи вариантов.",
+"howToFix": "Сделайте каждое сочетание опций варианта уникальным (или удалите дубликаты)."
+},
+"shopify/missing_option1_for_variant_data": {
+"title": "Нет Option1 value у варианта",
+"explanation": "Эта строка похожа на данные варианта, но Option1 value пусто.",
+"whyPlatformCares": "Shopify создаёт сочетания вариантов по значениям опций. Без них строка может быть отклонена или импортирована неверно.",
+"howToFix": "Заполните Option1 value (или уберите из этой строки поля, относящиеся только к вариантам)."
+},
+"shopify/mixed_default_title_with_options": {
+"title": "\"Default Title\" смешано с реальными опциями",
+"explanation": "У handle есть и строки \"Default Title\", и строки вариантов с опциями.",
+"whyPlatformCares": "Обычно это означает, что по ошибке смешаны структуры товара с одним вариантом и с несколькими.",
+"howToFix": "Используйте \"Default Title\", только если у товара один вариант. Для товаров с несколькими вариантами указывайте реальные значения опций в каждой строке варианта."
+},
+"shopify/duplicate_handle_not_variants": {
+"title": "Дублирующиеся строки с одинаковыми данными варианта",
+"explanation": "Строки с одним handle выглядят как дубликаты, а не как настоящие варианты.",
+"whyPlatformCares": "Дублирующиеся строки могут запутать импорт и привести к неожиданной перезаписи.",
+"howToFix": "Если это варианты, убедитесь, что значения опций (или SKU) различаются в каждой строке. Если это дополнительные изображения, оставьте в этих строках только handle и поля изображений."
+},
+"shopify/handle_title_mismatch": {
+"title": "Один handle с разными Title",
+"explanation": "В строках с одним URL handle используются разные Title.",
+"whyPlatformCares": "Shopify группирует строки по handle. Противоречащие друг другу названия могут привести к перезаписи или запутанному импорту.",
+"howToFix": "Используйте один согласованный Title во всех строках одного handle."
+},
+"shopify/product_missing_variant_row": {
+"title": "У товара есть изображения, но нет строки варианта",
+"explanation": "Похоже, у handle есть только строки с изображениями.",
+"whyPlatformCares": "Чтобы создать товар, Shopify нужна хотя бы одна основная строка товара/варианта (Title + поля варианта). Одних строк с изображениями недостаточно.",
+"howToFix": "Добавьте для handle основную строку с Title и полями варианта (Price/SKU/Options). Дополнительные строки с изображениями разместите после основной."
+},
+"shopify/blank_price": {
+"title": "Нет Price",
+"explanation": "Price пусто в строке варианта.",
+"whyPlatformCares": "Shopify импортирует пустую цену как 0.00, то есть вариант будет продаваться бесплатно.",
+"howToFix": "Укажите в Price число, например 19.99, если только вариант действительно не бесплатный."
+},
+"shopify/invalid_numeric_price": {
+"title": "Недопустимое Price",
+"explanation": "Price не является допустимым числом.",
+"whyPlatformCares": "Shopify требует числовые значения в полях цен.",
+"howToFix": "Используйте число, например 19.99."
+},
+"shopify/invalid_numeric_compare_at": {
+"title": "Недопустимое Compare-at price",
+"explanation": "Compare-at price не является допустимым числом.",
+"whyPlatformCares": "Shopify требует числовые значения в полях цен.",
+"howToFix": "Используйте число, например 24.99, или оставьте пустым."
+},
+"shopify/compare_at_lt_price": {
+"title": "Compare-at price ниже Price",
+"explanation": "Compare-at price меньше, чем Price.",
+"whyPlatformCares": "Compare-at price должна показывать более высокую исходную цену.",
+"howToFix": "Убедитесь, что Compare-at price ≥ Price, или оставьте поле пустым."
+},
+"shopify/invalid_integer_inventory_qty": {
+"title": "Недопустимый остаток",
+"explanation": "Inventory quantity не является допустимым целым числом.",
+"whyPlatformCares": "Остатки должны быть целыми числами.",
+"howToFix": "Используйте целое число, например 0, 5, 100."
+},
+"shopify/negative_inventory": {
+"title": "Отрицательный остаток",
+"explanation": "Inventory quantity отрицательное.",
+"whyPlatformCares": "Отрицательный остаток обычно означает ошибку в данных и может вызвать проблемы с выполнением заказов.",
+"howToFix": "Используйте 0 или положительное количество."
+},
+"shopify/invalid_inventory_policy": {
+"title": "Недопустимая политика остатков",
+"explanation": "Continue selling when out of stock не равно DENY/CONTINUE.",
+"whyPlatformCares": "Политика остатков определяет, можно ли продавать товар, когда его нет в наличии.",
+"howToFix": "Используйте \"DENY\" или \"CONTINUE\" (или оставьте пустым)."
+},
+"shopify/invalid_image_url": {
+"title": "Недопустимый URL изображения",
+"explanation": "URL изображения товара не является допустимым URL http(s).",
+"whyPlatformCares": "Shopify должен иметь возможность загрузить изображения по допустимому URL.",
+"howToFix": "Используйте полный URL http(s) общедоступного изображения."
+},
+"shopify/invalid_image_position": {
+"title": "Недопустимая позиция изображения",
+"explanation": "Image position не является допустимым целым числом.",
+"whyPlatformCares": "Image position определяет порядок изображений.",
+"howToFix": "Используйте 1, 2, 3… или оставьте пустым."
+},
+"shopify/image_row_has_variant_fields": {
+"title": "В строке изображения есть поля варианта",
+"explanation": "Строка похожа на строку только с изображением, но содержит поля SKU/Price/Options/Inventory.",
+"whyPlatformCares": "Это может нарушить группировку вариантов и запутать импорт.",
+"howToFix": "В дополнительных строках с изображениями оставьте только handle и поля изображений. Поля варианта перенесите в основную строку."
+},
+"shopify/duplicate_image_position": {
+"title": "Повторяющаяся позиция изображения",
+"explanation": "У двух строк одного handle одинаковая Image position.",
+"whyPlatformCares": "Из-за повторов порядок изображений может стать непредсказуемым.",
+"howToFix": "Используйте уникальные значения Image position для каждого handle (1, 2, 3…)."
+},
+"shopify/image_alt_text_too_long": {
+"title": "Слишком длинный альтернативный текст",
+"explanation": "Альтернативный текст изображения превышает лимит, рекомендованный Shopify.",
+"whyPlatformCares": "Слишком длинный альтернативный текст может обрезаться или вызывать проблемы с форматированием.",
+"howToFix": "Сократите альтернативный текст до 512 символов или меньше."
+},
+"shopify/duplicate_sku": {
+"title": "Повторяющийся SKU",
+"explanation": "Один и тот же SKU встречается в нескольких строках вариантов.",
+"whyPlatformCares": "Многие процессы учёта и доставки рассчитаны на уникальный SKU у каждого варианта.",
+"howToFix": "Сделайте SKU уникальными для каждого варианта (или оставьте пустыми, если вы не используете SKU)."
+},
+"shopify/duplicate_sku_across_products": {
+"title": "Один SKU у разных товаров",
+"explanation": "Один и тот же SKU встречается в разных URL handle (у разных товаров).",
+"whyPlatformCares": "Повторное использование SKU в разных товарах может запутать системы учёта, сервисы доставки и аналитику.",
+"howToFix": "Сделайте SKU уникальными во всём каталоге (рекомендуется) или подтвердите, что повтор намеренный."
+},
+"shopify/seo_title_too_long": {
+"title": "Слишком длинный SEO-заголовок",
+"explanation": "SEO-заголовок длиннее рекомендованного.",
+"whyPlatformCares": "Длинные заголовки могут обрезаться в результатах поиска.",
+"howToFix": "Сократите SEO-заголовок до 70 символов или меньше."
+},
+"shopify/seo_description_too_long": {
+"title": "Слишком длинное SEO-описание",
+"explanation": "SEO-описание длиннее рекомендованного.",
+"whyPlatformCares": "Длинные описания могут обрезаться в сниппетах поиска.",
+"howToFix": "Сократите SEO-описание до 320 символов или меньше."
+},
+"shopify/seo_title_missing": {
+"title": "Нет SEO-заголовка",
+"explanation": "SEO-заголовок пуст (Shopify использует Title).",
+"whyPlatformCares": "Собственный SEO-заголовок может повысить кликабельность.",
+"howToFix": "Необязательно: укажите собственный SEO-заголовок."
+},
+"shopify/seo_description_missing": {
+"title": "Нет SEO-описания",
+"explanation": "SEO-описание пусто (Shopify использует Description).",
+"whyPlatformCares": "Собственное описание может повысить кликабельность и понятность в результатах поиска.",
+"howToFix": "Необязательно: укажите собственное SEO-описание."
+},
+"shopify/vendor_missing": {
+"title": "Нет Vendor",
+"explanation": "Vendor пусто в основной строке товара.",
+"whyPlatformCares": "Vendor помогает упорядочивать товары и улучшает фильтрацию в магазине.",
+"howToFix": "Добавьте значение Vendor/бренда."
+},
+"shopify/product_category_missing": {
+"title": "Нет категории товара",
+"explanation": "Product category пусто в основной строке товара.",
+"whyPlatformCares": "Категории помогают находить товары и улучшают отчёты.",
+"howToFix": "Добавьте Product category."
+},
+"shopify/tags_missing": {
+"title": "Нет тегов",
+"explanation": "Tags пусто в основной строке товара.",
+"whyPlatformCares": "Теги могут наполнять коллекции и помогать поиску по магазину.",
+"howToFix": "Добавьте теги (через запятую)."
+},
+"shopify/description_too_short": {
+"title": "Очень короткое описание",
+"explanation": "Описание есть, но оно очень короткое.",
+"whyPlatformCares": "Более подробные описания могут улучшить конверсию и SEO.",
+"howToFix": "Подумайте о том, чтобы расширить описание."
+},
+"shopify/status_unrecognized": {
+"title": "Необычное значение Status",
+"explanation": "Status содержит значение вне привычных значений Shopify.",
+"whyPlatformCares": "Неожиданные значения могут игнорироваться или давать запутанный результат.",
+"howToFix": "Используйте \"Active\", \"Draft\" или \"Archived\" (или оставьте пустым)."
+},
+"shopify/missing_status_value": {
+"title": "Нет Status",
+"explanation": "Столбец Status есть, но в строке товара нет значения.",
+"whyPlatformCares": "Если столбец есть в файле, Shopify требует значение Status в каждой строке товара.",
+"howToFix": "Задайте Status: active, draft или archived."
+},
+"shopify/handle_generated_column": {
+"title": "URL handle созданы автоматически",
+"explanation": "В файле не было столбца URL handle, поэтому handle созданы из каждого Title.",
+"whyPlatformCares": "Shopify находит существующие товары по URL handle. Без настоящих handle обновление создаст новые товары.",
+"howToFix": "Если вы обновляете товары, добавьте столбец URL handle с их текущими handle."
+},
+"shopify/handle_rewritten": {
+"title": "URL handle изменён",
+"explanation": "URL handle содержал символы, недопустимые в Shopify, и был переписан.",
+"whyPlatformCares": "Shopify находит существующие товары по URL handle, поэтому товар с изменённым handle импортируется как новый.",
+"howToFix": "Если вы обновляете товар, проверьте, что новый handle совпадает с handle в Shopify."
+},
+"shopify/image_url_not_https": {
+"title": "URL изображения использует http",
+"explanation": "URL изображения начинается с http:// вместо https://.",
+"whyPlatformCares": "Shopify загружает изображения с общедоступных URL https://; обычные ссылки http могут не сработать.",
+"howToFix": "Используйте адрес изображения с https://, если ваш хостинг его поддерживает."
+},
+"shopify/invalid_charge_tax": {
+"title": "Недопустимое Charge tax",
+"explanation": "Charge tax не равно true или false.",
+"whyPlatformCares": "Shopify принимает в Charge tax только true или false.",
+"howToFix": "Замените значение на true или false."
+},
+"shopify/invalid_requires_shipping": {
+"title": "Недопустимое Requires shipping",
+"explanation": "Requires shipping не равно true или false.",
+"whyPlatformCares": "Shopify принимает в Requires shipping только true или false.",
+"howToFix": "Замените значение на true или false."
+},
+"shopify/invalid_gift_card": {
+"title": "Недопустимое Gift card",
+"explanation": "Gift card не равно true или false.",
+"whyPlatformCares": "Shopify принимает в Gift card только true или false.",
+"howToFix": "Замените значение на true или false."
+},
+"shopify/gift_card_import": {
+"title": "Подарочная карта в CSV",
+"explanation": "Строка отмечена как подарочная карта.",
+"whyPlatformCares": "Shopify не может создавать подарочные карты через импорт CSV.",
+"howToFix": "Создайте подарочные карты в панели администратора Shopify."
+},
+"shopify/invalid_numeric_cost": {
+"title": "Недопустимое Cost per item",
+"explanation": "Cost per item не является допустимым числом.",
+"whyPlatformCares": "Shopify нужно простое число (без символа валюты) для себестоимости.",
+"howToFix": "Используйте число, например 7.50."
+},
+"shopify/invalid_weight": {
+"title": "Недопустимый вес",
+"explanation": "Weight value (grams) не является целым числом граммов.",
+"whyPlatformCares": "Shopify хранит вес в граммах, без дробной части и единиц измерения.",
+"howToFix": "Указывайте только граммы, например 1,5 кг = 1500."
+},
+"shopify/invalid_weight_unit": {
+"title": "Недопустимая единица веса",
+"explanation": "Weight unit for display не равно g, kg, lb или oz.",
+"whyPlatformCares": "Shopify принимает в качестве единицы отображения только g, kg, lb или oz.",
+"howToFix": "Используйте g, kg, lb или oz."
+},
+"shopify/invalid_inventory_tracker": {
+"title": "Недопустимый учёт остатков",
+"explanation": "Inventory tracker содержит значение, которое Shopify не распознаёт.",
+"whyPlatformCares": "Shopify принимает shopify, shipwire, amazon_marketplace_web или пустое значение, если остатки не отслеживаются.",
+"howToFix": "Используйте shopify для учёта остатков или оставьте пустым."
+},
+"shopify/invalid_fulfillment_service": {
+"title": "Недопустимая служба выполнения заказов",
+"explanation": "Fulfillment service не является допустимым handle службы.",
+"whyPlatformCares": "Shopify ожидает manual или handle службы выполнения заказов, настроенной в панели (строчные буквы, дефисы).",
+"howToFix": "Используйте manual или handle вашей собственной службы."
+},
+"shopify/product_category_looks_like_google": {
+"title": "Product category похоже на ID Google",
+"explanation": "Product category содержит только цифры, как ID категории товаров Google.",
+"whyPlatformCares": "Product category в Shopify использует таксономию Shopify; ID категорий Google указываются в отдельном столбце.",
+"howToFix": "Используйте путь или ID из таксономии Shopify, а ID Google перенесите в «Google Shopping / Google product category»."
+},
+"shopify/packed_dimensions_incomplete": {
+"title": "Неполные размеры упаковки",
+"explanation": "Заполнены не все поля: длина, ширина, высота и единица измерения упаковки.",
+"whyPlatformCares": "Shopify отклоняет строку, если размеры упаковки указаны частично.",
+"howToFix": "Заполните все четыре поля упаковки или очистите все четыре."
+},
+"shopify/too_many_tags": {
+"title": "Слишком много тегов",
+"explanation": "У товара больше 250 тегов.",
+"whyPlatformCares": "Shopify допускает не более 250 тегов на товар.",
+"howToFix": "Удалите теги, чтобы осталось не более 250."
+},
+"woocommerce/missing_required_header": {
+"title": "Нет обязательного столбца",
+"explanation": "В строке заголовков нет одного или нескольких обязательных столбцов импорта WooCommerce.",
+"whyPlatformCares": "WooCommerce сопоставляет поля при импорте по определённым названиям столбцов.",
+"howToFix": "Экспортируйте свежий образец CSV из WooCommerce и убедитесь, что все обязательные столбцы есть и названы точно так же."
+},
+"woocommerce/unknown_header": {
+"title": "Неизвестный столбец",
+"explanation": "Импортёр WooCommerce не распознаёт этот столбец.",
+"whyPlatformCares": "Неизвестные столбцы игнорируются и могут скрывать проблемы в данных.",
+"howToFix": "Удалите столбец или переименуйте его в заголовок, который поддерживает импорт WooCommerce."
+},
+"woocommerce/missing_type": {
+"title": "Нет типа товара",
+"explanation": "Столбец Type обязателен и определяет, как будет прочитана строка.",
+"whyPlatformCares": "WooCommerce по Type решает, является ли строка товаром, вариацией или родительской группой.",
+"howToFix": "Задайте Type в каждой строке: simple, variable, variation, grouped или external."
+},
+"woocommerce/invalid_type": {
+"title": "Недопустимый тип товара",
+"explanation": "Значение Type не входит в число типов, поддерживаемых WooCommerce.",
+"whyPlatformCares": "Из-за недопустимых типов строки могут импортироваться неверно или быть отклонены.",
+"howToFix": "Используйте одно из значений: simple, variable, variation, grouped, external."
+},
+"woocommerce/missing_name": {
+"title": "Нет названия товара",
+"explanation": "У строк товаров, которые не являются вариациями, должно быть Name.",
+"whyPlatformCares": "Товары без названия бесполезны в магазине.",
+"howToFix": "Укажите Name во всех строках, которые не являются вариациями."
+},
+"woocommerce/variation_missing_parent": {
+"title": "Вариация не связана с родительским товаром",
+"explanation": "Строки вариаций должны быть связаны с родительским вариативным товаром через поле Parent.",
+"whyPlatformCares": "Осиротевшие вариации не могут быть импортированы корректно.",
+"howToFix": "Укажите в Parent ID родительского товара (или включите автоматическое создание родителей в настройке импорта вариативных товаров)."
+},
+"woocommerce/variation_missing_attributes": {
+"title": "У вариации нет атрибутов",
+"explanation": "Строкам вариаций нужны пары «название/значение» атрибута, чтобы образовать допустимое сочетание.",
+"whyPlatformCares": "Без атрибутов WooCommerce не может создать отдельную вариацию.",
+"howToFix": "Заполните Attribute 1 name (например, Size) и Attribute 1 value(s) (например, M) в каждой строке вариации."
+},
+"woocommerce/duplicate_variation_combo": {
+"title": "Повторяющееся сочетание вариации",
+"explanation": "У двух или более вариаций одного родителя одинаковое сочетание атрибутов.",
+"whyPlatformCares": "Повторяющиеся сочетания могут перезаписывать друг друга или неожиданно объединяться.",
+"howToFix": "Убедитесь, что у каждой вариации уникальное сочетание значений атрибутов в пределах родителя."
+},
+"woocommerce/missing_sku": {
+"title": "Нет SKU",
+"explanation": "Без SKU обновления менее надёжны, а учёт остатков может сломаться.",
+"whyPlatformCares": "SKU используются для сопоставления, обновлений и интеграций.",
+"howToFix": "По возможности укажите уникальный SKU для каждого товара/вариации."
+},
+"woocommerce/duplicate_sku": {
+"title": "Риск повторяющегося SKU",
+"explanation": "У двух или более строк одинаковый SKU.",
+"whyPlatformCares": "При импорте повторяющиеся SKU могут перезаписать существующие товары или привязать данные не к тому товару.",
+"howToFix": "Сделайте SKU уникальными. Если дубликаты нужны намеренно, разделите каталоги или используйте единую схему «родитель/дочерний»."
+},
+"woocommerce/invalid_regular_price": {
+"title": "Недопустимая обычная цена",
+"explanation": "Regular price должно быть допустимым числом.",
+"whyPlatformCares": "Недопустимые цены приводят к ошибкам импорта или неверным ценам в магазине.",
+"howToFix": "Используйте числовые значения, например 19.99 (без символов валюты)."
+},
+"woocommerce/invalid_sale_price": {
+"title": "Недопустимая цена со скидкой",
+"explanation": "Sale price должно быть допустимым числом.",
+"whyPlatformCares": "Недопустимая цена со скидкой может игнорироваться или вызывать проблемы с ценами.",
+"howToFix": "Используйте числовые значения, например 14.99 (без символов валюты)."
+},
+"woocommerce/missing_image": {
+"title": "Нет изображения",
+"explanation": "В этой строке товара нет URL изображения.",
+"whyPlatformCares": "Импорт может пройти и без изображений, но их отсутствие снижает качество карточки и конверсию.",
+"howToFix": "Укажите для товаров URL в Images (или несколько URL через запятую)."
+},
+"woocommerce/invalid_bool": {
+"title": "Недопустимое логическое значение",
+"explanation": "Логические поля, такие как Published, In stock? и Is featured?, ожидают 1/0 или true/false.",
+"whyPlatformCares": "Импортёр WooCommerce может неверно понять неожиданные значения, и товары окажутся скрыты или неправильно настроены.",
+"howToFix": "Используйте 1 (да/истина) или 0 (нет/ложь). Распространённые варианты (yes, no, true, false) мы можем нормализовать автоматически."
+},
+"woocommerce/invalid_price": {
+"title": "Недопустимое значение цены",
+"explanation": "Поле цены содержит нечисловое значение.",
+"whyPlatformCares": "WooCommerce ожидает простые десятичные цены. Символы валюты или текст приводят к ошибкам импорта или нулевым ценам.",
+"howToFix": "Используйте простые десятичные числа, например 19.99 (без символов валюты, запятых и текста)."
+},
+"woocommerce/invalid_int": {
+"title": "Недопустимое целое значение",
+"explanation": "Целочисленное поле (например, Stock) содержит нецелое значение.",
+"whyPlatformCares": "WooCommerce ожидает целые числа для остатков. Дробные значения могут обрезаться или отклоняться.",
+"howToFix": "Используйте целое число, например 0, 5 или 12."
+},
+"woocommerce/invalid_visibility": {
+"title": "Недопустимое значение видимости",
+"explanation": "Visibility in catalog должно иметь одно из четырёх допустимых значений.",
+"whyPlatformCares": "Нераспознанное значение видимости может сделать товар видимым по умолчанию или сорвать импорт.",
+"howToFix": "Используйте одно из значений: visible, catalog, search или hidden."
+},
+"woocommerce/invalid_image_url": {
+"title": "Недопустимый URL изображения",
+"explanation": "Один или несколько URL в столбце Images не являются допустимыми URL http(s).",
+"whyPlatformCares": "WooCommerce загружает изображения по указанным URL во время импорта. Из-за недопустимых URL товары останутся без изображений.",
+"howToFix": "Используйте полные URL https://, разделённые запятыми. Убедитесь, что изображения общедоступны."
+},
+"woocommerce/sale_price_not_lower": {
+"title": "Цена со скидкой не ниже обычной",
+"explanation": "Sale price должна быть ниже Regular price, иначе скидка не имеет смысла.",
+"whyPlatformCares": "WooCommerce может показать обе цены как зачёркнутую и со скидкой. Если цена со скидкой равна обычной или выше, цены отображаются запутанно или неверно.",
+"howToFix": "Задайте Sale price ниже Regular price или очистите поле Sale price."
+},
+"woocommerce/invalid_value": {
+"title": "Нераспознанное значение",
+"explanation": "Столбец типа «статус» содержит значение, которое WooCommerce не распознаёт.",
+"whyPlatformCares": "WooCommerce принимает только определённые значения в Published, In stock?, Backorders allowed? и Tax status; остальные игнорируются или отклоняются.",
+"howToFix": "Используйте одно из значений, указанных в описании проблемы."
+},
+"woocommerce/variation_multiple_values": {
+"title": "У вариации несколько значений",
+"explanation": "В строке вариации указано больше одного значения атрибута.",
+"whyPlatformCares": "Каждая вариация WooCommerce — это одно конкретное сочетание, поэтому у неё одно значение на атрибут.",
+"howToFix": "Перечислите все значения в родительской строке, а в каждой строке вариации — только одно."
+},
+"woocommerce/parent_not_in_file": {
+"title": "Родительского товара нет в файле",
+"explanation": "Вариация ссылается на родительский товар, которого нет в этом файле.",
+"whyPlatformCares": "WooCommerce привязывает вариации к существующему вариативному товару; если родителя ещё нет, вариация пропускается.",
+"howToFix": "Сначала импортируйте родительский товар или добавьте его строку в этот файл."
+},
+"etsy/missing_required_header": {
+"title": "Нет обязательного столбца",
+"explanation": "Нет одного или нескольких обязательных столбцов массовой загрузки объявлений Etsy.",
+"whyPlatformCares": "Импортёру Etsy нужны точные заголовки, чтобы правильно сопоставить поля объявления.",
+"howToFix": "Экспортируйте свежий CSV объявлений Etsy и убедитесь, что обязательные заголовки есть и не изменены."
+},
+"etsy/invalid_price": {
+"title": "Недопустимая цена",
+"explanation": "Цена должна быть допустимым числом.",
+"whyPlatformCares": "Из-за недопустимой цены объявление может быть отклонено.",
+"howToFix": "Используйте числовые значения, например 19.99 (без символов валюты)."
+},
+"etsy/title_too_long": {
+"title": "Слишком длинное название",
+"explanation": "У названий Etsy есть максимальная длина.",
+"whyPlatformCares": "Слишком длинные названия могут обрезаться или отклоняться в зависимости от импортёра.",
+"howToFix": "Сократите название (мы можем безопасно обрезать его до максимальной длины)."
+},
+"etsy/tags_too_many": {
+"title": "Слишком много тегов",
+"explanation": "Объявления Etsy поддерживают до 13 тегов.",
+"whyPlatformCares": "Теги сверх лимита игнорируются и ухудшают поисковую оптимизацию.",
+"howToFix": "Оставьте 13 лучших тегов (мы можем автоматически ограничить их до 13)."
+},
+"etsy/too_many_tags": {
+"title": "Слишком много тегов",
+"explanation": "Объявления Etsy поддерживают до 13 тегов.",
+"whyPlatformCares": "Теги сверх лимита игнорируются и ухудшают поисковую оптимизацию.",
+"howToFix": "Оставьте 13 лучших тегов (мы можем автоматически ограничить их до 13)."
+},
+"etsy/tag_too_long": {
+"title": "Тег длиннее 20 символов",
+"explanation": "Etsy ограничивает каждый тег 20 символами.",
+"whyPlatformCares": "Теги длиннее 20 символов Etsy отклоняет.",
+"howToFix": "Сократите проблемные теги до 20 символов или меньше."
+},
+"etsy/missing_title": {
+"title": "Нет названия объявления",
+"explanation": "У всех объявлений Etsy должно быть название.",
+"whyPlatformCares": "Объявления без названия нельзя опубликовать или импортировать.",
+"howToFix": "Укажите информативное название (до 140 символов)."
+},
+"etsy/missing_price": {
+"title": "Нет цены",
+"explanation": "У всех объявлений Etsy должна быть цена.",
+"whyPlatformCares": "Объявления без цены нельзя опубликовать.",
+"howToFix": "Укажите цену объявления простым десятичным числом (например, 19.99)."
+},
+"etsy/invalid_quantity": {
+"title": "Недопустимое количество",
+"explanation": "Количество должно быть неотрицательным целым числом.",
+"whyPlatformCares": "Недопустимые значения количества приводят к ошибкам импорта или публикации объявлений.",
+"howToFix": "Используйте целое число, например 0, 1 или 10."
+},
+"etsy/invalid_currency": {
+"title": "Недопустимый код валюты",
+"explanation": "Валюта должна быть допустимым трёхбуквенным кодом ISO 4217 (например, USD, GBP, EUR).",
+"whyPlatformCares": "Недопустимый код валюты может сорвать импорт или исказить отображение цен.",
+"howToFix": "Используйте стандартный трёхбуквенный код валюты (мы можем автоматически перевести его в верхний регистр)."
+},
+"etsy/invalid_image_url": {
+"title": "Недопустимый URL изображения",
+"explanation": "Один или несколько URL изображений не являются допустимыми URL http(s).",
+"whyPlatformCares": "Etsy не может загрузить изображения по недопустимым URL, и объявления останутся без фотографий.",
+"howToFix": "Используйте полные URL https:// общедоступных изображений, разделённые запятыми."
+},
+"etsy/duplicate_tags": {
+"title": "Повторяющиеся теги",
+"explanation": "Повторяющиеся теги занимают ограниченные места для тегов.",
+"whyPlatformCares": "Повторы тегов снижают видимость.",
+"howToFix": "Удалите дубликаты (мы можем сделать это автоматически, сохранив порядок)."
+},
+"etsy/missing_shipping_profile": {
+"title": "Нет профиля доставки",
+"explanation": "Для публикации нужен профиль доставки (или равнозначные поля доставки).",
+"whyPlatformCares": "Объявления без настроек доставки нельзя опубликовать.",
+"howToFix": "Укажите допустимый ID/название профиля доставки или поля доставки, которые требует ваш экспорт."
+},
+"etsy/duplicate_listing_id": {
+"title": "Риск повторяющегося Listing ID",
+"explanation": "У двух или более строк одинаковый Listing ID.",
+"whyPlatformCares": "Повторяющиеся ID могут перезаписать существующие объявления вместо создания новых.",
+"howToFix": "При создании объявлений следите за уникальностью Listing ID или указывайте его намеренно при обновлении существующих объявлений."
+},
+"etsy/duplicate_sku": {
+"title": "Риск повторяющегося SKU",
+"explanation": "У двух или более объявлений одинаковый SKU.",
+"whyPlatformCares": "Повторяющиеся SKU могут запутать учёт остатков и интеграции.",
+"howToFix": "По возможности делайте SKU уникальными."
+},
+"etsy/missing_required_field": {
+"title": "Не заполнено обязательное поле",
+"explanation": "Не заполнено обязательное поле Etsy.",
+"whyPlatformCares": "Если обязательные поля не заполнены, объявление отклоняется.",
+"howToFix": "Заполните недостающее обязательное поле, как указано в описании проблемы."
+},
+"etsy/unknown_header": {
+"title": "Неизвестный столбец",
+"explanation": "Импортёр Etsy не распознаёт этот столбец.",
+"whyPlatformCares": "Неизвестные столбцы игнорируются и могут скрывать проблемы в данных.",
+"howToFix": "Удалите столбец или переименуйте его в заголовок, который поддерживает Etsy."
+},
+"etsy/too_many_materials": {
+"title": "Слишком много материалов",
+"explanation": "В объявлении больше 13 материалов.",
+"whyPlatformCares": "Etsy допускает не более 13 материалов на объявление; лишние отклоняются при массовом редактировании.",
+"howToFix": "Оставьте 13 самых важных материалов."
+},
+"etsy/quantity_too_high": {
+"title": "Количество больше 999",
+"explanation": "Количество больше 999.",
+"whyPlatformCares": "Etsy ограничивает количество в каждом объявлении значением 999.",
+"howToFix": "Задайте Quantity не больше 999."
+},
+"ebay/missing_required_header": {
+"title": "Нет обязательного столбца",
+"explanation": "В строке заголовков нет одного или нескольких обязательных столбцов eBay File Exchange.",
+"whyPlatformCares": "eBay File Exchange нужны определённые названия столбцов, чтобы правильно сопоставить поля при загрузке.",
+"howToFix": "Используйте шаблон eBay File Exchange и убедитесь, что обязательные столбцы (Title, StartPrice, Quantity) есть в файле."
+},
+"ebay/invalid_action": {
+"title": "Недопустимое значение Action",
+"explanation": "Значение в столбце Action не входит в число операций, которые принимает eBay.",
+"whyPlatformCares": "eBay File Exchange по Action решает, добавить (Add), изменить (Revise), удалить или завершить (End) объявление. Из-за недопустимого значения отклоняется вся строка.",
+"howToFix": "Используйте одно из значений: Add, Revise, Relist, End, VerifyAdd или Status."
+},
+"ebay/missing_title": {
+"title": "Нет названия объявления",
+"explanation": "Поле Title обязательно для всех объявлений eBay.",
+"whyPlatformCares": "Объявления без названия нельзя опубликовать на eBay.",
+"howToFix": "Укажите информативное название объявления длиной до 80 символов."
+},
+"ebay/title_too_long": {
+"title": "Название длиннее 80 символов",
+"explanation": "eBay жёстко ограничивает названия объявлений 80 символами.",
+"whyPlatformCares": "Названия длиннее 80 символов eBay File Exchange отклоняет, и их нельзя загрузить.",
+"howToFix": "Сократите название до 80 символов или меньше. Сосредоточьтесь на ключевых словах, которые ищут покупатели."
+},
+"ebay/missing_price": {
+"title": "Нет StartPrice",
+"explanation": "StartPrice обязательно для всех объявлений eBay.",
+"whyPlatformCares": "Объявления без цены отклоняются при загрузке.",
+"howToFix": "Укажите StartPrice десятичным числом (например, 19.99)."
+},
+"ebay/invalid_price": {
+"title": "Недопустимое StartPrice",
+"explanation": "StartPrice должно быть допустимым десятичным числом.",
+"whyPlatformCares": "Из-за недопустимых цен строки объявлений не загружаются.",
+"howToFix": "Используйте простое десятичное число, например 19.99, без символов валюты и запятых."
+},
+"ebay/invalid_quantity": {
+"title": "Недопустимое Quantity",
+"explanation": "Quantity должно быть неотрицательным целым числом.",
+"whyPlatformCares": "eBay требует числовое количество во всех объявлениях. Недопустимые значения вызывают ошибки загрузки.",
+"howToFix": "Используйте целое число, например 0, 1 или 10."
+},
+"ebay/invalid_condition_id": {
+"title": "Нераспознанный ConditionID",
+"explanation": "Значение ConditionID не соответствует стандартному коду состояния eBay.",
+"whyPlatformCares": "eBay показывает покупателям состояние товара по ConditionID. Нераспознанные ID могут быть отклонены или показать неверное состояние.",
+"howToFix": "Используйте стандартный ConditionID eBay, например 1000=Новый, 1500=Новый (другое), 2000=Сертифицированный восстановленный, 2500=Восстановлен продавцом, 3000=Б/у, 7000=На запчасти или неисправен. Допустимые ID зависят от категории."
+},
+"ebay/invalid_duration": {
+"title": "Недопустимое Duration",
+"explanation": "Значение Duration не соответствует ни одному распознаваемому формату длительности объявления eBay.",
+"whyPlatformCares": "Нераспознанная длительность может по умолчанию дать короткий аукцион или привести к отклонению объявления.",
+"howToFix": "Используйте GTC (Good 'Til Cancelled) для объявлений с фиксированной ценой или Days_1, Days_3, Days_5, Days_7 или Days_10 для аукционов."
+},
+"ebay/invalid_format": {
+"title": "Недопустимый Format объявления",
+"explanation": "Значение Format не является распознаваемым типом объявления eBay.",
+"whyPlatformCares": "Поле Format сообщает eBay, как показывать объявление. Недопустимое значение может привести к ошибке строки.",
+"howToFix": "Используйте FixedPrice для объявлений «Купить сейчас» или Auction для аукционов."
+},
+"ebay/too_many_images": {
+"title": "Слишком много изображений",
+"explanation": "eBay допускает не более 24 фотографий на объявление.",
+"whyPlatformCares": "eBay отклоняет или отбрасывает фотографии сверх лимита в 24.",
+"howToFix": "Сократите список PictureURL до 24 URL или меньше, разделённых символом |."
+},
+"ebay/invalid_picture_url": {
+"title": "Недопустимый URL фотографии",
+"explanation": "Один или несколько URL фотографий не являются допустимыми URL http(s).",
+"whyPlatformCares": "eBay загружает изображения по указанным URL при публикации. Из-за недопустимых URL объявления останутся без изображений.",
+"howToFix": "Используйте полные URL https:// общедоступных изображений. Разделяйте несколько URL вертикальной чертой (|)."
+},
+"ebay/invalid_dispatch_time": {
+"title": "Недопустимое DispatchTimeMax",
+"explanation": "DispatchTimeMax должно быть неотрицательным целым числом — сроком обработки заказа в днях.",
+"whyPlatformCares": "eBay показывает срок обработки покупателям. Недопустимое значение может помешать загрузке объявления.",
+"howToFix": "Используйте целое число, например 1, 2 или 3 (дней до отправки)."
+},
+"ebay/duplicate_sku": {
+"title": "Повторяющийся CustomLabel (SKU)",
+"explanation": "У двух или более строк одинаковое значение CustomLabel.",
+"whyPlatformCares": "Повторяющиеся CustomLabel в действии Add могут создать конфликтующие объявления. Для обновления существующих объявлений используйте действие Revise.",
+"howToFix": "Убедитесь, что у каждого объявления уникальный CustomLabel, или используйте Action=Revise для обновления существующих объявлений."
+},
+"ebay/variation_specifics_mismatch": {
+"title": "Несоответствие характеристик вариации",
+"explanation": "VariationSpecificsName и VariationSpecificsValue должны быть либо оба заполнены, либо оба пусты.",
+"whyPlatformCares": "Чтобы построить атрибуты вариации, eBay нужны соответствующие пары «название/значение». Несоответствие не даёт создать вариацию.",
+"howToFix": "Укажите в каждой строке вариации и VariationSpecificsName (например, 'Color|Size'), и VariationSpecificsValue (например, 'Blue|Medium')."
+},
+"ebay/duplicate_variation_combo": {
+"title": "Повторяющееся сочетание вариации",
+"explanation": "У двух или более строк вариаций одного объявления одинаковое сочетание VariationSpecifics.",
+"whyPlatformCares": "Повторяющиеся сочетания вариаций перезаписывают друг друга при загрузке, что приводит к потере данных.",
+"howToFix": "Убедитесь, что у каждой строки вариации уникальное сочетание VariationSpecificsName и VariationSpecificsValue."
+},
+"ebay/missing_category_id": {
+"title": "Category пусто",
+"explanation": "У нового объявления нет номера категории eBay.",
+"whyPlatformCares": "eBay требует категорию для каждого нового объявления; строки без неё отклоняются.",
+"howToFix": "Найдите числовой ID категории в дереве категорий eBay и укажите его в каждой строке нового объявления."
+},
+"ebay/invalid_category_id": {
+"title": "Недопустимое Category",
+"explanation": "Значение Category не является числовым ID категории eBay.",
+"whyPlatformCares": "ID категорий eBay всегда числовые. Название категории при загрузке отклоняется.",
+"howToFix": "Используйте числовой ID из дерева категорий eBay (например, 9355 для «Мобильные телефоны и смартфоны»)."
+},
+"ebay/missing_action_column": {
+"title": "Нет столбца Action",
+"explanation": "В файле нет столбца Action.",
+"whyPlatformCares": "Файлы загрузки eBay по первому столбцу (Action, с площадкой и валютой в заголовке) решают, что делать с каждой строкой.",
+"howToFix": "Возьмите за основу шаблон загрузки из Seller Hub и сохраните его первый столбец."
+},
+"ebay/missing_action": {
+"title": "Нет Action",
+"explanation": "В строке объявления нет Action.",
+"whyPlatformCares": "Пустым Action могут оставлять только строки вариаций; остальные строки eBay пропускает.",
+"howToFix": "Задайте Action: Add, Revise, Relist или End."
+},
+"ebay/missing_item_id": {
+"title": "Нет ItemID",
+"explanation": "В строке Revise, Relist или End нет ItemID.",
+"whyPlatformCares": "eBay нужен номер товара, чтобы найти объявление, которое нужно изменить.",
+"howToFix": "Добавьте номер товара eBay в столбец ItemID."
+},
+"ebay/missing_end_code": {
+"title": "Нет EndCode",
+"explanation": "В строке End нет EndCode.",
+"whyPlatformCares": "eBay спрашивает, почему объявление завершается досрочно.",
+"howToFix": "Используйте NotAvailable, LostOrBroken, Incorrect или OtherListingError."
+},
+"ebay/missing_condition": {
+"title": "Нет состояния",
+"explanation": "У нового объявления нет ConditionID.",
+"whyPlatformCares": "Большинство категорий eBay требуют указать состояние товара.",
+"howToFix": "Укажите ConditionID, например 1000 (Новый) или 3000 (Б/у)."
+},
+"ebay/fixed_price_not_gtc": {
+"title": "Фиксированная цена не в режиме GTC",
+"explanation": "У объявления с фиксированной ценой длительность отличается от GTC.",
+"whyPlatformCares": "eBay размещает все объявления с фиксированной ценой в режиме Good 'Til Cancelled.",
+"howToFix": "Задайте Duration: GTC."
+},
+"ebay/invalid_relationship_details": {
+"title": "Недопустимое RelationshipDetails",
+"explanation": "RelationshipDetails не соответствует формату Name=Value, принятому в eBay.",
+"whyPlatformCares": "eBay строит выбор вариаций из RelationshipDetails; из-за неправильного значения объявление отклоняется.",
+"howToFix": "Родительская строка: Color=Blue;Red|Size=M;L. Вариация: Color=Blue|Size=M."
+},
+"ebay/variation_without_parent": {
+"title": "Вариация без родительской строки",
+"explanation": "Строка вариации не следует за родительской строкой объявления.",
+"whyPlatformCares": "eBay привязывает строки Relationship=Variation к родительской строке, которая находится прямо над ними.",
+"howToFix": "Переместите строки вариаций сразу под их родительскую строку."
+},
+"ebay/variation_value_not_in_parent": {
+"title": "Значение вариации не объявлено",
+"explanation": "Вариация использует значение, которого нет в родительской строке.",
+"whyPlatformCares": "eBay принимает только значения вариаций, объявленные в RelationshipDetails родительской строки.",
+"howToFix": "Добавьте значение в родительскую строку или исправьте вариацию."
+},
+"amazon/missing_required_header": {
+"title": "Нет обязательного столбца",
+"explanation": "В строке заголовков нет одного или нескольких обязательных столбцов плоского файла Amazon.",
+"whyPlatformCares": "Обработчику плоских файлов Amazon нужны точные названия столбцов. Если столбцов не хватает, файл отклоняется.",
+"howToFix": "Используйте шаблон Inventory Loader или шаблон категории Amazon; в каждом файле нужен столбец sku."
+},
+"amazon/missing_sku": {
+"title": "Нет SKU",
+"explanation": "Поле sku обязательно в каждой строке остатков Amazon.",
+"whyPlatformCares": "Amazon по SKU однозначно определяет ваши объявления. Строки без SKU отклоняются.",
+"howToFix": "Укажите уникальный SKU (до 40 символов) в каждой строке товара."
+},
+"amazon/sku_too_long": {
+"title": "SKU длиннее 40 символов",
+"explanation": "Amazon ограничивает SKU 40 символами.",
+"whyPlatformCares": "Обработчик плоских файлов отклоняет SKU длиннее 40 символов.",
+"howToFix": "Сократите SKU до 40 символов или меньше, сохранив его уникальность."
+},
+"amazon/duplicate_sku": {
+"title": "Повторяющийся SKU",
+"explanation": "У двух или более строк этого файла одинаковый SKU.",
+"whyPlatformCares": "Из-за повторяющихся SKU одна строка перезаписывает другую при обработке, и данные об остатках или ценах могут пропасть.",
+"howToFix": "Убедитесь, что каждый SKU встречается в файле только один раз. Чтобы явно удалить объявление, используйте add-delete='d'."
+},
+"amazon/missing_item_name": {
+"title": "Нет item-name",
+"explanation": "Поле item-name (название товара) обязательно для объявлений Amazon.",
+"whyPlatformCares": "Amazon нужно название товара, чтобы показывать объявления в поиске и на страницах товаров.",
+"howToFix": "Укажите информативное название товара в столбце item-name (до 500 символов)."
+},
+"amazon/item_name_too_long": {
+"title": "Слишком длинное item-name",
+"explanation": "Amazon обычно допускает до 500 символов в item-name.",
+"whyPlatformCares": "Названия сверх лимита могут обрезаться или отклоняться в зависимости от шаблона категории.",
+"howToFix": "Сократите item-name до 500 символов или меньше. Сосредоточьтесь на бренде, типе товара и ключевых характеристиках."
+},
+"amazon/missing_price": {
+"title": "Нет цены",
+"explanation": "price пусто в строке, которая добавляет или обновляет предложение.",
+"whyPlatformCares": "Существующие предложения сохраняют текущую цену, но новое предложение без цены не может быть опубликовано.",
+"howToFix": "Укажите допустимую цену десятичным числом (например, 29.99)."
+},
+"amazon/invalid_price": {
+"title": "Недопустимая цена",
+"explanation": "Значение price не является допустимым десятичным числом.",
+"whyPlatformCares": "Из-за недопустимой цены обработчик плоских файлов Amazon отклоняет строку.",
+"howToFix": "Используйте простое десятичное число, например 29.99 (без знака доллара, запятых и текста)."
+},
+"amazon/invalid_quantity": {
+"title": "Недопустимое количество",
+"explanation": "Значение quantity должно быть неотрицательным целым числом.",
+"whyPlatformCares": "Amazon отклоняет строки, в которых количество не является допустимым числом. Отрицательные значения не принимаются.",
+"howToFix": "Используйте целое число, например 0, 5 или 100."
+},
+"amazon/invalid_product_id_type": {
+"title": "Недопустимое product-id-type",
+"explanation": "Значение product-id-type не является распознаваемым типом идентификатора Amazon.",
+"whyPlatformCares": "Amazon по product-id-type понимает, как читать поле product-id (например, как ASIN или UPC). Из-за недопустимого типа товар не сопоставляется.",
+"howToFix": "Inventory Loader: 1 (ASIN), 2 (ISBN), 3 (UPC), 4 (EAN). Шаблоны категорий: ASIN, UPC, EAN, ISBN или GTIN."
+},
+"amazon/invalid_item_condition": {
+"title": "Недопустимое item-condition",
+"explanation": "Код item-condition не является распознаваемым значением состояния Amazon.",
+"whyPlatformCares": "Amazon показывает состояние покупателям и использует его для классификации объявлений. Нераспознанный код может быть отклонён.",
+"howToFix": "Используйте числовой код состояния Amazon: 11=Новый, 10=Восстановленный, 1=Б/у — как новый, 2=Б/у — очень хорошее, 3=Б/у — хорошее, 4=Б/у — приемлемое."
+},
+"amazon/min_above_max_price": {
+"title": "Минимальная цена выше максимальной",
+"explanation": "minimum-seller-allowed-price больше, чем maximum-seller-allowed-price, поэтому ни одна цена не удовлетворит обоим условиям.",
+"whyPlatformCares": "Amazon отклоняет такой диапазон цен, а все предложения вне его отключаются.",
+"howToFix": "Поменяйте значения местами или очистите одно из них."
+},
+"amazon/price_outside_allowed_range": {
+"title": "Цена вне допустимого диапазона",
+"explanation": "Цена ниже minimum-seller-allowed-price или выше maximum-seller-allowed-price.",
+"whyPlatformCares": "Amazon отключает предложения с ценой вне заданного вами диапазона, и товар перестаёт продаваться.",
+"howToFix": "Измените цену или расширьте диапазон минимума/максимума."
+},
+"amazon/invalid_add_delete": {
+"title": "Недопустимое значение add-delete",
+"explanation": "Поле add-delete должно быть 'a' (добавить или обновить), 'd' (удалить предложение) или 'x' (удалить предложение и данные товара).",
+"whyPlatformCares": "При недопустимом значении add-delete обработчик Amazon пропускает строку.",
+"howToFix": "Используйте 'a', чтобы добавить или обновить предложение, 'd', чтобы удалить его, или 'x', чтобы удалить его вместе с данными товара."
+},
+"amazon/invalid_fulfillment_channel": {
+"title": "Недопустимое fulfillment-center-id",
+"explanation": "Значение fulfillment-center-id не является распознаваемым типом выполнения заказов Amazon.",
+"whyPlatformCares": "Канал выполнения определяет, кто отправляет заказ: Amazon (FBA) или вы (MFN). Из-за недопустимого значения может примениться неверный вариант по умолчанию.",
+"howToFix": "Используйте DEFAULT для доставки продавцом (отправляете вы) или AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN для FBA в соответствующем регионе."
+},
+"amazon/invalid_image_url": {
+"title": "Недопустимый URL изображения",
+"explanation": "image-url не является допустимым URL http(s).",
+"whyPlatformCares": "Amazon загружает изображения товара по указанному URL. Из-за недопустимого URL объявление останется без изображений, а это снижает конверсию.",
+"howToFix": "Используйте полный URL https:// общедоступного изображения товара (JPEG или PNG, рекомендуется не меньше 500×500 px)."
+},
+"amazon/description_too_long": {
+"title": "Слишком длинное item-description",
+"explanation": "item-description превышает обычный лимит Amazon в 2000 символов.",
+"whyPlatformCares": "Описания сверх лимита могут обрезаться или отклоняться в зависимости от шаблона категории.",
+"howToFix": "Сократите item-description до 2000 символов или меньше."
+},
+"amazon/brand_name_too_long": {
+"title": "Слишком длинное brand-name",
+"explanation": "brand-name превышает лимит Amazon в 50 символов.",
+"whyPlatformCares": "Названия брендов сверх лимита могут обрезаться или отклоняться.",
+"howToFix": "Сократите brand-name до 50 символов или меньше."
+},
+"amazon/invalid_boolean_field": {
+"title": "Недопустимое значение логического поля",
+"explanation": "Логическое поле доставки (will-ship-internationally или expedited-shipping) содержит значение, отличное от 'y' или 'n'.",
+"whyPlatformCares": "Обработчик плоских файлов Amazon ожидает в этих полях ровно 'y', 'n' или пустое значение. Недопустимые значения молча игнорируются или приводят к отклонению строки.",
+"howToFix": "Используйте 'y', чтобы включить, или 'n', чтобы отключить вариант доставки, либо оставьте поле пустым, чтобы применить настройки аккаунта по умолчанию."
+},
+"amazon/product_id_scientific_notation": {
+"title": "Штрихкод испорчен таблицей",
+"explanation": "product-id выглядит как 1.23457E+11: таблица превратила штрихкод в экспоненциальную запись.",
+"whyPlatformCares": "Цифры после первых нескольких теряются, поэтому Amazon не может сопоставить товар.",
+"howToFix": "Задайте столбцу формат «Текст» и введите полный штрихкод заново."
+},
+"amazon/invalid_product_id": {
+"title": "Недопустимый product-id",
+"explanation": "product-id имеет неверную длину или недопустимые символы для своего типа.",
+"whyPlatformCares": "Amazon сопоставляет предложения с товарами по этому ID; неверный ID вызывает ошибки или привязывает предложение не к тому товару.",
+"howToFix": "Проверьте штрихкод или ASIN: UPC — 12 цифр, EAN — 13, ISBN — 10 или 13, ASIN — 10 букв и цифр."
+}
+}

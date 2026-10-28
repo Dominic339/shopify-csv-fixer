@@ -1,0 +1,201 @@
+---
+title: "Die Shopify-Produkt-CSV-Vorlage erklärt"
+description: "Spalte für Spalte jedes Feld der offiziellen Shopify-Produkt-CSV: was es bewirkt, welche Werte es akzeptiert und welche Felder Pflicht sind."
+keywords: ["shopify produkt csv vorlage", "shopify csv spalten erklärt", "shopify csv vorlage anleitung", "shopify import vorlage", "shopify csv felder", "shopify produktimport spalten", "shopify csv referenz"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Was jede Spalte der Shopify-Produkt-CSV-Vorlage bewirkt"
+  - "Welche Spalten Pflicht und welche optional sind"
+  - "Zulässige Werte und Formate für jeden Feldtyp"
+  - "Wie Spalten auf Produkt- und auf Variantenebene funktionieren"
+  - "Wie du die Vorlage für einfache und variable Produkte richtig ausfüllst"
+bestFor: "Shopify-Händler vor ihrem ersten Import und Entwickler, die einen CSV-Export für Shopify bauen"
+timeToComplete: "15 Minuten"
+---
+
+## Die Vorlage im Überblick
+
+Die offizielle Shopify-Produkt-CSV hat zwei Arten von Spalten: **Produktebene** (einmal pro Produkt, in der ersten bzw. übergeordneten Zeile) und **Variantenebene** (in jeder Zeile dieses Produkts). Hat ein Produkt mehrere Varianten, belegt es mehrere Zeilen in der Datei – alle mit demselben Handle.
+
+Lade die aktuelle Vorlage im Shopify-Adminbereich herunter: Produkte → Importieren → Beispiel-CSV herunterladen.
+
+---
+
+## Spalten zur Identifikation
+
+### Handle (Pflicht)
+
+Der Handle ist die eindeutige, URL-taugliche Kennung des Produkts. Er muss:
+- über alle Produkte deines Shops hinweg eindeutig sein
+- nur Kleinbuchstaben, Ziffern und Bindestriche enthalten
+- nach dem ersten Import gleich bleiben (ein geänderter Handle erzeugt eine neue Produkt-URL)
+
+**Beispiel:** `blue-leather-wallet`
+
+Alle Zeilen desselben Produkts müssen denselben Handle haben. Shopify gruppiert darüber die Variantenzeilen.
+
+### Title (Pflicht in der übergeordneten Zeile)
+
+Der Produktname, wie er im Shop angezeigt wird. Trage ihn in der ersten Zeile eines Produkts ein und lass ihn in den Variantenzeilen leer.
+
+**Beispiel:** `Blue Leather Wallet`
+
+### Body (HTML)
+
+Die Produktbeschreibung. Sie darf HTML enthalten. Enthält die Beschreibung Kommas oder spitze Klammern, setze den ganzen Wert in doppelte Anführungszeichen. Auch Zeilenumbrüche in einer Beschreibung müssen innerhalb eines Werts in Anführungszeichen stehen.
+
+### Vendor
+
+Der Marken- oder Lieferantenname. Einfacher Text.
+
+### Type
+
+Dein eigener Produkttyp (zur Organisation). Das ist nicht Shopifys Produktkategorie, sondern ein frei wählbarer Text zum Filtern.
+
+### Tags
+
+Eine kommagetrennte Liste von Tags. Enthält ein Tag ein Komma, muss der ganze Inhalt der Zelle Tags in Anführungszeichen stehen.
+
+**Beispiel:** `"summer, sale, leather"`
+
+---
+
+## Spalten zur Veröffentlichung
+
+### Published (Wahrheitswert)
+
+Ob das Produkt für Kunden sichtbar ist. Akzeptiert `TRUE` oder `FALSE` (großgeschrieben).
+
+- `TRUE` – das Produkt ist aktiv und sichtbar
+- `FALSE` – das Produkt ist ein Entwurf (im Shop ausgeblendet)
+
+### Published Scope
+
+Wo das Produkt veröffentlicht wird. Gängige Werte: `web` (Onlineshop), `global` (alle Kanäle).
+
+---
+
+## Optionsspalten
+
+Diese Spalten legen die Varianten-Dimensionen fest (Größe, Farbe, Material usw.).
+
+### Option1 Name / Option1 Value
+
+`Option1 Name` ist die Bezeichnung der Dimension (z. B. `Size`, `Color`). `Option1 Value` ist der konkrete Wert jeder Zeile (z. B. `Small`, `Medium`, `Blue`).
+
+Regeln:
+- `Option1 Name` sollte in jeder Zeile desselben Produkts gleich sein
+- `Option1 Value` ändert sich von Variantenzeile zu Variantenzeile
+- Hast du nur eine Option, nutze nur Option1 – nimm die Spalten Option2 und Option3 nur auf, wenn es eine zweite oder dritte Option gibt
+
+### Option2 Name / Option2 Value (optional)
+
+Eine zweite Dimension (z. B. Farbe). Nur nötig, wenn dein Produkt zwei Dimensionen hat.
+
+### Option3 Name / Option3 Value (optional)
+
+Eine dritte Dimension. Shopify unterstützt bis zu 3 Optionen pro Produkt.
+
+---
+
+## Variantenspalten
+
+Diese Spalten gelten für jede Zeile (übergeordnete Zeilen und Variantenzeilen).
+
+### Variant SKU
+
+Eine eindeutige Kennung für genau diese Variante. Optional – nutzt du aber eine Bestandsführung, müssen SKUs eindeutig sein. Lass das Feld leer, wenn du keine SKU-basierte Bestandsführung nutzt.
+
+### Variant Price (Pflicht)
+
+Der Verkaufspreis dieser Variante. Eine einfache Dezimalzahl – ohne Währungssymbole und ohne Tausendertrennzeichen.
+
+**Beispiel:** `19.99`
+
+### Variant Compare At Price
+
+Der „Statt“-Preis, der durchgestrichen angezeigt wird. Lass das Feld leer, wenn kein reduzierter Preis gilt.
+
+### Variant Inventory Qty
+
+Die Anzahl der vorrätigen Einheiten. Ganze Zahl. Nutze `0`, wenn nichts vorrätig ist. Lass das Feld leer, wenn die Bestandsführung für diese Variante abgeschaltet ist.
+
+### Variant Inventory Policy
+
+Was passiert, wenn der Bestand null erreicht. Zulässige Werte: `deny` (Kauf verhindern) oder `continue` (Kauf auch ohne Bestand erlauben).
+
+### Variant Fulfillment Service
+
+Wie die Variante ausgeliefert wird. `manual` für die normale Abwicklung oder der API-Name eines Drittanbieters.
+
+### Variant Requires Shipping (Wahrheitswert)
+
+`TRUE` für physische Produkte, die versendet werden; `FALSE` für digitale Produkte.
+
+### Variant Taxable (Wahrheitswert)
+
+`TRUE`, wenn diese Variante steuerpflichtig ist; `FALSE`, wenn sie steuerfrei ist.
+
+### Variant Barcode
+
+UPC-, EAN- oder ISBN-Barcode. Einfacher Text. Shopify prüft ihn nicht, sondern speichert ihn nur.
+
+### Variant Weight / Variant Weight Unit
+
+Gewicht und Einheit der Variante. Das Gewicht ist eine Dezimalzahl. Als Einheit sind `kg`, `g`, `lb` oder `oz` zulässig.
+
+---
+
+## Bildspalten
+
+### Image Src
+
+Die URL des Produktbilds. Sie muss eine öffentlich erreichbare HTTPS-URL sein. Unterstützte Formate: JPG, JPEG, PNG, GIF, WEBP.
+
+- In der übergeordneten Zeile: das Hauptbild des Produkts
+- In Variantenzeilen: das Bild zur Optionskombination dieser Variante (z. B. das Farbmuster in Blau)
+
+### Image Position
+
+Die Anzeigereihenfolge dieses Bilds. Ganze Zahl ab 1. Das Hauptbild sollte 1 sein.
+
+### Image Alt Text
+
+Der Alt-Text dieses Bilds, für Barrierefreiheit und SEO.
+
+---
+
+## SEO-Spalten
+
+### SEO Title
+
+Der Seitentitel (in Browser-Tabs und Suchergebnissen sichtbar). Bleibt er leer, wird der Title des Produkts verwendet. Empfohlen: unter 70 Zeichen.
+
+### SEO Description
+
+Die Meta-Beschreibung der Produktseite. Empfohlen: unter 160 Zeichen.
+
+---
+
+## Spalte für Geschenkgutscheine
+
+### Gift Card (Wahrheitswert)
+
+Nur `TRUE`, wenn dieses Produkt ein Geschenkgutschein ist. Bei den meisten Produkten sollte hier `FALSE` stehen oder das Feld leer sein.
+
+---
+
+## Einfaches Produkt vs. variables Produkt
+
+**Einfaches Produkt (eine Variante):** eine Zeile pro Produkt. Fülle alle Pflichtspalten aus. Optionsspalten sind optional.
+
+**Variables Produkt (mehrere Varianten):** mehrere Zeilen pro Produkt, alle mit demselben Handle. Die erste Zeile ist die übergeordnete Zeile (mit Title, Image Src, Body HTML usw.). Die weiteren Zeilen sind Variantenzeilen (Title leer; sie übernehmen die Produktdaten über die Gruppierung nach Handle).
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine Shopify-Vorlage in StriveFormats hoch und lass sie Spalte für Spalte prüfen. Pflichtfelder, Wahrheitswerte, die Variantenstruktur und Bild-URLs werden kontrolliert – danach exportierst du eine saubere, importfertige Datei.
+
+[Shopify-CSV-Reparateur öffnen](/app?preset=shopify_products) | [Shopify-Vorlage ansehen](/presets/shopify_products)

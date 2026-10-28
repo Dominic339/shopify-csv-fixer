@@ -1,0 +1,230 @@
+{
+ "shopify": {
+  "gotchas": [
+   {
+    "title": "Puste komórki nadpisują prawdziwe dane",
+    "body": "Przy imporcie z opcją „Nadpisz produkty o pasujących handle” pusta komórka zastępuje wartość, która już jest w sklepie. Korektor eksportuje tylko kolumny, których plik naprawdę używa, więc brakująca kolumna niczego nie usunie."
+   },
+   {
+    "title": "Warianty to wiersze ze wspólnym handle",
+    "body": "Tylko pierwszy wiersz produktu zawiera tytuł i opis. Każdy kolejny wiersz to wariant i potrzebuje własnych wartości opcji. Dwa wiersze z tymi samymi opcjami są odrzucane, a korektor pokazuje oba."
+   },
+   {
+    "title": "Ceny i wartości logiczne w formacie Shopify",
+    "body": "„$ 45”, „45,00” i „yes” wyglądają dobrze w arkuszu, ale nie przechodzą importu. Są zamieniane na 45.00 i true, a każda zmiana trafia do dziennika poprawek."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy działa ze starymi eksportami z Shopify?",
+    "a": "Tak. Starsze nazwy kolumn, takie jak „Variant Price” i „Body (HTML)”, są rozpoznawane, a poprawiony plik używa nazw z aktualnego szablonu, które Shopify akceptuje."
+   },
+   {
+    "q": "Czy usunie wiersze?",
+    "a": "Nie. Każdy wiersz z danymi zostaje (pomijane są tylko całkiem puste linie), a każda automatyczna zmiana trafia do dziennika poprawek."
+   },
+   {
+    "q": "Dlaczego w dużym pliku widzę tak wiele problemów?",
+    "a": "Jeden problem ze strukturą, np. brakująca kolumna opcji, powtarza się w każdym wierszu wariantu. Napraw go raz w tabeli, a liczba szybko spadnie."
+   }
+  ],
+  "metaTitle": "Błąd importu CSV w Shopify – sprawdź plik produktów za darmo | StriveFormats",
+  "metaDescription": "Sprawdź plik CSV produktów Shopify z oficjalnym szablonem przed importem. Ceny, handle i wartości true/false są poprawiane automatycznie; problemy z wariantami i nadpisywaniem są wskazywane co do wiersza.",
+  "kicker": "produkty Shopify",
+  "title": "Korektor CSV dla Shopify",
+  "intro": "Import w Shopify jest rygorystyczny: jeden produkt ze złym handle albo dwa identyczne warianty mogą zatrzymać cały plik. Sprawdź tu najpierw swój CSV, odbierz bezpieczne poprawki za darmo i zobacz dokładnie, które wiersze wciąż wymagają Twojej uwagi.",
+  "exportTip": "W panelu Shopify: Produkty → Eksportuj → „Zwykły plik CSV”. Albo zacznij od oficjalnego szablonu."
+ },
+ "woocommerce": {
+  "gotchas": [
+   {
+    "title": "Kolumny tak/nie to 1 i 0",
+    "body": "Published, „In stock?” i podobne kolumny oczekują 1 lub 0 (Published dopuszcza też -1 dla szkiców). Wartości takie jak „yes” czy „TRUE” są zamieniane za Ciebie."
+   },
+   {
+    "title": "SKU muszą być unikalne",
+    "body": "Importer znajduje istniejące produkty po ID lub SKU. Dwa wiersze z tym samym SKU oznaczają, że jeden się nie uda albo nadpisze drugi, dlatego korektor oznacza oba."
+   },
+   {
+    "title": "Cena promocyjna musi być niższa",
+    "body": "Cena promocyjna równa regularnej lub wyższa jest akceptowana, ale pokazuje bezsensowną „promocję”. Jest oznaczana jako ostrzeżenie, żebyś wychwycił literówki przed klientami."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy zmienia nazwy moich kolumn?",
+    "a": "Nie. Poprawiony plik zachowuje dokładnie przesłane kolumny w tej samej kolejności, więc importuje się ponownie z tym samym przypisaniem kolumn."
+   },
+   {
+    "q": "A produkty zmienne?",
+    "a": "Użyj korektora produktów zmiennych WooCommerce. Sprawdza on też, czy każdy wariant wskazuje produkt nadrzędny i ma unikalną kombinację atrybutów."
+   }
+  ],
+  "metaTitle": "Błąd importu CSV w WooCommerce – sprawdź plik za darmo | StriveFormats",
+  "metaDescription": "Sprawdź plik CSV produktów WooCommerce przed uruchomieniem importera. Ceny, wartości logiczne i stany magazynowe są ujednolicane; zduplikowane SKU i błędy ceny promocyjnej są oznaczane w każdym wierszu.",
+  "kicker": "produkty WooCommerce",
+  "title": "Korektor CSV dla WooCommerce",
+  "intro": "Wbudowany importer WooCommerce pomija wiersze, których nie rozumie, i nie zawsze mówi dlaczego. Sprawdź tu najpierw plik: korektor czyta te same kolumny, które eksportuje WooCommerce, i wskazuje wiersze, które zostałyby pominięte.",
+  "exportTip": "W WordPressie: Produkty → Eksportuj. Zostaw zaznaczone „Eksportuj wszystkie kolumny”."
+ },
+ "woocommerce-variable": {
+  "gotchas": [
+   {
+    "title": "Każdy wariant potrzebuje produktu nadrzędnego",
+    "body": "Kolumna Parent zawiera SKU produktu nadrzędnego (albo id:123). Jeśli nie ma go w pliku, musi już istnieć w sklepie; korektor powie Ci, których nie znalazł."
+   },
+   {
+    "title": "Jedna kombinacja na wariant",
+    "body": "Dwa warianty tego samego produktu z tymi samymi wartościami atrybutów nie mogą istnieć jednocześnie. Korektor oznacza parę, żebyś mógł zmienić jeden z nich."
+   },
+   {
+    "title": "Produkty nadrzędne wymieniają wszystkie wartości",
+    "body": "Wiersz nadrzędny wymienia wszystkie wartości atrybutu oddzielone przecinkami („S, M, L”); każdy wiersz wariantu tylko swoją wartość."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy produkty nadrzędne i warianty mogą być w osobnych plikach?",
+    "a": "Tak, jeśli produkty nadrzędne zostaną zaimportowane jako pierwsze. Wariant, którego produktu nadrzędnego nie ma w pliku, jest zgłaszany jako informacja, a nie błąd."
+   },
+   {
+    "q": "Czy obsługuje więcej niż jeden atrybut?",
+    "a": "Tak. Attribute 1, Attribute 2 itd. są porównywane przy szukaniu zduplikowanych kombinacji."
+   }
+  ],
+  "metaTitle": "Import produktów zmiennych WooCommerce z CSV bez błędów | StriveFormats",
+  "metaDescription": "Sprawdź produkty zmienne i warianty WooCommerce przed importem: odwołania do produktu nadrzędnego, wartości atrybutów i zduplikowane kombinacje wariantów, wiersz po wierszu.",
+  "kicker": "produkty zmienne WooCommerce",
+  "title": "Korektor produktów zmiennych WooCommerce",
+  "intro": "To przy produktach zmiennych importy WooCommerce najczęściej się psują: wariant wskazujący zły produkt nadrzędny albo dwa warianty z tymi samymi atrybutami. Korektor sprawdza całą rodzinę produktów naraz, a nie tylko pojedyncze wiersze.",
+  "exportTip": "Eksportuj przez Produkty → Eksportuj, razem z wariantami. Produkty nadrzędne mają Type „variable”, a podrzędne „variation”."
+ },
+ "etsy": {
+  "gotchas": [
+   {
+    "title": "13 tagów i ani jednego więcej",
+    "body": "Etsy zachowuje pierwsze 13 tagów, a resztę odrzuca. Korektor liczy je w każdej ofercie i ujednolica separatory."
+   },
+   {
+    "title": "Ceny bez symboli",
+    "body": "Ceny to zwykłe liczby w walucie sklepu: „$18” zmienia się w 18.00, a kody walut są zapisywane wielkimi literami (usd → USD)."
+   },
+   {
+    "title": "Linki do zdjęć muszą być pełnymi adresami",
+    "body": "„example.com/mug.jpg” się nie wczyta; potrzebne jest https://. Niedziałające linki do zdjęć są oznaczane przed przesłaniem."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy mogę przesłać poprawiony plik prosto do Etsy?",
+    "a": "Etsy nie ma własnego importu CSV dla ofert, więc większość sprzedawców używa poprawionego pliku z aplikacją do edycji hurtowej albo jako czystej kopii głównej katalogu."
+   },
+   {
+    "q": "Czy sprawdza inne limity Etsy?",
+    "a": "Sprawdza tagi, ceny, ilości, kody walut i adresy zdjęć. Kategorię i profil wysyłki nadal ustawiasz w Etsy."
+   }
+  ],
+  "metaTitle": "Sprawdź i uporządkuj plik CSV ofert Etsy za darmo | StriveFormats",
+  "metaDescription": "Uporządkuj plik CSV ofert Etsy: ceny, kody walut i tagi są ujednolicane, a limity tagów, adresy zdjęć i brakujące dane są oznaczane w każdym wierszu.",
+  "kicker": "oferty Etsy",
+  "title": "Korektor CSV dla Etsy",
+  "intro": "Eksport ofert z Etsy przydaje się do hurtowej edycji w arkuszu i równie łatwo go zepsuć. Korektor porządkuje ceny, kody walut i tagi oraz ostrzega przed wszystkim, co Etsy by obcięło lub odrzuciło.",
+  "exportTip": "W Shop Managerze: Ustawienia → Opcje → Pobierz dane → „Pobierz CSV” w sekcji Oferty."
+ },
+ "ebay": {
+  "gotchas": [
+   {
+    "title": "Stany to liczby",
+    "body": "eBay oczekuje ConditionID, np. 1000 (Nowy) lub 3000 (Używany). Słowa takie jak „Used” są zamieniane na odpowiedni kod."
+   },
+   {
+    "title": "Cena stała oznacza GTC",
+    "body": "Oferty z ceną stałą zawsze trwają „Good 'Til Cancelled”. Każdy inny czas trwania w wierszu z ceną stałą jest oznaczany (eBay zmieniłby go na GTC), a wartości takie jak „30”, które w ogóle nie są poprawnym czasem trwania, to błędy."
+   },
+   {
+    "title": "Nowe oferty potrzebują kategorii",
+    "body": "Dodanie oferty bez numeru kategorii się nie uda. Poprawki mogą ją pominąć, więc korektor oznacza ją tylko w wierszach Add."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy zachowuje nagłówek *Action(SiteID=...)?",
+    "a": "Tak. Nagłówek pierwszej kolumny zawiera ustawienia serwisu i waluty i zostaje dokładnie taki, jak w przesłanym pliku."
+   },
+   {
+    "q": "A oferty z wieloma wariantami?",
+    "a": "Użyj korektora wariantów eBay, który porównuje też ze sobą wiersze nadrzędne i podrzędne każdej oferty."
+   }
+  ],
+  "metaTitle": "Błędy CSV w eBay File Exchange i Seller Hub – sprawdź za darmo | StriveFormats",
+  "metaDescription": "Sprawdź plik ofert eBay przed przesłaniem do raportów Seller Hub lub File Exchange: akcje, ID stanu, czas trwania, kategorie, ceny i ilości.",
+  "kicker": "oferty eBay",
+  "title": "Korektor CSV dla eBay",
+  "intro": "Szablony eBay są wybredne co do kodów: kolumna Action, liczbowe ID stanu i czas trwania ofert muszą być dokładnie poprawne. Korektor zamienia typowe wartości za Ciebie i wskazuje resztę.",
+  "exportTip": "Seller Hub → Raporty → Przesyłanie → „Pobierz szablon”, albo wyeksportuj aktywne oferty."
+ },
+ "ebay-variations": {
+  "gotchas": [
+   {
+    "title": "Wiersz nadrzędny wymienia każdą opcję",
+    "body": "RelationshipDetails wiersza nadrzędnego wygląda tak: Size=8;9|Color=Blue. Każdy wiersz podrzędny może używać tylko wartości, które tam są."
+   },
+   {
+    "title": "Wiersze podrzędne mają cenę i ilość",
+    "body": "Każdy wiersz Variation ma własne SKU, cenę i ilość, a tytuł i kategoria są w wierszu nadrzędnym."
+   },
+   {
+    "title": "Bez powtórzonych kombinacji",
+    "body": "Dwa wiersze podrzędne z Size=8|Color=Blue są odrzucane. Korektor oznacza parę, a także powtórzone SKU."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy mogę łączyć zwykłe oferty i oferty z wariantami?",
+    "a": "Tak. Wiersze bez Relationship są traktowane jak zwykłe oferty i sprawdzane tak jak w ustawieniu dla ofert eBay."
+   },
+   {
+    "q": "Czy zmienia kolejność moich wierszy?",
+    "a": "Nie. Każdy wiersz podrzędny należy do najbliższego wiersza nadrzędnego nad nim, więc przesłana kolejność zostaje zachowana."
+   }
+  ],
+  "metaTitle": "Plik CSV wariantów eBay – sprawdź oferty z wariantami | StriveFormats",
+  "metaDescription": "Sprawdź oferty eBay z wieloma wariantami przed przesłaniem: opcje każdego wariantu muszą być w wierszu nadrzędnym, a żadne dwa warianty nie mogą mieć tej samej kombinacji.",
+  "kicker": "oferty eBay z wariantami",
+  "title": "Korektor wariantów eBay",
+  "intro": "Oferta z wariantami to jeden wiersz nadrzędny i po jednym wierszu podrzędnym na rozmiar lub kolor, połączone przez RelationshipDetails. Korektor czyta całą grupę i mówi, który wiersz podrzędny nie pasuje do nadrzędnego.",
+  "exportTip": "Pobierz szablon wariantów z Seller Hub → Raporty → Przesyłanie albo wyeksportuj oferty z wariantami."
+ },
+ "amazon": {
+  "gotchas": [
+   {
+    "title": "Kody, nie słowa",
+    "body": "product-id-type to 1 (ASIN), 2 (ISBN), 3 (UPC) lub 4 (EAN), a item-condition to liczba, np. 11 dla Nowego. Słowa są zamieniane automatycznie."
+   },
+   {
+    "title": "Arkusze psują kody kreskowe",
+    "body": "Excel zamienia 012345678905 na 1.23457E+11 albo usuwa zero z przodu. Oba przypadki są wykrywane; przy usuniętym zerze proponowany jest prawdopodobny oryginalny numer."
+   },
+   {
+    "title": "Trzymaj się swojego zakresu cen",
+    "body": "Jeśli cena wypada poza minimalną/maksymalną cenę dozwoloną przez sprzedawcę, Amazon wyłącza ofertę. Korektor porównuje wszystkie trzy."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy działa z szablonami kategorii (plikami płaskimi)?",
+    "a": "Akceptuje ich nazwy kolumn, np. item_sku i external_product_id_type, i je zachowuje, ale sprawdzenia są przygotowane z myślą o plikach ofert."
+   },
+   {
+    "q": "Mój plik to .txt rozdzielany tabulatorami. Czy mogę go użyć?",
+    "a": "Tak, prześlij go bez zmian. Poprawiony plik jest eksportowany jako CSV; otwórz go w arkuszu i zapisz jako tekst rozdzielany tabulatorami, jeśli Seller Central wymaga pliku .txt."
+   }
+  ],
+  "metaTitle": "Błędy w pliku Inventory Loader Amazon – sprawdź za darmo | StriveFormats",
+  "metaDescription": "Sprawdź plik Amazon Inventory Loader przed przesłaniem: typy ID produktu i kody stanu są zamieniane, a uszkodzone kody kreskowe, ilości i zakresy cen są oznaczane.",
+  "kicker": "Amazon Inventory Loader",
+  "title": "Korektor dla Amazon Inventory Loader",
+  "intro": "Inventory Loader dodaje lub aktualizuje oferty produktów, które już są na Amazon. To krótki plik, ale opiera się na kodach i identyfikatorach, które arkusze kalkulacyjne uwielbiają psuć. Korektor zamienia kody i wyłapuje szkody.",
+  "exportTip": "Seller Central → Katalog → Dodaj produkty przez przesłanie → Pobierz plik magazynowy (Inventory Loader)."
+ }
+}

@@ -1,0 +1,145 @@
+---
+title: "Les variantes de produit Shopify expliquées : structure CSV et erreurs courantes"
+description: "Découvrez comment le format CSV de Shopify représente les variantes avec le regroupement par Handle, les colonnes Option et les lignes parent/enfant. Évitez les erreurs qui scindent les produits, font disparaître des variantes ou bloquent l'import."
+keywords: ["variantes shopify csv", "importer variantes produit shopify", "shopify handle variantes", "shopify option1 option2", "shopify csv parent enfant", "prix variante shopify csv", "structure csv shopify"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Comment Shopify utilise le Handle pour regrouper un produit parent et ses variantes"
+  - "Quelles colonnes sont nécessaires aux lignes parent et aux lignes de variante"
+  - "Comment Option1 Name, Option1 Value et les colonnes Variant fonctionnent ensemble"
+  - "Les erreurs de structure des variantes les plus courantes et comment les corriger"
+  - "Comment ajouter des variantes à un produit existant sans l'écraser"
+bestFor: "Marchands et développeurs Shopify qui importent ou mettent à jour des produits avec tailles, couleurs, matières ou autres options"
+timeToComplete: "12 minutes"
+---
+
+## Comment Shopify représente les variantes dans le CSV
+
+Dans le CSV de produits Shopify, un produit à plusieurs variantes est représenté par **plusieurs lignes partageant le même Handle**. La première ligne est la ligne « parent » : elle contient les données du produit. Chaque ligne suivante avec le même Handle est une ligne de variante.
+
+### Exemple minimal : un t-shirt en deux tailles
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price,Variant SKU,Image Src
+blue-shirt,Blue T-Shirt,Size,Small,19.99,BLUE-SM,https://cdn.example.com/shirt.jpg
+blue-shirt,,Size,Medium,21.99,BLUE-MD,
+```
+
+À retenir :
+- Les deux lignes partagent le Handle `blue-shirt`.
+- La deuxième ligne a un Title vide, un Image Src vide et un nouvel Option1 Value.
+- Chaque ligne représente une variante achetable (une combinaison de valeurs d'options).
+
+---
+
+## La ligne parent
+
+La première ligne d'un Handle est la ligne parent. Elle définit les champs du produit :
+
+| Colonne | Obligatoire dans la ligne parent | Remarques |
+|---|---|---|
+| Handle | Oui | Identifiant unique du produit ; minuscules et tirets uniquement |
+| Title | Oui | Le nom du produit |
+| Body HTML | Non | Description du produit ; seulement dans la ligne parent |
+| Vendor | Non | Nom de la marque |
+| Type | Non | Type de produit (pour les collections) |
+| Tags | Non | Tags séparés par des virgules |
+| Published | Non | TRUE ou FALSE |
+| Option1 Name | Oui (avec des options) | Nom de la première option (par ex. « Size ») |
+| Option1 Value | Oui (avec des options) | Valeur de la première variante (par ex. « Small ») |
+| Image Src | Non | URL de l'image principale |
+
+**Une ligne parent doit avoir un Title.** Si le Title est vide, Shopify ne la reconnaît pas comme ligne parent et l'import peut donner des résultats incorrects.
+
+---
+
+## Les lignes de variante
+
+Chaque ligne qui suit la première avec le même Handle est une ligne de variante. Les lignes de variante :
+- Partagent le même Handle que la ligne parent.
+- Ont un Title vide (ou le même Title : Shopify l'ignore en dehors de la ligne parent).
+- Ont leur propre Option1 Value (et Option2 Value, Option3 Value le cas échéant).
+- Ont leurs propres Variant Price, Variant SKU, Variant Inventory Qty, etc.
+
+### Colonnes propres aux variantes
+
+| Colonne | Remarques |
+|---|---|
+| Variant Price | Obligatoire pour chaque variante ; nombre décimal (sans symbole monétaire) |
+| Variant SKU | Facultatif mais vivement conseillé ; doit être unique dans toute la boutique |
+| Variant Grams | Poids en grammes |
+| Variant Inventory Qty | Stock initial |
+| Variant Inventory Policy | `deny` ou `continue` (continue = autoriser la survente) |
+| Variant Fulfillment Service | En général `manual` |
+| Variant Requires Shipping | TRUE ou FALSE |
+| Variant Taxable | TRUE ou FALSE |
+| Variant Barcode | EAN, UPC ou autre code-barres |
+
+---
+
+## Plusieurs options (taille ET couleur)
+
+Shopify prend en charge jusqu'à trois options avec les colonnes Option1, Option2 et Option3.
+
+Exemple : t-shirt avec taille et couleur
+
+```
+Handle,Title,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant Price,Variant SKU
+blue-shirt,Blue T-Shirt,Size,Small,Color,Blue,19.99,BLUE-SM-BLU
+blue-shirt,,Size,Small,Color,Red,19.99,BLUE-SM-RED
+blue-shirt,,Size,Medium,Color,Blue,21.99,BLUE-MD-BLU
+blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
+```
+
+- Option1 Name et Option2 Name ne doivent figurer que sur la ligne parent (la première de chaque Handle). Les répéter sur les lignes de variante ne pose pas de problème.
+- Chaque combinaison d'options a besoin de sa propre ligne.
+- Un produit avec 3 tailles et 4 couleurs demande 12 lignes de variante.
+
+---
+
+## Erreurs courantes
+
+### Erreur 1 : des Handles différents pour le même produit
+
+**Symptôme :** Ce qui devrait être un seul produit avec des variantes apparaît comme plusieurs produits séparés après l'import.
+
+**Solution :** Toutes les lignes d'un même produit doivent avoir exactement le même Handle. Une faute de frappe (`blue-shirt` au lieu de `blue-shirt-`) fait créer un nouveau produit à Shopify.
+
+### Erreur 2 : un Title sur chaque ligne
+
+**Symptôme :** L'import réussit, mais Shopify crée des produits en double ou traite les lignes de variante comme des produits indépendants.
+
+**Solution :** Seule la première ligne de chaque Handle doit avoir un Title. Laissez le Title vide sur toutes les lignes de variante.
+
+### Erreur 3 : colonne Option1 Name manquante
+
+**Symptôme :** Erreur d'import « Option1 Name is required », ou toutes les variantes apparaissent comme une seule option nommée « Default Title ».
+
+**Solution :** Incluez toujours `Option1 Name` dans l'en-tête, avec une valeur au moins sur la ligne parent. Si votre produit n'a pas de vraies options, mettez `Title` dans Option1 Name et `Default Title` dans Option1 Value.
+
+### Erreur 4 : des valeurs d'option incohérentes d'une ligne à l'autre
+
+**Symptôme :** Shopify crée plus de variantes que prévu, ou des noms d'option apparaissent en double.
+
+**Solution :** Option1 Name doit être exactement le même texte sur toutes les lignes d'un Handle. Si la ligne parent indique `Size`, chaque ligne de variante doit aussi indiquer `Size` (ou rester vide). Mélanger `Size`, `size` et `Sizes` produit des données d'options incohérentes.
+
+### Erreur 5 : Variant Price vide
+
+**Symptôme :** L'import échoue avec « Variant Price is required », ou des variantes sont créées avec un prix de 0.00.
+
+**Solution :** Variant Price est obligatoire sur chaque ligne. Il n'y a pas d'héritage : même si toutes les variantes ont le même prix, chaque ligne doit l'indiquer.
+
+### Erreur 6 : ajouter une variante écrase les variantes existantes
+
+**Symptôme :** Après un import partiel (ajout d'une seule nouvelle variante), toutes les autres variantes disparaissent.
+
+**Solution :** Pour mettre à jour un produit par import CSV, vous devez inclure **toutes** les variantes existantes dans le fichier, pas seulement la nouvelle. L'import Shopify remplace l'ensemble des variantes d'un Handle. Les variantes omises sont supprimées.
+
+---
+
+## Conseils pour les grands catalogues
+
+- **Générez les lignes de variante automatiquement.** Pour les produits à nombreuses combinaisons (3 tailles × 4 couleurs × 2 matières = 24 lignes), utilisez une formule de tableur ou un script plutôt que de tout saisir à la main.
+- **Utilisez des modèles de SKU cohérents.** Un SKU comme `BASE-TAILLE-COULEUR` (par ex. `SHIRT-SM-BLU`) rend les variantes faciles à identifier et à trier.
+- **Testez d'abord avec un seul produit.** Importez un produit (la ligne parent et toutes ses variantes) avant d'envoyer tout le catalogue. Vérifiez la structure des variantes dans l'administration Shopify avant de continuer.

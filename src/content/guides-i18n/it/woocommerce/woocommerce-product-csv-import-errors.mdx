@@ -1,0 +1,146 @@
+---
+title: "Errori di importazione CSV dei prodotti WooCommerce: cause e soluzioni"
+description: "Correggi gli errori più comuni di importazione CSV dei prodotti WooCommerce: SKU mancanti, tipi non validi, problemi nelle righe di variazione, formato dei prezzi e colonne degli attributi."
+keywords: ["errore importazione csv woocommerce", "errori importazione prodotti woocommerce", "errori csv woocommerce", "correggere csv woocommerce", "problemi importazione woocommerce", "controllare csv woocommerce", "errore caricamento prodotti woocommerce"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Gli errori di importazione CSV di WooCommerce più comuni e cosa significano"
+  - "Come la colonna Type controlla il comportamento dell'importazione"
+  - "Come correggere gli errori nel legame tra prodotto principale e variazione"
+  - "Come formattare correttamente prezzi, booleani e attributi"
+  - "Come usare il report degli errori dell'importatore di WooCommerce"
+bestFor: "Titolari di negozi WooCommerce e sviluppatori alle prese con importazioni CSV di prodotti fallite o parziali"
+timeToComplete: "12 minuti"
+---
+
+## Come WooCommerce convalida le importazioni CSV
+
+L'importatore di prodotti integrato in WooCommerce legge il tuo file CSV e associa le colonne in base al nome. Convalida ogni riga rispetto al modello dati dei prodotti di WooCommerce. Se la convalida fallisce, WooCommerce salta la riga e registra un errore. Al termine dell'importazione vedi un riepilogo con quante righe sono state importate, quante saltate e perché.
+
+Se WordPress è in italiano, l'esportazione usa nomi di colonna in italiano (ad esempio "Tipo" invece di `Type`); l'importatore li riconosce entrambi. In questa guida usiamo i nomi inglesi.
+
+Conoscere le regole di convalida evita la maggior parte degli errori di importazione prima che si verifichino.
+
+---
+
+## Errore: tipo di prodotto non valido o mancante
+
+**Causa:** La colonna `Type` contiene un valore non riconosciuto oppure manca.
+
+**Valori accettati:**
+
+| Type | Descrizione |
+|---|---|
+| `simple` | Un prodotto semplice senza variazioni |
+| `variable` | Un prodotto con variazioni (riga principale) |
+| `variation` | Una variazione specifica di un prodotto variabile (riga figlia) |
+| `grouped` | Un gruppo di prodotti correlati |
+| `external` | Un prodotto che rimanda a un sito esterno |
+
+**Soluzione:**
+- Aggiungi una colonna `Type` se manca
+- Sostituisci i valori personalizzati o scritti male con uno di quelli sopra
+- `Variable` (con la V maiuscola) non equivale a `variable`: usa le minuscole
+
+---
+
+## Errore: SKU mancante o duplicato
+
+**Causa:** `SKU` è vuoto nella riga di un prodotto semplice o variabile, oppure lo stesso SKU compare in due righe diverse.
+
+WooCommerce usa lo SKU come identificativo univoco per collegare le righe importate ai prodotti esistenti. Se lo SKU è vuoto, WooCommerce crea un nuovo prodotto a ogni importazione invece di aggiornare quello esistente.
+
+**Soluzione:**
+- Assegna uno SKU univoco a ogni riga di prodotto (prodotti semplici e righe principali dei prodotti variabili)
+- Le righe di variazione possono ereditare lo SKU del prodotto principale o averne uno proprio, ma non devono duplicare lo SKU di un altro prodotto
+- Cerca gli SKU duplicati in Excel con `CONTA.SE`: `=CONTA.SE($A:$A; A2)`; ogni valore maggiore di 1 è un duplicato
+
+---
+
+## Errore: prezzo normale non valido
+
+**Causa:** `Regular price` contiene un simbolo di valuta (`€`, `$`), usa la virgola come separatore decimale (`19,99`) o è vuoto per un prodotto semplice o variabile.
+
+**Soluzione:**
+- Rimuovi i simboli di valuta: elimina `$`, `€` e `£` con Trova e sostituisci
+- Sostituisci la virgola decimale con il punto: `19,99` → `19.99`
+- Assicurati che ogni prodotto semplice e variabile abbia un prezzo; le righe di variazione possono ereditarlo dal prodotto principale
+
+---
+
+## Errore: campo booleano non valido
+
+**Causa:** Le colonne booleane di WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) accettano `1` (vero) o `0` (falso). Valori come `yes`, `TRUE` o `Y` causano errori di convalida.
+
+**Soluzione:** sostituisci tutti i valori booleani:
+
+| Sostituisci | Con |
+|---|---|
+| `yes`, `Yes`, `TRUE`, `true` | `1` |
+| `no`, `No`, `FALSE`, `false` | `0` |
+
+Usa Trova e sostituisci con "Confronta intero contenuto della cella" attivo.
+
+---
+
+## Errore: prodotto principale della variazione non trovato
+
+**Causa:** Una riga con `Type: variation` fa riferimento a un prodotto principale che non esiste né nel file di importazione né nel database.
+
+Le righe di variazione di WooCommerce hanno bisogno di un prodotto principale. Il collegamento avviene tramite la colonna `Parent` (che deve contenere l'ID del prodotto principale nel database) oppure inserendo il prodotto principale nello stesso file di importazione.
+
+**Soluzione:**
+- Inserisci la riga del prodotto principale nello stesso file CSV
+- Imposta la colonna `Parent` delle righe di variazione con l'ID prodotto WooCommerce del principale (il numero visibile nel pannello di WordPress)
+- Assicurati che la riga principale usi `Type: variable` e non `Type: simple`
+
+---
+
+## Errore: colonne degli attributi non riconosciute
+
+**Causa:** I nomi delle colonne degli attributi non seguono esattamente lo schema di WooCommerce.
+
+**Formato delle colonne degli attributi in WooCommerce:**
+
+- `Attribute 1 name`: il nome del primo attributo (ad es. `Color`)
+- `Attribute 1 value(s)`: il valore o i valori di quella riga (ad es. `Blue`, oppure `Blue | Red` se più di uno)
+- `Attribute 1 visible`: `1` se mostrato nella pagina del prodotto, `0` se nascosto
+- `Attribute 1 global`: `1` per un attributo globale, `0` per uno locale
+
+**Soluzione:**
+- Usa esattamente questo formato con gli spazi: `Attribute 1 name`, non `attribute_1_name` o `Attribute1Name`
+- Numera gli attributi in sequenza a partire da 1
+- Non lasciare buchi (non usare Attribute 3 se non hai usato Attribute 2)
+
+---
+
+## Errore: URL dell'immagine non raggiungibile
+
+**Causa:** L'URL dell'immagine nella colonna `Images` non è un URL HTTPS accessibile pubblicamente, è protetto da login o usa un protocollo diverso da HTTPS.
+
+WooCommerce scarica le immagini durante l'importazione e le salva nella libreria media.
+
+**Soluzione:**
+- Prova ogni URL di immagine nel browser: deve caricare l'immagine direttamente, senza login
+- Usa URL HTTPS (non HTTP)
+- Per le immagini su Google Drive o Dropbox, usa link di download diretto (non link di condivisione)
+- Se le immagini sono su localhost o su un server di staging, spostale prima in un percorso pubblico
+
+---
+
+## Leggere il report degli errori dell'importazione WooCommerce
+
+Dopo un'importazione, WooCommerce mostra un riepilogo con:
+- "X prodotti importati": creati o aggiornati correttamente
+- "X prodotti non riusciti": fai clic su "Visualizza il log di importazione" per vedere quali righe non sono riuscite e perché
+
+Il log di importazione mostra il numero di riga e l'errore specifico. Usa il numero di riga per trovarla nel tuo CSV (ricorda: l'intestazione è la riga 1, quindi i dati iniziano dalla riga 2).
+
+---
+
+## Correggi automaticamente con StriveFormats
+
+Carica il tuo CSV di WooCommerce su StriveFormats. Il validatore controlla i tipi di prodotto, gli SKU, i prezzi, i booleani, le colonne degli attributi e il legame tra prodotti principali e variazioni, e corregge automaticamente i problemi sicuri.
+
+[Apri il correttore CSV di WooCommerce](/app?preset=woocommerce_products) | [Vedi il modello di WooCommerce](/presets/woocommerce_products)

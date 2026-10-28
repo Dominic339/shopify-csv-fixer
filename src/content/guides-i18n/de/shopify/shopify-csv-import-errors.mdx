@@ -1,0 +1,151 @@
+---
+title: "Shopify-CSV-Importfehler: häufige Ursachen und Lösungen"
+description: "Ein vollständiger Leitfaden zu den häufigsten Fehlern beim Shopify-CSV-Import: fehlende Spalten, ungültige Wahr/Falsch-Werte, Probleme mit der Variantenstruktur, Preisfehler und Handle-Konflikte."
+keywords: ["shopify csv import fehler", "shopify import fehlgeschlagen", "shopify csv fehler", "shopify produktimport fehler", "shopify csv reparieren", "shopify csv prüfen", "shopify upload fehler"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Die häufigsten Fehler beim Shopify-CSV-Import und ihre Ursachen"
+  - "Wie Shopify Produkte, Varianten, Handles und Pflichtfelder prüft"
+  - "Wie du fehlende Spalten, ungültige Wahrheitswerte und Preisfehler behebst"
+  - "Wie du Probleme in der Variantenstruktur findest, die Produkte aufteilen oder verschwinden lassen"
+  - "Wie die offizielle Shopify-Vorlage Importfehlern vorbeugt"
+bestFor: "Shopify-Händler und Entwickler, die fehlgeschlagene oder unvollständige Produkt-CSV-Importe untersuchen"
+timeToComplete: "12 Minuten"
+---
+
+## Wie Shopify CSV-Importe prüft
+
+Wenn du eine Produkt-CSV importierst, durchläuft jede Zeile bei Shopify mehrere Prüfschritte:
+
+1. **Kopfzeilenprüfung** – kontrolliert, ob die Pflichtspalten vorhanden sind
+2. **Gruppierung nach Handle** – fasst Zeilen mit demselben Handle zu einem Produkt zusammen
+3. **Feldprüfung** – kontrolliert Datentypen, Pflichtwerte und zulässige Werte
+4. **Konflikterkennung** – sucht nach Handle- und SKU-Konflikten mit bestehenden Produkten
+
+Ein Fehler in einem dieser Schritte lässt Zeilen scheitern. Shopify importiert oft die gültigen Zeilen und überspringt die fehlerhaften – wenn du nicht vorher alle Fehler behebst, landet am Ende nur ein Teil deiner Produkte im Shop.
+
+---
+
+## Fehler: Pflichtspalte fehlt
+
+**Meldung:** „Your CSV file is missing the following columns: Handle, Title...“
+
+**Ursache:** Eine oder mehrere Pflichtspalten fehlen in der Kopfzeile, sind falsch geschrieben oder haben die falsche Groß-/Kleinschreibung.
+
+**Pflichtspalten bei Shopify:**
+
+| Spalte | Hinweis |
+|---|---|
+| `Handle` | URL-tauglicher Kurzname; gruppiert Varianten |
+| `Title` | Produktname |
+| `Variant Price` | Preis für jede Variantenzeile |
+
+**Lösung:**
+- Vergleiche deine Kopfzeile mit der [offiziellen Shopify-Vorlage für Produkt-CSVs](https://help.shopify.com/de/manual/products/import-export/using-csv)
+- Achte auf die Schreibweise: `Handle` statt `handle`, `Variant Price` statt `Variant price`
+- Suche nach Leerzeichen am Anfang oder Ende von Spaltennamen (öffne die Datei dazu in einem Texteditor, nicht in Excel)
+- Erscheint die erste Spalte als `﻿Handle` (mit BOM davor), speichere die Datei erneut als UTF-8 ohne BOM
+
+---
+
+## Fehler: Ungültiger Wahrheitswert
+
+**Meldung:** Die Zeilen werden importiert, aber Published, Gift Card oder Requires Shipping zeigen den falschen Wert
+
+**Ursache:** Die Wahr/Falsch-Spalten von Shopify erwarten `TRUE` oder `FALSE` (großgeschrieben). Werte wie `Yes`, `yes`, `1`, `true` oder `True` werden nicht in allen Feldern akzeptiert.
+
+**Betroffene Spalten:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**Lösung:** Ersetze alle Varianten per Suchen und Ersetzen:
+
+| Das hier ersetzen | Durch das hier |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+In Excel: `Strg+H` (Suchen und Ersetzen) und „Gesamten Zellinhalt vergleichen“ aktivieren, damit kein Text innerhalb längerer Werte ersetzt wird.
+
+---
+
+## Fehler: Leerer oder ungültiger Variantenpreis
+
+**Meldung:** „Variant Price can't be blank“ oder der Preis wird als 0.00 importiert
+
+**Ursache:** `Variant Price` ist leer, enthält ein Währungssymbol (`$19.99`), nutzt ein Komma als Dezimaltrennzeichen (`19,99`) oder ist ein Textwert.
+
+**Lösung:**
+- Fülle `Variant Price` in jeder Zeile aus (übergeordnete Zeilen und Variantenzeilen)
+- Entferne Währungssymbole: lösche `$` per Suchen und Ersetzen
+- Ersetze Kommas als Dezimaltrennzeichen durch Punkte: `19,99` → `19.99`
+- Formatiere die Spalte in Excel vor dem Speichern als Zahl (damit keine Symbole wieder hinzugefügt werden)
+
+---
+
+## Fehler: Variantenstruktur / fehlende Optionsspalten
+
+**Meldung:** Produkte werden ohne Varianten importiert oder Varianten erscheinen als eigene Produkte
+
+**Ursache:** Der Handle wird richtig verwendet (gleicher Wert für alle Zeilen einer Produktgruppe), aber die Optionsspalten stimmen nicht:
+
+- `Option1 Name` oder `Option1 Value` fehlt oder ist in manchen Zeilen leer
+- Die Namen der Optionsspalten sind innerhalb einer Gruppe nicht einheitlich
+- Zeilen, die zum selben Produkt gehören sollen, haben unterschiedliche Handles
+
+**Regeln für Variantenzeilen:**
+- Alle Zeilen desselben Produkts müssen genau denselben `Handle` haben
+- Jede Zeile braucht `Option1 Name` und `Option1 Value`
+- Bei 3 Optionen müssen alle Zeilen die Spalten `Option1`, `Option2` und `Option3` haben
+- `Option1 Name` (z. B. `Size`) sollte in allen Zeilen der Gruppe gleich sein; nur `Option1 Value` ändert sich
+
+**Beispiel für eine korrekte Variantenstruktur:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## Fehler: Doppelter Handle
+
+**Meldung:** Produkte überschreiben sich gegenseitig oder die Gruppierung der Varianten bricht
+
+**Ursache:** Zwei unabhängige Produkte teilen sich denselben Handle. Shopify fasst alle Zeilen mit demselben Handle zu einem Produkt zusammen – ein doppelter Handle verschmilzt also Produkte, die nichts miteinander zu tun haben.
+
+**Lösung:** Gib jedem Produkt einen eindeutigen Handle. Handles müssen URL-tauglich sein: nur Kleinbuchstaben, Ziffern und Bindestriche, keine Leer- oder Sonderzeichen.
+
+Wenn du ein bestehendes Produkt aktualisierst und der Handle in Shopify schon existiert, ist das gewollt – der Import aktualisiert dieses Produkt. Teilt ein neues Produkt aber versehentlich den Handle eines bestehenden, werden dessen Daten überschrieben.
+
+---
+
+## Fehler: SKU-Konflikte
+
+**Meldung:** Die Produkte werden importiert, aber der Lagerbestand stimmt nicht oder SKUs werden als doppelt gemeldet
+
+**Ursache:** Dieselbe SKU steht in zwei verschiedenen Zeilen (oder bei zwei verschiedenen Produkten). Shopify nutzt SKUs für die Bestandsführung – doppelte SKUs führen dazu, dass Bestände falsch zusammengeführt werden.
+
+**Lösung:** Sorge dafür, dass jede Variantenzeile eine eindeutige SKU hat. Wenn du keine SKU-basierte Bestandsführung nutzt, darfst du die SKU leer lassen, aber sie darf nicht in mehreren Zeilen gleich sein.
+
+---
+
+## Fehler: Bild wird nicht importiert
+
+**Meldung:** Die Produkte werden importiert, aber die Bilder fehlen
+
+**Ursache:**
+- Die URL in `Image Src` ist keine öffentlich erreichbare HTTPS-URL
+- Die URL enthält Leer- oder Sonderzeichen, die kodiert werden müssten
+- Das Bildformat wird nicht unterstützt (Shopify akzeptiert JPG, JPEG, PNG, GIF, WEBP)
+
+**Lösung:** Öffne jede Bild-URL im Browser – das Bild sollte direkt laden. Bilder in Google Drive, Dropbox oder auf localhost müssen vor dem Import auf einen öffentlichen Hoster verschoben werden.
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine Shopify-CSV in StriveFormats hoch. Der Validator prüft alle Pflichtspalten, Wahrheitswerte, die Variantenstruktur, Preisfelder und die Eindeutigkeit der Handles – und behebt sichere Probleme mit einem Klick.
+
+[Shopify-CSV-Reparateur öffnen](/app?preset=shopify_products) | [Shopify-Vorlage ansehen](/presets/shopify_products)

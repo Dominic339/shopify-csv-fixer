@@ -1,0 +1,151 @@
+---
+title: "Shopify CSV içe aktarma hataları: yaygın nedenler ve çözümler"
+description: "En yaygın Shopify CSV içe aktarma hataları için eksiksiz rehber: eksik sütunlar, geçersiz mantıksal değerler, varyant yapısı sorunları, fiyat hataları ve handle çakışmaları."
+keywords: ["shopify csv içe aktarma hatası", "shopify csv yükleme hatası", "shopify csv hataları", "shopify ürün içe aktarma hatası", "shopify csv düzeltme", "shopify csv kontrol", "shopify csv yüklenmiyor"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "En yaygın Shopify CSV içe aktarma hataları ve her birinin nedeni"
+  - "Shopify'ın ürünleri, varyantları, handle'ları ve zorunlu alanları nasıl doğruladığı"
+  - "Eksik sütun, geçersiz mantıksal değer ve fiyat hatalarının nasıl düzeltileceği"
+  - "Ürünleri bölen veya kaybolmasına yol açan varyant yapısı sorunlarının nasıl teşhis edileceği"
+  - "İçe aktarma hatalarını önlemek için resmî Shopify şablonunun nasıl kullanılacağı"
+bestFor: "Başarısız veya eksik kalan ürün CSV içe aktarmalarını inceleyen Shopify satıcıları ve geliştiricileri"
+timeToComplete: "12 dakika"
+---
+
+## Shopify CSV içe aktarmalarını nasıl doğrular
+
+Bir ürün CSV'si içe aktardığınızda Shopify her satırı birkaç doğrulama adımından geçirir:
+
+1. **Başlık kontrolü**: zorunlu sütunların olup olmadığını denetler
+2. **Handle'a göre gruplama**: aynı Handle'a sahip satırları tek bir üründe birleştirir
+3. **Alan doğrulaması**: veri türlerini, zorunlu değerleri ve izin verilen değerleri kontrol eder
+4. **Çakışma tespiti**: mevcut ürünlerle handle ve SKU çakışmalarını arar
+
+Herhangi bir adımdaki hata satırların başarısız olmasına neden olur. Shopify genellikle geçerli satırları içe aktarır ve hatalı olanları atlar; bu yüzden önce tüm hataları düzeltmezseniz içe aktarma eksik kalabilir.
+
+---
+
+## Hata: zorunlu sütun eksik
+
+**Mesaj:** "Your CSV file is missing the following columns: Handle, Title..."
+
+**Neden:** Bir veya daha fazla zorunlu sütun başlık satırında yok, yanlış yazılmış ya da büyük/küçük harfi hatalı.
+
+**Shopify'ın zorunlu sütunları:**
+
+| Sütun | Not |
+|---|---|
+| `Handle` | URL'ye uygun kısa ad; varyantları gruplar |
+| `Title` | Ürün adı |
+| `Variant Price` | Her varyant satırının fiyatı |
+
+**Çözüm:**
+- Başlık satırınızı [resmî Shopify ürün CSV şablonu](https://help.shopify.com/tr/manual/products/import-export/using-csv) ile karşılaştırın
+- Büyük/küçük harfe dikkat edin: `handle` değil `Handle`; `Variant price` değil `Variant Price`
+- Sütun adlarının başında veya sonunda boşluk olup olmadığına bakın (dosyayı Excel'de değil, bir metin düzenleyicide açın)
+- İlk sütun `﻿Handle` olarak görünüyorsa (önünde BOM varsa) dosyayı BOM'suz UTF-8 olarak yeniden kaydedin
+
+---
+
+## Hata: geçersiz mantıksal değer
+
+**Mesaj:** Satırlar içe aktarılıyor ama Published, Gift Card veya Requires Shipping yanlış değeri gösteriyor
+
+**Neden:** Shopify'ın mantıksal sütunları `TRUE` veya `FALSE` (büyük harf) bekler. `Yes`, `yes`, `1`, `true` veya `True` gibi değerler her alanda kabul edilmez.
+
+**Etkilenen sütunlar:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
+
+**Çözüm:** Tüm varyantları Bul ve Değiştir ile değiştirin:
+
+| Bunu değiştirin | Bununla |
+|---|---|
+| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
+| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+
+Excel'de: `Ctrl+H` (Bul ve Değiştir), daha uzun değerlerin içindeki metni değiştirmemek için "Tüm hücre içeriği eşleşsin"i işaretleyin.
+
+---
+
+## Hata: boş veya geçersiz varyant fiyatı
+
+**Mesaj:** "Variant Price can't be blank" ya da fiyat 0.00 olarak içe aktarılıyor
+
+**Neden:** `Variant Price` boş, para birimi simgesi içeriyor (`$19.99`), ondalık ayırıcı olarak virgül kullanıyor (`19,99`) veya metin.
+
+**Çözüm:**
+- `Variant Price` alanını her satırda doldurun (hem ana hem varyant satırlarında)
+- Para birimi simgelerini kaldırın: `$` işaretini Bul ve Değiştir ile silin
+- Ondalık virgülü noktayla değiştirin: `19,99` → `19.99`
+- Kaydetmeden önce sütunu Excel'de Sayı olarak biçimlendirin (simgelerin geri gelmemesi için)
+
+---
+
+## Hata: varyant yapısı / eksik seçenek sütunları
+
+**Mesaj:** Ürünler varyantsız içe aktarılıyor veya varyantlar ayrı ürünler olarak görünüyor
+
+**Neden:** Handle doğru kullanılıyor (bir ürün grubundaki tüm satırlarda aynı değer), ancak seçenek sütunları hatalı:
+
+- Bazı satırlarda `Option1 Name` veya `Option1 Value` eksik ya da boş
+- Aynı gruptaki satırlarda seçenek sütunu adları tutarlı değil
+- Aynı ürün olması gereken satırlarda handle farklı
+
+**Varyant satırları için kurallar:**
+- Aynı ürünün tüm satırları tam olarak aynı `Handle`'a sahip olmalı
+- Her satırda `Option1 Name` ve `Option1 Value` bulunmalı
+- 3 seçeneğiniz varsa tüm satırlarda `Option1`, `Option2` ve `Option3` sütunları olmalı
+- `Option1 Name` (ör. `Size`) gruptaki tüm satırlarda aynı olmalı; yalnızca `Option1 Value` değişir
+
+**Doğru varyant yapısı örneği:**
+
+```
+Handle,Title,Option1 Name,Option1 Value,Variant Price
+blue-shirt,Blue T-Shirt,Size,Small,19.99
+blue-shirt,,Size,Medium,21.99
+blue-shirt,,Size,Large,21.99
+```
+
+---
+
+## Hata: yinelenen handle
+
+**Mesaj:** Ürünler birbirinin üzerine yazıyor veya varyant gruplaması bozuluyor
+
+**Neden:** Birbiriyle ilgisi olmayan iki ürün aynı Handle'ı paylaşıyor. Shopify aynı Handle'a sahip tüm satırları tek bir üründe birleştirdiği için yinelenen Handle farklı ürünleri birleştirir.
+
+**Çözüm:** Her ürünün Handle'ını benzersiz yapın. Handle'lar URL'ye uygun olmalı: yalnızca küçük harf, rakam ve tire; boşluk veya özel karakter yok.
+
+Mevcut bir ürünü güncelliyorsanız ve Handle Shopify'da zaten varsa bu bilinçli bir durumdur: içe aktarma o ürünü günceller. Ancak yeni bir ürün yanlışlıkla mevcut bir ürünün Handle'ını paylaşırsa mevcut ürünün verileri üzerine yazılır.
+
+---
+
+## Hata: SKU çakışmaları
+
+**Mesaj:** Ürünler içe aktarılıyor ama stok yanlış ya da SKU'lar yinelenen olarak bildiriliyor
+
+**Neden:** Aynı SKU iki farklı satırda (veya iki farklı üründe) geçiyor. Shopify stok takibi için SKU'ları kullanır; yinelenen SKU'lar stokların yanlış birleşmesine yol açar.
+
+**Çözüm:** Her varyant satırının benzersiz bir SKU'su olduğundan emin olun. SKU tabanlı stok takibi kullanmıyorsanız SKU'yu boş bırakabilirsiniz, ancak satırlar arasında yinelenmemelidir.
+
+---
+
+## Hata: görsel içe aktarılmıyor
+
+**Mesaj:** Ürünler içe aktarılıyor ama görseller yok
+
+**Neden:**
+- `Image Src` URL'si herkese açık bir HTTPS URL'si değil
+- URL'de kodlanması gereken boşluklar veya özel karakterler var
+- Görsel biçimi desteklenmiyor (Shopify JPG, JPEG, PNG, GIF ve WEBP kabul eder)
+
+**Çözüm:** Her görsel URL'sini tarayıcıda deneyin: görsel doğrudan açılmalı. Google Drive, Dropbox veya localhost'taki görseller içe aktarmadan önce herkese açık bir barındırma adresine taşınmalıdır.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+Shopify CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı tüm zorunlu sütunları, mantıksal değer biçimlerini, varyant yapısını, fiyat alanlarını ve handle'ların benzersizliğini kontrol eder; güvenli sorunları tek tıkla düzeltir.
+
+[Shopify CSV Düzelticisini açın](/app?preset=shopify_products) | [Shopify şablonunu görüntüleyin](/presets/shopify_products)

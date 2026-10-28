@@ -40,7 +40,7 @@ export const woocommerceProducts: CsvFormat = {
       },
       {
         q: "What about plugin-specific columns?",
-        a: "We keep extra columns intact and place them after the canonical WooCommerce columns on export.",
+        a: "Extra columns are kept as they are: the fixed file has the same columns, in the same order, as the file you uploaded.",
       },
     ],
   },

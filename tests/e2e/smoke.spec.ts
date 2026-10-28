@@ -33,21 +33,23 @@ test("guides hub renders with platform links and search input", async ({ page })
   await expect(page.getByRole("link", { name: /Shopify/i }).first()).toBeVisible();
 });
 
-test("simulate import toggle shows PASS/FAIL card and turns off cleanly", async ({ page }) => {
+test("simulate import (in Advanced checks) shows PASS/FAIL card and turns off cleanly", async ({ page }) => {
   // Upload the clean Shopify fixture (no blocking issues → should show PASS)
   await page.goto("/app?preset=shopify_products");
   const csvPath = path.join(__dirname, "fixtures", "shopify_minimal.csv");
   await page.locator('input[type="file"][accept=".csv,text/csv"]').setInputFiles(csvPath);
   await expect(page.locator("table")).toBeVisible({ timeout: 10_000 });
 
-  // 1. Click "Simulate Import" toggle — card should appear with PASS
-  await page.getByRole("button", { name: /Simulate Import/i }).click();
+  // 1. Open "Advanced checks", then click "Simulate Import" — card should appear with PASS
+  await page.getByText("Advanced checks").click();
+  const toggle = page.getByRole("button", { name: /Simulate Import/i });
+  await toggle.click();
   const card = page.locator('[data-testid="simulation-results-card"]');
   await expect(card).toBeVisible({ timeout: 5_000 });
   await expect(card).toContainText("PASS");
 
-  // 2. Toggle OFF via "Turn off simulation" — card should disappear
-  await card.getByRole("button", { name: /Turn off simulation/i }).click();
+  // 2. Toggle it off again — card should disappear
+  await toggle.click();
   await expect(card).not.toBeVisible();
 });
 
