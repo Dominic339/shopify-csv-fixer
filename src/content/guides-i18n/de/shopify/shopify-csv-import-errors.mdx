@@ -2,7 +2,7 @@
 title: "Shopify-CSV-Importfehler: häufige Ursachen und Lösungen"
 description: "Ein vollständiger Leitfaden zu den häufigsten Fehlern beim Shopify-CSV-Import: fehlende Spalten, ungültige Wahr/Falsch-Werte, Probleme mit der Variantenstruktur, Preisfehler und Handle-Konflikte."
 keywords: ["shopify csv import fehler", "shopify import fehlgeschlagen", "shopify csv fehler", "shopify produktimport fehler", "shopify csv reparieren", "shopify csv prüfen", "shopify upload fehler"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Die häufigsten Fehler beim Shopify-CSV-Import und ihre Ursachen"
@@ -33,13 +33,13 @@ Ein Fehler in einem dieser Schritte lässt Zeilen scheitern. Shopify importiert 
 
 **Ursache:** Eine oder mehrere Pflichtspalten fehlen in der Kopfzeile, sind falsch geschrieben oder haben die falsche Groß-/Kleinschreibung.
 
-**Pflichtspalten bei Shopify:**
+**Wichtige Shopify-Spalten:**
 
 | Spalte | Hinweis |
 |---|---|
-| `Handle` | URL-tauglicher Kurzname; gruppiert Varianten |
-| `Title` | Produktname |
-| `Variant Price` | Preis für jede Variantenzeile |
+| `Handle` | Fasst Variantenzeilen zusammen. Nötig, wenn ein Produkt Varianten hat oder du vorhandene Produkte aktualisierst; sonst erzeugt Shopify ihn aus dem Titel |
+| `Title` | Produktname. Die einzige Spalte, die Shopify für ein neues Produkt verlangt |
+| `Variant Price` | Preis jeder Variante. Ein leerer Preis wird als 0.00 importiert |
 
 **Lösung:**
 - Vergleiche deine Kopfzeile mit der [offiziellen Shopify-Vorlage für Produkt-CSVs](https://help.shopify.com/de/manual/products/import-export/using-csv)
@@ -70,12 +70,12 @@ In Excel: `Strg+H` (Suchen und Ersetzen) und „Gesamten Zellinhalt vergleichen�
 
 ## Fehler: Leerer oder ungültiger Variantenpreis
 
-**Meldung:** „Variant Price can't be blank“ oder der Preis wird als 0.00 importiert
+**Symptom:** Produkte werden mit 0.00 importiert, oder die Preise stimmen nicht
 
 **Ursache:** `Variant Price` ist leer, enthält ein Währungssymbol (`$19.99`), nutzt ein Komma als Dezimaltrennzeichen (`19,99`) oder ist ein Textwert.
 
 **Lösung:**
-- Fülle `Variant Price` in jeder Zeile aus (übergeordnete Zeilen und Variantenzeilen)
+- Trage `Variant Price` in jeder Variantenzeile ein. Shopify lehnt einen leeren Preis nicht ab, sondern importiert die Variante mit 0.00
 - Entferne Währungssymbole: lösche `$` per Suchen und Ersetzen
 - Ersetze Kommas als Dezimaltrennzeichen durch Punkte: `19,99` → `19.99`
 - Formatiere die Spalte in Excel vor dem Speichern als Zahl (damit keine Symbole wieder hinzugefügt werden)
@@ -94,7 +94,7 @@ In Excel: `Strg+H` (Suchen und Ersetzen) und „Gesamten Zellinhalt vergleichen�
 
 **Regeln für Variantenzeilen:**
 - Alle Zeilen desselben Produkts müssen genau denselben `Handle` haben
-- Jede Zeile braucht `Option1 Name` und `Option1 Value`
+- Die erste Zeile jedes Produkts benennt die Optionen (`Option1 Name`); jede Variantenzeile braucht ihren eigenen `Option1 Value`
 - Bei 3 Optionen müssen alle Zeilen die Spalten `Option1`, `Option2` und `Option3` haben
 - `Option1 Name` (z. B. `Size`) sollte in allen Zeilen der Gruppe gleich sein; nur `Option1 Value` ändert sich
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Ursache:** Zwei unabhängige Produkte teilen sich denselben Handle. Shopify fasst alle Zeilen mit demselben Handle zu einem Produkt zusammen, ein doppelter Handle verschmilzt also Produkte, die nichts miteinander zu tun haben.
 
-**Lösung:** Gib jedem Produkt einen eindeutigen Handle. Handles müssen URL-tauglich sein: nur Kleinbuchstaben, Ziffern und Bindestriche, keine Leer- oder Sonderzeichen.
+**Lösung:** Gib jedem Produkt einen eindeutigen Handle. Handles dürfen Buchstaben, Ziffern und Bindestriche enthalten, aber keine Leerzeichen oder anderen Zeichen, und Shopify speichert sie in Kleinbuchstaben.
 
 Wenn du ein bestehendes Produkt aktualisierst und der Handle in Shopify schon existiert, ist das gewollt: Der Import aktualisiert dieses Produkt. Teilt ein neues Produkt aber versehentlich den Handle eines bestehenden, werden dessen Daten überschrieben.
 

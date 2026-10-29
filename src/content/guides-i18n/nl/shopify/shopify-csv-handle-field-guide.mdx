@@ -2,7 +2,7 @@
 title: "Gids voor het Handle-veld in de Shopify-CSV"
 description: "Alles wat je moet weten over het Handle-veld in de product-CSV van Shopify: wat het doet, de regels voor een geldige handle, hoe het varianten groepeert en hoe je handlefouten oplost."
 keywords: ["shopify csv handle veld", "shopify handle", "shopify handle csv", "shopify product handle", "shopify handle varianten", "shopify handle regels", "shopify csv handle fouten"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Wat het Handle-veld van Shopify doet en waarom het de belangrijkste kolom is"
@@ -33,7 +33,7 @@ Een geldige Shopify-handle moet:
 - alleen **kleine letters, cijfers en streepjes** bevatten
 - **geen spaties** bevatten (gebruik streepjes)
 - **geen speciale tekens** bevatten: geen `&`, `%`, `?`, `/`, `@` en geen Unicode-tekens
-- in elke rij **ingevuld** zijn: lege handles zijn niet toegestaan
+- Op **elke rij ingevuld** zijn bij een product met varianten. Een product van één rij mag hem leeg laten; Shopify maakt de handle dan aan op basis van de titel
 
 | Geldig | Ongeldig | Reden |
 |---|---|---|
@@ -41,7 +41,7 @@ Een geldige Shopify-handle moet:
 | `product-123` | `product/123` | Bevat een schuine streep |
 | `mens-running-shoes` | `men's-running-shoes` | Bevat een apostrof |
 | `widget-v2` | `widget_v2` | Bevat een liggend streepje (technisch toegestaan, maar niet aanbevolen) |
-| `shirt-sm` | `` | Leeg (niet toegestaan) |
+| `shirt-sm` | `` op een variantrij | Leeg: variantrijen hebben de handle nodig om gegroepeerd te blijven |
 
 ---
 

@@ -2,7 +2,7 @@
 title: "Shopify 商品 CSV 中的图片：Image Src、替代文本和位置"
 description: "了解如何在 Shopify 商品 CSV 中组织图片网址：Image Src、Image Position 和 Image Alt Text 列，如何为一个商品添加多张图片，以及如何避免最常见的图片导入失败。"
 keywords: ["shopify 图片 csv", "shopify image src", "shopify 图片替代文本", "shopify image position csv", "shopify 商品图片导入", "shopify csv 多张图片", "shopify 图片网址"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify 商品 CSV 中有哪些图片相关的列"
@@ -50,8 +50,8 @@ blue-shirt,,Size,Medium,21.99,,
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 关键规则：
@@ -88,7 +88,7 @@ Shopify 会在导入时从您提供的网址下载图片。网址必须满足以
 - **必须是 HTTPS**。普通的 HTTP 网址会被拒绝，或可能出现混合内容警告。
 - **必须可公开访问**。需要登录、经过 Cloudflare 验证或有 IP 限制的网址都无法使用。
 - **网址中不能有空格**。空格必须编码为 `%20`，或者修改网址结构。
-- **必须指向图片文件**。Shopify 支持 JPEG、PNG、GIF、WEBP 和 SVG。如果服务器返回正确的 content-type，网址不一定要以扩展名结尾，但大多数导入流程对带扩展名的网址更稳定。
+- **必须指向图片文件。** 使用常见格式，如 JPEG、PNG、GIF 或 WEBP。如果服务器返回正确的 content-type 头，URL 不必以扩展名结尾，但大多数导入在带扩展名的 URL 上更可靠。
 - **不能带会过期的参数**。如果使用会过期的预签名网址（来自 S3、Cloudinary 等），请确保它们在整个导入过程中都有效。
 
 ---
@@ -116,13 +116,13 @@ Shopify 会在导入时从您提供的网址下载图片。网址必须满足以
 
 **解决方法**：确保 Handle 完全一致。哪怕多一个空格或大小写不同，都会创建一个新商品。
 
-### 旧图片没有被删除
+### 重新导入图片
 
-**行为**：重新导入时，Shopify 的 CSV 导入会向商品**添加**图片，而不会删除已有图片。如需删除图片，必须在 Shopify 后台或通过 API 操作。
+**行为：** Shopify 的文档没有说明重新导入商品时，是再次添加图片还是替换现有图片。请先用一个商品测试，并在 Shopify 后台删除不需要的图片。
 
 ### 图片太多
 
-**行为**：如果为同一个 Handle 指定超过 250 个图片网址，Shopify 只会导入前 250 个，其余的会被悄悄忽略。
+**行为：** Shopify 每个商品最多支持 250 张图片。每个 handle 都不要超过这个上限。
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**变体图片（与特定变体行关联的图片**）：
-把 Image Src 放在该变体所在的行。Shopify 会将这张图片与该变体关联：
+**变体图片（关联到某个变体的图片）：**
+在该变体的行中，把图片 URL 填入 `Variant Image` 列（最新模板中为 `Variant image URL`）：
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

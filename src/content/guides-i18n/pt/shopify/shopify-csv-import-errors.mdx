@@ -2,7 +2,7 @@
 title: "Erros de importação de CSV do Shopify: causas comuns e soluções"
 description: "Um guia completo dos erros de importação de CSV mais comuns do Shopify: colunas ausentes, booleanos inválidos, problemas de estrutura de variantes, erros de preço e conflitos de handle."
 keywords: ["erro ao importar csv shopify", "erros de importação csv shopify", "shopify importar produtos csv erro", "csv shopify não importa", "corrigir csv shopify", "validar csv shopify", "erro upload csv shopify"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Os erros de importação de CSV mais comuns do Shopify e o que causa cada um"
@@ -33,13 +33,13 @@ Um erro em qualquer etapa faz linhas falharem. O Shopify muitas vezes importa as
 
 **Causa:** Uma ou mais colunas obrigatórias não estão na linha de cabeçalho, estão escritas errado ou com maiúsculas e minúsculas incorretas.
 
-**Colunas obrigatórias do Shopify:**
+**Colunas principais do Shopify:**
 
 | Coluna | Observações |
 |---|---|
-| `Handle` | Identificador próprio para URL; agrupa as variantes |
-| `Title` | Nome do produto |
-| `Variant Price` | Preço de cada linha de variante |
+| `Handle` | Agrupa as linhas de variantes. É necessário quando o produto tem variantes ou quando você atualiza produtos existentes; caso contrário, o Shopify o gera a partir do título |
+| `Title` | Nome do produto. A única coluna que o Shopify exige para um produto novo |
+| `Variant Price` | Preço de cada variante. Um preço em branco é importado como 0.00 |
 
 **Solução:**
 - Compare sua linha de cabeçalho com o [modelo oficial de CSV de produtos do Shopify](https://help.shopify.com/pt-BR/manual/products/import-export/using-csv)
@@ -70,12 +70,12 @@ No Excel, abra "Localizar e substituir" e marque "Coincidir conteúdo da célula
 
 ## Erro: preço da variante vazio ou inválido
 
-**Mensagem:** "Variant Price can't be blank" ou o preço é importado como 0.00
+**Sintoma:** os produtos são importados a 0.00 ou os preços saem errados
 
 **Causa:** `Variant Price` está vazio, tem símbolo de moeda (`$19.99`), usa vírgula decimal (`19,99`) ou é um texto.
 
 **Solução:**
-- Preencha `Variant Price` em todas as linhas (principais e de variante)
+- Preencha `Variant Price` em todas as linhas de variante. O Shopify não rejeita um preço em branco: importa a variante a 0.00
 - Remova os símbolos de moeda: apague `$` com Localizar e substituir
 - Troque a vírgula decimal por ponto: `19,99` → `19.99`
 - Formate a coluna como Número no Excel antes de salvar (para os símbolos não voltarem)
@@ -94,7 +94,7 @@ No Excel, abra "Localizar e substituir" e marque "Coincidir conteúdo da célula
 
 **Regras para linhas de variante:**
 - Todas as linhas do mesmo produto precisam ter exatamente o mesmo `Handle`
-- Toda linha precisa ter `Option1 Name` e `Option1 Value`
+- A primeira linha de cada produto dá nome às opções (`Option1 Name`); cada linha de variante precisa do próprio `Option1 Value`
 - Se você tem 3 opções, todas as linhas precisam ter as colunas `Option1`, `Option2` e `Option3`
 - `Option1 Name` (ex.: `Size`) deve ser igual em todas as linhas do grupo; só `Option1 Value` muda
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Causa:** Dois produtos sem relação compartilham o mesmo Handle. O Shopify agrupa todas as linhas com o mesmo Handle em um único produto, então um Handle duplicado junta produtos diferentes.
 
-**Solução:** Deixe o Handle de cada produto único. Handles precisam ser próprios para URL: só letras minúsculas, números e hifens, sem espaços nem caracteres especiais.
+**Solução:** use um Handle único para cada produto. Handles podem ter letras, números e hifens, sem espaços nem outros caracteres, e o Shopify os grava em minúsculas.
 
 Se você está atualizando um produto existente e o Handle já existe no Shopify, isso é intencional: a importação vai atualizar esse produto. Mas, se um produto novo compartilhar por engano o Handle de um existente, os dados do existente serão sobrescritos.
 

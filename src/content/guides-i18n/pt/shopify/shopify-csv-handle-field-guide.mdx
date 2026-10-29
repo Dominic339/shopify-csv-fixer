@@ -2,7 +2,7 @@
 title: "Guia do campo Handle no CSV do Shopify"
 description: "Tudo o que você precisa saber sobre o campo Handle do CSV de produtos do Shopify: para que serve, as regras de um handle válido, como ele agrupa variantes e como corrigir erros de handle."
 keywords: ["campo handle csv shopify", "shopify handle", "handle shopify csv", "handle do produto shopify", "shopify handle variantes", "regras de handle shopify", "erros de handle csv shopify"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Para que serve o campo Handle do Shopify e por que ele é a coluna mais importante"
@@ -33,7 +33,7 @@ Um handle válido do Shopify precisa:
 - Ter apenas **letras minúsculas, números e hifens**
 - **Não ter espaços** (use hifens no lugar)
 - **Não ter caracteres especiais**: nada de `&`, `%`, `?`, `/`, `@` ou caracteres Unicode
-- **Estar preenchido** em todas as linhas: handles vazios não são permitidos
+- Estar **preenchido em todas as linhas** de um produto com variantes. Um produto de uma linha só pode deixá-lo em branco, e o Shopify gera o handle a partir do título
 
 | Válido | Inválido | Motivo |
 |---|---|---|
@@ -41,7 +41,7 @@ Um handle válido do Shopify precisa:
 | `product-123` | `product/123` | Tem uma barra |
 | `mens-running-shoes` | `men's-running-shoes` | Tem um apóstrofo |
 | `widget-v2` | `widget_v2` | Tem um sublinhado (tecnicamente permitido, mas não recomendado) |
-| `shirt-sm` | `` | Vazio (não permitido) |
+| `shirt-sm` | `` numa linha de variante | Em branco: as linhas de variante precisam do handle para continuar agrupadas |
 
 ---
 

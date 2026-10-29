@@ -2,7 +2,7 @@
 title: "Shopify 商品 CSV 模板详解"
 description: "逐列讲解 Shopify 官方商品 CSV 模板中的每个字段：每列的作用、可接受的值以及哪些是必填项。"
 keywords: ["shopify 商品 csv 模板", "shopify csv 列说明", "shopify csv 模板指南", "shopify 导入模板", "shopify csv 字段", "shopify 商品导入列", "shopify csv 参考"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify 商品 CSV 模板中每一列的作用"
@@ -18,13 +18,13 @@ timeToComplete: "15 分钟"
 
 Shopify 官方商品 CSV 模板的列分为两类：**商品级**（每个商品填写一次，填在第一行即父行）和**变体级**（该商品的每一行都要填写）。有多个变体的商品会在文件中占用多行，这些行都使用同一个 Handle。
 
-请在 Shopify 后台下载最新模板：产品 → 导入 → 下载示例 CSV。
+在 Shopify 后台下载最新模板：产品 → 导入 → 下载示例 CSV。最新模板使用了新的列名（`URL handle`、`Description`、`Price`、`Product image URL`、`Published on online store` 等）。Shopify 仍然接受本指南使用的旧列名。
 
 ---
 
 ## 标识列
 
-### Handle（必填）
+### Handle（最新模板中为 `URL handle`）
 
 Handle 是商品可用于网址的唯一标识符。它必须：
 - 在店铺所有商品中唯一
@@ -70,9 +70,9 @@ Handle 是商品可用于网址的唯一标识符。它必须：
 - `true`：商品发布到在线商店
 - `false`：商品不在在线商店中显示（仍保留在后台；草稿状态需在 Status 列中单独设置）
 
-### Published Scope
+### Status
 
-商品发布的位置。常用值：`web`（在线商店）、`global`（所有渠道）。
+商品是否可以销售：`active`（默认）、`draft` 或 `archived`。
 
 ---
 
@@ -107,9 +107,9 @@ Handle 是商品可用于网址的唯一标识符。它必须：
 
 该变体的唯一标识符。可选，但如果您跟踪库存，SKU 必须唯一。不按 SKU 跟踪库存时可以留空。
 
-### Variant Price（必填）
+### Variant Price（最新模板中为 `Price`）
 
-该变体的售价。纯小数，不带货币符号，也不带千位分隔符。
+该变体的售价。填写普通小数，不带货币符号和千位分隔符。价格留空会按 0.00 导入。
 
 **示例**：`19.99`
 
@@ -119,7 +119,7 @@ Handle 是商品可用于网址的唯一标识符。它必须：
 
 ### Variant Inventory Qty
 
-库存数量，整数。缺货时填 `0`。如果该变体未开启库存跟踪，则留空。
+库存数量，填写整数。只适用于只有一个地点的商店；有多个地点的商店请用 Shopify 的库存 CSV 更新库存。
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ Handle 是商品可用于网址的唯一标识符。它必须：
 
 ### Variant Barcode
 
-UPC、EAN 或 ISBN 条形码，纯文本。Shopify 不会验证，只会保存。
+UPC、EAN 或 ISBN 条形码。把该列设为文本格式，以免电子表格删掉开头的 0 或把数字变成 1.23E+11。
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-变体的重量和单位。重量为小数，单位可以是 `kg`、`g`、`lb` 或 `oz`。
+`Variant Grams`（最新模板中为 `Weight value (grams)`）是以克为单位的重量，填写不带单位的整数：5.125 kg 写作 `5125`。`Variant Weight Unit`（`Weight unit for display`）只决定向顾客显示的单位：`g`、`kg`、`lb` 或 `oz`。
 
 ---
 
@@ -151,7 +151,7 @@ UPC、EAN 或 ISBN 条形码，纯文本。Shopify 不会验证，只会保存�
 
 ### Image Src
 
-商品图片的网址，必须是可公开访问的 HTTPS 网址。支持的格式：JPG、JPEG、PNG、GIF、WEBP。
+商品图片的 URL。必须是公开可访问、没有密码保护的 `https://` 地址。
 
 - 父行中：商品的主图
 - 变体行中：与该变体选项组合对应的图片（例如蓝色色板）
@@ -174,7 +174,7 @@ UPC、EAN 或 ISBN 条形码，纯文本。Shopify 不会验证，只会保存�
 
 ### SEO Description
 
-商品页面的元描述。建议少于 160 个字符。
+商品页面的元描述。Shopify 最多允许 320 个字符；留空时使用商品描述。
 
 ---
 
@@ -182,7 +182,7 @@ UPC、EAN 或 ISBN 条形码，纯文本。Shopify 不会验证，只会保存�
 
 ### Gift Card（布尔值）
 
-仅当该商品是礼品卡时填 `true`。大多数商品应填 `false` 或留空。
+只有当商品是礼品卡时才填 `true`。大多数商品应为 `false` 或留空。Shopify 无法通过 CSV 导入创建礼品卡，新的礼品卡请在后台创建。
 
 ---
 

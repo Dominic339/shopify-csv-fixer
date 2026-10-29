@@ -2,7 +2,7 @@
 title: "Die Shopify-Produkt-CSV-Vorlage erklärt"
 description: "Spalte für Spalte jedes Feld der offiziellen Shopify-Produkt-CSV: was es bewirkt, welche Werte es akzeptiert und welche Felder Pflicht sind."
 keywords: ["shopify produkt csv vorlage", "shopify csv spalten erklärt", "shopify csv vorlage anleitung", "shopify import vorlage", "shopify csv felder", "shopify produktimport spalten", "shopify csv referenz"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Was jede Spalte der Shopify-Produkt-CSV-Vorlage bewirkt"
@@ -18,13 +18,13 @@ timeToComplete: "15 Minuten"
 
 Die offizielle Shopify-Produkt-CSV hat zwei Arten von Spalten: **Produktebene** (einmal pro Produkt, in der ersten bzw. übergeordneten Zeile) und **Variantenebene** (in jeder Zeile dieses Produkts). Hat ein Produkt mehrere Varianten, belegt es mehrere Zeilen in der Datei, alle mit demselben Handle.
 
-Lade die aktuelle Vorlage im Shopify-Adminbereich herunter: Produkte → Importieren → Beispiel-CSV herunterladen.
+Lade die aktuelle Vorlage in deinem Shopify-Adminbereich herunter: Produkte → Importieren → Beispiel-CSV herunterladen. Die aktuelle Vorlage verwendet neuere Spaltennamen (`URL handle`, `Description`, `Price`, `Product image URL`, `Published on online store` usw.). Shopify akzeptiert weiterhin die älteren Namen aus dieser Anleitung.
 
 ---
 
 ## Spalten zur Identifikation
 
-### Handle (Pflicht)
+### Handle (`URL handle` in der aktuellen Vorlage)
 
 Der Handle ist die eindeutige, URL-taugliche Kennung des Produkts. Er muss:
 - über alle Produkte deines Shops hinweg eindeutig sein
@@ -70,9 +70,9 @@ Ob das Produkt in deinem Onlineshop veröffentlicht wird. Akzeptiert `true` oder
 - `true`: das Produkt wird in deinem Onlineshop veröffentlicht
 - `false`: das Produkt erscheint nicht in deinem Onlineshop (es bleibt in deiner Verwaltung; den Entwurfsstatus legt die Spalte Status fest)
 
-### Published Scope
+### Status
 
-Wo das Produkt veröffentlicht wird. Gängige Werte: `web` (Onlineshop), `global` (alle Kanäle).
+Ob das Produkt verkauft werden kann: `active` (Standard), `draft` oder `archived`.
 
 ---
 
@@ -107,9 +107,9 @@ Diese Spalten gelten für jede Zeile (übergeordnete Zeilen und Variantenzeilen)
 
 Eine eindeutige Kennung für genau diese Variante. Sie ist optional, aber wenn du eine Bestandsführung nutzt, müssen SKUs eindeutig sein. Lass das Feld leer, wenn du keine SKU-basierte Bestandsführung nutzt.
 
-### Variant Price (Pflicht)
+### Variant Price (`Price` in der aktuellen Vorlage)
 
-Der Verkaufspreis dieser Variante. Eine einfache Dezimalzahl ohne Währungssymbole und ohne Tausendertrennzeichen.
+Der Verkaufspreis dieser Variante. Eine einfache Dezimalzahl ohne Währungssymbol und ohne Tausendertrennzeichen. Ein leerer Preis wird als 0.00 importiert.
 
 **Beispiel:** `19.99`
 
@@ -119,7 +119,7 @@ Der „Statt“-Preis, der durchgestrichen angezeigt wird. Lass das Feld leer, w
 
 ### Variant Inventory Qty
 
-Die Anzahl der vorrätigen Einheiten. Ganze Zahl. Nutze `0`, wenn nichts vorrätig ist. Lass das Feld leer, wenn die Bestandsführung für diese Variante abgeschaltet ist.
+Die Anzahl der vorrätigen Einheiten als ganze Zahl. Sie gilt nur für Shops mit einem einzigen Standort; Shops mit mehreren Standorten aktualisieren den Bestand über Shopifys Inventar-CSV.
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ Wie die Variante ausgeliefert wird. `manual` für die normale Abwicklung oder de
 
 ### Variant Barcode
 
-UPC-, EAN- oder ISBN-Barcode. Einfacher Text. Shopify prüft ihn nicht, sondern speichert ihn nur.
+UPC-, EAN- oder ISBN-Barcode. Formatiere die Spalte als Text, damit eine Tabellenkalkulation keine führenden Nullen entfernt oder die Zahl in 1.23E+11 verwandelt.
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-Gewicht und Einheit der Variante. Das Gewicht ist eine Dezimalzahl. Als Einheit sind `kg`, `g`, `lb` oder `oz` zulässig.
+`Variant Grams` (`Weight value (grams)` in der aktuellen Vorlage) ist das Gewicht in Gramm, als ganze Zahl ohne Einheit: 5,125 kg sind `5125`. `Variant Weight Unit` (`Weight unit for display`) legt nur die Einheit fest, die Kunden sehen: `g`, `kg`, `lb` oder `oz`.
 
 ---
 
@@ -151,7 +151,7 @@ Gewicht und Einheit der Variante. Das Gewicht ist eine Dezimalzahl. Als Einheit 
 
 ### Image Src
 
-Die URL des Produktbilds. Sie muss eine öffentlich erreichbare HTTPS-URL sein. Unterstützte Formate: JPG, JPEG, PNG, GIF, WEBP.
+Die URL des Produktbilds. Sie muss eine öffentlich erreichbare `https://`-URL ohne Passwortschutz sein.
 
 - In der übergeordneten Zeile: das Hauptbild des Produkts
 - In Variantenzeilen: das Bild zur Optionskombination dieser Variante (z. B. das Farbmuster in Blau)
@@ -174,7 +174,7 @@ Der Seitentitel (in Browser-Tabs und Suchergebnissen sichtbar). Bleibt er leer, 
 
 ### SEO Description
 
-Die Meta-Beschreibung der Produktseite. Empfohlen: unter 160 Zeichen.
+Die Meta-Beschreibung der Produktseite. Shopify erlaubt bis zu 320 Zeichen; eine leere Zelle übernimmt die Produktbeschreibung.
 
 ---
 
@@ -182,7 +182,7 @@ Die Meta-Beschreibung der Produktseite. Empfohlen: unter 160 Zeichen.
 
 ### Gift Card (Wahrheitswert)
 
-Nur `true`, wenn dieses Produkt ein Geschenkgutschein ist. Bei den meisten Produkten sollte hier `false` stehen oder das Feld leer sein.
+Nur `true`, wenn dieses Produkt ein Geschenkgutschein ist. Die meisten Produkte sollten `false` oder leer sein. Shopify kann Geschenkgutscheine nicht per CSV-Import anlegen, also erstelle neue im Adminbereich.
 
 ---
 

@@ -2,7 +2,7 @@
 title: "Variantes de produto do Shopify explicadas: estrutura do CSV e erros comuns"
 description: "Saiba como o formato CSV do Shopify representa variantes com o agrupamento por Handle, as colunas Option e as linhas principais/secundárias. Evite os erros que dividem produtos, somem com variantes e causam falhas na importação."
 keywords: ["variantes shopify csv", "importar variantes de produto shopify", "shopify handle variantes", "shopify option1 option2", "shopify csv produto principal variante", "preço da variante shopify csv", "estrutura csv shopify"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Como o Shopify usa o Handle para agrupar um produto principal e suas variantes"
@@ -39,7 +39,7 @@ A primeira linha de cada Handle é a linha principal. Ela define os campos do pr
 
 | Coluna | Obrigatória na principal | Observações |
 |---|---|---|
-| Handle | Sim | Identificador único do produto; minúsculas e apenas hifens |
+| Handle | Sim | Identificador único deste produto; letras, números e hifens |
 | Title | Sim | O nome do produto |
 | Body HTML | Não | Descrição do produto; só precisa estar na linha principal |
 | Vendor | Não | Nome da marca |
@@ -66,8 +66,8 @@ Cada linha depois da primeira com o mesmo Handle é uma linha de variante. As li
 
 | Coluna | Observações |
 |---|---|
-| Variant Price | Obrigatória em cada variante; número decimal (sem símbolo de moeda) |
-| Variant SKU | Opcional, mas muito recomendada; precisa ser única em toda a loja |
+| Variant Price | Número decimal (sem símbolo de moeda); um preço em branco é importado como 0.00 |
+| Variant SKU | Opcional, mas muito recomendado; mantenha-o único, porque o Shopify não impede duplicatas |
 | Variant Grams | Peso em gramas |
 | Variant Inventory Qty | Estoque inicial |
 | Variant Inventory Policy | `deny` ou `continue` (continue = permitir vender sem estoque) |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Solução:** Todas as linhas de um produto precisam ter exatamente o mesmo Handle. Um erro de digitação (`blue-shirt` em vez de `blue-shirt-`) faz o Shopify criar um produto novo.
 
-### Erro 2: Title em todas as linhas
+### Erro 2: dados do produto nas linhas de variante
 
-**Sintoma:** A importação funciona, mas o Shopify cria produtos duplicados ou trata linhas de variante como produtos independentes.
+**Sintoma:** um título, uma descrição ou uma tag digitada numa linha de variante não aparece depois da importação.
 
-**Solução:** Só a primeira linha de cada Handle deve ter Title. Deixe o Title vazio em todas as linhas de variante.
+**Solução:** o Shopify lê os campos do produto (Title, Body HTML, Vendor, Tags etc.) na primeira linha de cada Handle. Coloque-os ali e deixe-os em branco nas linhas seguintes.
 
 ### Erro 3: falta a coluna Option1 Name
 
-**Sintoma:** Erro de importação "Option1 Name is required" ou todas as variantes aparecem como uma única opção chamada "Default Title".
+**Sintoma:** as variantes não aparecem ou o produto fica com uma única variante chamada "Default Title".
 
-**Solução:** Inclua sempre `Option1 Name` no cabeçalho, com valor pelo menos na linha principal. Se o produto não tiver opções de verdade, coloque `Title` em Option1 Name e `Default Title` em Option1 Value.
+**Solução:** inclua sempre `Option1 Name` no cabeçalho, com um valor pelo menos na linha principal. Se o produto não tiver opções reais, use `Title` em Option1 Name e `Default Title` em Option1 Value. Se você tirar todas as colunas de opção, o Shopify cria uma nova variante padrão e exclui as existentes.
 
 ### Erro 4: valores de opção diferentes entre as linhas
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### Erro 5: Variant Price vazio
 
-**Sintoma:** A importação falha com "Variant Price is required" ou as variantes são criadas com preço 0.00.
+**Sintoma:** as variantes são criadas com preço de US$ 0.00.
 
-**Solução:** Variant Price é obrigatório em todas as linhas. Não há herança: mesmo que todas as variantes tenham o mesmo preço, cada linha precisa informá-lo.
+**Solução:** o Shopify não rejeita um preço em branco: importa a variante a 0.00. Os preços não são herdados, então mesmo que todas as variantes custem o mesmo, cada linha precisa informá-lo.
 
 ### Erro 6: adicionar uma variante nova sobrescreve as existentes
 
 **Sintoma:** Depois de uma importação parcial (adicionando uma variante nova), todas as outras variantes somem.
 
-**Solução:** Ao atualizar um produto por importação de CSV, você precisa incluir **todas** as variantes existentes no arquivo, não só a nova. O importador do Shopify substitui o conjunto inteiro de variantes de um Handle. Variantes que ficarem de fora são excluídas.
+**Solução:** ao atualizar um produto por importação de CSV, inclua no arquivo **todas** as variantes existentes, não só a nova. O Shopify associa as variantes pelos valores das opções, e as que faltarem no arquivo podem ser removidas quando você sobrescreve o produto.
 
 ---
 

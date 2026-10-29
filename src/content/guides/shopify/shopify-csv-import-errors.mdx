@@ -2,7 +2,7 @@
 title: "Shopify CSV Import Errors: Common Causes and Fixes"
 description: "A complete guide to the most common Shopify CSV import errors: missing columns, invalid booleans, variant structure problems, price errors, and handle conflicts."
 keywords: ["shopify csv import errors", "shopify import failed", "shopify csv errors", "shopify product import error", "fix shopify csv import", "shopify csv validation", "shopify upload error"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "The most common Shopify CSV import errors and what causes each one"
@@ -33,13 +33,13 @@ Errors at any stage cause rows to fail. Shopify often imports the valid rows and
 
 **Cause:** One or more required columns are absent from the header row, misspelled, or have incorrect case.
 
-**Required Shopify columns:**
+**Key Shopify columns:**
 
 | Column | Notes |
 |---|---|
-| `Handle` | URL-safe slug; groups variants |
-| `Title` | Product name |
-| `Variant Price` | Price for every variant row |
+| `Handle` | Groups variant rows. Needed when a product has variants or when you update existing products; otherwise Shopify generates it from the Title |
+| `Title` | Product name. The only column Shopify requires for a new product |
+| `Variant Price` | Price of each variant. A blank price imports as 0.00 |
 
 **Fix:**
 - Compare your header row to the [official Shopify product CSV template](https://help.shopify.com/en/manual/products/import-export/using-csv)
@@ -70,12 +70,12 @@ In Excel: `Ctrl+H` (Find & Replace), check "Match entire cell contents" to avoid
 
 ## Error: Blank or Invalid Variant Price
 
-**Message:** "Variant Price can't be blank" or price imported as 0.00
+**Symptom:** Products import at 0.00, or prices come out wrong
 
 **Cause:** `Variant Price` is empty, contains a currency symbol (`$19.99`), uses a comma decimal separator (`19,99`), or is a text value.
 
 **Fix:**
-- Fill in `Variant Price` for every row (both parent and variant rows)
+- Fill in `Variant Price` on every variant row. Shopify doesn't reject a blank price; it imports the variant at 0.00
 - Remove currency symbols: use Find & Replace to remove `$`
 - Replace comma decimal separators with periods: `19,99` → `19.99`
 - Format the column as Number in Excel before saving (prevents re-adding symbols)
@@ -94,7 +94,7 @@ In Excel: `Ctrl+H` (Find & Replace), check "Match entire cell contents" to avoid
 
 **Rules for variant rows:**
 - All rows for the same product must share the exact same `Handle`
-- Every row must have `Option1 Name` and `Option1 Value`
+- The first row of each product names the options (`Option1 Name`); every variant row needs its own `Option1 Value`
 - If you have 3 options, all rows must have `Option1`, `Option2`, and `Option3` columns
 - `Option1 Name` (e.g., `Size`) should be the same across all rows in the group; only `Option1 Value` changes
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Cause:** Two unrelated products share the same Handle. Shopify groups all rows with the same Handle into one product, so a duplicate Handle merges unrelated products.
 
-**Fix:** Make every product's Handle unique. Handles must be URL-safe: lowercase letters, numbers, and hyphens only. No spaces or special characters.
+**Fix:** Make every product's Handle unique. Handles can contain letters, numbers and hyphens, with no spaces or other characters, and Shopify stores them in lowercase.
 
 If you're updating an existing product and the Handle already exists in Shopify, that's intentional, and the import will update that product. But if a new product accidentally shares a Handle with an existing one, the existing product's data will be overwritten.
 

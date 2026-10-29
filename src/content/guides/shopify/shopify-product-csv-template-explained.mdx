@@ -2,7 +2,7 @@
 title: "Shopify Product CSV Template Explained"
 description: "A column-by-column explanation of every field in the official Shopify product CSV template: what each column does, what values it accepts, and which are required."
 keywords: ["shopify product csv template", "shopify csv columns explained", "shopify csv template guide", "shopify import template", "shopify csv fields", "shopify product import columns", "shopify csv reference"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "What every column in the Shopify product CSV template does"
@@ -18,13 +18,13 @@ timeToComplete: "15 minutes"
 
 The official Shopify product CSV template has two categories of columns: **product-level** (set once per product, on the first/parent row) and **variant-level** (set on every row for that product). When a product has multiple variants, it takes up multiple rows in the file, all sharing the same Handle.
 
-Download the current template from your Shopify admin: Products → Import → Download sample CSV.
+Download the current template from your Shopify admin: Products → Import → Download sample CSV. The current template uses newer column names (`URL handle`, `Description`, `Price`, `Product image URL`, `Published on online store` and so on). Shopify still accepts the older names used in this guide.
 
 ---
 
 ## Identity Columns
 
-### Handle (Required)
+### Handle (`URL handle` in the current template)
 
 The Handle is the product's unique URL-safe identifier. It must:
 - Be unique across all products in your store
@@ -70,9 +70,9 @@ Whether the product is published to your online store. Accepts `true` or `false`
 - `true`: the product is published on your online store
 - `false`: the product isn't shown in your online store (it stays in your admin; draft status is set separately in the Status column)
 
-### Published Scope
+### Status
 
-Where the product is published. Common values: `web` (online store), `global` (all channels).
+Whether the product can be sold: `active` (the default), `draft` or `archived`.
 
 ---
 
@@ -107,9 +107,9 @@ These columns apply to every row (both parent and variant rows).
 
 A unique identifier for this specific variant. It's optional, but if you use inventory tracking, SKUs must be unique. Leave it blank if you don't use SKU-based tracking.
 
-### Variant Price (Required)
+### Variant Price (`Price` in the current template)
 
-The selling price for this variant. A plain decimal number, with no currency symbols or thousands separators.
+The selling price for this variant. A plain decimal number, with no currency symbols or thousands separators. A blank price imports as 0.00.
 
 **Example:** `19.99`
 
@@ -119,7 +119,7 @@ The "was" price shown as a strikethrough. Leave blank if no sale price applies.
 
 ### Variant Inventory Qty
 
-The number of units in stock. Integer. Use `0` if out of stock. Leave blank if inventory tracking is disabled for this variant.
+The number of units in stock, as a whole number. It only applies to stores with a single location; stores with several locations update stock with Shopify's inventory CSV.
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ How the variant is fulfilled. `manual` for standard fulfillment, or the API name
 
 ### Variant Barcode
 
-UPC, EAN, or ISBN barcode. Plain text. Shopify doesn't validate it; it's just stored.
+UPC, EAN, or ISBN barcode. Format the column as text so a spreadsheet doesn't drop leading zeros or turn the number into 1.23E+11.
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-The variant's weight and unit. Weight is a decimal number. Unit accepts `kg`, `g`, `lb`, or `oz`.
+`Variant Grams` (`Weight value (grams)` in the current template) is the weight in grams, as a whole number with no unit: 5.125 kg is `5125`. `Variant Weight Unit` (`Weight unit for display`) only sets the unit shown to customers: `g`, `kg`, `lb` or `oz`.
 
 ---
 
@@ -151,7 +151,7 @@ The variant's weight and unit. Weight is a decimal number. Unit accepts `kg`, `g
 
 ### Image Src
 
-The URL of the product image. Must be a publicly accessible HTTPS URL. Supported formats: JPG, JPEG, PNG, GIF, WEBP.
+The URL of the product image. Must be a publicly accessible `https://` URL with no password protection.
 
 - On the parent row: the main product image
 - On variant rows: the image specific to that variant's option combination (e.g., the blue color swatch)
@@ -174,7 +174,7 @@ The page title tag (shown in browser tabs and search results). Defaults to the p
 
 ### SEO Description
 
-The meta description for the product page. Under 160 characters recommended.
+The meta description for the product page. Shopify allows up to 320 characters; a blank cell uses the product description.
 
 ---
 
@@ -182,7 +182,7 @@ The meta description for the product page. Under 160 characters recommended.
 
 ### Gift Card (Boolean)
 
-`true` only if this product is a gift card. Most products should be `false` or blank.
+`true` only if this product is a gift card. Most products should be `false` or blank. Shopify can't create gift cards from a CSV import, so make new gift cards in the admin.
 
 ---
 

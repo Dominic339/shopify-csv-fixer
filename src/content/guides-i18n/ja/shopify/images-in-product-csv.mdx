@@ -2,7 +2,7 @@
 title: "Shopify 商品 CSV の画像：Image Src、代替テキスト、表示順"
 description: "Shopify の商品 CSV で画像 URL を構成する方法を解説します。Image Src、Image Position、Image Alt Text の列、1 商品に複数の画像を追加する方法、よくある画像インポートの失敗の防ぎ方を紹介します。"
 keywords: ["shopify 画像 csv", "shopify image src", "shopify 画像 代替テキスト", "shopify image position csv", "shopify 商品画像 インポート", "shopify csv 複数画像", "shopify 画像 url"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify の商品 CSV にある画像関連の列"
@@ -50,8 +50,8 @@ blue-shirt,,Size,Medium,21.99,,
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 主なルール：
@@ -88,7 +88,7 @@ Shopify はインポート時に、指定された URL から画像をダウン�
 - **HTTPS であること**。HTTP の URL は拒否されるか、混在コンテンツの警告が出ることがあります。
 - **一般公開されていること**。ログインが必要な URL、Cloudflare のチェックがかかる URL、IP 制限のある URL は使えません。
 - **URL にスペースを含まないこと**。スペースは `%20` にエンコードするか、URL 自体を変更してください。
-- **画像ファイルを指していること**。Shopify は JPEG、PNG、GIF、WEBP、SVG に対応しています。サーバーが正しい Content-Type を返すなら URL の末尾に拡張子がなくても構いませんが、拡張子付きの URL のほうがほとんどのインポート処理で安定して動きます。
+- **画像ファイルを指していること。** JPEG、PNG、GIF、WEBP などの一般的な形式を使います。サーバーが正しい content-type ヘッダーを返せば URL の末尾に拡張子がなくても構いませんが、拡張子付きの URL のほうが多くのインポートで確実に動きます。
 - **期限切れになるパラメータを含まないこと**。S3 や Cloudinary などの期限付き署名 URL を使う場合は、インポートが終わるまで有効であることを確認してください。
 
 ---
@@ -116,13 +116,13 @@ Shopify はインポート時に、指定された URL から画像をダウン�
 
 **対処法**：Handle を完全に一致させてください。余分なスペースが1つあるだけでも、大文字・小文字が違うだけでも、新しい商品が作られます。
 
-### 古い画像が削除されない
+### 画像を再インポートするとき
 
-**動作**：Shopify の CSV インポートは、再インポート時に画像を**追加**します。既存の画像は削除しません。画像を削除したい場合は、Shopify の管理画面か API から行う必要があります。
+**動作:** 商品を再インポートしたときに画像が追加されるのか、既存の画像が置き換わるのかは、Shopify のドキュメントに書かれていません。まず 1 つの商品で試し、不要な画像は Shopify の管理画面で削除してください。
 
 ### 画像が多すぎる
 
-**動作**：1つの Handle に250を超える画像 URL を指定すると、Shopify は最初の250枚だけを取り込み、残りは通知なしで無視します。
+**動作:** Shopify では 1 商品につき最大 250 枚の画像を使えます。各 handle でこの上限を超えないようにします。
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**バリエーション画像（特定のバリエーション行に紐づく画像**）：
-バリエーションと同じ行に Image Src を入れます。Shopify はその画像をそのバリエーションに紐づけます。
+**バリエーション画像（特定のバリエーションにひも付ける画像）:**
+そのバリエーションの行で、画像 URL を `Variant Image` 列（最新のテンプレートでは `Variant image URL`）に入れます:
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

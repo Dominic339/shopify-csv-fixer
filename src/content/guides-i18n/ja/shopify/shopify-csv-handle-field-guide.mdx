@@ -2,7 +2,7 @@
 title: "Shopify CSV の Handle 項目ガイド"
 description: "Shopify 商品 CSV の Handle 項目について知っておくべきことをすべて解説します。役割、有効な handle のルール、バリエーションのまとめ方、handle のエラーの直し方を紹介します。"
 keywords: ["shopify csv handle 項目", "shopify handle", "shopify handle csv", "shopify 商品 handle", "shopify handle バリエーション", "shopify handle ルール", "shopify csv handle エラー"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify の Handle 項目の役割と、それが最も重要な列である理由"
@@ -33,7 +33,7 @@ Handle は Shopify CSV で最も重要な列です。Handle のエラーは、�
 - 使えるのは**半角英小文字、数字、ハイフン**だけ
 - **スペースを含まない**（代わりにハイフンを使う）
 - **特殊文字を含まない**：`&`、`%`、`?`、`/`、`@`、Unicode 文字は使えない
-- すべての行で**空欄にしない**：空の handle は使えない
+- バリエーションのある商品では**すべての行に入力**します。1 行だけの商品は空欄でもよく、その場合 Shopify がタイトルから handle を生成します
 
 | 有効 | 無効 | 理由 |
 |---|---|---|
@@ -41,7 +41,7 @@ Handle は Shopify CSV で最も重要な列です。Handle のエラーは、�
 | `product-123` | `product/123` | スラッシュを含む |
 | `mens-running-shoes` | `men's-running-shoes` | アポストロフィを含む |
 | `widget-v2` | `widget_v2` | アンダースコアを含む（技術的には可能だが非推奨） |
-| `shirt-sm` | `` | 空欄（不可） |
+| `shirt-sm` | バリエーション行で `` | 空欄: バリエーション行がまとまるには handle が必要です |
 
 ---
 
