@@ -17,7 +17,7 @@
 "description": "Los veelvoorkomende CSV-fouten op bij bulkuploads naar eBay via Seller Hub Reports en File Exchange-bestanden: de INFO-regel, ongeldige Action-waarden, categorie-ID's, titellengte, conditie-ID's, looptijden, prijzen en afbeeldings-URL's."
 },
 "etsy/etsy-csv-template-guide": {
-"title": "Gids voor het Etsy-CSV-sjabloon: velden, formaten en veelgemaakte fouten",
+"title": "Gids voor de Etsy-CSV-sjabloon: velden, formaten en veelvoorkomende fouten",
 "description": "Wat er in Etsy's CSV-export van listings staat, wat Etsy er wel en niet mee toestaat, welke limieten elk veld heeft (titels, tags, aantal) en hoe je fouten oplost die spreadsheets erin brengen."
 },
 "general/append-vs-merge-join-csv": {

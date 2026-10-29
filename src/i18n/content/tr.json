@@ -17,7 +17,7 @@
 "description": "Seller Hub Reports ve File Exchange dosyalarıyla yapılan eBay toplu yüklemelerindeki yaygın CSV hatalarını düzeltin: INFO satırı, geçersiz Action değerleri, kategori ID'leri, başlık uzunluğu, durum ID'leri, süreler, fiyatlar ve görsel URL'leri."
 },
 "etsy/etsy-csv-template-guide": {
-"title": "Etsy CSV şablonu rehberi: alanlar, biçimler ve yaygın hatalar",
+"title": "Etsy CSV Şablonu Rehberi: Alanlar, Biçimler ve Sık Yapılan Hatalar",
 "description": "Etsy'nin ilan CSV dışa aktarımında neler olduğu, Etsy'nin bu dosyayla neye izin verip vermediği, her alanın sınırları (başlık, etiket, miktar) ve elektronik tabloların yol açtığı hataların nasıl düzeltileceği."
 },
 "general/append-vs-merge-join-csv": {

@@ -1,0 +1,136 @@
+---
+title: "Leitfaden zur Etsy-CSV-Vorlage: Felder, Formate und häufige Fehler"
+description: "Was in Etsys CSV-Export der Angebote steht, was Etsy damit erlaubt und was nicht, welche Grenzen jedes Feld einhalten muss (Titel, Tags, Menge) und wie du Fehler behebst, die Tabellenkalkulationen einbauen."
+keywords: ["etsy csv vorlage", "etsy angebote csv", "etsy csv felder", "etsy csv import", "etsy massenupload csv", "etsy csv format", "etsy vorlage erklärt", "etsy angebote als csv herunterladen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wie du deine Etsy-Angebote als CSV herunterlädst und was darin steht"
+  - "Warum Etsy keinen CSV-Upload hat und wofür Verkäufer die Datei stattdessen nutzen"
+  - "Die Grenzen für Titel, Tags, Materialien und Menge"
+  - "Wie du Preise, Tags und Bild-URLs richtig formatierst"
+  - "Wie du Fehler behebst, die beim Bearbeiten in Tabellenkalkulationen entstehen"
+bestFor: "Etsy-Verkäufer, die ihre Angebote in einer Tabellenkalkulation bearbeiten, prüfen oder umziehen oder eine Datei für eine App zum Masseneinstellen vorbereiten"
+timeToComplete: "9 Minuten"
+---
+
+## Was Etsys Angebots-CSV ist (und was nicht)
+
+Etsy lässt dich deine aktiven Angebote als CSV herunterladen: Öffne **Shop-Manager → Einstellungen → Optionen → Daten herunterladen** und wähle den CSV-Download für deine Angebote. Laut Etsys Hilfe enthält die Datei für jedes Angebot:
+
+- Titel
+- Beschreibung
+- Preis und Währungscode
+- Menge
+- Tags
+- Materialien
+- Bild-URLs
+- SKU (falls du deinen Angeboten SKUs gegeben hast)
+
+**Etsy hat keinen CSV-Upload für Angebote.** Änderungen in der Datei wirken sich nicht auf deinen Shop aus, und Etsy bietet keine Möglichkeit, sie wieder zu importieren. Verkäufer nutzen den Export, um:
+
+- Angebotsdaten in einer Tabellenkalkulation zu prüfen und aufzuräumen
+- eine Sicherungskopie ihres Katalogs aufzubewahren
+- Angebote auf eine andere Plattform zu übertragen, etwa Shopify oder WooCommerce
+- eine App zum Masseneinstellen zu füttern, die über Etsys API arbeitet
+
+Für Massenänderungen direkt in Etsy nutzt du die Optionen zur Mehrfachbearbeitung auf der Seite Angebote im Shop-Manager.
+
+---
+
+## Die Spalten im Export
+
+In der Datei hat jedes Feld eine eigene Spalte, mit Überschriften wie `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` und `SKU`. Fotos bekommen je eine eigene Spalte (`IMAGE1`, `IMAGE2` usw.) mit der URL des Bilds.
+
+| Spalte | Inhalt | Format |
+|---|---|---|
+| `TITLE` | Titel des Angebots | Bis zu 140 Zeichen |
+| `DESCRIPTION` | Beschreibung des Angebots | Reiner Text |
+| `PRICE` | Preis in deiner Shopwährung | Einfache Zahl, z. B. `14.99` |
+| `CURRENCY_CODE` | Shopwährung | Dreistelliger Code, z. B. `USD` |
+| `QUANTITY` | Verfügbare Menge | Ganze Zahl, bis 999 |
+| `TAGS` | Such-Tags | Durch Kommas getrennt, bis zu 13 |
+| `MATERIALS` | Materialien | Durch Kommas getrennt, bis zu 13 |
+| `IMAGE1`, `IMAGE2`, ... | Foto-URLs | Vollständige `https://`-URLs |
+| `SKU` | Deine SKU | Text |
+
+Behalte die Spaltennamen genau bei, wenn ein Tool die Datei wieder einlesen soll.
+
+---
+
+## Grenzen, die jedes Feld einhalten muss
+
+Das sind die Grenzen, die Etsys Angebotseditor durchsetzt. Eine Datei, die sie überschreitet, lässt sich mit keinem Tool wieder in gültige Angebote verwandeln:
+
+- **Titel:** höchstens 140 Zeichen. Die Etsy-Suche zeigt nur den Anfang, also stell die wichtigsten Wörter nach vorne.
+- **Tags:** bis zu 13 pro Angebot, jeder höchstens 20 Zeichen lang, Leerzeichen eingeschlossen. Verwende Buchstaben, Ziffern und Leerzeichen; Etsy lehnt die meisten Sonderzeichen in Tags ab.
+- **Materialien:** bis zu 13 pro Angebot.
+- **Menge:** eine ganze Zahl bis 999 pro Angebot.
+- **Preis:** eine einfache Zahl in deiner Shopwährung, ohne Währungssymbol.
+
+---
+
+## Preise formatieren
+
+- Verwende eine einfache Dezimalzahl: `14.99`
+- Keine Währungssymbole (`$`, `€`, `£`)
+- Verwende einen Punkt (kein Komma) als Dezimaltrennzeichen, auch wenn deine Tabellenkalkulation Kommas nutzt
+- Die Währung legt dein Shop fest, `CURRENCY_CODE` hält sie nur fest
+
+---
+
+## Tags
+
+Die Tags stehen in einer Zelle, durch Kommas getrennt:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Weil die Zelle Kommas enthält, muss sie in der CSV in doppelten Anführungszeichen stehen. Tabellenkalkulationen erledigen das beim Speichern für dich. Achte auf:
+
+- Mehr als 13 Tags in der Zelle
+- Einen Tag mit mehr als 20 Zeichen
+- Doppelte Kommas oder Leerzeichen um Kommas, die nach dem Bearbeiten übrig bleiben
+
+---
+
+## Felder, die eine App zum Masseneinstellen verlangen kann
+
+Etsys Export enthält nicht jede Angebotseinstellung. Apps von Drittanbietern, die Angebote über Etsys API anlegen, verlangen oft zusätzliche Spalten, etwa wer den Artikel hergestellt hat (`who_made`), wann er hergestellt wurde (`when_made`), ob es Bastelbedarf ist (`is_supply`), das Versandprofil und die Shoprubrik. Die zulässigen Werte stammen aus Etsys API und ändern sich mit der Zeit (zum Beispiel die Jahresbereiche für `when_made`). Verwende also genau die Werte, die in der Vorlage dieser App stehen.
+
+---
+
+## Häufige Probleme nach dem Bearbeiten in einer Tabellenkalkulation
+
+### Preise mit Symbolen oder Kommas
+
+Ein Preis wie `$14.99` oder `14,99` ist keine einfache Zahl.
+
+**Lösung:** Entferne mit Suchen und Ersetzen `$`, `€` und `£` und wandle Dezimalkommas in Punkte um.
+
+### Titel zu lang
+
+Der Titel hat mehr als 140 Zeichen.
+
+**Lösung:** Füge in Excel eine Hilfsspalte mit `=LEN(A2)` hinzu (in deutschem Excel `=LÄNGE(A2)`), um Titel über 140 Zeichen zu finden, und kürze sie.
+
+### Zu viele oder zu lange Tags
+
+Ein Angebot hat mehr als 13 Tags, oder ein Tag hat mehr als 20 Zeichen.
+
+**Lösung:** Zähle die Tags (Kommas + 1) und halte jeden Tag bei höchstens 20 Zeichen.
+
+### Kaputte Bildlinks
+
+In einer Bildzelle steht etwa `mug.jpg` oder ein Link ohne `https://`.
+
+**Lösung:** Verwende die vollständige Bild-URL, die mit `https://` beginnt.
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine Etsy-Angebots-CSV in StriveFormats hoch. Es vereinheitlicht Preise, Währungscodes und Tag-Listen und markiert zu lange Titel, zu viele Tags, Tags über 20 Zeichen, Mengen über 999, kaputte Bild-URLs und doppelte SKUs, jeweils mit der genauen Zeile.
+
+[Etsy-CSV-Fixer öffnen](/app?preset=etsy_listings) | [Etsy-Vorlage ansehen](/presets/etsy_listings)

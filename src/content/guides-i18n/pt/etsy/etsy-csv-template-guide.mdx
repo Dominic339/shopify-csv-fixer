@@ -1,0 +1,136 @@
+---
+title: "Guia do modelo CSV do Etsy: campos, formatos e erros comuns"
+description: "O que vem na exportação CSV de anúncios do Etsy, o que o Etsy permite ou não fazer com ela, os limites de cada campo (títulos, tags, quantidade) e como corrigir os erros que as planilhas introduzem."
+keywords: ["guia modelo csv etsy", "csv anúncios etsy", "campos csv etsy", "importar csv etsy", "envio em massa csv etsy", "formato csv etsy", "modelo etsy explicado", "baixar anúncios etsy csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Como baixar seus anúncios do Etsy em CSV e o que há no arquivo"
+  - "Por que o Etsy não tem envio de CSV e para que os vendedores usam o arquivo"
+  - "Os limites de títulos, tags, materiais e quantidade"
+  - "Como formatar corretamente preços, tags e URLs de imagem"
+  - "Como corrigir os erros que a edição em planilhas introduz"
+bestFor: "Vendedores do Etsy que editam, revisam ou migram anúncios numa planilha, ou que preparam um arquivo para um app de publicação em massa"
+timeToComplete: "9 minutos"
+---
+
+## O que é o CSV de anúncios do Etsy (e o que não é)
+
+O Etsy permite baixar seus anúncios ativos em CSV: abra **Gerenciador da loja → Configurações → Opções → Baixar dados** e escolha o download em CSV dos anúncios. Segundo a ajuda do Etsy, o arquivo traz de cada anúncio:
+
+- Título
+- Descrição
+- Preço e código da moeda
+- Quantidade
+- Tags
+- Materiais
+- URLs das imagens
+- SKU (se você tiver adicionado SKUs aos anúncios)
+
+**O Etsy não tem envio de CSV para anúncios.** Editar o arquivo não muda nada na sua loja, e o Etsy não oferece um jeito de importá-lo de volta. Os vendedores usam a exportação para:
+
+- Revisar e limpar os dados dos anúncios numa planilha
+- Guardar uma cópia de segurança do catálogo
+- Levar os anúncios para outra plataforma, como Shopify ou WooCommerce
+- Alimentar um app de terceiros de publicação em massa que trabalha pela API do Etsy
+
+Para alterações em massa dentro do próprio Etsy, use as opções de edição em massa da página Anúncios do Gerenciador da loja.
+
+---
+
+## As colunas da exportação
+
+No arquivo, cada campo tem sua própria coluna, com cabeçalhos como `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` e `SKU`. Cada foto tem uma coluna própria (`IMAGE1`, `IMAGE2` e assim por diante) com a URL da imagem.
+
+| Coluna | O que contém | Formato |
+|---|---|---|
+| `TITLE` | Título do anúncio | Até 140 caracteres |
+| `DESCRIPTION` | Descrição do anúncio | Texto simples |
+| `PRICE` | Preço na moeda da sua loja | Número simples, como `14.99` |
+| `CURRENCY_CODE` | Moeda da loja | Código de três letras, como `USD` |
+| `QUANTITY` | Quantidade disponível | Número inteiro, até 999 |
+| `TAGS` | Tags de busca | Separadas por vírgulas, até 13 |
+| `MATERIALS` | Materiais | Separados por vírgulas, até 13 |
+| `IMAGE1`, `IMAGE2`, ... | URLs das fotos | URLs completas com `https://` |
+| `SKU` | Seu SKU | Texto |
+
+Mantenha os nomes das colunas como estão se alguma ferramenta for ler o arquivo de volta.
+
+---
+
+## Limites que cada campo precisa respeitar
+
+Estes são os limites que o editor de anúncios do Etsy aplica. Um arquivo que passa deles não pode virar anúncios válidos de novo, qualquer que seja a ferramenta:
+
+- **Título:** no máximo 140 caracteres. A busca do Etsy mostra só o começo, então coloque as palavras mais importantes primeiro.
+- **Tags:** até 13 por anúncio, cada uma com no máximo 20 caracteres, espaços incluídos. Use letras, números e espaços; o Etsy recusa a maioria dos símbolos nas tags.
+- **Materiais:** até 13 por anúncio.
+- **Quantidade:** um número inteiro de até 999 por anúncio.
+- **Preço:** um número simples na moeda da sua loja, sem símbolo de moeda.
+
+---
+
+## Formatação de preços
+
+- Use um número decimal simples: `14.99`
+- Sem símbolos de moeda (`$`, `€`, `£`)
+- Use ponto (e não vírgula) como separador decimal, mesmo que sua planilha use vírgulas
+- A moeda é definida pela loja; `CURRENCY_CODE` só a registra
+
+---
+
+## Tags
+
+As tags ficam numa única célula, separadas por vírgulas:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Como a célula tem vírgulas, ela precisa ficar entre aspas duplas no CSV. As planilhas fazem isso por você ao salvar. Fique de olho em:
+
+- Mais de 13 tags na célula
+- Uma tag com mais de 20 caracteres
+- Vírgulas duplas ou espaços em volta das vírgulas que sobram depois da edição
+
+---
+
+## Campos que um app de publicação em massa pode pedir
+
+A exportação do Etsy não inclui todas as configurações de um anúncio. Apps de terceiros que criam anúncios pela API do Etsy costumam pedir colunas extras, como quem fez o item (`who_made`), quando ele foi feito (`when_made`), se é material para artesanato (`is_supply`), o perfil de frete e a seção da loja. Os valores aceitos vêm da API do Etsy e mudam com o tempo (por exemplo, as faixas de anos de `when_made`), então use exatamente os valores do modelo desse app.
+
+---
+
+## Problemas comuns depois de editar numa planilha
+
+### Preços com símbolos ou vírgulas
+
+Um preço como `$14.99` ou `14,99` não é um número simples.
+
+**Solução:** use Localizar e substituir para remover `$`, `€` e `£`, e troque as vírgulas decimais por pontos.
+
+### Título longo demais
+
+O título tem mais de 140 caracteres.
+
+**Solução:** no Excel, adicione uma coluna auxiliar com `=LEN(A2)` (no Excel em português, `=NÚM.CARACT(A2)`) para achar os títulos com mais de 140 caracteres e encurte-os.
+
+### Tags demais, ou tags longas demais
+
+Um anúncio tem mais de 13 tags, ou uma tag passa de 20 caracteres.
+
+**Solução:** conte as tags (vírgulas + 1) e deixe cada uma com no máximo 20 caracteres.
+
+### Links de imagem quebrados
+
+Uma célula de imagem tem algo como `mug.jpg` ou um link sem `https://`.
+
+**Solução:** use a URL completa da imagem, começando por `https://`.
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu CSV de anúncios do Etsy ao StriveFormats. Ele padroniza preços, códigos de moeda e listas de tags, e aponta títulos longos demais, excesso de tags, tags com mais de 20 caracteres, quantidades acima de 999, URLs de imagem quebradas e SKUs duplicados, com a linha exata de cada um.
+
+[Abrir o corretor de CSV do Etsy](/app?preset=etsy_listings) | [Ver o modelo do Etsy](/presets/etsy_listings)

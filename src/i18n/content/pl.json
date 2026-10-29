@@ -17,7 +17,7 @@
 "description": "Napraw najczęstsze błędy CSV przy masowym przesyłaniu ofert do eBay przez Seller Hub Reports i pliki File Exchange: wiersz INFO, nieprawidłowe wartości Action, ID kategorii, długość tytułu, ID stanu, czas trwania, ceny i adresy zdjęć."
 },
 "etsy/etsy-csv-template-guide": {
-"title": "Przewodnik po szablonie CSV Etsy: pola, formaty i typowe błędy",
+"title": "Przewodnik po szablonie CSV Etsy: pola, formaty i częste błędy",
 "description": "Co zawiera eksport ofert Etsy do CSV, na co Etsy pozwala, a na co nie, jakie limity obowiązują poszczególne pola (tytuły, tagi, ilość) i jak naprawić błędy wprowadzane przez arkusze kalkulacyjne."
 },
 "general/append-vs-merge-join-csv": {

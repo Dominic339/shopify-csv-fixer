@@ -1,0 +1,136 @@
+---
+title: "Gids voor de Etsy-CSV-sjabloon: velden, formaten en veelvoorkomende fouten"
+description: "Wat er in Etsy's CSV-export van listings staat, wat Etsy er wel en niet mee toestaat, welke limieten elk veld heeft (titels, tags, aantal) en hoe je fouten oplost die spreadsheets erin brengen."
+keywords: ["etsy csv sjabloon gids", "etsy listings csv", "etsy csv velden", "etsy csv import", "etsy bulkupload csv", "etsy csv formaat", "etsy sjabloon uitgelegd", "etsy listings csv downloaden"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Hoe je je Etsy-listings als CSV downloadt en wat erin staat"
+  - "Waarom Etsy geen CSV-upload heeft en waarvoor verkopers het bestand wel gebruiken"
+  - "De limieten voor titels, tags, materialen en aantal"
+  - "Hoe je prijzen, tags en afbeeldings-URL's goed opmaakt"
+  - "Hoe je fouten oplost die door bewerken in een spreadsheet ontstaan"
+bestFor: "Etsy-verkopers die hun listings in een spreadsheet bewerken, controleren of verhuizen, of een bestand klaarmaken voor een app voor bulkplaatsing"
+timeToComplete: "9 minuten"
+---
+
+## Wat Etsy's listings-CSV is (en wat niet)
+
+Etsy laat je je actieve listings als CSV downloaden: open **Shopbeheer → Instellingen → Opties → Gegevens downloaden** en kies de CSV-download voor je listings. Volgens de hulp van Etsy bevat het bestand per listing:
+
+- Titel
+- Beschrijving
+- Prijs en valutacode
+- Aantal
+- Tags
+- Materialen
+- Afbeeldings-URL's
+- SKU (als je SKU's aan je listings hebt toegevoegd)
+
+**Etsy heeft geen CSV-upload voor listings.** Het bestand bewerken verandert niets in je winkel, en Etsy biedt geen manier om het weer te importeren. Verkopers gebruiken de export om:
+
+- Listinggegevens te controleren en op te schonen in een spreadsheet
+- Een reservekopie van hun catalogus te bewaren
+- Listings over te zetten naar een ander platform, zoals Shopify of WooCommerce
+- Een app van derden voor bulkplaatsing te voeden die via de API van Etsy werkt
+
+Voor bulkwijzigingen in Etsy zelf gebruik je de opties voor bulkbewerking op de pagina Listings in Shopbeheer.
+
+---
+
+## De kolommen in de export
+
+In het bestand heeft elk veld een eigen kolom, met koppen als `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` en `SKU`. Elke foto krijgt een eigen kolom (`IMAGE1`, `IMAGE2` enzovoort) met de URL van de afbeelding.
+
+| Kolom | Inhoud | Formaat |
+|---|---|---|
+| `TITLE` | Titel van de listing | Tot 140 tekens |
+| `DESCRIPTION` | Beschrijving van de listing | Platte tekst |
+| `PRICE` | Prijs in de valuta van je winkel | Gewoon getal, zoals `14.99` |
+| `CURRENCY_CODE` | Valuta van de winkel | Code van drie letters, zoals `USD` |
+| `QUANTITY` | Beschikbaar aantal | Geheel getal, tot 999 |
+| `TAGS` | Zoektags | Gescheiden door komma's, tot 13 |
+| `MATERIALS` | Materialen | Gescheiden door komma's, tot 13 |
+| `IMAGE1`, `IMAGE2`, ... | Foto-URL's | Volledige `https://`-URL's |
+| `SKU` | Je SKU | Tekst |
+
+Laat de kolomnamen precies zoals ze zijn als een tool het bestand weer gaat inlezen.
+
+---
+
+## Limieten die elk veld moet respecteren
+
+Dit zijn de limieten die de listingeditor van Etsy hanteert. Een bestand dat ze overschrijdt, kun je met geen enkele tool weer omzetten in geldige listings:
+
+- **Titel:** maximaal 140 tekens. De zoekfunctie van Etsy toont alleen het begin, dus zet de belangrijkste woorden vooraan.
+- **Tags:** tot 13 per listing, elk maximaal 20 tekens, spaties meegeteld. Gebruik letters, cijfers en spaties; Etsy weigert de meeste symbolen in tags.
+- **Materialen:** tot 13 per listing.
+- **Aantal:** een geheel getal tot 999 per listing.
+- **Prijs:** een gewoon getal in de valuta van je winkel, zonder valutateken.
+
+---
+
+## Prijzen opmaken
+
+- Gebruik een gewoon decimaal getal: `14.99`
+- Geen valutatekens (`$`, `€`, `£`)
+- Gebruik een punt (geen komma) als decimaalteken, ook als je spreadsheet komma's gebruikt
+- De valuta wordt door je winkel bepaald; `CURRENCY_CODE` legt die alleen vast
+
+---
+
+## Tags
+
+De tags staan in één cel, gescheiden door komma's:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Omdat de cel komma's bevat, moet hij in de CSV tussen dubbele aanhalingstekens staan. Spreadsheets doen dat voor je bij het opslaan. Let op:
+
+- Meer dan 13 tags in de cel
+- Een tag van meer dan 20 tekens
+- Dubbele komma's of spaties rond komma's die na het bewerken zijn blijven staan
+
+---
+
+## Velden die een app voor bulkplaatsing kan vragen
+
+De export van Etsy bevat niet elke instelling van een listing. Apps van derden die listings via de API van Etsy aanmaken, vragen vaak extra kolommen, zoals wie het object heeft gemaakt (`who_made`), wanneer het is gemaakt (`when_made`), of het hobbymateriaal is (`is_supply`), het verzendprofiel en de winkelsectie. De toegestane waarden komen uit de API van Etsy en veranderen in de loop van de tijd (bijvoorbeeld de jaarbereiken voor `when_made`), dus gebruik precies de waarden uit de sjabloon van die app.
+
+---
+
+## Veelvoorkomende problemen na bewerken in een spreadsheet
+
+### Prijzen met symbolen of komma's
+
+Een prijs als `$14.99` of `14,99` is geen gewoon getal.
+
+**Oplossing:** verwijder met Zoeken en vervangen `$`, `€` en `£`, en vervang decimale komma's door punten.
+
+### Titel te lang
+
+De titel heeft meer dan 140 tekens.
+
+**Oplossing:** voeg in Excel een hulpkolom toe met `=LEN(A2)` (in Nederlandstalige Excel `=LENGTE(A2)`) om titels van meer dan 140 tekens te vinden, en kort ze in.
+
+### Te veel of te lange tags
+
+Een listing heeft meer dan 13 tags, of een tag is langer dan 20 tekens.
+
+**Oplossing:** tel de tags (komma's + 1) en houd elke tag op maximaal 20 tekens.
+
+### Kapotte afbeeldingslinks
+
+In een afbeeldingscel staat iets als `mug.jpg` of een link zonder `https://`.
+
+**Oplossing:** gebruik de volledige afbeeldings-URL, die begint met `https://`.
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je Etsy-listings-CSV naar StriveFormats. Het maakt prijzen, valutacodes en taglijsten eenvormig en markeert te lange titels, te veel tags, tags van meer dan 20 tekens, aantallen boven 999, kapotte afbeeldings-URL's en dubbele SKU's, elk met de precieze rij.
+
+[Etsy CSV-fixer openen](/app?preset=etsy_listings) | [Etsy-sjabloon bekijken](/presets/etsy_listings)

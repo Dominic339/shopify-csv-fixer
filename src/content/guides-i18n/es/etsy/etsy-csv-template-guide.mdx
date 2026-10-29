@@ -1,0 +1,136 @@
+---
+title: "Guía de la plantilla CSV de Etsy: campos, formatos y errores comunes"
+description: "Qué contiene la exportación CSV de anuncios de Etsy, qué permite Etsy hacer con ella y qué no, los límites de cada campo (títulos, etiquetas, cantidad) y cómo corregir los errores que introducen las hojas de cálculo."
+keywords: ["guía plantilla csv etsy", "csv anuncios etsy", "campos csv etsy", "importar csv etsy", "carga masiva csv etsy", "formato csv etsy", "plantilla etsy explicada", "descargar anuncios etsy csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cómo descargar tus anuncios de Etsy en CSV y qué contiene el archivo"
+  - "Por qué Etsy no tiene carga de CSV y para qué usan los vendedores el archivo"
+  - "Los límites de títulos, etiquetas, materiales y cantidad"
+  - "Cómo dar formato correcto a precios, etiquetas y URL de imágenes"
+  - "Cómo corregir los errores que introduce la edición en hojas de cálculo"
+bestFor: "Vendedores de Etsy que editan, revisan o migran sus anuncios en una hoja de cálculo, o que preparan un archivo para una app de publicación masiva"
+timeToComplete: "9 minutos"
+---
+
+## Qué es el CSV de anuncios de Etsy (y qué no es)
+
+Etsy te permite descargar tus anuncios activos en CSV: abre **Administrador de la tienda → Configuración → Opciones → Descargar datos** y elige la descarga en CSV de tus anuncios. Según la ayuda de Etsy, el archivo incluye de cada anuncio:
+
+- Título
+- Descripción
+- Precio y código de moneda
+- Cantidad
+- Etiquetas
+- Materiales
+- URL de imágenes
+- SKU (si has añadido SKU a tus anuncios)
+
+**Etsy no tiene carga de CSV para anuncios.** Editar el archivo no cambia nada en tu tienda, y Etsy no ofrece ninguna forma de volver a importarlo. Los vendedores usan la exportación para:
+
+- Revisar y limpiar los datos de los anuncios en una hoja de cálculo
+- Guardar una copia de seguridad de su catálogo
+- Pasar los anuncios a otra plataforma, como Shopify o WooCommerce
+- Alimentar una app de publicación masiva de terceros que trabaja con la API de Etsy
+
+Para cambios masivos dentro de Etsy, usa las opciones de edición masiva de la página Anuncios del Administrador de la tienda.
+
+---
+
+## Las columnas de la exportación
+
+En el archivo, cada campo tiene su propia columna, con encabezados como `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` y `SKU`. Cada foto tiene una columna propia (`IMAGE1`, `IMAGE2`, etc.) con la URL de la imagen.
+
+| Columna | Qué contiene | Formato |
+|---|---|---|
+| `TITLE` | Título del anuncio | Hasta 140 caracteres |
+| `DESCRIPTION` | Descripción del anuncio | Texto sin formato |
+| `PRICE` | Precio en la moneda de tu tienda | Número simple, como `14.99` |
+| `CURRENCY_CODE` | Moneda de la tienda | Código de tres letras, como `USD` |
+| `QUANTITY` | Cantidad disponible | Número entero, hasta 999 |
+| `TAGS` | Etiquetas de búsqueda | Separadas por comas, hasta 13 |
+| `MATERIALS` | Materiales | Separados por comas, hasta 13 |
+| `IMAGE1`, `IMAGE2`, ... | URL de fotos | URL completas con `https://` |
+| `SKU` | Tu SKU | Texto |
+
+Mantén los nombres de las columnas tal cual si una herramienta va a volver a leer el archivo.
+
+---
+
+## Límites que debe respetar cada campo
+
+Estos son los límites que aplica el editor de anuncios de Etsy. Un archivo que los supera no se puede convertir de nuevo en anuncios válidos, uses la herramienta que uses:
+
+- **Título:** 140 caracteres como máximo. La búsqueda de Etsy solo muestra el principio, así que pon primero las palabras más importantes.
+- **Etiquetas:** hasta 13 por anuncio, cada una de 20 caracteres como máximo, espacios incluidos. Usa letras, números y espacios; Etsy rechaza la mayoría de los símbolos en las etiquetas.
+- **Materiales:** hasta 13 por anuncio.
+- **Cantidad:** un número entero de hasta 999 por anuncio.
+- **Precio:** un número simple en la moneda de tu tienda, sin símbolo de moneda.
+
+---
+
+## Formato de los precios
+
+- Usa un número decimal simple: `14.99`
+- Sin símbolos de moneda (`$`, `€`, `£`)
+- Usa un punto (no una coma) como separador decimal, aunque tu hoja de cálculo use comas
+- La moneda la fija tu tienda; `CURRENCY_CODE` solo la registra
+
+---
+
+## Etiquetas
+
+Las etiquetas van en una sola celda, separadas por comas:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Como la celda contiene comas, debe ir entre comillas dobles en el CSV. Las hojas de cálculo lo hacen por ti al guardar. Problemas a vigilar:
+
+- Más de 13 etiquetas en la celda
+- Una etiqueta de más de 20 caracteres
+- Comas dobles o espacios alrededor de las comas que quedan tras editar
+
+---
+
+## Campos que puede pedir una app de publicación masiva
+
+La exportación de Etsy no incluye todos los ajustes de un anuncio. Las apps de terceros que crean anuncios con la API de Etsy suelen pedir columnas adicionales, como quién hizo el artículo (`who_made`), cuándo se hizo (`when_made`), si es un material para manualidades (`is_supply`), el perfil de envío y la sección de la tienda. Sus valores aceptados vienen de la API de Etsy y cambian con el tiempo (por ejemplo, los rangos de años de `when_made`), así que usa exactamente los valores que indique la plantilla de esa app.
+
+---
+
+## Problemas habituales tras editar en una hoja de cálculo
+
+### Precios con símbolos o comas
+
+Un precio como `$14.99` o `14,99` no es un número simple.
+
+**Solución:** usa Buscar y reemplazar para quitar `$`, `€` y `£`, y cambia las comas decimales por puntos.
+
+### Título demasiado largo
+
+El título tiene más de 140 caracteres.
+
+**Solución:** en Excel, añade una columna auxiliar con `=LEN(A2)` (en Excel en español, `=LARGO(A2)`) para encontrar los títulos de más de 140 caracteres y acórtalos.
+
+### Demasiadas etiquetas o etiquetas demasiado largas
+
+Un anuncio tiene más de 13 etiquetas, o una etiqueta supera los 20 caracteres.
+
+**Solución:** cuenta las etiquetas (comas + 1) y deja cada una en 20 caracteres o menos.
+
+### Enlaces de imagen rotos
+
+Una celda de imagen contiene algo como `mug.jpg` o un enlace sin `https://`.
+
+**Solución:** usa la URL completa de la imagen, empezando por `https://`.
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+Sube tu CSV de anuncios de Etsy a StriveFormats. Normaliza precios, códigos de moneda y listas de etiquetas, y marca títulos demasiado largos, demasiadas etiquetas, etiquetas de más de 20 caracteres, cantidades superiores a 999, URL de imágenes rotas y SKU duplicados, indicando la fila exacta de cada uno.
+
+[Abrir el corrector de CSV de Etsy](/app?preset=etsy_listings) | [Ver la plantilla de Etsy](/presets/etsy_listings)
