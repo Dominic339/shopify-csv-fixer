@@ -5,8 +5,8 @@
 "description": "Amazon フラットファイル CSV でよくあるインポートエラーを解決します。SKU の問題、無効な状態コード、価格の書式、出荷チャネルの値、テンプレートの不一致などを扱います。"
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Amazon フラットファイルの真偽値項目：y/n、TRUE/FALSE とよくある落とし穴",
-"description": "Seller Central のフラットファイルで 'y' か 'n'（TRUE/FALSE や 1/0 ではなく）を求める真偽値項目、無効な値を一括で直す方法、列を壊してしまう表計算ソフトの自動書式設定を避ける方法を解説します。"
+"title": "Amazon フラットファイルのはい/いいえ項目：true/false、y/n とよくある落とし穴",
+"description": "Amazon のはい/いいえ列で使える値はファイルによって異なります。カテゴリテンプレートは Valid Values タブの値（多くは true/false）、Inventory Loader は y/n または 1/2 を使います。これらの列を確認・修正・保護する方法を解説します。"
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "eBay の CategoryID と File Exchange：概要と設定方法",

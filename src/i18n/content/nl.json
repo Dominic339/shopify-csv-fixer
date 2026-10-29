@@ -5,8 +5,8 @@
 "description": "Los de meest voorkomende importfouten in Amazon-flatfiles op: SKU-problemen, ongeldige staatcodes, prijsnotatie, waarden voor het fulfillmentkanaal en sjablonen die niet overeenkomen."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Booleaanse velden in Amazon-flatfiles: y/n, TRUE/FALSE en valkuilen",
-"description": "Ontdek welke booleaanse velden in Seller Central-flatfiles 'y' of 'n' verwachten (geen TRUE/FALSE of 1/0), hoe je ongeldige waarden in bulk herstelt en hoe je voorkomt dat de automatische opmaak van je spreadsheet deze kolommen verpest."
+"title": "Ja/nee-velden in Amazon-flatfiles: true/false, y/n en veelgemaakte fouten",
+"description": "Welke waarden de ja/nee-kolommen van Amazon accepteren, hangt af van het bestand: categoriesjablonen gebruiken de waarden uit hun tabblad Valid Values (meestal true/false), de Inventory Loader gebruikt y/n of 1/2. Zo controleer, herstel en bescherm je deze kolommen."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "eBay CategoryID en File Exchange: wat het is en hoe je het instelt",

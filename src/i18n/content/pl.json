@@ -5,8 +5,8 @@
 "description": "Napraw najczęstsze błędy importu plików płaskich CSV Amazon: problemy z SKU, nieprawidłowe kody stanu, format cen, wartości kanału realizacji i niezgodne szablony."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Pola logiczne w plikach płaskich Amazon: y/n, TRUE/FALSE i typowe pułapki",
-"description": "Sprawdź, które pola logiczne w plikach płaskich Seller Central oczekują 'y' lub 'n' (a nie TRUE/FALSE czy 1/0), jak hurtowo poprawić nieprawidłowe wartości i jak uniknąć automatycznego formatowania arkusza, które psuje te kolumny."
+"title": "Pola tak/nie w plikach płaskich Amazon: true/false, y/n i typowe pułapki",
+"description": "Wartości akceptowane przez kolumny tak/nie w Amazonie zależą od pliku: szablony kategorii używają wartości z karty Valid Values (zwykle true/false), a Inventory Loader używa y/n lub 1/2. Dowiedz się, jak sprawdzać, poprawiać i chronić te kolumny."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "CategoryID w eBay i File Exchange: czym jest i jak je ustawić",

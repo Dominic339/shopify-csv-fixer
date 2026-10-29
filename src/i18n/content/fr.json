@@ -5,8 +5,8 @@
 "description": "Corrigez les erreurs d'import de fichier plat Amazon les plus courantes : problèmes de SKU, codes d'état non valides, format des prix, valeurs de canal d'expédition et modèles incompatibles."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Champs booléens du fichier plat Amazon : y/n, TRUE/FALSE et pièges courants",
-"description": "Découvrez quels champs booléens des fichiers plats Seller Central attendent 'y' ou 'n' (et non TRUE/FALSE ou 1/0), comment corriger les valeurs non valides en masse et comment éviter la mise en forme automatique du tableur qui abîme ces colonnes."
+"title": "Champs oui/non des fichiers plats Amazon : true/false, y/n et pièges courants",
+"description": "Les valeurs acceptées par les colonnes oui/non d'Amazon dépendent du fichier : les modèles de catégorie utilisent les valeurs de leur onglet Valid Values (souvent true/false), l'Inventory Loader utilise y/n ou 1/2. Apprenez à vérifier, corriger et protéger ces colonnes."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "CategoryID eBay et File Exchange : définition et paramétrage",

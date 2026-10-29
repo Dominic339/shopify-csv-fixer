@@ -5,8 +5,8 @@
 "description": "Correggi gli errori più comuni di importazione dei file flat CSV di Amazon: problemi di SKU, codici di condizione non validi, formato dei prezzi, valori del canale di evasione e modelli non corrispondenti."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Campi booleani dei file flat Amazon: y/n, TRUE/FALSE e trappole comuni",
-"description": "Scopri quali campi booleani dei file flat di Seller Central si aspettano 'y' o 'n' (non TRUE/FALSE o 1/0), come correggere in blocco i valori non validi ed evitare la formattazione automatica del foglio di calcolo che rovina queste colonne."
+"title": "Campi sì/no dei file flat Amazon: true/false, y/n e trappole comuni",
+"description": "I valori accettati dalle colonne sì/no di Amazon dipendono dal file: i modelli di categoria usano i valori della scheda Valid Values (di solito true/false), mentre l'Inventory Loader usa y/n o 1/2. Scopri come controllare, correggere e proteggere queste colonne."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "CategoryID di eBay e File Exchange: cos'è e come impostarlo",

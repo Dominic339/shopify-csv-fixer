@@ -5,8 +5,8 @@
 "description": "En yaygın Amazon düz dosya CSV içe aktarma hatalarını düzeltin: SKU sorunları, geçersiz durum kodları, fiyat biçimi, gönderim kanalı değerleri ve uyumsuz şablonlar."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Amazon düz dosya mantıksal alanları: y/n, TRUE/FALSE ve yaygın tuzaklar",
-"description": "Seller Central düz dosyalarındaki hangi mantıksal alanların 'y' veya 'n' beklediğini (TRUE/FALSE veya 1/0 değil), geçersiz değerleri toplu olarak nasıl düzelteceğinizi ve bu sütunları bozan elektronik tablo otomatik biçimlendirmesinden nasıl kaçınacağınızı öğrenin."
+"title": "Amazon düz dosyalarında evet/hayır alanları: true/false, y/n ve sık yapılan hatalar",
+"description": "Amazon'un evet/hayır sütunlarının kabul ettiği değerler dosyaya göre değişir: kategori şablonları Valid Values sekmesindeki değerleri (genellikle true/false), Inventory Loader ise y/n veya 1/2 kullanır. Bu sütunları nasıl kontrol edeceğinizi, düzelteceğinizi ve koruyacağınızı öğrenin."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "eBay CategoryID ve File Exchange: nedir ve nasıl ayarlanır",

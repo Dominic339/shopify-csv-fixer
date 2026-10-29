@@ -5,8 +5,8 @@
 "description": "Behebe die häufigsten Importfehler in Amazon-Flatfile-CSVs: SKU-Probleme, ungültige Zustandscodes, Preisformate, Werte für den Versandkanal und nicht passende Vorlagen."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Ja/Nein-Felder in Amazon-Flatfiles: y/n, TRUE/FALSE und typische Fallen",
-"description": "Welche Ja/Nein-Felder in Amazon-Flatfiles 'y' oder 'n' erwarten (nicht TRUE/FALSE oder 1/0), wie du ungültige Werte in großen Mengen korrigierst und wie du verhinderst, dass Tabellenkalkulationen diese Spalten verfälschen."
+"title": "Ja/Nein-Felder in Amazon-Flatfiles: true/false, y/n und typische Fallen",
+"description": "Welche Werte Amazons Ja/Nein-Spalten akzeptieren, hängt von der Datei ab: Kategorievorlagen nutzen die Werte aus ihrem Tabellenblatt Valid Values (meist true/false), der Inventory Loader nutzt y/n oder 1/2. So prüfst, korrigierst und schützt du diese Spalten."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "eBay CategoryID und File Exchange: was es ist und wie du es setzt",
