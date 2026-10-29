@@ -113,5 +113,79 @@
       }
     ]
   },
-  "translationNote": "Bu çeviri kolaylık sağlamak için sunulmuştur. Farklılık olması hâlinde İngilizce sürüm geçerlidir:"
+  "translationNote": "Bu çeviri kolaylık sağlamak için sunulmuştur. Farklılık olması hâlinde İngilizce sürüm geçerlidir:",
+  "howItWorks": {
+    "metaTitle": "CSV Düzelticisi nasıl çalışır, adım adım",
+    "metaDescription": "Shopify, WooCommerce, Etsy, eBay veya Amazon için bir ürün CSV'sini düzeltmenin görsel anlatımı: formatı seçin, özeti okuyun, kalanları düzeltin ve içe aktarılabilen bir dosya indirin.",
+    "eyebrow": "Nasıl çalışır",
+    "title": "Dağınık bir dışa aktarımdan temiz bir içe aktarıma",
+    "intro": "Bu anlatım, küçük bir Shopify ürün dosyasını yüklemeden indirmeye kadar takip ediyor. Diğer tüm formatlar da aynı şekilde çalışır.",
+    "ctaFixer": "CSV Düzelticisini açın",
+    "ctaDemo": "Örnek dosyayı indirin",
+    "stepLabel": "Adım {n}",
+    "steps": [
+      {
+        "title": "Formatı seçin ve dosyanızı ekleyin",
+        "desc": "İçe aktaracağınız platformla başlayın, çünkü her birinin kendi kuralları vardır.",
+        "alt": "Shopify seçili format seçici ve satır ile sütun sayısını gösteren yüklenmiş bir dosya",
+        "notes": [
+          "İçe aktaracağınız platformu seçin. Sonradan değiştirebilirsiniz; dosya yeniden kontrol edilir.",
+          "CSV'nizi sürükleyin, seçin veya metni yapıştırın. Elinizde dosya yoksa örneği yükleyin. Dosyanız tarayıcınızda okunur ve asla yüklenmez."
+        ]
+      },
+      {
+        "title": "Özeti okuyun",
+        "desc": "Kontroller dosya açılır açılmaz çalışır ve özet, dosyanın içe aktarılıp aktarılamayacağını söyler.",
+        "alt": "Bir engelleyici sorun, hata ve uyarı sayıları, doğrulama puanı ve dışa aktarma düğmesi bulunan özet paneli",
+        "notes": [
+          "Bu kutudaki her şey içe aktarmanın başarısız olmasına yol açar. Kutu yeşile döndüğünde dosya hazırdır.",
+          "Puan hızlı bir sağlık kontrolüdür. Hatalar uyarılardan daha ağır basar.",
+          "İstediğiniz zaman dışa aktarabilirsiniz. Engelleyici sorunlar kaldıysa önce onay istenir."
+        ]
+      },
+      {
+        "title": "Kalanları tabloda düzeltin",
+        "desc": "Aracın kendi başına güvenle düzeltemediği sorunlar yerinde gösterilir; birkaç tıklamayla düzeltirsiniz.",
+        "alt": "Yinelenen seçenek değerleri kırmızı, yinelenen bir SKU sarı vurgulanmış sorun tablosu ve altında elle düzeltmeler listesi",
+        "notes": [
+          "Tabloyu hatalara, uyarılara veya ipuçlarına göre filtreleyin.",
+          "Kırmızı hücreler hata, sarı hücreler uyarıdır. Düzenlemek için bir hücreye tıklayın; kontroller hemen yeniden çalışır.",
+          "Sorunlu satırlar Elle düzeltmeler altında sabitlenir; her birinde neyin yanlış olduğu ve nasıl düzeltileceği açıklanır."
+        ]
+      },
+      {
+        "title": "Otomatik düzeltmeleri kontrol edin ve indirin",
+        "desc": "Sizin için yapılan her değişikliği görmek için otomatik düzeltmeler listesini açın, ardından düzeltilmiş dosyayı indirip platformunuza aktarın.",
+        "alt": "Normalleştirilmiş fiyatlar, true/false değerleri, bir URL tanımlayıcısı ve bir durum gösteren açık otomatik düzeltmeler listesi",
+        "notes": [
+          "Fiyatlar, true/false değerleri, tanımlayıcılar ve durumlar anlamları değişmeden düzeltilir.",
+          "Her değişikliğin kaydını tutmak isterseniz düzeltme günlüğünü indirin.",
+          "{rows} satıra kadar dosyaları her zaman ücretsiz indirebilirsiniz."
+        ]
+      }
+    ],
+    "convertLabel": "Platform mu değiştiriyorsunuz?",
+    "convertTitle": "Önce dönüştürün, sonra kontrol edin",
+    "convertDesc": "Format Dönüştürücü, WooCommerce, Etsy, eBay veya Amazon dışa aktarımını Shopify içe aktarımına ya da tersine dönüştürür. Sonucu önizleyin ve tek tıklamayla CSV Düzelticisine gönderin.",
+    "convertAlt": "Shopify'a dönüştürülmüş bir WooCommerce dosyasını uyarılar ve çıktı önizlemesiyle gösteren dönüştürücü",
+    "ctaConverter": "Dönüştürücüyü açın",
+    "ctaMigrations": "Adım adım geçiş rehberleri",
+    "tipsTitle": "Bilmeniz iyi olur",
+    "tips": [
+      {
+        "title": "Hiçbir şey yüklenmez",
+        "desc": "Dosyanız kendi bilgisayarınızda okunur, kontrol edilir ve kaydedilir. Tedarikçi maliyetleri ve henüz yayınlanmamış ürünler gizli kalır."
+      },
+      {
+        "title": "Hiçbir şey sessizce değişmez",
+        "desc": "Her otomatik değişiklik listelenir ve anlamı değiştirebilecek her şey sizin kararınızı bekler."
+      },
+      {
+        "title": "Denemesi ücretsiz",
+        "desc": "Tüm kontroller ve düzeltmeler hesap olmadan çalışır ve {rows} satıra kadar dosyalar her zaman ücretsizdir."
+      }
+    ],
+    "finalTitle": "Kendi dosyanızla deneyin",
+    "finalDesc": "Yaklaşık bir dakika sürer ve herhangi bir karar vermeden önce her sorunu görürsünüz."
+  }
 }

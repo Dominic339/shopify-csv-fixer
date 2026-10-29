@@ -50,6 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Store-migration pages (English only)
     english("/migrate", "monthly", 0.75),
     ...CONVERT_ROUTES.map((r) => english(`/migrate/${r.slug}`, "monthly", 0.8)),
+    ...translated("/how-it-works", "monthly", 0.7),
     ...translated("/about", "monthly", 0.4),
     ...translated("/privacy", "yearly", 0.2),
     ...translated("/terms", "yearly", 0.2),

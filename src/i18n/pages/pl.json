@@ -113,5 +113,79 @@
       }
     ]
   },
-  "translationNote": "To tłumaczenie ma charakter pomocniczy. W razie rozbieżności obowiązuje wersja angielska:"
+  "translationNote": "To tłumaczenie ma charakter pomocniczy. W razie rozbieżności obowiązuje wersja angielska:",
+  "howItWorks": {
+    "metaTitle": "Jak działa Naprawiacz CSV, krok po kroku",
+    "metaDescription": "Ilustrowany przewodnik po poprawianiu pliku CSV z produktami dla Shopify, WooCommerce, Etsy, eBay lub Amazon: wybierz format, przeczytaj podsumowanie, popraw resztę i pobierz plik, który się zaimportuje.",
+    "eyebrow": "Jak to działa",
+    "title": "Od chaotycznego eksportu do czystego importu",
+    "intro": "Ten przewodnik prowadzi mały plik produktów z Shopify od wgrania do pobrania. Wszystkie inne formaty działają tak samo.",
+    "ctaFixer": "Otwórz Naprawiacz CSV",
+    "ctaDemo": "Pobierz plik przykładowy",
+    "stepLabel": "Krok {n}",
+    "steps": [
+      {
+        "title": "Wybierz format i dodaj plik",
+        "desc": "Zacznij od platformy, do której importujesz, bo każda ma własne zasady.",
+        "alt": "Wybór formatu z zaznaczonym Shopify i wgrany plik z liczbą wierszy i kolumn",
+        "notes": [
+          "Wybierz platformę, do której importujesz. Możesz ją później zmienić, a plik zostanie sprawdzony ponownie.",
+          "Przeciągnij plik CSV, wybierz go lub wklej tekst. Jeśli nie masz pliku pod ręką, wczytaj przykład. Plik jest odczytywany w przeglądarce i nigdy nie jest wysyłany."
+        ]
+      },
+      {
+        "title": "Przeczytaj podsumowanie",
+        "desc": "Kontrole startują od razu po otwarciu pliku, a podsumowanie mówi, czy plik by się zaimportował.",
+        "alt": "Panel podsumowania z jednym blokującym problemem, liczbą błędów i ostrzeżeń, wynikiem walidacji i przyciskiem eksportu",
+        "notes": [
+          "Wszystko w tym polu spowodowałoby nieudany import. Gdy zrobi się zielone, plik jest gotowy.",
+          "Wynik to szybka ocena stanu pliku. Błędy ważą więcej niż ostrzeżenia.",
+          "Eksportować możesz w każdej chwili. Jeśli zostały blokujące problemy, najpierw poprosimy o potwierdzenie."
+        ]
+      },
+      {
+        "title": "Popraw resztę w tabeli",
+        "desc": "Problemy, których narzędzie nie może bezpiecznie naprawić samo, są pokazane na miejscu, więc poprawisz je kilkoma kliknięciami.",
+        "alt": "Tabela problemów ze zduplikowanymi wartościami opcji na czerwono, zduplikowanym SKU na żółto i listą ręcznych poprawek poniżej",
+        "notes": [
+          "Filtruj tabelę według błędów, ostrzeżeń lub wskazówek.",
+          "Czerwone komórki to błędy, a żółte ostrzeżenia. Kliknij komórkę, aby ją edytować, a kontrole od razu uruchomią się ponownie.",
+          "Wiersze z problemami są przypięte w sekcji Ręczne poprawki, każdy z wyjaśnieniem, co jest nie tak i jak to naprawić."
+        ]
+      },
+      {
+        "title": "Sprawdź automatyczne poprawki i pobierz",
+        "desc": "Otwórz listę automatycznych poprawek, aby zobaczyć każdą zmianę wprowadzoną za ciebie, a potem pobierz poprawiony plik i zaimportuj go na swoją platformę.",
+        "alt": "Rozwinięta lista automatycznych poprawek z ujednoliconymi cenami, wartościami true/false, uchwytem URL i statusem",
+        "notes": [
+          "Ceny, wartości true/false, uchwyty i statusy są poprawiane bez zmiany ich znaczenia.",
+          "Pobierz dziennik poprawek, jeśli chcesz mieć zapis każdej zmiany.",
+          "Pliki do {rows} wierszy zawsze pobierzesz za darmo."
+        ]
+      }
+    ],
+    "convertLabel": "Zmieniasz platformę?",
+    "convertTitle": "Najpierw konwertuj, potem sprawdzaj",
+    "convertDesc": "Konwerter formatów zamienia eksport z WooCommerce, Etsy, eBay lub Amazon na import do Shopify albo odwrotnie. Obejrzyj podgląd wyniku i wyślij go jednym kliknięciem do Naprawiacza CSV.",
+    "convertAlt": "Konwerter z plikiem WooCommerce przekształconym do Shopify, z ostrzeżeniami i podglądem wyniku",
+    "ctaConverter": "Otwórz konwerter",
+    "ctaMigrations": "Przewodniki migracji krok po kroku",
+    "tipsTitle": "Warto wiedzieć",
+    "tips": [
+      {
+        "title": "Nic nie jest wysyłane",
+        "desc": "Plik jest odczytywany, sprawdzany i zapisywany na twoim komputerze. Ceny zakupu i nieopublikowane produkty pozostają prywatne."
+      },
+      {
+        "title": "Nic nie zmienia się po cichu",
+        "desc": "Każda automatyczna zmiana jest na liście, a wszystko, co mogłoby zmienić znaczenie, czeka na twoją decyzję."
+      },
+      {
+        "title": "Za darmo na próbę",
+        "desc": "Wszystkie kontrole i poprawki działają bez konta, a pliki do {rows} wierszy są zawsze darmowe."
+      }
+    ],
+    "finalTitle": "Wypróbuj na własnym pliku",
+    "finalDesc": "To zajmuje około minuty, a każdy problem widzisz, zanim cokolwiek zdecydujesz."
+  }
 }

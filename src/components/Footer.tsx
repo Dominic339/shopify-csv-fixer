@@ -32,6 +32,7 @@ export default function Footer({ navByLocale }: Props) {
       title: t.resources,
       links: [
         { href: href("/presets"), label: t.templates },
+        { href: href("/how-it-works"), label: t.howItWorks },
         { href: href("/guides"), label: t.guides },
         { href: `${href("/")}#pricing`, label: t.pricing },
       ],
