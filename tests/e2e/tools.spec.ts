@@ -313,3 +313,44 @@ test("footer language switcher moves to the same page in another language", asyn
   await expect(page).toHaveURL(/\/de\/presets$/);
   await expect(page.locator("header").first()).toContainText("Vorlagen");
 });
+
+// ---------------------------------------------------------------------------
+// Free single-purpose tools (/tools)
+// ---------------------------------------------------------------------------
+
+const csvFile = (name: string, text: string) => ({ name, mimeType: "text/csv", buffer: Buffer.from(text, "utf8") });
+
+test("tools index lists the free tools", async ({ page }) => {
+  await page.goto("/tools");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Free CSV tools");
+  await expect(page.getByRole("link", { name: /Remove duplicate rows/ })).toBeVisible();
+});
+
+test("remove duplicate rows: lists and removes an identical row", async ({ page }) => {
+  await page.goto("/tools/remove-duplicate-rows");
+  await page.locator('input[type="file"]').setInputFiles(csvFile("dupes.csv", "SKU,Name\nA,One\nB,Two\nA,One\n"));
+  await expect(page.getByText("1 duplicate rows removed. 2 rows kept.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download cleaned CSV" })).toBeVisible();
+});
+
+test("fix barcodes: restores a leading zero proven by the check digit", async ({ page }) => {
+  await page.goto("/tools/fix-barcodes");
+  await page.locator('input[type="file"]').setInputFiles(csvFile("codes.csv", "Title,Variant Barcode\nShirt,12345678905\nMug,4.00638E+12\n"));
+  await expect(page.getByText("1 repaired · 1 lost · 0 invalid")).toBeVisible();
+  await expect(page.getByRole("cell", { name: "012345678905" })).toBeVisible();
+});
+
+test("shopify handle generator: makes unique handles from pasted titles", async ({ page }) => {
+  await page.goto("/de/tools/shopify-handle-generator");
+  await page.locator("textarea").first().fill("Café Crème\nCafé crème");
+  await expect(page.locator("textarea").nth(1)).toHaveValue("cafe-creme\ncafe-creme-1");
+});
+
+test("free tools fit a phone screen", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  for (const path of ["/tools", "/ja/tools/csv-splitter", "/de/tools/fix-csv-encoding"]) {
+    await page.goto(path);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, `horizontal overflow on ${path}`).toBeLessThanOrEqual(0);
+  }
+});

@@ -39,6 +39,7 @@
     "language": "语言",
     "themeDark": "切换到深色模式",
     "themeLight": "切换到浅色模式",
+    "freeTools": "免费 CSV 工具",
     "storeMigrations": "店铺迁移"
   },
   "guide": {
@@ -955,5 +956,258 @@
     "guidesTitle": "指南",
     "allGuides": "所有{platform}指南 →",
     "otherFixers": "其他修复工具"
+  },
+  "smallTools": {
+    "indexMetaTitle": "面向网店卖家的免费 CSV 工具",
+    "indexTitle": "免费 CSV 工具",
+    "indexDescription": "商品 CSV 文件的免费工具：拆分大文件、删除重复行、修复编码和条形码、将 Excel 转为 CSV、生成 Shopify handle。全部在浏览器中运行。",
+    "indexIntro": "快速解决导致商品文件无法导入的问题。免费、无需注册，文件从不离开你的浏览器。",
+    "quickTitle": "快速修复",
+    "fullTitle": "完整工具",
+    "badge": "免费 · 无需注册 · 在浏览器中运行",
+    "open": "打开",
+    "dropTitle": "将 CSV 文件拖到这里，或",
+    "dropTitleExcel": "将 Excel 文件（.xlsx）拖到这里，或",
+    "choose": "选择文件",
+    "dropHere": "在此放下文件",
+    "privacy": "文件在你的浏览器中处理，不会上传。",
+    "fileInfo": "{rows} 行 · {cols} 列",
+    "useAnother": "换一个文件",
+    "readError": "无法读取此文件。请确认它是 CSV 文件。",
+    "emptyFile": "此文件没有数据行。",
+    "preview": "预览",
+    "previewNote": "共 {total} 行，显示前 {shown} 行。",
+    "downloadCsv": "下载 CSV",
+    "checkInFixer": "在 CSV修复工具中检查",
+    "nextStep": "下一步：按照你的平台的导入规则检查文件。",
+    "row": "行",
+    "column": "列",
+    "before": "修改前",
+    "after": "修改后",
+    "howTitle": "使用方法",
+    "faqTitle": "常见问题",
+    "relatedTitle": "更多免费工具",
+    "options": "选项",
+    "result": "结果",
+    "tools": {
+      "split": {
+        "name": "CSV 拆分",
+        "metaTitle": "将大型 CSV 文件拆分为多个小文件",
+        "description": "将大型商品 CSV 拆分为多个小文件，每个文件都带有标题行。同一商品的变体保持在一起，并且可以让每个文件都低于 Shopify 的 15 MB 导入上限。",
+        "intro": "将大型 CSV 拆分为多个带标题行的小文件。同一商品的行会留在同一个文件中。",
+        "rowsPerFile": "每个文件的行数",
+        "maxSize": "每个文件保持在 15 MB 以下（Shopify 的导入上限）",
+        "groupBy": "按此列将行保持在一起",
+        "noGrouping": "不分组",
+        "groupHint": "同一商品的行在这一列中的值相同，因此不会被拆到两个文件中。",
+        "resultTitle": "{count} 个文件",
+        "part": "第 {n} 部分",
+        "partInfo": "{rows} 行 · {size}",
+        "download": "下载",
+        "downloadZip": "全部打包为 .zip 下载",
+        "steps": [
+          "拖入你的 CSV。文件在浏览器中读取。",
+          "选择每个文件的行数。同一商品的变体行会自动保持在一起。",
+          "逐个下载各部分，或打包成 .zip 一次下载，然后按顺序导入。"
+        ],
+        "faq": [
+          {
+            "q": "同一商品的变体会被分到不同文件吗？",
+            "a": "不会。Shopify Handle 相同的行，或紧跟在父商品后面的 WooCommerce 变体，始终在同一个文件中。为了不拆开商品，文件的行数可能会略微超出设定值。"
+          },
+          {
+            "q": "Shopify 的文件大小上限是多少？",
+            "a": "Shopify 接受最大 15 MB 的商品 CSV 文件。勾选大小选项后，每个部分都会低于这个上限。"
+          },
+          {
+            "q": "每个部分都有标题行吗？",
+            "a": "是的。每个文件都以相同的标题行开头，因此都可以单独导入。"
+          }
+        ]
+      },
+      "dedupe": {
+        "name": "删除重复行",
+        "metaTitle": "删除 CSV 文件中的重复行",
+        "description": "删除 CSV 中的重复行，可以是完全相同的行，也可以是 SKU 或其他列相同的行。下载前可以确切看到删除了哪些行。",
+        "intro": "查找并删除重复行：所有列都相同的行，或共享某个值（如 SKU）的行。",
+        "compare": "重复的判断标准",
+        "wholeRow": "所有列都相同",
+        "byColumns": "以下列相同：",
+        "keep": "保留",
+        "keepFirst": "第一行",
+        "keepLast": "最后一行",
+        "loose": "忽略大小写和多余空格",
+        "skipBlank": "这些列为空的行永不删除",
+        "handleWarning": "Shopify 商品的所有变体共用同一个 Handle。只按 Handle 比较会删掉变体，请改为按 Variant SKU 比较。",
+        "summary": "已删除 {removed} 个重复行，保留 {kept} 行。",
+        "none": "没有发现重复行。",
+        "removedTitle": "已删除的行",
+        "downloadKept": "下载清理后的 CSV",
+        "downloadRemoved": "下载已删除的行",
+        "steps": [
+          "拖入你的 CSV。",
+          "选择判断两行相同的标准：所有列，或 SKU 等关键列。",
+          "查看已删除行的列表，然后下载清理后的文件。"
+        ],
+        "faq": [
+          {
+            "q": "两行重复时保留哪一行？",
+            "a": "默认保留第一行。如果文件是陆续追加内容的，选择\"最后一行\"即可保留最新版本。"
+          },
+          {
+            "q": "能看到删除了什么吗？",
+            "a": "可以。每个被删除的行都会连同行号列出，你也可以把已删除的行单独下载为 CSV。"
+          },
+          {
+            "q": "对 Shopify 文件安全吗？",
+            "a": "按整行或 Variant SKU 比较是安全的。不要只按 Handle 比较：同一商品的所有变体都共用它。"
+          }
+        ]
+      },
+      "encoding": {
+        "name": "修复 CSV 编码",
+        "metaTitle": "修复 CSV 编码和乱码（Ã©、â€™）",
+        "description": "修复 CSV 中 Ã©、â€™ 之类的乱码并转换为 UTF-8。支持 Excel 以 Windows-1252 或 UTF-16 保存的文件。",
+        "intro": "把\"CafÃ©\"这样的乱码还原为\"Café\"，并将文件转换为所有店铺平台都支持的 UTF-8。",
+        "detected": "检测到的编码",
+        "encUtf8": "UTF-8",
+        "encUtf8Bom": "UTF-8（带 BOM）",
+        "encUtf16": "UTF-16",
+        "encWin1252": "Windows-1252（已转换为 UTF-8）",
+        "garbled": "乱码",
+        "repaired": "已修复 {count} 个乱码单元格。",
+        "clean": "没有发现乱码。下载的是普通 UTF-8 文件。",
+        "bom": "添加字节顺序标记（BOM），帮助 Windows 版 Excel 正确打开文件",
+        "downloadFixed": "下载 UTF-8 CSV",
+        "steps": [
+          "拖入你的 CSV。编码会自动检测。",
+          "乱码会被修复，你可以查看每一处修改。",
+          "下载干净的 UTF-8 文件。"
+        ],
+        "faq": [
+          {
+            "q": "为什么 é 变成了 Ã©？",
+            "a": "文件原本以 UTF-8 保存，后来被当作 Windows-1252 打开又重新保存。每个带重音的字母都变成了两三个奇怪的字符。这个工具可以还原。"
+          },
+          {
+            "q": "会改动原本正确的文字吗？",
+            "a": "不会。只修改明显是 UTF-8 损坏的字符序列；正确的重音字母、符号和中文等其他文字保持不变。"
+          },
+          {
+            "q": "需要添加 BOM 吗？",
+            "a": "只有在 Windows 上用 Excel 打开时才需要。Shopify、WooCommerce 和大多数导入工具都能读取带或不带 BOM 的 UTF-8。"
+          }
+        ]
+      },
+      "barcodes": {
+        "name": "修复条形码",
+        "metaTitle": "修复被 Excel 破坏的条形码：开头的 0 和 1.23E+11",
+        "description": "修复被 Excel 改动的 UPC、EAN 和 GTIN 条形码：找回丢失的开头 0，并在校验位验证后展开 1.23457E+11 这类科学计数法。",
+        "intro": "Excel 会删掉条形码开头的 0，并把长条形码显示成 1.23457E+11。这个工具只修复能被证明正确的部分，其余的会标记出来。",
+        "columns": "条形码列",
+        "noColumns": "没有找到条形码列。请选择要检查的列：",
+        "fixed": "已修复",
+        "lost": "数字已丢失",
+        "invalid": "校验位无效",
+        "summary": "已修复 {fixed} · 已丢失 {lost} · 无效 {invalid}",
+        "allGood": "所有条形码都有效，无需修复。",
+        "reasonLeadingZero": "已补回开头的 0",
+        "reasonScientific": "已展开科学计数法",
+        "reasonDecimal": "已删除\".0\"",
+        "reasonSpaces": "已删除空格",
+        "lostHelp": "Excel 对这些条形码做了四舍五入，原始数字已经不在文件里了。请从供应商或原来的平台重新复制。",
+        "invalidHelp": "这些数字的校验位不正确，可能输错了，也可能根本不是条形码。",
+        "tip": "为避免 Excel 再次这样做，请通过 数据 → 从文本/CSV 打开 CSV 文件，并将条形码列设为\"文本\"。",
+        "downloadFixed": "下载修复后的 CSV",
+        "steps": [
+          "拖入你的 CSV。条形码列（UPC、EAN、GTIN、Barcode）会被自动找到。",
+          "只有当条形码的校验位能证明结果时，才会修复开头的 0 和科学计数法。",
+          "下载修复后的文件，并查看需要你处理的条形码列表。"
+        ],
+        "faq": [
+          {
+            "q": "怎么确定补上的 0 是对的？",
+            "a": "每个 UPC 和 EAN 的最后一位都是由其他数字算出的校验位。只有补 0 后的编码通过这项校验才会添加，因此修复结果是可以证明的。"
+          },
+          {
+            "q": "1.23457E+11 能还原吗？",
+            "a": "仅凭这段文字不能：Excel 只保留了 6 位数字。如果文件中还保留着全部数字（例如 1.23456789012E+11），就会被展开；否则该单元格会被标记，方便你重新复制条形码。"
+          },
+          {
+            "q": "哪些平台需要有效的条形码？",
+            "a": "Shopify 以文本形式保存条形码，Google 购物和 Amazon 会检查 GTIN，很多电商平台会拒绝无效的条形码。少了一个 0 的条形码代表的是另一件商品。"
+          }
+        ]
+      },
+      "excel": {
+        "name": "Excel 转 CSV",
+        "metaTitle": "将 Excel（.xlsx）转为 CSV，不丢失开头的 0",
+        "description": "将 Excel 工作簿（.xlsx）转换为 UTF-8 CSV，保留开头的 0、长数字的全部位数以及易读的日期。在浏览器中运行。",
+        "intro": "将 .xlsx 工作簿转换为 UTF-8 CSV。条形码保留全部数字，日期变为 YYYY-MM-DD 格式，中文也不会乱码。",
+        "sheet": "工作表",
+        "rowsCols": "{rows} 行 · {cols} 列",
+        "xlsOnly": "仅支持 .xlsx 文件。请先在 Excel 中选择 文件 → 另存为 → Excel 工作簿（.xlsx）。",
+        "notWorkbook": "此文件不是 .xlsx 工作簿。",
+        "emptySheet": "此工作表为空。",
+        "steps": [
+          "拖入你的 .xlsx 文件。文件在浏览器中读取。",
+          "选择要转换的工作表并查看预览。",
+          "下载可直接导入的 UTF-8 CSV。"
+        ],
+        "faq": [
+          {
+            "q": "为什么不直接在 Excel 里另存为 CSV？",
+            "a": "Excel 导出 CSV 时使用电脑的区域编码，可能改用分号分隔，并按显示的样子写入长数字。这个工具以逗号分隔的 UTF-8 写入，并保留每一位数字。"
+          },
+          {
+            "q": "日期会怎样写入？",
+            "a": "写成所有平台都能识别的 YYYY-MM-DD 格式（有时间时也会带上时间）。"
+          },
+          {
+            "q": "能转换旧的 .xls 文件吗？",
+            "a": "不能直接转换。请先用 Excel 或 Google 表格打开文件，另存为 .xlsx。"
+          }
+        ]
+      },
+      "handles": {
+        "name": "Shopify handle 生成器",
+        "metaTitle": "Shopify handle 生成器：把商品标题变成 URL handle",
+        "description": "根据商品标题生成 Shopify URL handle，可以逐个生成，也可以为整个 CSV 生成。会去掉重音、清理符号，并为重复项编号。",
+        "intro": "把商品标题转换成整洁的 Shopify URL handle，可以用标题列表，也可以处理整个商品 CSV。",
+        "modePaste": "粘贴标题",
+        "modeCsv": "填充 CSV",
+        "titlesLabel": "商品标题，每行一个",
+        "titlesPlaceholder": "Linen Shirt – Navy\nCafé Crème Mug\nRock & Roll Tee",
+        "unique": "为重复项加编号（-1、-2…）",
+        "handlesLabel": "Handle",
+        "copy": "复制 handle",
+        "copied": "已复制",
+        "titleColumn": "标题列",
+        "handleColumn": "Handle 列",
+        "overwrite": "替换已填写的 handle",
+        "filled": "已填写 {count} 个 handle。",
+        "variantNote": "没有标题的行（Shopify 变体行）会使用上方商品的 handle。",
+        "downloadFixed": "下载 CSV",
+        "steps": [
+          "粘贴标题，或拖入商品 CSV 并选择标题列。",
+          "按照 Shopify 的规则生成 handle：小写、去掉重音、符号替换为连字符。",
+          "复制 handle，或下载已填好 Handle 列的文件。"
+        ],
+        "faq": [
+          {
+            "q": "什么是 Shopify handle？",
+            "a": "商品网址中 /products/ 后面的部分。它必须是小写，只能包含字母、数字和连字符，并且在店铺内唯一。"
+          },
+          {
+            "q": "标题重复时会怎样？",
+            "a": "第二个加 -1，第三个加 -2，依此类推，和 Shopify 为重复项编号的方式一样。"
+          },
+          {
+            "q": "之后还能修改 handle 吗？",
+            "a": "可以，但如果不设置重定向，旧网址就会失效。所以最好在导入前就把 handle 定好。"
+          }
+        ]
+      }
+    }
   }
 }

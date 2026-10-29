@@ -39,6 +39,7 @@
     "language": "Dil",
     "themeDark": "Koyu moda geç",
     "themeLight": "Açık moda geç",
+    "freeTools": "Ücretsiz CSV araçları",
     "storeMigrations": "Mağaza taşıma"
   },
   "guide": {
@@ -955,5 +956,258 @@
     "guidesTitle": "Rehberler",
     "allGuides": "Tüm {platform} rehberleri →",
     "otherFixers": "Diğer düzelticiler"
+  },
+  "smallTools": {
+    "indexMetaTitle": "Online satıcılar için ücretsiz CSV araçları",
+    "indexTitle": "Ücretsiz CSV araçları",
+    "indexDescription": "Ürün CSV dosyaları için ücretsiz araçlar: büyük dosyaları bölün, yinelenen satırları kaldırın, kodlamayı ve barkodları onarın, Excel'i CSV'ye dönüştürün ve Shopify tanımlayıcıları oluşturun. Hepsi tarayıcınızda çalışır.",
+    "indexIntro": "Bir ürün dosyasının içe aktarılmasını engelleyen sorunlar için hızlı çözümler. Ücretsiz, kayıt gerektirmez ve dosyalarınız tarayıcınızdan hiç çıkmaz.",
+    "quickTitle": "Hızlı çözümler",
+    "fullTitle": "Kapsamlı araçlar",
+    "badge": "Ücretsiz · kayıt gerekmez · tarayıcınızda çalışır",
+    "open": "Aç",
+    "dropTitle": "Bir CSV dosyasını buraya bırakın veya",
+    "dropTitleExcel": "Bir Excel dosyasını (.xlsx) buraya bırakın veya",
+    "choose": "Dosya seçin",
+    "dropHere": "Dosyayı buraya bırakın",
+    "privacy": "Dosyanız tarayıcınızda işlenir. Hiçbir yere yüklenmez.",
+    "fileInfo": "{rows} satır · {cols} sütun",
+    "useAnother": "Başka bir dosya kullan",
+    "readError": "Bu dosya okunamadı. CSV dosyası olduğundan emin olun.",
+    "emptyFile": "Bu dosyada veri satırı yok.",
+    "preview": "Önizleme",
+    "previewNote": "{total} satırın ilk {shown} tanesi.",
+    "downloadCsv": "CSV'yi indir",
+    "checkInFixer": "CSV Düzelticisinde kontrol et",
+    "nextStep": "Sonraki adım: dosyayı platformunuzun içe aktarma kurallarına göre kontrol edin.",
+    "row": "Satır",
+    "column": "Sütun",
+    "before": "Önce",
+    "after": "Sonra",
+    "howTitle": "Nasıl çalışır",
+    "faqTitle": "Sorular",
+    "relatedTitle": "Diğer ücretsiz araçlar",
+    "options": "Seçenekler",
+    "result": "Sonuç",
+    "tools": {
+      "split": {
+        "name": "CSV bölücü",
+        "metaTitle": "Büyük bir CSV dosyasını küçük dosyalara bölün",
+        "description": "Büyük bir ürün CSV'sini her birinde başlık satırı bulunan küçük dosyalara bölün. Bir ürünün varyantları bir arada kalır ve her dosyayı Shopify'ın 15 MB içe aktarma sınırının altında tutabilirsiniz.",
+        "intro": "Büyük bir CSV'yi, her birinde başlık satırı olan küçük dosyalara bölün. Aynı ürünün satırları aynı dosyada kalır.",
+        "rowsPerFile": "Dosya başına satır",
+        "maxSize": "Her dosyayı 15 MB'ın altında tut (Shopify'ın içe aktarma sınırı)",
+        "groupBy": "Satırları bir arada tut",
+        "noGrouping": "Satırları gruplama",
+        "groupHint": "Bir ürünün satırları bu sütunu paylaşır, bu yüzden asla iki dosyaya bölünmezler.",
+        "resultTitle": "{count} dosya",
+        "part": "Bölüm {n}",
+        "partInfo": "{rows} satır · {size}",
+        "download": "İndir",
+        "downloadZip": "Tümünü .zip olarak indir",
+        "steps": [
+          "CSV'nizi bırakın. Dosya tarayıcınızda okunur.",
+          "Her dosyada kaç satır olacağını seçin. Bir ürünün varyant satırları otomatik olarak bir arada kalır.",
+          "Bölümleri tek tek ya da hepsini birden .zip olarak indirin ve sırayla içe aktarın."
+        ],
+        "faq": [
+          {
+            "q": "Bir ürünün varyantları farklı dosyalara düşebilir mi?",
+            "a": "Hayır. Aynı Shopify Handle değerini paylaşan satırlar ya da ana ürünlerinin ardından gelen WooCommerce varyasyonları her zaman aynı dosyada kalır. Bir ürünü bölmemek için dosya satır sayısını biraz aşabilir."
+          },
+          {
+            "q": "Shopify'ın dosya boyutu sınırı nedir?",
+            "a": "Shopify 15 MB'a kadar ürün CSV dosyalarını kabul eder. Boyut seçeneğini işaretlerseniz her bölüm bu sınırın altında kalır."
+          },
+          {
+            "q": "Her bölümde başlık satırı var mı?",
+            "a": "Evet. Her dosya aynı başlık satırıyla başlar, böylece her biri ayrı ayrı içe aktarılabilir."
+          }
+        ]
+      },
+      "dedupe": {
+        "name": "Yinelenen satırları kaldır",
+        "metaTitle": "Bir CSV dosyasından yinelenen satırları kaldırın",
+        "description": "Bir CSV'den yinelenen satırları kaldırın: birebir aynı satırları ya da aynı SKU'yu veya başka bir sütunu paylaşan satırları. İndirmeden önce hangi satırların kaldırıldığını tam olarak görün.",
+        "intro": "Yinelenen satırları bulup kaldırın: tüm sütunları aynı olan satırlar ya da SKU gibi bir değeri paylaşan satırlar.",
+        "compare": "Satırlar şu durumda yinelenmiş sayılır:",
+        "wholeRow": "tüm sütunlar aynıysa",
+        "byColumns": "şu sütunlar aynıysa:",
+        "keep": "Tutulacak",
+        "keepFirst": "ilk satır",
+        "keepLast": "son satır",
+        "loose": "Büyük/küçük harfi ve fazla boşlukları yok say",
+        "skipBlank": "Bu sütunları boş olan satırları asla kaldırma",
+        "handleWarning": "Bir Shopify ürününün tüm varyantları aynı Handle değerini paylaşır. Yalnızca Handle'a göre karşılaştırmak varyantları siler; bunun yerine Variant SKU'ya göre karşılaştırın.",
+        "summary": "{removed} yinelenen satır kaldırıldı. {kept} satır tutuldu.",
+        "none": "Yinelenen satır bulunamadı.",
+        "removedTitle": "Kaldırılan satırlar",
+        "downloadKept": "Temizlenmiş CSV'yi indir",
+        "downloadRemoved": "Kaldırılan satırları indir",
+        "steps": [
+          "CSV'nizi bırakın.",
+          "İki satırı neyin aynı yaptığını seçin: tüm sütunlar ya da SKU gibi anahtar sütunlar.",
+          "Kaldırılan satırların listesini kontrol edin, ardından temizlenmiş dosyayı indirin."
+        ],
+        "faq": [
+          {
+            "q": "İki satır yinelenmişse hangisi tutulur?",
+            "a": "Varsayılan olarak ilki. Dosya zamanla genişletildiyse en yeni sürümü tutmak için \"son satır\"ı seçin."
+          },
+          {
+            "q": "Neyin kaldırıldığını görebilir miyim?",
+            "a": "Evet. Kaldırılan her satır satır numarasıyla listelenir ve kaldırılan satırları ayrı bir CSV olarak indirebilirsiniz."
+          },
+          {
+            "q": "Shopify dosyaları için güvenli mi?",
+            "a": "Evet, tüm satırları veya Variant SKU'yu karşılaştırırsanız. Yalnızca Handle'a göre karşılaştırmayın: bir ürünün tüm varyantları onu paylaşır."
+          }
+        ]
+      },
+      "encoding": {
+        "name": "CSV kodlamasını onar",
+        "metaTitle": "CSV kodlamasını ve bozuk karakterleri onarın (Ã©, â€™)",
+        "description": "Bir CSV'deki Ã© ve â€™ gibi bozuk karakterleri onarın ve dosyayı UTF-8'e dönüştürün. Excel'in Windows-1252 veya UTF-16 olarak kaydettiği dosyalarla çalışır.",
+        "intro": "\"CafÃ©\" gibi bozuk metni yeniden \"Café\" yapın ve dosyayı her mağaza platformunun beklediği kodlama olan UTF-8'e dönüştürün.",
+        "detected": "Algılanan kodlama",
+        "encUtf8": "UTF-8",
+        "encUtf8Bom": "BOM'lu UTF-8",
+        "encUtf16": "UTF-16",
+        "encWin1252": "Windows-1252 (UTF-8'e dönüştürüldü)",
+        "garbled": "Bozuk metin",
+        "repaired": "{count} bozuk hücre onarıldı.",
+        "clean": "Bozuk metin bulunamadı. İndirilen dosya düz UTF-8'dir.",
+        "bom": "Bayt sırası işareti ekle (Windows'taki Excel'in dosyayı doğru açmasına yardımcı olur)",
+        "downloadFixed": "UTF-8 CSV'yi indir",
+        "steps": [
+          "CSV'nizi bırakın. Kodlama otomatik olarak algılanır.",
+          "Bozuk karakterler onarılır ve her değişikliği kontrol edebilirsiniz.",
+          "Temiz bir UTF-8 dosyası indirin."
+        ],
+        "faq": [
+          {
+            "q": "Neden é yerine Ã© görüyorum?",
+            "a": "Dosya UTF-8 olarak kaydedilmiş, sonra Windows-1252 olarak açılıp yeniden kaydedilmiş. Her aksanlı harf iki ya da üç tuhaf karaktere dönüşmüş. Bu araç bunu geri alır."
+          },
+          {
+            "q": "Zaten doğru olan metni değiştirir mi?",
+            "a": "Hayır. Yalnızca açıkça bozulmuş UTF-8 olan karakter dizileri değiştirilir; doğru Türkçe karakterler, semboller ve diğer alfabeler olduğu gibi kalır."
+          },
+          {
+            "q": "BOM eklemeli miyim?",
+            "a": "Yalnızca dosyayı Windows'ta Excel ile açacaksanız. Shopify, WooCommerce ve çoğu içe aktarıcı UTF-8'i BOM'lu da BOM'suz da okur."
+          }
+        ]
+      },
+      "barcodes": {
+        "name": "Barkodları onar",
+        "metaTitle": "Excel'in bozduğu barkodları onarın: baştaki sıfırlar ve 1,23E+11",
+        "description": "Excel'in değiştirdiği UPC, EAN ve GTIN barkodlarını onarın: kaybolan baştaki sıfırları geri getirin ve 1.23457E+11 gibi bilimsel gösterimi kontrol basamağı doğrulamasıyla açın.",
+        "intro": "Excel barkodlardaki baştaki sıfırları siler ve uzun olanları 1.23457E+11 olarak gösterir. Bu araç kanıtlanabilenleri onarır, kalanları işaretler.",
+        "columns": "Barkod sütunları",
+        "noColumns": "Barkod sütunu bulunamadı. Kontrol edilecek sütunları seçin:",
+        "fixed": "Onarıldı",
+        "lost": "Basamaklar kayıp",
+        "invalid": "Geçersiz kontrol basamağı",
+        "summary": "{fixed} onarıldı · {lost} kayıp · {invalid} geçersiz",
+        "allGood": "Tüm barkodlar geçerli. Onarılacak bir şey yok.",
+        "reasonLeadingZero": "Baştaki sıfır geri getirildi",
+        "reasonScientific": "Bilimsel gösterim açıldı",
+        "reasonDecimal": "\".0\" kaldırıldı",
+        "reasonSpaces": "Boşluklar kaldırıldı",
+        "lostHelp": "Excel bu barkodları yuvarlamış, bu yüzden orijinal basamaklar artık dosyada yok. Onları tedarikçinizden veya eski platformunuzdan yeniden kopyalayın.",
+        "invalidHelp": "Bu sayıların geçerli bir kontrol basamağı yok. Yanlış yazılmış olabilirler ya da barkod olmayabilirler.",
+        "tip": "Excel'in bunu tekrar yapmasını önlemek için CSV dosyalarını Veri → Metinden/CSV'den ile açın ve barkod sütunlarını Metin olarak ayarlayın.",
+        "downloadFixed": "Onarılmış CSV'yi indir",
+        "steps": [
+          "CSV'nizi bırakın. Barkod sütunları (UPC, EAN, GTIN, Barcode) otomatik olarak bulunur.",
+          "Baştaki sıfırlar ve bilimsel gösterim yalnızca barkodun kontrol basamağı sonucu doğruladığında onarılır.",
+          "Onarılmış dosyayı indirin ve ilgilenmeniz gereken barkodların listesine bakın."
+        ],
+        "faq": [
+          {
+            "q": "Baştaki bir sıfırın doğru olduğundan nasıl emin olunuyor?",
+            "a": "Her UPC ve EAN, diğer basamaklardan hesaplanan bir kontrol basamağıyla biter. Sıfır yalnızca tamamlanan kod bu kontrolden geçerse eklenir, yani onarım kanıtlanabilir."
+          },
+          {
+            "q": "1.23457E+11 geri getirilebilir mi?",
+            "a": "O metinden hayır: Excel yalnızca altı basamak tutmuş. Dosyada hâlâ tüm basamaklar varsa (örneğin 1.23456789012E+11) sayı açılır. Yoksa hücre işaretlenir, böylece barkodu yeniden kopyalayabilirsiniz."
+          },
+          {
+            "q": "Hangi platformlar geçerli barkod ister?",
+            "a": "Shopify onları metin olarak saklar, Google Alışveriş ve Amazon GTIN'leri kontrol eder ve pek çok pazar yeri geçersiz olanları reddeder. Sıfırı eksik bir barkod başka bir ürüne aittir."
+          }
+        ]
+      },
+      "excel": {
+        "name": "Excel'den CSV'ye",
+        "metaTitle": "Excel'i (.xlsx) sıfırları kaybetmeden CSV'ye dönüştürün",
+        "description": "Bir Excel çalışma kitabını (.xlsx), baştaki sıfırları, uzun sayıların tamamını ve okunabilir tarihleri koruyan bir UTF-8 CSV'ye dönüştürün. Tarayıcınızda çalışır.",
+        "intro": ".xlsx çalışma kitabını UTF-8 CSV'ye dönüştürün. Barkodlar basamaklarını korur, tarihler YYYY-AA-GG olur ve Türkçe karakterler bozulmaz.",
+        "sheet": "Sayfa",
+        "rowsCols": "{rows} satır · {cols} sütun",
+        "xlsOnly": "Yalnızca .xlsx dosyaları desteklenir. Excel'de önce Dosya → Farklı Kaydet → Excel Çalışma Kitabı (.xlsx) seçeneğini kullanın.",
+        "notWorkbook": "Bu dosya bir .xlsx çalışma kitabı değil.",
+        "emptySheet": "Bu sayfa boş.",
+        "steps": [
+          ".xlsx dosyanızı bırakın. Tarayıcınızda okunur.",
+          "Dönüştürülecek sayfayı seçin ve önizlemeyi kontrol edin.",
+          "İçe aktarmaya hazır bir UTF-8 CSV indirin."
+        ],
+        "faq": [
+          {
+            "q": "Neden Excel'de CSV olarak kaydetmiyorum?",
+            "a": "Excel'in CSV dışa aktarımı bilgisayarınızın bölgesel kodlamasını kullanır, noktalı virgüle geçebilir ve uzun sayıları göründükleri gibi yazar. Bu araç virgüllü UTF-8 yazar ve her basamağı korur."
+          },
+          {
+            "q": "Tarihler nasıl yazılır?",
+            "a": "Her platformun anladığı YYYY-AA-GG biçiminde (varsa saatle birlikte)."
+          },
+          {
+            "q": "Eski .xls dosyalarını dönüştürebilir miyim?",
+            "a": "Doğrudan hayır. Dosyayı Excel'de veya Google E-Tablolar'da açıp önce .xlsx olarak kaydedin."
+          }
+        ]
+      },
+      "handles": {
+        "name": "Shopify tanımlayıcı oluşturucu",
+        "metaTitle": "Shopify tanımlayıcı oluşturucu: başlıklardan URL tanımlayıcılarına",
+        "description": "Ürün başlıklarından Shopify URL tanımlayıcıları (handle) oluşturun; tek tek ya da tüm bir CSV için. Aksanlar kaldırılır, semboller temizlenir ve yinelenenler numaralandırılır.",
+        "intro": "Ürün başlıklarını temiz Shopify URL tanımlayıcılarına dönüştürün; bir başlık listesinden ya da tüm bir ürün CSV'si için.",
+        "modePaste": "Başlıkları yapıştır",
+        "modeCsv": "CSV'yi doldur",
+        "titlesLabel": "Ürün başlıkları, her satıra bir tane",
+        "titlesPlaceholder": "Keten Gömlek – Lacivert\nCafé Crème Kupa\nRock & Roll Tişört",
+        "unique": "Yinelenenleri benzersiz yap (-1, -2…)",
+        "handlesLabel": "Tanımlayıcılar",
+        "copy": "Tanımlayıcıları kopyala",
+        "copied": "Kopyalandı",
+        "titleColumn": "Başlık sütunu",
+        "handleColumn": "Tanımlayıcı sütunu",
+        "overwrite": "Zaten dolu olan tanımlayıcıları değiştir",
+        "filled": "{count} tanımlayıcı dolduruldu.",
+        "variantNote": "Başlığı olmayan satırlar (Shopify varyant satırları) üstlerindeki ürünün tanımlayıcısını alır.",
+        "downloadFixed": "CSV'yi indir",
+        "steps": [
+          "Başlıklarınızı yapıştırın ya da bir ürün CSV'si bırakıp başlık sütununu seçin.",
+          "Tanımlayıcılar Shopify'ın kurallarıyla oluşturulur: küçük harf, aksansız, semboller yerine tire.",
+          "Tanımlayıcıları kopyalayın ya da Handle sütunu doldurulmuş dosyayı indirin."
+        ],
+        "faq": [
+          {
+            "q": "Shopify tanımlayıcısı (handle) nedir?",
+            "a": "Ürün URL'sinde /products/ sonrasındaki kısım. Küçük harfle yazılmalı, yalnızca harf, rakam ve tire içermeli ve mağazanızda benzersiz olmalıdır."
+          },
+          {
+            "q": "Yinelenen başlıklara ne olur?",
+            "a": "İkincisi -1, üçüncüsü -2 alır ve bu böyle devam eder; Shopify'ın yinelenenleri numaralandırdığı gibi."
+          },
+          {
+            "q": "Bir tanımlayıcıyı sonradan değiştirebilir miyim?",
+            "a": "Evet, ama yönlendirme eklemezseniz eski URL çalışmaz. Bu yüzden tanımlayıcıları içe aktarmadan önce doğru belirlemek iyi olur."
+          }
+        ]
+      }
+    }
   }
 }

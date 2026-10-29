@@ -20,6 +20,7 @@ export const LOCALISED_PREFIXES = [
   "/ebay-variations-csv-fixer",
   "/amazon-csv-fixer",
   "/how-it-works",
+  "/tools",
   "/about",
   "/privacy",
   "/terms",

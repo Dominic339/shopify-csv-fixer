@@ -39,6 +39,7 @@
     "language": "Sprache",
     "themeDark": "Zum dunklen Modus wechseln",
     "themeLight": "Zum hellen Modus wechseln",
+    "freeTools": "Kostenlose CSV-Tools",
     "storeMigrations": "Shop-Umzüge"
   },
   "guide": {
@@ -955,5 +956,258 @@
     "guidesTitle": "Anleitungen",
     "allGuides": "Alle Anleitungen zu {platform} →",
     "otherFixers": "Weitere Reparateure"
+  },
+  "smallTools": {
+    "indexMetaTitle": "Kostenlose CSV-Tools für Onlinehändler",
+    "indexTitle": "Kostenlose CSV-Tools",
+    "indexDescription": "Kostenlose Tools für Produkt-CSVs: große Dateien aufteilen, doppelte Zeilen entfernen, Kodierung und Barcodes reparieren, Excel in CSV umwandeln und Shopify-Handles erzeugen. Alles läuft in deinem Browser.",
+    "indexIntro": "Schnelle Lösungen für die Probleme, an denen ein Produktimport scheitert. Kostenlos, ohne Anmeldung, und deine Dateien verlassen nie deinen Browser.",
+    "quickTitle": "Schnelle Lösungen",
+    "fullTitle": "Vollständige Tools",
+    "badge": "Kostenlos · ohne Anmeldung · läuft im Browser",
+    "open": "Öffnen",
+    "dropTitle": "Zieh eine CSV-Datei hierher oder",
+    "dropTitleExcel": "Zieh eine Excel-Datei (.xlsx) hierher oder",
+    "choose": "Datei auswählen",
+    "dropHere": "Datei hier ablegen",
+    "privacy": "Deine Datei wird in deinem Browser verarbeitet. Sie wird nicht hochgeladen.",
+    "fileInfo": "{rows} Zeilen · {cols} Spalten",
+    "useAnother": "Andere Datei verwenden",
+    "readError": "Diese Datei konnte nicht gelesen werden. Prüfe, ob es eine CSV-Datei ist.",
+    "emptyFile": "Diese Datei enthält keine Datenzeilen.",
+    "preview": "Vorschau",
+    "previewNote": "Die ersten {shown} von {total} Zeilen.",
+    "downloadCsv": "CSV herunterladen",
+    "checkInFixer": "Im CSV-Reparateur prüfen",
+    "nextStep": "Nächster Schritt: Prüfe die Datei anhand der Importregeln deiner Plattform.",
+    "row": "Zeile",
+    "column": "Spalte",
+    "before": "Vorher",
+    "after": "Nachher",
+    "howTitle": "So funktioniert's",
+    "faqTitle": "Fragen",
+    "relatedTitle": "Weitere kostenlose Tools",
+    "options": "Optionen",
+    "result": "Ergebnis",
+    "tools": {
+      "split": {
+        "name": "CSV aufteilen",
+        "metaTitle": "Große CSV-Datei in kleinere Dateien aufteilen",
+        "description": "Teile eine große Produkt-CSV in kleinere Dateien auf, jede mit Kopfzeile. Varianten eines Produkts bleiben zusammen, und jede Datei kann unter Shopifys Importgrenze von 15 MB bleiben.",
+        "intro": "Teile eine große CSV in kleinere Dateien auf, jede mit der Kopfzeile. Zeilen desselben Produkts bleiben in derselben Datei.",
+        "rowsPerFile": "Zeilen pro Datei",
+        "maxSize": "Jede Datei unter 15 MB halten (Shopifys Importgrenze)",
+        "groupBy": "Zeilen zusammenhalten nach",
+        "noGrouping": "Zeilen nicht gruppieren",
+        "groupHint": "Die Zeilen eines Produkts haben in dieser Spalte denselben Wert und werden daher nie auf zwei Dateien verteilt.",
+        "resultTitle": "{count} Dateien",
+        "part": "Teil {n}",
+        "partInfo": "{rows} Zeilen · {size}",
+        "download": "Herunterladen",
+        "downloadZip": "Alle als .zip herunterladen",
+        "steps": [
+          "Zieh deine CSV hinein. Die Datei wird in deinem Browser gelesen.",
+          "Wähle, wie viele Zeilen jede Datei bekommt. Die Variantenzeilen eines Produkts bleiben automatisch zusammen.",
+          "Lade die Teile einzeln oder zusammen als .zip herunter und importiere sie der Reihe nach."
+        ],
+        "faq": [
+          {
+            "q": "Landen Varianten eines Produkts in verschiedenen Dateien?",
+            "a": "Nein. Zeilen mit demselben Shopify-Handle oder WooCommerce-Variationen, die auf ihr Elternprodukt folgen, bleiben immer in derselben Datei. Eine Datei kann dafür etwas über der Zeilenzahl liegen."
+          },
+          {
+            "q": "Wie groß darf eine Datei bei Shopify sein?",
+            "a": "Shopify akzeptiert Produkt-CSVs bis 15 MB. Aktiviere die Größenoption, dann bleibt jeder Teil unter dieser Grenze."
+          },
+          {
+            "q": "Hat jeder Teil die Kopfzeile?",
+            "a": "Ja. Jede Datei beginnt mit derselben Kopfzeile und lässt sich einzeln importieren."
+          }
+        ]
+      },
+      "dedupe": {
+        "name": "Doppelte Zeilen entfernen",
+        "metaTitle": "Doppelte Zeilen aus einer CSV-Datei entfernen",
+        "description": "Entferne doppelte Zeilen aus einer CSV: identische Zeilen oder Zeilen mit derselben SKU oder einer anderen Spalte. Sieh genau, welche Zeilen entfernt werden, bevor du herunterlädst.",
+        "intro": "Finde und entferne doppelte Zeilen: Zeilen, die in allen Spalten gleich sind, oder Zeilen mit einem gemeinsamen Wert wie der SKU.",
+        "compare": "Zeilen gelten als doppelt, wenn",
+        "wholeRow": "alle Spalten gleich sind",
+        "byColumns": "diese Spalten gleich sind:",
+        "keep": "Behalten",
+        "keepFirst": "die erste Zeile",
+        "keepLast": "die letzte Zeile",
+        "loose": "Groß-/Kleinschreibung und überflüssige Leerzeichen ignorieren",
+        "skipBlank": "Zeilen, in denen diese Spalten leer sind, nie entfernen",
+        "handleWarning": "Alle Varianten eines Shopify-Produkts teilen sich ein Handle. Ein Vergleich nur nach Handle würde Varianten löschen; vergleiche stattdessen nach Variant SKU.",
+        "summary": "{removed} doppelte Zeilen entfernt. {kept} Zeilen behalten.",
+        "none": "Keine doppelten Zeilen gefunden.",
+        "removedTitle": "Entfernte Zeilen",
+        "downloadKept": "Bereinigte CSV herunterladen",
+        "downloadRemoved": "Entfernte Zeilen herunterladen",
+        "steps": [
+          "Zieh deine CSV hinein.",
+          "Wähle, wann zwei Zeilen gleich sind: in allen Spalten oder in Schlüsselspalten wie der SKU.",
+          "Prüfe die Liste der entfernten Zeilen und lade dann die bereinigte Datei herunter."
+        ],
+        "faq": [
+          {
+            "q": "Welche Zeile bleibt, wenn zwei doppelt sind?",
+            "a": "Standardmäßig die erste. Wähle „die letzte Zeile“, um die neueste Version zu behalten, wenn eine Datei über die Zeit ergänzt wurde."
+          },
+          {
+            "q": "Kann ich sehen, was entfernt wurde?",
+            "a": "Ja. Jede entfernte Zeile wird mit ihrer Zeilennummer aufgelistet, und du kannst die entfernten Zeilen als eigene CSV herunterladen."
+          },
+          {
+            "q": "Ist das für Shopify-Dateien sicher?",
+            "a": "Ja, wenn du ganze Zeilen oder die Variant SKU vergleichst. Vergleiche nicht nur nach Handle: Alle Varianten eines Produkts teilen es."
+          }
+        ]
+      },
+      "encoding": {
+        "name": "CSV-Kodierung reparieren",
+        "metaTitle": "CSV-Kodierung und kaputte Zeichen reparieren (Ã©, â€™)",
+        "description": "Repariere kaputte Zeichen wie Ã© und â€™ in einer CSV und wandle sie in UTF-8 um. Funktioniert mit Dateien, die Excel in Windows-1252 oder UTF-16 gespeichert hat.",
+        "intro": "Mach aus kaputtem Text wie „CafÃ©“ wieder „Café“ und wandle die Datei in UTF-8 um, die Kodierung, die jede Shop-Plattform erwartet.",
+        "detected": "Erkannte Kodierung",
+        "encUtf8": "UTF-8",
+        "encUtf8Bom": "UTF-8 mit BOM",
+        "encUtf16": "UTF-16",
+        "encWin1252": "Windows-1252 (in UTF-8 umgewandelt)",
+        "garbled": "Kaputter Text",
+        "repaired": "{count} Zellen repariert.",
+        "clean": "Kein kaputter Text gefunden. Der Download ist reines UTF-8.",
+        "bom": "Byte Order Mark hinzufügen (hilft Excel unter Windows, die Datei richtig zu öffnen)",
+        "downloadFixed": "UTF-8-CSV herunterladen",
+        "steps": [
+          "Zieh deine CSV hinein. Die Kodierung wird automatisch erkannt.",
+          "Kaputte Zeichen werden repariert, und du kannst jede Änderung prüfen.",
+          "Lade eine saubere UTF-8-Datei herunter."
+        ],
+        "faq": [
+          {
+            "q": "Warum sehe ich Ã© statt é?",
+            "a": "Die Datei wurde als UTF-8 gespeichert, dann als Windows-1252 geöffnet und erneut gespeichert. Aus jedem Umlaut oder Akzent wurden zwei oder drei seltsame Zeichen. Dieses Tool macht das rückgängig."
+          },
+          {
+            "q": "Ändert es Text, der schon richtig ist?",
+            "a": "Nein. Nur Zeichenfolgen, die eindeutig kaputtes UTF-8 sind, werden geändert; richtige Umlaute, Symbole und andere Schriften bleiben unverändert."
+          },
+          {
+            "q": "Soll ich ein BOM hinzufügen?",
+            "a": "Nur, wenn du die Datei in Excel unter Windows öffnen willst. Shopify, WooCommerce und die meisten Importer lesen UTF-8 mit oder ohne."
+          }
+        ]
+      },
+      "barcodes": {
+        "name": "Barcodes reparieren",
+        "metaTitle": "Von Excel kaputte Barcodes reparieren: führende Nullen und 1,23E+11",
+        "description": "Repariere UPC-, EAN- und GTIN-Barcodes, die Excel verändert hat: verlorene führende Nullen wiederherstellen und wissenschaftliche Schreibweise wie 1.23457E+11 ausschreiben, mit Prüfziffer-Kontrolle.",
+        "intro": "Excel entfernt führende Nullen aus Barcodes und zeigt lange als 1.23457E+11. Dieses Tool repariert, was sich nachweisen lässt, und markiert den Rest.",
+        "columns": "Barcode-Spalten",
+        "noColumns": "Keine Barcode-Spalte gefunden. Wähle die Spalten, die geprüft werden sollen:",
+        "fixed": "Repariert",
+        "lost": "Ziffern verloren",
+        "invalid": "Ungültige Prüfziffer",
+        "summary": "{fixed} repariert · {lost} verloren · {invalid} ungültig",
+        "allGood": "Alle Barcodes sind gültig. Nichts zu reparieren.",
+        "reasonLeadingZero": "Führende Null wiederhergestellt",
+        "reasonScientific": "Wissenschaftliche Schreibweise ausgeschrieben",
+        "reasonDecimal": "„.0“ entfernt",
+        "reasonSpaces": "Leerzeichen entfernt",
+        "lostHelp": "Excel hat diese Barcodes gerundet, die ursprünglichen Ziffern stehen nicht mehr in der Datei. Kopiere sie erneut von deinem Lieferanten oder deiner alten Plattform.",
+        "invalidHelp": "Diese Zahlen haben keine gültige Prüfziffer. Vielleicht sind sie vertippt oder gar keine Barcodes.",
+        "tip": "Damit Excel das nicht wieder tut, öffne CSV-Dateien über Daten → Aus Text/CSV und stelle Barcode-Spalten auf Text.",
+        "downloadFixed": "Reparierte CSV herunterladen",
+        "steps": [
+          "Zieh deine CSV hinein. Barcode-Spalten (UPC, EAN, GTIN, Barcode) werden automatisch gefunden.",
+          "Führende Nullen und wissenschaftliche Schreibweise werden nur repariert, wenn die Prüfziffer das Ergebnis bestätigt.",
+          "Lade die reparierte Datei herunter und prüfe die Liste der Barcodes, die deine Aufmerksamkeit brauchen."
+        ],
+        "faq": [
+          {
+            "q": "Woher wisst ihr, dass eine führende Null richtig ist?",
+            "a": "Jeder UPC und EAN endet mit einer Prüfziffer, die aus den anderen Ziffern berechnet wird. Eine Null wird nur ergänzt, wenn der aufgefüllte Code diese Prüfung besteht. So ist die Reparatur nachweisbar."
+          },
+          {
+            "q": "Lässt sich 1.23457E+11 wiederherstellen?",
+            "a": "Nicht aus diesem Text: Excel hat nur sechs Ziffern behalten. Stehen noch alle Ziffern in der Datei (zum Beispiel 1.23456789012E+11), wird die Zahl ausgeschrieben. Sonst wird die Zelle markiert, damit du den Barcode neu kopieren kannst."
+          },
+          {
+            "q": "Welche Plattformen brauchen gültige Barcodes?",
+            "a": "Shopify speichert sie als Text, Google Shopping und Amazon prüfen GTINs, und viele Marktplätze lehnen ungültige ab. Ein Barcode mit fehlender Null ist ein anderes Produkt."
+          }
+        ]
+      },
+      "excel": {
+        "name": "Excel in CSV",
+        "metaTitle": "Excel (.xlsx) in CSV umwandeln, ohne Nullen zu verlieren",
+        "description": "Wandle eine Excel-Arbeitsmappe (.xlsx) in eine UTF-8-CSV um, die führende Nullen, lange Zahlen in voller Länge und lesbare Datumsangaben behält. Läuft in deinem Browser.",
+        "intro": "Wandle eine .xlsx-Arbeitsmappe in eine UTF-8-CSV um. Barcodes behalten ihre Ziffern, Datumsangaben werden zu JJJJ-MM-TT, und Umlaute bleiben erhalten.",
+        "sheet": "Tabellenblatt",
+        "rowsCols": "{rows} Zeilen · {cols} Spalten",
+        "xlsOnly": "Nur .xlsx-Dateien werden unterstützt. Nutze in Excel zuerst Datei → Speichern unter → Excel-Arbeitsmappe (.xlsx).",
+        "notWorkbook": "Diese Datei ist keine .xlsx-Arbeitsmappe.",
+        "emptySheet": "Dieses Tabellenblatt ist leer.",
+        "steps": [
+          "Zieh deine .xlsx-Datei hinein. Sie wird in deinem Browser gelesen.",
+          "Wähle das Tabellenblatt und prüfe die Vorschau.",
+          "Lade eine UTF-8-CSV herunter, die bereit für den Import ist."
+        ],
+        "faq": [
+          {
+            "q": "Warum nicht einfach in Excel als CSV speichern?",
+            "a": "Der CSV-Export von Excel nutzt die regionale Kodierung deines Computers, wechselt manchmal zu Semikolons und schreibt lange Zahlen so, wie sie angezeigt werden. Dieses Tool schreibt UTF-8 mit Kommas und behält jede Ziffer."
+          },
+          {
+            "q": "Wie werden Datumsangaben geschrieben?",
+            "a": "Als JJJJ-MM-TT (mit Uhrzeit, falls vorhanden). Das versteht jede Plattform."
+          },
+          {
+            "q": "Kann ich alte .xls-Dateien umwandeln?",
+            "a": "Nicht direkt. Öffne die Datei in Excel oder Google Sheets und speichere sie zuerst als .xlsx."
+          }
+        ]
+      },
+      "handles": {
+        "name": "Shopify-Handle-Generator",
+        "metaTitle": "Shopify-Handle-Generator: aus Titeln URL-Handles machen",
+        "description": "Erzeuge Shopify-URL-Handles aus Produkttiteln, einzeln oder für eine ganze CSV. Akzente werden entfernt, Sonderzeichen bereinigt und Duplikate nummeriert.",
+        "intro": "Mach aus Produkttiteln saubere Shopify-URL-Handles, aus einer Titelliste oder für eine ganze Produkt-CSV.",
+        "modePaste": "Titel einfügen",
+        "modeCsv": "CSV ausfüllen",
+        "titlesLabel": "Produkttitel, einer pro Zeile",
+        "titlesPlaceholder": "Leinenhemd – Navy\nCafé Crème Tasse\nRock & Roll Shirt",
+        "unique": "Duplikate eindeutig machen (-1, -2…)",
+        "handlesLabel": "Handles",
+        "copy": "Handles kopieren",
+        "copied": "Kopiert",
+        "titleColumn": "Titelspalte",
+        "handleColumn": "Handle-Spalte",
+        "overwrite": "Bereits ausgefüllte Handles ersetzen",
+        "filled": "{count} Handles ausgefüllt.",
+        "variantNote": "Zeilen ohne Titel (Variantenzeilen bei Shopify) bekommen das Handle des Produkts darüber.",
+        "downloadFixed": "CSV herunterladen",
+        "steps": [
+          "Füge deine Titel ein oder zieh eine Produkt-CSV hinein und wähle die Titelspalte.",
+          "Handles werden nach Shopifys Regeln erzeugt: Kleinbuchstaben, ohne Akzente, Sonderzeichen werden zu Bindestrichen.",
+          "Kopiere die Handles oder lade die Datei mit ausgefüllter Handle-Spalte herunter."
+        ],
+        "faq": [
+          {
+            "q": "Was ist ein Shopify-Handle?",
+            "a": "Der Teil der Produkt-URL nach /products/. Er muss kleingeschrieben sein, darf nur Buchstaben, Zahlen und Bindestriche enthalten und muss in deinem Shop eindeutig sein."
+          },
+          {
+            "q": "Was passiert mit doppelten Titeln?",
+            "a": "Der zweite bekommt -1, der dritte -2 und so weiter, so wie Shopify Duplikate nummeriert."
+          },
+          {
+            "q": "Kann ich ein Handle später ändern?",
+            "a": "Ja, aber die alte URL funktioniert dann nicht mehr, außer du richtest eine Weiterleitung ein. Es lohnt sich also, die Handles vor dem Import richtig zu setzen."
+          }
+        ]
+      }
+    }
   }
 }

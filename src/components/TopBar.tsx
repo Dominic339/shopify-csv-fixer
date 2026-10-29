@@ -158,6 +158,7 @@ export default function TopBar({ navByLocale }: Props) {
     { path: "/convert", label: navT.formatConverter },
     { path: "/merge", label: navT.csvMerger },
     { path: "/csv-inspector", label: navT.csvInspector },
+    { path: "/tools", label: navT.freeTools },
     // English-only pages, so not prefixed with the reader's locale.
     { path: "/migrate", label: navT.storeMigrations, englishOnly: true },
   ];
