@@ -14,7 +14,7 @@
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange CSV 오류: 원인과 해결 방법",
-"description": "eBay File Exchange CSV에서 흔한 오류를 해결하세요. 잘못된 Action 값, 카테고리 ID 문제, 제목 길이 초과, 상태 코드, 가격 형식, 이미지 URL 문제를 다룹니다."
+"description": "Seller Hub Reports와 File Exchange 파일로 eBay에 대량 업로드할 때 자주 생기는 CSV 오류를 고치세요. INFO 줄, 잘못된 Action 값, 카테고리 ID, 제목 길이, 상품 상태 ID, 판매 기간, 가격, 이미지 URL을 다룹니다."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV 템플릿 가이드: 필드, 형식, 흔한 오류",

@@ -14,7 +14,7 @@
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay-File-Exchange-CSV-Fehler: Ursachen und Lösungen",
-"description": "Behebe häufige Fehler in eBay-File-Exchange-CSVs: ungültige Action-Werte, Probleme mit Kategorie-IDs, zu lange Titel, Zustandscodes, Preisformate und Bild-URLs."
+"description": "Behebe häufige CSV-Fehler bei eBay-Massenuploads über Seller Hub Reports und File-Exchange-Dateien: die INFO-Zeile, ungültige Action-Werte, Kategorie-IDs, Titellänge, Zustands-IDs, Laufzeiten, Preise und Bild-URLs."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Leitfaden zur Etsy-CSV-Vorlage: Felder, Formate und häufige Fehler",

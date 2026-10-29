@@ -14,7 +14,7 @@
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange の CSV エラー：原因と対処法",
-"description": "eBay File Exchange の CSV でよくあるエラーを解決します。無効な Action の値、カテゴリ ID の問題、タイトルの文字数超過、状態コード、価格の書式、画像 URL の問題などを扱います。"
+"description": "Seller Hub Reports と File Exchange 形式のファイルによる eBay 一括アップロードで起きる CSV エラーを解決します。INFO 行、無効な Action の値、カテゴリ ID、タイトルの長さ、商品の状態 ID、出品期間、価格、画像 URL を扱います。"
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV テンプレートガイド：項目、書式、よくあるエラー",

@@ -14,7 +14,7 @@
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange CSV 错误：原因与解决方法",
-"description": "解决常见的 eBay File Exchange CSV 错误：无效的 Action 值、类目 ID 问题、标题超长、状况代码、价格格式和图片网址问题。"
+"description": "修复通过 Seller Hub Reports 和 File Exchange 文件批量上传到 eBay 时常见的 CSV 错误：INFO 行、无效的 Action 值、类目 ID、标题长度、物品状况 ID、刊登时长、价格和图片 URL。"
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV 模板指南：字段、格式与常见错误",

@@ -14,7 +14,7 @@
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Erreurs CSV eBay File Exchange : causes et solutions",
-"description": "Corrigez les erreurs CSV courantes d'eBay File Exchange : valeurs Action non valides, problèmes d'ID de catégorie, titres trop longs, codes d'état, format des prix et URL d'images."
+"description": "Corrigez les erreurs CSV courantes des envois groupés eBay via Seller Hub Reports et les fichiers File Exchange : la ligne INFO, valeurs Action non valides, ID de catégorie, longueur du titre, ID d'état, durées, prix et URL d'images."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Guide du modèle CSV Etsy : champs, formats et erreurs courantes",

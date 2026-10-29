@@ -1,0 +1,204 @@
+---
+title: "eBay File Exchange CSV-fouten: oorzaken en oplossingen"
+description: "Los veelvoorkomende CSV-fouten op bij bulkuploads naar eBay via Seller Hub Reports en File Exchange-bestanden: de INFO-regel, ongeldige Action-waarden, categorie-ID's, titellengte, conditie-ID's, looptijden, prijzen en afbeeldings-URL's."
+keywords: ["ebay file exchange csv fouten", "ebay csv import fouten", "ebay file exchange fouten", "ebay csv oplossen", "ebay csv upload fout", "ebay advertenties csv fouten", "ebay bulkupload fouten", "seller hub reports upload"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Hoe de bulkupload van eBay een CSV controleert en waarom rijen mislukken"
+  - "Waarom de INFO-regel bovenaan eBay-sjablonen moet blijven staan"
+  - "De toegestane waarden voor Action, ConditionID en Duration"
+  - "Hoe je fouten in titellengte, categorie, prijs, afbeeldings-URL en objectnummer oplost"
+  - "Hoe je een kleine testbatch uploadt voordat je je hele voorraad uploadt"
+bestFor: "eBay-verkopers die advertenties in bulk uploaden via Seller Hub Reports of CSV-bestanden in File Exchange-formaat"
+timeToComplete: "12 minuten"
+---
+
+## Hoe eBay een bulkupload controleert
+
+Bulkuploads van advertenties lopen bij eBay tegenwoordig via **Seller Hub → Rapporten → Uploads**, waar je ook de CSV-sjablonen in File Exchange-formaat downloadt. Als je een bestand uploadt, controleert eBay:
+
+1. **De opbouw van het bestand**: de INFO-regel bovenaan en de kopregel eronder
+2. **De kolom Action**: wat er met elke advertentierij moet gebeuren
+3. **Gegevenstypen**: prijzen als getallen, aantallen als hele getallen, URL's als volledige webadressen
+4. **Bedrijfsregels**: geldige categorie-ID's, conditie-ID's die in de categorie zijn toegestaan, geldige looptijden
+5. **Inhoudsregels**: titellengte en advertentiebeleid
+
+Na de verwerking staat er op de pagina Uploads een resultatenbestand. Daarin zie je welke rijen gelukt zijn, welke niet en waarom. Bekijk het altijd, want eBay importeert vaak een deel van de rijen en weigert andere.
+
+---
+
+## Fout: sjabloon niet herkend (de INFO-regel)
+
+De huidige sjablonen van eBay beginnen met een regel als deze, boven de kolomkoppen:
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+eBay heeft die eerste INFO-regel nodig bij het uploaden. Andere regels die beginnen met `#INFO` of `INFO` (instructies in het sjabloon) mogen blijven staan of weg.
+
+**Oplossing:**
+- Verwijder de eerste regel van het sjabloon niet, ook al lijkt hij op een notitie.
+- Gebruik je Excel op een Mac, controleer dan dat er niets vóór `#INFO` op de eerste regel staat. Excel kan daar onzichtbare tekens toevoegen, en dan weigert eBay het bestand. Open de CSV in een teksteditor om ze te zien.
+
+StriveFormats leest de kopregel onder de INFO-regels en zet die regels bij het downloaden weer bovenaan, zonder de losse tekens.
+
+---
+
+## Fout: Action ontbreekt of is ongeldig
+
+Elke advertentierij heeft een Action nodig. De uitzondering zijn variatierijen (`Relationship` = `Variation`): die staan onder hun hoofdadvertentie en laten Action leeg.
+
+Geaccepteerde waarden:
+
+| Waarde | Betekenis |
+|---|---|
+| `Add` | Een nieuwe advertentie maken |
+| `VerifyAdd` | Een nieuwe advertentie controleren en de kosten zien zonder hem te plaatsen |
+| `Revise` | Velden van een actieve advertentie wijzigen |
+| `Relist` | Een beëindigde advertentie opnieuw plaatsen |
+| `End` | Een actieve advertentie beëindigen (met een `EndCode`) |
+| `Status` | De status van een verkocht object wijzigen, bijvoorbeeld als verzonden markeren |
+| `AddToItemDescription` | Tekst toevoegen aan het einde van de beschrijving van een actieve advertentie |
+| `Draft` | Een advertentie opslaan als concept (alleen in het conceptsjabloon) |
+
+**Oplossing:** elke advertentierij moet een van de waarden hierboven gebruiken, precies zo gespeld. eBay vergelijkt exact, dus `verifyadd` is niet hetzelfde als `VerifyAdd`.
+
+---
+
+## Fout: ongeldige categorie
+
+**Oorzaak:** de waarde in `Category` (of `Category ID`) is geen geldige numerieke categorie-ID van eBay, of de categorie is opgeheven.
+
+Categorie-ID's van eBay zijn getallen (bijvoorbeeld `15687` voor T-shirts voor heren op eBay VS). Ze veranderen af en toe als eBay zijn categorieën herindeelt.
+
+**Oplossing:**
+- Zoek de juiste categorie-ID op in de categorieboom van eBay
+- Neem categorie-ID's uit oude sjablonen niet over zonder te controleren of ze nog actief zijn
+- Sommige categorieën vragen extra specificaties, dus kijk wat de categorie nodig heeft
+
+In [eBay CategoryID: wat het is en hoe je het instelt](/guides/ebay/categoryid-and-file-exchange) lees je hoe je ID's vindt.
+
+---
+
+## Fout: titel te lang
+
+**Oorzaak:** de waarde in `Title` is langer dan 80 tekens, de grens van eBay voor advertentietitels.
+
+**Oplossing:**
+
+Voeg in Excel een hulpkolom toe: `=LEN(B2)` (vervang B2 door de cel van je titelkolom; in Nederlandstalige Excel heet de functie `LENGTE`). Filter op rijen langer dan 80 tekens en kort die titels in.
+
+In Python:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Fout: ongeldige conditie-ID
+
+**Oorzaak:** de waarde in `ConditionID` is geen geldige conditie-ID van eBay, of hij is niet toegestaan in de categorie van het object.
+
+Veelgebruikte conditie-ID's uit de conditietabel van eBay:
+
+| ID | Conditie | Opmerkingen |
+|---|---|---|
+| `1000` | New | Ook getoond als Brand New, New with tags of New with box |
+| `1500` | New other | Nieuw zonder label of doos, geopende verpakking |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | Alleen voor goedgekeurde verkopers in sommige categorieën |
+| `2500` | Seller refurbished | In sommige categorieën vervangen door de refurbished-niveaus hieronder |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | Alleen voor goedgekeurde verkopers in sommige categorieën |
+| `2750` | Like New | |
+| `3000` | Used | Ook getoond als Pre-owned |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | Alleen in categorieën waar het zinvol is |
+
+Welke ID's je kunt gebruiken, hangt af van de categorie, en ook de namen die kopers zien verschillen per categorie.
+
+**Oplossing:** vervang conditienamen door de numerieke ID. StriveFormats zet de conditienamen van eBay (zoals "Used" of "Open box") voor je om in hun ID's.
+
+---
+
+## Fout: ongeldige StartPrice
+
+**Oorzaak:** het veld `StartPrice` bevat een valutateken (`$9.99`), gebruikt een decimale komma (`9,99`), is negatief of leeg.
+
+**Oplossing:**
+- Verwijder valutatekens met Zoeken en vervangen
+- Vervang decimale komma's door punten
+- Zorg dat elke prijs een positief decimaal getal is
+- Stel de kolom in Excel in als Getal voordat je opslaat
+
+---
+
+## Fout: ongeldige Duration
+
+**Oorzaak:** het veld `Duration` bevat een waarde die eBay niet accepteert voor het advertentieformaat.
+
+**Geaccepteerde waarden:**
+
+| Formaat | Duration |
+|---|---|
+| `FixedPrice` | `GTC` (Good 'Til Cancelled). Advertenties met een vaste prijs hebben geen vast aantal dagen meer |
+| `Auction` | `Days_1`, `Days_3`, `Days_5`, `Days_7` of `Days_10` |
+
+**Oplossing:** gebruik `GTC` voor advertenties met een vaste prijs en een van de `Days_`-waarden voor veilingen.
+
+---
+
+## Fout: afbeeldings-URL niet bereikbaar
+
+**Oorzaak:** het veld `PicURL` bevat een URL die eBay niet kan downloaden: de afbeelding zit achter een login, staat op je eigen computer of achter een doorverwijzing.
+
+Seller Hub Reports van eBay accepteert tot **24 afbeeldingen** per advertentie in `PicURL`, gescheiden door een verticale streep `|`. Elke URL mag tot 2048 tekens lang zijn, en spaties in een URL moet je schrijven als `%20`.
+
+**Oplossing:**
+- Open elke URL in een privévenster van je browser. Je hoort de afbeelding direct te zien, zonder in te loggen
+- Gebruik volledige `https://`-URL's
+- Vervang spaties door `%20` (StriveFormats doet dat voor je)
+- Vermijd URL-verkorters en doorverwijsdiensten
+
+---
+
+## Fout: objectnummer of UPC verschijnt als 1.23457E+11
+
+**Oorzaak:** Excel heeft een lang getal (een `ItemID` of een barcode in `P:UPC`) omgezet naar wetenschappelijke notatie. De cijfers na de eerste paar zijn verloren, zodat eBay de advertentie niet vindt of het product niet kan koppelen.
+
+**Oplossing:** voer de volledige nummers opnieuw in vanuit je eigen gegevens. De hulp van eBay raadt aan kolommen met objectnummers vóór het opslaan in te stellen als Getal met 0 decimalen. Instellen als Tekst werkt ook. StriveFormats markeert elke cel waarin dit is gebeurd.
+
+---
+
+## Fout: ongeldig aantal
+
+**Oorzaak:** `Quantity` is leeg, bevat decimalen (bijvoorbeeld `1.5`) of is negatief.
+
+**Oplossing:** gebruik hele getallen. Nieuwe advertenties horen een aantal van minstens 1 te hebben. Bij advertenties met variaties zet je het aantal van elke variatie op een eigen rij, niet op de hoofdrij.
+
+---
+
+## Test voordat je alles uploadt
+
+1. Kopieer 2 of 3 rijen naar een nieuw bestand en behoud de INFO-regel en de kopregel.
+2. Zet hun Action op `VerifyAdd` en upload het bestand. eBay controleert de rijen en toont de kosten zonder iets te plaatsen.
+3. Los op wat het resultatenbestand meldt en zet de Action voor het volledige bestand weer op `Add`.
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je eBay-CSV naar StriveFormats. De validator controleert de kolom Action, categorie-ID's, prijzen, titellengtes, conditie-ID's, looptijden, afbeeldings-URL's en variatierijen, en markeert de precieze rijen en cellen met problemen.
+
+[eBay CSV-fixer openen](/app?preset=ebay_listings) | [eBay-sjabloon bekijken](/presets/ebay_listings)

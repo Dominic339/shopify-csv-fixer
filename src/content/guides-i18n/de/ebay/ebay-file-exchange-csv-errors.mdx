@@ -1,0 +1,204 @@
+---
+title: "eBay-File-Exchange-CSV-Fehler: Ursachen und Lösungen"
+description: "Behebe häufige CSV-Fehler bei eBay-Massenuploads über Seller Hub Reports und File-Exchange-Dateien: die INFO-Zeile, ungültige Action-Werte, Kategorie-IDs, Titellänge, Zustands-IDs, Laufzeiten, Preise und Bild-URLs."
+keywords: ["ebay file exchange csv fehler", "ebay csv import fehler", "ebay file exchange fehler", "ebay csv korrigieren", "ebay csv upload fehler", "ebay angebote csv fehler", "ebay massenupload fehler", "seller hub reports upload"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wie eBays Massenupload eine CSV prüft und warum Zeilen scheitern"
+  - "Warum die INFO-Zeile oben in eBays Vorlagen bleiben muss"
+  - "Die erlaubten Werte für Action, ConditionID und Duration"
+  - "Wie du Fehler bei Titellänge, Kategorie, Preis, Bild-URL und Artikelnummer behebst"
+  - "Wie du einen kleinen Testlauf machst, bevor du deinen ganzen Bestand hochlädst"
+bestFor: "eBay-Verkäufer, die Angebote in großen Mengen über Seller Hub Reports oder CSV-Dateien im File-Exchange-Format hochladen"
+timeToComplete: "12 Minuten"
+---
+
+## Wie eBay einen Massenupload prüft
+
+Massenuploads von Angeboten laufen bei eBay heute über **Seller Hub → Berichte → Uploads**. Dort lädst du auch die CSV-Vorlagen im File-Exchange-Format herunter. Beim Hochladen prüft eBay:
+
+1. **Den Dateiaufbau**: die INFO-Zeile ganz oben und die Kopfzeile darunter
+2. **Die Spalte Action**: was mit jeder Angebotszeile passieren soll
+3. **Datentypen**: Preise als Zahlen, Mengen als ganze Zahlen, URLs als vollständige Webadressen
+4. **Geschäftsregeln**: gültige Kategorie-IDs, in der Kategorie erlaubte Zustands-IDs, gültige Laufzeiten
+5. **Inhaltsregeln**: Titellänge und Angebotsgrundsätze
+
+Nach der Verarbeitung steht auf der Seite Uploads eine Ergebnisdatei bereit. Sie zeigt, welche Zeilen erfolgreich waren, welche nicht und warum. Sieh sie dir immer an, denn eBay importiert oft einen Teil der Zeilen und lehnt andere ab.
+
+---
+
+## Fehler: Vorlage nicht erkannt (die INFO-Zeile)
+
+eBays aktuelle Vorlagen beginnen über den Spaltenüberschriften mit einer Zeile wie dieser:
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+eBay braucht diese erste INFO-Zeile beim Hochladen. Weitere Zeilen, die mit `#INFO` oder `INFO` beginnen (Hinweise in der Vorlage), können bleiben oder entfernt werden.
+
+**Lösung:**
+- Lösche die erste Zeile der Vorlage nicht, auch wenn sie wie eine Notiz aussieht.
+- Wenn du Excel auf dem Mac verwendest, prüfe, dass in der ersten Zeile nichts vor `#INFO` steht. Excel kann dort unsichtbare Zeichen einfügen, und eBay lehnt die Datei dann ab. Öffne die CSV in einem Texteditor, um sie zu sehen.
+
+StriveFormats liest die Kopfzeile unter den INFO-Zeilen und setzt die INFO-Zeilen beim Herunterladen wieder an den Anfang, ohne störende Zeichen.
+
+---
+
+## Fehler: Action fehlt oder ist ungültig
+
+Jede Angebotszeile braucht eine Action. Die Ausnahme sind Variantenzeilen (`Relationship` = `Variation`): Sie stehen unter ihrem Elternangebot und lassen Action leer.
+
+Zulässige Werte:
+
+| Wert | Bedeutung |
+|---|---|
+| `Add` | Neues Angebot erstellen |
+| `VerifyAdd` | Neues Angebot prüfen und Gebühren anzeigen, ohne es einzustellen |
+| `Revise` | Felder eines aktiven Angebots ändern |
+| `Relist` | Ein beendetes Angebot wieder einstellen |
+| `End` | Ein aktives Angebot beenden (mit `EndCode`) |
+| `Status` | Den Status eines verkauften Artikels ändern, z. B. als versendet markieren |
+| `AddToItemDescription` | Text am Ende der Beschreibung eines aktiven Angebots ergänzen |
+| `Draft` | Ein Angebot unter Entwürfe speichern (nur Entwurfsvorlage) |
+
+**Lösung:** Jede Angebotszeile muss einen der Werte oben verwenden, genau so geschrieben. eBay vergleicht exakt, `verifyadd` ist also nicht dasselbe wie `VerifyAdd`.
+
+---
+
+## Fehler: Ungültige Kategorie
+
+**Ursache:** Der Wert in `Category` (oder `Category ID`) ist keine gültige numerische eBay-Kategorie-ID, oder die Kategorie wurde abgeschafft.
+
+eBay-Kategorie-IDs sind Zahlen (zum Beispiel `15687` für Herren-T-Shirts auf eBay USA). Sie ändern sich von Zeit zu Zeit, wenn eBay seine Kategorien umbaut.
+
+**Lösung:**
+- Suche die richtige Kategorie-ID im Kategoriebaum von eBay
+- Übernimm Kategorie-IDs aus alten Vorlagen nicht ungeprüft, sondern kontrolliere, ob sie noch aktiv sind
+- Manche Kategorien verlangen zusätzliche Artikelmerkmale, prüfe also, was die Kategorie braucht
+
+Unter [eBay CategoryID: was sie ist und wie du sie setzt](/guides/ebay/categoryid-and-file-exchange) findest du Wege, IDs zu finden.
+
+---
+
+## Fehler: Titel zu lang
+
+**Ursache:** Der Wert in `Title` ist länger als 80 Zeichen, eBays Grenze für Angebotstitel.
+
+**Lösung:**
+
+Füge in Excel eine Hilfsspalte hinzu: `=LEN(B2)` (ersetze B2 durch die Zelle deiner Titelspalte; in deutschem Excel heißt die Funktion `LÄNGE`). Filtere nach Zeilen mit einer Länge über 80 und kürze diese Titel.
+
+In Python:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Fehler: Ungültige Zustands-ID
+
+**Ursache:** Der Wert in `ConditionID` ist keine gültige eBay-Zustands-ID, oder er ist in der Kategorie des Artikels nicht erlaubt.
+
+Gängige Zustands-IDs aus eBays Zustandstabelle:
+
+| ID | Zustand | Hinweise |
+|---|---|---|
+| `1000` | New | Auch als Brand New, New with tags oder New with box angezeigt |
+| `1500` | New other | Neu ohne Etikett oder Verpackung, geöffnete Verpackung |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | Nur für zugelassene Verkäufer in einigen Kategorien |
+| `2500` | Seller refurbished | In manchen Kategorien durch die Refurbished-Stufen unten ersetzt |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | Nur für zugelassene Verkäufer in einigen Kategorien |
+| `2750` | Like New | |
+| `3000` | Used | Auch als Pre-owned angezeigt |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | Nur in Kategorien, in denen es sinnvoll ist |
+
+Welche IDs du verwenden kannst, hängt von der Kategorie ab, und auch die Namen, die Käufer sehen, unterscheiden sich je nach Kategorie.
+
+**Lösung:** Ersetze Zustandsnamen durch die numerische ID. StriveFormats wandelt eBays Zustandsnamen (wie „Used“ oder „Open box“) automatisch in ihre IDs um.
+
+---
+
+## Fehler: Ungültiger StartPrice
+
+**Ursache:** Das Feld `StartPrice` enthält ein Währungssymbol (`$9.99`), ein Dezimalkomma (`9,99`), ist negativ oder leer.
+
+**Lösung:**
+- Entferne Währungssymbole mit Suchen und Ersetzen
+- Ersetze Dezimalkommas durch Punkte
+- Achte darauf, dass jeder Preis eine positive Dezimalzahl ist
+- Formatiere die Spalte vor dem Speichern in Excel als Zahl
+
+---
+
+## Fehler: Ungültige Duration
+
+**Ursache:** Das Feld `Duration` enthält einen Wert, den eBay für das Angebotsformat nicht akzeptiert.
+
+**Zulässige Werte:**
+
+| Format | Duration |
+|---|---|
+| `FixedPrice` | `GTC` (Good 'Til Cancelled). Festpreisangebote haben keine feste Anzahl von Tagen mehr |
+| `Auction` | `Days_1`, `Days_3`, `Days_5`, `Days_7` oder `Days_10` |
+
+**Lösung:** Verwende `GTC` für Festpreisangebote und einen der `Days_`-Werte für Auktionen.
+
+---
+
+## Fehler: Bild-URL nicht erreichbar
+
+**Ursache:** Das Feld `PicURL` enthält eine URL, die eBay nicht herunterladen kann: Das Bild liegt hinter einer Anmeldung, auf deinem eigenen Computer oder hinter einer Weiterleitung.
+
+eBays Seller Hub Reports nehmen bis zu **24 Bilder** pro Angebot in `PicURL` an, getrennt durch einen senkrechten Strich `|`. Jede URL darf bis zu 2048 Zeichen lang sein, und Leerzeichen in einer URL müssen als `%20` geschrieben werden.
+
+**Lösung:**
+- Öffne jede URL in einem privaten Browserfenster. Sie sollte das Bild direkt zeigen, ohne Anmeldung
+- Verwende vollständige `https://`-URLs
+- Ersetze Leerzeichen durch `%20` (StriveFormats erledigt das für dich)
+- Vermeide URL-Kürzer und Weiterleitungsdienste
+
+---
+
+## Fehler: Artikelnummer oder UPC erscheint als 1.23457E+11
+
+**Ursache:** Excel hat eine lange Zahl (eine `ItemID` oder einen Barcode in `P:UPC`) in wissenschaftliche Schreibweise umgewandelt. Die Ziffern nach den ersten paar sind verloren, sodass eBay das Angebot nicht findet oder das Produkt nicht zuordnen kann.
+
+**Lösung:** Gib die vollständigen Nummern aus deinen Unterlagen erneut ein. eBays Hilfe empfiehlt, Spalten mit Artikelnummern vor dem Speichern als Zahl mit 0 Dezimalstellen zu formatieren. Als Text formatieren funktioniert ebenfalls. StriveFormats markiert jede Zelle, in der das passiert ist.
+
+---
+
+## Fehler: Ungültige Menge
+
+**Ursache:** `Quantity` ist leer, enthält eine Dezimalzahl (zum Beispiel `1.5`) oder ist negativ.
+
+**Lösung:** Verwende ganze Zahlen. Neue Angebote sollten eine Menge von mindestens 1 haben. Bei Angeboten mit Varianten steht die Menge jeder Variante in ihrer eigenen Zeile, nicht in der Elternzeile.
+
+---
+
+## Teste, bevor du alles hochlädst
+
+1. Kopiere 2 oder 3 Zeilen in eine neue Datei und behalte dabei die INFO-Zeile und die Kopfzeile.
+2. Setze ihre Action auf `VerifyAdd` und lade sie hoch. eBay prüft die Zeilen und zeigt die Gebühren an, ohne etwas einzustellen.
+3. Behebe, was die Ergebnisdatei meldet, und stelle die Action für die ganze Datei wieder auf `Add` um.
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine eBay-CSV in StriveFormats hoch. Der Validator prüft die Spalte Action, Kategorie-IDs, Preise, Titellängen, Zustands-IDs, Laufzeiten, Bild-URLs und Variantenzeilen und markiert die genauen Zeilen und Zellen mit Problemen.
+
+[eBay-CSV-Fixer öffnen](/app?preset=ebay_listings) | [eBay-Vorlage ansehen](/presets/ebay_listings)

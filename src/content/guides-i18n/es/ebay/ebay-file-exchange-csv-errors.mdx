@@ -1,0 +1,204 @@
+---
+title: "Errores CSV de eBay File Exchange: causas y soluciones"
+description: "Corrige los errores CSV más comunes en las cargas masivas de eBay con Seller Hub Reports y archivos de File Exchange: la línea INFO, valores de Action no válidos, ID de categoría, longitud del título, ID de estado, duraciones, precios y URL de imágenes."
+keywords: ["errores csv ebay file exchange", "errores importacion csv ebay", "errores file exchange ebay", "corregir csv ebay", "error subir csv ebay", "errores csv anuncios ebay", "errores carga masiva ebay", "seller hub reports carga"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cómo revisa eBay un CSV en la carga masiva y por qué fallan las filas"
+  - "Por qué la línea INFO del principio de las plantillas de eBay debe quedarse"
+  - "Los valores permitidos para Action, ConditionID y Duration"
+  - "Cómo corregir errores de longitud del título, categoría, precio, URL de imagen y número de artículo"
+  - "Cómo probar un lote pequeño antes de subir todo tu inventario"
+bestFor: "Vendedores de eBay que suben anuncios en bloque con Seller Hub Reports o archivos CSV con el formato de File Exchange"
+timeToComplete: "12 minutos"
+---
+
+## Cómo revisa eBay una carga masiva
+
+Las cargas masivas de anuncios en eBay se hacen ahora en **Seller Hub → Informes → Cargas**, donde también se descargan las plantillas CSV con el formato de File Exchange. Al subir un archivo, eBay comprueba:
+
+1. **La estructura del archivo**: la línea INFO del principio y la fila de encabezados debajo
+2. **La columna Action**: qué hacer con cada fila de anuncio
+3. **Tipos de datos**: precios como números, cantidades como números enteros, URL como direcciones web completas
+4. **Reglas del negocio**: ID de categoría válidos, ID de estado permitidos en esa categoría, duraciones válidas
+5. **Reglas de contenido**: longitud del título y normas de los anuncios
+
+Tras el procesamiento, en la página Cargas encontrarás un archivo de resultados. Indica qué filas se completaron, cuáles fallaron y por qué. Revísalo siempre, porque eBay a menudo importa unas filas y rechaza otras.
+
+---
+
+## Error: plantilla no reconocida (la línea INFO)
+
+Las plantillas actuales de eBay empiezan con una línea como esta, encima de los encabezados de columna:
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+eBay necesita esa primera línea INFO al subir el archivo. Las demás líneas que empiezan por `#INFO` o `INFO` (instrucciones de la plantilla) pueden quedarse o quitarse.
+
+**Solución:**
+- No borres la primera línea de la plantilla, aunque parezca una nota.
+- Si usas Excel en Mac, comprueba que no haya nada delante de `#INFO` en la primera línea. Excel puede añadir ahí caracteres invisibles, y entonces eBay rechaza el archivo. Abre el CSV en un editor de texto para verlos.
+
+StriveFormats lee la fila de encabezados que hay debajo de las líneas INFO y vuelve a ponerlas arriba al descargar, sin los caracteres sobrantes.
+
+---
+
+## Error: Action vacío o no válido
+
+Cada fila de anuncio necesita un Action. La excepción son las filas de variación (`Relationship` = `Variation`), que van debajo de su anuncio principal y dejan Action vacío.
+
+Valores aceptados:
+
+| Valor | Significado |
+|---|---|
+| `Add` | Crear un anuncio nuevo |
+| `VerifyAdd` | Comprobar un anuncio nuevo y ver sus tarifas sin publicarlo |
+| `Revise` | Cambiar campos de un anuncio activo |
+| `Relist` | Volver a publicar un anuncio finalizado |
+| `End` | Finalizar un anuncio activo (con un `EndCode`) |
+| `Status` | Cambiar el estado de un artículo vendido, por ejemplo marcarlo como enviado |
+| `AddToItemDescription` | Añadir texto al final de la descripción de un anuncio activo |
+| `Draft` | Guardar un anuncio en Borradores (solo en la plantilla de borradores) |
+
+**Solución:** cada fila de anuncio debe usar uno de los valores anteriores, escrito exactamente igual. eBay los compara de forma exacta, así que `verifyadd` no es lo mismo que `VerifyAdd`.
+
+---
+
+## Error: categoría no válida
+
+**Causa:** el valor de `Category` (o `Category ID`) no es un ID de categoría numérico válido de eBay, o la categoría se ha retirado.
+
+Los ID de categoría de eBay son números (por ejemplo, `15687` para camisetas de hombre en eBay Estados Unidos). Cambian de vez en cuando, cuando eBay reorganiza sus categorías.
+
+**Solución:**
+- Busca el ID de categoría correcto en el árbol de categorías de eBay
+- No copies ID de categoría de plantillas antiguas sin comprobar que siguen activos
+- Algunas categorías exigen especificaciones adicionales, así que revisa lo que necesita la categoría
+
+En [eBay CategoryID: qué es y cómo configurarlo](/guides/ebay/categoryid-and-file-exchange) tienes formas de encontrar los ID.
+
+---
+
+## Error: título demasiado largo
+
+**Causa:** el valor de `Title` supera los 80 caracteres, el límite de eBay para los títulos de los anuncios.
+
+**Solución:**
+
+En Excel, añade una columna auxiliar: `=LEN(B2)` (cambia B2 por la celda de tu columna de título; en Excel en español la función se llama `LARGO`). Filtra las filas con una longitud superior a 80 y acorta esos títulos.
+
+En Python:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Error: ID de estado no válido
+
+**Causa:** el valor de `ConditionID` no es un ID de estado válido de eBay, o no está permitido en la categoría del artículo.
+
+ID de estado habituales de la tabla de estados de eBay:
+
+| ID | Estado | Notas |
+|---|---|---|
+| `1000` | New | También aparece como Brand New, New with tags o New with box |
+| `1500` | New other | Nuevo sin etiquetas ni caja, caja abierta |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | Solo para vendedores aprobados en algunas categorías |
+| `2500` | Seller refurbished | En algunas categorías lo sustituyen los niveles de reacondicionado de abajo |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | Solo para vendedores aprobados en algunas categorías |
+| `2750` | Like New | |
+| `3000` | Used | También aparece como Pre-owned |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | Solo en categorías donde tiene sentido |
+
+Los ID que puedes usar dependen de la categoría, y los nombres que ven los compradores también varían según la categoría.
+
+**Solución:** sustituye los nombres de estado por el ID numérico. StriveFormats convierte por ti los nombres de estado de eBay (como "Used" u "Open box") a sus ID.
+
+---
+
+## Error: StartPrice no válido
+
+**Causa:** el campo `StartPrice` contiene un símbolo de moneda (`$9.99`), usa una coma decimal (`9,99`), es negativo o está vacío.
+
+**Solución:**
+- Quita los símbolos de moneda con Buscar y reemplazar
+- Cambia las comas decimales por puntos
+- Asegúrate de que cada precio sea un número decimal positivo
+- Da formato de número a la columna en Excel antes de guardar
+
+---
+
+## Error: Duration no válido
+
+**Causa:** el campo `Duration` contiene un valor que eBay no acepta para el formato del anuncio.
+
+**Valores aceptados:**
+
+| Formato | Duration |
+|---|---|
+| `FixedPrice` | `GTC` (Good 'Til Cancelled). Los anuncios de precio fijo ya no admiten un número de días |
+| `Auction` | `Days_1`, `Days_3`, `Days_5`, `Days_7` o `Days_10` |
+
+**Solución:** usa `GTC` para los anuncios de precio fijo y uno de los valores `Days_` para las subastas.
+
+---
+
+## Error: URL de imagen no accesible
+
+**Causa:** el campo `PicURL` contiene una URL que eBay no puede descargar: la imagen está tras un inicio de sesión, en tu propio ordenador o detrás de una redirección.
+
+Seller Hub Reports de eBay admite hasta **24 imágenes** por anuncio en `PicURL`, separadas por una barra vertical `|`. Cada URL puede tener hasta 2048 caracteres, y los espacios de una URL se deben escribir como `%20`.
+
+**Solución:**
+- Abre cada URL en una ventana privada del navegador. Debe mostrar la imagen directamente, sin iniciar sesión
+- Usa URL completas con `https://`
+- Cambia los espacios por `%20` (StriveFormats lo hace por ti)
+- Evita los acortadores de URL y los servicios de redirección
+
+---
+
+## Error: el número de artículo o el UPC aparece como 1.23457E+11
+
+**Causa:** Excel convirtió un número largo (un `ItemID` o un código de barras en `P:UPC`) a notación científica. Se han perdido las cifras a partir de las primeras, así que eBay no encuentra el anuncio ni puede identificar el producto.
+
+**Solución:** vuelve a escribir los números completos a partir de tus registros. La ayuda de eBay recomienda dar a las columnas de números de artículo formato de número con 0 decimales antes de guardar. El formato de texto también sirve. StriveFormats marca cada celda donde ha ocurrido.
+
+---
+
+## Error: cantidad no válida
+
+**Causa:** `Quantity` está vacío, tiene decimales (por ejemplo `1.5`) o es negativo.
+
+**Solución:** usa números enteros. Los anuncios nuevos deberían tener una cantidad de al menos 1. En los anuncios con variaciones, pon la cantidad de cada variación en su propia fila, no en la fila principal.
+
+---
+
+## Prueba antes de subirlo todo
+
+1. Copia 2 o 3 filas en un archivo nuevo, manteniendo la línea INFO y la fila de encabezados.
+2. Cambia su Action a `VerifyAdd` y súbelo. eBay revisa las filas y muestra las tarifas sin publicar nada.
+3. Corrige lo que indique el archivo de resultados y vuelve a poner el Action en `Add` para el archivo completo.
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+Sube tu CSV de eBay a StriveFormats. El validador revisa la columna Action, los ID de categoría, los precios, la longitud de los títulos, los ID de estado, las duraciones, las URL de imágenes y las filas de variación, y marca las filas y celdas exactas con problemas.
+
+[Abrir el corrector de CSV de eBay](/app?preset=ebay_listings) | [Ver la plantilla de eBay](/presets/ebay_listings)

@@ -1,0 +1,204 @@
+---
+title: "Błędy CSV w eBay File Exchange: przyczyny i rozwiązania"
+description: "Napraw najczęstsze błędy CSV przy masowym przesyłaniu ofert do eBay przez Seller Hub Reports i pliki File Exchange: wiersz INFO, nieprawidłowe wartości Action, ID kategorii, długość tytułu, ID stanu, czas trwania, ceny i adresy zdjęć."
+keywords: ["błędy csv ebay file exchange", "błędy importu csv ebay", "błędy file exchange ebay", "naprawa csv ebay", "błąd przesyłania csv ebay", "błędy csv ofert ebay", "błędy masowego przesyłania ebay", "seller hub reports przesyłanie"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Jak masowe przesyłanie eBay sprawdza plik CSV i dlaczego wiersze są odrzucane"
+  - "Dlaczego wiersz INFO na górze szablonów eBay musi zostać"
+  - "Dozwolone wartości Action, ConditionID i Duration"
+  - "Jak naprawić błędy długości tytułu, kategorii, ceny, adresu zdjęcia i numeru przedmiotu"
+  - "Jak przetestować małą partię przed przesłaniem całego asortymentu"
+bestFor: "Sprzedawcy eBay przesyłający oferty masowo przez Seller Hub Reports lub pliki CSV w formacie File Exchange"
+timeToComplete: "12 minut"
+---
+
+## Jak eBay sprawdza masowe przesyłanie
+
+Masowe przesyłanie ofert w eBay odbywa się dziś w **Seller Hub → Raporty → Przesłane pliki**, gdzie pobierasz też szablony CSV w formacie File Exchange. Po przesłaniu pliku eBay sprawdza:
+
+1. **Budowę pliku**: wiersz INFO na samej górze i wiersz nagłówków pod nim
+2. **Kolumnę Action**: co zrobić z każdym wierszem oferty
+3. **Typy danych**: ceny jako liczby, ilości jako liczby całkowite, adresy URL jako pełne adresy internetowe
+4. **Reguły biznesowe**: prawidłowe ID kategorii, ID stanu dozwolone w danej kategorii, prawidłowy czas trwania
+5. **Reguły treści**: długość tytułu i zasady dotyczące ofert
+
+Po przetworzeniu na stronie przesłanych plików pojawia się plik wyników. Pokazuje on, które wiersze się powiodły, które nie i dlaczego. Zawsze go sprawdzaj, bo eBay często importuje część wierszy, a inne odrzuca.
+
+---
+
+## Błąd: nierozpoznany szablon (wiersz INFO)
+
+Aktualne szablony eBay zaczynają się od takiego wiersza, umieszczonego nad nagłówkami kolumn:
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+eBay potrzebuje tego pierwszego wiersza INFO przy przesyłaniu. Pozostałe wiersze zaczynające się od `#INFO` lub `INFO` (instrukcje w szablonie) mogą zostać albo zniknąć.
+
+**Rozwiązanie:**
+- Nie usuwaj pierwszego wiersza szablonu, nawet jeśli wygląda jak notatka.
+- Jeśli używasz Excela na Macu, sprawdź, czy przed `#INFO` w pierwszym wierszu nic nie ma. Excel potrafi dodać tam niewidoczne znaki, a wtedy eBay odrzuca plik. Otwórz plik CSV w edytorze tekstu, żeby je zobaczyć.
+
+StriveFormats odczytuje wiersz nagłówków pod wierszami INFO, a przy pobieraniu umieszcza te wiersze z powrotem na górze, bez zbędnych znaków.
+
+---
+
+## Błąd: brak lub nieprawidłowa wartość Action
+
+Każdy wiersz oferty potrzebuje wartości Action. Wyjątkiem są wiersze wariantów (`Relationship` = `Variation`): znajdują się pod ofertą nadrzędną i zostawiają Action puste.
+
+Akceptowane wartości:
+
+| Wartość | Znaczenie |
+|---|---|
+| `Add` | Utwórz nową ofertę |
+| `VerifyAdd` | Sprawdź nową ofertę i zobacz opłaty bez jej wystawiania |
+| `Revise` | Zmień pola aktywnej oferty |
+| `Relist` | Wystaw ponownie zakończoną ofertę |
+| `End` | Zakończ aktywną ofertę (podaj `EndCode`) |
+| `Status` | Zmień status sprzedanego przedmiotu, np. oznacz go jako wysłany |
+| `AddToItemDescription` | Dodaj tekst na końcu opisu aktywnej oferty |
+| `Draft` | Zapisz ofertę w wersjach roboczych (tylko szablon wersji roboczych) |
+
+**Rozwiązanie:** każdy wiersz oferty musi mieć jedną z powyższych wartości, zapisaną dokładnie tak samo. eBay porównuje je dokładnie, więc `verifyadd` to nie to samo co `VerifyAdd`.
+
+---
+
+## Błąd: nieprawidłowa kategoria
+
+**Przyczyna:** wartość w `Category` (lub `Category ID`) nie jest prawidłowym liczbowym ID kategorii eBay albo kategoria została wycofana.
+
+ID kategorii eBay to liczby (na przykład `15687` dla męskich koszulek na eBay w USA). Od czasu do czasu się zmieniają, gdy eBay przebudowuje kategorie.
+
+**Rozwiązanie:**
+- Znajdź właściwe ID kategorii w drzewie kategorii eBay
+- Nie kopiuj ID kategorii ze starych szablonów bez sprawdzenia, czy są nadal aktywne
+- Niektóre kategorie wymagają dodatkowych parametrów, więc sprawdź, czego potrzebuje kategoria
+
+W przewodniku [eBay CategoryID: czym jest i jak go ustawić](/guides/ebay/categoryid-and-file-exchange) znajdziesz sposoby szukania ID.
+
+---
+
+## Błąd: za długi tytuł
+
+**Przyczyna:** wartość w `Title` ma ponad 80 znaków, czyli więcej niż limit eBay dla tytułów ofert.
+
+**Rozwiązanie:**
+
+W Excelu dodaj kolumnę pomocniczą: `=LEN(B2)` (zamień B2 na komórkę kolumny z tytułem; w polskim Excelu funkcja nazywa się `DŁ`). Odfiltruj wiersze dłuższe niż 80 znaków i skróć te tytuły.
+
+W Pythonie:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Błąd: nieprawidłowe ID stanu
+
+**Przyczyna:** wartość w `ConditionID` nie jest prawidłowym ID stanu eBay albo nie jest dozwolona w kategorii przedmiotu.
+
+Typowe ID stanu z tabeli stanów eBay:
+
+| ID | Stan | Uwagi |
+|---|---|---|
+| `1000` | New | Wyświetlany też jako Brand New, New with tags lub New with box |
+| `1500` | New other | Nowy bez metki lub pudełka, otwarte opakowanie |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | Tylko dla zatwierdzonych sprzedawców w niektórych kategoriach |
+| `2500` | Seller refurbished | W niektórych kategoriach zastąpiony poziomami odnowienia poniżej |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | Tylko dla zatwierdzonych sprzedawców w niektórych kategoriach |
+| `2750` | Like New | |
+| `3000` | Used | Wyświetlany też jako Pre-owned |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | Tylko w kategoriach, w których ma to sens |
+
+To, których ID możesz użyć, zależy od kategorii, a nazwy widoczne dla kupujących też różnią się w zależności od kategorii.
+
+**Rozwiązanie:** zastąp nazwy stanów liczbowym ID. StriveFormats sam zamienia nazwy stanów eBay (np. „Used” albo „Open box”) na ich ID.
+
+---
+
+## Błąd: nieprawidłowa StartPrice
+
+**Przyczyna:** pole `StartPrice` zawiera symbol waluty (`$9.99`), używa przecinka dziesiętnego (`9,99`), jest ujemne albo puste.
+
+**Rozwiązanie:**
+- Usuń symbole walut za pomocą Znajdź i zamień
+- Zamień przecinki dziesiętne na kropki
+- Upewnij się, że każda cena jest dodatnią liczbą dziesiętną
+- Przed zapisaniem ustaw w Excelu format kolumny na Liczbowy
+
+---
+
+## Błąd: nieprawidłowa Duration
+
+**Przyczyna:** pole `Duration` zawiera wartość, której eBay nie akceptuje dla danego formatu oferty.
+
+**Akceptowane wartości:**
+
+| Format | Duration |
+|---|---|
+| `FixedPrice` | `GTC` (Good 'Til Cancelled). Oferty Kup teraz nie mają już określonej liczby dni |
+| `Auction` | `Days_1`, `Days_3`, `Days_5`, `Days_7` lub `Days_10` |
+
+**Rozwiązanie:** używaj `GTC` dla ofert z ceną stałą i jednej z wartości `Days_` dla aukcji.
+
+---
+
+## Błąd: niedostępny adres URL zdjęcia
+
+**Przyczyna:** pole `PicURL` zawiera adres URL, którego eBay nie może pobrać: zdjęcie wymaga logowania, jest na twoim komputerze albo za przekierowaniem.
+
+Seller Hub Reports w eBay przyjmuje do **24 zdjęć** na ofertę w `PicURL`, rozdzielonych pionową kreską `|`. Każdy adres URL może mieć do 2048 znaków, a spacje w adresie trzeba zapisać jako `%20`.
+
+**Rozwiązanie:**
+- Otwórz każdy adres w prywatnym oknie przeglądarki. Zdjęcie powinno się wyświetlić od razu, bez logowania
+- Używaj pełnych adresów `https://`
+- Zamień spacje na `%20` (StriveFormats zrobi to za ciebie)
+- Unikaj skracaczy adresów i usług przekierowań
+
+---
+
+## Błąd: numer przedmiotu lub UPC wyświetla się jako 1.23457E+11
+
+**Przyczyna:** Excel zamienił długą liczbę (`ItemID` albo kod kreskowy w `P:UPC`) na notację naukową. Cyfry po kilku pierwszych przepadły, więc eBay nie znajdzie oferty ani nie dopasuje produktu.
+
+**Rozwiązanie:** wpisz ponownie pełne numery ze swoich danych. Pomoc eBay zaleca, aby przed zapisaniem ustawić kolumny z numerami przedmiotów na format liczbowy z 0 miejscami po przecinku. Format tekstowy też działa. StriveFormats oznacza każdą komórkę, w której to się stało.
+
+---
+
+## Błąd: nieprawidłowa ilość
+
+**Przyczyna:** `Quantity` jest puste, ma część dziesiętną (np. `1.5`) albo jest ujemne.
+
+**Rozwiązanie:** używaj liczb całkowitych. Nowe oferty powinny mieć ilość co najmniej 1. W ofertach z wariantami podaj ilość każdego wariantu w jego własnym wierszu, a nie w wierszu nadrzędnym.
+
+---
+
+## Przetestuj przed przesłaniem całości
+
+1. Skopiuj 2 lub 3 wiersze do nowego pliku, zachowując wiersz INFO i wiersz nagłówków.
+2. Zmień ich Action na `VerifyAdd` i prześlij plik. eBay sprawdzi wiersze i pokaże opłaty, niczego nie wystawiając.
+3. Popraw to, co wskaże plik wyników, a potem zmień Action z powrotem na `Add` w pełnym pliku.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV eBay do StriveFormats. Walidator sprawdza kolumnę Action, ID kategorii, ceny, długość tytułów, ID stanu, czas trwania, adresy zdjęć i wiersze wariantów, a następnie wskazuje dokładne wiersze i komórki z problemami.
+
+[Otwórz korektor CSV dla eBay](/app?preset=ebay_listings) | [Zobacz szablon eBay](/presets/ebay_listings)

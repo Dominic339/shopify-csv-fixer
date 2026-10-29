@@ -13,8 +13,8 @@
 "description": "eBay CategoryID alanının ne olduğunu, File Exchange yüklemelerinde neden zorunlu olduğunu, ürünleriniz için doğru kategori kimliğini nasıl bulacağınızı ve tüm kataloğunuzda toplu olarak nasıl dolduracağınızı öğrenin."
 },
 "ebay/ebay-file-exchange-csv-errors": {
-"title": "eBay File Exchange CSV hataları: nedenleri ve çözümleri",
-"description": "Yaygın eBay File Exchange CSV hatalarını düzeltin: geçersiz Action değerleri, kategori kimliği sorunları, başlık uzunluğu ihlalleri, durum kodları, fiyat biçimi ve görsel URL'leri."
+"title": "eBay File Exchange CSV Hataları: Nedenleri ve Çözümleri",
+"description": "Seller Hub Reports ve File Exchange dosyalarıyla yapılan eBay toplu yüklemelerindeki yaygın CSV hatalarını düzeltin: INFO satırı, geçersiz Action değerleri, kategori ID'leri, başlık uzunluğu, durum ID'leri, süreler, fiyatlar ve görsel URL'leri."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV şablonu rehberi: alanlar, biçimler ve yaygın hatalar",

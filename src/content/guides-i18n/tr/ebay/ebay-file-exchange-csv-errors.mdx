@@ -1,0 +1,204 @@
+---
+title: "eBay File Exchange CSV Hataları: Nedenleri ve Çözümleri"
+description: "Seller Hub Reports ve File Exchange dosyalarıyla yapılan eBay toplu yüklemelerindeki yaygın CSV hatalarını düzeltin: INFO satırı, geçersiz Action değerleri, kategori ID'leri, başlık uzunluğu, durum ID'leri, süreler, fiyatlar ve görsel URL'leri."
+keywords: ["ebay file exchange csv hataları", "ebay csv içe aktarma hataları", "ebay file exchange hataları", "ebay csv düzeltme", "ebay csv yükleme hatası", "ebay ilan csv hataları", "ebay toplu yükleme hataları", "seller hub reports yükleme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "eBay toplu yüklemesinin bir CSV'yi nasıl denetlediği ve satırların neden başarısız olduğu"
+  - "eBay şablonlarının en üstündeki INFO satırının neden kalması gerektiği"
+  - "Action, ConditionID ve Duration için izin verilen değerler"
+  - "Başlık uzunluğu, kategori, fiyat, görsel URL'si ve ürün numarası hatalarının nasıl düzeltileceği"
+  - "Tüm envanterinizi yüklemeden önce küçük bir partiyle nasıl test yapacağınız"
+bestFor: "Seller Hub Reports veya File Exchange biçimindeki CSV dosyalarıyla toplu ilan yükleyen eBay satıcıları"
+timeToComplete: "12 dakika"
+---
+
+## eBay toplu yüklemeyi nasıl denetler
+
+eBay'de toplu ilan yüklemeleri artık **Seller Hub → Raporlar → Yüklemeler** üzerinden yapılır; File Exchange biçimindeki CSV şablonlarını da buradan indirirsiniz. Bir dosya yüklediğinizde eBay şunları denetler:
+
+1. **Dosya yapısı**: en üstteki INFO satırı ve altındaki başlık satırı
+2. **Action sütunu**: her ilan satırıyla ne yapılacağı
+3. **Veri türleri**: fiyatlar sayı, miktarlar tam sayı, URL'ler tam web adresi olmalı
+4. **İş kuralları**: geçerli kategori ID'leri, kategoride izin verilen durum ID'leri, geçerli süreler
+5. **İçerik kuralları**: başlık uzunluğu ve ilan politikaları
+
+İşlemden sonra Yüklemeler sayfasında bir sonuç dosyası bulunur. Hangi satırların başarılı olduğunu, hangilerinin başarısız olduğunu ve nedenini gösterir. Her zaman kontrol edin, çünkü eBay çoğu zaman bazı satırları içe aktarıp diğerlerini reddeder.
+
+---
+
+## Hata: Şablon tanınmadı (INFO satırı)
+
+eBay'in güncel şablonları, sütun başlıklarının üstünde buna benzer bir satırla başlar:
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+eBay yükleme sırasında bu ilk INFO satırına ihtiyaç duyar. `#INFO` veya `INFO` ile başlayan diğer satırlar (şablondaki açıklamalar) kalabilir ya da silinebilir.
+
+**Çözüm:**
+- Not gibi görünse bile şablonun ilk satırını silmeyin.
+- Mac'te Excel kullanıyorsanız ilk satırda `#INFO`'nun önünde hiçbir şey olmadığını kontrol edin. Excel oraya görünmez karakterler ekleyebilir ve bu durumda eBay dosyayı reddeder. Bunları görmek için CSV'yi bir metin düzenleyicide açın.
+
+StriveFormats, INFO satırlarının altındaki başlık satırını okur ve indirirken INFO satırlarını gereksiz karakterler olmadan yeniden en üste koyar.
+
+---
+
+## Hata: Action eksik veya geçersiz
+
+Her ilan satırının bir Action değeri olmalıdır. İstisna varyasyon satırlarıdır (`Relationship` = `Variation`): bunlar ana ilanın altında yer alır ve Action'ı boş bırakır.
+
+Kabul edilen değerler:
+
+| Değer | Anlamı |
+|---|---|
+| `Add` | Yeni bir ilan oluştur |
+| `VerifyAdd` | Yeni bir ilanı yayınlamadan denetle ve ücretlerini gör |
+| `Revise` | Etkin bir ilanın alanlarını değiştir |
+| `Relist` | Sona ermiş bir ilanı yeniden yayınla |
+| `End` | Etkin bir ilanı sonlandır (`EndCode` ile birlikte) |
+| `Status` | Satılan bir ürünün durumunu değiştir, örneğin gönderildi olarak işaretle |
+| `AddToItemDescription` | Etkin bir ilanın açıklamasının sonuna metin ekle |
+| `Draft` | Bir ilanı taslaklara kaydet (yalnızca taslak şablonu) |
+
+**Çözüm:** Her ilan satırı yukarıdaki değerlerden birini, tam olarak bu şekilde yazılmış hâliyle kullanmalıdır. eBay birebir karşılaştırır, yani `verifyadd` ile `VerifyAdd` aynı değildir.
+
+---
+
+## Hata: Geçersiz kategori
+
+**Neden:** `Category` (veya `Category ID`) değeri geçerli bir sayısal eBay kategori ID'si değil ya da kategori kaldırılmış.
+
+eBay kategori ID'leri sayılardır (örneğin eBay ABD'de erkek tişörtleri için `15687`). eBay kategorilerini yeniden düzenledikçe zaman zaman değişirler.
+
+**Çözüm:**
+- Doğru kategori ID'sini eBay'in kategori ağacında bulun
+- Eski şablonlardaki kategori ID'lerini hâlâ etkin olup olmadıklarını kontrol etmeden kopyalamayın
+- Bazı kategoriler ek ürün özellikleri ister, bu yüzden kategorinin neye ihtiyaç duyduğunu kontrol edin
+
+ID bulmanın yolları için [eBay CategoryID: Nedir ve nasıl ayarlanır](/guides/ebay/categoryid-and-file-exchange) rehberine bakın.
+
+---
+
+## Hata: Başlık çok uzun
+
+**Neden:** `Title` değeri, eBay'in ilan başlıkları için sınırı olan 80 karakteri aşıyor.
+
+**Çözüm:**
+
+Excel'de bir yardımcı sütun ekleyin: `=LEN(B2)` (B2'yi başlık sütununuzdaki hücreyle değiştirin; Türkçe Excel'de işlevin adı `UZUNLUK`). Uzunluğu 80'i aşan satırları filtreleyin ve bu başlıkları kısaltın.
+
+Python ile:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Hata: Geçersiz durum ID'si
+
+**Neden:** `ConditionID` değeri geçerli bir eBay durum ID'si değil ya da ürünün kategorisinde izin verilmiyor.
+
+eBay'in durum tablosundan yaygın durum ID'leri:
+
+| ID | Durum | Notlar |
+|---|---|---|
+| `1000` | New | Brand New, New with tags veya New with box olarak da gösterilir |
+| `1500` | New other | Etiketsiz veya kutusuz yeni, açılmış kutu |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | Bazı kategorilerde yalnızca onaylı satıcılar için |
+| `2500` | Seller refurbished | Bazı kategorilerde aşağıdaki yenilenmiş seviyeleriyle değiştirildi |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | Bazı kategorilerde yalnızca onaylı satıcılar için |
+| `2750` | Like New | |
+| `3000` | Used | Pre-owned olarak da gösterilir |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | Yalnızca anlamlı olduğu kategorilerde |
+
+Kullanabileceğiniz ID'ler kategoriye bağlıdır ve alıcıların gördüğü adlar da kategoriye göre değişir.
+
+**Çözüm:** Durum adlarını sayısal ID ile değiştirin. StriveFormats, eBay'in durum adlarını ("Used" veya "Open box" gibi) sizin için ID'lerine çevirir.
+
+---
+
+## Hata: Geçersiz StartPrice
+
+**Neden:** `StartPrice` alanında para birimi simgesi var (`$9.99`), ondalık virgül kullanılmış (`9,99`), değer negatif veya boş.
+
+**Çözüm:**
+- Para birimi simgelerini Bul ve Değiştir ile kaldırın
+- Ondalık virgülleri noktayla değiştirin
+- Her fiyatın pozitif bir ondalık sayı olduğundan emin olun
+- Kaydetmeden önce Excel'de sütunu Sayı olarak biçimlendirin
+
+---
+
+## Hata: Geçersiz Duration
+
+**Neden:** `Duration` alanı, eBay'in ilan biçimi için kabul etmediği bir değer içeriyor.
+
+**Kabul edilen değerler:**
+
+| Biçim | Duration |
+|---|---|
+| `FixedPrice` | `GTC` (Good 'Til Cancelled). Sabit fiyatlı ilanlar artık belirli bir gün sayısı almaz |
+| `Auction` | `Days_1`, `Days_3`, `Days_5`, `Days_7` veya `Days_10` |
+
+**Çözüm:** Sabit fiyatlı ilanlar için `GTC`, açık artırmalar için `Days_` değerlerinden birini kullanın.
+
+---
+
+## Hata: Görsel URL'sine erişilemiyor
+
+**Neden:** `PicURL` alanında eBay'in indiremediği bir URL var: görsel giriş gerektiriyor, kendi bilgisayarınızda duruyor veya bir yönlendirmenin arkasında.
+
+eBay'in Seller Hub Reports aracı, `PicURL` içinde ilan başına dikey çizgi `|` ile ayrılmış **24 görsele** kadar kabul eder. Her URL en fazla 2048 karakter olabilir ve URL'deki boşluklar `%20` olarak yazılmalıdır.
+
+**Çözüm:**
+- Her URL'yi tarayıcının gizli penceresinde açın. Görsel, giriş yapmadan doğrudan görünmelidir
+- Tam `https://` URL'leri kullanın
+- Boşlukları `%20` ile değiştirin (StriveFormats bunu sizin için yapar)
+- URL kısaltıcılardan ve yönlendirme hizmetlerinden kaçının
+
+---
+
+## Hata: Ürün numarası veya UPC 1.23457E+11 olarak görünüyor
+
+**Neden:** Excel uzun bir sayıyı (bir `ItemID` veya `P:UPC` içindeki bir barkodu) bilimsel gösterime çevirdi. İlk birkaç basamaktan sonrası kayboldu, bu yüzden eBay ilanı bulamıyor veya ürünü eşleştiremiyor.
+
+**Çözüm:** Tam numaraları kendi kayıtlarınızdan yeniden girin. eBay'in yardımı, ürün numarası sütunlarının kaydetmeden önce 0 ondalık basamaklı Sayı olarak biçimlendirilmesini önerir. Metin olarak biçimlendirmek de işe yarar. StriveFormats bunun olduğu her hücreyi işaretler.
+
+---
+
+## Hata: Geçersiz miktar
+
+**Neden:** `Quantity` boş, ondalık içeriyor (örneğin `1.5`) veya negatif.
+
+**Çözüm:** Tam sayılar kullanın. Yeni ilanların miktarı en az 1 olmalıdır. Varyasyonlu ilanlarda her varyasyonun miktarını ana satıra değil, kendi satırına yazın.
+
+---
+
+## Her şeyi yüklemeden önce test edin
+
+1. INFO satırını ve başlık satırını koruyarak 2 veya 3 satırı yeni bir dosyaya kopyalayın.
+2. Bu satırların Action değerini `VerifyAdd` yapın ve yükleyin. eBay satırları denetler ve hiçbir şey yayınlamadan ücretleri gösterir.
+3. Sonuç dosyasının bildirdiklerini düzeltin, ardından tam dosya için Action'ı yeniden `Add` yapın.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+eBay CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı Action sütununu, kategori ID'lerini, fiyatları, başlık uzunluklarını, durum ID'lerini, süreleri, görsel URL'lerini ve varyasyon satırlarını denetler, ardından sorunlu satır ve hücreleri tam olarak işaretler.
+
+[eBay CSV düzelticisini aç](/app?preset=ebay_listings) | [eBay şablonunu görüntüle](/presets/ebay_listings)

@@ -14,7 +14,7 @@
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Ошибки CSV в eBay File Exchange: причины и решения",
-"description": "Исправьте частые ошибки CSV в eBay File Exchange: недопустимые значения Action, проблемы с ID категорий, слишком длинные названия, коды состояния, формат цен и URL изображений."
+"description": "Исправьте частые ошибки CSV при массовой загрузке на eBay через Seller Hub Reports и файлы File Exchange: строка INFO, недопустимые значения Action, ID категорий, длина заголовка, ID состояния, сроки, цены и URL изображений."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Руководство по шаблону CSV Etsy: поля, форматы и частые ошибки",
