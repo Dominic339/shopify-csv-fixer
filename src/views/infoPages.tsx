@@ -6,6 +6,7 @@ import Link from "next/link";
 import en from "@/i18n/pages/en.json";
 import { localizedLandings } from "@/lib/landing/localize";
 import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 import { fmt } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates } from "@/lib/i18n/seo";
@@ -135,6 +136,21 @@ export async function AboutView({ locale = DEFAULT_LOCALE }: { locale?: Locale }
   );
 }
 
+/** Replace "{email}" in a paragraph with a link to the support address. */
+function withEmail(text: string) {
+  const parts = text.split("{email}");
+  return parts.flatMap((part, i) =>
+    i === 0
+      ? [part]
+      : [
+          <a key={i} className="font-medium text-[var(--secondary-text)] underline" href={`mailto:${SUPPORT_EMAIL}`}>
+            {SUPPORT_EMAIL}
+          </a>,
+          part,
+        ],
+  );
+}
+
 /** Privacy policy and terms: a title, an intro and titled sections of paragraphs. */
 export async function PolicyView({ page, locale = DEFAULT_LOCALE }: { page: "privacy" | "terms"; locale?: Locale }) {
   const dict = await loadPages(locale);
@@ -156,7 +172,7 @@ export async function PolicyView({ page, locale = DEFAULT_LOCALE }: { page: "pri
           <h2 className="text-xl font-semibold text-[var(--text)]">{s.title}</h2>
           <div className={`mt-2 space-y-2 text-sm leading-7 ${muted}`}>
             {s.paras.map((p, i) => (
-              <p key={i}>{p}</p>
+              <p key={i}>{withEmail(p)}</p>
             ))}
           </div>
         </section>

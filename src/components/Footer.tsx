@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { SUPPORT_EMAIL } from "@/lib/contact";
 import { LOCALES, LOCALE_NAMES, localeHref, type Locale } from "@/lib/i18n/locales";
 import { pathInLocale, rememberLocale, splitLocale } from "@/lib/i18n/paths";
 import type { Translations } from "@/lib/i18n/getTranslations";
@@ -41,6 +42,7 @@ export default function Footer({ navByLocale }: Props) {
         { href: href("/about"), label: t.about },
         { href: href("/privacy"), label: t.privacy },
         { href: href("/terms"), label: t.terms },
+        { href: `mailto:${SUPPORT_EMAIL}`, label: t.contact },
       ],
     },
   ];

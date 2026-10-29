@@ -75,13 +75,17 @@
       },
       {
         "title": "Płatności",
-        "paras": ["Płatności obsługuje Stripe. Nigdy nie widzimy ani nie przechowujemy danych twojej karty; od Stripe otrzymujemy tylko status subskrypcji."]
+        "paras": ["Płatności obsługuje Stripe. Nigdy nie widzimy ani nie przechowujemy danych twojej karty; od Stripe otrzymujemy tylko status subskrypcji lub karnetu."]
       },
       {
         "title": "Twoje wybory",
         "paras": [
-          "Dane zapisane w przeglądarce możesz w każdej chwili usunąć w jej ustawieniach. Aby usunąć konto lub adres e-mail, skontaktuj się z właścicielem serwisu."
+          "Dane zapisane w przeglądarce możesz w każdej chwili usunąć w jej ustawieniach. Aby usunąć konto lub adres e-mail, napisz na {email}."
         ]
+      },
+      {
+        "title": "Kontakt",
+        "paras": ["Pytania dotyczące tej polityki lub twoich danych? Napisz na {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Subskrypcje",
-        "paras": ["Rozliczenia subskrypcji obsługuje Stripe. Subskrypcję możesz anulować lub zmienić w portalu rozliczeń."]
+        "paras": ["Rozliczenia subskrypcji obsługuje Stripe. Subskrypcję możesz anulować lub zmienić w portalu rozliczeń.", "Karnet 24-godzinny to jednorazowa płatność. Nie odnawia się i nie jest subskrypcją."]
       },
       {
         "title": "Ograniczenie odpowiedzialności",
         "paras": ["StriveFormats nie odpowiada za straty związane z importem danych, działalnością firmy ani problemami platform zewnętrznych."]
+      },
+      {
+        "title": "Kontakt",
+        "paras": ["Pytania dotyczące regulaminu, rozliczeń lub karnetu? Napisz na {email}."]
       }
     ]
   },

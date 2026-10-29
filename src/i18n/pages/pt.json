@@ -75,13 +75,17 @@
       },
       {
         "title": "Pagamentos",
-        "paras": ["Os pagamentos são processados pela Stripe. Nunca vemos nem guardamos os dados do seu cartão; só recebemos da Stripe o status da sua assinatura."]
+        "paras": ["Os pagamentos são processados pela Stripe. Nunca vemos nem guardamos os dados do seu cartão; só recebemos da Stripe o status da sua assinatura ou do seu passe."]
       },
       {
         "title": "Suas escolhas",
         "paras": [
-          "Você pode apagar a qualquer momento os dados salvos no navegador pelas configurações dele. Para remover a sua conta ou o seu e-mail, entre em contato com o responsável pelo site."
+          "Você pode apagar a qualquer momento os dados salvos no navegador pelas configurações dele. Para remover a sua conta ou o seu e-mail, escreva para {email}."
         ]
+      },
+      {
+        "title": "Contato",
+        "paras": ["Dúvidas sobre esta política ou sobre os seus dados? Escreva para {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Assinaturas",
-        "paras": ["A cobrança das assinaturas é feita pela Stripe. Você pode cancelar ou gerenciar a sua assinatura pelo portal de cobrança."]
+        "paras": ["A cobrança das assinaturas é feita pela Stripe. Você pode cancelar ou gerenciar a sua assinatura pelo portal de cobrança.", "O passe de 24 horas é um pagamento único. Ele não é renovado e não é uma assinatura."]
       },
       {
         "title": "Limitação de responsabilidade",
         "paras": ["O StriveFormats não se responsabiliza por perdas relacionadas a importações de dados, operações comerciais ou problemas de plataformas de terceiros."]
+      },
+      {
+        "title": "Contato",
+        "paras": ["Dúvidas sobre estes termos, a cobrança ou um passe? Escreva para {email}."]
       }
     ]
   },

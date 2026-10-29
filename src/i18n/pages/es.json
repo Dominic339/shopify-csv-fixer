@@ -75,13 +75,17 @@
       },
       {
         "title": "Pagos",
-        "paras": ["Los pagos los gestiona Stripe. Nunca vemos ni guardamos los datos de tu tarjeta; solo recibimos de Stripe el estado de tu suscripción."]
+        "paras": ["Los pagos los gestiona Stripe. Nunca vemos ni guardamos los datos de tu tarjeta; solo recibimos de Stripe el estado de tu suscripción o de tu pase."]
       },
       {
         "title": "Tus opciones",
         "paras": [
-          "Puedes borrar en cualquier momento los datos guardados en tu navegador desde su configuración. Para que eliminemos tu cuenta o tu correo, ponte en contacto con el responsable del sitio."
+          "Puedes borrar en cualquier momento los datos guardados en tu navegador desde su configuración. Para que eliminemos tu cuenta o tu correo, escríbenos a {email}."
         ]
+      },
+      {
+        "title": "Contacto",
+        "paras": ["¿Dudas sobre esta política o sobre tus datos? Escríbenos a {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Suscripciones",
-        "paras": ["La facturación de las suscripciones se gestiona a través de Stripe. Puedes cancelar o gestionar tu suscripción desde el portal de facturación."]
+        "paras": ["La facturación de las suscripciones se gestiona a través de Stripe. Puedes cancelar o gestionar tu suscripción desde el portal de facturación.", "El pase de 24 horas es un pago único. No se renueva y no es una suscripción."]
       },
       {
         "title": "Limitación de responsabilidad",
         "paras": ["StriveFormats no se hace responsable de pérdidas relacionadas con importaciones de datos, operaciones comerciales o problemas de plataformas de terceros."]
+      },
+      {
+        "title": "Contacto",
+        "paras": ["¿Dudas sobre estas condiciones, la facturación o un pase? Escríbenos a {email}."]
       }
     ]
   },

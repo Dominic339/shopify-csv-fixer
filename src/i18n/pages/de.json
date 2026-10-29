@@ -75,13 +75,17 @@
       },
       {
         "title": "Zahlungen",
-        "paras": ["Zahlungen werden von Stripe abgewickelt. Wir sehen oder speichern deine Kartendaten nie; wir erhalten von Stripe nur deinen Abostatus."]
+        "paras": ["Zahlungen werden von Stripe abgewickelt. Wir sehen oder speichern deine Kartendaten nie; wir erhalten von Stripe nur den Status deines Abos oder Passes."]
       },
       {
         "title": "Deine Möglichkeiten",
         "paras": [
-          "Die in deinem Browser gespeicherten Daten kannst du jederzeit über die Browsereinstellungen löschen. Wenn dein Konto oder deine E-Mail-Adresse gelöscht werden soll, wende dich an den Betreiber der Website."
+          "Die in deinem Browser gespeicherten Daten kannst du jederzeit über die Browsereinstellungen löschen. Wenn dein Konto oder deine E-Mail-Adresse gelöscht werden soll, schreib an {email}."
         ]
+      },
+      {
+        "title": "Kontakt",
+        "paras": ["Fragen zu dieser Datenschutzerklärung oder deinen Daten? Schreib an {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Abonnements",
-        "paras": ["Die Abrechnung von Abonnements erfolgt über Stripe. Du kannst dein Abo im Abrechnungsportal kündigen oder verwalten."]
+        "paras": ["Die Abrechnung von Abonnements erfolgt über Stripe. Du kannst dein Abo im Abrechnungsportal kündigen oder verwalten.", "Der 24-Stunden-Pass ist eine Einmalzahlung. Er verlängert sich nicht und ist kein Abo."]
       },
       {
         "title": "Haftungsbeschränkung",
         "paras": ["StriveFormats haftet nicht für Verluste im Zusammenhang mit Datenimporten, Geschäftsabläufen oder Problemen bei Plattformen Dritter."]
+      },
+      {
+        "title": "Kontakt",
+        "paras": ["Fragen zu diesen Bedingungen, zur Abrechnung oder zu einem Pass? Schreib an {email}."]
       }
     ]
   },
