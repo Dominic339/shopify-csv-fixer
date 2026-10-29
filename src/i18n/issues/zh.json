@@ -840,10 +840,16 @@
 "howToFix": "请将 brand-name 缩短到 50 个字符以内。"
 },
 "amazon/invalid_boolean_field": {
-"title": "布尔字段值无效",
-"explanation": "某个配送相关的布尔字段（will-ship-internationally 或 expedited-shipping）的值不是 'y' 或 'n'。",
-"whyPlatformCares": "Amazon 平面文件处理程序要求这些字段严格为 'y'、'n' 或留空。无效的值会被静默忽略，或导致该行被拒绝。",
-"howToFix": "使用 'y' 启用或 'n' 关闭该配送选项，或留空以使用账户默认设置。"
+"title": "will-ship-internationally 值无效",
+"explanation": "will-ship-internationally 字段包含 1、2、y、n 以外的值。",
+"whyPlatformCares": "Amazon 的 Inventory Loader 将 1 或 n 读作仅在美国境内发货，将 2 或 y 读作国际发货。其他值无法识别，因此该行可能被拒绝或该设置被忽略。",
+"howToFix": "仅在美国境内发货请用 n 或 1，国际发货请用 y 或 2。如果不想设置，请将单元格留空。"
+},
+"amazon/invalid_expedited_shipping": {
+"title": "expedited-shipping 值无效",
+"explanation": "expedited-shipping 字段包含 Amazon 配送选项名称以外的内容。",
+"whyPlatformCares": "Amazon 的 Inventory Loader 需要一个用逗号分隔的加急配送选项列表：Next（一天）、Second（两天）、Domestic、International 和 Plus。N 或空单元格表示不提供。yes、true 等词或其他任何值都无法对应到选项。",
+"howToFix": "列出你提供的选项并用逗号分隔，例如 Next,Second。如果不提供加急配送，请填 N 或将单元格留空。"
 },
 "amazon/product_id_scientific_notation": {
 "title": "条形码被电子表格破坏",

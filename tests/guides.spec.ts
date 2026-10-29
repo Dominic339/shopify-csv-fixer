@@ -256,6 +256,22 @@ describe("expandIssueContent", () => {
     expect(result.examples[0].good).toBe("y");
   });
 
+  it("Amazon expedited-shipping lists Amazon's shipping options, not y/n", () => {
+    const result = expandIssueContent({
+      issueCode: "amazon/invalid_expedited_shipping",
+      title: "Invalid expedited-shipping value",
+      category: "compliance",
+      platform: "amazon",
+      explanation: "The expedited-shipping field contains something other than Amazon's shipping option names.",
+      whyPlatformCares: "Amazon expects a comma-separated list of the faster shipping options you offer.",
+      howToFix: "List the options you offer separated by commas, for example Next,Second.",
+      autoFixable: false,
+      blocking: false,
+    });
+    expect(result.issueType).toBe("enum");
+    expect(result.validValues).toEqual(["Next", "Second", "Domestic", "International", "Plus", "N"]);
+  });
+
   it("money issue has Excel steps mentioning currency symbols", () => {
     const result = expandIssueContent({
       issueCode: "ebay/invalid_price",

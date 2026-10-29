@@ -55,6 +55,11 @@ const VALID_PRODUCT_ID_TYPES = new Set(["asin", "upc", "ean", "isbn", "jan", "gc
 // 5=Collectible;Like New, 6=Collectible;Very Good, 7=Collectible;Good, 8=Collectible;Acceptable
 // 10=Refurbished, 11=New
 // 9=Club (legacy). Category templates use names (New, UsedLikeNew, Refurbished, ...).
+// will-ship-internationally: 1/n = US only, 2/y = international (Inventory Loader guide).
+const VALID_SHIP_INTERNATIONALLY = new Set(["1", "2", "y", "n"]);
+// expedited-shipping options: Next (one day), Second (two day), Domestic, International, Plus.
+const EXPEDITED_OPTIONS = new Set(["next", "second", "domestic", "international", "plus"]);
+
 const VALID_ITEM_CONDITIONS = new Set(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]);
 const VALID_CONDITION_NAMES = new Set([
   "new", "refurbished", "usedlikenew", "usedverygood", "usedgood", "usedacceptable",
@@ -442,21 +447,41 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
       }
     }
 
-    // Boolean shipping fields: must be y, n, or empty
-    for (const col of ["will-ship-internationally", "expedited-shipping"]) {
-      if (col in out) {
-        const val = (out[col] ?? "").trim().toLowerCase();
-        if (val && val !== "y" && val !== "n") {
-          issues.push({
-            rowIndex,
-            column: col,
-            severity: "warning",
-            code: "amazon/invalid_boolean_field",
-            message: `${col} must be 'y' or 'n'. Found '${out[col]}'.`,
-            suggestion: "Use 'y' (yes) or 'n' (no), or leave blank.",
-            details: { column: col, value: out[col] },
-          });
-        }
+    // Shipping options, as Amazon's Inventory Loader guide defines them.
+    // will-ship-internationally: 1 or n = US only, 2 or y = ships internationally.
+    if ("will-ship-internationally" in out) {
+      const raw = out["will-ship-internationally"] ?? "";
+      const val = raw.trim().toLowerCase();
+      if (val && !VALID_SHIP_INTERNATIONALLY.has(val)) {
+        issues.push({
+          rowIndex,
+          column: "will-ship-internationally",
+          severity: "warning",
+          code: "amazon/invalid_boolean_field",
+          message: `will-ship-internationally must be 1, 2, y or n. Found '${raw}'.`,
+          suggestion: "Use n or 1 to ship within the US only, y or 2 to ship internationally, or leave blank.",
+          details: { column: "will-ship-internationally", value: raw },
+        });
+      }
+    }
+
+    // expedited-shipping: a comma-separated list of Next, Second, Domestic, International
+    // and Plus, or N (or blank) for none.
+    if ("expedited-shipping" in out) {
+      const raw = out["expedited-shipping"] ?? "";
+      const val = raw.trim().toLowerCase();
+      const parts = val.split(",").map((p) => p.trim());
+      const ok = !val || val === "n" || parts.every((p) => EXPEDITED_OPTIONS.has(p));
+      if (!ok) {
+        issues.push({
+          rowIndex,
+          column: "expedited-shipping",
+          severity: "warning",
+          code: "amazon/invalid_expedited_shipping",
+          message: `expedited-shipping value '${raw}' is not valid.`,
+          suggestion: "List the options you offer, separated by commas (Next, Second, Domestic, International, Plus), or use N or leave blank for none.",
+          details: { column: "expedited-shipping", value: raw },
+        });
       }
     }
 

@@ -840,10 +840,16 @@
 "howToFix": "brand-name を 50 文字以下にしてください。"
 },
 "amazon/invalid_boolean_field": {
-"title": "真偽値の項目の値が無効です",
-"explanation": "配送に関する真偽値の項目（will-ship-internationally または expedited-shipping）に 'y' と 'n' 以外の値があります。",
-"whyPlatformCares": "Amazon のフラットファイル処理では、これらの項目は 'y'、'n'、または空欄である必要があります。無効な値は黙って無視されるか、行が拒否されます。",
-"howToFix": "配送オプションを有効にするには 'y'、無効にするには 'n' を使うか、アカウントの既定を使う場合は空欄にしてください。"
+"title": "will-ship-internationally の値が無効",
+"explanation": "will-ship-internationally 項目に 1、2、y、n 以外の値が入っています。",
+"whyPlatformCares": "Amazon の Inventory Loader は 1 または n を米国内のみの発送、2 または y を海外発送として読み取ります。それ以外の値は読み取れないため、行が拒否されるか設定が無視されることがあります。",
+"howToFix": "米国内のみに発送する場合は n または 1、海外にも発送する場合は y または 2 を使ってください。設定しない場合はセルを空欄にしてください。"
+},
+"amazon/invalid_expedited_shipping": {
+"title": "expedited-shipping の値が無効",
+"explanation": "expedited-shipping 項目に Amazon の配送オプション名以外の値が入っています。",
+"whyPlatformCares": "Amazon の Inventory Loader は、提供する速達配送オプションのカンマ区切りの一覧を想定しています：Next（翌日）、Second（2 日）、Domestic、International、Plus。N または空欄は「なし」を意味します。yes や true などの単語やその他の値は、どのオプションにも一致しません。",
+"howToFix": "提供するオプションをカンマ区切りで入力してください（例：Next,Second）。速達配送を提供しない場合は N を入力するか、セルを空欄にしてください。"
 },
 "amazon/product_id_scientific_notation": {
 "title": "表計算ソフトでバーコードが壊れています",

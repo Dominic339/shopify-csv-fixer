@@ -840,10 +840,16 @@
 "howToFix": "Kürze brand-name auf höchstens 50 Zeichen."
 },
 "amazon/invalid_boolean_field": {
-"title": "Ungültiger Ja/Nein-Wert",
-"explanation": "Ein Versandfeld (will-ship-internationally oder expedited-shipping) enthält einen anderen Wert als 'y' oder 'n'.",
-"whyPlatformCares": "Die Amazon-Flatfile-Verarbeitung erwartet hier genau 'y', 'n' oder leer. Ungültige Werte werden stillschweigend ignoriert oder lassen die Zeile ablehnen.",
-"howToFix": "Verwende 'y', um die Versandoption zu aktivieren, 'n', um sie zu deaktivieren, oder lass das Feld leer für die Standardwerte deines Kontos."
+"title": "Ungültiger will-ship-internationally-Wert",
+"explanation": "Das Feld will-ship-internationally enthält einen anderen Wert als 1, 2, y oder n.",
+"whyPlatformCares": "Der Amazon Inventory Loader liest 1 oder n als Versand nur innerhalb der USA und 2 oder y als internationalen Versand. Andere Werte kann er nicht lesen, daher wird die Zeile womöglich abgelehnt oder die Einstellung ignoriert.",
+"howToFix": "Verwende n oder 1 für Versand nur innerhalb der USA oder y oder 2 für internationalen Versand. Lass die Zelle leer, wenn du nichts festlegen möchtest."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Ungültiger expedited-shipping-Wert",
+"explanation": "Das Feld expedited-shipping enthält etwas anderes als Amazons Namen für Versandoptionen.",
+"whyPlatformCares": "Der Amazon Inventory Loader erwartet eine durch Kommas getrennte Liste der schnelleren Versandoptionen, die du anbietest: Next (ein Tag), Second (zwei Tage), Domestic, International und Plus. N oder eine leere Zelle bedeutet keine. Wörter wie yes oder true und alles andere lassen sich keiner Option zuordnen.",
+"howToFix": "Liste die angebotenen Optionen durch Kommas getrennt auf, zum Beispiel Next,Second. Verwende N oder lass die Zelle leer, wenn du keinen Expressversand anbietest."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Barcode von Tabellenkalkulation beschädigt",

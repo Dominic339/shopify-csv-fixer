@@ -840,10 +840,16 @@
 "howToFix": "Kort brand-name in tot 50 tekens of minder."
 },
 "amazon/invalid_boolean_field": {
-"title": "Ongeldige waarde in booleaans veld",
-"explanation": "Een booleaans verzendveld (will-ship-internationally of expedited-shipping) bevat een andere waarde dan 'y' of 'n'.",
-"whyPlatformCares": "De flatfileverwerking van Amazon verwacht in deze velden precies 'y', 'n' of leeg. Ongeldige waarden worden zonder melding genegeerd of zorgen dat de rij wordt geweigerd.",
-"howToFix": "Gebruik 'y' om de verzendoptie in te schakelen of 'n' om hem uit te schakelen, of laat het veld leeg om je accountinstellingen te gebruiken."
+"title": "Ongeldige will-ship-internationally-waarde",
+"explanation": "Het veld will-ship-internationally bevat een andere waarde dan 1, 2, y of n.",
+"whyPlatformCares": "De Inventory Loader van Amazon leest 1 of n als verzending alleen binnen de VS en 2 of y als internationale verzending. Andere waarden kan hij niet lezen, dus de rij kan worden geweigerd of de instelling genegeerd.",
+"howToFix": "Gebruik n of 1 om alleen binnen de VS te verzenden, of y of 2 om internationaal te verzenden. Laat de cel leeg als je het niet wilt instellen."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Ongeldige expedited-shipping-waarde",
+"explanation": "Het veld expedited-shipping bevat iets anders dan de namen van Amazons verzendopties.",
+"whyPlatformCares": "De Inventory Loader van Amazon verwacht een door komma's gescheiden lijst van de snellere verzendopties die je aanbiedt: Next (één dag), Second (twee dagen), Domestic, International en Plus. N of een lege cel betekent geen. Woorden als yes of true, of iets anders, passen bij geen enkele optie.",
+"howToFix": "Vermeld de opties die je aanbiedt, gescheiden door komma's, bijvoorbeeld Next,Second. Gebruik N of laat de cel leeg als je geen snelle verzending aanbiedt."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Barcode verminkt door een spreadsheet",
