@@ -1,0 +1,328 @@
+---
+title: "Noções básicas de CSV para importações de e-commerce"
+description: "Entenda cabeçalhos, codificação UTF-8, aspas, quebras de linha e os erros mais comuns que quebram importações CSV, antes do seu primeiro envio."
+keywords: ["noções básicas csv", "codificação csv utf-8", "cabeçalhos csv", "aspas e vírgulas csv", "quebras de linha csv", "erros de importação csv", "corrigir arquivo csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Como um CSV é estruturado e por que isso importa nas importações"
+  - "Armadilhas de codificação, BOM e quebras de linha"
+  - "Formatos de delimitador e como converter entre eles"
+  - "Riscos da formatação automática das planilhas (zeros à esquerda, notação científica, datas)"
+  - "Linhas em branco, vírgulas no fim da linha e caracteres invisíveis"
+bestFor: "Vendedores iniciantes, gestores de catálogo e desenvolvedores resolvendo os primeiros erros de importação"
+timeToComplete: "10 minutos"
+---
+
+## O que é um arquivo CSV?
+
+Um arquivo CSV (Comma-Separated Values, valores separados por vírgula) é um arquivo de texto simples em que cada linha é um registro e as colunas são separadas por vírgulas. A primeira linha contém os nomes das colunas (a linha de cabeçalho). Cada linha depois dela contém dados.
+
+Veja como fica, em texto puro, um CSV mínimo de produtos da Shopify:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Arquivos CSV parecem simples, mas plataformas como Shopify, WooCommerce, Etsy, eBay e Amazon são rígidas com detalhes de formato que as planilhas podem estragar sem avisar. Este guia explica cada regra importante para que suas importações deem certo de primeira.
+
+---
+
+## A linha de cabeçalho
+
+A primeira linha de todo CSV precisa conter os nomes das colunas (cabeçalhos). As plataformas usam esses nomes para associar seus dados aos campos certos durante a importação.
+
+### Regras
+
+- **Escreva os nomes exatamente, inclusive maiúsculas e minúsculas.** Alguns importadores tratam `Handle`, `handle` e `HANDLE` de forma diferente, então copie os cabeçalhos do modelo da plataforma.
+- **Sem espaços no início ou no fim.** Um cabeçalho `" Title"` (com espaço no início) não corresponde a `"Title"`. Os dados dessa coluna são ignorados sem aviso.
+- **Sem cabeçalhos duplicados.** Se duas colunas têm o mesmo nome, a maioria dos leitores usa só a última.
+- **Em algumas plataformas a ordem das colunas importa.** Alguns modelos do eBay e da Amazon esperam as colunas na ordem do modelo, então mantenha a ordem do modelo que você baixou. A Shopify permite acrescentar colunas em qualquer posição.
+
+### Como conferir
+
+Abra o CSV num editor de texto simples, como o Bloco de Notas (Windows), o TextEdit (Mac) ou o VS Code. Olhe a linha 1. Ela deve ter nomes separados por vírgulas, sem nenhuma linha em branco acima:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Se a primeira linha começar com três caracteres estranhos antes dos nomes dos cabeçalhos, o arquivo tem BOM. Veja como corrigir na seção sobre codificação, mais abaixo.
+
+---
+
+## Codificação UTF-8
+
+A codificação é a forma como os caracteres de texto são guardados como bytes no disco. A codificação errada gera texto embaralhado. Por exemplo, um apóstrofo tipográfico salvo em UTF-8 mas lido como Latin-1 vira uma sequência de três caracteres que parece lixo.
+
+### Por que UTF-8
+
+UTF-8 é a escolha segura para todas as plataformas de e-commerce. Shopify e WooCommerce esperam esse formato, e os modelos atuais do eBay o declaram no cabeçalho Action (`CC=UTF-8`). Salvar em UTF-8 garante que:
+
+- Caracteres acentuados e o ç apareçam corretamente.
+- Símbolos de moeda e pontuação especial não quebrem.
+- O importador da plataforma consiga ler o arquivo sem rejeitá-lo.
+
+### Com ou sem BOM
+
+UTF-8 com BOM acrescenta uma sequência oculta de 3 bytes bem no início do arquivo. O Excel no Windows grava essa sequência quando você usa "Salvar como > CSV UTF-8 (delimitado por vírgulas)". Shopify e WooCommerce leem arquivos com BOM corretamente, mas algumas ferramentas e scripts leem errado o primeiro cabeçalho por causa dos bytes extras.
+
+Como saber se o arquivo tem BOM: abra-o no VS Code e olhe a barra de status no canto inferior direito. Se aparecer "UTF-8 with BOM", ele tem.
+
+**Correção no VS Code:** clique no indicador de codificação na barra de status, escolha "Save with Encoding" e depois "UTF-8" (sem BOM).
+
+**Correção no Excel:** o Excel não consegue salvar UTF-8 sem BOM. Não troque para o simples "CSV (separado por vírgulas)" para evitar o BOM: essa opção salva na codificação antiga do sistema (muitas vezes Windows-1252) e estraga os acentos. Fique com "CSV UTF-8" e só remova o BOM no VS Code se uma plataforma ler errado a primeira coluna.
+
+**Correção com Python:**
+
+```python
+# utf-8-sig remove o BOM na leitura; utf-8 simples grava sem BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### A codificação em outras ferramentas
+
+**Google Sheets:** Arquivo > Fazer download > Valores separados por vírgula exporta em UTF-8 sem BOM.
+
+**LibreOffice Calc:** ao salvar como CSV, escolha "Unicode (UTF-8)" na caixa de diálogo.
+
+**Numbers (Mac):** Arquivo > Exportar Para > CSV exporta em UTF-8 sem BOM nas versões atuais do macOS.
+
+---
+
+## Regras de aspas e vírgulas dentro dos valores
+
+Quando o valor de uma célula contém uma vírgula, coloque o valor inteiro entre aspas duplas. É o padrão CSV (RFC 4180).
+
+### Exemplo básico
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Sem as aspas, o leitor enxerga cinco colunas em vez de três e põe os dados nos campos errados.
+
+### Aspas dentro de valores entre aspas
+
+Se o valor contém aspas duplas, escape-as duplicando:
+
+```
+"She said ""this is great"""
+```
+
+Isso representa o texto: She said "this is great"
+
+### Quando você precisa de aspas?
+
+Você precisa colocar o valor entre aspas duplas quando ele contém:
+
+- Uma vírgula
+- Aspas duplas
+- Uma quebra de linha dentro do valor
+- Tags HTML (alguns leitores interpretam mal os sinais < e > sem aspas)
+
+Valores simples como `29.99` ou `Active` não precisam de aspas. Colocar aspas em tudo não faz mal, e muitas ferramentas fazem isso automaticamente.
+
+### Erros comuns com aspas
+
+| Erro | Exemplo errado | Correto |
+|---|---|---|
+| Vírgula no valor, sem aspas | `Wallet, Brown` | `"Wallet, Brown"` |
+| Descrição em HTML sem aspas | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Quebra de linha no valor, sem aspas | Duas linhas separadas | `"Line1\nLine2"` numa célula |
+| Escape errado de aspas internas | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Quebras de linha
+
+As quebras de linha mostram ao leitor onde uma linha termina e a próxima começa. Existem dois formatos:
+
+| Formato | Bytes | Usado por |
+|---|---|---|
+| CRLF | retorno de carro + avanço de linha | Windows, Excel |
+| LF | só avanço de linha | macOS, Linux, a maioria das ferramentas web |
+
+A maioria das plataformas aceita os dois. Os problemas aparecem quando eles se misturam, com algumas linhas em CRLF e outras em LF. Quebras misturadas podem fazer o leitor enxergar linhas em branco a mais ou interpretar mal valores de várias linhas.
+
+### Como conferir e corrigir
+
+Abra o arquivo no VS Code. A barra de status mostra "CRLF" ou "LF". Clique para alternar e salve.
+
+Com Python:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Padronizar em LF
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Os erros que mais quebram importações
+
+**1. Linhas em branco a mais**
+
+Muitas planilhas acrescentam uma linha em branco no fim. As plataformas pulam as linhas em branco ou dão erro. Exclua-as antes de exportar. No Excel, pressione Ctrl+End para ir à última célula usada. Se ela estiver vazia, exclua as linhas vazias abaixo dos dados.
+
+**2. Linhas de resumo ou de total**
+
+Fórmulas SOMA() no fim da planilha aparecem no CSV como linhas de produto. Exclua as linhas de resumo antes de exportar.
+
+**3. Células mescladas**
+
+Células mescladas são exportadas com o valor na primeira célula e vazias nas demais. O importador enxerga essas células vazias como campos obrigatórios em branco. Desfaça todas as mesclagens antes de exportar.
+
+**4. Células com fórmulas**
+
+Quando o Excel salva um CSV, ele grava o que cada célula exibe: o resultado atual da fórmula, com o formato de número dela. Uma fórmula de preço formatada como moeda é gravada como `R$ 29,99` ou `$29.99`, e uma quebrada como `#N/D` ou `#REF!`. Confira as colunas com fórmulas em busca de erros e depois use Colar Especial > Valores para transformá-las em valores fixos antes de salvar como CSV.
+
+**5. Espaços no fim dos cabeçalhos**
+
+`"Title "` (com espaço no fim) não é o mesmo que `"Title"`. Os dados dessa coluna são ignorados sem aviso na importação. Use Localizar e Substituir (Ctrl+U no Excel em português, Ctrl+H em outras versões) para tirar os espaços do fim dos cabeçalhos.
+
+**6. Formato errado com extensão .csv**
+
+Salvar como `.xlsx` e dar ao arquivo o nome `.csv` gera um arquivo que não é CSV de verdade. Abra-o num editor de texto. Se aparecerem caracteres binários, não é um CSV de verdade. Exporte de novo no formato certo.
+
+**7. Codificação ANSI ou Latin-1**
+
+Versões antigas do Excel às vezes salvam em ANSI (Windows-1252). Nomes de produtos com acentos ficam embaralhados na importação. Sempre escolha UTF-8 explicitamente ao salvar.
+
+---
+
+## Delimitadores: vírgulas, tabulações e ponto e vírgula
+
+O nome "CSV" fala em vírgulas, mas alguns arquivos usam tabulações (TSV) ou ponto e vírgula. A maioria das plataformas de e-commerce espera arquivos realmente separados por vírgula. Enviar um arquivo separado por ponto e vírgula como se fosse CSV faz cada linha aparecer como uma única coluna.
+
+### Como identificar o delimitador
+
+Abra o arquivo num editor de texto simples. Olhe a primeira linha:
+
+- Se os nomes das colunas estão separados por `,`, o arquivo é separado por vírgula (CSV padrão)
+- Se estão separados por `;`, é separado por ponto e vírgula (comum no Excel com configuração regional do Brasil e de vários países europeus)
+- Se estão separados por espaços largos, é separado por tabulação (TSV)
+
+### Converter um arquivo com ponto e vírgula para vírgulas
+
+**No Excel:** Arquivo > Salvar como > CSV UTF-8 (delimitado por vírgulas). Se o Excel continuar salvando com ponto e vírgula (porque sua configuração regional usa o ponto e vírgula como separador de lista), mude o separador de lista nas configurações regionais do Windows ou use o método em Python abaixo.
+
+**Em Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Riscos da formatação automática das planilhas
+
+Planilhas como o Excel e o Google Sheets alteram certos valores sem avisar quando você abre ou edita um CSV. Essas mudanças podem estragar seus dados antes mesmo de você editar qualquer coisa.
+
+### Zeros à esquerda removidos de SKUs e IDs
+
+O Excel remove os zeros à esquerda de valores que interpreta como números. Um SKU como `00123` vira `123`. Um CEP como `02110` vira `2110`.
+
+**Como evitar:**
+
+- No Excel: antes de importar o CSV, use o assistente de importação de texto (Dados > De Texto/CSV) e defina o tipo "Texto" para toda coluna que precisa manter os zeros à esquerda.
+- No Google Sheets: depois de importar, formate a coluna afetada como "Texto simples" (Formatar > Número > Texto simples) antes de editar.
+- Com Python: sempre leia as colunas de SKU e ID com `dtype=str` se usar pandas, ou use o módulo padrão `csv`, que nunca converte tipos.
+
+### Números convertidos em notação científica
+
+Sequências numéricas longas (códigos de barras de 13 dígitos, códigos EAN) podem aparecer como `1,23457E+12` no Excel. Ao salvar como CSV, essa notação é gravada literalmente, o que quebra a validação do código de barras na importação.
+
+**Correção:** selecione a coluna afetada no Excel, formate como "Número" com 0 casas decimais (não "Científico") e salve. Outra opção é colocar um apóstrofo antes do valor (força o tratamento como texto) ou formatar a coluna como texto antes de colar os valores.
+
+### Datas convertidas para o formato regional
+
+Um campo com `2024-01-15` pode ser convertido automaticamente em `15/01/2024` ou `15 de janeiro de 2024`, dependendo da configuração regional. Plataformas que esperam o formato ISO (`YYYY-MM-DD`) rejeitam o valor reformatado.
+
+**Correção:** depois de abrir o arquivo, selecione as colunas de data e formate-as como texto, ou use o módulo `csv` do Python para ler e gravar sem nenhuma conversão de tipo.
+
+### Preços com símbolo de moeda
+
+O Excel às vezes salva uma célula formatada como moeda como `$19.99` em vez de `19.99`. A maioria das plataformas espera valores decimais simples, sem símbolo de moeda.
+
+**Correção:** no Excel, formate as colunas de preço como "Número" (não "Moeda" nem "Contábil") antes de salvar como CSV. Use Localizar e Substituir para remover `$`, `EUR` ou outros símbolos que já estejam nos dados.
+
+---
+
+## Linhas em branco, vírgulas no fim da linha e problemas invisíveis
+
+### Linhas em branco a mais no fim
+
+Muitas ferramentas acrescentam uma linha em branco depois da última linha de dados. As plataformas costumam pular linhas em branco, mas algumas as rejeitam como registros inválidos. Sempre exclua as linhas em branco do fim antes de exportar.
+
+No Excel: pressione Ctrl+End para ir à última célula usada. Se ela estiver vazia (uma linha vazia abaixo dos dados), selecione essas linhas e exclua-as (botão direito > Excluir).
+
+### Vírgulas no fim da linha
+
+Algumas ferramentas de exportação gravam uma vírgula no fim de cada linha: `value1,value2,`. Isso cria uma coluna vazia a mais. A maioria dos leitores lida bem com isso, mas validadores rígidos podem apontar um problema de estrutura.
+
+**Correção:** se todas as linhas, inclusive o cabeçalho, terminam com uma vírgula a mais, remova exatamente uma vírgula do fim de cada linha. Remover todas apagaria também células vazias reais no fim de uma linha:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Caracteres invisíveis
+
+Algumas ferramentas inserem espaços de largura zero (U+200B) ou espaços não separáveis (U+00A0) dentro dos valores. Eles são invisíveis na planilha, mas podem fazer os cabeçalhos não baterem ou os valores serem rejeitados na importação.
+
+**Como conferir:** abra o arquivo no VS Code e use Localizar (Ctrl+F) no modo de expressão regular. Procure `​` ou ` ` para encontrar esses caracteres.
+
+---
+
+## Regras de cada plataforma
+
+Cada plataforma acrescenta exigências próprias ao padrão CSV básico:
+
+- **Shopify:** a coluna Handle agrupa as linhas de variantes. Handles ausentes ou inválidos quebram o agrupamento dos produtos.
+- **WooCommerce:** usa uma coluna Type (`simple`, `variable`, `variation`) para definir a estrutura do produto.
+- **Etsy:** não tem envio de CSV. A exportação de anúncios serve para editar, fazer backup e migrar, e os apps de publicação em massa definem as próprias colunas.
+- **eBay:** exige a coluna Action (por exemplo `Add`, `Revise`, `Relist` ou `End`) em todas as linhas.
+- **Amazon:** os nomes das colunas variam conforme o modelo da categoria; baixe no Seller Central o modelo exato da sua categoria.
+
+---
+
+## Checklist rápido antes de importar
+
+- [ ] A linha 1 tem os cabeçalhos, sem linha em branco acima
+- [ ] Os cabeçalhos correspondem exatamente aos nomes que a plataforma espera, inclusive maiúsculas e minúsculas
+- [ ] Nenhum nome de coluna duplicado
+- [ ] Nenhum espaço no início ou no fim dos cabeçalhos
+- [ ] Arquivo salvo em UTF-8
+- [ ] Valores com vírgulas, aspas ou quebras de linha estão entre aspas duplas
+- [ ] Nenhuma linha em branco a mais no fim
+- [ ] Nenhuma linha de resumo nem célula com fórmula
+- [ ] Quebras de linha uniformes (todas CRLF ou todas LF)
+- [ ] A extensão é .csv e o arquivo contém texto simples separado por vírgulas
+
+---
+
+## Próximo passo: valide antes de importar
+
+Depois de preparar o arquivo, envie-o ao corretor de CSV para uma validação automática. Ele confere os cabeçalhos, aponta problemas de codificação, encontra problemas específicos de cada plataforma e corrige com um clique os que podem ser resolvidos com segurança.

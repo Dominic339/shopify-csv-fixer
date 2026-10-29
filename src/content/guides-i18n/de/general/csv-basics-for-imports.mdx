@@ -1,0 +1,328 @@
+---
+title: "CSV-Grundlagen für E-Commerce-Importe"
+description: "Spaltenköpfe, UTF-8-Kodierung, Anführungszeichen, Zeilenenden und die häufigsten Fehler, die E-Commerce-CSV-Importe scheitern lassen, verständlich erklärt, bevor du das erste Mal hochlädst."
+keywords: ["csv grundlagen", "csv kodierung utf-8", "csv spaltenköpfe", "csv anführungszeichen kommas", "csv zeilenenden", "csv importfehler", "csv datei reparieren"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wie eine CSV aufgebaut ist und warum das für Importe wichtig ist"
+  - "Fallen bei Kodierung, BOM und Zeilenenden"
+  - "Trennzeichen und wie du zwischen ihnen umwandelst"
+  - "Gefahren durch automatische Formatierung in Tabellen (führende Nullen, wissenschaftliche Notation, Datumswerte)"
+  - "Leerzeilen, Kommas am Zeilenende und unsichtbare Zeichen"
+bestFor: "Neue Händler, Katalogverantwortliche und Entwickler, die ihre ersten Importfehler beheben"
+timeToComplete: "10 Minuten"
+---
+
+## Was ist eine CSV-Datei?
+
+Eine CSV-Datei (Comma-Separated Values) ist eine reine Textdatei, in der jede Zeile ein Datensatz ist und die Spalten durch Kommas getrennt sind. Die erste Zeile enthält die Spaltennamen (die Kopfzeile). Jede Zeile danach enthält Daten.
+
+So sieht eine minimale Shopify-Produkt-CSV als reiner Text aus:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+CSV-Dateien wirken einfach, aber Plattformen wie Shopify, WooCommerce, Etsy, eBay und Amazon sind streng bei Formatdetails, die Tabellenprogramme unbemerkt kaputt machen können. Dieser Leitfaden erklärt jede wichtige Regel, damit deine Importe gleich beim ersten Mal sauber durchlaufen.
+
+---
+
+## Die Kopfzeile
+
+Die erste Zeile jeder CSV muss die Spaltennamen (Spaltenköpfe) enthalten. Plattformen ordnen deine Daten beim Import anhand dieser Namen den richtigen Feldern zu.
+
+### Regeln
+
+- **Schreib die Namen exakt, auch bei Groß- und Kleinschreibung.** Manche Importer behandeln `Handle`, `handle` und `HANDLE` unterschiedlich, also übernimm die Spaltennamen aus der Vorlage der Plattform.
+- **Keine Leerzeichen am Anfang oder Ende.** Ein Spaltenkopf `" Title"` (mit Leerzeichen am Anfang) passt nicht zu `"Title"`. Die Daten in dieser Spalte werden stillschweigend ignoriert.
+- **Keine doppelten Spaltenköpfe.** Haben zwei Spalten denselben Namen, nutzen die meisten Parser nur die letzte.
+- **Bei manchen Plattformen zählt die Spaltenreihenfolge.** Manche Vorlagen von eBay und Amazon erwarten die Spalten in der Reihenfolge der Vorlage, also behalte die Reihenfolge der heruntergeladenen Vorlage bei. Bei Shopify darfst du Spalten an beliebiger Stelle einfügen.
+
+### So prüfst du es
+
+Öffne deine CSV in einem reinen Texteditor wie Editor (Windows), TextEdit (Mac) oder VS Code. Sieh dir Zeile 1 an. Sie sollte aus kommagetrennten Namen bestehen, ohne Leerzeile darüber:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Beginnt die erste Zeile vor den Spaltennamen mit drei seltsamen Zeichen, hat deine Datei ein BOM. Wie du das behebst, steht unten im Abschnitt zur Kodierung.
+
+---
+
+## UTF-8-Kodierung
+
+Die Kodierung legt fest, wie Textzeichen als Bytes gespeichert werden. Eine falsche Kodierung führt zu Zeichensalat. Ein typografischer Apostroph, der als UTF-8 gespeichert, aber als Latin-1 gelesen wird, wird zum Beispiel zu einer Folge aus drei Zeichen, die wie Müll aussieht.
+
+### Warum UTF-8
+
+UTF-8 ist für jede E-Commerce-Plattform die sichere Wahl. Shopify und WooCommerce erwarten es, und die aktuellen eBay-Vorlagen geben es im Action-Spaltenkopf an (`CC=UTF-8`). Speichern als UTF-8 sorgt dafür, dass:
+
+- Umlaute und Akzente richtig angezeigt werden.
+- Währungssymbole und Sonderzeichen nicht kaputtgehen.
+- der Importer der Plattform die Datei lesen kann, ohne sie abzulehnen.
+
+### Mit oder ohne BOM
+
+UTF-8 mit BOM setzt eine versteckte Folge von 3 Bytes ganz an den Anfang der Datei. Excel unter Windows schreibt sie, wenn du „Speichern unter > CSV UTF-8 (durch Trennzeichen getrennt)“ wählst. Shopify und WooCommerce lesen Dateien mit BOM richtig, aber manche Tools und Skripte lesen wegen der zusätzlichen Bytes den ersten Spaltenkopf falsch.
+
+So erkennst du ein BOM: Öffne die Datei in VS Code und sieh unten rechts in die Statusleiste. Steht dort „UTF-8 with BOM“, hat die Datei eines.
+
+**Lösung in VS Code:** Klicke in der Statusleiste auf die Kodierungsanzeige, wähle „Save with Encoding“ und dann „UTF-8“ (ohne BOM).
+
+**Lösung in Excel:** Excel kann UTF-8 nicht ohne BOM speichern. Weiche nicht auf „CSV (Trennzeichen-getrennt)“ aus, um das BOM zu vermeiden: Diese Option speichert in der alten Kodierung deines Systems (oft Windows-1252) und zerstört Umlaute. Bleib bei „CSV UTF-8“ und entferne das BOM nur dann in VS Code, wenn eine Plattform die erste Spalte falsch liest.
+
+**Lösung mit Python:**
+
+```python
+# utf-8-sig entfernt das BOM beim Lesen; einfaches utf-8 schreibt ohne BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### Kodierung in anderen Programmen
+
+**Google Tabellen:** Datei > Herunterladen > Kommagetrennte Werte exportiert UTF-8 ohne BOM.
+
+**LibreOffice Calc:** Wähle beim Speichern als CSV im Dialog „Unicode (UTF-8)“.
+
+**Numbers (Mac):** Ablage > Exportieren > CSV exportiert auf aktuellen macOS-Versionen UTF-8 ohne BOM.
+
+---
+
+## Anführungszeichen und Kommas in Werten
+
+Enthält ein Zellwert ein Komma, setzt du den ganzen Wert in doppelte Anführungszeichen. Das ist der CSV-Standard (RFC 4180).
+
+### Einfaches Beispiel
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Ohne die Anführungszeichen sieht der Parser fünf statt drei Spalten und legt Daten in die falschen Felder.
+
+### Anführungszeichen in Werten mit Anführungszeichen
+
+Enthält der Wert selbst ein doppeltes Anführungszeichen, maskierst du es, indem du es verdoppelst:
+
+```
+"She said ""this is great"""
+```
+
+Das steht für den Text: She said "this is great"
+
+### Wann brauchst du Anführungszeichen?
+
+Doppelte Anführungszeichen brauchst du, wenn ein Wert Folgendes enthält:
+
+- ein Komma
+- ein doppeltes Anführungszeichen
+- einen Zeilenumbruch im Wert
+- HTML-Tags (manche Parser lesen spitze Klammern ohne Anführungszeichen falsch)
+
+Für einfache Werte wie `29.99` oder `Active` brauchst du keine Anführungszeichen. Alles in Anführungszeichen zu setzen schadet nicht, und viele Tools tun das automatisch.
+
+### Typische Fehler bei Anführungszeichen
+
+| Fehler | Falsches Beispiel | Richtig |
+|---|---|---|
+| Komma im Wert, keine Anführungszeichen | `Wallet, Brown` | `"Wallet, Brown"` |
+| HTML-Beschreibung ohne Anführungszeichen | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Zeilenumbruch im Wert, keine Anführungszeichen | Zwei getrennte Zeilen | `"Line1\nLine2"` in einer Zelle |
+| Falsche Maskierung eines Anführungszeichens | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Zeilenenden
+
+Zeilenenden zeigen dem Parser, wo eine Zeile endet und die nächste beginnt. Es gibt zwei Formate:
+
+| Format | Bytes | Verwendet von |
+|---|---|---|
+| CRLF | Wagenrücklauf + Zeilenvorschub | Windows, Excel |
+| LF | nur Zeilenvorschub | macOS, Linux, die meisten Web-Tools |
+
+Die meisten Plattformen akzeptieren beide Formate. Probleme entstehen, wenn Zeilenenden gemischt sind, also manche Zeilen CRLF und andere LF verwenden. Gemischte Zeilenenden können dazu führen, dass Parser zusätzliche Leerzeilen sehen oder mehrzeilige Werte falsch lesen.
+
+### So prüfst und behebst du es
+
+Öffne die Datei in VS Code. Die Statusleiste zeigt „CRLF“ oder „LF“. Klicke darauf, um umzuschalten, und speichere.
+
+Mit Python:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Auf LF vereinheitlichen
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Die häufigsten Fehler, die Importe scheitern lassen
+
+**1. Zusätzliche Leerzeilen**
+
+Viele Tabellenprogramme hängen am Ende eine Leerzeile an. Plattformen überspringen Leerzeilen oder melden einen Fehler. Lösche sie vor dem Export. Drücke in Excel Strg+Ende, um zur letzten benutzten Zelle zu springen. Ist sie leer, lösche die leeren Zeilen unter deinen Daten.
+
+**2. Summen- oder Ergebniszeilen**
+
+SUMME()-Formeln am Ende eines Blatts landen in der CSV als Produktzeilen. Lösche Summenzeilen vor dem Export.
+
+**3. Verbundene Zellen**
+
+Verbundene Zellen werden als Wert in der ersten Zelle und Leerstellen in allen anderen exportiert. Der Importer sieht die leeren Zellen als leere Pflichtfelder. Hebe alle Zellverbünde vor dem Export auf.
+
+**4. Formelzellen**
+
+Wenn Excel eine CSV speichert, schreibt es, was jede Zelle anzeigt: das aktuelle Ergebnis der Formel mit ihrem Zahlenformat. Eine als Währung formatierte Preisformel wird als `$29.99` geschrieben, eine fehlerhafte als `#NV` oder `#BEZUG!`. Prüfe Formelspalten auf Fehler und wandle sie dann mit Inhalte einfügen > Werte in feste Werte um, bevor du als CSV speicherst.
+
+**5. Leerzeichen am Ende von Spaltennamen**
+
+`"Title "` (mit Leerzeichen am Ende) ist nicht dasselbe wie `"Title"`. Die Daten dieser Spalte werden beim Import stillschweigend ignoriert. Entferne Leerzeichen am Ende von Spaltenköpfen mit Suchen und Ersetzen (Strg+H).
+
+**6. Falsches Dateiformat mit der Endung .csv**
+
+Wer als `.xlsx` speichert, die Datei aber `.csv` nennt, erhält eine Datei, die gar keine CSV ist. Öffne sie in einem Texteditor. Siehst du Binärzeichen, ist es keine echte CSV. Exportiere sie mit dem richtigen Dateityp neu.
+
+**7. ANSI- oder Latin-1-Kodierung**
+
+Ältere Excel-Versionen speichern manchmal als ANSI (Windows-1252). Produktnamen mit Umlauten oder Akzenten werden beim Import zu Zeichensalat. Wähle beim Speichern immer ausdrücklich UTF-8.
+
+---
+
+## Trennzeichen: Kommas, Tabulatoren und Semikolons
+
+Der Name „CSV“ deutet auf Kommas hin, aber manche Dateien nutzen stattdessen Tabulatoren (TSV) oder Semikolons. Die meisten E-Commerce-Plattformen erwarten echte kommagetrennte Dateien. Lädst du eine semikolongetrennte Datei als CSV hoch, erscheint jede Zeile als eine einzige Spalte.
+
+### So erkennst du das Trennzeichen
+
+Öffne die Datei in einem reinen Texteditor. Sieh dir die erste Zeile an:
+
+- Sind die Spaltennamen durch `,` getrennt, ist die Datei kommagetrennt (Standard-CSV)
+- Sind sie durch `;` getrennt, ist sie semikolongetrennt (typisch für Excel mit europäischen Ländereinstellungen, auch deutschen)
+- Sind sie durch breite Lücken getrennt, ist sie tabulatorgetrennt (TSV)
+
+### Eine Semikolon-Datei in eine kommagetrennte umwandeln
+
+**In Excel:** Datei > Speichern unter > CSV UTF-8 (durch Trennzeichen getrennt). Speichert Excel trotzdem mit Semikolons (weil deine Ländereinstellung das Semikolon als Listentrennzeichen nutzt), ändere das Listentrennzeichen in den Windows-Regionseinstellungen oder nutze die Python-Methode unten.
+
+**In Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Gefahren durch automatische Formatierung
+
+Tabellenprogramme wie Excel und Google Tabellen verändern bestimmte Werte stillschweigend, wenn du eine CSV öffnest oder bearbeitest. Diese Änderungen können deine Daten beschädigen, bevor du überhaupt etwas bearbeitet hast.
+
+### Führende Nullen in SKUs und IDs verschwinden
+
+Excel entfernt führende Nullen aus Werten, die es für Zahlen hält. Eine SKU wie `00123` wird zu `123`. Eine Postleitzahl wie `02110` wird zu `2110`.
+
+**So verhinderst du es:**
+
+- In Excel: Importiere die CSV über den Textimport (Daten > Aus Text/CSV) und setze den Spaltentyp für jede Spalte, deren führende Nullen erhalten bleiben sollen, auf „Text“.
+- In Google Tabellen: Formatiere die betroffene Spalte nach dem Import als „Nur Text“ (Format > Zahl > Nur Text), bevor du bearbeitest.
+- Mit Python: Lies SKU- und ID-Spalten in pandas immer mit `dtype=str`, oder nutze das Standardmodul `csv`, das Typen nie umwandelt.
+
+### Zahlen werden zu wissenschaftlicher Notation
+
+Lange Ziffernfolgen (13-stellige Barcodes, EAN-Codes) können in Excel als `1,23457E+12` erscheinen. Beim Speichern als CSV wird diese Schreibweise wörtlich übernommen, und die Barcode-Prüfung beim Import schlägt fehl.
+
+**Lösung:** Markiere die betroffene Spalte in Excel, formatiere sie als „Zahl“ mit 0 Dezimalstellen (nicht „Wissenschaftlich“) und speichere dann. Alternativ stellst du dem Wert ein einfaches Hochkomma voran (erzwingt Text) oder formatierst die Spalte vor dem Einfügen der Werte als Text.
+
+### Datumswerte im regionalen Format
+
+Ein Feld mit `2024-01-15` kann je nach Ländereinstellung automatisch zu `15.01.2024` oder `15. Januar 2024` werden. Plattformen, die das ISO-Format (`YYYY-MM-DD`) erwarten, lehnen den umformatierten Wert ab.
+
+**Lösung:** Markiere nach dem Öffnen die Datumsspalten und formatiere sie als Text, oder nutze das Python-Modul `csv`, das ohne jede Typumwandlung liest und schreibt.
+
+### Preise mit Währungssymbol
+
+Excel speichert eine als Währung formatierte Zelle manchmal als `$19.99` statt `19.99`. Die meisten Plattformen erwarten einfache Dezimalwerte ohne Währungssymbol.
+
+**Lösung:** Formatiere Preisspalten in Excel vor dem Speichern als CSV als „Zahl“ (nicht „Währung“ oder „Buchhaltung“). Entferne `$`, `EUR` oder andere Symbole, die schon in den Daten stehen, mit Suchen und Ersetzen (Strg+H).
+
+---
+
+## Leerzeilen, Kommas am Zeilenende und unsichtbare Probleme
+
+### Zusätzliche Leerzeilen am Ende
+
+Viele Tools hängen nach der letzten Datenzeile eine Leerzeile an. Plattformen überspringen Leerzeilen meist, manche lehnen sie aber als ungültige Datensätze ab. Lösche Leerzeilen am Ende immer vor dem Export.
+
+In Excel: Drücke Strg+Ende, um zur letzten benutzten Zelle zu springen. Ist sie leer (eine leere Zeile unter deinen Daten), markiere diese Zeilen und lösche sie (Rechtsklick > Zellen löschen).
+
+### Kommas am Zeilenende
+
+Manche Export-Tools schreiben am Ende jeder Zeile ein Komma: `value1,value2,`. Das erzeugt eine zusätzliche leere Spalte. Die meisten Parser kommen damit zurecht, strenge Validatoren können es aber als Strukturproblem melden.
+
+**Lösung:** Endet jede Zeile, auch die Kopfzeile, mit einem zusätzlichen Komma, entferne genau ein Komma am Ende jeder Zeile. Würdest du alle entfernen, gingen auch echte leere Zellen am Zeilenende verloren:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Unsichtbare Zeichen
+
+Manche Tools fügen Leerzeichen ohne Breite (U+200B) oder geschützte Leerzeichen (U+00A0) in Zellwerte ein. In der Tabellenansicht sind sie unsichtbar, können aber beim Import zu nicht passenden Spaltenköpfen oder abgelehnten Werten führen.
+
+**Prüfen:** Öffne die Datei in VS Code und nutze die Suche (Strg+F) im Regex-Modus. Suche nach `​` oder ` `, um diese Zeichen zu finden.
+
+---
+
+## Regeln der einzelnen Plattformen
+
+Jede Plattform stellt über den CSV-Standard hinaus eigene Anforderungen:
+
+- **Shopify:** Die Spalte Handle gruppiert Variantenzeilen. Fehlende oder ungültige Handles zerstören die Produktgruppierung.
+- **WooCommerce:** Nutzt eine Spalte Type (`simple`, `variable`, `variation`), um den Produktaufbau festzulegen.
+- **Etsy:** Hat keinen CSV-Upload. Der Export der Angebote dient zum Bearbeiten, für Sicherungen und Umzüge, und Apps für Massen-Einstellungen legen ihre eigenen Spalten fest.
+- **eBay:** Verlangt in jeder Zeile die Spalte Action (etwa `Add`, `Revise`, `Relist` oder `End`).
+- **Amazon:** Die Spaltennamen hängen von der Kategorievorlage ab. Lade in Seller Central genau die Vorlage für deine Kategorie herunter.
+
+---
+
+## Kurze Checkliste vor dem Import
+
+- [ ] Zeile 1 enthält die Spaltenköpfe, ohne Leerzeile darüber
+- [ ] Die Spaltenköpfe entsprechen genau den Spaltennamen der Plattform (inklusive Groß- und Kleinschreibung)
+- [ ] Keine doppelten Spaltennamen
+- [ ] Keine Leerzeichen am Anfang oder Ende von Spaltennamen
+- [ ] Datei als UTF-8 gespeichert
+- [ ] Werte mit Kommas, Anführungszeichen oder Zeilenumbrüchen stehen in doppelten Anführungszeichen
+- [ ] Keine zusätzlichen Leerzeilen am Ende
+- [ ] Keine Summenzeilen oder Formelzellen
+- [ ] Einheitliche Zeilenenden (alle CRLF oder alle LF)
+- [ ] Die Dateiendung ist .csv und die Datei enthält reinen kommagetrennten Text
+
+---
+
+## Nächster Schritt: vor dem Import prüfen
+
+Wenn deine Datei vorbereitet ist, lade sie zur automatischen Prüfung in den CSV-Fixer hoch. Er prüft die Spaltenköpfe, meldet Kodierungsprobleme, findet plattformspezifische Fehler und behebt sichere Probleme mit einem Klick.

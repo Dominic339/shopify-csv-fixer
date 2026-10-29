@@ -1,0 +1,328 @@
+---
+title: "CSV-basiskennis voor e-commerce-imports"
+description: "Begrijp kolomkoppen, UTF-8-codering, aanhalingstekens, regeleinden en de meest voorkomende fouten die CSV-imports laten mislukken, nog vóór je eerste upload."
+keywords: ["csv basiskennis", "csv codering utf-8", "csv kolomkoppen", "csv aanhalingstekens komma's", "csv regeleinden", "csv importfouten", "csv bestand herstellen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Hoe een CSV is opgebouwd en waarom dat belangrijk is voor imports"
+  - "Valkuilen rond codering, BOM en regeleinden"
+  - "Scheidingstekens en hoe je ertussen omzet"
+  - "Gevaren van automatische opmaak in spreadsheets (voorloopnullen, wetenschappelijke notatie, datums)"
+  - "Lege rijen, komma's aan het eind en onzichtbare tekens"
+bestFor: "Nieuwe verkopers, catalogusbeheerders en ontwikkelaars die hun eerste importfouten oplossen"
+timeToComplete: "10 minuten"
+---
+
+## Wat is een CSV-bestand?
+
+Een CSV-bestand (Comma-Separated Values) is een tekstbestand zonder opmaak waarin elke rij een record is en de kolommen door komma's gescheiden zijn. De eerste rij bevat de kolomnamen (de koprij). Elke rij daarna bevat gegevens.
+
+Zo ziet een minimale Shopify-product-CSV eruit als platte tekst:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+CSV-bestanden lijken eenvoudig, maar platforms als Shopify, WooCommerce, Etsy, eBay en Amazon zijn streng op opmaakdetails die spreadsheetprogramma's ongemerkt kunnen beschadigen. Deze handleiding legt elke belangrijke regel uit, zodat je imports in één keer goed gaan.
+
+---
+
+## De koprij
+
+De eerste rij van elke CSV moet de kolomnamen (kolomkoppen) bevatten. Platforms gebruiken die namen om je gegevens tijdens de import aan de juiste velden te koppelen.
+
+### Regels
+
+- **Schrijf de namen precies, ook qua hoofdletters.** Sommige importprogramma's behandelen `Handle`, `handle` en `HANDLE` verschillend, dus kopieer de kolomkoppen uit het sjabloon van het platform.
+- **Geen spaties aan het begin of eind.** Een kolomkop `" Title"` (met een spatie vooraan) komt niet overeen met `"Title"`. De gegevens in die kolom worden zonder melding genegeerd.
+- **Geen dubbele kolomkoppen.** Hebben twee kolommen dezelfde naam, dan gebruiken de meeste parsers alleen de laatste.
+- **Bij sommige platforms telt de kolomvolgorde.** Sommige sjablonen van eBay en Amazon verwachten de kolommen in de volgorde van het sjabloon, dus houd de volgorde van het gedownloade sjabloon aan. Bij Shopify mag je kolommen overal toevoegen.
+
+### Zo controleer je het
+
+Open je CSV in een teksteditor zonder opmaak, zoals Kladblok (Windows), TextEdit (Mac) of VS Code. Kijk naar regel 1. Die moet bestaan uit namen gescheiden door komma's, zonder lege rij erboven:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Begint de eerste regel met drie vreemde tekens vóór de kolomnamen, dan heeft je bestand een BOM. Hoe je dat oplost, lees je hieronder bij codering.
+
+---
+
+## UTF-8-codering
+
+Codering bepaalt hoe teksttekens als bytes op schijf worden opgeslagen. Een verkeerde codering geeft onleesbare tekst. Een gekrulde apostrof die als UTF-8 is opgeslagen maar als Latin-1 wordt gelezen, wordt bijvoorbeeld een reeks van drie tekens die op rommel lijkt.
+
+### Waarom UTF-8
+
+UTF-8 is voor elk e-commerceplatform de veilige keuze. Shopify en WooCommerce verwachten het, en de huidige sjablonen van eBay vermelden het in de kolomkop Action (`CC=UTF-8`). Opslaan als UTF-8 zorgt ervoor dat:
+
+- Letters met accenten goed worden weergegeven.
+- Valutasymbolen en speciale leestekens niet stukgaan.
+- Het importprogramma van het platform het bestand kan lezen zonder het af te wijzen.
+
+### Met of zonder BOM
+
+UTF-8 met BOM zet een verborgen reeks van 3 bytes helemaal aan het begin van het bestand. Excel op Windows schrijft die als je "Opslaan als > CSV UTF-8 (door komma's gescheiden)" kiest. Shopify en WooCommerce lezen bestanden met een BOM goed, maar sommige tools en scripts lezen door de extra bytes de eerste kolomkop verkeerd.
+
+Zo zie je of je bestand een BOM heeft: open het in VS Code en kijk rechtsonder in de statusbalk. Staat daar "UTF-8 with BOM", dan heeft het er een.
+
+**Oplossing in VS Code:** klik in de statusbalk op de coderingsaanduiding, kies "Save with Encoding" en daarna "UTF-8" (zonder BOM).
+
+**Oplossing in Excel:** Excel kan UTF-8 niet zonder BOM opslaan. Stap niet over op gewoon "CSV (gescheiden door lijstscheidingsteken)" om de BOM te vermijden: die optie slaat op in de oude codering van je systeem (vaak Windows-1252) en maakt accenten kapot. Blijf bij "CSV UTF-8" en verwijder de BOM alleen in VS Code als een platform de eerste kolom verkeerd leest.
+
+**Oplossing met Python:**
+
+```python
+# utf-8-sig haalt de BOM weg bij het lezen; gewoon utf-8 schrijft zonder BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### Codering in andere programma's
+
+**Google Spreadsheets:** Bestand > Downloaden > Kommagescheiden waarden exporteert UTF-8 zonder BOM.
+
+**LibreOffice Calc:** kies bij het opslaan als CSV in het dialoogvenster "Unicode (UTF-8)".
+
+**Numbers (Mac):** Archief > Exporteer naar > CSV exporteert op recente macOS-versies UTF-8 zonder BOM.
+
+---
+
+## Aanhalingstekens en komma's in waarden
+
+Bevat een celwaarde een komma, zet dan de hele waarde tussen dubbele aanhalingstekens. Dat is de CSV-standaard (RFC 4180).
+
+### Eenvoudig voorbeeld
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Zonder de aanhalingstekens ziet de parser vijf kolommen in plaats van drie en zet hij gegevens in de verkeerde velden.
+
+### Aanhalingstekens in waarden tussen aanhalingstekens
+
+Bevat de waarde zelf een dubbel aanhalingsteken, escape het dan door het te verdubbelen:
+
+```
+"She said ""this is great"""
+```
+
+Dit staat voor de tekst: She said "this is great"
+
+### Wanneer heb je aanhalingstekens nodig?
+
+Je moet een waarde tussen dubbele aanhalingstekens zetten als die het volgende bevat:
+
+- Een komma
+- Een dubbel aanhalingsteken
+- Een regeleinde in de waarde
+- HTML-tags (sommige parsers lezen punthaken zonder aanhalingstekens verkeerd)
+
+Voor eenvoudige waarden als `29.99` of `Active` heb je geen aanhalingstekens nodig. Alles tussen aanhalingstekens zetten kan geen kwaad, en veel tools doen het automatisch.
+
+### Veelgemaakte fouten met aanhalingstekens
+
+| Fout | Fout voorbeeld | Goed |
+|---|---|---|
+| Komma in de waarde, geen aanhalingstekens | `Wallet, Brown` | `"Wallet, Brown"` |
+| HTML-beschrijving zonder aanhalingstekens | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Regeleinde in de waarde, geen aanhalingstekens | Twee aparte rijen | `"Line1\nLine2"` in één cel |
+| Verkeerde escape van een aanhalingsteken | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Regeleinden
+
+Regeleinden vertellen de parser waar een rij eindigt en de volgende begint. Er zijn twee formaten:
+
+| Formaat | Bytes | Gebruikt door |
+|---|---|---|
+| CRLF | wagenterugloop + regelopschuiving | Windows, Excel |
+| LF | alleen regelopschuiving | macOS, Linux, de meeste webtools |
+
+De meeste platforms accepteren beide. Problemen ontstaan als regeleinden gemengd zijn, met sommige rijen in CRLF en andere in LF. Gemengde regeleinden kunnen ervoor zorgen dat parsers extra lege rijen zien of waarden over meerdere regels verkeerd lezen.
+
+### Zo controleer en herstel je het
+
+Open het bestand in VS Code. De statusbalk toont "CRLF" of "LF". Klik erop om te wisselen en sla op.
+
+Met Python:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Gelijktrekken naar LF
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## De fouten die imports het vaakst laten mislukken
+
+**1. Extra lege rijen**
+
+Veel spreadsheetprogramma's zetten een lege rij aan het eind. Platforms slaan lege rijen over of geven een fout. Verwijder ze vóór het exporteren. Druk in Excel op Ctrl+End om naar de laatst gebruikte cel te springen. Is die leeg, verwijder dan de lege rijen onder je gegevens.
+
+**2. Samenvattings- of totaalrijen**
+
+SOM()-formules onder aan een blad komen in de CSV terecht als productrijen. Verwijder samenvattingsrijen vóór het exporteren.
+
+**3. Samengevoegde cellen**
+
+Samengevoegde cellen worden geëxporteerd met een waarde in de eerste cel en lege cellen in de rest. Het importprogramma ziet die lege cellen als lege verplichte velden. Hef alle samenvoegingen op vóór het exporteren.
+
+**4. Cellen met formules**
+
+Als Excel een CSV opslaat, schrijft het wat elke cel toont: het huidige resultaat van de formule, met de getalnotatie. Een prijsformule met valutanotatie wordt geschreven als `€ 29,99` of `$29.99`, en een kapotte als `#N/B` of `#VERW!`. Controleer formulekolommen op fouten en zet ze daarna met Plakken speciaal > Waarden om in vaste waarden voordat je als CSV opslaat.
+
+**5. Spaties aan het eind van kolomnamen**
+
+`"Title "` (met een spatie aan het eind) is niet hetzelfde als `"Title"`. De gegevens in die kolom worden bij de import zonder melding genegeerd. Haal spaties aan het eind van kolomkoppen weg met Zoeken en vervangen (Ctrl+H).
+
+**6. Verkeerd bestandsformaat met de extensie .csv**
+
+Sla je op als `.xlsx` maar noem je het bestand `.csv`, dan krijg je een bestand dat helemaal geen CSV is. Open het in een teksteditor. Zie je binaire tekens, dan is het geen echte CSV. Exporteer het opnieuw in het juiste formaat.
+
+**7. ANSI- of Latin-1-codering**
+
+Oudere Excel-versies slaan soms op als ANSI (Windows-1252). Productnamen met accenten worden bij de import onleesbaar. Kies bij het opslaan altijd uitdrukkelijk UTF-8.
+
+---
+
+## Scheidingstekens: komma's, tabs en puntkomma's
+
+De naam "CSV" wijst op komma's, maar sommige bestanden gebruiken tabs (TSV) of puntkomma's. De meeste e-commerceplatforms verwachten echte kommagescheiden bestanden. Upload je een bestand met puntkomma's alsof het een CSV is, dan staat elke rij in één kolom.
+
+### Zo herken je het scheidingsteken
+
+Open het bestand in een teksteditor zonder opmaak. Kijk naar de eerste rij:
+
+- Staan er `,` tussen de kolomnamen, dan is het bestand kommagescheiden (standaard-CSV)
+- Staan er `;` tussen, dan is het puntkommagescheiden (gebruikelijk bij Excel met Europese landinstellingen, ook de Nederlandse)
+- Staan er brede tussenruimtes tussen, dan is het tabgescheiden (TSV)
+
+### Een bestand met puntkomma's omzetten naar komma's
+
+**In Excel:** Bestand > Opslaan als > CSV UTF-8 (door komma's gescheiden). Slaat Excel toch op met puntkomma's (omdat je landinstelling de puntkomma als lijstscheidingsteken gebruikt), wijzig dan het lijstscheidingsteken in de landinstellingen van Windows of gebruik de Python-methode hieronder.
+
+**In Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Gevaren van automatische opmaak
+
+Spreadsheetprogramma's als Excel en Google Spreadsheets veranderen bepaalde waarden zonder melding wanneer je een CSV opent of bewerkt. Die wijzigingen kunnen je gegevens beschadigen voordat je ook maar iets hebt bewerkt.
+
+### Voorloopnullen verdwijnen uit SKU's en ID's
+
+Excel haalt voorloopnullen weg uit waarden die het als getal ziet. Een SKU als `00123` wordt `123`. Een postcode als `02110` wordt `2110`.
+
+**Zo voorkom je het:**
+
+- In Excel: importeer de CSV via de tekstimport (Gegevens > Van tekst/CSV) en zet het kolomtype op "Tekst" voor elke kolom waarvan de voorloopnullen moeten blijven.
+- In Google Spreadsheets: geef de betreffende kolom na de import de opmaak "Tekst zonder opmaak" (Opmaak > Getal > Tekst zonder opmaak) voordat je bewerkt.
+- Met Python: lees SKU- en ID-kolommen in pandas altijd met `dtype=str`, of gebruik de standaardmodule `csv`, die nooit typen omzet.
+
+### Getallen omgezet naar wetenschappelijke notatie
+
+Lange cijferreeksen (barcodes van 13 cijfers, EAN-codes) kunnen in Excel verschijnen als `1,23457E+12`. Bij opslaan als CSV wordt die notatie letterlijk weggeschreven, en dan mislukt de barcodecontrole bij de import.
+
+**Oplossing:** selecteer de betreffende kolom in Excel, geef die de notatie "Getal" met 0 decimalen (niet "Wetenschappelijk") en sla op. Je kunt ook een enkel aanhalingsteken voor de waarde zetten (dat dwingt tekst af) of de kolom als tekst opmaken voordat je de waarden plakt.
+
+### Datums omgezet naar de regionale notatie
+
+Een veld met `2024-01-15` kan, afhankelijk van je landinstelling, automatisch `15-1-2024` of `15 januari 2024` worden. Platforms die de ISO-notatie (`YYYY-MM-DD`) verwachten, wijzen de omgezette waarde af.
+
+**Oplossing:** selecteer na het openen de datumkolommen en maak ze op als tekst, of gebruik de Python-module `csv` om te lezen en te schrijven zonder typeomzetting.
+
+### Prijzen met valutasymbool
+
+Excel slaat een cel met valutanotatie soms op als `$19.99` in plaats van `19.99`. De meeste platforms verwachten eenvoudige decimale waarden zonder valutasymbool.
+
+**Oplossing:** geef prijskolommen in Excel de notatie "Getal" (niet "Valuta" of "Financieel") voordat je als CSV opslaat. Haal `$`, `EUR` of andere symbolen die al in de gegevens staan weg met Zoeken en vervangen (Ctrl+H).
+
+---
+
+## Lege rijen, komma's aan het eind en onzichtbare problemen
+
+### Extra lege rijen aan het eind
+
+Veel tools zetten een lege rij na de laatste rij met gegevens. Platforms slaan lege rijen meestal over, maar sommige wijzen ze af als ongeldige records. Verwijder lege rijen onderaan altijd vóór het exporteren.
+
+In Excel: druk op Ctrl+End om naar de laatst gebruikte cel te springen. Is die leeg (een lege rij onder je gegevens), selecteer die rijen dan en verwijder ze (rechtermuisknop > Verwijderen).
+
+### Komma's aan het eind
+
+Sommige exporttools schrijven aan het eind van elke rij een komma: `value1,value2,`. Dat levert een extra lege kolom op. De meeste parsers kunnen ermee overweg, maar strenge validators kunnen het als structuurprobleem melden.
+
+**Oplossing:** eindigt elke rij, ook de koprij, op een extra komma, haal dan precies één komma aan het eind van elke regel weg. Als je ze allemaal weghaalt, verdwijnen ook echte lege cellen aan het eind van een rij:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Onzichtbare tekens
+
+Sommige tools zetten spaties zonder breedte (U+200B) of vaste spaties (U+00A0) in celwaarden. In de spreadsheet zijn ze onzichtbaar, maar bij de import kunnen ze ervoor zorgen dat kolomkoppen niet overeenkomen of waarden worden afgewezen.
+
+**Controleren:** open het bestand in VS Code en gebruik Zoeken (Ctrl+F) in regex-modus. Zoek naar `​` of ` ` om deze tekens te vinden.
+
+---
+
+## Regels per platform
+
+Elk platform stelt bovenop de CSV-standaard eigen eisen:
+
+- **Shopify:** de kolom Handle groepeert variantrijen. Ontbrekende of ongeldige handles breken de groepering van producten.
+- **WooCommerce:** gebruikt een kolom Type (`simple`, `variable`, `variation`) om de opbouw van het product vast te leggen.
+- **Etsy:** heeft geen CSV-upload. De export van aanbiedingen is bedoeld voor bewerken, back-ups en verhuizingen, en apps voor bulkplaatsing bepalen hun eigen kolommen.
+- **eBay:** vereist op elke rij de kolom Action (bijvoorbeeld `Add`, `Revise`, `Relist` of `End`).
+- **Amazon:** de kolomnamen hangen af van het categoriesjabloon; download in Seller Central precies het sjabloon voor jouw categorie.
+
+---
+
+## Korte checklist vóór de import
+
+- [ ] Rij 1 bevat de kolomkoppen, zonder lege rij erboven
+- [ ] De kolomkoppen komen precies overeen met de namen die het platform verwacht, ook qua hoofdletters
+- [ ] Geen dubbele kolomnamen
+- [ ] Geen spaties aan het begin of eind van kolomnamen
+- [ ] Bestand opgeslagen als UTF-8
+- [ ] Waarden met komma's, aanhalingstekens of regeleinden staan tussen dubbele aanhalingstekens
+- [ ] Geen extra lege rijen onderaan
+- [ ] Geen samenvattingsrijen of cellen met formules
+- [ ] Regeleinden zijn overal gelijk (allemaal CRLF of allemaal LF)
+- [ ] De extensie is .csv en het bestand bevat platte, kommagescheiden tekst
+
+---
+
+## Volgende stap: controleer vóór de import
+
+Is je bestand klaar, upload het dan naar de CSV-fixer voor een automatische controle. Die controleert de kolomkoppen, meldt coderingsproblemen, vindt problemen die per platform verschillen en herstelt veilige problemen met één klik.

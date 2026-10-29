@@ -1,0 +1,328 @@
+---
+title: "Nozioni di base sul CSV per le importazioni e-commerce"
+description: "Comprendi intestazioni, codifica UTF-8, virgolette, fine riga e gli errori più comuni che fanno fallire le importazioni CSV, prima del tuo primo caricamento."
+keywords: ["nozioni base csv", "codifica csv utf-8", "intestazioni csv", "virgolette e virgole csv", "fine riga csv", "errori importazione csv", "correggere file csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Com'è strutturato un CSV e perché conta per le importazioni"
+  - "Le insidie di codifica, BOM e fine riga"
+  - "I formati di delimitatore e come passare dall'uno all'altro"
+  - "I rischi della formattazione automatica dei fogli di calcolo (zeri iniziali, notazione scientifica, date)"
+  - "Righe vuote, virgole finali e caratteri invisibili"
+bestFor: "Nuovi venditori, responsabili di catalogo e sviluppatori alle prese con i primi errori di importazione"
+timeToComplete: "10 minuti"
+---
+
+## Che cos'è un file CSV?
+
+Un file CSV (Comma-Separated Values, valori separati da virgole) è un file di testo semplice in cui ogni riga è un record e le colonne sono separate da virgole. La prima riga contiene i nomi delle colonne (la riga di intestazione). Ogni riga successiva contiene dati.
+
+Ecco come appare, come testo semplice, un CSV minimo di prodotti Shopify:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+I CSV sembrano semplici, ma piattaforme come Shopify, WooCommerce, Etsy, eBay e Amazon sono rigide su dettagli di formato che i fogli di calcolo possono rovinare senza avvisare. Questa guida spiega ogni regola importante, così le tue importazioni vanno a buon fine al primo tentativo.
+
+---
+
+## La riga di intestazione
+
+La prima riga di ogni CSV deve contenere i nomi delle colonne (le intestazioni). Le piattaforme usano questi nomi per associare i tuoi dati ai campi giusti durante l'importazione.
+
+### Regole
+
+- **Scrivi i nomi esattamente, maiuscole e minuscole comprese.** Alcuni importatori trattano `Handle`, `handle` e `HANDLE` in modo diverso, quindi copia le intestazioni dal modello della piattaforma.
+- **Niente spazi all'inizio o alla fine.** Un'intestazione `" Title"` (con uno spazio iniziale) non corrisponde a `"Title"`. I dati di quella colonna vengono ignorati senza avvisi.
+- **Niente intestazioni duplicate.** Se due colonne hanno lo stesso nome, la maggior parte dei parser usa solo l'ultima.
+- **Per alcune piattaforme conta l'ordine delle colonne.** Alcuni modelli di eBay e Amazon si aspettano le colonne nell'ordine del modello, quindi mantieni l'ordine del modello scaricato. Shopify permette di aggiungere colonne in qualsiasi punto.
+
+### Come controllare
+
+Apri il CSV in un editor di testo semplice come Blocco note (Windows), TextEdit (Mac) o VS Code. Guarda la riga 1. Deve contenere nomi separati da virgole, senza righe vuote sopra:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Se la prima riga inizia con tre caratteri strani prima dei nomi delle intestazioni, il file ha un BOM. Più sotto, nella sezione sulla codifica, trovi come correggerlo.
+
+---
+
+## Codifica UTF-8
+
+La codifica è il modo in cui i caratteri di testo vengono salvati come byte sul disco. Una codifica sbagliata produce testo illeggibile. Per esempio, un apostrofo tipografico salvato in UTF-8 ma letto come Latin-1 diventa una sequenza di tre caratteri che sembra spazzatura.
+
+### Perché UTF-8
+
+UTF-8 è la scelta sicura per tutte le piattaforme e-commerce. Shopify e WooCommerce se lo aspettano, e gli attuali modelli di eBay lo dichiarano nell'intestazione Action (`CC=UTF-8`). Salvare in UTF-8 garantisce che:
+
+- I caratteri accentati vengano mostrati correttamente.
+- I simboli di valuta e la punteggiatura speciale non si rovinino.
+- L'importatore della piattaforma possa leggere il file senza rifiutarlo.
+
+### Con o senza BOM
+
+UTF-8 con BOM aggiunge una sequenza nascosta di 3 byte all'inizio del file. Excel su Windows la scrive quando usi «Salva con nome > CSV UTF-8 (delimitato da virgole)». Shopify e WooCommerce leggono correttamente i file con BOM, ma alcuni strumenti e script leggono male la prima intestazione a causa dei byte in più.
+
+Come capire se il file ha un BOM: aprilo in VS Code e guarda la barra di stato in basso a destra. Se dice «UTF-8 with BOM», ce l'ha.
+
+**Correzione in VS Code:** fai clic sull'indicatore di codifica nella barra di stato, scegli «Save with Encoding» e poi «UTF-8» (senza BOM).
+
+**Correzione in Excel:** Excel non può salvare UTF-8 senza BOM. Non passare al semplice «CSV (delimitato dal separatore di elenco)» per evitarlo: quell'opzione salva nella vecchia codifica del sistema (spesso Windows-1252) e rovina gli accenti. Resta su «CSV UTF-8» e rimuovi il BOM in VS Code solo se una piattaforma legge male la prima colonna.
+
+**Correzione con Python:**
+
+```python
+# utf-8-sig rimuove il BOM in lettura; utf-8 semplice scrive senza BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### La codifica in altri strumenti
+
+**Google Sheets:** File > Scarica > Valori separati da virgole esporta in UTF-8 senza BOM.
+
+**LibreOffice Calc:** quando salvi come CSV, scegli «Unicode (UTF-8)» nella finestra di dialogo.
+
+**Numbers (Mac):** File > Esporta come > CSV esporta in UTF-8 senza BOM sulle versioni recenti di macOS.
+
+---
+
+## Regole delle virgolette e virgole nei valori
+
+Quando il valore di una cella contiene una virgola, racchiudi l'intero valore tra virgolette doppie. È lo standard CSV (RFC 4180).
+
+### Esempio di base
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Senza virgolette, il parser vede cinque colonne invece di tre e mette i dati nei campi sbagliati.
+
+### Virgolette dentro valori tra virgolette
+
+Se il valore contiene a sua volta una virgoletta doppia, raddoppiala per farne l'escape:
+
+```
+"She said ""this is great"""
+```
+
+Rappresenta il testo: She said "this is great"
+
+### Quando servono le virgolette?
+
+Devi racchiudere il valore tra virgolette doppie quando contiene:
+
+- Una virgola
+- Una virgoletta doppia
+- Un a capo all'interno del valore
+- Tag HTML (alcuni parser leggono male le parentesi angolari senza virgolette)
+
+Non servono virgolette per valori semplici come `29.99` o `Active`. Mettere virgolette ovunque non fa danni, e molti strumenti lo fanno in automatico.
+
+### Errori comuni con le virgolette
+
+| Errore | Esempio sbagliato | Corretto |
+|---|---|---|
+| Virgola nel valore, senza virgolette | `Wallet, Brown` | `"Wallet, Brown"` |
+| Descrizione HTML senza virgolette | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| A capo nel valore, senza virgolette | Due righe separate | `"Line1\nLine2"` in una cella |
+| Escape sbagliato di una virgoletta interna | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Fine riga
+
+I caratteri di fine riga indicano al parser dove finisce una riga e inizia la successiva. Esistono due formati:
+
+| Formato | Byte | Usato da |
+|---|---|---|
+| CRLF | ritorno a capo + avanzamento riga | Windows, Excel |
+| LF | solo avanzamento riga | macOS, Linux, la maggior parte degli strumenti web |
+
+La maggior parte delle piattaforme accetta entrambi. I problemi nascono quando sono mescolati, con alcune righe in CRLF e altre in LF. Fine riga misti possono far vedere al parser righe vuote in più o fargli leggere male i valori su più righe.
+
+### Come controllare e correggere
+
+Apri il file in VS Code. La barra di stato mostra «CRLF» o «LF». Fai clic per cambiarlo, poi salva.
+
+Con Python:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Uniformare a LF
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Gli errori che più spesso fanno fallire le importazioni
+
+**1. Righe vuote in più**
+
+Molti fogli di calcolo aggiungono una riga vuota alla fine. Le piattaforme saltano le righe vuote o danno errore. Eliminale prima di esportare. In Excel, premi Ctrl+Fine per andare all'ultima cella usata. Se è vuota, elimina le righe vuote sotto i dati.
+
+**2. Righe di riepilogo o di totale**
+
+Le formule SOMMA() in fondo a un foglio finiscono nel CSV come righe di prodotto. Elimina le righe di riepilogo prima di esportare.
+
+**3. Celle unite**
+
+Le celle unite vengono esportate con un valore nella prima cella e celle vuote nelle altre. L'importatore vede quelle celle vuote come campi obbligatori non compilati. Separa tutte le celle unite prima di esportare.
+
+**4. Celle con formule**
+
+Quando Excel salva un CSV, scrive ciò che ogni cella mostra: il risultato attuale della formula, con il suo formato numerico. Una formula di prezzo formattata come valuta viene scritta come `$29.99`, e una rotta come `#N/D` o `#RIF!`. Controlla le colonne con formule in cerca di errori, poi usa Incolla speciale > Valori per trasformarle in valori fissi prima di salvare come CSV.
+
+**5. Spazi alla fine delle intestazioni**
+
+`"Title "` (con uno spazio finale) non è la stessa cosa di `"Title"`. I dati di quella colonna vengono ignorati senza avvisi durante l'importazione. Usa Trova e sostituisci (Ctrl+H) per togliere gli spazi finali dalle intestazioni.
+
+**6. Formato sbagliato con estensione .csv**
+
+Salvare in `.xlsx` ma chiamare il file `.csv` produce un file che in realtà non è un CSV. Aprilo in un editor di testo. Se vedi caratteri binari, non è un vero CSV. Esportalo di nuovo nel formato corretto.
+
+**7. Codifica ANSI o Latin-1**
+
+Le vecchie versioni di Excel a volte salvano in ANSI (Windows-1252). I nomi di prodotto con accenti diventano illeggibili all'importazione. Scegli sempre esplicitamente UTF-8 quando salvi.
+
+---
+
+## Delimitatori: virgole, tabulazioni e punti e virgola
+
+Il nome «CSV» parla di virgole, ma alcuni file usano tabulazioni (TSV) o punti e virgola. La maggior parte delle piattaforme e-commerce si aspetta file davvero separati da virgole. Se carichi un file separato da punti e virgola come se fosse un CSV, ogni riga appare come un'unica colonna.
+
+### Come riconoscere il delimitatore
+
+Apri il file in un editor di testo semplice. Guarda la prima riga:
+
+- Se i nomi delle colonne sono separati da `,`, il file è delimitato da virgole (CSV standard)
+- Se sono separati da `;`, è delimitato da punti e virgola (frequente con Excel in impostazioni regionali europee, compresa quella italiana)
+- Se sono separati da ampi spazi, è delimitato da tabulazioni (TSV)
+
+### Convertire un file con punti e virgola in uno con virgole
+
+**In Excel:** File > Salva con nome > CSV UTF-8 (delimitato da virgole). Se Excel salva comunque con i punti e virgola (perché le tue impostazioni regionali usano il punto e virgola come separatore di elenco), cambia il separatore di elenco nelle impostazioni internazionali di Windows oppure usa il metodo Python qui sotto.
+
+**In Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## I rischi della formattazione automatica
+
+I fogli di calcolo come Excel e Google Sheets modificano alcuni valori senza avvisare quando apri o modifichi un CSV. Queste modifiche possono rovinare i dati prima ancora che tu faccia qualsiasi intervento.
+
+### Zeri iniziali eliminati da SKU e ID
+
+Excel elimina gli zeri iniziali dai valori che interpreta come numeri. Uno SKU come `00123` diventa `123`. Un codice postale come `02110` diventa `2110`.
+
+**Come evitarlo:**
+
+- In Excel: prima di importare il CSV, usa l'importazione guidata del testo (Dati > Da testo/CSV) e imposta il tipo «Testo» per ogni colonna che deve mantenere gli zeri iniziali.
+- In Google Sheets: dopo l'importazione, applica alla colonna interessata il formato «Testo normale» (Formato > Numero > Testo normale) prima di modificarla.
+- Con Python: leggi sempre le colonne di SKU e ID con `dtype=str` se usi pandas, oppure usa il modulo standard `csv`, che non converte mai i tipi.
+
+### Numeri convertiti in notazione scientifica
+
+Le lunghe sequenze di cifre (codici a barre a 13 cifre, codici EAN) possono comparire in Excel come `1,23457E+12`. Quando salvi come CSV, questa notazione viene scritta così com'è, e la convalida dei codici a barre fallisce all'importazione.
+
+**Correzione:** seleziona la colonna interessata in Excel, applica il formato «Numero» con 0 decimali (non «Scientifico») e poi salva. In alternativa, metti un apostrofo davanti al valore (lo forza a testo) o formatta la colonna come testo prima di incollare i valori.
+
+### Date convertite nel formato regionale
+
+Un campo con `2024-01-15` può essere convertito automaticamente in `15/01/2024` o `15 gennaio 2024` a seconda delle impostazioni regionali. Le piattaforme che si aspettano il formato ISO (`YYYY-MM-DD`) rifiuteranno il valore riformattato.
+
+**Correzione:** dopo aver aperto il file, seleziona le colonne di data e formattale come testo, oppure usa il modulo `csv` di Python per leggere e scrivere senza conversioni di tipo.
+
+### Prezzi con simbolo di valuta
+
+Excel a volte salva una cella formattata come valuta come `$19.99` invece di `19.99`. La maggior parte delle piattaforme si aspetta valori decimali semplici senza simbolo di valuta.
+
+**Correzione:** in Excel, formatta le colonne dei prezzi come «Numero» (non «Valuta» o «Contabilità») prima di salvare come CSV. Usa Trova e sostituisci (Ctrl+H) per togliere `$`, `EUR` o altri simboli già presenti nei dati.
+
+---
+
+## Righe vuote, virgole finali e problemi invisibili
+
+### Righe vuote in più alla fine
+
+Molti strumenti aggiungono una riga vuota dopo l'ultima riga di dati. Le piattaforme di solito saltano le righe vuote, ma alcune le rifiutano come record non validi. Elimina sempre le righe vuote in fondo prima di esportare.
+
+In Excel: premi Ctrl+Fine per andare all'ultima cella usata. Se è vuota (una riga vuota sotto i dati), seleziona quelle righe ed eliminale (clic destro > Elimina righe).
+
+### Virgole finali
+
+Alcuni strumenti di esportazione scrivono una virgola alla fine di ogni riga: `value1,value2,`. Questo crea una colonna vuota in più. La maggior parte dei parser la gestisce senza problemi, ma i validatori più rigidi possono segnalarla come problema di struttura.
+
+**Correzione:** se ogni riga, intestazione compresa, termina con una virgola in più, togli esattamente una virgola dalla fine di ogni riga. Toglierle tutte cancellerebbe anche celle vuote reali alla fine di una riga:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Caratteri invisibili
+
+Alcuni strumenti inseriscono spazi a larghezza zero (U+200B) o spazi unificatori (U+00A0) nei valori. Sono invisibili nel foglio di calcolo, ma possono far sì che le intestazioni non corrispondano o che i valori vengano rifiutati all'importazione.
+
+**Controllo:** apri il file in VS Code e usa Trova (Ctrl+F) in modalità espressione regolare. Cerca `​` o ` ` per trovare questi caratteri.
+
+---
+
+## Le regole di ogni piattaforma
+
+Ogni piattaforma aggiunge requisiti propri oltre allo standard CSV di base:
+
+- **Shopify:** la colonna Handle raggruppa le righe delle varianti. Handle mancanti o non validi rompono il raggruppamento dei prodotti.
+- **WooCommerce:** usa una colonna Type (`simple`, `variable`, `variation`) per definire la struttura del prodotto.
+- **Etsy:** non ha un caricamento CSV. La sua esportazione delle inserzioni serve per modificare, fare backup e migrare, e le app di pubblicazione in blocco definiscono le proprie colonne.
+- **eBay:** richiede la colonna Action (per esempio `Add`, `Revise`, `Relist` o `End`) in ogni riga.
+- **Amazon:** i nomi delle colonne dipendono dal modello di categoria; scarica da Seller Central il modello esatto della tua categoria.
+
+---
+
+## Checklist rapida prima dell'importazione
+
+- [ ] La riga 1 contiene le intestazioni, senza righe vuote sopra
+- [ ] Le intestazioni corrispondono esattamente ai nomi che la piattaforma si aspetta, maiuscole e minuscole comprese
+- [ ] Nessun nome di colonna duplicato
+- [ ] Nessuno spazio all'inizio o alla fine delle intestazioni
+- [ ] File salvato in UTF-8
+- [ ] I valori con virgole, virgolette o a capo sono racchiusi tra virgolette doppie
+- [ ] Nessuna riga vuota in più in fondo
+- [ ] Nessuna riga di riepilogo né cella con formule
+- [ ] Fine riga uniformi (tutti CRLF o tutti LF)
+- [ ] L'estensione è .csv e il file contiene testo semplice separato da virgole
+
+---
+
+## Prossimo passo: convalida prima di importare
+
+Dopo aver preparato il file, caricalo nel correttore CSV per una convalida automatica. Controlla le intestazioni, segnala i problemi di codifica, individua i problemi specifici di ogni piattaforma e corregge con un clic quelli risolvibili senza rischi.
