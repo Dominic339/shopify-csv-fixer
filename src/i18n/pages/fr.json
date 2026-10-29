@@ -75,13 +75,17 @@
       },
       {
         "title": "Paiements",
-        "paras": ["Les paiements sont gérés par Stripe. Nous ne voyons ni n'enregistrons jamais les données de votre carte ; nous recevons seulement de Stripe l'état de votre abonnement."]
+        "paras": ["Les paiements sont gérés par Stripe. Nous ne voyons ni n'enregistrons jamais les données de votre carte ; nous recevons seulement de Stripe l'état de votre abonnement ou de votre pass."]
       },
       {
         "title": "Vos choix",
         "paras": [
-          "Vous pouvez effacer à tout moment les données enregistrées dans votre navigateur via ses paramètres. Pour faire supprimer votre compte ou votre adresse e-mail, contactez le responsable du site."
+          "Vous pouvez effacer à tout moment les données enregistrées dans votre navigateur via ses paramètres. Pour faire supprimer votre compte ou votre adresse e-mail, écrivez à {email}."
         ]
+      },
+      {
+        "title": "Contact",
+        "paras": ["Une question sur cette politique ou sur vos données ? Écrivez à {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Abonnements",
-        "paras": ["La facturation des abonnements est gérée par Stripe. Vous pouvez résilier ou gérer votre abonnement depuis le portail de facturation."]
+        "paras": ["La facturation des abonnements est gérée par Stripe. Vous pouvez résilier ou gérer votre abonnement depuis le portail de facturation.", "Le pass 24 heures est un paiement unique. Il ne se renouvelle pas et n'est pas un abonnement."]
       },
       {
         "title": "Limitation de responsabilité",
         "paras": ["StriveFormats n'est pas responsable des pertes liées aux imports de données, aux opérations commerciales ou aux problèmes de plateformes tierces."]
+      },
+      {
+        "title": "Contact",
+        "paras": ["Une question sur ces conditions, la facturation ou un pass ? Écrivez à {email}."]
       }
     ]
   },

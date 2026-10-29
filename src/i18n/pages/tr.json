@@ -75,13 +75,17 @@
       },
       {
         "title": "Ödemeler",
-        "paras": ["Ödemeler Stripe tarafından yürütülür. Kart bilgilerinizi asla görmez veya saklamayız; Stripe'tan yalnızca abonelik durumunuzu alırız."]
+        "paras": ["Ödemeler Stripe tarafından yürütülür. Kart bilgilerinizi asla görmez veya saklamayız; Stripe'tan yalnızca abonelik veya geçiş durumunuzu alırız."]
       },
       {
         "title": "Seçenekleriniz",
         "paras": [
-          "Tarayıcınızda kayıtlı verileri tarayıcı ayarlarından istediğiniz zaman silebilirsiniz. Hesabınızın veya e-posta adresinizin silinmesi için site sahibiyle iletişime geçin."
+          "Tarayıcınızda kayıtlı verileri tarayıcı ayarlarından istediğiniz zaman silebilirsiniz. Hesabınızın veya e-posta adresinizin silinmesi için {email} adresine yazın."
         ]
+      },
+      {
+        "title": "İletişim",
+        "paras": ["Bu politika veya verileriniz hakkında sorularınız mı var? {email} adresine yazın."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Abonelikler",
-        "paras": ["Abonelik faturalandırması Stripe üzerinden yürütülür. Aboneliğinizi faturalandırma portalından iptal edebilir veya yönetebilirsiniz."]
+        "paras": ["Abonelik faturalandırması Stripe üzerinden yürütülür. Aboneliğinizi faturalandırma portalından iptal edebilir veya yönetebilirsiniz.", "24 saatlik geçiş tek seferlik bir ödemedir. Yenilenmez ve abonelik değildir."]
       },
       {
         "title": "Sorumluluğun sınırlandırılması",
         "paras": ["StriveFormats; veri içe aktarmaları, iş operasyonları veya üçüncü taraf platform sorunlarıyla ilgili kayıplardan sorumlu değildir."]
+      },
+      {
+        "title": "İletişim",
+        "paras": ["Bu koşullar, faturalandırma veya geçiş hakkında sorularınız mı var? {email} adresine yazın."]
       }
     ]
   },

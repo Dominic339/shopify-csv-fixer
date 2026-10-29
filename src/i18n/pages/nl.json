@@ -75,13 +75,17 @@
       },
       {
         "title": "Betalingen",
-        "paras": ["Betalingen worden afgehandeld door Stripe. We zien of bewaren je kaartgegevens nooit; we ontvangen van Stripe alleen de status van je abonnement."]
+        "paras": ["Betalingen worden afgehandeld door Stripe. We zien of bewaren je kaartgegevens nooit; we ontvangen van Stripe alleen de status van je abonnement of pas."]
       },
       {
         "title": "Je keuzes",
         "paras": [
-          "Je kunt de gegevens in je browser op elk moment wissen via de browserinstellingen. Wil je dat je account of e-mailadres wordt verwijderd, neem dan contact op met de beheerder van de site."
+          "Je kunt de gegevens in je browser op elk moment wissen via de browserinstellingen. Wil je dat je account of e-mailadres wordt verwijderd, mail dan naar {email}."
         ]
+      },
+      {
+        "title": "Contact",
+        "paras": ["Vragen over dit beleid of je gegevens? Mail naar {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Abonnementen",
-        "paras": ["De facturering van abonnementen loopt via Stripe. Je kunt je abonnement opzeggen of beheren via het factureringsportaal."]
+        "paras": ["De facturering van abonnementen loopt via Stripe. Je kunt je abonnement opzeggen of beheren via het factureringsportaal.", "De 24-uurspas is een eenmalige betaling. Hij wordt niet verlengd en is geen abonnement."]
       },
       {
         "title": "Beperking van aansprakelijkheid",
         "paras": ["StriveFormats is niet aansprakelijk voor verliezen in verband met gegevensimports, bedrijfsvoering of problemen bij platforms van derden."]
+      },
+      {
+        "title": "Contact",
+        "paras": ["Vragen over deze voorwaarden, facturering of een pas? Mail naar {email}."]
       }
     ]
   },

@@ -75,13 +75,17 @@
       },
       {
         "title": "Payments",
-        "paras": ["Payments are handled by Stripe. We never see or store your card details; we only receive your subscription status from Stripe."]
+        "paras": ["Payments are handled by Stripe. We never see or store your card details; we only receive your subscription or pass status from Stripe."]
       },
       {
         "title": "Your choices",
         "paras": [
-          "You can clear the data saved in your browser at any time through your browser settings. To have your account or email address removed, contact the site owner."
+          "You can clear the data saved in your browser at any time through your browser settings. To have your account or email address removed, email {email}."
         ]
+      },
+      {
+        "title": "Contact",
+        "paras": ["Questions about this policy or your data? Email {email}."]
       }
     ]
   },
@@ -97,11 +101,15 @@
       },
       {
         "title": "Subscriptions",
-        "paras": ["Subscription billing is managed through Stripe. You can cancel or manage your subscription through the billing portal."]
+        "paras": ["Subscription billing is managed through Stripe. You can cancel or manage your subscription through the billing portal.", "The 24-hour pass is a one-time payment. It does not renew and is not a subscription."]
       },
       {
         "title": "Limitation of liability",
         "paras": ["StriveFormats is not liable for losses related to data imports, business operations, or third-party platform issues."]
+      },
+      {
+        "title": "Contact",
+        "paras": ["Questions about these terms, billing or a pass? Email {email}."]
       }
     ]
   },
