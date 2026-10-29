@@ -65,10 +65,10 @@ Eine kommagetrennte Liste von Tags. Enthält ein Tag ein Komma, muss der ganze I
 
 ### Published (Wahrheitswert)
 
-Ob das Produkt für Kunden sichtbar ist. Akzeptiert `TRUE` oder `FALSE` (großgeschrieben).
+Ob das Produkt in deinem Onlineshop veröffentlicht wird. Akzeptiert `true` oder `false`, eine leere Zelle zählt als `true`.
 
-- `TRUE`: das Produkt ist aktiv und sichtbar
-- `FALSE`: das Produkt ist ein Entwurf (im Shop ausgeblendet)
+- `true`: das Produkt wird in deinem Onlineshop veröffentlicht
+- `false`: das Produkt erscheint nicht in deinem Onlineshop (es bleibt in deiner Verwaltung; den Entwurfsstatus legt die Spalte Status fest)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Wie die Variante ausgeliefert wird. `manual` für die normale Abwicklung oder de
 
 ### Variant Requires Shipping (Wahrheitswert)
 
-`TRUE` für physische Produkte, die versendet werden; `FALSE` für digitale Produkte.
+`true` für physische Produkte, die versendet werden; `false` für digitale Produkte.
 
 ### Variant Taxable (Wahrheitswert)
 
-`TRUE`, wenn diese Variante steuerpflichtig ist; `FALSE`, wenn sie steuerfrei ist.
+`true`, wenn diese Variante steuerpflichtig ist; `false`, wenn sie steuerfrei ist.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ Die Meta-Beschreibung der Produktseite. Empfohlen: unter 160 Zeichen.
 
 ### Gift Card (Wahrheitswert)
 
-Nur `TRUE`, wenn dieses Produkt ein Geschenkgutschein ist. Bei den meisten Produkten sollte hier `FALSE` stehen oder das Feld leer sein.
+Nur `true`, wenn dieses Produkt ein Geschenkgutschein ist. Bei den meisten Produkten sollte hier `false` stehen oder das Feld leer sein.
 
 ---
 

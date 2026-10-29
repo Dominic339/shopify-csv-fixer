@@ -53,7 +53,7 @@ Een fout in een van deze stappen laat rijen mislukken. Shopify importeert vaak d
 
 **Melding:** De rijen worden geïmporteerd, maar Published, Gift Card of Requires Shipping tonen de verkeerde waarde
 
-**Oorzaak:** De booleaanse kolommen van Shopify verwachten `TRUE` of `FALSE` (hoofdletters). Waarden als `Yes`, `yes`, `1`, `true` of `True` worden niet in alle velden geaccepteerd.
+**Oorzaak:** De booleaanse kolommen van Shopify verwachten `true` of `false`, zoals de eigen sjabloon en documentatie van Shopify ze schrijven. Waarden als `Yes`, `1` of `N` zijn niet geldig, en een lege cel krijgt de standaardwaarde van de kolom (`true` voor Published, Charge tax en Requires shipping, `false` voor Gift card).
 
 **Betrokken kolommen:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Een fout in een van deze stappen laat rijen mislukken. Shopify importeert vaak d
 
 | Vervang dit | Door dit |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 In Excel: `Ctrl+H` (Zoeken en vervangen) en vink "Volledige celinhoud vergelijken" aan, zodat je geen tekst binnen langere waarden vervangt.
 

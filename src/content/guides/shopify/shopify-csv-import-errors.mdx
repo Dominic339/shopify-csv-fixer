@@ -53,7 +53,7 @@ Errors at any stage cause rows to fail. Shopify often imports the valid rows and
 
 **Message:** Rows are imported but Published, Gift Card, or Requires Shipping shows the wrong value
 
-**Cause:** Shopify's boolean columns expect `TRUE` or `FALSE` (uppercase). Values like `Yes`, `yes`, `1`, `true`, or `True` are not accepted on all fields.
+**Cause:** Shopify's boolean columns expect `true` or `false`. That's how Shopify's own template and documentation write them. Values like `Yes`, `1` or `N` aren't valid, and a blank cell uses the column's default (`true` for Published, Charge tax and Requires shipping, `false` for Gift card).
 
 **Affected columns:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Errors at any stage cause rows to fail. Shopify often imports the valid rows and
 
 | Replace this | With this |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 In Excel: `Ctrl+H` (Find & Replace), check "Match entire cell contents" to avoid replacing text inside longer values.
 

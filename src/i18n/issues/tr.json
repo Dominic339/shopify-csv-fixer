@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "Geçersiz Published değeri",
 "explanation": "Published on online store mantıksal olmayan bir değer içeriyor.",
-"whyPlatformCares": "Shopify TRUE/FALSE (veya boş) bekler. Geçersiz değerler içe aktarmayı engelleyebilir.",
-"howToFix": "TRUE, FALSE kullanın veya boş bırakın."
+"whyPlatformCares": "Shopify true/false (veya boş) bekler. Geçersiz değerler içe aktarmayı engelleyebilir.",
+"howToFix": "true, false kullanın veya boş bırakın."
 },
 "shopify/invalid_status": {
 "title": "Geçersiz Status değeri",
-"explanation": "Status; Active, Draft veya Archived değil.",
+"explanation": "Status; active, draft veya archived değil.",
 "whyPlatformCares": "Beklenmeyen durum değerleri Shopify'ın bir satırı yok saymasına veya yanlış yorumlamasına neden olabilir.",
-"howToFix": "\"Active\", \"Draft\" veya \"Archived\" kullanın (ya da boş bırakın)."
+"howToFix": "\"active\", \"draft\" veya \"archived\" kullanın (ya da boş bırakın)."
 },
 "shopify/option_order_invalid": {
 "title": "Seçenek sütunları sırasız",
@@ -225,7 +225,7 @@
 "title": "Alışılmadık Status değeri",
 "explanation": "Status, Shopify'ın yaygın değerleri dışında bir değer içeriyor.",
 "whyPlatformCares": "Beklenmeyen değerler yok sayılabilir veya kafa karıştırıcı sonuçlar doğurabilir.",
-"howToFix": "\"Active\", \"Draft\" veya \"Archived\" kullanın (ya da boş bırakın)."
+"howToFix": "\"active\", \"draft\" veya \"archived\" kullanın (ya da boş bırakın)."
 },
 "shopify/missing_status_value": {
 "title": "Status eksik",

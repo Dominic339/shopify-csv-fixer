@@ -65,10 +65,10 @@ Een lijst met tags, gescheiden door komma's. Bevat een tag een komma, dan moet d
 
 ### Published (booleaans)
 
-Of het product zichtbaar is voor klanten. Accepteert `TRUE` of `FALSE` (hoofdletters).
+Of het product in je webwinkel wordt gepubliceerd. Accepteert `true` of `false`; een lege cel telt als `true`.
 
-- `TRUE`: het product is actief en zichtbaar
-- `FALSE`: het product is een concept (verborgen in de winkel)
+- `true`: het product wordt in je webwinkel gepubliceerd
+- `false`: het product verschijnt niet in je webwinkel (het blijft in je beheeromgeving; de conceptstatus stel je apart in met de kolom Status)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Hoe de variant wordt afgehandeld. `manual` voor standaardafhandeling, of de API-
 
 ### Variant Requires Shipping (booleaans)
 
-`TRUE` voor fysieke producten die verzonden worden; `FALSE` voor digitale producten.
+`true` voor fysieke producten die verzonden worden; `false` voor digitale producten.
 
 ### Variant Taxable (booleaans)
 
-`TRUE` als deze variant belast is; `FALSE` als hij vrijgesteld is.
+`true` als deze variant belast is; `false` als hij vrijgesteld is.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ De metabeschrijving van de productpagina. Aanbevolen: minder dan 160 tekens.
 
 ### Gift Card (booleaans)
 
-Alleen `TRUE` als dit product een cadeaubon is. Bij de meeste producten hoort hier `FALSE` te staan of blijft het veld leeg.
+Alleen `true` als dit product een cadeaubon is. Bij de meeste producten hoort hier `false` te staan of blijft het veld leeg.
 
 ---
 

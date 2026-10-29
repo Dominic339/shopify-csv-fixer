@@ -53,7 +53,7 @@ timeToComplete: "12分"
 
 **メッセージ**：行は取り込まれるが、Published、Gift Card、Requires Shipping の値が違う
 
-**原因**：Shopify の真偽値の列は `TRUE` または `FALSE`（大文字）を前提としています。`Yes`、`yes`、`1`、`true`、`True` などは、すべてのフィールドで受け付けられるわけではありません。
+**原因**：Shopify の真偽値の列には `true` または `false` を入力します。Shopify 公式のテンプレートとドキュメントもこの表記です。`Yes`、`1`、`N` などは有効な値ではなく、空欄のセルには列の既定値が使われます（Published、Charge tax、Requires shipping は `true`、Gift card は `false`）。
 
 **対象の列**：`Published`、`Gift Card`、`Requires Shipping`、`Taxable`
 
@@ -61,8 +61,8 @@ timeToComplete: "12分"
 
 | 置換前 | 置換後 |
 |---|---|
-| `Yes`、`yes`、`Y`、`true`、`1` | `TRUE` |
-| `No`、`no`、`N`、`false`、`0` | `FALSE` |
+| `Yes`、`yes`、`Y`、`1`、`TRUE` | `true` |
+| `No`、`no`、`N`、`0`、`FALSE` | `false` |
 
 Excel では `Ctrl+H`（検索と置換）を使い、長い値の中の文字まで置き換えないよう「セル内容が完全に同一であるものを検索する」にチェックを入れます。
 

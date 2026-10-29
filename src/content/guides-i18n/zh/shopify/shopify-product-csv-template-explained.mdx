@@ -65,10 +65,10 @@ Handle 是商品可用于网址的唯一标识符。它必须：
 
 ### Published（布尔值）
 
-商品是否对顾客可见，接受 `TRUE` 或 `FALSE`（大写）。
+商品是否发布到你的在线商店，接受 `true` 或 `false`，留空视为 `true`。
 
-- `TRUE`：商品已启用且可见
-- `FALSE`：商品为草稿（在店铺中隐藏）
+- `true`：商品发布到在线商店
+- `false`：商品不在在线商店中显示（仍保留在后台；草稿状态需在 Status 列中单独设置）
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Handle 是商品可用于网址的唯一标识符。它必须：
 
 ### Variant Requires Shipping（布尔值）
 
-需要配送的实物商品填 `TRUE`；数字商品填 `FALSE`。
+需要配送的实物商品填 `true`；数字商品填 `false`。
 
 ### Variant Taxable（布尔值）
 
-该变体需要缴税填 `TRUE`；免税填 `FALSE`。
+该变体需要缴税填 `true`；免税填 `false`。
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ UPC、EAN 或 ISBN 条形码，纯文本。Shopify 不会验证，只会保存�
 
 ### Gift Card（布尔值）
 
-仅当该商品是礼品卡时填 `TRUE`。大多数商品应填 `FALSE` 或留空。
+仅当该商品是礼品卡时填 `true`。大多数商品应填 `false` 或留空。
 
 ---
 

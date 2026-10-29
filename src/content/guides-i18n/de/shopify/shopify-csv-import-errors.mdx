@@ -53,7 +53,7 @@ Ein Fehler in einem dieser Schritte lässt Zeilen scheitern. Shopify importiert 
 
 **Meldung:** Die Zeilen werden importiert, aber Published, Gift Card oder Requires Shipping zeigen den falschen Wert
 
-**Ursache:** Die Wahr/Falsch-Spalten von Shopify erwarten `TRUE` oder `FALSE` (großgeschrieben). Werte wie `Yes`, `yes`, `1`, `true` oder `True` werden nicht in allen Feldern akzeptiert.
+**Ursache:** Die Wahr/Falsch-Spalten von Shopify erwarten `true` oder `false`, so wie Shopifys eigene Vorlage und Dokumentation sie schreiben. Werte wie `Yes`, `1` oder `N` sind nicht gültig, und eine leere Zelle übernimmt den Standardwert der Spalte (`true` bei Published, Charge tax und Requires shipping, `false` bei Gift card).
 
 **Betroffene Spalten:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Ein Fehler in einem dieser Schritte lässt Zeilen scheitern. Shopify importiert 
 
 | Das hier ersetzen | Durch das hier |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 In Excel: `Strg+H` (Suchen und Ersetzen) und „Gesamten Zellinhalt vergleichen“ aktivieren, damit kein Text innerhalb längerer Werte ersetzt wird.
 

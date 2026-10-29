@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "잘못된 Published 값",
 "explanation": "Published on online store에 참/거짓이 아닌 값이 있습니다.",
-"whyPlatformCares": "Shopify는 TRUE/FALSE(또는 빈칸)를 기대합니다. 잘못된 값이 있으면 가져오기가 막힐 수 있습니다.",
-"howToFix": "TRUE, FALSE를 사용하거나 비워 두세요."
+"whyPlatformCares": "Shopify는 true/false(또는 빈칸)를 기대합니다. 잘못된 값이 있으면 가져오기가 막힐 수 있습니다.",
+"howToFix": "true, FALSE를 사용하거나 비워 두세요."
 },
 "shopify/invalid_status": {
 "title": "잘못된 Status 값",
-"explanation": "Status가 Active, Draft, Archived 중 하나가 아닙니다.",
+"explanation": "Status가 active, draft, archived 중 하나가 아닙니다.",
 "whyPlatformCares": "예상하지 못한 상태 값이 있으면 Shopify가 해당 행을 무시하거나 잘못 해석할 수 있습니다.",
-"howToFix": "\"Active\", \"Draft\", \"Archived\" 중 하나를 사용하세요(또는 비워 두세요)."
+"howToFix": "\"active\", \"draft\", \"archived\" 중 하나를 사용하세요(또는 비워 두세요)."
 },
 "shopify/option_order_invalid": {
 "title": "옵션 열 순서가 잘못되었습니다",
@@ -225,7 +225,7 @@
 "title": "흔하지 않은 Status 값",
 "explanation": "Status에 Shopify의 일반적인 값이 아닌 값이 있습니다.",
 "whyPlatformCares": "예상하지 못한 값은 무시되거나 헷갈리는 결과를 낼 수 있습니다.",
-"howToFix": "\"Active\", \"Draft\", \"Archived\" 중 하나를 사용하세요(또는 비워 두세요)."
+"howToFix": "\"active\", \"draft\", \"archived\" 중 하나를 사용하세요(또는 비워 두세요)."
 },
 "shopify/missing_status_value": {
 "title": "Status 없음",

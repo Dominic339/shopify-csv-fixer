@@ -65,10 +65,10 @@ Uma lista de tags separadas por vírgula. Se uma tag tiver vírgula, o conteúdo
 
 ### Published (booleano)
 
-Se o produto fica visível para os clientes. Aceita `TRUE` ou `FALSE` (em maiúsculas).
+Indica se o produto é publicado na sua loja virtual. Aceita `true` ou `false`, e uma célula vazia conta como `true`.
 
-- `TRUE`: o produto está ativo e visível
-- `FALSE`: o produto é um rascunho (oculto na loja)
+- `true`: o produto é publicado na sua loja virtual
+- `false`: o produto não aparece na sua loja virtual (continua no seu painel; o status de rascunho é definido à parte, na coluna Status)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Como a variante é enviada. `manual` para o processamento padrão, ou o nome de 
 
 ### Variant Requires Shipping (booleano)
 
-`TRUE` para produtos físicos que precisam de envio; `FALSE` para produtos digitais.
+`true` para produtos físicos que precisam de envio; `false` para produtos digitais.
 
 ### Variant Taxable (booleano)
 
-`TRUE` se esta variante é tributável; `FALSE` se é isenta.
+`true` se esta variante é tributável; `false` se é isenta.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ A meta descrição da página do produto. Recomendado: menos de 160 caracteres.
 
 ### Gift Card (booleano)
 
-`TRUE` só se o produto for um cartão-presente. Na maioria dos produtos deve ser `FALSE` ou ficar vazia.
+`true` só se o produto for um cartão-presente. Na maioria dos produtos deve ser `false` ou ficar vazia.
 
 ---
 

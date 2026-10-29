@@ -53,7 +53,7 @@ timeToComplete: "12 分钟"
 
 **提示信息**：行已导入，但 Published、Gift Card 或 Requires Shipping 显示的值不对
 
-**原因**：Shopify 的布尔列要求填写 `TRUE` 或 `FALSE`（大写）。`Yes`、`yes`、`1`、`true` 或 `True` 等值并非所有字段都接受。
+**原因**：Shopify 的布尔列要求填写 `true` 或 `false`，Shopify 官方模板和文档也是这样写的。`Yes`、`1` 或 `N` 等值无效，留空的单元格会使用该列的默认值（Published、Charge tax 和 Requires shipping 为 `true`，Gift card 为 `false`）。
 
 **涉及的列**：`Published`、`Gift Card`、`Requires Shipping`、`Taxable`
 
@@ -61,8 +61,8 @@ timeToComplete: "12 分钟"
 
 | 替换前 | 替换后 |
 |---|---|
-| `Yes`、`yes`、`Y`、`true`、`1` | `TRUE` |
-| `No`、`no`、`N`、`false`、`0` | `FALSE` |
+| `Yes`、`yes`、`Y`、`1`、`TRUE` | `true` |
+| `No`、`no`、`N`、`0`、`FALSE` | `false` |
 
 在 Excel 中按 `Ctrl+H`（查找和替换），并勾选“单元格匹配”，以免替换掉较长值中的文字。
 

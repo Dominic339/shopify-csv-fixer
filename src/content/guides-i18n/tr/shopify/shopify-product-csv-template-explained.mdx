@@ -65,10 +65,10 @@ Virgülle ayrılmış etiket listesi. Bir etiket virgül içeriyorsa Tags hücre
 
 ### Published (mantıksal)
 
-Ürünün müşterilere görünür olup olmadığı. `TRUE` veya `FALSE` (büyük harf) kabul eder.
+Ürünün çevrimiçi mağazanızda yayınlanıp yayınlanmayacağını belirtir. `true` veya `false` kabul eder; boş bir hücre `true` sayılır.
 
-- `TRUE`: ürün etkin ve görünür
-- `FALSE`: ürün taslaktır (mağazada gizli)
+- `true`: ürün çevrimiçi mağazanızda yayınlanır
+- `false`: ürün çevrimiçi mağazanızda görünmez (yönetim panelinizde kalır; taslak durumu ayrıca Status sütununda belirlenir)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Varyantın nasıl gönderileceği. Standart gönderim için `manual` veya üçü
 
 ### Variant Requires Shipping (mantıksal)
 
-Gönderim gerektiren fiziksel ürünler için `TRUE`; dijital ürünler için `FALSE`.
+Gönderim gerektiren fiziksel ürünler için `true`; dijital ürünler için `false`.
 
 ### Variant Taxable (mantıksal)
 
-Varyant vergiye tabiyse `TRUE`; vergiden muafsa `FALSE`.
+Varyant vergiye tabiyse `true`; vergiden muafsa `false`.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ Sayfa başlığı etiketi (tarayıcı sekmelerinde ve arama sonuçlarında gör�
 
 ### Gift Card (mantıksal)
 
-Yalnızca ürün bir hediye kartıysa `TRUE`. Çoğu ürün için `FALSE` olmalı veya boş bırakılmalıdır.
+Yalnızca ürün bir hediye kartıysa `true`. Çoğu ürün için `false` olmalı veya boş bırakılmalıdır.
 
 ---
 

@@ -65,10 +65,10 @@ A comma-separated list of tags. If a tag contains a comma, the entire Tags cell 
 
 ### Published (Boolean)
 
-Whether the product is visible to customers. Accepts `TRUE` or `FALSE` (uppercase).
+Whether the product is published to your online store. Accepts `true` or `false`, and a blank cell counts as `true`.
 
-- `TRUE`: product is active and visible
-- `FALSE`: product is a draft (hidden from the storefront)
+- `true`: the product is published on your online store
+- `false`: the product isn't shown in your online store (it stays in your admin; draft status is set separately in the Status column)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ How the variant is fulfilled. `manual` for standard fulfillment, or the API name
 
 ### Variant Requires Shipping (Boolean)
 
-`TRUE` for physical products that need shipping; `FALSE` for digital goods.
+`true` for physical products that need shipping; `false` for digital goods.
 
 ### Variant Taxable (Boolean)
 
-`TRUE` if this variant is taxable; `FALSE` if tax-exempt.
+`true` if this variant is taxable; `false` if tax-exempt.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ The meta description for the product page. Under 160 characters recommended.
 
 ### Gift Card (Boolean)
 
-`TRUE` only if this product is a gift card. Most products should be `FALSE` or blank.
+`true` only if this product is a gift card. Most products should be `false` or blank.
 
 ---
 

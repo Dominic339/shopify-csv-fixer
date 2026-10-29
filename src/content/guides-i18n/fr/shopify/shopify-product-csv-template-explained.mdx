@@ -65,10 +65,10 @@ Une liste de tags séparés par des virgules. Si un tag contient une virgule, to
 
 ### Published (booléen)
 
-Indique si le produit est visible par les clients. Accepte `TRUE` ou `FALSE` (en majuscules).
+Indique si le produit est publié sur votre boutique en ligne. Accepte `true` ou `false`, et une cellule vide compte comme `true`.
 
-- `TRUE` : le produit est actif et visible
-- `FALSE` : le produit est un brouillon (masqué dans la boutique)
+- `true` : le produit est publié sur votre boutique en ligne
+- `false` : le produit n'apparaît pas sur votre boutique en ligne (il reste dans votre interface d'administration ; le statut brouillon se règle à part, dans la colonne Status)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Le mode d'expédition de la variante. `manual` pour une gestion standard, ou le 
 
 ### Variant Requires Shipping (booléen)
 
-`TRUE` pour les produits physiques à expédier ; `FALSE` pour les produits numériques.
+`true` pour les produits physiques à expédier ; `false` pour les produits numériques.
 
 ### Variant Taxable (booléen)
 
-`TRUE` si cette variante est soumise à la taxe ; `FALSE` si elle en est exonérée.
+`true` si cette variante est soumise à la taxe ; `false` si elle en est exonérée.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ La méta-description de la page produit. Moins de 160 caractères recommandés.
 
 ### Gift Card (booléen)
 
-`TRUE` uniquement si ce produit est une carte-cadeau. Pour la plupart des produits, mettez `FALSE` ou laissez vide.
+`true` uniquement si ce produit est une carte-cadeau. Pour la plupart des produits, mettez `false` ou laissez vide.
 
 ---
 
