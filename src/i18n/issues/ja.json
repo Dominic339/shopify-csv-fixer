@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "Published の値が無効です",
 "explanation": "Published on online store に真偽値以外の値が入っています。",
-"whyPlatformCares": "Shopify は TRUE/FALSE（または空欄）を想定しています。無効な値があるとインポートできない場合があります。",
-"howToFix": "TRUE、FALSE を使うか、空欄にしてください。"
+"whyPlatformCares": "Shopify は true/false（または空欄）を想定しています。無効な値があるとインポートできない場合があります。",
+"howToFix": "true、false を使うか、空欄にしてください。"
 },
 "shopify/invalid_status": {
 "title": "Status の値が無効です",
-"explanation": "Status が Active、Draft、Archived のいずれでもありません。",
+"explanation": "Status が active、draft、archived のいずれでもありません。",
 "whyPlatformCares": "想定外のステータスがあると、Shopify がその行を無視したり誤って解釈したりすることがあります。",
-"howToFix": "\"Active\"、\"Draft\"、\"Archived\" のいずれかを使ってください（または空欄）。"
+"howToFix": "\"active\"、\"draft\"、\"archived\" のいずれかを使ってください（または空欄）。"
 },
 "shopify/option_order_invalid": {
 "title": "オプション列の順序が正しくありません",
@@ -225,7 +225,7 @@
 "title": "見慣れない Status の値",
 "explanation": "Status に Shopify の一般的な値以外が入っています。",
 "whyPlatformCares": "想定外の値は無視されたり、わかりにくい結果になったりすることがあります。",
-"howToFix": "\"Active\"、\"Draft\"、\"Archived\" のいずれかを使ってください（または空欄）。"
+"howToFix": "\"active\"、\"draft\"、\"archived\" のいずれかを使ってください（または空欄）。"
 },
 "shopify/missing_status_value": {
 "title": "Status がありません",

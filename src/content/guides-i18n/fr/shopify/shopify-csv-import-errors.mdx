@@ -53,7 +53,7 @@ Une erreur à n'importe quelle étape fait échouer des lignes. Shopify importe 
 
 **Message :** Les lignes sont importées, mais Published, Gift Card ou Requires Shipping affichent la mauvaise valeur
 
-**Cause :** Les colonnes booléennes de Shopify attendent `TRUE` ou `FALSE` (en majuscules). Des valeurs comme `Yes`, `yes`, `1`, `true` ou `True` ne sont pas acceptées dans tous les champs.
+**Cause :** Les colonnes booléennes de Shopify attendent `true` ou `false`, comme les écrivent le modèle et la documentation de Shopify. Des valeurs comme `Yes`, `1` ou `N` ne sont pas valides, et une cellule vide prend la valeur par défaut de la colonne (`true` pour Published, Charge tax et Requires shipping, `false` pour Gift card).
 
 **Colonnes concernées :** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Une erreur à n'importe quelle étape fait échouer des lignes. Shopify importe 
 
 | Remplacer ceci | Par ceci |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 Dans Excel : `Ctrl+H` (Rechercher et remplacer), cochez « Totalité du contenu de la cellule » pour ne pas remplacer du texte à l'intérieur de valeurs plus longues.
 

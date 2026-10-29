@@ -65,10 +65,10 @@ Lista tagów oddzielonych przecinkami. Jeśli tag zawiera przecinek, cała zawar
 
 ### Published (wartość logiczna)
 
-Czy produkt jest widoczny dla klientów. Przyjmuje `TRUE` lub `FALSE` (wielkimi literami).
+Czy produkt jest opublikowany w twoim sklepie internetowym. Przyjmuje `true` lub `false`, a pusta komórka oznacza `true`.
 
-- `TRUE`: produkt jest aktywny i widoczny
-- `FALSE`: produkt jest wersją roboczą (ukrytą w sklepie)
+- `true`: produkt jest opublikowany w sklepie internetowym
+- `false`: produkt nie pojawia się w sklepie internetowym (zostaje w panelu administracyjnym; status wersji roboczej ustawia się osobno w kolumnie Status)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Sposób realizacji wariantu. `manual` dla standardowej realizacji albo nazwa API
 
 ### Variant Requires Shipping (wartość logiczna)
 
-`TRUE` dla produktów fizycznych wymagających wysyłki; `FALSE` dla produktów cyfrowych.
+`true` dla produktów fizycznych wymagających wysyłki; `false` dla produktów cyfrowych.
 
 ### Variant Taxable (wartość logiczna)
 
-`TRUE`, jeśli wariant podlega opodatkowaniu; `FALSE`, jeśli jest zwolniony.
+`true`, jeśli wariant podlega opodatkowaniu; `false`, jeśli jest zwolniony.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ Metaopis strony produktu. Zalecane: poniżej 160 znaków.
 
 ### Gift Card (wartość logiczna)
 
-`TRUE` tylko wtedy, gdy produkt jest kartą podarunkową. W przypadku większości produktów powinno być `FALSE` albo puste.
+`true` tylko wtedy, gdy produkt jest kartą podarunkową. W przypadku większości produktów powinno być `false` albo puste.
 
 ---
 

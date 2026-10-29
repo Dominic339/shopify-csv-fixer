@@ -53,7 +53,7 @@ Błąd na dowolnym etapie powoduje odrzucenie wierszy. Shopify często importuje
 
 **Komunikat:** Wiersze są importowane, ale Published, Gift Card lub Requires Shipping mają złą wartość
 
-**Przyczyna:** Kolumny logiczne Shopify oczekują `TRUE` lub `FALSE` (wielkimi literami). Wartości takie jak `Yes`, `yes`, `1`, `true` czy `True` nie są akceptowane we wszystkich polach.
+**Przyczyna:** Kolumny logiczne Shopify oczekują `true` lub `false`, tak jak zapisują je szablon i dokumentacja Shopify. Wartości takie jak `Yes`, `1` czy `N` nie są poprawne, a pusta komórka przyjmuje domyślną wartość kolumny (`true` dla Published, Charge tax i Requires shipping, `false` dla Gift card).
 
 **Dotyczy kolumn:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Błąd na dowolnym etapie powoduje odrzucenie wierszy. Shopify często importuje
 
 | Zamień to | Na to |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 W Excelu: `Ctrl+H` („Znajdź i zamień”) i zaznacz „Uwzględnij całą zawartość komórki”, żeby nie zamieniać tekstu wewnątrz dłuższych wartości.
 

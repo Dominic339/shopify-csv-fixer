@@ -65,10 +65,10 @@ Una lista de etiquetas separadas por comas. Si una etiqueta contiene una coma, t
 
 ### Published (booleano)
 
-Indica si los clientes pueden ver el producto. Acepta `TRUE` o `FALSE` (en mayúsculas).
+Indica si el producto se publica en tu tienda online. Acepta `true` o `false`, y una celda vacía cuenta como `true`.
 
-- `TRUE`: el producto está activo y visible
-- `FALSE`: el producto es un borrador (oculto en la tienda)
+- `true`: el producto se publica en tu tienda online
+- `false`: el producto no aparece en tu tienda online (sigue en tu panel; el estado de borrador se define aparte, en la columna Status)
 
 ### Published Scope
 
@@ -131,11 +131,11 @@ Cómo se prepara el envío de la variante. `manual` para la gestión estándar, 
 
 ### Variant Requires Shipping (booleano)
 
-`TRUE` para productos físicos que se envían; `FALSE` para productos digitales.
+`true` para productos físicos que se envían; `false` para productos digitales.
 
 ### Variant Taxable (booleano)
 
-`TRUE` si la variante paga impuestos; `FALSE` si está exenta.
+`true` si la variante paga impuestos; `false` si está exenta.
 
 ### Variant Barcode
 
@@ -182,7 +182,7 @@ La metadescripción de la página del producto. Se recomiendan menos de 160 cara
 
 ### Gift Card (booleano)
 
-`TRUE` solo si el producto es una tarjeta regalo. En la mayoría de los productos debe ser `FALSE` o quedar vacía.
+`true` solo si el producto es una tarjeta regalo. En la mayoría de los productos debe ser `false` o quedar vacía.
 
 ---
 

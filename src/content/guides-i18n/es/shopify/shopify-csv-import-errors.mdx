@@ -53,7 +53,7 @@ Un error en cualquiera de estas etapas hace que fallen filas. Shopify suele impo
 
 **Mensaje:** Las filas se importan, pero Published, Gift Card o Requires Shipping muestran un valor incorrecto
 
-**Causa:** Las columnas booleanas de Shopify esperan `TRUE` o `FALSE` (en mayúsculas). Valores como `Yes`, `yes`, `1`, `true` o `True` no se aceptan en todos los campos.
+**Causa:** Las columnas booleanas de Shopify esperan `true` o `false`, que es como las escriben la plantilla y la documentación de Shopify. Valores como `Yes`, `1` o `N` no son válidos, y una celda vacía toma el valor predeterminado de la columna (`true` para Published, Charge tax y Requires shipping, `false` para Gift card).
 
 **Columnas afectadas:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Un error en cualquiera de estas etapas hace que fallen filas. Shopify suele impo
 
 | Reemplaza esto | Por esto |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 En Excel, abre «Buscar y reemplazar» y marca «Coincidir con el contenido de toda la celda» para no reemplazar texto dentro de valores más largos.
 

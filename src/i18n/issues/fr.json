@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "Valeur Published non valide",
 "explanation": "Published on online store contient une valeur qui n'est pas booléenne.",
-"whyPlatformCares": "Shopify attend TRUE/FALSE (ou vide). Les valeurs non valides peuvent bloquer l'import.",
-"howToFix": "Utilisez TRUE, FALSE ou laissez vide."
+"whyPlatformCares": "Shopify attend true/false (ou vide). Les valeurs non valides peuvent bloquer l'import.",
+"howToFix": "Utilisez true, false ou laissez vide."
 },
 "shopify/invalid_status": {
 "title": "Valeur Status non valide",
-"explanation": "Status ne vaut pas Active, Draft ou Archived.",
+"explanation": "Status ne vaut pas active, draft ou archived.",
 "whyPlatformCares": "Avec une valeur de statut inattendue, Shopify peut ignorer ou mal interpréter une ligne.",
-"howToFix": "Utilisez \"Active\", \"Draft\" ou \"Archived\" (ou laissez vide)."
+"howToFix": "Utilisez \"active\", \"draft\" ou \"archived\" (ou laissez vide)."
 },
 "shopify/option_order_invalid": {
 "title": "Colonnes d'option dans le désordre",
@@ -225,7 +225,7 @@
 "title": "Valeur Status inhabituelle",
 "explanation": "Status a une valeur en dehors des valeurs courantes de Shopify.",
 "whyPlatformCares": "Les valeurs inattendues peuvent être ignorées ou donner des résultats confus.",
-"howToFix": "Utilisez \"Active\", \"Draft\" ou \"Archived\" (ou laissez vide)."
+"howToFix": "Utilisez \"active\", \"draft\" ou \"archived\" (ou laissez vide)."
 },
 "shopify/missing_status_value": {
 "title": "Status manquant",

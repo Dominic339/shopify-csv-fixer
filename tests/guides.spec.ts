@@ -232,7 +232,9 @@ describe("expandIssueContent", () => {
   it("provides valid values for boolean issues", () => {
     const result = expandIssueContent(booleanInput);
     expect(result.validValues).not.toBeNull();
-    expect(result.validValues?.join(" ")).toContain("TRUE");
+    // Shopify's CSV documentation lists lowercase true/false, which is what the fixer writes.
+    expect(result.validValues?.slice(0, 2)).toEqual(["true", "false"]);
+    expect(result.examples.find((e) => e.bad === "TRUE")?.good).toBe("true");
   });
 
   it("provides examples for boolean issues", () => {

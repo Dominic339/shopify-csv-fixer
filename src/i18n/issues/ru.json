@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "Недопустимое значение Published",
 "explanation": "В Published on online store указано не логическое значение.",
-"whyPlatformCares": "Shopify ожидает TRUE/FALSE (или пустое значение). Недопустимые значения могут заблокировать импорт.",
-"howToFix": "Используйте TRUE, FALSE или оставьте пустым."
+"whyPlatformCares": "Shopify ожидает true/false (или пустое значение). Недопустимые значения могут заблокировать импорт.",
+"howToFix": "Используйте true, false или оставьте пустым."
 },
 "shopify/invalid_status": {
 "title": "Недопустимое значение Status",
-"explanation": "Status не равно Active, Draft или Archived.",
+"explanation": "Status не равно active, draft или archived.",
 "whyPlatformCares": "При неожиданном статусе Shopify может проигнорировать строку или понять её неправильно.",
-"howToFix": "Используйте \"Active\", \"Draft\" или \"Archived\" (или оставьте пустым)."
+"howToFix": "Используйте \"active\", \"draft\" или \"archived\" (или оставьте пустым)."
 },
 "shopify/option_order_invalid": {
 "title": "Столбцы опций заполнены не по порядку",
@@ -225,7 +225,7 @@
 "title": "Необычное значение Status",
 "explanation": "Status содержит значение вне привычных значений Shopify.",
 "whyPlatformCares": "Неожиданные значения могут игнорироваться или давать запутанный результат.",
-"howToFix": "Используйте \"Active\", \"Draft\" или \"Archived\" (или оставьте пустым)."
+"howToFix": "Используйте \"active\", \"draft\" или \"archived\" (или оставьте пустым)."
 },
 "shopify/missing_status_value": {
 "title": "Нет Status",

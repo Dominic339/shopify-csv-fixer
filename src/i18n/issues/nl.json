@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "Ongeldige waarde voor Published",
 "explanation": "Published on online store heeft een waarde die geen booleaanse waarde is.",
-"whyPlatformCares": "Shopify verwacht TRUE/FALSE (of leeg). Ongeldige waarden kunnen de import blokkeren.",
-"howToFix": "Gebruik TRUE, FALSE of laat leeg."
+"whyPlatformCares": "Shopify verwacht true/false (of leeg). Ongeldige waarden kunnen de import blokkeren.",
+"howToFix": "Gebruik true, false of laat leeg."
 },
 "shopify/invalid_status": {
 "title": "Ongeldige waarde voor Status",
-"explanation": "Status is niet Active, Draft of Archived.",
+"explanation": "Status is niet active, draft of archived.",
 "whyPlatformCares": "Bij een onverwachte status kan Shopify een rij negeren of verkeerd interpreteren.",
-"howToFix": "Gebruik \"Active\", \"Draft\" of \"Archived\" (of laat leeg)."
+"howToFix": "Gebruik \"active\", \"draft\" of \"archived\" (of laat leeg)."
 },
 "shopify/option_order_invalid": {
 "title": "Optiekolommen in de verkeerde volgorde",
@@ -225,7 +225,7 @@
 "title": "Ongebruikelijke Status-waarde",
 "explanation": "Status heeft een waarde buiten de gebruikelijke waarden van Shopify.",
 "whyPlatformCares": "Onverwachte waarden kunnen worden genegeerd of verwarrende resultaten geven.",
-"howToFix": "Gebruik \"Active\", \"Draft\" of \"Archived\" (of laat leeg)."
+"howToFix": "Gebruik \"active\", \"draft\" of \"archived\" (of laat leeg)."
 },
 "shopify/missing_status_value": {
 "title": "Status ontbreekt",

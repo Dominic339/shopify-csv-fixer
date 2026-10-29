@@ -183,22 +183,23 @@ export function classifyIssue(input: IssueInput): IssueType {
 function booleanValues(platform: string, tr: Tr): string[] {
   switch (platform) {
     case "shopify":
-      return ["TRUE", "FALSE", tr("(blank: treated as FALSE for most boolean fields)")];
+      return ["true", "false", tr("(blank: uses the column's default, which is true for most fields)")];
     case "woocommerce":
       return [tr("1 (true)"), tr("0 (false)"), tr("(the fixer normalizes common variants like yes/no)")];
     case "amazon":
       return [tr("y  (lowercase, means true)"), tr("n  (lowercase, means false)")];
     default:
-      return ["TRUE", "FALSE"];
+      return ["true", "false"];
   }
 }
 
 const ENUM_BY_CODE: Record<string, string[]> = {
-  "shopify/invalid_status": ["Active", "Draft", "Archived"],
-  "shopify/invalid_boolean_published": ["TRUE", "FALSE"],
-  "shopify/invalid_boolean_requires_shipping": ["TRUE", "FALSE"],
-  "shopify/invalid_boolean_taxable": ["TRUE", "FALSE"],
-  "shopify/invalid_boolean_gift_card": ["TRUE", "FALSE"],
+  // Shopify's CSV documentation lists these in lowercase.
+  "shopify/invalid_status": ["active", "draft", "archived"],
+  "shopify/invalid_boolean_published": ["true", "false"],
+  "shopify/invalid_boolean_requires_shipping": ["true", "false"],
+  "shopify/invalid_boolean_taxable": ["true", "false"],
+  "shopify/invalid_boolean_gift_card": ["true", "false"],
   "ebay/invalid_action": ["Add", "Revise", "Delete", "End"],
   "woocommerce/invalid_type": ["simple", "variable", "variation", "grouped", "external"],
   "woocommerce/invalid_stock_status": ["instock", "outofstock", "onbackorder"],
@@ -294,12 +295,20 @@ function getExamples(type: IssueType, input: IssueInput, tr: Tr): Example[] {
           { bad: "FALSE", good: "n" },
         ];
       }
+      if (input.platform === "woocommerce") {
+        return [
+          { bad: "yes", good: "1", note: tr("Use 1 or 0") },
+          { bad: "TRUE", good: "1" },
+          { bad: "No", good: "0" },
+          { bad: "false", good: "0" },
+        ];
+      }
       return [
-        { bad: "yes", good: "TRUE", note: tr("Must be uppercase") },
-        { bad: "1", good: "TRUE" },
-        { bad: "No", good: "FALSE" },
-        { bad: "0", good: "FALSE" },
-        { bad: "True", good: "TRUE", note: tr("Mixed case not accepted") },
+        { bad: "yes", good: "true", note: tr("Use true or false") },
+        { bad: "1", good: "true" },
+        { bad: "No", good: "false" },
+        { bad: "0", good: "false" },
+        { bad: "TRUE", good: "true", note: tr("Lowercase, as in Shopify's own template") },
       ];
     case "money":
       return [
@@ -386,14 +395,11 @@ function getExamples(type: IssueType, input: IssueInput, tr: Tr): Example[] {
 // Excel step-by-step instructions
 // ---------------------------------------------------------------------------
 
-/** The true/false spellings a platform wants (Amazon: y/n). */
+/** The true/false spellings a platform wants (Shopify: true/false, WooCommerce: 1/0, Amazon: y/n). */
 function boolSpellings(platform: string, tr: Tr) {
-  const amazon = platform === "amazon";
-  return {
-    t: amazon ? "y" : "TRUE",
-    f: amazon ? "n" : "FALSE",
-    pair: amazon ? tr("y and n") : tr("TRUE and FALSE"),
-  };
+  if (platform === "amazon") return { t: "y", f: "n", pair: tr("y and n") };
+  if (platform === "woocommerce") return { t: "1", f: "0", pair: tr("1 and 0") };
+  return { t: "true", f: "false", pair: tr("true and false") };
 }
 
 function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: Tr): string[] {
@@ -417,7 +423,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Press Ctrl+H to open Find & Replace."),
         tr("In 'Find what', type yes, in 'Replace with', type {t}, tick 'Match entire cell contents', then click Replace All.", { t }),
         tr("Repeat: no -> {f},  1 -> {t},  0 -> {f}.", { t, f }),
-        tr("Also replace: True -> {t},  False -> {f}.", { t, f }),
+        ...(t === "true" ? [] : [tr("Also replace: True -> {t},  False -> {f}.", { t, f })]),
         tr("Scan the column to confirm only {pair} remain (and blanks if allowed).", { pair }),
         tr("Save as CSV (Comma delimited)."),
       ];
@@ -528,7 +534,9 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
         tr("In Google Sheets, click the column letter for the {column} column to select the whole column.", col),
         tr("Press Ctrl+H to open Find & Replace."),
         tr("Find yes, replace it with {t}, tick 'Match entire cell contents', then click Replace All.", { t }),
-        tr("Repeat: no -> {f},  1 -> {t},  0 -> {f},  True -> {t},  False -> {f}.", { t, f }),
+        t === "true"
+          ? tr("Repeat: no -> {f},  1 -> {t},  0 -> {f}.", { t, f })
+          : tr("Repeat: no -> {f},  1 -> {t},  0 -> {f},  True -> {t},  False -> {f}.", { t, f }),
         tr("Verify only {pair} remain in the column.", { pair }),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
       ];
@@ -659,7 +667,9 @@ function getPreventTips(type: IssueType, input: IssueInput, tr: Tr): string[] {
       return [
         isAmazon
           ? tr("Always type y or n (lowercase). Don't use spreadsheet checkboxes; export them as text instead.")
-          : tr("Always type TRUE or FALSE (all caps). Don't use spreadsheet checkboxes; export them as text instead."),
+          : input.platform === "woocommerce"
+            ? tr("Always type 1 or 0. Don't use spreadsheet checkboxes; export them as text instead.")
+            : tr("Always type true or false in lowercase, as in Shopify's own template. Don't use spreadsheet checkboxes; export them as text instead."),
         tr("If you export data from the platform's own admin panel, don't edit boolean columns in Excel, because autocorrect can quietly change the values."),
         tr("Set the cell format to Text in Excel before pasting boolean values to prevent automatic conversion."),
         tr("Use StriveFormats auto-fix as a final pass before every import."),
@@ -758,7 +768,7 @@ function getPlatformNote(type: IssueType, input: IssueInput, tr: Tr): string | n
 
   if (type === "boolean") {
     if (platform === "shopify")
-      return tr("Shopify requires TRUE or FALSE in all caps. A blank cell is treated as FALSE for most boolean fields. Don't use Yes, No, 1, or 0, because Shopify's importer rejects them.");
+      return tr("Shopify's template uses lowercase true and false. A blank cell uses the column's default: true for Published on online store, Charge tax and Requires shipping, and false for Gift card. Values like Yes, No, 1 or 0 aren't valid, but StriveFormats converts them to true or false for you.");
     if (platform === "amazon")
       return tr("Amazon flat files use lowercase y for true and lowercase n for false. This is different from most other platforms that use TRUE/FALSE.");
     if (platform === "woocommerce")
@@ -791,6 +801,8 @@ function getDetectionNote(type: IssueType, input: IssueInput, column: string, tr
   const v = { platform: platformDisplayName(input.platform, tr), column };
   switch (type) {
     case "boolean":
+      if (input.platform === "shopify")
+        return tr(`StriveFormats reads every cell in the {column} column. Capitals and common spellings like "TRUE", "Yes", "1" or "No" are converted to true or false automatically, and anything else is flagged as an error.`, v);
       return tr(`StriveFormats reads every cell in the {column} column and checks it against {platform}'s accepted boolean values. Any value that doesn't match exactly, including mixed-case variants like "True" or "Yes", is flagged as an error.`, v);
     case "required_header":
       return tr("StriveFormats compares your file's header row (row 1) against the full set of required columns for the {platform} format. Any column name from the required list that is absent triggers this issue.", v);
@@ -826,7 +838,7 @@ function getTechnicalDetail(type: IssueType, input: IssueInput, column: string, 
         return tr(`Amazon flat files require the literal lowercase strings "y" and "n" for boolean fields. This differs from most other platforms. Spreadsheet applications often export boolean cells as "TRUE"/"FALSE", "Yes"/"No", or "1"/"0", none of which Amazon's importer accepts. Even a correctly-spelled "Y" (uppercase) will be rejected because Amazon's parser is case-sensitive for these values.`);
       if (input.platform === "woocommerce")
         return tr(`WooCommerce's CSV importer accepts "1" for true and "0" for false. Some export tools produce "yes", "no", "TRUE", or "FALSE" instead. WooCommerce's built-in importer handles some of these, but third-party migration tools and staging sites often don't, so sticking to "1" and "0" avoids surprises.`);
-      return tr(`{platform}'s importer performs an exact, case-sensitive match on boolean fields. Only the uppercase strings TRUE and FALSE are accepted. Spreadsheet applications commonly produce alternative representations: Excel exports checkbox cells as TRUE/FALSE (which works), but "true" (lowercase), "Yes", "1", or "checked" will all fail. The blank value is treated as FALSE for most boolean fields, so leaving optional boolean fields empty is safe.`, v);
+      return tr(`Shopify's product CSV documentation lists true and false, in lowercase, for its boolean columns, and that is what StriveFormats writes. Spreadsheets often produce other spellings: Excel checkboxes export as TRUE/FALSE, and hand-typed files contain "Yes", "1" or "checked". StriveFormats converts capitals and yes/no/1/0 to true or false, and flags anything it can't map. A blank cell takes the column's default, which is true for Published on online store, Charge tax and Requires shipping, and false for Gift card.`, v);
     case "required_header":
       return tr(`{platform}'s importer reads the first row of the CSV as the header row before processing any data. If a required column name is missing from that row, the importer has nowhere to put that data, and it can't guess missing columns from the content. Column names are matched exactly (case-sensitive on most platforms), so "variant price" won't count as "Variant Price".`, v);
     case "money":

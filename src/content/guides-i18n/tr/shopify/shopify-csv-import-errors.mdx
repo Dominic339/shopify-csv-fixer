@@ -53,7 +53,7 @@ Herhangi bir adımdaki hata satırların başarısız olmasına neden olur. Shop
 
 **Mesaj:** Satırlar içe aktarılıyor ama Published, Gift Card veya Requires Shipping yanlış değeri gösteriyor
 
-**Neden:** Shopify'ın mantıksal sütunları `TRUE` veya `FALSE` (büyük harf) bekler. `Yes`, `yes`, `1`, `true` veya `True` gibi değerler her alanda kabul edilmez.
+**Neden:** Shopify'ın mantıksal sütunları `true` veya `false` bekler; Shopify'ın kendi şablonu ve belgeleri de bunları böyle yazar. `Yes`, `1` veya `N` gibi değerler geçerli değildir ve boş bir hücre sütunun varsayılan değerini alır (Published, Charge tax ve Requires shipping için `true`, Gift card için `false`).
 
 **Etkilenen sütunlar:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ Herhangi bir adımdaki hata satırların başarısız olmasına neden olur. Shop
 
 | Bunu değiştirin | Bununla |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 Excel'de: `Ctrl+H` (Bul ve Değiştir), daha uzun değerlerin içindeki metni değiştirmemek için "Tüm hücre içeriği eşleşsin"i işaretleyin.
 

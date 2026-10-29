@@ -53,7 +53,7 @@ timeToComplete: "12분"
 
 **메시지:** 행은 가져와지지만 Published, Gift Card, Requires Shipping 값이 잘못 표시됨
 
-**원인:** Shopify의 참/거짓 열은 `TRUE` 또는 `FALSE`(대문자)를 기대합니다. `Yes`, `yes`, `1`, `true`, `True` 같은 값은 모든 필드에서 허용되지는 않습니다.
+**원인:** Shopify의 불리언 열에는 `true` 또는 `false`를 입력합니다. Shopify 자체 템플릿과 문서도 이렇게 표기합니다. `Yes`, `1`, `N` 같은 값은 유효하지 않으며, 빈 셀은 열의 기본값을 따릅니다(Published, Charge tax, Requires shipping은 `true`, Gift card는 `false`).
 
 **해당 열:** `Published`, `Gift Card`, `Requires Shipping`, `Taxable`
 
@@ -61,8 +61,8 @@ timeToComplete: "12분"
 
 | 바꿀 값 | 바뀔 값 |
 |---|---|
-| `Yes`, `yes`, `Y`, `true`, `1` | `TRUE` |
-| `No`, `no`, `N`, `false`, `0` | `FALSE` |
+| `Yes`, `yes`, `Y`, `1`, `TRUE` | `true` |
+| `No`, `no`, `N`, `0`, `FALSE` | `false` |
 
 Excel에서는 `Ctrl+H`(찾기 및 바꾸기)를 누르고, 긴 값 안의 글자까지 바뀌지 않도록 "전체 셀 내용 일치"에 체크하세요.
 

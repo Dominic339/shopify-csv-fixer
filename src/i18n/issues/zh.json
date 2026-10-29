@@ -26,14 +26,14 @@
 "shopify/invalid_boolean_published": {
 "title": "Published 值无效",
 "explanation": "Published on online store 的值不是布尔值。",
-"whyPlatformCares": "Shopify 需要 TRUE/FALSE（或留空）。无效的值可能导致导入被阻止。",
-"howToFix": "请使用 TRUE、FALSE 或留空。"
+"whyPlatformCares": "Shopify 需要 true/false（或留空）。无效的值可能导致导入被阻止。",
+"howToFix": "请使用 true、false 或留空。"
 },
 "shopify/invalid_status": {
 "title": "Status 值无效",
-"explanation": "Status 不是 Active、Draft 或 Archived。",
+"explanation": "Status 不是 active、draft 或 archived。",
 "whyPlatformCares": "意外的状态值可能导致 Shopify 忽略该行或错误解读。",
-"howToFix": "请使用 \"Active\"、\"Draft\" 或 \"Archived\"（或留空）。"
+"howToFix": "请使用 \"active\"、\"draft\" 或 \"archived\"（或留空）。"
 },
 "shopify/option_order_invalid": {
 "title": "选项列顺序错误",
@@ -225,7 +225,7 @@
 "title": "不常见的 Status 值",
 "explanation": "Status 的值不在 Shopify 常用值之内。",
 "whyPlatformCares": "意外的值可能被忽略或产生令人困惑的结果。",
-"howToFix": "请使用 \"Active\"、\"Draft\" 或 \"Archived\"（或留空）。"
+"howToFix": "请使用 \"active\"、\"draft\" 或 \"archived\"（或留空）。"
 },
 "shopify/missing_status_value": {
 "title": "缺少 Status",

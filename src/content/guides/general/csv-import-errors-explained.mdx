@@ -90,11 +90,11 @@ The price field contains a non-numeric value. Common causes:
 
 **Fix:** Remove currency symbols and convert commas to periods for decimal separation. Format the column as "Number" in Excel before saving.
 
-### "Invalid boolean" / "Must be TRUE or FALSE"
+### "Invalid boolean" / "Must be true or false"
 
 A yes/no field contains an unexpected value. Platforms are strict about boolean formats:
 
-- **Shopify:** expects `TRUE` or `FALSE` (case-sensitive on some fields)
+- **Shopify:** expects `true` or `false`, as written in Shopify's own template
 - **WooCommerce:** uses `1` / `0` or `yes` / `no`
 - **Amazon:** uses `y` / `n`
 
