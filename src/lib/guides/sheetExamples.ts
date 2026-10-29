@@ -669,6 +669,11 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
     ["y", "Next,Second"],
     ["no", "N"],
   ]),
+  "amazon/quantity_on_fba_offer": {
+    cols: ["sku", "price", "quantity", "fulfillment-center-id"],
+    before: [["MUG-01", "15.00", "40", "AMAZON_NA"]],
+    after: [["MUG-01", "15.00", "", "AMAZON_NA"]],
+  },
   "amazon/brand_name_too_long": amz("brand-name", [["Acme Handmade Ceramics and Home Goods Company International", "Acme Ceramics"]]),
   "amazon/min_above_max_price": {
     cols: [...A, "minimum-seller-allowed-price", "maximum-seller-allowed-price"],

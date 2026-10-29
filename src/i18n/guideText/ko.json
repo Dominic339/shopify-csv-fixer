@@ -256,5 +256,10 @@
   "Use 1 or 0": "1 또는 0 사용",
   "the header row": "머리글 행",
   "expedited-shipping isn't a yes/no field. It lists the faster shipping options you offer, separated by commas: Next (one day), Second (two day), Domestic, International and Plus. For example, Next,Second offers one-day and two-day shipping. Use N, or leave the cell blank, if you offer none.": "expedited-shipping은 예/아니요 필드가 아닙니다. 제공하는 빠른 배송 옵션을 쉼표로 구분해 나열합니다: Next(1일), Second(2일), Domestic, International, Plus. 예를 들어 Next,Second는 1일 배송과 2일 배송을 제공합니다. 제공하지 않으면 N을 입력하거나 셀을 비워 두세요.",
-  "StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.": "StriveFormats는 expedited-shipping 셀을 쉼표로 나누고 각 부분을 대소문자와 관계없이 Amazon의 옵션 이름과 비교합니다. 빈 셀이나 N은 통과하며, y, yes, Standard 같은 나머지 값은 모두 표시됩니다."
+  "StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.": "StriveFormats는 expedited-shipping 셀을 쉼표로 나누고 각 부분을 대소문자와 관계없이 Amazon의 옵션 이름과 비교합니다. 빈 셀이나 N은 통과하며, y, yes, Standard 같은 나머지 값은 모두 표시됩니다.",
+  "Save as Text (Tab delimited) (*.txt).": "\"텍스트(탭으로 분리)(*.txt)\" 형식으로 저장하세요.",
+  "When done, select the helper column, right-click, and choose Delete. Save as Text (Tab delimited) (*.txt).": "끝나면 보조 열을 선택하고 마우스 오른쪽 버튼을 클릭해 \"삭제\"를 선택하세요. \"텍스트(탭으로 분리)(*.txt)\" 형식으로 저장하세요.",
+  "Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.": "파일 > 다운로드 > 탭으로 구분된 값(.tsv)을 선택한 다음, 파일 이름이 .txt로 끝나도록 바꾸세요.",
+  "Delete the helper column. Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.": "보조 열을 삭제하세요. 파일 > 다운로드 > 탭으로 구분된 값(.tsv)을 선택한 다음, 파일 이름이 .txt로 끝나도록 바꾸세요.",
+  "Amazon's Inventory Loader guide says to leave quantity blank for products fulfilled by Amazon. Their stock is the number of units the fulfillment center receives, and a quantity in the file converts the SKU to seller-fulfilled.": "Amazon Inventory Loader 가이드에 따르면 Amazon이 배송하는 상품은 quantity를 비워 둬야 합니다. 재고는 풀필먼트 센터가 받은 수량으로 정해지며, 파일에 수량을 넣으면 해당 SKU가 판매자 배송으로 바뀝니다."
 }

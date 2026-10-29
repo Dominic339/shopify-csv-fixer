@@ -2,7 +2,7 @@
 title: "Erreurs d'import de fichier plat Amazon : causes et solutions"
 description: "Corrigez les erreurs d'import de fichier plat Amazon les plus courantes : problèmes de SKU, codes d'état non valides, format des prix, valeurs de canal d'expédition et modèles incompatibles."
 keywords: ["erreurs fichier plat amazon", "erreur import csv amazon", "erreur fichier d'inventaire amazon", "corriger csv amazon", "erreurs inventory loader amazon", "validation fichier plat amazon", "erreur chargement groupé amazon"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Comment Amazon valide les fichiers plats CSV envoyés et ce qui provoque les échecs"
@@ -16,7 +16,7 @@ timeToComplete: "12 minutes"
 
 ## Comment Amazon valide les fichiers plats
 
-Les fichiers plats Amazon sont des fichiers CSV délimités par des tabulations ou des virgules, qui suivent des schémas de colonnes stricts définis pour chaque catégorie de produits. Quand vous envoyez un fichier plat, Amazon le fait passer par plusieurs étapes de validation :
+Les fichiers plats Amazon suivent des schémas de colonnes stricts propres à chaque catégorie de produits, et le guide de l'Inventory Loader d'Amazon demande d'enregistrer le fichier en texte délimité par des tabulations (.txt) avant l'envoi. Quand vous envoyez un fichier plat, Amazon le fait passer par plusieurs contrôles :
 
 1. **Correspondance du modèle** : vérifie que vos en-têtes de colonnes correspondent au modèle attendu pour ce type de fichier
 2. **Validation des champs obligatoires** : vérifie que toutes les colonnes obligatoires ont une valeur
@@ -24,7 +24,7 @@ Les fichiers plats Amazon sont des fichiers CSV délimités par des tabulations 
 4. **Règles métier** : vérifie les ASIN, valide les SKU, contrôle les codes d'état et les fourchettes de prix
 5. **Vérification du catalogue** : rapproche les identifiants produit du catalogue Amazon
 
-Après le traitement, Amazon génère un **rapport de traitement** (accessible dans Seller Central, sous Stock → Ajouter des produits via un chargement). Consultez toujours le rapport de traitement : il liste chaque ligne en échec avec l'erreur précise.
+Après le traitement, Amazon génère un **rapport de traitement** (dans Seller Central, sous Catalogue → Ajouter des produits via un chargement). Consultez-le toujours. Il liste chaque ligne en échec avec l'erreur précise.
 
 ---
 
@@ -34,8 +34,8 @@ Après le traitement, Amazon génère un **rapport de traitement** (accessible d
 
 **Règles pour seller_sku :**
 - 40 caractères maximum
-- Pas d'espaces (utilisez des tirets ou des traits de soulignement)
-- Lettres et chiffres, plus `-`, `_`, `.`
+- Le guide d'Amazon le décrit comme une chaîne alphanumérique ; le SKU d'exemple d'Amazon, `dt-black`, contient pourtant un trait d'union
+- Évitez les espaces et les autres symboles, que certains outils gèrent mal
 - Doit être unique dans tout votre compte vendeur Amazon
 
 **Solution :** vérifiez que chaque ligne a un SKU unique. Utilisez une formule comme `=NB.SI($A:$A; A2)` pour trouver les doublons. Raccourcissez les SKU de plus de 40 caractères.
@@ -73,7 +73,7 @@ Après le traitement, Amazon génère un **rapport de traitement** (accessible d
 | `Refurbished` | Reconditionné par le vendeur |
 | `Club` | Club (catégorie médias) |
 
-**Solution :** remplacez toute valeur d'état non standard par une valeur de la liste ci-dessus. `New` doit commencer par une majuscule ; `new` (en minuscules) est refusé.
+**Solution :** remplacez toute valeur d'état non standard par une valeur de la liste ci-dessus. Dans l'Inventory Loader, `item-condition` utilise des nombres : `11` pour Neuf, `1` à `4` pour Occasion (comme neuf, très bon état, bon état, état correct) et `5` à `8` pour Collection dans le même ordre. Le guide d'Amazon indique que `9` n'est pas utilisé.
 
 ---
 
@@ -86,6 +86,7 @@ Après le traitement, Amazon génère un **rapport de traitement** (accessible d
 - Aucun symbole monétaire
 - Doit être positif (supérieur à 0)
 - Point comme séparateur décimal
+- Pas de séparateur de milliers : `1250.00`, pas `1,250.00`
 
 **Solution :** supprimez les symboles monétaires et remplacez les virgules décimales par des points. Mettez la colonne des prix au format Nombre dans Excel avant d'enregistrer.
 
@@ -100,11 +101,11 @@ Après le traitement, Amazon génère un **rapport de traitement** (accessible d
 | Valeur | Description |
 |---|---|
 | `DEFAULT` | Expédié par le vendeur (FBM) |
-| `AMAZON_NA` (ou `AMAZON`) | Expédié par Amazon (FBA) |
+| `AMAZON_NA` | Expédié par Amazon (FBA) aux États-Unis |
 
 Le nom exact de la colonne et les valeurs acceptées varient légèrement selon le modèle de fichier plat. Vérifiez votre modèle.
 
-**Solution :** utilisez `DEFAULT` pour FBM et `AMAZON_NA` ou `AMAZON` pour FBA. N'utilisez pas `FBA`, `FBM` ni d'autres abréviations.
+**Solution :** utilisez `DEFAULT` pour FBM et `AMAZON_NA` pour FBA aux États-Unis. N'utilisez pas `FBA`, `FBM` ni d'autres abréviations. Sur les lignes FBA, laissez `quantity` vide : selon le guide d'Amazon, une quantité fait passer le SKU en expédition par le vendeur.
 
 ---
 
@@ -130,7 +131,7 @@ Le nom exact de la colonne et les valeurs acceptées varient légèrement selon 
 
 ## Erreur : mauvais modèle pour la catégorie du produit
 
-**Cause :** vous avez utilisé un modèle Inventory Loader général pour une catégorie qui exige un fichier plat spécifique (par exemple vêtements, chaussures, bijoux).
+**Cause :** vous avez utilisé l'Inventory Loader pour un produit qui n'est pas encore dans le catalogue Amazon. L'Inventory Loader crée ou met à jour uniquement des offres sur des produits existants ; les nouveaux produits demandent le fichier d'inventaire propre à la catégorie (par exemple Vêtements, Chaussures, Bijoux).
 
 Amazon propose des modèles par catégorie avec des champs obligatoires supplémentaires. Avec le mauvais modèle, tous les champs obligatoires propres à la catégorie manquent.
 
@@ -145,14 +146,11 @@ Catégories courantes avec leur propre modèle : vêtements, chaussures, bijoux,
 
 ## Lire le rapport de traitement
 
-Après l'envoi, téléchargez le rapport de traitement depuis Seller Central (Stock → Ajouter des produits via un chargement → Suivre l'état du chargement → Afficher le rapport de traitement).
+Après l'envoi, ouvrez le rapport de traitement dans Seller Central (Catalogue → Ajouter des produits via un chargement → Suivre l'état du chargement). Les menus de Seller Central changent parfois de place : si vous ne voyez pas ce chemin, recherchez « Ajouter des produits via un chargement » dans Seller Central.
 
-Le rapport comporte trois onglets :
-- **Summary** : nombre total de lignes, de réussites et d'échecs
-- **Results** : une ligne par enregistrement de votre fichier, avec son statut et le message d'erreur
-- **Original** : les données que vous avez envoyées
+Le rapport commence par un résumé : le nombre d'enregistrements traités et le nombre de réussites.
 
-Pour trouver les lignes en échec, filtrez l'onglet Results sur la colonne `status`. Les lignes `FAILURE` comportent un `error-code` et un `error-message` qui expliquent précisément le problème.
+En dessous, chaque problème occupe une ligne avec le numéro de ligne de votre fichier (`original-record-number`), le `sku`, un `error-code`, le `error-type` (Error ou Warning) et un `error-message`. Les erreurs bloquent la ligne ; les avertissements la laissent passer mais signalent un point à vérifier.
 
 ---
 

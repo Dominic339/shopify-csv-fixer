@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { isValidLocale, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
-import { toCsv } from "@/lib/csv";
+import { exportFileFor, toCsv } from "@/lib/csv";
 import { processCsv } from "@/lib/processCsvClient";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { exportCountsTowardLimit } from "@/lib/plans";
@@ -1083,15 +1083,15 @@ useEffect(() => {
       await consumeExport(rows.length);
 
       const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
-      const csv = toCsv(cols, rows);
+      const file = exportFileFor(activeFormat?.id, cols, rows);
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const blob = new Blob([file.text], { type: file.type });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
 
-      const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.csv$/i, "").trim() || "fixed";
-      a.download = `${base}_fixed.csv`;
+      const base = (exportBaseName ?? fileName ?? "fixed").replace(/\.(csv|txt|tsv)$/i, "").trim() || "fixed";
+      a.download = `${base}_fixed.${file.extension}`;
 
       document.body.appendChild(a);
       a.click();
@@ -1102,7 +1102,7 @@ useEffect(() => {
         rows: rows.length,
         fixes: autoFixes.length,
         score: Number(validation.score),
-        fileName: `${base}_fixed.csv`,
+        fileName: a.download,
       });
       setUpsellDismissed(false);
 

@@ -851,6 +851,12 @@
 "whyPlatformCares": "Inventory Loader Amazona oczekuje listy szybszych opcji wysyłki, które oferujesz, oddzielonych przecinkami: Next (jeden dzień), Second (dwa dni), Domestic, International i Plus. N lub pusta komórka oznacza brak. Słów takich jak yes czy true ani innych wartości nie da się dopasować do żadnej opcji.",
 "howToFix": "Wymień oferowane opcje oddzielone przecinkami, na przykład Next,Second. Wpisz N lub zostaw komórkę pustą, jeśli nie oferujesz szybkiej wysyłki."
 },
+"amazon/quantity_on_fba_offer": {
+"title": "Ilość w ofercie FBA",
+"explanation": "Wiersz z fulfillment-center-id Amazona (np. AMAZON_NA) zawiera też ilość w quantity.",
+"whyPlatformCares": "Przewodnik Amazona po Inventory Loaderze mówi, aby nie podawać ilości dla produktów wysyłanych przez Amazon. Ich stan wynika z liczby sztuk przyjętych przez centrum logistyczne, a ilość w pliku przełącza SKU na wysyłkę przez sprzedawcę.",
+"howToFix": "Wyczyść komórkę quantity w wierszach FBA. Ilość powinny mieć tylko wiersze wysyłane przez sprzedawcę (fulfillment-center-id DEFAULT lub puste)."
+},
 "amazon/product_id_scientific_notation": {
 "title": "Kod kreskowy zepsuty przez arkusz kalkulacyjny",
 "explanation": "product-id wygląda jak 1.23457E+11: arkusz kalkulacyjny zamienił kod kreskowy na notację naukową.",

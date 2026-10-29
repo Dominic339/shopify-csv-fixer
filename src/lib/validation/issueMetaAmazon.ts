@@ -223,6 +223,17 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
     howToFix: "List the options you offer separated by commas, for example Next,Second. Use N or leave the cell blank if you offer no expedited shipping.",
   },
 
+  "amazon/quantity_on_fba_offer": {
+    code: "amazon/quantity_on_fba_offer",
+    title: "Quantity on an FBA offer",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "A row with an Amazon fulfillment-center-id (such as AMAZON_NA) also has a quantity.",
+    whyPlatformCares: "Amazon's Inventory Loader guide says not to enter a quantity for products fulfilled by Amazon. Their stock comes from the units the fulfillment center receives, and a quantity in the file switches the SKU to seller-fulfilled.",
+    howToFix: "Clear the quantity cell on FBA rows. Only seller-fulfilled rows (fulfillment-center-id DEFAULT or blank) should have a quantity.",
+  },
+
   "amazon/product_id_scientific_notation": {
     code: "amazon/product_id_scientific_notation",
     title: "Barcode mangled by a spreadsheet",

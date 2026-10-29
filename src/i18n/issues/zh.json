@@ -851,6 +851,12 @@
 "whyPlatformCares": "Amazon 的 Inventory Loader 需要一个用逗号分隔的加急配送选项列表：Next（一天）、Second（两天）、Domestic、International 和 Plus。N 或空单元格表示不提供。yes、true 等词或其他任何值都无法对应到选项。",
 "howToFix": "列出你提供的选项并用逗号分隔，例如 Next,Second。如果不提供加急配送，请填 N 或将单元格留空。"
 },
+"amazon/quantity_on_fba_offer": {
+"title": "FBA 报价填写了数量",
+"explanation": "带有 Amazon fulfillment-center-id（如 AMAZON_NA）的行同时在 quantity 中填写了数量。",
+"whyPlatformCares": "Amazon 的 Inventory Loader 指南规定，由 Amazon 配送的商品不要填写数量。其库存来自运营中心收到的件数，在文件中填写数量会把该 SKU 转为卖家自配送。",
+"howToFix": "清空 FBA 行的 quantity 单元格。只有卖家自配送的行（fulfillment-center-id 为 DEFAULT 或留空）才应填写数量。"
+},
 "amazon/product_id_scientific_notation": {
 "title": "条形码被电子表格破坏",
 "explanation": "某个 product-id 看起来像 1.23457E+11：电子表格把条形码转换成了科学计数法。",

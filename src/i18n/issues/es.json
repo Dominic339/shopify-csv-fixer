@@ -851,6 +851,12 @@
 "whyPlatformCares": "El Inventory Loader de Amazon espera una lista separada por comas de las opciones de envío rápido que ofreces: Next (un día), Second (dos días), Domestic, International y Plus. N o una celda vacía significa ninguna. Palabras como yes o true, o cualquier otra cosa, no corresponden a ninguna opción.",
 "howToFix": "Enumera las opciones que ofreces separadas por comas, por ejemplo Next,Second. Usa N o deja la celda vacía si no ofreces envío urgente."
 },
+"amazon/quantity_on_fba_offer": {
+"title": "Cantidad en una oferta FBA",
+"explanation": "Una fila con un fulfillment-center-id de Amazon (como AMAZON_NA) también tiene una cantidad en quantity.",
+"whyPlatformCares": "La guía del Inventory Loader de Amazon dice que no se indique cantidad en los productos gestionados por Amazon. Su stock sale de las unidades que recibe el centro logístico, y una cantidad en el archivo cambia el SKU a gestionado por el vendedor.",
+"howToFix": "Vacía la celda quantity en las filas FBA. Solo las filas gestionadas por el vendedor (fulfillment-center-id DEFAULT o vacío) deben tener cantidad."
+},
 "amazon/product_id_scientific_notation": {
 "title": "Código de barras estropeado por una hoja de cálculo",
 "explanation": "Un product-id tiene la forma 1.23457E+11: una hoja de cálculo convirtió el código de barras a notación científica.",

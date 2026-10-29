@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { parseCsv, toCsv } from "@/lib/csv";
+import { exportFileFor, parseCsv, toCsv } from "@/lib/csv";
 import { convertCsv, CONVERT_FORMAT_OPTIONS, type ConvertResult } from "@/lib/convertCsv";
 import { CONVERT_ROUTES, routeFor } from "@/lib/convertRoutes";
 import { consumeExport } from "@/lib/quota";
@@ -24,8 +24,8 @@ import { useValidationText } from "@/lib/i18n/useValidationText";
 import { card, muted, platformLabel, StepTitle } from "@/app/app/fixer/ui";
 import { readTextFile } from "@/lib/textFile";
 
-function downloadCsv(filename: string, content: string) {
-  const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+function downloadFile(filename: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -145,14 +145,16 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
     setTargetFormatId(s);
   }
 
-  const outName = `${(fileName ?? "products").replace(/\.(csv|txt|tsv)$/i, "")}_${targetFormatId}.csv`;
+  const outExtension = targetFormatId.startsWith("amazon_") ? "txt" : "csv";
+  const outName = `${(fileName ?? "products").replace(/\.(csv|txt|tsv)$/i, "")}_${targetFormatId}.${outExtension}`;
 
   async function handleDownload() {
     if (!result) return;
     setError(null);
     try {
       await consumeExport(result.rows.length);
-      downloadCsv(outName, toCsv(result.headers, result.rows));
+      const file = exportFileFor(targetFormatId, result.headers, result.rows);
+      downloadFile(outName, file.text, file.type);
       trackToolEvent("convert_downloaded", { source: sourceFormatId, target: targetFormatId, rows: result.rows.length });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";

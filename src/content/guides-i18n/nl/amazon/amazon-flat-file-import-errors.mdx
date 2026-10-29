@@ -2,7 +2,7 @@
 title: "Importfouten in Amazon-flatfiles: oorzaken en oplossingen"
 description: "Los de meest voorkomende importfouten in Amazon-flatfiles op: SKU-problemen, ongeldige staatcodes, prijsnotatie, waarden voor het fulfillmentkanaal en sjablonen die niet overeenkomen."
 keywords: ["amazon flatfile importfouten", "amazon csv importfouten", "amazon flatfile fouten", "amazon csv repareren", "amazon inventory loader fouten", "amazon flatfile validatie", "amazon bulkupload fouten"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Hoe Amazon flatfile-uploads valideert en waardoor ze mislukken"
@@ -16,7 +16,7 @@ timeToComplete: "12 minuten"
 
 ## Hoe Amazon flatfiles valideert
 
-Amazon-flatfiles zijn tab- of kommagescheiden CSV-bestanden die strikte kolomschema's per productcategorie volgen. Als je een flatfile uploadt, gaat het bij Amazon door een reeks controles:
+Amazon-flatfiles volgen strikte kolomschema's die per productcategorie zijn vastgelegd, en volgens de Inventory Loader-handleiding van Amazon sla je het bestand vóór het uploaden op als tekst met tabs als scheidingsteken (.txt). Wanneer je een flatfile uploadt, voert Amazon een reeks controles uit:
 
 1. **Sjablooncontrole**: controleert of je kolomkoppen overeenkomen met het verwachte sjabloon voor het bestandstype
 2. **Verplichte velden**: controleert of alle verplichte kolommen een waarde hebben
@@ -24,7 +24,7 @@ Amazon-flatfiles zijn tab- of kommagescheiden CSV-bestanden die strikte kolomsch
 4. **Bedrijfsregels**: controleert ASIN's, SKU's, staatcodes en prijsbereiken
 5. **Cataloguscontrole**: koppelt product-ID's aan de catalogus van Amazon
 
-Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onder Voorraad → Producten toevoegen via upload). Bekijk het verwerkingsrapport altijd: het noemt elke mislukte rij met de specifieke fout.
+Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onder Catalogus → Producten toevoegen via upload). Bekijk het altijd. Het toont elke mislukte rij met de precieze fout.
 
 ---
 
@@ -34,8 +34,8 @@ Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onde
 
 **Regels voor seller_sku:**
 - Maximaal 40 tekens
-- Geen spaties (gebruik koppeltekens of underscores)
-- Letters en cijfers plus `-`, `_`, `.`
+- Amazons handleiding beschrijft de SKU als een alfanumerieke tekenreeks; Amazons eigen voorbeeld-SKU, `dt-black`, bevat wel een koppelteken
+- Vermijd spaties en andere symbolen, waar sommige tools slecht mee omgaan
 - Moet uniek zijn binnen je hele Amazon-verkopersaccount
 
 **Oplossing:** zorg dat elke rij een unieke SKU heeft. Met een formule als `=AANTAL.ALS($A:$A; A2)` vind je duplicaten. Kort SKU's van meer dan 40 tekens in.
@@ -73,7 +73,7 @@ Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onde
 | `Refurbished` | Door verkoper opgeknapt |
 | `Club` | Club (mediacategorie) |
 
-**Oplossing:** vervang afwijkende staatwaarden door een waarde uit de lijst hierboven. `New` moet met een hoofdletter; `new` (kleine letters) wordt geweigerd.
+**Oplossing:** vervang elke niet-standaard conditiewaarde door een waarde uit de lijst hierboven. In de Inventory Loader gebruikt `item-condition` in plaats daarvan getallen: `11` voor Nieuw, `1` tot en met `4` voor Gebruikt (zo goed als nieuw, zeer goed, goed, acceptabel) en `5` tot en met `8` voor Verzamelobject in dezelfde volgorde. Amazons handleiding markeert `9` als niet gebruikt.
 
 ---
 
@@ -86,6 +86,7 @@ Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onde
 - Geen valutatekens
 - Moet positief zijn (groter dan 0)
 - Punt als decimaalteken
+- Geen scheidingstekens voor duizendtallen: `1250.00`, niet `1,250.00`
 
 **Oplossing:** verwijder valutatekens en vervang decimale komma's door punten. Let op: in een Nederlandstalige Excel is de komma het decimaalteken, dus controleer na het opslaan in een teksteditor dat de prijzen een punt gebruiken.
 
@@ -100,11 +101,11 @@ Na de verwerking maakt Amazon een **verwerkingsrapport** (in Seller Central onde
 | Waarde | Beschrijving |
 |---|---|
 | `DEFAULT` | Verzonden door de verkoper (FBM) |
-| `AMAZON_NA` (of `AMAZON`) | Verzonden door Amazon (FBA) |
+| `AMAZON_NA` | Verzonden door Amazon (FBA) in de VS |
 
 De exacte kolomnaam en toegestane waarden verschillen iets per flatfile-sjabloon. Controleer je eigen sjabloon.
 
-**Oplossing:** gebruik `DEFAULT` voor FBM en `AMAZON_NA` of `AMAZON` voor FBA. Gebruik geen `FBA`, `FBM` of andere afkortingen.
+**Oplossing:** gebruik `DEFAULT` voor FBM en `AMAZON_NA` voor FBA in de VS. Gebruik geen `FBA`, `FBM` of andere afkortingen. Laat `quantity` leeg in FBA-rijen: volgens Amazons handleiding zet een aantal de SKU om naar verzending door de verkoper.
 
 ---
 
@@ -130,7 +131,7 @@ De exacte kolomnaam en toegestane waarden verschillen iets per flatfile-sjabloon
 
 ## Fout: verkeerd sjabloon voor de productcategorie
 
-**Oorzaak:** je gebruikte een algemeen Inventory Loader-sjabloon voor een categorie die een eigen flatfile vereist (bijv. kleding, schoenen, sieraden).
+**Oorzaak:** je hebt de Inventory Loader gebruikt voor een product dat nog niet in de Amazon-catalogus staat. De Inventory Loader maakt of werkt alleen aanbiedingen bij voor producten die al bestaan; nieuwe producten hebben het categoriespecifieke voorraadbestand nodig (bijv. Kleding, Schoenen, Sieraden).
 
 Amazon heeft categoriespecifieke sjablonen met extra verplichte velden. Met het verkeerde sjabloon ontbreken al die categoriespecifieke verplichte velden.
 
@@ -145,14 +146,11 @@ Veelvoorkomende categorieën met een eigen sjabloon: kleding, schoenen, sieraden
 
 ## Het verwerkingsrapport lezen
 
-Download na het uploaden het verwerkingsrapport in Seller Central (Voorraad → Producten toevoegen via upload → Uploadstatus controleren → Verwerkingsrapport bekijken).
+Open na het uploaden het verwerkingsrapport in Seller Central (Catalogus → Producten toevoegen via upload → Uploadstatus volgen). De menu's van Seller Central verschuiven weleens; zie je dit pad niet, zoek dan in Seller Central naar "Producten toevoegen via upload".
 
-Het rapport heeft drie tabbladen:
-- **Summary**: totaal aantal rijen, geslaagde en mislukte rijen
-- **Results**: één rij per record in je bestand, met status en foutmelding
-- **Original**: je oorspronkelijk geüploade gegevens
+Het rapport begint met een samenvatting: hoeveel records zijn verwerkt en hoeveel daarvan gelukt zijn.
 
-Zo vind je mislukte rijen: filter het tabblad Results op de kolom `status`. Rijen met `FAILURE` bevatten een `error-code` en een `error-message` die precies uitleggen wat er misging.
+Daaronder krijgt elk probleem een eigen regel met het rijnummer uit je bestand (`original-record-number`), de `sku`, een `error-code`, het `error-type` (Error of Warning) en een `error-message`. Fouten houden die rij tegen; waarschuwingen laten hem door, maar wijzen op iets wat je moet nakijken.
 
 ---
 

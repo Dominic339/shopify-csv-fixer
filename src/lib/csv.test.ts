@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCsv } from "./csv";
+import { exportFileFor, parseCsv } from "./csv";
 
 describe("parseCsv parse issues", () => {
   it("warns about extra and missing cells, with the row they are on", () => {
@@ -19,5 +19,19 @@ describe("parseCsv parse issues", () => {
   it("reports nothing for a well-formed or single-column file", () => {
     expect(parseCsv("A,B\n1,2\n").parseIssues).toEqual([]);
     expect(parseCsv("Email\na@example.com\n").parseIssues).toEqual([]);
+  });
+});
+
+describe("exportFileFor", () => {
+  it("writes Amazon files as tab-delimited text with no quoting", () => {
+    const file = exportFileFor("amazon_inventory_loader", ["sku", "item-note"], [{ sku: "A-1", "item-note": 'Box has a 2" dent,\tsee\nphoto' }]);
+    expect(file.extension).toBe("txt");
+    expect(file.text).toBe('sku\titem-note\r\nA-1\tBox has a 2" dent, see photo');
+  });
+
+  it("keeps quoted CSV for other platforms", () => {
+    const file = exportFileFor("shopify_products", ["Handle"], [{ Handle: "mug" }]);
+    expect(file.extension).toBe("csv");
+    expect(file.text).toBe('"Handle"\r\n"mug"');
   });
 });

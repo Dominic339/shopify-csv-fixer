@@ -851,6 +851,12 @@
 "whyPlatformCares": "Der Amazon Inventory Loader erwartet eine durch Kommas getrennte Liste der schnelleren Versandoptionen, die du anbietest: Next (ein Tag), Second (zwei Tage), Domestic, International und Plus. N oder eine leere Zelle bedeutet keine. Wörter wie yes oder true und alles andere lassen sich keiner Option zuordnen.",
 "howToFix": "Liste die angebotenen Optionen durch Kommas getrennt auf, zum Beispiel Next,Second. Verwende N oder lass die Zelle leer, wenn du keinen Expressversand anbietest."
 },
+"amazon/quantity_on_fba_offer": {
+"title": "Menge bei einem FBA-Angebot",
+"explanation": "Eine Zeile mit einer Amazon-fulfillment-center-id (etwa AMAZON_NA) enthält auch eine Menge in quantity.",
+"whyPlatformCares": "Laut Amazons Inventory-Loader-Anleitung gibst du für Produkte, die Amazon versendet, keine Menge an. Ihr Bestand ergibt sich aus den Einheiten, die das Logistikzentrum erhält, und eine Menge in der Datei stellt die SKU auf Versand durch den Verkäufer um.",
+"howToFix": "Leere die Zelle quantity in FBA-Zeilen. Nur Zeilen mit Versand durch den Verkäufer (fulfillment-center-id DEFAULT oder leer) sollten eine Menge haben."
+},
 "amazon/product_id_scientific_notation": {
 "title": "Barcode von Tabellenkalkulation beschädigt",
 "explanation": "Eine product-id sieht aus wie 1.23457E+11: Eine Tabellenkalkulation hat den Barcode in wissenschaftliche Schreibweise umgewandelt.",

@@ -217,7 +217,7 @@
    },
    {
     "q": "Meu arquivo é um .txt separado por tabulações. Posso usar?",
-    "a": "Sim, envie como está. O arquivo corrigido é exportado como CSV; abra numa planilha e salve como texto separado por tabulações se o Seller Central pedir .txt."
+    "a": "Sim, envie como está ou envie um CSV. O arquivo corrigido é baixado como texto separado por tabulações (.txt), o formato que o guia do Inventory Loader da Amazon pede, então você pode enviá-lo direto ao Seller Central."
    }
   ],
   "metaTitle": "Erros no arquivo Inventory Loader da Amazon: verifique grátis | StriveFormats",

@@ -256,5 +256,10 @@
   "Use 1 or 0": "1 または 0 を使用",
   "the header row": "見出し行",
   "expedited-shipping isn't a yes/no field. It lists the faster shipping options you offer, separated by commas: Next (one day), Second (two day), Domestic, International and Plus. For example, Next,Second offers one-day and two-day shipping. Use N, or leave the cell blank, if you offer none.": "expedited-shipping ははい/いいえの項目ではありません。提供する速達配送オプションをカンマ区切りで並べます：Next（翌日）、Second（2 日）、Domestic、International、Plus。たとえば Next,Second は翌日配送と 2 日配送を提供します。提供しない場合は N を入力するか、セルを空欄にしてください。",
-  "StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.": "StriveFormats は expedited-shipping の各セルをカンマで区切り、それぞれを大文字・小文字を問わず Amazon のオプション名と照合します。空欄または N は有効で、y、yes、Standard などそれ以外はすべて指摘されます。"
+  "StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.": "StriveFormats は expedited-shipping の各セルをカンマで区切り、それぞれを大文字・小文字を問わず Amazon のオプション名と照合します。空欄または N は有効で、y、yes、Standard などそれ以外はすべて指摘されます。",
+  "Save as Text (Tab delimited) (*.txt).": "「テキスト (タブ区切り) (*.txt)」形式で保存します。",
+  "When done, select the helper column, right-click, and choose Delete. Save as Text (Tab delimited) (*.txt).": "終わったら補助列を選択し、右クリックして「削除」を選びます。「テキスト (タブ区切り) (*.txt)」形式で保存します。",
+  "Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.": "［ファイル］>［ダウンロード］>［タブ区切り形式（.tsv）］を選び、ファイル名の末尾を .txt に変更します。",
+  "Delete the helper column. Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.": "補助列を削除し、［ファイル］>［ダウンロード］>［タブ区切り形式（.tsv）］を選び、ファイル名の末尾を .txt に変更します。",
+  "Amazon's Inventory Loader guide says to leave quantity blank for products fulfilled by Amazon. Their stock is the number of units the fulfillment center receives, and a quantity in the file converts the SKU to seller-fulfilled.": "Amazon の Inventory Loader ガイドでは、Amazon が出荷する商品の quantity は空欄にするよう定められています。在庫数はフルフィルメントセンターが受け取った数で決まり、ファイルに数量を入れるとその SKU は出品者出荷に切り替わります。"
 }

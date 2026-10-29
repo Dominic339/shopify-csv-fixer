@@ -72,6 +72,7 @@ const englishTr: Tr = fillTemplate;
 const COLUMN_NAME_MAP: Record<string, string> = {
   invalid_boolean_field: "will-ship-internationally",
   invalid_expedited_shipping: "expedited-shipping",
+  quantity_on_fba_offer: "quantity",
   blank_handle: "Handle",
   invalid_handle: "Handle",
   duplicate_handle: "Handle",
@@ -122,6 +123,7 @@ export function classifyIssue(input: IssueInput): IssueType {
 
   if (suffix === "missing_required_header" || suffix === "extra_column") return "required_header";
   if (suffix === "invalid_expedited_shipping") return "enum";
+  if (suffix === "quantity_on_fba_offer") return "misc";
 
   if (
     suffix.includes("boolean") ||
@@ -407,7 +409,23 @@ function boolSpellings(platform: string, tr: Tr) {
   return { t: "true", f: "false", pair: tr("true and false") };
 }
 
+/** Amazon's upload page takes tab-delimited text, so its save steps name that format instead of CSV. */
+const AMAZON_SAVE_STEPS: Record<string, string> = {
+  "Save as CSV (Comma delimited).": "Save as Text (Tab delimited) (*.txt).",
+  "When done, select the helper column, right-click, and choose Delete. Save as CSV (Comma delimited).":
+    "When done, select the helper column, right-click, and choose Delete. Save as Text (Tab delimited) (*.txt).",
+  "Go to File > Download > Comma Separated Values (.csv).":
+    "Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.",
+  "Delete the helper column. Go to File > Download > Comma Separated Values (.csv).":
+    "Delete the helper column. Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.",
+};
+
+function saveStepsFor(platform: string, tr: Tr): Tr {
+  return platform === "amazon" ? (t, v) => tr(AMAZON_SAVE_STEPS[t] ?? t, v) : tr;
+}
+
 function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: Tr): string[] {
+  tr = saveStepsFor(input.platform, tr);
   const platform = platformDisplayName(input.platform, tr);
   const col = { column };
   switch (type) {
@@ -520,6 +538,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
 // ---------------------------------------------------------------------------
 
 function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: Tr): string[] {
+  tr = saveStepsFor(input.platform, tr);
   const platform = platformDisplayName(input.platform, tr);
   const col = { column };
 
@@ -779,6 +798,9 @@ function getPlatformNote(type: IssueType, input: IssueInput, tr: Tr): string | n
     if (platform === "woocommerce")
       return tr("WooCommerce Product CSV supports 1 and 0 as well as yes and no for boolean fields. The StriveFormats fixer normalizes these to the correct format automatically.");
   }
+
+  if (issueCode === "amazon/quantity_on_fba_offer")
+    return tr("Amazon's Inventory Loader guide says to leave quantity blank for products fulfilled by Amazon. Their stock is the number of units the fulfillment center receives, and a quantity in the file converts the SKU to seller-fulfilled.");
 
   if (issueCode === "amazon/invalid_expedited_shipping")
     return tr("expedited-shipping isn't a yes/no field. It lists the faster shipping options you offer, separated by commas: Next (one day), Second (two day), Domestic, International and Plus. For example, Next,Second offers one-day and two-day shipping. Use N, or leave the cell blank, if you offer none.");

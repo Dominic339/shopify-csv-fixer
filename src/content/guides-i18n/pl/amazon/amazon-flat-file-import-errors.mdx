@@ -2,7 +2,7 @@
 title: "Błędy importu plików płaskich Amazon: przyczyny i rozwiązania"
 description: "Napraw najczęstsze błędy importu plików płaskich CSV Amazon: problemy z SKU, nieprawidłowe kody stanu, format cen, wartości kanału realizacji i niezgodne szablony."
 keywords: ["błędy importu pliku płaskiego amazon", "błędy importu csv amazon", "błędy flat file amazon", "naprawa csv amazon", "błędy inventory loader amazon", "walidacja pliku płaskiego amazon", "błędy masowego przesyłania amazon"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Jak Amazon sprawdza przesyłane pliki płaskie CSV i co powoduje błędy"
@@ -16,7 +16,7 @@ timeToComplete: "12 minut"
 
 ## Jak Amazon sprawdza pliki płaskie
 
-Pliki płaskie Amazon to pliki CSV rozdzielane tabulatorami lub przecinkami, które muszą trzymać się ścisłych schematów kolumn określonych dla każdej kategorii produktów. Gdy przesyłasz plik płaski, Amazon przepuszcza go przez kilka etapów walidacji:
+Pliki płaskie Amazon mają ścisłe schematy kolumn określone dla każdej kategorii produktów, a przewodnik Amazona po Inventory Loaderze mówi, aby przed przesłaniem zapisać plik jako tekst rozdzielany tabulatorami (.txt). Gdy przesyłasz plik płaski, Amazon przepuszcza go przez kilka etapów walidacji:
 
 1. **Zgodność z szablonem**: sprawdza, czy nagłówki kolumn odpowiadają szablonowi oczekiwanemu dla danego typu pliku
 2. **Pola wymagane**: sprawdza, czy wszystkie wymagane kolumny mają wartości
@@ -24,7 +24,7 @@ Pliki płaskie Amazon to pliki CSV rozdzielane tabulatorami lub przecinkami, kt�
 4. **Reguły biznesowe**: sprawdza ASIN-y, SKU, kody stanu i zakresy cen
 5. **Kontrola katalogu**: dopasowuje identyfikatory produktów do katalogu Amazon
 
-Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekcji Magazyn → Dodaj produkty przez przesłanie pliku). Zawsze przeglądaj raport przetwarzania. Zawiera każdy nieudany wiersz wraz z konkretnym błędem.
+Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekcji Katalog → Dodaj produkty przez przesłanie). Zawsze go przeglądaj. Zawiera każdy wiersz, który się nie powiódł, wraz z konkretnym błędem.
 
 ---
 
@@ -34,8 +34,8 @@ Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekc
 
 **Zasady dla seller_sku:**
 - Maksymalnie 40 znaków
-- Bez spacji (używaj łączników lub podkreśleń)
-- Litery i cyfry oraz `-`, `_`, `.`
+- Przewodnik Amazona opisuje go jako ciąg alfanumeryczny; przykładowy SKU samego Amazona, `dt-black`, zawiera jednak łącznik
+- Unikaj spacji i innych symboli, z którymi niektóre narzędzia sobie nie radzą
 - Musi być unikalny w całym koncie sprzedawcy Amazon
 
 **Rozwiązanie:** upewnij się, że każdy wiersz ma unikalne SKU. Duplikaty znajdziesz formułą `=LICZ.JEŻELI($A:$A; A2)`. Skróć SKU dłuższe niż 40 znaków.
@@ -73,7 +73,7 @@ Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekc
 | `Refurbished` | Odnowiony przez sprzedawcę |
 | `Club` | Club (kategoria multimediów) |
 
-**Rozwiązanie:** zastąp niestandardowe wartości stanu jedną z powyższej listy. `New` musi zaczynać się wielką literą; `new` (małymi literami) zostanie odrzucone.
+**Rozwiązanie:** zastąp każdą niestandardową wartość stanu wartością z listy powyżej. W Inventory Loaderze `item-condition` przyjmuje zamiast tego liczby: `11` dla nowego, od `1` do `4` dla używanego (jak nowy, bardzo dobry, dobry, akceptowalny) i od `5` do `8` dla kolekcjonerskiego w tej samej kolejności. Przewodnik Amazona oznacza `9` jako nieużywane.
 
 ---
 
@@ -86,6 +86,7 @@ Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekc
 - Bez symboli walut
 - Musi być dodatnia (większa od 0)
 - Kropka jako separator dziesiętny
+- Bez separatorów tysięcy: `1250.00`, a nie `1,250.00`
 
 **Rozwiązanie:** usuń symbole walut i zamień przecinki dziesiętne na kropki. W polskim Excelu separatorem dziesiętnym jest przecinek, więc po zapisaniu sprawdź w edytorze tekstu, że ceny mają kropkę.
 
@@ -100,11 +101,11 @@ Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekc
 | Wartość | Opis |
 |---|---|
 | `DEFAULT` | Realizacja przez sprzedawcę (FBM) |
-| `AMAZON_NA` (lub `AMAZON`) | Realizacja przez Amazon (FBA) |
+| `AMAZON_NA` | Realizacja przez Amazon (FBA) w USA |
 
 Dokładna nazwa kolumny i dozwolone wartości nieco się różnią w zależności od szablonu pliku płaskiego. Sprawdź swój szablon.
 
-**Rozwiązanie:** używaj `DEFAULT` dla FBM oraz `AMAZON_NA` lub `AMAZON` dla FBA. Nie używaj `FBA`, `FBM` ani innych skrótów.
+**Rozwiązanie:** używaj `DEFAULT` dla FBM i `AMAZON_NA` dla FBA w USA. Nie używaj `FBA`, `FBM` ani innych skrótów. W wierszach FBA zostaw `quantity` puste: według przewodnika Amazona podanie ilości przełącza SKU na wysyłkę przez sprzedawcę.
 
 ---
 
@@ -130,7 +131,7 @@ Dokładna nazwa kolumny i dozwolone wartości nieco się różnią w zależnośc
 
 ## Błąd: zły szablon dla kategorii produktu
 
-**Przyczyna:** użyto ogólnego szablonu Inventory Loader dla kategorii, która wymaga własnego pliku płaskiego (np. odzież, obuwie, biżuteria).
+**Przyczyna:** użyłeś Inventory Loadera dla produktu, którego jeszcze nie ma w katalogu Amazon. Inventory Loader tylko tworzy lub aktualizuje oferty dla istniejących produktów; nowe produkty wymagają pliku inwentarza właściwego dla kategorii (np. Odzież, Obuwie, Biżuteria).
 
 Amazon ma szablony dla poszczególnych kategorii z dodatkowymi polami wymaganymi. Przy złym szablonie brakuje wszystkich pól wymaganych dla danej kategorii.
 
@@ -145,14 +146,11 @@ Popularne kategorie z własnymi szablonami: odzież, obuwie, biżuteria, elektro
 
 ## Jak czytać raport przetwarzania
 
-Po przesłaniu pobierz raport przetwarzania z Seller Central (Magazyn → Dodaj produkty przez przesłanie pliku → Monitoruj stan przesyłania → Wyświetl raport przetwarzania).
+Po przesłaniu otwórz raport przetwarzania w Seller Central (Katalog → Dodaj produkty przez przesłanie → Monitoruj stan przesyłania). Menu Seller Central bywają przenoszone, więc jeśli nie widzisz tej ścieżki, wyszukaj w Seller Central „Dodaj produkty przez przesłanie”.
 
-Raport ma trzy karty:
-- **Summary**: łączna liczba wierszy, sukcesów i błędów
-- **Results**: jeden wiersz na każdy rekord z pliku, ze statusem i komunikatem błędu
-- **Original**: twoje pierwotnie przesłane dane
+Raport zaczyna się od podsumowania: ile rekordów przetworzono i ile z nich się powiodło.
 
-Aby znaleźć nieudane wiersze, odfiltruj kartę Results według kolumny `status`. Wiersze `FAILURE` zawierają `error-code` i `error-message`, które dokładnie wyjaśniają, co poszło nie tak.
+Poniżej każdy problem ma osobny wiersz z numerem wiersza z twojego pliku (`original-record-number`), `sku`, `error-code`, `error-type` (Error lub Warning) i `error-message`. Błędy zatrzymują dany wiersz; ostrzeżenia go przepuszczają, ale wskazują coś do sprawdzenia.
 
 ---
 

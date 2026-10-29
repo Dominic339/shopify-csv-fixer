@@ -97,7 +97,7 @@ describe("eBay", () => {
 
 describe("Amazon Inventory Loader", () => {
   it("accepts numeric product-id-type codes and keeps fulfillment-center-id", () => {
-    const res = run("amazon_inventory_loader", "sku,product-id,product-id-type,price,quantity,fulfillment-center-id\nA-1,B08XYZABCD,1,19.99,5,AMAZON_EU");
+    const res = run("amazon_inventory_loader", "sku,product-id,product-id-type,price,quantity,fulfillment-center-id\nA-1,B08XYZABCD,1,19.99,,AMAZON_EU");
     expect(res.issues).toEqual([]);
     expect(res.fixedHeaders).toContain("fulfillment-center-id");
   });
@@ -139,6 +139,26 @@ describe("Amazon Inventory Loader", () => {
       "sku,product-id,product-id-type,price,quantity,will-ship-internationally,expedited-shipping\nA,B08XYZABCD,1,10,1,2,\"Next,Second\"\nB,B08XYZABCE,1,10,1,1,N\nC,B08XYZABCF,1,10,1,Y,\"domestic, international\"\nD,B08XYZABCG,1,10,1,n,"
     );
     expect(codes(res)).toEqual([]);
+  });
+
+  it("accepts delete in the min/max price columns and flags 0", () => {
+    const res = run(
+      "amazon_inventory_loader",
+      "sku,product-id,product-id-type,price,minimum-seller-allowed-price,maximum-seller-allowed-price,quantity\nA,B08XYZABCD,1,10,delete,DELETE,1\nB,B08XYZABCE,1,10,0,,1"
+    );
+    expect(res.issues.map((i) => [i.rowIndex, i.column, i.code])).toEqual([[1, "minimum-seller-allowed-price", "amazon/invalid_price"]]);
+    expect(res.fixedRows[0]["minimum-seller-allowed-price"]).toBe("delete");
+  });
+
+  it("flags a quantity on an FBA offer and condition code 9", () => {
+    const res = run(
+      "amazon_inventory_loader",
+      "sku,product-id,product-id-type,price,quantity,item-condition,fulfillment-center-id\nA,B08XYZABCD,1,10,5,11,AMAZON_NA\nB,B08XYZABCE,1,10,5,9,DEFAULT"
+    );
+    expect(res.issues.map((i) => [i.rowIndex, i.code])).toEqual([
+      [0, "amazon/quantity_on_fba_offer"],
+      [1, "amazon/invalid_item_condition"],
+    ]);
   });
 
   it("flags yes/no words in the shipping fields", () => {

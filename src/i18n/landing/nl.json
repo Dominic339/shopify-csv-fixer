@@ -217,7 +217,7 @@
    },
    {
     "q": "Mijn bestand is een tab-gescheiden .txt. Kan ik dat gebruiken?",
-    "a": "Ja, upload het zoals het is. Het gecorrigeerde bestand wordt als CSV geëxporteerd; open het in een spreadsheet en sla het op als tab-gescheiden tekst als Seller Central om een .txt vraagt."
+    "a": "Ja, upload het zoals het is, of upload een CSV. Het gecorrigeerde bestand wordt gedownload als tab-gescheiden tekst (.txt), het formaat dat de Inventory Loader-handleiding van Amazon vraagt, dus je kunt het direct in Seller Central uploaden."
    }
   ],
   "metaTitle": "Fouten in je Amazon Inventory Loader-bestand oplossen | StriveFormats",

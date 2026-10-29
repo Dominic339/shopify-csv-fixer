@@ -2,7 +2,7 @@
 title: "Amazon Flat File Import Errors: Causes and Fixes"
 description: "Fix the most common Amazon flat file CSV import errors: SKU problems, invalid condition codes, price formatting, fulfillment channel values, and template mismatch issues."
 keywords: ["amazon flat file import errors", "amazon csv import errors", "amazon flat file errors", "fix amazon csv", "amazon inventory loader errors", "amazon flat file validation", "amazon bulk upload errors"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "How Amazon validates flat file CSV uploads and what causes failures"
@@ -16,7 +16,7 @@ timeToComplete: "12 minutes"
 
 ## How Amazon Flat File Validation Works
 
-Amazon flat files are tab-delimited or comma-delimited CSV files that follow strict column schemas defined per product category. When you upload a flat file, Amazon runs it through a validation pipeline:
+Amazon flat files follow strict column schemas defined per product category, and Amazon's Inventory Loader guide says to save the file as tab-delimited text (.txt) before uploading. When you upload a flat file, Amazon runs it through a validation pipeline:
 
 1. **Template match**: checks that your column headers match the expected template for the file type
 2. **Required field validation**: verifies all required columns have values
@@ -24,7 +24,7 @@ Amazon flat files are tab-delimited or comma-delimited CSV files that follow str
 4. **Business rules**: verifies ASINs, validates SKUs, checks condition codes and price ranges
 5. **Catalog check**: matches product IDs to Amazon's catalog
 
-After processing, Amazon generates a **Processing Report** (accessible in Seller Central under Inventory → Add Products via Upload). Always review it. It lists every row that failed and the specific error.
+After processing, Amazon generates a **Processing Report** (in Seller Central under Catalog → Add Products via Upload). Always review it. It lists every row that failed and the specific error.
 
 ---
 
@@ -34,8 +34,8 @@ After processing, Amazon generates a **Processing Report** (accessible in Seller
 
 **Rules for seller_sku:**
 - Maximum 40 characters
-- No spaces (use hyphens or underscores)
-- Alphanumeric plus `-`, `_`, `.`
+- Amazon's guide describes it as an alphanumeric string; its own example SKU, `dt-black`, also uses a hyphen
+- Avoid spaces and other symbols, which some tools mishandle
 - Must be unique across your entire Amazon seller account
 
 **Fix:** Ensure every row has a unique SKU. Use a formula like `=COUNTIF($A:$A, A2)` to find duplicates. Trim any SKUs over 40 characters.
@@ -73,7 +73,7 @@ After processing, Amazon generates a **Processing Report** (accessible in Seller
 | `Refurbished` | Seller refurbished |
 | `Club` | Club (media category) |
 
-**Fix:** Replace any non-standard condition values with one from the list above. `New` must be capitalized; `new` (lowercase) is rejected.
+**Fix:** Replace any non-standard condition values with one from the list above. In the Inventory Loader, `item-condition` takes numbers instead: `11` for New, `1` to `4` for Used (Like New, Very Good, Good, Acceptable) and `5` to `8` for Collectible in the same order. Amazon's guide marks `9` as not used.
 
 ---
 
@@ -86,6 +86,7 @@ After processing, Amazon generates a **Processing Report** (accessible in Seller
 - No currency symbols
 - Must be positive (greater than 0)
 - Period as decimal separator
+- No thousands separators: `1250.00`, not `1,250.00`
 
 **Fix:** Remove currency symbols and replace comma decimal separators with periods. Format the price column as Number in Excel before saving.
 
@@ -100,11 +101,11 @@ After processing, Amazon generates a **Processing Report** (accessible in Seller
 | Value | Description |
 |---|---|
 | `DEFAULT` | Fulfilled by merchant (FBM) |
-| `AMAZON_NA` (or `AMAZON`) | Fulfilled by Amazon (FBA) |
+| `AMAZON_NA` | Fulfilled by Amazon (FBA) in the US |
 
 The exact column name and accepted values vary slightly by flat file template. Check your specific template.
 
-**Fix:** Use `DEFAULT` for FBM and `AMAZON_NA` or `AMAZON` for FBA. Do not use `FBA`, `FBM`, or other shorthand values.
+**Fix:** Use `DEFAULT` for FBM and `AMAZON_NA` for FBA in the US. Do not use `FBA`, `FBM`, or other shorthand values. On FBA rows, leave `quantity` blank: Amazon's guide says a quantity switches the SKU to seller-fulfilled.
 
 ---
 
@@ -130,7 +131,7 @@ The exact column name and accepted values vary slightly by flat file template. C
 
 ## Error: Wrong Template for Product Category
 
-**Cause:** You used a general Inventory Loader template for a category that requires a category-specific flat file (e.g., Clothing, Shoes, Jewelry).
+**Cause:** You used the Inventory Loader for a product that isn't in Amazon's catalog yet. The Inventory Loader only creates or updates offers on products that already exist; new products need the category-specific inventory file (e.g., Clothing, Shoes, Jewelry).
 
 Amazon has category-specific templates with additional required fields. Using the wrong template causes all category-specific required fields to be missing.
 
@@ -145,14 +146,11 @@ Common categories with their own templates: Clothing, Shoes, Jewelry, Electronic
 
 ## Reading the Processing Report
 
-After uploading, download the Processing Report from Seller Central (Inventory → Add Products via Upload → Monitor Upload Status → View Processing Report).
+After uploading, open the upload's Processing Report in Seller Central (Catalog → Add Products via Upload → Monitor Upload Status). Seller Central menus move around, so if you don't see this path, search Seller Central for "Add Products via Upload".
 
-The report has three tabs:
-- **Summary**: total rows, successes, and failures
-- **Results**: one row per record in your file, with status and error message
-- **Original**: your original uploaded data
+The report starts with a summary: how many records were processed and how many succeeded.
 
-To find failed rows: filter the Results tab by the `status` column. `FAILURE` rows include an `error-code` and `error-message` that explain exactly what went wrong.
+Below that, each problem gets one line with the row number from your file (`original-record-number`), the `sku`, an `error-code`, the `error-type` (Error or Warning) and an `error-message`. Errors stop that row; warnings let it through but point to something worth checking.
 
 ---
 

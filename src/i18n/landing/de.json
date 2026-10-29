@@ -217,7 +217,7 @@
    },
    {
     "q": "Meine Datei ist eine tabgetrennte .txt-Datei. Kann ich sie nutzen?",
-    "a": "Ja, lade sie einfach hoch. Die korrigierte Datei wird als CSV exportiert; öffne sie in einer Tabelle und speichere sie als tabgetrennten Text, wenn Seller Central eine .txt verlangt."
+    "a": "Ja, lade sie einfach hoch, oder lade eine CSV hoch. Die korrigierte Datei wird als tabgetrennter Text (.txt) heruntergeladen, also in dem Format, das Amazons Inventory-Loader-Anleitung verlangt, und du kannst sie direkt in Seller Central hochladen."
    }
   ],
   "metaTitle": "Amazon Inventory Loader: Fehler in der Lagerbestandsdatei beheben | StriveFormats",

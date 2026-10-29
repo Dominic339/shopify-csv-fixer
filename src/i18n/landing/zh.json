@@ -217,7 +217,7 @@
    },
    {
     "q": "我的文件是制表符分隔的.txt文件，可以使用吗？",
-    "a": "可以，直接上传即可。修复后的文件会导出为CSV；如果卖家平台需要.txt，请在表格软件中打开并另存为制表符分隔的文本。"
+    "a": "可以，直接上传即可，也可以上传 CSV。修复后的文件会以 Amazon Inventory Loader 指南要求的制表符分隔文本（.txt）格式下载，因此可以直接上传到卖家平台。"
    }
   ],
   "metaTitle": "Amazon库存文件（Inventory Loader）错误解决 | StriveFormats",

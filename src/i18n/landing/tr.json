@@ -217,7 +217,7 @@
    },
    {
     "q": "Dosyam sekmeyle ayrılmış bir .txt. Kullanabilir miyim?",
-    "a": "Evet, olduğu gibi yükleyin. Düzeltilmiş dosya CSV olarak dışa aktarılır; Seller Central .txt isterse bir elektronik tabloda açıp sekmeyle ayrılmış metin olarak kaydedin."
+    "a": "Evet, olduğu gibi yükleyin veya bir CSV yükleyin. Düzeltilmiş dosya, Amazon'un Inventory Loader kılavuzunun istediği biçimde, sekmeyle ayrılmış metin (.txt) olarak iner; böylece doğrudan Seller Central'a yükleyebilirsiniz."
    }
   ],
   "metaTitle": "Amazon Inventory Loader dosyası hataları – ücretsiz kontrol | StriveFormats",

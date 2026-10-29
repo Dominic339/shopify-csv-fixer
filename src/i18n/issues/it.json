@@ -851,6 +851,12 @@
 "whyPlatformCares": "L'Inventory Loader di Amazon si aspetta un elenco separato da virgole delle opzioni di spedizione veloce che offri: Next (un giorno), Second (due giorni), Domestic, International e Plus. N o una cella vuota significa nessuna. Parole come yes o true, o qualsiasi altra cosa, non corrispondono a nessuna opzione.",
 "howToFix": "Elenca le opzioni che offri separate da virgole, ad esempio Next,Second. Usa N o lascia la cella vuota se non offri la spedizione rapida."
 },
+"amazon/quantity_on_fba_offer": {
+"title": "Quantità su un'offerta FBA",
+"explanation": "Una riga con un fulfillment-center-id di Amazon (come AMAZON_NA) contiene anche una quantità in quantity.",
+"whyPlatformCares": "La guida dell'Inventory Loader di Amazon dice di non inserire una quantità per i prodotti gestiti da Amazon. Il loro stock deriva dalle unità ricevute dal centro logistico, e una quantità nel file trasforma lo SKU in gestito dal venditore.",
+"howToFix": "Svuota la cella quantity nelle righe FBA. Solo le righe gestite dal venditore (fulfillment-center-id DEFAULT o vuoto) devono avere una quantità."
+},
 "amazon/product_id_scientific_notation": {
 "title": "Codice a barre rovinato da un foglio di calcolo",
 "explanation": "Un product-id ha la forma 1.23457E+11: un foglio di calcolo ha convertito il codice a barre in notazione scientifica.",

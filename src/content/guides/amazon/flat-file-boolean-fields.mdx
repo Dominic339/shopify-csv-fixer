@@ -24,7 +24,7 @@ Amazon doesn't use one yes/no format across all of its upload files. What a colu
 | Inventory Loader (offer file with `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` or `1` for US only, `y` or `2` for international |
 | Inventory Loader | `expedited-shipping` | Not yes/no: a list of shipping options (see below) |
 
-Amazon's own Listings API also stores `batteries_required` as a true/false value, which matches what sellers see in their category templates.
+Amazon's Inventory Loader guide lists `batteries_required` and `are_batteries_included` with the options `true` or `false`, and Amazon's Listings API stores them as true/false too.
 
 **The most common mistake:** typing a word that isn't on the template's list, such as `Yes`, `Y` or `1` in a column whose Valid Values tab says `true` / `false`, or copying a convention from one Amazon file into another.
 
