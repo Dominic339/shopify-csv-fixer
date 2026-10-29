@@ -86,7 +86,11 @@
     "metaTitle": "{title} | Poradnik CSV {platform}",
     "metaIssueDescription": "{description} Dowiedz się, jak krok po kroku naprawić ten błąd importu CSV w {platform} w StriveFormats, Excelu i Arkuszach Google.",
     "faqWhatIs": "Co oznacza błąd „{title}”?",
-    "faqHowFix": "Jak naprawić „{title}”?"
+    "faqHowFix": "Jak naprawić „{title}”?",
+    "sheetTitle": "Jak to wygląda w pliku",
+    "sheetBefore": "W twoim pliku",
+    "sheetAfter": "Po poprawce",
+    "sheetEmpty": "(puste)"
   },
   "guides": {
     "title": "Poradniki importu CSV",

@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform} CSV-handleiding",
     "metaIssueDescription": "{description} Zo los je deze {platform} CSV-importfout stap voor stap op in StriveFormats, Excel en Google Spreadsheets.",
     "faqWhatIs": "Wat is de fout „{title}”?",
-    "faqHowFix": "Hoe los ik „{title}” op?"
+    "faqHowFix": "Hoe los ik „{title}” op?",
+    "sheetTitle": "Zo ziet het eruit in je bestand",
+    "sheetBefore": "In je bestand",
+    "sheetAfter": "Na de correctie",
+    "sheetEmpty": "(leeg)"
   },
   "guides": {
     "title": "CSV-importhanleidingen",

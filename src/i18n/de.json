@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform}-CSV-Anleitung",
     "metaIssueDescription": "{description} So behebst du diesen {platform}-CSV-Importfehler Schritt für Schritt in StriveFormats, Excel und Google Tabellen.",
     "faqWhatIs": "Was bedeutet der Fehler „{title}“?",
-    "faqHowFix": "Wie behebe ich „{title}“?"
+    "faqHowFix": "Wie behebe ich „{title}“?",
+    "sheetTitle": "So sieht es in deiner Datei aus",
+    "sheetBefore": "In deiner Datei",
+    "sheetAfter": "Nach der Korrektur",
+    "sheetEmpty": "(leer)"
   },
   "guides": {
     "title": "CSV-Import-Anleitungen",

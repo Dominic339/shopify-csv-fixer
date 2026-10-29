@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform} CSVガイド",
     "metaIssueDescription": "{description} この{platform} CSVインポートエラーをStriveFormats、Excel、Googleスプレッドシートで解決する手順を解説します。",
     "faqWhatIs": "「{title}」エラーとは？",
-    "faqHowFix": "「{title}」はどう解決しますか？"
+    "faqHowFix": "「{title}」はどう解決しますか？",
+    "sheetTitle": "ファイルではこう見えます",
+    "sheetBefore": "あなたのファイル",
+    "sheetAfter": "修正後",
+    "sheetEmpty": "（空）"
   },
   "guides": {
     "title": "CSVインポートガイド",

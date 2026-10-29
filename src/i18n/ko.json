@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform} CSV 가이드",
     "metaIssueDescription": "{description} 이 {platform} CSV 가져오기 오류를 StriveFormats, Excel, Google 스프레드시트에서 단계별로 해결하는 방법을 알아보세요.",
     "faqWhatIs": "'{title}' 오류란 무엇인가요?",
-    "faqHowFix": "'{title}' 문제는 어떻게 해결하나요?"
+    "faqHowFix": "'{title}' 문제는 어떻게 해결하나요?",
+    "sheetTitle": "파일에서는 이렇게 보입니다",
+    "sheetBefore": "내 파일",
+    "sheetAfter": "수정 후",
+    "sheetEmpty": "(비어 있음)"
   },
   "guides": {
     "title": "CSV 가져오기 가이드",

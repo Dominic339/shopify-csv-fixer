@@ -17,9 +17,9 @@ import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 
-/** Distinct import checks across the built-in formats. */
+/** Distinct import checks across the built-in formats (formats can share a rule set). */
 function countChecks(): number {
-  return Object.values(ISSUE_META_REGISTRY).reduce((n, checks) => n + Object.keys(checks).length, 0);
+  return new Set(Object.values(ISSUE_META_REGISTRY).flatMap((checks) => Object.keys(checks))).size;
 }
 
 /** Built-in format names in the page's language, for the fixer's format picker. */

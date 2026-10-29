@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform} CSV指南",
     "metaIssueDescription": "{description} 了解如何在StriveFormats、Excel和Google表格中逐步修复这个{platform} CSV导入错误。",
     "faqWhatIs": "什么是\"{title}\"错误？",
-    "faqHowFix": "如何修复\"{title}\"？"
+    "faqHowFix": "如何修复\"{title}\"？",
+    "sheetTitle": "在文件中的样子",
+    "sheetBefore": "你的文件",
+    "sheetAfter": "修复后",
+    "sheetEmpty": "（空）"
   },
   "guides": {
     "title": "CSV导入指南",

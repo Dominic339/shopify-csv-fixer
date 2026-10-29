@@ -115,7 +115,7 @@ test("/api/ping responds 200 and is not rate-limited on back-to-back requests", 
   }
 });
 
-test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, Examples)", async ({ page }) => {
+test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sheets, before/after example)", async ({ page }) => {
   // Visit a well-known Shopify boolean issue guide
   await page.goto("/guides/shopify/invalid-boolean-published");
 
@@ -128,8 +128,10 @@ test("issue guide page renders expanded sections (Fix in Excel, Fix in Google Sh
   // Fix in Google Sheets section
   await expect(page.getByRole("heading", { name: /Fix in Google Sheets/i })).toBeVisible();
 
-  // Examples section
-  await expect(page.getByRole("heading", { name: /Examples/i })).toBeVisible();
+  // Before/after spreadsheet: the broken value and the fixed one
+  await expect(page.getByRole("heading", { name: /What it looks like in your file/i })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "yes", exact: true })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "true", exact: true }).first()).toBeVisible();
 
   // Prevent it next time section
   await expect(page.getByRole("heading", { name: /Prevent it next time/i })).toBeVisible();

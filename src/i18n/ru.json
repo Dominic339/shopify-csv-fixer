@@ -86,7 +86,11 @@
     "metaTitle": "{title} | Руководство по CSV для {platform}",
     "metaIssueDescription": "{description} Пошаговое исправление этой ошибки импорта CSV в {platform} в StriveFormats, Excel и Google Таблицах.",
     "faqWhatIs": "Что означает ошибка «{title}»?",
-    "faqHowFix": "Как исправить «{title}»?"
+    "faqHowFix": "Как исправить «{title}»?",
+    "sheetTitle": "Как это выглядит в файле",
+    "sheetBefore": "В вашем файле",
+    "sheetAfter": "После исправления",
+    "sheetEmpty": "(пусто)"
   },
   "guides": {
     "title": "Руководства по импорту CSV",
