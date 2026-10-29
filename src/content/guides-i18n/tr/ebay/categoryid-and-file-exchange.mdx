@@ -1,0 +1,156 @@
+---
+title: "eBay CategoryID ve File Exchange: Nedir ve Nasıl Ayarlanır"
+description: "eBay'deki CategoryID alanının ne olduğunu, File Exchange yüklemelerinde neden zorunlu olduğunu, ürünleriniz için doğru kategori ID'sini nasıl bulacağınızı ve tüm kataloğunuza toplu olarak nasıl gireceğinizi öğrenin."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "ebay kategori id", "ebay csv içe aktarma", "ebay düz dosya kategori", "ebay toplu ilan yükleme", "ebay categoryid bulma"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "File Exchange CSV dosyalarındaki CategoryID sütununun neyi temsil ettiği"
+  - "Eksik veya yanlış bir CategoryID'nin ilanların neden başarısız olmasına yol açtığı"
+  - "Ürün türünüz için doğru CategoryID'yi nasıl bulacağınız"
+  - "CategoryID'yi yüzlerce satıra verimli şekilde nasıl gireceğiniz"
+  - "Yüklemeden önce kategori seçimini doğrulamak için ipuçları"
+bestFor: "File Exchange veya diğer toplu yükleme araçlarını kullanan ve yeni ya da mevcut ilanlara kategori ID'si ataması gereken eBay satıcıları"
+timeToComplete: "10 dakika"
+---
+
+## CategoryID nedir?
+
+eBay'in toplu ilan CSV'sindeki `Category` sütunu (File Exchange şablonunun sürümüne göre `CategoryID`), ürününüzün ait olduğu eBay kategorisinin **sayısal kimliğidir**. eBay'deki her etkin ilanın bir kategorisi olmalıdır ve eBay bu ID'yi şunları belirlemek için kullanır:
+
+- İlanınızın kategorilerde gezinirken nerede görüneceği.
+- İlanınız için hangi ürün özelliklerinin (zorunlu alanların) geçerli olduğu.
+- Ürününüzün hangi alıcı aramalarında çıkacağı.
+
+Eksik veya yanlış bir CategoryID, File Exchange yüklemelerinin tamamen başarısız olmasının ya da eksik ürün özellikli ilanlar oluşmasının en yaygın nedenlerinden biridir.
+
+---
+
+## CategoryID ile kategori yolu
+
+CSV, okunabilir kategori yolunu değil, bir **sayı** (CategoryID) ister. Örneğin:
+
+| Kategori yolu | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+CSV'de yol metnini kullanamazsınız. Sayısal ID olmalıdır.
+
+---
+
+## CategoryID ürün özellikleri için neden önemlidir
+
+eBay'in ürün özellikleri sistemi (marka, beden, renk, malzeme vb.) kategoriye bağlıdır. Yanlış kategori seçmek şu anlama gelir:
+- Doğru kategorinin zorunlu ürün özellikleri ne istenir ne de denetlenir.
+- Zorunlu özellikler eksikse ilanınız arama sonuçlarında geri plana düşebilir.
+- Kategorinizde ürün özelliklerine göre filtreleme yapan alıcılar ilanınızı bulamaz.
+
+Her zaman geniş bir üst kategori yerine mümkün olan en belirli kategoriyi (ürününüzü tam olarak tanımlayan en alt kategoriyi) atayın.
+
+---
+
+## Doğru CategoryID nasıl bulunur
+
+### Yöntem 1: eBay'in kategori önerileri (Seller Hub)
+
+1. eBay Seller Hub'da ürünlerinizden biri için elle bir taslak ilan oluşturun.
+2. "Kategori" adımında arama kutusunu kullanarak ürün türünüzü bulun.
+3. eBay anahtar kelimelerinize göre kategoriler önerir.
+4. En uygun ve en belirli kategoriyi seçin.
+5. Kategori adını not edin ve ID'yi aşağıdaki yöntemlerden biriyle bulun.
+
+### Yöntem 2: eBay'in kategori ID başvuru listesi
+
+Seller Hub Reports yardımı, toplu yüklemeler için bir kategori adı ve ID başvuru listesine bağlantı verir:
+
+1. **Seller Hub → Raporlar → Yüklemeler** bölümüne gidin ve yükleme şablonlarının yardımını açın.
+2. Kategori adı ve ID başvuru listesini bulun ve ürün türünüzü arayın.
+3. Geliştiriciler tüm kategori ağacını eBay'in API'lerinden de alabilir (örneğin Taxonomy API).
+
+### Yöntem 3: Başarılı bir ilanın URL'sine bakın
+
+Aynı kategoride kendi ilanınız veya bir rakibin ilanı varsa:
+
+1. eBay'de kategori sayfasını açın (bir ilanın üstündeki gezinme yolunda kategori adına tıklayın).
+2. Kategori sayfalarının URL'leri `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176` gibidir.
+3. Kategori adından sonraki sayı (`11483`, erkek kot pantolon) kategori ID'sidir.
+
+### Yöntem 4: Bir kategori şablonu indirin
+
+**Seller Hub → Raporlar → Yüklemeler** bölümünde eBay belirli bir kategori için ilan şablonu indirmenize izin verir. Orada seçtiğiniz kategori ID'si, dosyanızda kullanmanız gereken ID'dir.
+
+---
+
+## File Exchange CSV'sinde CategoryID
+
+eBay'in ilan şablonlarında sütunun adı `*Category`'dir (yıldız işareti zorunlu bir sütunu belirtir), taslak şablonunda ise `Category ID`'dir.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Kurallar:**
+- Değer, geçerli bir en alt eBay kategorisine karşılık gelen pozitif bir tam sayı olmalıdır.
+- Üst ve ara kategoriler genellikle kabul edilmez. En belirli kategoriyi kullanın.
+- Kategori eBay sitenizde geçerli olmalıdır (ABD kategorileri İngiltere, Almanya, Avustralya vb. kategorilerinden farklıdır).
+
+---
+
+## CategoryID'yi toplu olarak doldurma
+
+Ürünlerin çoğunun birkaç kategoriye girdiği büyük kataloglar için:
+
+### Excel'de: Kategorileri EĞER veya DÜŞEYARA ile atayın
+
+Ürün türü kodu içeren bir yardımcı sütununuz varsa:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+Ya da bir başvuru tablosu (ürün türü → CategoryID) oluşturup DÜŞEYARA kullanın:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+Türkçe Excel'de işlevlerin adı `EĞER` ve `DÜŞEYARA`'dır ve bağımsız değişkenler noktalı virgülle ayrılır.
+
+### Excel'de: Aynı kategorideki grupları aşağı doldurun
+
+1. Ürün listenizi ürün türüne göre sıralayın.
+2. Her grubun ilk ürününe CategoryID'yi girin.
+3. O hücreden grubun son ürününe kadar seçin.
+4. **Doldur → Aşağı** komutunu kullanın (İngilizce Excel'de kısayol **Ctrl+D**'dir).
+
+### Filtre kullanarak
+
+1. Kataloğunuzu ürün türü sütununa göre filtreleyin.
+2. CategoryID sütunundaki tüm görünür hücreleri seçin.
+3. CategoryID'yi yazın ve seçili tüm hücreleri tek seferde doldurmak için **Ctrl+Enter**'a basın.
+
+---
+
+## Yüklemeden önce CategoryID'yi doğrulama
+
+Yanlış bir CategoryID, ilanları yanlış kategoride oluşturur. Bu yaygın ve fark edilmesi zor bir hatadır:
+
+1. **Örnek kontrol:** CSV'nizden 5 CategoryID değeri alın ve beklenen kategori yoluna karşılık geldiklerini doğrulamak için eBay'de arayın.
+2. **Ürün türü başvuru tablonuzla karşılaştırın:** Basit bir ürün türü → CategoryID tablosu tutun ve yeni ürün türleri eklediğinizde gözden geçirin.
+3. **Test yüklemesi:** Önce 1-3 satırlık bir test dosyası yükleyin. Oluşan ilanlara bakın ve doğru kategoride göründüklerini doğrulayın.
+4. **eBay'in sonuç dosyasını inceleyin:** Her yüklemeden sonra Seller Hub Reports'taki Yüklemeler sayfasında bir sonuç dosyası bulunur. Geçersiz kategori ID'leriyle ilgili satır hataları olup olmadığına bakın.
+
+---
+
+## Yaygın hatalar
+
+| Hata mesajı | Olası neden |
+|---|---|
+| "Category is required" | CategoryID sütunu boş |
+| "Invalid category" | ID geçerli bir en alt eBay kategorisi değil |
+| "Category not allowed for this listing type" | Sabit fiyat veya açık artırma için kategori kısıtlaması |
+| Yüklemeden sonra ürün özelliği hataları | Yanlış kategori, bu yüzden özellikler ürünlerinize uymuyor |

@@ -9,8 +9,8 @@
 "description": "Wartości akceptowane przez kolumny tak/nie w Amazonie zależą od pliku: szablony kategorii używają wartości z karty Valid Values (zwykle true/false), a Inventory Loader używa y/n lub 1/2. Dowiedz się, jak sprawdzać, poprawiać i chronić te kolumny."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "CategoryID w eBay i File Exchange: czym jest i jak je ustawić",
-"description": "Dowiedz się, czym jest pole CategoryID w eBay, dlaczego jest wymagane przy przesyłaniu przez File Exchange, jak znaleźć właściwe ID kategorii dla produktów i jak uzupełnić je hurtowo w całym katalogu."
+"title": "CategoryID w eBay i File Exchange: czym jest i jak go ustawić",
+"description": "Czym jest pole CategoryID w eBay, dlaczego jest wymagane przy przesyłaniu przez File Exchange, jak znaleźć właściwe ID kategorii dla produktów i jak wypełnić je masowo w całym katalogu."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Błędy CSV w eBay File Exchange: przyczyny i rozwiązania",

@@ -1,0 +1,156 @@
+---
+title: "eBay CategoryID en File Exchange: wat het is en hoe je het instelt"
+description: "Wat het veld CategoryID van eBay is, waarom het verplicht is bij File Exchange-uploads, hoe je de juiste categorie-ID voor je producten vindt en hoe je die in één keer voor je hele catalogus invult."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "ebay categorie id", "ebay csv import", "ebay flatfile categorie", "ebay bulkupload advertenties", "ebay categoryid opzoeken"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Waar de kolom CategoryID in File Exchange-CSV-bestanden voor staat"
+  - "Waarom een ontbrekende of foute CategoryID advertenties laat mislukken"
+  - "Hoe je de juiste CategoryID voor je producttype vindt"
+  - "Hoe je CategoryID efficiënt in honderden rijen invult"
+  - "Tips om de categorie te controleren voordat je uploadt"
+bestFor: "eBay-verkopers die File Exchange of andere tools voor bulkuploads gebruiken en categorie-ID's moeten toewijzen aan nieuwe of bestaande advertenties"
+timeToComplete: "10 minuten"
+---
+
+## Wat is CategoryID?
+
+De kolom `Category` (of `CategoryID`, afhankelijk van de versie van het File Exchange-sjabloon) in de CSV voor bulkuploads van eBay is een **numerieke code** voor de eBay-categorie waartoe je object hoort. Elke actieve advertentie op eBay moet een categorie hebben, en eBay bepaalt aan de hand van deze ID:
+
+- Waar je advertentie verschijnt als iemand door categorieën bladert.
+- Welke objectspecificaties (verplichte velden) voor je advertentie gelden.
+- Bij welke zoekopdrachten van kopers je object opduikt.
+
+Een ontbrekende of foute CategoryID is een van de meest voorkomende redenen waarom File Exchange-uploads helemaal mislukken of advertenties met onvolledige specificaties opleveren.
+
+---
+
+## CategoryID of categoriepad
+
+De CSV vraagt om een **getal** (de CategoryID), niet om het leesbare categoriepad. Bijvoorbeeld:
+
+| Categoriepad | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+De tekst van het pad kun je niet in de CSV gebruiken. Het moet de numerieke ID zijn.
+
+---
+
+## Waarom CategoryID belangrijk is voor specificaties
+
+Het specificatiesysteem van eBay (merk, maat, kleur, materiaal enzovoort) hangt af van de categorie. Een verkeerde categorie betekent:
+- De verplichte specificaties van de juiste categorie worden niet gevraagd of gecontroleerd.
+- Je advertentie kan lager komen te staan in de zoekresultaten als verplichte specificaties ontbreken.
+- Kopers die in jouw categorie op specificaties filteren, vinden je advertentie niet.
+
+Kies altijd de meest specifieke categorie (de onderste categorie die je product precies beschrijft), geen brede hoofdcategorie.
+
+---
+
+## Zo vind je de juiste CategoryID
+
+### Methode 1: categoriesuggesties van eBay (Seller Hub)
+
+1. Maak in Seller Hub handmatig een conceptadvertentie voor een van je producten.
+2. Zoek in de stap "Categorie" met het zoekvak naar je producttype.
+3. eBay stelt categorieën voor op basis van je zoekwoorden.
+4. Kies de meest specifieke passende categorie.
+5. Noteer de categorienaam en zoek daarmee de ID op met een van de methoden hieronder.
+
+### Methode 2: het overzicht van categorie-ID's van eBay
+
+De hulp bij Seller Hub Reports verwijst naar een overzicht van categorienamen en ID's voor bulkuploads:
+
+1. Ga naar **Seller Hub → Rapporten → Uploads** en open de hulp bij de uploadsjablonen.
+2. Zoek het overzicht van categorienamen en ID's en zoek je producttype op.
+3. Ontwikkelaars kunnen de volledige categorieboom ook ophalen via de API's van eBay (bijvoorbeeld de Taxonomy API).
+
+### Methode 3: bekijk de URL van een bestaande advertentie
+
+Als je een eigen advertentie of die van een concurrent in dezelfde categorie hebt:
+
+1. Open de categoriepagina op eBay (klik op de categorienaam in het kruimelpad boven een advertentie).
+2. Categoriepagina's hebben URL's als `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`.
+3. Het getal na de categorienaam (`11483`, herenjeans) is de categorie-ID.
+
+### Methode 4: download een categoriesjabloon
+
+Onder **Seller Hub → Rapporten → Uploads** kun je een advertentiesjabloon voor een specifieke categorie downloaden. De categorie-ID die je daar kiest, is de ID voor je bestand.
+
+---
+
+## CategoryID in de File Exchange-CSV
+
+De kolom heet `*Category` in de advertentiesjablonen van eBay (het sterretje geeft een verplichte kolom aan) en `Category ID` in het conceptsjabloon.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Regels:**
+- De waarde moet een positief geheel getal zijn dat hoort bij een geldige onderste eBay-categorie.
+- Hoofd- en tussencategorieën worden meestal niet geaccepteerd. Gebruik de meest specifieke categorie.
+- De categorie moet gelden voor jouw eBay-site (Amerikaanse categorieën verschillen van die in het VK, Duitsland, Australië enzovoort).
+
+---
+
+## CategoryID in bulk invullen
+
+Voor grote catalogi waarin de meeste producten in een paar categorieën vallen:
+
+### In Excel: wijs categorieën toe met ALS of VERT.ZOEKEN
+
+Als je een hulpkolom met een producttypecode hebt:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+Of maak een referentietabel (producttype → CategoryID) en gebruik VERT.ZOEKEN:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+In Nederlandstalige Excel heten de functies `ALS` en `VERT.ZOEKEN`, en scheid je argumenten met puntkomma's.
+
+### In Excel: groepen met dezelfde categorie naar beneden doorvoeren
+
+1. Sorteer je productlijst op producttype.
+2. Vul de CategoryID in bij het eerste product van elke groep.
+3. Selecteer van die cel tot het laatste product van de groep.
+4. Gebruik **Doorvoeren → Omlaag** (in Engelstalige Excel is de sneltoets **Ctrl+D**).
+
+### Met een filter
+
+1. Filter je catalogus op de kolom met het producttype.
+2. Selecteer alle zichtbare cellen in de kolom CategoryID.
+3. Typ de CategoryID en druk op **Ctrl+Enter** om alle geselecteerde cellen in één keer te vullen.
+
+---
+
+## CategoryID controleren voordat je uploadt
+
+Een foute CategoryID levert advertenties in de verkeerde categorie op. Het komt vaak voor en valt moeilijk op:
+
+1. **Steekproef:** neem 5 CategoryID-waarden uit je CSV en zoek ze op eBay op om te controleren of ze bij het verwachte categoriepad horen.
+2. **Vergelijk met je producttype-overzicht:** houd een eenvoudige tabel producttype → CategoryID bij en controleer die als je nieuwe producttypen toevoegt.
+3. **Testupload:** upload eerst een testbestand met 1 tot 3 rijen. Bekijk de advertenties die zijn aangemaakt en controleer of ze in de juiste categorie staan.
+4. **Bekijk het resultatenbestand van eBay:** na elke upload staat op de pagina Uploads van Seller Hub Reports een resultatenbestand. Kijk daarin of er rijfouten zijn die met ongeldige categorie-ID's te maken hebben.
+
+---
+
+## Veelvoorkomende fouten
+
+| Foutmelding | Waarschijnlijke oorzaak |
+|---|---|
+| "Category is required" | De kolom CategoryID is leeg |
+| "Invalid category" | De ID is geen geldige onderste eBay-categorie |
+| "Category not allowed for this listing type" | Beperking van de categorie voor vaste prijs of veiling |
+| Fouten in specificaties na de upload | Verkeerde categorie, dus de specificaties passen niet bij je objecten |

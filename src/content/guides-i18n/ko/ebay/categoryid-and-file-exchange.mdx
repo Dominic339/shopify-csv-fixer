@@ -1,0 +1,154 @@
+---
+title: "eBay CategoryID와 File Exchange: 무엇이고 어떻게 설정하나"
+description: "eBay CategoryID 필드가 무엇인지, File Exchange 업로드에서 왜 필수인지, 상품에 맞는 카테고리 ID를 찾는 방법과 카탈로그 전체에 한 번에 입력하는 방법을 알아보세요."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "ebay 카테고리 id", "ebay csv 가져오기", "ebay 플랫 파일 카테고리", "ebay 대량 리스팅 업로드", "ebay categoryid 찾기"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "File Exchange CSV 파일에서 CategoryID 열이 나타내는 것"
+  - "CategoryID가 없거나 틀리면 리스팅이 실패하는 이유"
+  - "상품 유형에 맞는 CategoryID를 찾는 방법"
+  - "수백 개 행에 CategoryID를 효율적으로 채우는 방법"
+  - "업로드 전에 카테고리 선택을 확인하는 요령"
+bestFor: "File Exchange나 다른 대량 리스팅 도구를 쓰면서 새 리스팅이나 기존 리스팅에 카테고리 ID를 지정해야 하는 eBay 판매자"
+timeToComplete: "10분"
+---
+
+## CategoryID란?
+
+eBay 대량 리스팅 CSV의 `Category` 열(File Exchange 템플릿 버전에 따라 `CategoryID`)은 상품이 속한 eBay 카테고리의 **숫자 식별자**입니다. eBay의 모든 판매 중 리스팅에는 카테고리가 있어야 하며, eBay는 이 ID로 다음을 정합니다.
+
+- 카테고리를 둘러볼 때 리스팅이 어디에 나타나는지.
+- 리스팅에 어떤 상품 정보(필수 필드)가 적용되는지.
+- 어떤 구매자 검색에서 상품이 노출되는지.
+
+CategoryID가 없거나 틀리면 File Exchange 업로드가 통째로 실패하거나 상품 정보가 불완전한 리스팅이 만들어집니다. 가장 흔한 원인 중 하나입니다.
+
+---
+
+## CategoryID와 카테고리 경로
+
+CSV에는 사람이 읽는 카테고리 경로가 아니라 **숫자**(CategoryID)가 필요합니다. 예:
+
+| 카테고리 경로 | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+CSV에 경로 텍스트는 쓸 수 없습니다. 숫자 ID여야 합니다.
+
+---
+
+## 상품 정보에 CategoryID가 중요한 이유
+
+eBay의 상품 정보 시스템(브랜드, 사이즈, 색상, 소재 등)은 카테고리에 따라 달라집니다. 카테고리를 잘못 고르면 다음과 같은 일이 생깁니다.
+- 올바른 카테고리의 필수 상품 정보를 요구하지도, 확인하지도 않습니다.
+- 필수 상품 정보가 빠지면 리스팅이 검색 결과에서 밀릴 수 있습니다.
+- 해당 카테고리에서 상품 정보로 필터링하는 구매자가 리스팅을 찾지 못합니다.
+
+넓은 상위 카테고리가 아니라 상품을 정확히 설명하는 가장 구체적인 카테고리(최하위 카테고리)를 항상 지정하세요.
+
+---
+
+## 올바른 CategoryID 찾는 법
+
+### 방법 1: eBay 카테고리 추천(Seller Hub)
+
+1. Seller Hub에서 상품 하나의 임시 리스팅을 직접 만드세요.
+2. "카테고리" 단계에서 검색창에 상품 유형을 입력하세요.
+3. eBay가 키워드를 바탕으로 카테고리를 추천합니다.
+4. 가장 구체적으로 맞는 카테고리를 고르세요.
+5. 카테고리 이름을 적어 두고 아래 방법 중 하나로 ID를 찾으세요.
+
+### 방법 2: eBay 카테고리 ID 참고 자료
+
+Seller Hub Reports 도움말에는 대량 업로드용 카테고리 이름과 ID 참고 자료 링크가 있습니다.
+
+1. **Seller Hub → 보고서 → 업로드**로 가서 업로드 템플릿 도움말을 여세요.
+2. 카테고리 이름과 ID 참고 자료를 찾아 상품 유형을 검색하세요.
+3. 개발자는 eBay API(예: Taxonomy API)로 전체 카테고리 트리를 받을 수도 있습니다.
+
+### 방법 3: 기존 리스팅의 URL 보기
+
+같은 카테고리에 내 리스팅이나 경쟁사 리스팅이 있다면:
+
+1. eBay에서 카테고리 페이지를 여세요(리스팅 위 이동 경로에서 카테고리 이름을 클릭).
+2. 카테고리 페이지 URL은 `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176` 같은 형태입니다.
+3. 카테고리 이름 뒤의 숫자(`11483`, 남성 청바지)가 카테고리 ID입니다.
+
+### 방법 4: 카테고리 템플릿 내려받기
+
+**Seller Hub → 보고서 → 업로드**에서 특정 카테고리용 리스팅 템플릿을 내려받을 수 있습니다. 거기서 고른 카테고리 ID를 파일에 쓰면 됩니다.
+
+---
+
+## File Exchange CSV의 CategoryID
+
+eBay 리스팅 템플릿에서는 열 이름이 `*Category`(별표는 필수 열 표시)이고, 임시 저장 템플릿에서는 `Category ID`입니다.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**규칙:**
+- 값은 유효한 eBay 최하위 카테고리에 해당하는 양의 정수여야 합니다.
+- 상위 카테고리나 중간 카테고리는 대개 받아들여지지 않습니다. 가장 구체적인 카테고리를 쓰세요.
+- 카테고리는 판매하는 eBay 사이트에서 유효해야 합니다(미국 카테고리는 영국, 독일, 호주 등과 다릅니다).
+
+---
+
+## CategoryID 한꺼번에 채우기
+
+대부분의 상품이 몇 개 카테고리에 속하는 큰 카탈로그라면:
+
+### Excel: IF나 VLOOKUP으로 카테고리 지정
+
+상품 유형 코드가 든 보조 열이 있다면:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+또는 참조 표(상품 유형 → CategoryID)를 만들어 VLOOKUP을 쓰세요.
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+### Excel: 같은 카테고리 그룹을 아래로 채우기
+
+1. 상품 목록을 상품 유형 순으로 정렬하세요.
+2. 각 그룹의 첫 상품에 CategoryID를 입력하세요.
+3. 그 셀부터 그룹의 마지막 상품까지 선택하세요.
+4. **Ctrl+D**로 아래로 채우세요.
+
+### 필터 사용
+
+1. 상품 유형 열로 카탈로그를 필터링하세요.
+2. CategoryID 열에서 보이는 셀을 모두 선택하세요.
+3. CategoryID를 입력하고 **Ctrl+Enter**를 눌러 선택한 셀을 한 번에 채우세요.
+
+---
+
+## 업로드 전에 CategoryID 확인하기
+
+CategoryID가 틀리면 리스팅이 엉뚱한 카테고리에 만들어집니다. 흔하면서도 알아차리기 어려운 실수입니다.
+
+1. **표본 확인:** CSV에서 CategoryID 값 5개를 골라 eBay에서 찾아보고, 예상한 카테고리 경로와 맞는지 확인하세요.
+2. **상품 유형 참조 표와 대조:** 상품 유형 → CategoryID 표를 간단히 만들어 두고, 새 상품 유형을 추가할 때 다시 확인하세요.
+3. **테스트 업로드:** 먼저 1~3행짜리 테스트 파일을 올리세요. 만들어진 리스팅을 보고 올바른 카테고리에 있는지 확인하세요.
+4. **eBay 결과 파일 확인:** 업로드할 때마다 Seller Hub Reports의 업로드 페이지에 결과 파일이 생깁니다. 잘못된 카테고리 ID와 관련된 행 오류가 있는지 살펴보세요.
+
+---
+
+## 흔한 오류
+
+| 오류 메시지 | 가능한 원인 |
+|---|---|
+| "Category is required" | CategoryID 열이 비어 있음 |
+| "Invalid category" | ID가 유효한 eBay 최하위 카테고리가 아님 |
+| "Category not allowed for this listing type" | 고정가 또는 경매에 대한 카테고리 제한 |
+| 업로드 후 상품 정보 오류 | 카테고리가 틀려서 상품 정보가 상품과 맞지 않음 |

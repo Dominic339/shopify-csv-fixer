@@ -9,8 +9,8 @@
 "description": "Amazon'un evet/hayır sütunlarının kabul ettiği değerler dosyaya göre değişir: kategori şablonları Valid Values sekmesindeki değerleri (genellikle true/false), Inventory Loader ise y/n veya 1/2 kullanır. Bu sütunları nasıl kontrol edeceğinizi, düzelteceğinizi ve koruyacağınızı öğrenin."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "eBay CategoryID ve File Exchange: nedir ve nasıl ayarlanır",
-"description": "eBay CategoryID alanının ne olduğunu, File Exchange yüklemelerinde neden zorunlu olduğunu, ürünleriniz için doğru kategori kimliğini nasıl bulacağınızı ve tüm kataloğunuzda toplu olarak nasıl dolduracağınızı öğrenin."
+"title": "eBay CategoryID ve File Exchange: Nedir ve Nasıl Ayarlanır",
+"description": "eBay'deki CategoryID alanının ne olduğunu, File Exchange yüklemelerinde neden zorunlu olduğunu, ürünleriniz için doğru kategori ID'sini nasıl bulacağınızı ve tüm kataloğunuza toplu olarak nasıl gireceğinizi öğrenin."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange CSV Hataları: Nedenleri ve Çözümleri",

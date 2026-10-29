@@ -9,8 +9,8 @@
 "description": "Welche Werte Amazons Ja/Nein-Spalten akzeptieren, hängt von der Datei ab: Kategorievorlagen nutzen die Werte aus ihrem Tabellenblatt Valid Values (meist true/false), der Inventory Loader nutzt y/n oder 1/2. So prüfst, korrigierst und schützt du diese Spalten."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "eBay CategoryID und File Exchange: was es ist und wie du es setzt",
-"description": "Was das eBay-Feld CategoryID ist, warum es bei File-Exchange-Uploads Pflicht ist, wie du die richtige Kategorie-ID für deine Produkte findest und wie du sie für den ganzen Katalog einträgst."
+"title": "eBay CategoryID und File Exchange: was sie ist und wie du sie setzt",
+"description": "Was das Feld CategoryID von eBay bedeutet, warum es bei File-Exchange-Uploads Pflicht ist, wie du die richtige Kategorie-ID für deine Produkte findest und wie du sie für den ganzen Katalog in einem Rutsch einträgst."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay-File-Exchange-CSV-Fehler: Ursachen und Lösungen",

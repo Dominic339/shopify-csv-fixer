@@ -1,0 +1,156 @@
+---
+title: "CategoryID de eBay y File Exchange: qué es y cómo configurarlo"
+description: "Qué es el campo CategoryID de eBay, por qué es obligatorio en las cargas de File Exchange, cómo encontrar el ID de categoría correcto para tus productos y cómo rellenarlo en bloque en todo tu catálogo."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "id de categoría ebay", "importar csv ebay", "categoría archivo plano ebay", "carga masiva anuncios ebay", "buscar categoryid ebay"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Qué representa la columna CategoryID en los CSV de File Exchange"
+  - "Por qué un CategoryID vacío o incorrecto hace fallar los anuncios"
+  - "Cómo encontrar el CategoryID correcto para tu tipo de producto"
+  - "Cómo rellenar CategoryID en cientos de filas de forma eficiente"
+  - "Consejos para comprobar la categoría antes de subir el archivo"
+bestFor: "Vendedores de eBay que usan File Exchange u otras herramientas de carga masiva y necesitan asignar ID de categoría a anuncios nuevos o existentes"
+timeToComplete: "10 minutos"
+---
+
+## ¿Qué es CategoryID?
+
+La columna `Category` (o `CategoryID`, según la versión de la plantilla de File Exchange) del CSV de carga masiva de eBay es un **identificador numérico** de la categoría de eBay a la que pertenece tu artículo. Todo anuncio activo en eBay debe tener una categoría, y eBay usa este ID para decidir:
+
+- Dónde aparece tu anuncio al navegar por categorías.
+- Qué especificaciones del artículo (campos obligatorios) se aplican a tu anuncio.
+- En qué búsquedas de los compradores aparece tu artículo.
+
+Un CategoryID vacío o incorrecto es uno de los motivos más habituales por los que las cargas de File Exchange fallan por completo o crean anuncios con especificaciones incompletas.
+
+---
+
+## CategoryID frente a ruta de categoría
+
+El CSV necesita un **número** (el CategoryID), no la ruta legible de la categoría. Por ejemplo:
+
+| Ruta de categoría | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+No puedes usar el texto de la ruta en el CSV. Tiene que ser el ID numérico.
+
+---
+
+## Por qué CategoryID importa para las especificaciones
+
+El sistema de especificaciones de eBay (marca, talla, color, material, etc.) depende de la categoría. Elegir la categoría equivocada significa que:
+- No se piden ni se comprueban las especificaciones obligatorias de la categoría correcta.
+- Tu anuncio puede quedar relegado en los resultados de búsqueda si faltan especificaciones obligatorias.
+- Los compradores que filtran por especificaciones en tu categoría no encontrarán tu anuncio.
+
+Asigna siempre la categoría más específica posible (la categoría final que describe tu producto con precisión), no una categoría principal amplia.
+
+---
+
+## Cómo encontrar el CategoryID correcto
+
+### Método 1: sugerencias de categoría de eBay (Seller Hub)
+
+1. En Seller Hub, crea a mano un borrador de anuncio para uno de tus productos.
+2. En el paso "Categoría", usa el cuadro de búsqueda para encontrar tu tipo de producto.
+3. eBay sugiere categorías a partir de tus palabras clave.
+4. Elige la categoría más específica que encaje.
+5. Anota el nombre de la categoría y úsalo para buscar el ID con uno de los métodos siguientes.
+
+### Método 2: la referencia de ID de categoría de eBay
+
+La ayuda de Seller Hub Reports enlaza una referencia de nombres e ID de categoría para las cargas masivas:
+
+1. Ve a **Seller Hub → Informes → Cargas** y abre la ayuda de las plantillas de carga.
+2. Busca la referencia de nombres e ID de categoría y localiza tu tipo de producto.
+3. Los desarrolladores también pueden obtener el árbol completo de categorías con las API de eBay (por ejemplo, la Taxonomy API).
+
+### Método 3: mira la URL de un anuncio que funcione
+
+Si tienes un anuncio propio o de la competencia en la misma categoría:
+
+1. Abre la página de la categoría en eBay (haz clic en el nombre de la categoría en la ruta de navegación sobre un anuncio).
+2. Las páginas de categoría tienen URL como `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`.
+3. El número que va después del nombre de la categoría (`11483`, vaqueros de hombre) es el ID de categoría.
+
+### Método 4: descarga una plantilla de categoría
+
+En **Seller Hub → Informes → Cargas**, eBay te deja descargar una plantilla de anuncios para una categoría concreta. El ID de categoría que eliges ahí es el que debes usar en tu archivo.
+
+---
+
+## CategoryID en el CSV de File Exchange
+
+La columna se llama `*Category` en las plantillas de anuncios de eBay (el asterisco indica una columna obligatoria) y `Category ID` en la plantilla de borradores.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Reglas:**
+- El valor debe ser un número entero positivo que corresponda a una categoría final válida de eBay.
+- Las categorías principales o intermedias no suelen aceptarse. Usa la categoría más específica.
+- La categoría debe ser válida para tu sitio de eBay (las categorías de EE. UU. son distintas de las de Reino Unido, Alemania, Australia, etc.).
+
+---
+
+## Rellenar CategoryID en bloque
+
+Para catálogos grandes en los que la mayoría de los productos caen en pocas categorías:
+
+### En Excel: usa SI o BUSCARV para asignar categorías
+
+Si tienes una columna auxiliar con un código de tipo de producto:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+O crea una tabla de referencia (tipo de producto → CategoryID) y usa BUSCARV:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+En Excel en español, las funciones se llaman `SI` y `BUSCARV`, y los argumentos se separan con punto y coma.
+
+### En Excel: rellena hacia abajo los grupos de la misma categoría
+
+1. Ordena tu lista de productos por tipo de producto.
+2. Escribe el CategoryID en el primer producto de cada grupo.
+3. Selecciona desde esa celda hasta el último producto del grupo.
+4. Pulsa **Ctrl+J** (o **Ctrl+D** en Excel en inglés) para rellenar hacia abajo.
+
+### Con un filtro
+
+1. Filtra tu catálogo por la columna de tipo de producto.
+2. Selecciona todas las celdas visibles de la columna CategoryID.
+3. Escribe el CategoryID y pulsa **Ctrl+Intro** para rellenar todas las celdas seleccionadas a la vez.
+
+---
+
+## Comprobar CategoryID antes de subir el archivo
+
+Un CategoryID incorrecto crea anuncios en la categoría equivocada. Es un error común y difícil de detectar:
+
+1. **Comprobación puntual:** toma 5 valores de CategoryID de tu CSV y búscalos en eBay para confirmar que corresponden a la ruta de categoría esperada.
+2. **Compara con tu referencia de tipos de producto:** mantén una tabla sencilla de tipo de producto → CategoryID y revísala cuando añadas tipos nuevos.
+3. **Carga de prueba:** sube primero un archivo de prueba de 1 a 3 filas. Mira los anuncios creados y confirma que aparecen en la categoría correcta.
+4. **Revisa el archivo de resultados de eBay:** después de cada carga, la página Cargas de Seller Hub Reports tiene un archivo de resultados. Revisa si hay errores por fila relacionados con ID de categoría no válidos.
+
+---
+
+## Errores habituales
+
+| Mensaje de error | Causa probable |
+|---|---|
+| "Category is required" | La columna CategoryID está vacía |
+| "Invalid category" | El ID no es una categoría final válida de eBay |
+| "Category not allowed for this listing type" | Restricción de la categoría para precio fijo o subasta |
+| Errores de especificaciones tras la carga | Categoría equivocada, así que las especificaciones no encajan con tus artículos |

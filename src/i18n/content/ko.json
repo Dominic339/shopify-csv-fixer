@@ -9,8 +9,8 @@
 "description": "Amazon 예/아니요 열이 허용하는 값은 파일마다 다릅니다. 카테고리 템플릿은 Valid Values 탭의 값(대개 true/false)을, Inventory Loader는 y/n 또는 1/2를 사용합니다. 이 열을 확인하고 고치고 보호하는 방법을 알아보세요."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "eBay CategoryID와 File Exchange: 개념과 설정 방법",
-"description": "eBay CategoryID 필드가 무엇인지, File Exchange 업로드에서 왜 필수인지, 상품에 맞는 카테고리 ID를 찾는 방법, 카탈로그 전체에 한꺼번에 입력하는 방법을 알아보세요."
+"title": "eBay CategoryID와 File Exchange: 무엇이고 어떻게 설정하나",
+"description": "eBay CategoryID 필드가 무엇인지, File Exchange 업로드에서 왜 필수인지, 상품에 맞는 카테고리 ID를 찾는 방법과 카탈로그 전체에 한 번에 입력하는 방법을 알아보세요."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange CSV 오류: 원인과 해결 방법",

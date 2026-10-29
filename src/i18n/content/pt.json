@@ -9,8 +9,8 @@
 "description": "Os valores aceitos pelas colunas de sim/não da Amazon dependem do arquivo: os modelos de categoria usam os valores da aba Valid Values (geralmente true/false), e o Inventory Loader usa y/n ou 1/2. Saiba como verificar, corrigir e proteger essas colunas."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "CategoryID do eBay e File Exchange: o que é e como definir",
-"description": "Entenda o que é o campo CategoryID do eBay, por que ele é obrigatório nos uploads do File Exchange, como encontrar o ID de categoria certo para seus produtos e como preenchê-lo em massa em todo o catálogo."
+"title": "CategoryID do eBay e File Exchange: o que é e como configurar",
+"description": "O que é o campo CategoryID do eBay, por que ele é obrigatório nos envios do File Exchange, como achar o ID de categoria certo para seus produtos e como preenchê-lo em massa em todo o catálogo."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Erros de CSV no eBay File Exchange: causas e soluções",

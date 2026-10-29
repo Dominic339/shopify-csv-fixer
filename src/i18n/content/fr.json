@@ -9,8 +9,8 @@
 "description": "Les valeurs acceptées par les colonnes oui/non d'Amazon dépendent du fichier : les modèles de catégorie utilisent les valeurs de leur onglet Valid Values (souvent true/false), l'Inventory Loader utilise y/n ou 1/2. Apprenez à vérifier, corriger et protéger ces colonnes."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "CategoryID eBay et File Exchange : définition et paramétrage",
-"description": "Comprenez ce qu'est le champ CategoryID d'eBay, pourquoi il est obligatoire dans les imports File Exchange, comment trouver le bon ID de catégorie pour vos produits et comment le renseigner en masse dans tout votre catalogue."
+"title": "CategoryID eBay et File Exchange : ce que c'est et comment le définir",
+"description": "Ce qu'est le champ CategoryID d'eBay, pourquoi il est obligatoire dans les envois File Exchange, comment trouver le bon ID de catégorie pour vos produits et comment le renseigner en masse dans tout votre catalogue."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Erreurs CSV eBay File Exchange : causes et solutions",

@@ -9,8 +9,8 @@
 "description": "Amazon 是/否列接受的值取决于文件：类目模板使用其 Valid Values 选项卡中的值（通常是 true/false），Inventory Loader 使用 y/n 或 1/2。了解如何检查、修正和保护这些列。"
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "eBay CategoryID 与 File Exchange：含义与设置方法",
-"description": "了解 eBay CategoryID 字段是什么、为什么在 File Exchange 上传中必填、如何为商品找到正确的类目 ID，以及如何在整个目录中批量填写。"
+"title": "eBay CategoryID 与 File Exchange：是什么以及如何设置",
+"description": "了解 eBay 的 CategoryID 字段是什么、为什么 File Exchange 上传必须填写、如何为商品找到正确的类目 ID，以及如何为整个目录批量填写。"
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange CSV 错误：原因与解决方法",
