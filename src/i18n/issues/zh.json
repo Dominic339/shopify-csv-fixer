@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay 会向买家显示处理时间。无效的值可能导致刊登无法上传。",
 "howToFix": "请使用 1、2 或 3 这样的整数（发货所需天数）。"
 },
+"ebay/number_in_scientific_notation": {
+"title": "编号被电子表格损坏",
+"explanation": "物品编号或条形码（ItemID、UPC、EAN 或 ISBN）显示为 1.23457E+11 这样的形式：电子表格把它转换成了科学计数法。",
+"whyPlatformCares": "前几位之后的数字会丢失，eBay 因此找不到要修改的刊登，也无法匹配商品。eBay Seller Hub 帮助要求在保存前把物品编号设置为不带小数的数值格式。",
+"howToFix": "重新输入完整编号，然后在保存 CSV 前将该列设为小数位数为 0 的数值格式（或文本格式）。"
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) 重复",
 "explanation": "有两行或更多行的 CustomLabel 值相同。",

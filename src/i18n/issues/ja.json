@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay は発送までの日数を購入者に表示します。値が無効だと出品をアップロードできないことがあります。",
 "howToFix": "1、2、3 のような整数を使ってください（発送までの日数）。"
 },
+"ebay/number_in_scientific_notation": {
+"title": "スプレッドシートで壊れた番号",
+"explanation": "商品番号またはバーコード（ItemID、UPC、EAN、ISBN）が 1.23457E+11 のようになっています。スプレッドシートが指数表記に変換しました。",
+"whyPlatformCares": "先頭の数桁以降が失われるため、eBay は修正対象の出品を見つけられず、商品も照合できません。eBay の Seller Hub ヘルプでは、保存前に商品番号を小数点なしの数値として書式設定するよう案内しています。",
+"howToFix": "番号をすべて入力し直し、CSV を保存する前に列の書式を小数点以下 0 桁の数値（または文字列）にしてください。"
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) が重複しています",
 "explanation": "2 つ以上の行で CustomLabel の値が同じです。",

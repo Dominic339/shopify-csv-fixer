@@ -99,6 +99,8 @@ export function useFixer(t: AppStrings) {
   const vt = useValidationText(currentLocale);
 
   const [headers, setHeaders] = useState<string[]>([]);
+  // Lines above the header (eBay's "#INFO" lines), written back on export.
+  const [preamble, setPreamble] = useState<string[]>([]);
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [issues, setIssues] = useState<UiIssue[]>([]);
   const [parseIssues, setParseIssues] = useState<UiIssue[]>([]);
@@ -926,6 +928,7 @@ useEffect(() => {
 
       setHeaders(res.fixedHeaders ?? []);
       setRows(res.fixedRows ?? []);
+      setPreamble(res.preamble ?? []);
 
       setIssues([...(res.issues ?? []), ...nextParseIssues] as any);
 
@@ -1083,7 +1086,7 @@ useEffect(() => {
       await consumeExport(rows.length);
 
       const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
-      const file = exportFileFor(activeFormat?.id, cols, rows);
+      const file = exportFileFor(activeFormat?.id, cols, rows, preamble);
 
       const blob = new Blob([file.text], { type: file.type });
       const url = URL.createObjectURL(blob);

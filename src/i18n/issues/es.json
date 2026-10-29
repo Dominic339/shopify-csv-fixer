@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay muestra el plazo de preparación a los compradores. Un valor no válido puede impedir que se suba el anuncio.",
 "howToFix": "Usa un número entero como 1, 2 o 3 (días hasta el envío)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Número estropeado por una hoja de cálculo",
+"explanation": "Un número de artículo o código de barras (ItemID, UPC, EAN o ISBN) aparece como 1.23457E+11: una hoja de cálculo lo convirtió a notación científica.",
+"whyPlatformCares": "Se pierden los dígitos a partir de los primeros, así que eBay no encuentra el anuncio que quieres revisar ni puede identificar el producto. La ayuda de Seller Hub de eBay pide dar formato de número sin decimales a los números de artículo antes de guardar.",
+"howToFix": "Vuelve a escribir el número completo y, antes de guardar el CSV, da formato a la columna como Número con 0 decimales (o como Texto)."
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) duplicado",
 "explanation": "Dos o más filas comparten el mismo valor de CustomLabel.",

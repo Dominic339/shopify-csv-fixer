@@ -93,7 +93,8 @@ export const EBAY_VARIATION_EXAMPLE_ROW: CsvRow = {
   RelationshipDetails: "Color=Blue|Size=M",
 };
 
-const VALID_ACTIONS = new Set(["add", "verifyadd", "revise", "relist", "end", "status", "delete", "addtoitemdescription"]);
+// "Draft" is the drafts template's action (Seller Hub Reports help: "Valid entry is Draft").
+const VALID_ACTIONS = new Set(["add", "verifyadd", "revise", "relist", "end", "status", "delete", "addtoitemdescription", "draft"]);
 
 // Listing formats: File Exchange names and their API equivalents.
 const FORMATS: Record<string, "fixed" | "auction"> = {
@@ -122,18 +123,33 @@ const CONDITION_IDS: Record<string, string> = {
   "6000": "Acceptable",
   "7000": "For parts or not working",
 };
+// Names from eBay's "Item condition ID and name values" table (names vary by category).
 const CONDITION_TEXT_TO_ID: Record<string, string> = {
   new: "1000",
   "brand new": "1000",
+  "new with box": "1000",
+  "new with tags": "1000",
+  "new/factory sealed": "1000",
   "new other": "1500",
   "new other (see details)": "1500",
+  "new without box": "1500",
+  "new without tags": "1500",
+  "open box": "1500",
+  "new - open box": "1500",
   "new with defects": "1750",
   "certified refurbished": "2000",
   "manufacturer refurbished": "2000",
+  "excellent - refurbished": "2010",
+  "very good - refurbished": "2020",
+  "good - refurbished": "2030",
   "seller refurbished": "2500",
+  remanufactured: "2500",
   "like new": "2750",
+  "pre-owned - excellent": "2990",
   used: "3000",
   "pre-owned": "3000",
+  "pre-owned - good": "3000",
+  "pre-owned - fair": "3010",
   "very good": "4000",
   good: "5000",
   acceptable: "6000",
@@ -155,11 +171,19 @@ const CANON: Record<string, string> = {
   "custom label (sku)": "CustomLabel",
   itemid: "ItemID",
   "item id": "ItemID",
+  "item number": "ItemID",
+  "p:upc": "UPC",
+  upc: "UPC",
+  "p:ean": "EAN",
+  ean: "EAN",
+  "p:isbn": "ISBN",
+  isbn: "ISBN",
   category: "Category",
   categoryid: "Category",
   "category id": "Category",
   title: "Title",
   conditionid: "ConditionID",
+  "condition id": "ConditionID",
   condition: "ConditionID",
   "item condition": "ConditionID",
   item_condition: "ConditionID",
@@ -168,6 +192,7 @@ const CANON: Record<string, string> = {
   pictureurl: "PicURL",
   "image url": "PicURL",
   imageurl: "PicURL",
+  "item photo url": "PicURL",
   format: "Format",
   "listing type": "Format",
   listing_type: "Format",
@@ -284,7 +309,7 @@ function validateEbay(headers: string[], rows: CsvRow[], mode: Mode): CsvFixResu
           severity: "error",
           code: "ebay/invalid_action",
           message: `Invalid Action '${actionRaw}'.`,
-          suggestion: "Use Add, Revise, Relist, End, VerifyAdd, or Status.",
+          suggestion: "Use Add, VerifyAdd, Revise, Relist, End, Status, or Draft.",
         });
       } else {
         const proper =
@@ -364,7 +389,7 @@ function validateEbay(headers: string[], rows: CsvRow[], mode: Mode): CsvFixResu
       });
     }
 
-    if (isAdd && has("Category") && isEmpty(get(r, "Category"))) {
+    if ((isAdd || action === "draft") && has("Category") && isEmpty(get(r, "Category"))) {
       push({
         rowIndex: i,
         column: "Category",
@@ -540,10 +565,27 @@ function validateEbay(headers: string[], rows: CsvRow[], mode: Mode): CsvFixResu
           details: { badUrls: bad },
         });
       }
-      const cleaned = urls.join("|");
+      // eBay asks for spaces in picture URLs to be written as %20.
+      const cleaned = urls.map((u) => u.replace(/ /g, "%20")).join("|");
       if (cleaned !== raw.trim()) {
         set(r, c, cleaned);
         fixesApplied.push(`Cleaned ${c} list on row ${row}`);
+      }
+    }
+
+    // Item numbers and barcodes that a spreadsheet turned into 1.23457E+11 have lost digits.
+    for (const c of ["ItemID", "UPC", "EAN", "ISBN"]) {
+      const raw = get(r, c).trim();
+      if (/^\d(\.\d+)?e\+?\d+$/i.test(raw)) {
+        push({
+          rowIndex: i,
+          column: c,
+          severity: "error",
+          code: "ebay/number_in_scientific_notation",
+          message: `${header(c)} '${raw}' was turned into scientific notation by a spreadsheet, so digits are lost.`,
+          suggestion: "Re-enter the full number from your records, then format the column as Number with 0 decimal places (or as Text) before saving.",
+          details: { column: header(c), value: raw },
+        });
       }
     }
 

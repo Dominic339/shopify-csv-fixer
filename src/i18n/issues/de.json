@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay zeigt Käufern die Bearbeitungszeit an. Ein ungültiger Wert kann das Hochladen des Angebots verhindern.",
 "howToFix": "Verwende eine ganze Zahl wie 1, 2 oder 3 (Tage bis zum Versand)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Nummer von Tabellenkalkulation beschädigt",
+"explanation": "Eine Artikelnummer oder ein Barcode (ItemID, UPC, EAN oder ISBN) sieht aus wie 1.23457E+11: Eine Tabellenkalkulation hat ihn in wissenschaftliche Schreibweise umgewandelt.",
+"whyPlatformCares": "Die Ziffern nach den ersten paar gehen verloren, sodass eBay das Angebot zum Überarbeiten nicht findet oder das Produkt nicht zuordnen kann. Laut eBays Seller-Hub-Hilfe sollen Artikelnummern vor dem Speichern als Zahlen ohne Dezimalstellen formatiert werden.",
+"howToFix": "Gib die vollständige Nummer erneut ein und formatiere die Spalte vor dem Speichern der CSV als Zahl mit 0 Dezimalstellen (oder als Text)."
+},
 "ebay/duplicate_sku": {
 "title": "Doppeltes CustomLabel (SKU)",
 "explanation": "Zwei oder mehr Zeilen haben denselben CustomLabel-Wert.",

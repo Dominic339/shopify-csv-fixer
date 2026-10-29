@@ -36,7 +36,7 @@ describe("processCsvText", () => {
       const direct = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
       const viaRef = processCsvText(CSV, resolveFormat({ kind: "builtin", id: format.id })!, { strictShopify: false });
 
-      expect(viaRef).toEqual({ ...direct, parseErrors: parsed.parseErrors, parseIssues: parsed.parseIssues });
+      expect(viaRef).toEqual({ ...direct, parseErrors: parsed.parseErrors, parseIssues: parsed.parseIssues, preamble: parsed.preamble });
     }
   });
 
@@ -46,7 +46,7 @@ describe("processCsvText", () => {
     const viaRef = processCsvText(CSV, resolveFormat({ kind: "user", spec: userSpec })!, { strictShopify: false });
 
     expect(viaRef.fixedHeaders).toEqual(["SKU", "Name"]);
-    expect(viaRef).toEqual({ ...direct, parseErrors: parsed.parseErrors, parseIssues: parsed.parseIssues });
+    expect(viaRef).toEqual({ ...direct, parseErrors: parsed.parseErrors, parseIssues: parsed.parseIssues, preamble: parsed.preamble });
   });
 
   it("applies the strict-mode preference only for the duration of the call", () => {

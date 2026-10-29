@@ -14,7 +14,7 @@ export type FormatRef = { kind: "builtin"; id: string } | { kind: "user"; spec: 
 
 export type ProcessCsvOptions = { strictShopify: boolean };
 
-export type ProcessCsvResult = CsvFixResult & { parseErrors: string[]; parseIssues: ParseIssue[] };
+export type ProcessCsvResult = CsvFixResult & { parseErrors: string[]; parseIssues: ParseIssue[]; preamble: string[] };
 
 export function resolveFormat(ref: FormatRef): CsvFormat | null {
   if (ref.kind === "user") return userFormatToCsvFormat(ref.spec);
@@ -26,7 +26,7 @@ export function processCsvText(text: string, format: CsvFormat, opts: ProcessCsv
   try {
     const parsed = parseCsv(text);
     const res = applyFormatToParsedCsv(parsed.headers, parsed.rows, format);
-    return { ...res, parseErrors: parsed.parseErrors ?? [], parseIssues: parsed.parseIssues ?? [] };
+    return { ...res, parseErrors: parsed.parseErrors ?? [], parseIssues: parsed.parseIssues ?? [], preamble: parsed.preamble };
   } finally {
     setStrictModeOverride(null);
   }

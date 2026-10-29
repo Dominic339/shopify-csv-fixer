@@ -436,6 +436,11 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
       ["Revise", "TOTE-01", "Canvas Tote Bag Natural"],
     ],
   },
+  "ebay/number_in_scientific_notation": {
+    cols: [...E, "P:UPC"],
+    before: [["Add", "MUG-01", "Ceramic Coffee Mug 12oz", "1.23457E+11"]],
+    after: [["Add", "MUG-01", "Ceramic Coffee Mug 12oz", "012345678905"]],
+  },
   "ebay/missing_title": { cols: E, before: [["Add", "MUG-01", ""]], after: [["Add", "MUG-01", "Ceramic Coffee Mug 12oz"]] },
   "ebay/title_too_long": { cols: E, before: [["Add", "MUG-01", LONG_TITLE]], after: [["Add", "MUG-01", "Handmade Ceramic Coffee Mug 12oz Speckled Stoneware Tea Cup Gift Coffee Lover"]] },
   "ebay/missing_price": ebay("*StartPrice", [["", "18.00"]]),
