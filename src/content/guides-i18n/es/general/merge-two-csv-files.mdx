@@ -1,0 +1,336 @@
+---
+title: "Cómo combinar dos archivos CSV"
+description: "Guía paso a paso para combinar dos archivos CSV en uno con Power Query de Excel, Google Sheets o una sencilla línea de comandos, sin experiencia en programación."
+keywords: ["combinar archivos csv", "juntar csv", "unir dos csv", "power query excel csv", "combinar csv google sheets", "añadir filas csv", "apilar archivos csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cuatro métodos para combinar archivos CSV (Excel, Sheets, línea de comandos, Python)"
+  - "Cuándo NO combinar y qué hacer en su lugar"
+  - "Cómo corregir encabezados que no coinciden y columnas en otro orden"
+  - "Cómo quitar filas de encabezado duplicadas de un archivo combinado"
+  - "Cómo tratar codificaciones y delimitadores distintos entre archivos"
+bestFor: "Vendedores que juntan exportaciones de catálogo, archivos de inventario o exportaciones de pedidos de varias fuentes"
+timeToComplete: "15 minutos"
+---
+
+## ¿Cuándo hay que combinar archivos CSV?
+
+Combinar dos archivos CSV en uno es un paso habitual antes de una importación de ecommerce. Puede que lo necesites para:
+
+- Reunir los productos de dos proveedores en una sola subida del catálogo
+- Juntar la exportación de productos del mes pasado con las novedades
+- Dividir una importación grande en lotes más pequeños y luego volver a juntarlos
+- Reunir en un único CSV de productos filas de variantes de distintas fuentes
+
+Esta guía cubre cuatro métodos fiables: Power Query de Excel, Google Sheets, la línea de comandos y Python. Todos conservan la fila de encabezado del primer archivo y añaden solo las filas de datos del segundo.
+
+---
+
+## Antes de empezar: alinea los encabezados
+
+Los dos archivos deben tener los mismos encabezados de columna en el mismo orden. Si las columnas no coinciden, al combinar los datos irán a parar a campos equivocados y la importación se estropeará.
+
+Lista rápida antes de combinar:
+
+- [ ] Abre los dos archivos y compara la primera fila (encabezados) lado a lado
+- [ ] Los nombres de columna coinciden exactamente (algunas plataformas distinguen mayúsculas y minúsculas)
+- [ ] Las columnas están en el mismo orden en los dos archivos
+- [ ] Ningún archivo tiene filas de resumen ni de pie
+- [ ] Los dos archivos están guardados como UTF-8
+
+Si los encabezados están en otro orden, reordena las columnas de un archivo antes de combinar. El método de Python con DictWriter (método 4, más abajo) resuelve automáticamente las diferencias de orden.
+
+---
+
+## Método 1: Power Query de Excel (Windows, recomendado)
+
+Power Query de Excel junta varios CSV sin fórmulas ni macros. Resuelve automáticamente las diferencias de codificación y de finales de línea entre archivos y nunca repite la fila de encabezado.
+
+### Pasos
+
+1. Abre un libro de Excel en blanco.
+2. Ve a la pestaña **Datos**, haz clic en **Obtener datos**, luego en **Desde un archivo** y en **Desde el texto/CSV**.
+3. Selecciona tu **primer archivo CSV** y haz clic en **Importar**. Cuando aparezca la vista previa, haz clic en **Transformar datos** (no en Cargar).
+4. En el Editor de Power Query, ve a **Inicio** > **Nuevo origen** > **Archivo** > **Texto o CSV**, selecciona tu **segundo archivo CSV** y haz clic en **Aceptar**. Los dos archivos aparecen ahora como consultas en el panel izquierdo.
+5. Selecciona la primera consulta y ve a **Inicio** > **Anexar consultas** > **Anexar consultas para crear una nueva**.
+6. En el cuadro de diálogo, elige **Dos tablas** y selecciona tu segunda consulta en la lista.
+7. En el panel izquierdo aparece una nueva consulta combinada. Haz clic en **Cerrar y cargar** para escribirla en una hoja nueva.
+8. Con la hoja combinada activa, ve a **Archivo** > **Guardar como** y elige **CSV UTF-8 (delimitado por comas)** como formato. Excel solo guarda la hoja activa. El simple «CSV (delimitado por comas)» usa una codificación antigua y puede estropear los acentos.
+
+### Por qué Power Query
+
+- Detecta la codificación de cada archivo y te deja cambiarla en la vista previa si se equivoca.
+- Añade la fila de encabezado una sola vez, no una por archivo.
+- No añade filas en blanco entre los dos archivos.
+- Admite archivos grandes, hasta el límite de Excel de 1.048.576 filas por hoja. Para más filas, usa la línea de comandos o Python.
+
+---
+
+## Método 2: Google Sheets (en el navegador, archivos pequeños)
+
+Google Sheets es una opción rápida si no tienes Excel. Funciona bien con archivos de menos de unas 50.000 filas en total.
+
+### Pasos
+
+1. Abre Google Drive y sube tu primer CSV: clic derecho en una zona vacía, **Subir archivo**, elige el CSV y luego haz clic derecho en el archivo subido y elige **Abrir con > Hojas de cálculo de Google**.
+2. Anota el número de la última fila de datos (por ejemplo, la fila 500 si tu archivo tiene 499 filas de datos más una de encabezado).
+3. Abre el segundo CSV del mismo modo en otra pestaña del navegador.
+4. En la segunda hoja, haz clic en el número de fila **2** (la primera fila de datos, debajo del encabezado). Pulsa **Ctrl+Mayús+Fin** para ampliar la selección hasta la última fila y columna con datos.
+5. Pulsa **Ctrl+C** para copiar. Vuelve a la primera pestaña y haz clic en la primera fila vacía debajo de tus datos.
+6. Pulsa **Ctrl+V** para pegar las filas de datos (sin el encabezado).
+7. Ve a **Archivo** > **Descargar** > **Valores separados por comas (.csv)**.
+
+### Ten cuidado con
+
+- Google Sheets exporta UTF-8 sin BOM, así que el archivo combinado se puede subir tal cual.
+- Los archivos muy grandes (más de 100.000 filas) pueden ralentizar o bloquear Sheets. Usa entonces la línea de comandos o Python.
+- Comprueba que las filas pegadas quedan alineadas con las columnas. Un solo desplazamiento de una columna estropea toda la combinación.
+
+---
+
+## Método 3: línea de comandos (lo más rápido, cualquier tamaño)
+
+Si tienes una terminal, la línea de comandos tarda menos de un segundo, sea cual sea el tamaño del archivo. En macOS y Linux no hay que instalar nada.
+
+### macOS o Linux
+
+```bash
+# Combinar file1.csv y file2.csv en merged.csv
+# tail -n +2 se salta la fila de encabezado del segundo archivo
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Si `file1.csv` no termina con un salto de línea, su última fila y la primera fila de `file2.csv` quedan en la misma línea. Revisa esa unión en el resultado.
+
+### Windows (Símbolo del sistema)
+
+```bat
+:: Copiar primero el primer archivo
+copy file1.csv merged.csv
+
+:: Añadir todas las filas del segundo archivo menos el encabezado
+more +1 file2.csv >> merged.csv
+```
+
+Nota: el comando `more +1` de Windows se salta la primera línea. También convierte las tabulaciones en espacios, puede estropear el texto que no sea ASCII y se atasca con archivos muy grandes, así que revisa el resultado o usa Python (método 4) en Windows.
+
+### Comprobar el resultado
+
+Después de combinar con la línea de comandos, abre el resultado en un editor de texto y comprueba que:
+
+- La fila de encabezado aparece una sola vez (arriba del todo)
+- No hay ninguna línea en blanco entre los datos de los dos archivos
+- La última fila de file1 y la primera fila de datos de file2 están en líneas seguidas
+- No hay un salto de línea de más al final (la mayoría de los importadores lo toleran, pero queda más limpio sin él)
+
+---
+
+## Método 4: Python (multiplataforma, admite columnas distintas)
+
+`csv.DictWriter` de Python es el método más fiable. Admite columnas en distinto orden, columnas que solo tiene un archivo y archivos grandes. No hace falta saber programar: instala Python y ejecuta el script de abajo.
+
+### El script
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Reunir todos los nombres de columna en el orden en que aparecen por primera vez
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" deja vacía una columna en las filas de un archivo que no la tiene
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig quita el BOM si lo hay
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Guarda este archivo como `merge.py` en la misma carpeta que tus CSV. Abre una terminal o un símbolo del sistema en esa carpeta y ejecuta:
+
+```
+python merge.py
+```
+
+### ¿Por qué Python?
+
+- Funciona en Windows, Mac y Linux.
+- Quita el BOM automáticamente (utf-8-sig). Convierte antes cualquier archivo que no esté en UTF-8 (consulta la sección de codificación más abajo).
+- Admite columnas en otro orden, porque DictWriter las asigna por nombre y no por posición. Las columnas que le faltan a un archivo quedan vacías, y las que solo tiene un archivo se conservan.
+- Procesa los archivos fila a fila sin cargarlo todo en memoria, así que funciona con archivos muy grandes.
+
+---
+
+## Cuándo NO combinar
+
+Combinar es la herramienta adecuada para apilar filas de archivos con la misma estructura. No combines cuando:
+
+- **Los archivos tienen estructuras distintas.** Si file1 tiene 30 columnas y file2 tiene 25 columnas diferentes, una combinación ingenua produce un archivo con los datos desalineados. Usa el método de Python con DictWriter (método 4), que conserva todas las columnas y deja los huecos vacíos, o iguala antes las estructuras.
+- **Quieres unir por una clave (un JOIN como en SQL).** Combinar apila filas; no empareja filas de dos archivos por un SKU, Handle o ID común. Para uniones por clave, usa `csv.DictReader` de Python con un diccionario, o una herramienta como pandas.
+- **Un archivo tiene totales, resúmenes o tablas dinámicas.** Exporta solo las filas de datos antes de combinar. Las filas de resumen, las fórmulas SUMA y las filas de promedios aparecerán como datos de producto después de combinar.
+- **Los archivos vienen de plantillas de exportación distintas.** Una exportación de productos de Shopify y una de inventario de Shopify tienen columnas distintas y no se pueden combinar añadiendo filas.
+
+---
+
+## Corregir encabezados que no coinciden antes de combinar
+
+Si los dos archivos tienen las mismas columnas pero con nombres distintos (por ejemplo, `Title` y `Product Title`, o `Price` y `Variant Price`), unifícalos antes de combinar.
+
+### A mano en Excel o Google Sheets
+
+1. Abre los dos archivos uno al lado del otro.
+2. Compara la fila 1 (encabezados) de cada archivo.
+3. Cambia en un archivo los encabezados que no siguen el estándar para que coincidan con el otro. Edita la celda directamente (tecla F2 en Excel).
+4. Guarda los dos archivos como CSV antes de combinar.
+
+### Automáticamente con Python
+
+```python
+import csv
+
+# Asignar los nombres no estándar de file2 a los nombres estándar de file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Cambiar el nombre de los encabezados
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Reordenar columnas para que coincidan
+
+Si los nombres de columna son idénticos pero el orden no, el método de Python con DictWriter (método 4) lo resuelve solo, porque asigna por nombre. En Excel o Sheets, reordena a mano:
+
+**En Excel:**
+1. Inserta una fila en blanco encima de la fila 1 en uno de los archivos.
+2. Numera las columnas en el orden que deben tener en el archivo de destino (1, 2, 3...).
+3. Ordena las columnas por esa fila de números (Datos > Ordenar > Opciones > Ordenar de izquierda a derecha, por la fila 1).
+4. Elimina la fila auxiliar de números.
+
+**En Google Sheets:**
+1. Inserta una fila en blanco arriba.
+2. Escribe los números de posición que quieres para cada columna.
+3. En una hoja auxiliar, usa `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (con los números de columna en el orden que quieras), o corta y pega las columnas a mano en el orden correcto.
+4. Descargar > CSV.
+
+---
+
+## Quitar filas de encabezado duplicadas de un archivo combinado
+
+Si un archivo combinado contiene por error una fila de encabezado duplicada en medio (habitual al combinar varias veces exportaciones de la misma herramienta), quítala con Python:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Conservar solo las filas que no son idénticas al encabezado (salvo la primera)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Codificaciones y delimitadores distintos entre archivos
+
+Si un archivo está en UTF-8 y el otro en Windows-1252 (ANSI), el archivo combinado tendrá caracteres ilegibles en todos los sitios donde el archivo Windows-1252 tenía letras acentuadas, comillas tipográficas o símbolos de moneda.
+
+**Convierte Windows-1252 a UTF-8 antes de combinar:**
+
+En macOS o Linux:
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Con Python:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Si los dos archivos usan la misma codificación pero distintos delimitadores (comas y punto y coma), convierte el delimitador de uno de ellos antes de combinar. Consulta la sección de delimitadores de la guía de conceptos básicos de CSV.
+
+---
+
+## Solución de problemas en archivos combinados
+
+| Problema | Causa | Solución |
+|---|---|---|
+| Fila en blanco de más en medio del archivo combinado | El segundo archivo tenía un salto de línea o una fila de resumen al final | Elimina la fila en blanco, o añade `if any(row.values()):` antes de `writer.writerow(row)` en Python |
+| Fila de encabezado duplicada en medio | No se saltó el encabezado del segundo archivo | Usa `tail -n +2` (línea de comandos) o Anexar de Power Query (lo salta automáticamente) |
+| Datos en columnas equivocadas | El orden de las columnas es distinto entre archivos | Reordena antes las columnas de un archivo, o usa el método de Python con DictWriter |
+| Caracteres ilegibles en el archivo combinado | Los archivos tienen codificaciones distintas | Convierte antes los dos archivos a UTF-8 con iconv en Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| La primera columna no se reconoce tras la subida | El archivo combinado tiene un BOM que la plataforma lee mal | Ábrelo en VS Code y vuelve a guardarlo como UTF-8 sin BOM |
+
+---
+
+## Qué no hacer
+
+- **No dependas de copiar y pegar a mano con archivos grandes o complejos.** Es fácil saltarse una fila, pegar con una columna de desfase o repetir sin querer el encabezado. El método 2 sirve para archivos pequeños si revisas el resultado; si no, usa Power Query, la línea de comandos o Python.
+- **No abras los dos archivos con doble clic en Excel para cortar y pegar filas.** Excel cambia el formato de fechas, números largos y ceros a la izquierda cuando abre así un CSV, y estropea los datos sin avisar.
+- **No combines archivos con distinto número de columnas sin arreglar antes los encabezados.** El resultado tendrá los datos desalineados.
+
+---
+
+## Lista de comprobación tras combinar
+
+Antes de importar el archivo combinado, comprueba lo siguiente:
+
+- [ ] La fila de encabezado aparece una sola vez (en la fila 1, sin repetirse en medio)
+- [ ] El número de filas es correcto: (filas de file1 − 1 encabezado) + (filas de file2 − 1 encabezado) = total de filas de datos
+- [ ] No hay ninguna fila en blanco de más entre las partes de datos de los dos archivos
+- [ ] No hay SKU ni Handle duplicados que no deban estarlo (pásalo por el corrector de CSV)
+- [ ] Están todas las columnas de los dos archivos de origen (si usas DictWriter con estructuras distintas)
+- [ ] El archivo está guardado como UTF-8
+- [ ] La extensión es .csv y el contenido es texto plano separado por comas
+
+---
+
+## Después de combinar: valida antes de importar
+
+Después de combinar, pasa el archivo resultante por el corrector de CSV antes de importarlo. Al combinar pueden aparecer problemas que no estaban en ninguno de los archivos de origen:
+
+- Una fila de encabezado de más en medio (el corrector la detecta como problema de estructura)
+- SKU o Handle duplicados (los detecta la validación de duplicados)
+- Codificación incoherente (la detecta el análisis de codificación del corrector)
+
+Sube tu CSV combinado al corrector y deja que valide el archivo completo antes de enviarlo a tu plataforma.

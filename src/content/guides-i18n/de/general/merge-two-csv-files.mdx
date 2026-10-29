@@ -1,0 +1,336 @@
+---
+title: "Zwei CSV-Dateien zusammenführen"
+description: "Schritt für Schritt zwei CSV-Dateien zu einer zusammenführen, mit Excel Power Query, Google Sheets oder einem einfachen Befehl, ganz ohne Programmierkenntnisse."
+keywords: ["csv dateien zusammenführen", "csv kombinieren", "zwei csv verbinden", "excel power query csv", "google sheets csv zusammenführen", "csv anhängen", "csv dateien untereinander"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Vier Wege, CSV-Dateien zusammenzuführen (Excel, Tabellen, Kommandozeile, Python)"
+  - "Wann du NICHT zusammenführen solltest und was du stattdessen tust"
+  - "Wie du unterschiedliche Spaltenköpfe und Spaltenreihenfolgen angleichst"
+  - "Wie du doppelte Kopfzeilen aus zusammengeführten Dateien entfernst"
+  - "Wie du mit unterschiedlichen Kodierungen und Trennzeichen umgehst"
+bestFor: "Händler, die Produktexporte, Bestandsdateien oder Bestellexporte aus mehreren Quellen zusammenbringen"
+timeToComplete: "15 Minuten"
+---
+
+## Wann musst du CSV-Dateien zusammenführen?
+
+Zwei CSV-Dateien zu einer zusammenzuführen ist ein häufiger Schritt vor einem E-Commerce-Import. Du brauchst es zum Beispiel, wenn du:
+
+- Produkte von zwei Lieferanten in einen Katalog-Upload bringst
+- den Produktexport des letzten Monats mit neuen Artikeln kombinierst
+- einen großen Import in kleinere Teile aufteilst und diese später wieder zusammensetzt
+- Variantenzeilen aus verschiedenen Quellen in einer Produkt-CSV vereinst
+
+Dieser Leitfaden zeigt vier zuverlässige Wege: Excel Power Query, Google Tabellen, die Kommandozeile und Python. Jeder Weg behält die Kopfzeile der ersten Datei und hängt nur die Datenzeilen der zweiten an.
+
+---
+
+## Bevor du anfängst: Spaltenköpfe angleichen
+
+Beide Dateien müssen dieselben Spaltenköpfe in derselben Reihenfolge haben. Weichen die Spalten ab, landen Daten beim Zusammenführen in den falschen Feldern, und der Import wird beschädigt.
+
+Kurze Checkliste vor dem Zusammenführen:
+
+- [ ] Öffne beide Dateien und vergleiche die erste Zeile (die Spaltenköpfe) nebeneinander
+- [ ] Die Spaltennamen stimmen genau überein (manche Plattformen unterscheiden Groß- und Kleinschreibung)
+- [ ] Die Spalten stehen in beiden Dateien in derselben Reihenfolge
+- [ ] Keine Summen- oder Fußzeilen in einer der Dateien
+- [ ] Beide Dateien sind als UTF-8 gespeichert
+
+Stehen die Spaltenköpfe in unterschiedlicher Reihenfolge, sortiere die Spalten einer Datei vor dem Zusammenführen um. Die Python-Methode mit DictWriter (Methode 4 unten) gleicht abweichende Spaltenreihenfolgen automatisch aus.
+
+---
+
+## Methode 1: Excel Power Query (Windows, empfohlen)
+
+Power Query in Excel hängt mehrere CSV-Dateien ohne Formeln oder Makros aneinander. Es gleicht Unterschiede bei Kodierung und Zeilenenden zwischen den Dateien automatisch aus und wiederholt die Kopfzeile nie.
+
+### Schritte
+
+1. Öffne eine leere Excel-Arbeitsmappe.
+2. Gehe zur Registerkarte **Daten**, klicke auf **Daten abrufen**, dann **Aus Datei** und **Aus Text/CSV**.
+3. Wähle deine **erste CSV-Datei** und klicke auf **Importieren**. Klicke in der Vorschau auf **Daten transformieren** (nicht auf Laden).
+4. Gehe im Power-Query-Editor zu **Start** > **Neue Quelle** > **Datei** > **Text/CSV**, wähle deine **zweite CSV-Datei** und klicke auf **OK**. Beide Dateien erscheinen jetzt links als Abfragen.
+5. Wähle die erste Abfrage und gehe zu **Start** > **Abfragen anfügen** > **Abfragen als neue Abfrage anfügen**.
+6. Wähle im Dialog **Zwei Tabellen** und dann deine zweite Abfrage aus der Liste.
+7. Links erscheint eine neue kombinierte Abfrage. Klicke auf **Schließen & laden**, um sie in ein neues Tabellenblatt zu schreiben.
+8. Gehe mit dem kombinierten Blatt als aktivem Blatt zu **Datei** > **Speichern unter** und wähle **CSV UTF-8 (durch Trennzeichen getrennt)** als Dateityp. Excel speichert nur das aktive Blatt. Das einfache „CSV (Trennzeichen-getrennt)“ nutzt eine alte Kodierung und kann Umlaute zerstören.
+
+### Warum Power Query
+
+- Erkennt die Kodierung jeder Datei und lässt dich sie in der Vorschau einstellen, falls die Vermutung falsch ist.
+- Fügt die Kopfzeile genau einmal ein, nicht einmal pro Datei.
+- Fügt keine zusätzlichen Leerzeilen zwischen den beiden Dateien ein.
+- Kommt mit großen Dateien zurecht, bis zur Excel-Grenze von 1.048.576 Zeilen pro Blatt. Für mehr Zeilen nutze die Kommandozeile oder Python.
+
+---
+
+## Methode 2: Google Tabellen (im Browser, kleinere Dateien)
+
+Google Tabellen ist eine schnelle Option, wenn du kein Excel hast. Es eignet sich für Dateien mit insgesamt weniger als etwa 50.000 Zeilen.
+
+### Schritte
+
+1. Öffne Google Drive und lade deine erste CSV hoch: Rechtsklick auf eine leere Fläche, **Datei hochladen**, CSV wählen, dann Rechtsklick auf die hochgeladene Datei und **Öffnen mit > Google Tabellen**.
+2. Merke dir die Nummer der letzten Datenzeile (zum Beispiel Zeile 500, wenn deine Datei 499 Datenzeilen plus eine Kopfzeile hat).
+3. Öffne deine zweite CSV auf dieselbe Weise in einem neuen Browser-Tab.
+4. Klicke in der zweiten Tabelle auf die Zeilennummer **2** (die erste Datenzeile unter der Kopfzeile). Drücke **Strg+Umschalt+Ende**, um die Auswahl bis zur letzten Zeile und Spalte mit Daten zu erweitern.
+5. Drücke **Strg+C** zum Kopieren. Wechsle zum ersten Tab und klicke in die erste leere Zeile unter deinen Daten.
+6. Drücke **Strg+V**, um die Datenzeilen (ohne Kopfzeile) einzufügen.
+7. Gehe zu **Datei** > **Herunterladen** > **Kommagetrennte Werte (.csv)**.
+
+### Darauf solltest du achten
+
+- Google Tabellen exportiert UTF-8 ohne BOM, die zusammengeführte Datei kann also direkt hochgeladen werden.
+- Sehr große Dateien (100.000+ Zeilen) können Tabellen verlangsamen oder einfrieren. Nutze dann die Kommandozeile oder Python.
+- Prüfe, ob die eingefügten Zeilen genau unter den richtigen Spalten stehen. Eine einzige Verschiebung um eine Spalte zerstört die ganze Zusammenführung.
+
+---
+
+## Methode 3: Kommandozeile (am schnellsten, jede Dateigröße)
+
+Hast du ein Terminal, dauert das Zusammenführen auf der Kommandozeile unabhängig von der Dateigröße weniger als eine Sekunde. Unter macOS und Linux musst du nichts installieren.
+
+### macOS oder Linux
+
+```bash
+# file1.csv und file2.csv zu merged.csv zusammenführen
+# tail -n +2 überspringt die Kopfzeile der zweiten Datei
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Endet `file1.csv` nicht mit einem Zeilenumbruch, landen ihre letzte Zeile und die erste Zeile von `file2.csv` in derselben Zeile. Prüfe diese Stelle im Ergebnis.
+
+### Windows (Eingabeaufforderung)
+
+```bat
+:: Zuerst die erste Datei kopieren
+copy file1.csv merged.csv
+
+:: Alle Zeilen der zweiten Datei außer der Kopfzeile anhängen
+more +1 file2.csv >> merged.csv
+```
+
+Hinweis: Der Windows-Befehl `more +1` überspringt die erste Zeile. Er wandelt aber auch Tabulatoren in Leerzeichen um, kann Nicht-ASCII-Text verfälschen und bleibt bei sehr großen Dateien hängen. Prüfe also das Ergebnis oder nutze unter Windows Python (Methode 4).
+
+### Das Ergebnis prüfen
+
+Öffne das Ergebnis nach dem Zusammenführen auf der Kommandozeile in einem Texteditor und prüfe:
+
+- Die Kopfzeile steht genau einmal da (ganz oben)
+- Keine Leerzeile zwischen den Daten der beiden Dateien
+- Die letzte Zeile von file1 und die erste Datenzeile von file2 stehen in aufeinanderfolgenden Zeilen
+- Kein zusätzlicher Zeilenumbruch am Ende (die meisten Importer stören sich nicht daran, aber ohne ist es sauberer)
+
+---
+
+## Methode 4: Python (plattformübergreifend, auch bei abweichenden Spalten)
+
+`csv.DictWriter` in Python ist die zuverlässigste Methode. Sie kommt mit unterschiedlicher Spaltenreihenfolge, mit Spalten, die nur eine Datei hat, und mit großen Dateien zurecht. Du musst nicht programmieren können: Installiere Python und führe das Skript unten aus.
+
+### Das Skript
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Alle Spaltennamen in der Reihenfolge ihres ersten Auftretens sammeln
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" lässt eine Spalte leer, wenn sie in der Datei einer Zeile fehlt
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig entfernt ein vorhandenes BOM
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Speichere das Skript als `merge.py` im selben Ordner wie deine CSV-Dateien. Öffne in diesem Ordner ein Terminal oder eine Eingabeaufforderung und führe aus:
+
+```
+python merge.py
+```
+
+### Warum Python?
+
+- Läuft unter Windows, Mac und Linux.
+- Entfernt ein BOM automatisch (utf-8-sig). Wandle jede Datei, die nicht UTF-8 ist, vorher um (siehe Abschnitt zur Kodierung unten).
+- Kommt mit unterschiedlicher Spaltenreihenfolge zurecht, weil DictWriter nach Spaltennamen zuordnet, nicht nach Position. Spalten, die in einer Datei fehlen, bleiben leer, und Spalten, die nur eine Datei hat, bleiben erhalten.
+- Verarbeitet die Dateien Zeile für Zeile, ohne alles in den Speicher zu laden, und funktioniert daher auch mit sehr großen Dateien.
+
+---
+
+## Wann du NICHT zusammenführen solltest
+
+Zusammenführen ist das richtige Werkzeug, um Zeilen aus gleich aufgebauten Dateien untereinanderzusetzen. Führe nicht zusammen, wenn:
+
+- **Die Dateien unterschiedlich aufgebaut sind.** Hat file1 30 Spalten und file2 25 andere Spalten, entsteht beim naiven Zusammenführen eine Datei mit verrutschten Daten. Nutze die Python-Methode mit DictWriter (Methode 4 oben), die alle Spalten behält und Lücken leer lässt, oder gleiche den Aufbau vorher an.
+- **Du über einen Schlüssel verknüpfen willst (JOIN wie in SQL).** Zusammenführen setzt Zeilen untereinander; es ordnet keine Zeilen aus zwei Dateien über eine gemeinsame SKU, ein Handle oder eine ID zu. Für Verknüpfungen über einen Schlüssel nutze `csv.DictReader` in Python mit einem Dictionary oder ein Werkzeug wie pandas.
+- **Eine Datei Summen, Zusammenfassungen oder Pivot-Tabellen enthält.** Exportiere vor dem Zusammenführen nur die reinen Datenzeilen. Summenzeilen, SUMME-Formeln und Durchschnittszeilen erscheinen nach dem Zusammenführen als Produktdaten.
+- **Die Dateien aus verschiedenen Exportvorlagen stammen.** Ein Shopify-Produktexport und ein Shopify-Bestandsexport haben unterschiedliche Spalten und lassen sich nicht durch Anhängen von Zeilen zusammenführen.
+
+---
+
+## Unterschiedliche Spaltenköpfe vor dem Zusammenführen angleichen
+
+Haben beide Dateien dieselben Spalten, aber unterschiedliche Spaltennamen (zum Beispiel `Title` und `Product Title` oder `Price` und `Variant Price`), vereinheitliche sie vor dem Zusammenführen.
+
+### Von Hand in Excel oder Google Tabellen
+
+1. Öffne beide Dateien nebeneinander.
+2. Vergleiche Zeile 1 (die Spaltenköpfe) beider Dateien.
+3. Benenne die abweichenden Spaltenköpfe in einer Datei so um, dass sie zur anderen passen. Bearbeite die Zelle direkt (in Excel mit F2).
+4. Speichere beide Dateien als CSV, bevor du zusammenführst.
+
+### Automatisch mit Python
+
+```python
+import csv
+
+# Abweichende Namen in file2 den Standardnamen aus file1 zuordnen
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Spaltenköpfe umbenennen
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Spalten in die gleiche Reihenfolge bringen
+
+Sind die Spaltennamen gleich, aber die Reihenfolge anders, erledigt das die Python-Methode mit DictWriter (Methode 4) automatisch, weil sie nach Namen zuordnet. In Excel oder Tabellen sortierst du von Hand um:
+
+**In Excel:**
+1. Füge in einer Datei über Zeile 1 eine leere Zeile ein.
+2. Nummeriere die Spalten in der Reihenfolge, die sie in der Zieldatei haben sollen (1, 2, 3 ...).
+3. Sortiere die Spalten nach dieser Zahlenzeile (Daten > Sortieren > Optionen > Spalten sortieren, nach Zeile 1).
+4. Lösche die Hilfszeile mit den Zahlen.
+
+**In Google Tabellen:**
+1. Füge oben eine leere Zeile ein.
+2. Trage die gewünschten Spaltenpositionen ein.
+3. Nutze auf einem Hilfsblatt `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (mit den Spaltennummern in der gewünschten Reihenfolge) oder schneide die Spalten von Hand aus und füge sie in der richtigen Reihenfolge ein.
+4. Herunterladen > CSV.
+
+---
+
+## Doppelte Kopfzeilen aus einer zusammengeführten Datei entfernen
+
+Enthält eine zusammengeführte Datei versehentlich eine doppelte Kopfzeile in der Mitte (typisch, wenn man Exporte desselben Tools mehrmals zusammenführt), entferne sie mit Python:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Nur Zeilen behalten, die nicht mit der Kopfzeile identisch sind (außer der ersten)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Unterschiedliche Kodierungen und Trennzeichen
+
+Ist eine Datei UTF-8 und die andere Windows-1252 (ANSI), enthält die zusammengeführte Datei Zeichensalat überall dort, wo die Windows-1252-Datei Umlaute, typografische Anführungszeichen oder Währungssymbole hatte.
+
+**Windows-1252 vor dem Zusammenführen in UTF-8 umwandeln:**
+
+Unter macOS oder Linux:
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Mit Python:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Haben beide Dateien dieselbe Kodierung, aber unterschiedliche Trennzeichen (Kommas und Semikolons), wandle das Trennzeichen in einer Datei vor dem Zusammenführen um. Siehe den Abschnitt zu Trennzeichen im Leitfaden zu den CSV-Grundlagen.
+
+---
+
+## Probleme mit zusammengeführten Dateien beheben
+
+| Problem | Ursache | Lösung |
+|---|---|---|
+| Zusätzliche Leerzeile mitten in der zusammengeführten Datei | Die zweite Datei hatte einen Zeilenumbruch oder eine Summenzeile am Ende | Leerzeile löschen oder in Python `if any(row.values()):` vor `writer.writerow(row)` einfügen |
+| Doppelte Kopfzeile in der Mitte | Kopfzeile der zweiten Datei nicht übersprungen | `tail -n +2` (Kommandozeile) oder Anfügen in Power Query nutzen (überspringt sie automatisch) |
+| Daten in den falschen Spalten | Spaltenreihenfolge unterscheidet sich zwischen den Dateien | Spalten einer Datei vorher umsortieren oder die Python-Methode mit DictWriter nutzen |
+| Zeichensalat in der zusammengeführten Datei | Die Dateien haben unterschiedliche Kodierungen | Beide Dateien vorher in UTF-8 umwandeln, unter Mac/Linux mit iconv: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Erste Spalte nach dem Hochladen nicht erkannt | Die zusammengeführte Datei hat ein BOM, das die Plattform falsch liest | In VS Code öffnen und als UTF-8 ohne BOM neu speichern |
+
+---
+
+## Was du nicht tun solltest
+
+- **Verlass dich bei großen oder komplexen Dateien nicht auf Kopieren und Einfügen von Hand.** Dabei überspringt man leicht eine Zeile, fügt eine Spalte versetzt ein oder wiederholt aus Versehen die Kopfzeile. Methode 2 ist für kleine Dateien in Ordnung, wenn du das Ergebnis prüfst; sonst nutze Power Query, die Kommandozeile oder Python.
+- **Öffne nicht beide Dateien per Doppelklick in Excel, um Zeilen auszuschneiden und einzufügen.** Excel formatiert beim Öffnen einer CSV auf diese Weise Datumswerte, lange Zahlen und führende Nullen um und beschädigt die Daten unbemerkt.
+- **Führe keine Dateien mit unterschiedlicher Spaltenzahl zusammen, ohne vorher die Spaltenköpfe anzugleichen.** Sonst verrutschen die Daten.
+
+---
+
+## Checkliste nach dem Zusammenführen
+
+Prüfe vor dem Import der zusammengeführten Datei diese Punkte:
+
+- [ ] Die Kopfzeile steht genau einmal da (in Zeile 1, nicht in der Mitte wiederholt)
+- [ ] Die Zeilenzahl stimmt: (Zeilen in file1 − 1 Kopfzeile) + (Zeilen in file2 − 1 Kopfzeile) = Datenzeilen insgesamt
+- [ ] Keine zusätzliche Leerzeile zwischen den Datenteilen der beiden Dateien
+- [ ] Keine doppelten SKUs oder Handles, die nicht doppelt sein sollten (im CSV-Fixer prüfen)
+- [ ] Alle Spalten beider Quelldateien sind vorhanden (bei DictWriter mit abweichendem Aufbau)
+- [ ] Datei als UTF-8 gespeichert
+- [ ] Die Dateiendung ist .csv und der Inhalt reiner kommagetrennter Text
+
+---
+
+## Nach dem Zusammenführen: vor dem Import prüfen
+
+Lass die zusammengeführte Datei vor dem Import durch den CSV-Fixer laufen. Beim Zusammenführen können Probleme entstehen, die in keiner der Quelldateien vorhanden waren:
+
+- Eine zusätzliche Kopfzeile in der Mitte (vom Fixer als Strukturproblem erkannt)
+- Doppelte SKUs oder Handles (von der Duplikatprüfung erkannt)
+- Uneinheitliche Kodierung (von der Kodierungsanalyse des Fixers erkannt)
+
+Lade deine zusammengeführte CSV in den Fixer hoch und lass die ganze Datei prüfen, bevor du sie an deine Plattform schickst.

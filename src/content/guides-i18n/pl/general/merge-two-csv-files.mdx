@@ -1,0 +1,336 @@
+---
+title: "Jak scalić dwa pliki CSV"
+description: "Instrukcja krok po kroku, jak połączyć dwa pliki CSV w jeden w Power Query w Excelu, Arkuszach Google lub prostym wierszu poleceń, bez znajomości programowania."
+keywords: ["scalanie plików csv", "łączenie csv", "połączyć dwa csv", "power query excel csv", "scalanie csv arkusze google", "dopisywanie csv", "łączenie plików csv jeden pod drugim"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cztery sposoby scalania plików CSV (Excel, Arkusze, wiersz poleceń, Python)"
+  - "Kiedy NIE scalać i co zrobić zamiast tego"
+  - "Jak ujednolicić różne nagłówki i inną kolejność kolumn"
+  - "Jak usunąć zdublowane wiersze nagłówka ze scalonego pliku"
+  - "Jak poradzić sobie z różnym kodowaniem i separatorami w plikach"
+bestFor: "Sprzedawcy, którzy łączą eksporty katalogu, pliki magazynowe lub eksporty zamówień z wielu źródeł"
+timeToComplete: "15 minut"
+---
+
+## Kiedy trzeba scalać pliki CSV?
+
+Scalenie dwóch plików CSV w jeden to częsty krok przed importem do sklepu. Może Ci się przydać, gdy:
+
+- Łączysz produkty od dwóch dostawców w jeden plik katalogu do przesłania
+- Łączysz eksport produktów z zeszłego miesiąca z nowościami
+- Dzielisz duży import na mniejsze partie, a potem łączysz je z powrotem
+- Zbierasz w jednym pliku CSV produktów wiersze wariantów z różnych źródeł
+
+Ten poradnik opisuje cztery niezawodne metody: Power Query w Excelu, Arkusze Google, wiersz poleceń i Pythona. Każda zachowuje wiersz nagłówka z pierwszego pliku i dopisuje tylko wiersze danych z drugiego.
+
+---
+
+## Zanim zaczniesz: wyrównaj nagłówki
+
+Oba pliki muszą mieć te same nagłówki kolumn w tej samej kolejności. Jeśli kolumny się różnią, scalenie przesunie dane do złych pól i zepsuje import.
+
+Szybka lista kontrolna przed scaleniem:
+
+- [ ] Otwórz oba pliki i porównaj obok siebie pierwszy wiersz (nagłówki)
+- [ ] Nazwy kolumn zgadzają się dokładnie (niektóre platformy rozróżniają wielkość liter)
+- [ ] Kolumny są w obu plikach w tej samej kolejności
+- [ ] Żaden plik nie ma wierszy podsumowań ani stopki
+- [ ] Oba pliki są zapisane jako UTF-8
+
+Jeśli nagłówki są w innej kolejności, przed scaleniem przestaw kolumny w jednym z plików. Metoda w Pythonie z DictWriter (metoda 4 poniżej) sama radzi sobie z różną kolejnością kolumn.
+
+---
+
+## Metoda 1: Power Query w Excelu (Windows, zalecana)
+
+Power Query w Excelu łączy wiele plików CSV bez formuł i makr. Sam radzi sobie z różnicami w kodowaniu i końcach wierszy między plikami i nigdy nie powtarza wiersza nagłówka.
+
+### Kroki
+
+1. Otwórz pusty skoroszyt Excela.
+2. Przejdź na kartę **Dane**, kliknij **Pobierz dane**, potem **Z pliku** i **Z pliku tekstowego/CSV**.
+3. Wybierz **pierwszy plik CSV** i kliknij **Importuj**. W podglądzie kliknij **Przekształć dane** (a nie Załaduj).
+4. W edytorze Power Query przejdź do **Narzędzia główne** > **Nowe źródło** > **Plik** > **Tekst/CSV**, wybierz **drugi plik CSV** i kliknij **OK**. Oba pliki są teraz widoczne jako zapytania w lewym panelu.
+5. Zaznacz pierwsze zapytanie i przejdź do **Narzędzia główne** > **Dołącz zapytania** > **Dołącz zapytania jako nowe**.
+6. W oknie dialogowym wybierz **Dwie tabele**, a potem drugie zapytanie z listy.
+7. W lewym panelu pojawi się nowe połączone zapytanie. Kliknij **Zamknij i załaduj**, aby zapisać je w nowym arkuszu.
+8. Gdy aktywny jest połączony arkusz, przejdź do **Plik** > **Zapisz jako** i wybierz format **CSV UTF-8 (rozdzielany przecinkami)**. Excel zapisuje tylko aktywny arkusz. Zwykły „CSV (rozdzielany przecinkami)” używa starego kodowania i może popsuć polskie znaki.
+
+### Dlaczego Power Query
+
+- Rozpoznaje kodowanie każdego pliku i pozwala je poprawić w podglądzie, jeśli zgadnie źle.
+- Dodaje wiersz nagłówka tylko raz, a nie raz na każdy plik.
+- Nie dodaje pustych wierszy między plikami.
+- Radzi sobie z dużymi plikami, aż do limitu Excela wynoszącego 1 048 576 wierszy na arkusz. Przy większej liczbie wierszy użyj wiersza poleceń lub Pythona.
+
+---
+
+## Metoda 2: Arkusze Google (w przeglądarce, mniejsze pliki)
+
+Arkusze Google to szybka opcja, jeśli nie masz Excela. Dobrze sprawdzają się przy plikach mających łącznie mniej niż ok. 50 000 wierszy.
+
+### Kroki
+
+1. Otwórz Dysk Google i prześlij pierwszy plik CSV: kliknij prawym przyciskiem puste miejsce, wybierz **Prześlij plik**, wskaż plik CSV, a potem kliknij prawym przyciskiem przesłany plik i wybierz **Otwórz za pomocą > Arkusze Google**.
+2. Zapamiętaj numer ostatniego wiersza danych (np. wiersz 500, jeśli plik ma 499 wierszy danych i jeden wiersz nagłówka).
+3. Otwórz drugi plik CSV w ten sam sposób w nowej karcie przeglądarki.
+4. W drugim arkuszu kliknij numer wiersza **2** (pierwszy wiersz danych, pod nagłówkiem). Naciśnij **Ctrl+Shift+End**, aby rozszerzyć zaznaczenie do ostatniego wiersza i kolumny z danymi.
+5. Naciśnij **Ctrl+C**, aby skopiować. Przejdź do pierwszej karty i kliknij pierwszy pusty wiersz pod danymi.
+6. Naciśnij **Ctrl+V**, aby wkleić wiersze danych (bez nagłówka).
+7. Przejdź do **Plik** > **Pobierz** > **Wartości rozdzielone przecinkami (.csv)**.
+
+### Na co uważać
+
+- Arkusze Google eksportują UTF-8 bez BOM, więc scalony plik można przesłać bez zmian.
+- Bardzo duże pliki (ponad 100 000 wierszy) mogą spowolnić lub zawiesić Arkusze. Użyj wtedy wiersza poleceń lub Pythona.
+- Sprawdź, czy wklejone wiersze trafiły pod właściwe kolumny. Jedno przesunięcie o kolumnę psuje całe scalenie.
+
+---
+
+## Metoda 3: wiersz poleceń (najszybsza, dowolny rozmiar)
+
+Jeśli masz terminal, scalanie w wierszu poleceń trwa poniżej sekundy niezależnie od rozmiaru pliku. W macOS i Linuksie nie trzeba niczego instalować.
+
+### macOS lub Linux
+
+```bash
+# Scalenie file1.csv i file2.csv w merged.csv
+# tail -n +2 pomija wiersz nagłówka drugiego pliku
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Jeśli `file1.csv` nie kończy się znakiem nowego wiersza, jego ostatni wiersz i pierwszy wiersz `file2.csv` trafią do tej samej linii. Sprawdź to miejsce w wyniku.
+
+### Windows (wiersz polecenia)
+
+```bat
+:: Najpierw skopiuj pierwszy plik
+copy file1.csv merged.csv
+
+:: Dopisz wszystkie wiersze drugiego pliku poza nagłówkiem
+more +1 file2.csv >> merged.csv
+```
+
+Uwaga: polecenie `more +1` w Windows pomija pierwszy wiersz. Zamienia jednak też tabulatory na spacje, może zepsuć tekst spoza ASCII (w tym polskie znaki) i zawiesza się przy bardzo dużych plikach, więc sprawdź wynik albo użyj w Windows Pythona (metoda 4).
+
+### Sprawdzenie wyniku
+
+Po scaleniu w wierszu poleceń otwórz wynik w edytorze tekstu i sprawdź, czy:
+
+- Wiersz nagłówka występuje tylko raz (na samej górze)
+- Między danymi z obu plików nie ma pustej linii
+- Ostatni wiersz file1 i pierwszy wiersz danych file2 są w kolejnych liniach
+- Na końcu nie ma dodatkowego znaku nowego wiersza (większość importerów to toleruje, ale bez niego jest czyściej)
+
+---
+
+## Metoda 4: Python (wszystkie systemy, różne kolumny)
+
+`csv.DictWriter` w Pythonie to najpewniejsza metoda scalania. Radzi sobie z różną kolejnością kolumn, z kolumnami, które ma tylko jeden plik, i z dużymi plikami. Nie musisz być programistą: zainstaluj Pythona i uruchom poniższy skrypt.
+
+### Skrypt
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Zebranie wszystkich nazw kolumn w kolejności ich pierwszego wystąpienia
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" zostawia pustą kolumnę w wierszach z pliku, który jej nie ma
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig usuwa BOM, jeśli jest
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Zapisz ten plik jako `merge.py` w tym samym folderze co pliki CSV. Otwórz w tym folderze terminal lub wiersz polecenia i uruchom:
+
+```
+python merge.py
+```
+
+### Dlaczego Python?
+
+- Działa w Windows, na Macu i w Linuksie.
+- Automatycznie usuwa BOM (utf-8-sig). Każdy plik, który nie jest w UTF-8, najpierw przekonwertuj (zobacz sekcję o kodowaniu poniżej).
+- Radzi sobie z inną kolejnością kolumn, bo DictWriter dopasowuje kolumny po nazwie, a nie po pozycji. Kolumny, których brakuje w jednym pliku, zostają puste, a kolumny, które ma tylko jeden plik, są zachowane.
+- Przetwarza pliki wiersz po wierszu, nie ładując wszystkiego do pamięci, więc działa też z bardzo dużymi plikami.
+
+---
+
+## Kiedy NIE scalać
+
+Scalanie służy do układania jeden pod drugim wierszy z plików o tej samej strukturze. Nie scalaj, gdy:
+
+- **Pliki mają różną strukturę.** Jeśli file1 ma 30 kolumn, a file2 25 innych kolumn, naiwne scalenie da plik z rozjechanymi danymi. Użyj metody w Pythonie z DictWriter (metoda 4), która zachowuje wszystkie kolumny i zostawia puste luki, albo najpierw ujednolić strukturę.
+- **Chcesz połączyć pliki po kluczu (JOIN jak w SQL).** Scalanie układa wiersze jeden pod drugim; nie dopasowuje wierszy z dwóch plików po wspólnym SKU, Handle czy ID. Do łączenia po kluczu użyj `csv.DictReader` w Pythonie ze słownikiem albo narzędzia takiego jak pandas.
+- **Jeden plik zawiera sumy, podsumowania lub tabele przestawne.** Przed scaleniem wyeksportuj tylko surowe wiersze danych. Wiersze podsumowań, formuły SUMA i wiersze średnich pojawią się po scaleniu jako dane produktów.
+- **Pliki pochodzą z różnych szablonów eksportu.** Eksport produktów Shopify i eksport stanów magazynowych Shopify mają różne kolumny i nie da się ich scalić przez dopisanie wierszy.
+
+---
+
+## Ujednolicenie różnych nagłówków przed scaleniem
+
+Jeśli oba pliki mają te same kolumny, ale o innych nazwach (np. `Title` i `Product Title` albo `Price` i `Variant Price`), ujednolić je przed scaleniem.
+
+### Ręcznie w Excelu lub Arkuszach Google
+
+1. Otwórz oba pliki obok siebie.
+2. Porównaj wiersz 1 (nagłówki) w każdym pliku.
+3. Zmień w jednym pliku nazwy niestandardowych nagłówków tak, by pasowały do drugiego. Edytuj komórkę bezpośrednio (klawisz F2 w Excelu).
+4. Zapisz oba pliki jako CSV, zanim przejdziesz do scalania.
+
+### Automatycznie w Pythonie
+
+```python
+import csv
+
+# Przypisanie niestandardowych nazw z file2 do standardowych nazw z file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Zmiana nazw nagłówków
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Ustawienie kolumn w tej samej kolejności
+
+Jeśli nazwy kolumn są identyczne, ale kolejność inna, metoda w Pythonie z DictWriter (metoda 4) zrobi to sama, bo dopasowuje po nazwie. W Excelu lub Arkuszach przestaw kolumny ręcznie:
+
+**W Excelu:**
+1. Wstaw w jednym pliku pusty wiersz nad wierszem 1.
+2. Ponumeruj kolumny w kolejności, jaką mają mieć w pliku docelowym (1, 2, 3...).
+3. Posortuj kolumny według tego wiersza z numerami (Dane > Sortuj > Opcje > Sortuj od lewej do prawej, według wiersza 1).
+4. Usuń pomocniczy wiersz z numerami.
+
+**W Arkuszach Google:**
+1. Wstaw pusty wiersz na górze.
+2. Wpisz docelowe pozycje kolumn.
+3. W arkuszu pomocniczym użyj `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (z numerami kolumn w potrzebnej kolejności) albo ręcznie wytnij i wklej kolumny we właściwej kolejności.
+4. Pobierz > CSV.
+
+---
+
+## Usuwanie zdublowanych wierszy nagłówka ze scalonego pliku
+
+Jeśli scalony plik przypadkiem zawiera zdublowany wiersz nagłówka w środku (częste, gdy kilka razy scala się eksporty z tego samego narzędzia), usuń go w Pythonie:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Zachowanie tylko wierszy różnych od nagłówka (poza pierwszym)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Różne kodowania i separatory w plikach
+
+Jeśli jeden plik jest w UTF-8, a drugi w Windows-1250 lub Windows-1252 (ANSI), scalony plik będzie miał krzaczki wszędzie tam, gdzie plik ANSI miał polskie znaki, litery z akcentami, typograficzne cudzysłowy lub symbole walut.
+
+**Przed scaleniem przekonwertuj plik ANSI na UTF-8:**
+
+W macOS lub Linuksie (polskie pliki ANSI to zwykle `windows-1250`):
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+W Pythonie:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Jeśli oba pliki mają to samo kodowanie, ale różne separatory (przecinki i średniki), przed scaleniem zmień separator w jednym z nich. Zobacz sekcję o separatorach w poradniku o podstawach CSV.
+
+---
+
+## Rozwiązywanie problemów ze scalonymi plikami
+
+| Problem | Przyczyna | Rozwiązanie |
+|---|---|---|
+| Dodatkowy pusty wiersz w środku scalonego pliku | Drugi plik miał na końcu znak nowego wiersza lub wiersz podsumowania | Usuń pusty wiersz albo dodaj w Pythonie `if any(row.values()):` przed `writer.writerow(row)` |
+| Zdublowany wiersz nagłówka w środku | Nie pominięto nagłówka drugiego pliku | Użyj `tail -n +2` (wiersz poleceń) lub dołączania w Power Query (pomija go automatycznie) |
+| Dane w złych kolumnach | Kolejność kolumn różni się między plikami | Najpierw przestaw kolumny w jednym pliku albo użyj metody w Pythonie z DictWriter |
+| Krzaczki w scalonym pliku | Pliki mają różne kodowania | Najpierw przekonwertuj oba pliki na UTF-8 za pomocą iconv w Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Pierwsza kolumna nierozpoznana po przesłaniu | Scalony plik ma BOM, który platforma źle odczytuje | Otwórz w VS Code i zapisz ponownie jako UTF-8 bez BOM |
+
+---
+
+## Czego nie robić
+
+- **Nie polegaj na ręcznym kopiowaniu i wklejaniu przy dużych lub złożonych plikach.** Łatwo pominąć wiersz, wkleić z przesunięciem o kolumnę albo przypadkiem powtórzyć nagłówek. Metoda 2 nadaje się do małych plików, jeśli sprawdzisz wynik; w innych przypadkach użyj Power Query, wiersza poleceń lub Pythona.
+- **Nie otwieraj obu plików dwukrotnym kliknięciem w Excelu, żeby wycinać i wklejać wiersze.** Excel przy takim otwieraniu CSV zmienia format dat, długich liczb i zer wiodących, po cichu psując dane.
+- **Nie scalaj plików z różną liczbą kolumn bez wcześniejszego ujednolicenia nagłówków.** Wynik będzie miał rozjechane dane.
+
+---
+
+## Lista kontrolna po scaleniu
+
+Przed importem scalonego pliku sprawdź:
+
+- [ ] Wiersz nagłówka występuje tylko raz (w wierszu 1, bez powtórzeń w środku)
+- [ ] Liczba wierszy się zgadza: (wiersze w file1 − 1 nagłówek) + (wiersze w file2 − 1 nagłówek) = łączna liczba wierszy danych
+- [ ] Nie ma dodatkowego pustego wiersza między danymi z obu plików
+- [ ] Nie ma zdublowanych SKU ani Handle, które nie powinny się powtarzać (sprawdź w korektorze CSV)
+- [ ] Są wszystkie kolumny z obu plików źródłowych (przy użyciu DictWriter z różną strukturą)
+- [ ] Plik zapisany jako UTF-8
+- [ ] Rozszerzenie to .csv, a zawartość to zwykły tekst rozdzielany przecinkami
+
+---
+
+## Po scaleniu: sprawdź przed importem
+
+Po scaleniu przepuść połączony plik przez korektor CSV, zanim go zaimportujesz. Scalanie może wprowadzić problemy, których nie było w żadnym z plików źródłowych:
+
+- Dodatkowy wiersz nagłówka w środku (korektor wykrywa go jako problem ze strukturą)
+- Zdublowane SKU lub Handle (wykrywane przez kontrolę duplikatów)
+- Niespójne kodowanie (wykrywane przez analizę kodowania w korektorze)
+
+Prześlij scalony plik CSV do korektora i pozwól mu sprawdzić cały plik, zanim wyślesz go na swoją platformę.

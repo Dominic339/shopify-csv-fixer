@@ -1,0 +1,336 @@
+---
+title: "Twee CSV-bestanden samenvoegen"
+description: "Stapsgewijze uitleg om twee CSV-bestanden samen te voegen met Power Query in Excel, Google Sheets of een eenvoudige opdrachtregel, zonder programmeerervaring."
+keywords: ["csv bestanden samenvoegen", "csv combineren", "twee csv samenvoegen", "excel power query csv", "google sheets csv samenvoegen", "csv toevoegen", "csv bestanden onder elkaar"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Vier manieren om CSV-bestanden samen te voegen (Excel, Spreadsheets, opdrachtregel, Python)"
+  - "Wanneer je NIET moet samenvoegen en wat je dan doet"
+  - "Hoe je verschillende kolomkoppen en een andere kolomvolgorde gelijktrekt"
+  - "Hoe je dubbele koprijen uit een samengevoegd bestand haalt"
+  - "Hoe je omgaat met verschillende coderingen en scheidingstekens"
+bestFor: "Verkopers die catalogusexports, voorraadbestanden of orderexports uit meerdere bronnen samenvoegen"
+timeToComplete: "15 minuten"
+---
+
+## Wanneer moet je CSV-bestanden samenvoegen?
+
+Twee CSV-bestanden samenvoegen is een veelvoorkomende stap vóór een e-commerce-import. Je hebt het bijvoorbeeld nodig om:
+
+- Producten van twee leveranciers in één catalogusupload te zetten
+- De productexport van vorige maand te combineren met nieuwe artikelen
+- Een grote import in kleinere delen te splitsen en die later weer samen te voegen
+- Variantrijen uit verschillende bronnen in één product-CSV te zetten
+
+Deze handleiding behandelt vier betrouwbare methoden: Power Query in Excel, Google Spreadsheets, de opdrachtregel en Python. Elke methode houdt de koprij van het eerste bestand en voegt alleen de rijen met gegevens van het tweede toe.
+
+---
+
+## Voordat je begint: kolomkoppen gelijktrekken
+
+Beide bestanden moeten dezelfde kolomkoppen in dezelfde volgorde hebben. Wijken de kolommen af, dan komen gegevens bij het samenvoegen in de verkeerde velden terecht en raakt je import beschadigd.
+
+Korte checklist vóór het samenvoegen:
+
+- [ ] Open beide bestanden en vergelijk de eerste rij (de kolomkoppen) naast elkaar
+- [ ] De kolomnamen komen precies overeen (sommige platforms letten op hoofdletters)
+- [ ] De kolommen staan in beide bestanden in dezelfde volgorde
+- [ ] Geen samenvattings- of voettekstrijen in een van de bestanden
+- [ ] Beide bestanden zijn opgeslagen als UTF-8
+
+Staan de kolomkoppen in een andere volgorde, zet de kolommen van één bestand dan om voordat je samenvoegt. De Python-methode met DictWriter (methode 4 hieronder) lost een afwijkende kolomvolgorde automatisch op.
+
+---
+
+## Methode 1: Power Query in Excel (Windows, aanbevolen)
+
+Power Query in Excel voegt meerdere CSV-bestanden samen zonder formules of macro's. Het vangt verschillen in codering en regeleinden tussen bestanden automatisch op en herhaalt de koprij nooit.
+
+### Stappen
+
+1. Open een lege Excel-werkmap.
+2. Ga naar het tabblad **Gegevens**, klik op **Gegevens ophalen**, dan **Uit bestand** en **Van tekst/CSV**.
+3. Selecteer je **eerste CSV-bestand** en klik op **Importeren**. Klik in het voorbeeld op **Gegevens transformeren** (niet op Laden).
+4. Ga in de Power Query-editor naar **Start** > **Nieuwe bron** > **Bestand** > **Tekst/CSV**, selecteer je **tweede CSV-bestand** en klik op **OK**. Beide bestanden staan nu als query's in het linkerdeelvenster.
+5. Selecteer de eerste query en ga naar **Start** > **Query's toevoegen** > **Query's toevoegen als nieuw**.
+6. Kies in het venster **Twee tabellen** en selecteer daarna je tweede query in de lijst.
+7. Links verschijnt een nieuwe gecombineerde query. Klik op **Sluiten en laden** om die naar een nieuw werkblad te schrijven.
+8. Ga met het gecombineerde werkblad actief naar **Bestand** > **Opslaan als** en kies **CSV UTF-8 (door komma's gescheiden)** als bestandstype. Excel slaat alleen het actieve werkblad op. Gewone "CSV" gebruikt een oude codering en kan letters met accenten beschadigen.
+
+### Waarom Power Query
+
+- Herkent de codering van elk bestand en laat je die in het voorbeeld aanpassen als de gok niet klopt.
+- Zet de koprij precies één keer neer, niet één keer per bestand.
+- Voegt geen lege rijen tussen de twee bestanden toe.
+- Kan grote bestanden aan, tot de Excel-grens van 1.048.576 rijen per werkblad. Gebruik voor meer rijen de opdrachtregel of Python.
+
+---
+
+## Methode 2: Google Spreadsheets (in de browser, kleinere bestanden)
+
+Google Spreadsheets is een snelle optie als je geen Excel hebt. Het werkt goed voor bestanden met in totaal minder dan ongeveer 50.000 rijen.
+
+### Stappen
+
+1. Open Google Drive en upload je eerste CSV: klik met de rechtermuisknop op een lege plek, kies **Bestand uploaden**, selecteer de CSV en klik daarna met de rechtermuisknop op het geüploade bestand en kies **Openen met > Google Spreadsheets**.
+2. Noteer het nummer van de laatste rij met gegevens (bijvoorbeeld rij 500 als je bestand 499 rijen met gegevens plus een koprij heeft).
+3. Open je tweede CSV op dezelfde manier in een nieuw browsertabblad.
+4. Klik in het tweede blad op rijnummer **2** (de eerste rij met gegevens, onder de koprij). Druk op **Ctrl+Shift+End** om de selectie uit te breiden tot de laatste rij en kolom met gegevens.
+5. Druk op **Ctrl+C** om te kopiëren. Ga naar het eerste tabblad en klik op de eerste lege rij onder je gegevens.
+6. Druk op **Ctrl+V** om de rijen met gegevens (zonder koprij) te plakken.
+7. Ga naar **Bestand** > **Downloaden** > **Kommagescheiden waarden (.csv)**.
+
+### Let op
+
+- Google Spreadsheets exporteert UTF-8 zonder BOM, dus het samengevoegde bestand kan zo worden geüpload.
+- Heel grote bestanden (meer dan 100.000 rijen) kunnen Spreadsheets traag maken of laten vastlopen. Gebruik dan de opdrachtregel of Python.
+- Controleer of de geplakte rijen onder de juiste kolommen staan. Eén verschuiving van één kolom maakt het hele resultaat kapot.
+
+---
+
+## Methode 3: opdrachtregel (het snelst, elke bestandsgrootte)
+
+Heb je een terminal, dan duurt samenvoegen op de opdrachtregel minder dan een seconde, ongeacht de bestandsgrootte. Op macOS en Linux hoef je niets te installeren.
+
+### macOS of Linux
+
+```bash
+# file1.csv en file2.csv samenvoegen tot merged.csv
+# tail -n +2 slaat de koprij van het tweede bestand over
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Eindigt `file1.csv` niet op een regeleinde, dan komen de laatste rij ervan en de eerste rij van `file2.csv` op dezelfde regel. Controleer die overgang in het resultaat.
+
+### Windows (opdrachtprompt)
+
+```bat
+:: Eerst het eerste bestand kopiëren
+copy file1.csv merged.csv
+
+:: Alle rijen van het tweede bestand behalve de koprij toevoegen
+more +1 file2.csv >> merged.csv
+```
+
+Let op: de Windows-opdracht `more +1` slaat de eerste regel over. Hij zet ook tabs om in spaties, kan niet-ASCII-tekst beschadigen en loopt vast bij heel grote bestanden. Controleer dus het resultaat, of gebruik op Windows Python (methode 4).
+
+### Het resultaat controleren
+
+Open het resultaat na het samenvoegen op de opdrachtregel in een teksteditor en controleer:
+
+- De koprij staat er precies één keer (bovenaan)
+- Geen lege regel tussen de gegevens van de twee bestanden
+- De laatste rij van file1 en de eerste rij met gegevens van file2 staan op opeenvolgende regels
+- Geen extra regeleinde aan het eind (de meeste importprogramma's vinden het niet erg, maar zonder is het netter)
+
+---
+
+## Methode 4: Python (op elk platform, ook bij afwijkende kolommen)
+
+`csv.DictWriter` in Python is de betrouwbaarste manier om samen te voegen. Het kan om met een andere kolomvolgorde, kolommen die maar één bestand heeft en grote bestanden. Je hoeft niet te kunnen programmeren: installeer Python en voer het script hieronder uit.
+
+### Het script
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Alle kolomnamen verzamelen, in de volgorde waarin ze voor het eerst voorkomen
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" laat een kolom leeg voor rijen uit een bestand dat die kolom mist
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig haalt een BOM weg als die er is
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Sla dit op als `merge.py` in dezelfde map als je CSV-bestanden. Open in die map een terminal of opdrachtprompt en voer uit:
+
+```
+python merge.py
+```
+
+### Waarom Python?
+
+- Werkt op Windows, Mac en Linux.
+- Haalt een BOM automatisch weg (utf-8-sig). Zet elk bestand dat geen UTF-8 is eerst om (zie het deel over codering hieronder).
+- Kan om met een andere kolomvolgorde, omdat DictWriter kolommen op naam koppelt en niet op positie. Kolommen die in een bestand ontbreken, blijven leeg, en kolommen die maar één bestand heeft, blijven behouden.
+- Verwerkt de bestanden rij voor rij zonder alles in het geheugen te laden, en werkt dus ook met heel grote bestanden.
+
+---
+
+## Wanneer je NIET moet samenvoegen
+
+Samenvoegen is het juiste middel om rijen uit bestanden met dezelfde opbouw onder elkaar te zetten. Voeg niet samen als:
+
+- **De bestanden een verschillende opbouw hebben.** Heeft file1 30 kolommen en file2 25 andere kolommen, dan levert simpel samenvoegen een bestand met verschoven gegevens op. Gebruik de Python-methode met DictWriter (methode 4), die alle kolommen houdt en de gaten leeg laat, of trek de opbouw eerst gelijk.
+- **Je op een sleutel wilt koppelen (een JOIN zoals in SQL).** Samenvoegen zet rijen onder elkaar; het koppelt geen rijen uit twee bestanden via een gemeenschappelijke SKU, Handle of ID. Gebruik voor koppelingen op een sleutel `csv.DictReader` in Python met een dictionary, of een tool als pandas.
+- **Een bestand totalen, samenvattingen of draaitabellen bevat.** Exporteer vóór het samenvoegen alleen de ruwe rijen met gegevens. Samenvattingsrijen, SOM-formules en gemiddelderijen verschijnen na het samenvoegen als productgegevens.
+- **De bestanden uit verschillende exportsjablonen komen.** Een Shopify-productexport en een Shopify-voorraadexport hebben verschillende kolommen en kunnen niet worden samengevoegd door rijen toe te voegen.
+
+---
+
+## Afwijkende kolomkoppen gelijktrekken vóór het samenvoegen
+
+Hebben de twee bestanden dezelfde kolommen maar met andere namen (bijvoorbeeld `Title` en `Product Title`, of `Price` en `Variant Price`), maak ze dan gelijk voordat je samenvoegt.
+
+### Met de hand in Excel of Google Spreadsheets
+
+1. Open beide bestanden naast elkaar.
+2. Vergelijk rij 1 (de kolomkoppen) van elk bestand.
+3. Hernoem in één bestand de afwijkende kolomkoppen zodat ze bij het andere passen. Bewerk de cel direct (F2 in Excel).
+4. Sla beide bestanden op als CSV voordat je gaat samenvoegen.
+
+### Automatisch met Python
+
+```python
+import csv
+
+# Afwijkende namen in file2 koppelen aan de standaardnamen uit file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Kolomkoppen hernoemen
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Kolommen in dezelfde volgorde zetten
+
+Zijn de kolomnamen gelijk maar de volgorde niet, dan regelt de Python-methode met DictWriter (methode 4) dat automatisch, omdat die op naam koppelt. In Excel of Spreadsheets zet je ze met de hand om:
+
+**In Excel:**
+1. Voeg in één bestand een lege rij in boven rij 1.
+2. Nummer de kolommen in de volgorde die ze in het doelbestand moeten hebben (1, 2, 3 ...).
+3. Sorteer de kolommen op die rij met nummers (Gegevens > Sorteren > Opties > Van links naar rechts sorteren, op rij 1).
+4. Verwijder de hulprij met nummers.
+
+**In Google Spreadsheets:**
+1. Voeg bovenaan een lege rij in.
+2. Typ de gewenste positie van elke kolom.
+3. Gebruik op een hulpblad `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (met de kolomnummers in de volgorde die je wilt), of knip en plak de kolommen met de hand in de juiste volgorde.
+4. Downloaden > CSV.
+
+---
+
+## Dubbele koprijen uit een samengevoegd bestand halen
+
+Bevat een samengevoegd bestand per ongeluk een dubbele koprij in het midden (vaak als je exports van dezelfde tool meerdere keren samenvoegt), haal die dan weg met Python:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Alleen rijen houden die niet gelijk zijn aan de koprij (behalve de eerste)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Verschillende coderingen en scheidingstekens tussen bestanden
+
+Is het ene bestand UTF-8 en het andere Windows-1252 (ANSI), dan krijgt het samengevoegde bestand onleesbare tekens overal waar het Windows-1252-bestand letters met accenten, gekrulde aanhalingstekens of valutasymbolen had.
+
+**Zet Windows-1252 vóór het samenvoegen om naar UTF-8:**
+
+Op macOS of Linux:
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Met Python:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Gebruiken beide bestanden dezelfde codering maar verschillende scheidingstekens (komma's en puntkomma's), zet dan het scheidingsteken van één bestand om voordat je samenvoegt. Zie het deel over scheidingstekens in de handleiding over CSV-basiskennis.
+
+---
+
+## Problemen met samengevoegde bestanden oplossen
+
+| Probleem | Oorzaak | Oplossing |
+|---|---|---|
+| Extra lege rij midden in het samengevoegde bestand | Het tweede bestand had een regeleinde of samenvattingsrij aan het eind | Verwijder de lege rij, of zet in Python `if any(row.values()):` vóór `writer.writerow(row)` |
+| Dubbele koprij in het midden | De koprij van het tweede bestand is niet overgeslagen | Gebruik `tail -n +2` (opdrachtregel) of Toevoegen in Power Query (slaat hem automatisch over) |
+| Gegevens in de verkeerde kolommen | De kolomvolgorde verschilt tussen de bestanden | Zet eerst de kolommen van één bestand om, of gebruik de Python-methode met DictWriter |
+| Onleesbare tekens in het samengevoegde bestand | De bestanden hebben verschillende coderingen | Zet eerst beide bestanden om naar UTF-8 met iconv op Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Eerste kolom na het uploaden niet herkend | Het samengevoegde bestand heeft een BOM die het platform verkeerd leest | Open het in VS Code en sla het opnieuw op als UTF-8 zonder BOM |
+
+---
+
+## Wat je niet moet doen
+
+- **Vertrouw bij grote of complexe bestanden niet op kopiëren en plakken met de hand.** Je slaat makkelijk een rij over, plakt een kolom verschoven of herhaalt per ongeluk de koprij. Methode 2 is prima voor kleine bestanden als je het resultaat controleert; gebruik anders Power Query, de opdrachtregel of Python.
+- **Open de twee bestanden niet door te dubbelklikken in Excel om rijen te knippen en te plakken.** Excel verandert de notatie van datums, lange getallen en voorloopnullen als het een CSV zo opent, en beschadigt de gegevens zonder melding.
+- **Voeg geen bestanden met een verschillend aantal kolommen samen zonder eerst de kolomkoppen gelijk te trekken.** Het resultaat bevat dan verschoven gegevens.
+
+---
+
+## Checklist na het samenvoegen
+
+Controleer deze punten voordat je het samengevoegde bestand importeert:
+
+- [ ] De koprij staat er precies één keer (in rij 1, niet herhaald in het midden)
+- [ ] Het aantal rijen klopt: (rijen in file1 − 1 koprij) + (rijen in file2 − 1 koprij) = totaal aantal rijen met gegevens
+- [ ] Geen extra lege rij tussen de gegevens van de twee bestanden
+- [ ] Geen dubbele SKU's of Handles die niet dubbel horen te zijn (controleer met de CSV-fixer)
+- [ ] Alle kolommen uit beide bronbestanden zijn aanwezig (als je DictWriter gebruikt met een afwijkende opbouw)
+- [ ] Bestand opgeslagen als UTF-8
+- [ ] De extensie is .csv en de inhoud is platte, kommagescheiden tekst
+
+---
+
+## Na het samenvoegen: controleer vóór de import
+
+Laat het samengevoegde bestand vóór de import door de CSV-fixer controleren. Bij het samenvoegen kunnen problemen ontstaan die in geen van de bronbestanden zaten:
+
+- Een extra koprij in het midden (door de fixer herkend als structuurprobleem)
+- Dubbele SKU's of Handles (herkend door de controle op dubbele waarden)
+- Ongelijke codering (herkend door de coderingsanalyse van de fixer)
+
+Upload je samengevoegde CSV naar de fixer en laat het hele bestand controleren voordat je het naar je platform stuurt.

@@ -1,0 +1,336 @@
+---
+title: "Comment fusionner deux fichiers CSV"
+description: "Guide pas à pas pour combiner deux fichiers CSV en un seul avec Power Query d'Excel, Google Sheets ou une simple ligne de commande, sans aucune expérience en programmation."
+keywords: ["fusionner fichiers csv", "combiner csv", "assembler deux csv", "power query excel csv", "fusionner csv google sheets", "ajouter lignes csv", "empiler fichiers csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Quatre méthodes pour fusionner des CSV (Excel, Sheets, ligne de commande, Python)"
+  - "Quand NE PAS fusionner, et que faire à la place"
+  - "Comment corriger des en-têtes différents et un ordre de colonnes différent"
+  - "Comment supprimer les lignes d'en-tête en double d'un fichier fusionné"
+  - "Comment gérer des encodages et des séparateurs différents entre fichiers"
+bestFor: "Vendeurs qui combinent des exports de catalogue, des fichiers de stock ou des exports de commandes venant de plusieurs sources"
+timeToComplete: "15 minutes"
+---
+
+## Quand faut-il fusionner des fichiers CSV ?
+
+Fusionner deux fichiers CSV en un seul est une étape courante avant un import e-commerce. Vous en aurez besoin par exemple pour :
+
+- Réunir les produits de deux fournisseurs dans un seul envoi de catalogue
+- Combiner l'export produits du mois dernier avec les nouveautés
+- Découper un gros import en lots plus petits, puis les réassembler
+- Réunir dans un seul CSV produits des lignes de variantes venant de sources différentes
+
+Ce guide présente quatre méthodes fiables : Power Query d'Excel, Google Sheets, la ligne de commande et Python. Chacune garde la ligne d'en-tête du premier fichier et n'ajoute que les lignes de données du second.
+
+---
+
+## Avant de commencer : alignez les en-têtes
+
+Les deux fichiers doivent avoir les mêmes en-têtes de colonnes dans le même ordre. Si les colonnes diffèrent, la fusion décale les données dans de mauvais champs et abîme l'import.
+
+Liste de contrôle rapide avant la fusion :
+
+- [ ] Ouvrez les deux fichiers et comparez la première ligne (les en-têtes) côte à côte
+- [ ] Les noms de colonnes correspondent exactement (certaines plateformes tiennent compte de la casse)
+- [ ] Les colonnes sont dans le même ordre dans les deux fichiers
+- [ ] Aucun fichier ne contient de ligne de synthèse ou de pied de page
+- [ ] Les deux fichiers sont enregistrés en UTF-8
+
+Si les en-têtes ne sont pas dans le même ordre, réorganisez les colonnes de l'un des fichiers avant la fusion. La méthode Python avec DictWriter (méthode 4 ci-dessous) gère automatiquement les différences d'ordre.
+
+---
+
+## Méthode 1 : Power Query d'Excel (Windows, recommandée)
+
+Power Query d'Excel assemble plusieurs CSV sans formules ni macros. Il gère automatiquement les différences d'encodage et de fins de ligne entre les fichiers, et ne répète jamais la ligne d'en-tête.
+
+### Étapes
+
+1. Ouvrez un classeur Excel vierge.
+2. Allez dans l'onglet **Données**, cliquez sur **Obtenir des données**, puis **À partir d'un fichier** et **À partir d'un fichier texte/CSV**.
+3. Sélectionnez votre **premier fichier CSV** et cliquez sur **Importer**. Dans l'aperçu, cliquez sur **Transformer les données** (et non Charger).
+4. Dans l'éditeur Power Query, allez dans **Accueil** > **Nouvelle source** > **Fichier** > **Texte/CSV**, sélectionnez votre **second fichier CSV** et cliquez sur **OK**. Les deux fichiers apparaissent maintenant comme requêtes dans le volet de gauche.
+5. Sélectionnez la première requête, puis allez dans **Accueil** > **Ajouter des requêtes** > **Ajouter des requêtes comme nouvelles**.
+6. Dans la boîte de dialogue, choisissez **Deux tables**, puis sélectionnez votre seconde requête dans la liste.
+7. Une nouvelle requête combinée apparaît dans le volet de gauche. Cliquez sur **Fermer et charger** pour l'écrire dans une nouvelle feuille.
+8. Avec la feuille combinée active, allez dans **Fichier** > **Enregistrer sous** et choisissez le format **CSV UTF-8 (délimité par des virgules)**. Excel n'enregistre que la feuille active. Le simple « CSV » utilise un ancien encodage et peut abîmer les accents.
+
+### Pourquoi Power Query
+
+- Détecte l'encodage de chaque fichier et vous laisse le corriger dans l'aperçu si la détection se trompe.
+- Ajoute la ligne d'en-tête une seule fois, et non une fois par fichier.
+- N'ajoute pas de lignes vides entre les deux fichiers.
+- Gère les gros fichiers, jusqu'à la limite d'Excel de 1 048 576 lignes par feuille. Au-delà, utilisez la ligne de commande ou Python.
+
+---
+
+## Méthode 2 : Google Sheets (dans le navigateur, petits fichiers)
+
+Google Sheets est une solution rapide si vous n'avez pas Excel. Elle convient aux fichiers de moins de 50 000 lignes environ au total.
+
+### Étapes
+
+1. Ouvrez Google Drive et importez votre premier CSV : clic droit sur une zone vide, **Importer un fichier**, choisissez le CSV, puis clic droit sur le fichier importé et **Ouvrir avec > Google Sheets**.
+2. Notez le numéro de la dernière ligne de données (par exemple la ligne 500 si votre fichier compte 499 lignes de données plus une ligne d'en-tête).
+3. Ouvrez votre second CSV de la même façon dans un nouvel onglet du navigateur.
+4. Dans la seconde feuille, cliquez sur le numéro de ligne **2** (la première ligne de données, sous l'en-tête). Appuyez sur **Ctrl+Maj+Fin** pour étendre la sélection jusqu'à la dernière ligne et la dernière colonne contenant des données.
+5. Appuyez sur **Ctrl+C** pour copier. Revenez au premier onglet et cliquez sur la première ligne vide sous vos données.
+6. Appuyez sur **Ctrl+V** pour coller les lignes de données (sans l'en-tête).
+7. Allez dans **Fichier** > **Télécharger** > **Valeurs séparées par des virgules (.csv)**.
+
+### Points de vigilance
+
+- Google Sheets exporte en UTF-8 sans BOM : le fichier fusionné peut être envoyé tel quel.
+- Les très gros fichiers (plus de 100 000 lignes) peuvent ralentir ou bloquer Sheets. Utilisez alors la ligne de commande ou Python.
+- Vérifiez que les lignes collées sont bien alignées sur les colonnes. Un seul décalage d'une colonne fausse toute la fusion.
+
+---
+
+## Méthode 3 : ligne de commande (la plus rapide, toutes tailles)
+
+Si vous disposez d'un terminal, la ligne de commande prend moins d'une seconde, quelle que soit la taille du fichier. Rien à installer sous macOS ou Linux.
+
+### macOS ou Linux
+
+```bash
+# Fusionner file1.csv et file2.csv dans merged.csv
+# tail -n +2 ignore la ligne d'en-tête du second fichier
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Si `file1.csv` ne se termine pas par un saut de ligne, sa dernière ligne et la première ligne de `file2.csv` se retrouvent sur la même ligne. Vérifiez cette jonction dans le résultat.
+
+### Windows (invite de commandes)
+
+```bat
+:: Copier d'abord le premier fichier
+copy file1.csv merged.csv
+
+:: Ajouter toutes les lignes du second fichier sauf l'en-tête
+more +1 file2.csv >> merged.csv
+```
+
+Remarque : la commande Windows `more +1` ignore la première ligne. Elle transforme aussi les tabulations en espaces, peut abîmer le texte non ASCII et bloque sur les très gros fichiers : vérifiez le résultat, ou utilisez Python (méthode 4) sous Windows.
+
+### Vérifier le résultat
+
+Après une fusion en ligne de commande, ouvrez le résultat dans un éditeur de texte et vérifiez que :
+
+- La ligne d'en-tête apparaît une seule fois (tout en haut)
+- Il n'y a pas de ligne vide entre les données des deux fichiers
+- La dernière ligne de file1 et la première ligne de données de file2 se suivent
+- Il n'y a pas de saut de ligne en trop à la fin (la plupart des outils d'import le tolèrent, mais c'est plus propre sans)
+
+---
+
+## Méthode 4 : Python (toutes plateformes, colonnes différentes)
+
+`csv.DictWriter` de Python est la méthode de fusion la plus fiable. Elle gère un ordre de colonnes différent, les colonnes présentes dans un seul fichier et les gros fichiers. Inutile d'être programmeur : installez Python et lancez le script ci-dessous.
+
+### Le script
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Rassembler tous les noms de colonnes, dans l'ordre de leur première apparition
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" laisse une colonne vide pour les lignes d'un fichier qui ne l'a pas
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig retire le BOM s'il est présent
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Enregistrez ce fichier sous le nom `merge.py` dans le même dossier que vos CSV. Ouvrez un terminal ou une invite de commandes dans ce dossier et lancez :
+
+```
+python merge.py
+```
+
+### Pourquoi Python ?
+
+- Fonctionne sous Windows, Mac et Linux.
+- Retire automatiquement le BOM (utf-8-sig). Convertissez d'abord tout fichier qui n'est pas en UTF-8 (voir la section sur l'encodage plus bas).
+- Gère un ordre de colonnes différent, car DictWriter associe les colonnes par nom et non par position. Les colonnes absentes d'un fichier restent vides, et celles qu'un seul fichier contient sont conservées.
+- Traite les fichiers ligne par ligne sans tout charger en mémoire, et fonctionne donc sur de très gros fichiers.
+
+---
+
+## Quand NE PAS fusionner
+
+La fusion sert à empiler des lignes de fichiers de même structure. Ne fusionnez pas quand :
+
+- **Les fichiers ont des structures différentes.** Si file1 a 30 colonnes et file2 25 colonnes différentes, une fusion naïve produit un fichier aux données décalées. Utilisez la méthode Python avec DictWriter (méthode 4), qui garde toutes les colonnes et laisse les cases manquantes vides, ou harmonisez d'abord les structures.
+- **Vous voulez joindre sur une clé (un JOIN façon SQL).** La fusion empile des lignes ; elle n'associe pas les lignes de deux fichiers par un SKU, un Handle ou un ID commun. Pour une jointure sur une clé, utilisez `csv.DictReader` de Python avec un dictionnaire, ou un outil comme pandas.
+- **Un fichier contient des totaux, des synthèses ou des tableaux croisés dynamiques.** N'exportez que les lignes de données brutes avant la fusion. Les lignes de synthèse, les formules SOMME et les lignes de moyennes apparaîtront comme des produits après la fusion.
+- **Les fichiers viennent de modèles d'export différents.** Un export de produits Shopify et un export de stock Shopify n'ont pas les mêmes colonnes et ne peuvent pas être fusionnés en ajoutant des lignes.
+
+---
+
+## Corriger des en-têtes différents avant la fusion
+
+Si les deux fichiers ont les mêmes colonnes mais avec des noms différents (par exemple `Title` et `Product Title`, ou `Price` et `Variant Price`), harmonisez-les avant la fusion.
+
+### À la main dans Excel ou Google Sheets
+
+1. Ouvrez les deux fichiers côte à côte.
+2. Comparez la ligne 1 (les en-têtes) de chaque fichier.
+3. Renommez dans l'un des fichiers les en-têtes non conformes pour qu'ils correspondent à l'autre. Modifiez directement la cellule (touche F2 dans Excel).
+4. Enregistrez les deux fichiers en CSV avant de passer à la fusion.
+
+### Automatiquement avec Python
+
+```python
+import csv
+
+# Associer les noms non standard de file2 aux noms standard utilisés dans file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Renommer les en-têtes
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Remettre les colonnes dans le même ordre
+
+Si les noms de colonnes sont identiques mais l'ordre différent, la méthode Python avec DictWriter (méthode 4) s'en charge automatiquement, car elle associe par nom. Dans Excel ou Sheets, réorganisez à la main :
+
+**Dans Excel :**
+1. Insérez une ligne vide au-dessus de la ligne 1 dans l'un des fichiers.
+2. Numérotez les colonnes dans l'ordre voulu pour le fichier cible (1, 2, 3...).
+3. Triez les colonnes selon cette ligne de numéros (Données > Trier > Options > De la gauche vers la droite, selon la ligne 1).
+4. Supprimez la ligne de numéros auxiliaire.
+
+**Dans Google Sheets :**
+1. Insérez une ligne vide en haut.
+2. Saisissez la position voulue de chaque colonne.
+3. Sur une feuille auxiliaire, utilisez `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (avec les numéros de colonnes dans l'ordre voulu), ou coupez et collez les colonnes à la main dans le bon ordre.
+4. Télécharger > CSV.
+
+---
+
+## Supprimer les lignes d'en-tête en double d'un fichier fusionné
+
+Si un fichier fusionné contient par erreur une ligne d'en-tête en double au milieu (fréquent quand on fusionne plusieurs fois des exports du même outil), supprimez-la avec Python :
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Ne garder que les lignes différentes de l'en-tête (sauf la première)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Encodages et séparateurs différents entre fichiers
+
+Si un fichier est en UTF-8 et l'autre en Windows-1252 (ANSI), le fichier fusionné contiendra des caractères illisibles partout où le fichier Windows-1252 avait des lettres accentuées, des guillemets typographiques ou des symboles monétaires.
+
+**Convertir le Windows-1252 en UTF-8 avant la fusion :**
+
+Sous macOS ou Linux :
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Avec Python :
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Si les deux fichiers utilisent le même encodage mais des séparateurs différents (virgules et points-virgules), convertissez le séparateur de l'un d'eux avant la fusion. Voir la section sur les séparateurs du guide des bases du CSV.
+
+---
+
+## Dépannage des fichiers fusionnés
+
+| Problème | Cause | Solution |
+|---|---|---|
+| Ligne vide en trop au milieu du fichier fusionné | Le second fichier avait un saut de ligne ou une ligne de synthèse à la fin | Supprimez la ligne vide, ou ajoutez `if any(row.values()):` avant `writer.writerow(row)` en Python |
+| Ligne d'en-tête en double au milieu | L'en-tête du second fichier n'a pas été ignoré | Utilisez `tail -n +2` (ligne de commande) ou l'ajout de Power Query (qui l'ignore automatiquement) |
+| Données dans les mauvaises colonnes | L'ordre des colonnes diffère entre les fichiers | Réorganisez d'abord les colonnes d'un fichier, ou utilisez la méthode Python avec DictWriter |
+| Caractères illisibles dans le fichier fusionné | Les fichiers ont des encodages différents | Convertissez d'abord les deux fichiers en UTF-8 avec iconv sous Mac/Linux : `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Première colonne non reconnue après l'envoi | Le fichier fusionné a un BOM que la plateforme lit mal | Ouvrez-le dans VS Code et réenregistrez-le en UTF-8 sans BOM |
+
+---
+
+## Ce qu'il ne faut pas faire
+
+- **Ne comptez pas sur le copier-coller à la main pour les fichiers gros ou complexes.** On saute facilement une ligne, on colle avec une colonne de décalage ou on répète l'en-tête par erreur. La méthode 2 convient aux petits fichiers si vous vérifiez le résultat ; sinon, utilisez Power Query, la ligne de commande ou Python.
+- **N'ouvrez pas les deux fichiers par un double-clic dans Excel pour couper-coller des lignes.** Excel reformate les dates, les nombres longs et les zéros en tête quand il ouvre un CSV de cette façon, et abîme les données sans prévenir.
+- **Ne fusionnez pas des fichiers au nombre de colonnes différent sans corriger d'abord les en-têtes.** Le résultat aura des données décalées.
+
+---
+
+## Liste de contrôle après la fusion
+
+Avant d'importer le fichier fusionné, vérifiez ces points :
+
+- [ ] La ligne d'en-tête apparaît une seule fois (en ligne 1, sans répétition au milieu)
+- [ ] Le nombre de lignes est correct : (lignes de file1 − 1 en-tête) + (lignes de file2 − 1 en-tête) = total des lignes de données
+- [ ] Pas de ligne vide en trop entre les deux blocs de données
+- [ ] Pas de SKU ni de Handle en double qui ne devraient pas l'être (passez le fichier dans le correcteur CSV)
+- [ ] Toutes les colonnes des deux fichiers sources sont présentes (si vous utilisez DictWriter avec des structures différentes)
+- [ ] Fichier enregistré en UTF-8
+- [ ] L'extension est .csv et le contenu est du texte brut séparé par des virgules
+
+---
+
+## Après la fusion : validez avant d'importer
+
+Après la fusion, faites passer le fichier combiné dans le correcteur CSV avant l'import. Une fusion peut introduire des problèmes absents des deux fichiers sources :
+
+- Une ligne d'en-tête en trop au milieu (repérée par le correcteur comme problème de structure)
+- Des SKU ou Handle en double (repérés par la détection des doublons)
+- Un encodage incohérent (repéré par l'analyse d'encodage du correcteur)
+
+Envoyez votre CSV fusionné dans le correcteur et laissez-le valider l'ensemble du fichier avant de l'envoyer à votre plateforme.
