@@ -2,7 +2,8 @@
 // MDX element styling for curated guides: each H2 section (wrapped by rehypeWrapSections)
 // renders as a card.
 
-import type { ReactNode } from "react";
+import { isValidElement, type ReactNode } from "react";
+import { CsvSheet, parseCsvBlock } from "@/components/guides/CsvSheet";
 import { slugifyHeading } from "@/lib/guides/slug";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { isLocalisedPath } from "@/lib/i18n/paths";
@@ -42,6 +43,15 @@ export const mdxGuideComponents = {
       {children}
     </pre>
   ),
+  table: ({ children }: C) => (
+    <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+      <table className="w-full border-collapse text-sm">{children}</table>
+    </div>
+  ),
+  thead: ({ children }: C) => <thead className="bg-[var(--surface-2)]">{children}</thead>,
+  tr: ({ children }: C) => <tr className="border-b border-[var(--border)] last:border-b-0">{children}</tr>,
+  th: ({ children }: C) => <th className="px-3 py-2 text-left font-semibold text-[var(--text)]">{children}</th>,
+  td: ({ children }: C) => <td className="px-3 py-2 align-top text-[color:rgba(var(--muted-rgb),1)]">{children}</td>,
   hr: () => <div className="my-1 border-t border-[color:rgba(var(--border-rgb),0.35)]" />,
   a: ({ children, href }: C & { href?: string }) => (
     <a
@@ -59,16 +69,28 @@ export const mdxGuideComponents = {
   ),
 };
 
-/** The same components, with site links ("/app?preset=...") pointing at `locale`'s pages. */
-export function mdxGuideComponentsFor(locale: Locale) {
-  if (locale === "en") return mdxGuideComponents;
+/** A plain CSV example reads better as a spreadsheet than as a wall of commas. */
+function preAsSheet({ children }: C) {
+  const code = isValidElement<{ children?: unknown; className?: string }>(children) ? children.props : null;
+  const rows = code && typeof code.children === "string" && !code.className ? parseCsvBlock(code.children) : null;
+  return rows ? <CsvSheet rows={rows} label="CSV" /> : mdxGuideComponents.pre({ children });
+}
+
+/**
+ * The components for a guide in `locale`: site links ("/app?preset=...") point at that
+ * locale's pages, and with `csvSheets` CSV examples render as spreadsheets. (The general
+ * guides teach CSV syntax itself, so they keep the raw text.)
+ */
+export function mdxGuideComponentsFor(locale: Locale, { csvSheets = false }: { csvSheets?: boolean } = {}) {
+  const base = csvSheets ? { ...mdxGuideComponents, pre: preAsSheet } : mdxGuideComponents;
+  if (locale === "en") return base;
   const localize = (href?: string) => {
     if (!href?.startsWith("/") || href.startsWith("//")) return href;
     const path = href.split(/[?#]/)[0];
     return isLocalisedPath(path) ? localeHref(locale, path) + href.slice(path.length) : href;
   };
   return {
-    ...mdxGuideComponents,
+    ...base,
     a: ({ children, href }: C & { href?: string }) => mdxGuideComponents.a({ children, href: localize(href) }),
   };
 }
