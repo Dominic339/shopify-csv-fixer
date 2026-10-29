@@ -86,7 +86,11 @@
     "metaTitle": "{title} | Guida CSV {platform}",
     "metaIssueDescription": "{description} Scopri come risolvere questo errore di importazione CSV di {platform} passo dopo passo in StriveFormats, Excel e Fogli Google.",
     "faqWhatIs": "Che cos'è l'errore «{title}»?",
-    "faqHowFix": "Come si risolve «{title}»?"
+    "faqHowFix": "Come si risolve «{title}»?",
+    "sheetTitle": "Come appare nel tuo file",
+    "sheetBefore": "Nel tuo file",
+    "sheetAfter": "Dopo la correzione",
+    "sheetEmpty": "(vuoto)"
   },
   "guides": {
     "title": "Guide all'importazione CSV",

@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform} CSV Rehberi",
     "metaIssueDescription": "{description} Bu {platform} CSV içe aktarma hatasını StriveFormats, Excel ve Google E-Tablolar'da adım adım nasıl düzelteceğinizi öğrenin.",
     "faqWhatIs": "\"{title}\" hatası nedir?",
-    "faqHowFix": "\"{title}\" nasıl düzeltilir?"
+    "faqHowFix": "\"{title}\" nasıl düzeltilir?",
+    "sheetTitle": "Dosyanızda nasıl görünür",
+    "sheetBefore": "Dosyanızda",
+    "sheetAfter": "Düzeltmeden sonra",
+    "sheetEmpty": "(boş)"
   },
   "guides": {
     "title": "CSV İçe Aktarma Kılavuzları",

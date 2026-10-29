@@ -86,7 +86,11 @@
     "metaTitle": "{title} | {platform} CSV Guide",
     "metaIssueDescription": "{description} Learn how to fix this {platform} CSV import error step by step in StriveFormats, Excel, and Google Sheets.",
     "faqWhatIs": "What is the \"{title}\" error?",
-    "faqHowFix": "How do I fix \"{title}\"?"
+    "faqHowFix": "How do I fix \"{title}\"?",
+    "sheetTitle": "What it looks like in your file",
+    "sheetBefore": "In your file",
+    "sheetAfter": "After the fix",
+    "sheetEmpty": "(empty)"
   },
   "guides": {
     "title": "CSV Import Guides",

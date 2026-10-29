@@ -7,6 +7,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { SheetFix } from "@/components/guides/SheetFix";
+import { sheetExampleFor } from "@/lib/guides/sheetExamples";
 
 import JsonLd from "@/components/JsonLd";
 import MdxGuideToc from "@/components/MdxGuideToc";
@@ -399,6 +401,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
     english.kind === "issue" && english.issueCode
       ? expandIssueContent({ ...issueInput(english, platform), localTitle: guide.title }, guideText.tr)
       : null;
+  const sheet = english.kind === "issue" ? sheetExampleFor(english.issueCode) : null;
   const showWooVariableLink = platform === "woocommerce" && expanded?.issueType === "variant_structure";
   const curated = guide.kind === "curated" ? readCuratedGuide(platform, slug, locale) : null;
   const toc = curated ? extractTocFromMdx(curated.rawMdx) : [];
@@ -559,6 +562,15 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
               )}
             </section>
 
+            {sheet && (
+              <section className={`${card} p-5 sm:p-6`}>
+                <SheetFix
+                  example={sheet}
+                  labels={{ title: t.guide.sheetTitle, before: t.guide.sheetBefore, after: t.guide.sheetAfter, empty: t.guide.sheetEmpty }}
+                />
+              </section>
+            )}
+
             {checked ? fixerCta : null}
 
             <section className={`${card} p-5 sm:p-6`}>
@@ -574,7 +586,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
 
             {expanded.validValues?.length ? <Steps title={t.guide.validValues} items={expanded.validValues} /> : null}
 
-            {expanded.examples.length > 0 && (
+            {!sheet && expanded.examples.length > 0 && (
               <section className={`${card} p-5 sm:p-6`}>
                 <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.examples}</h2>
                 <div className="mt-3 overflow-x-auto">
