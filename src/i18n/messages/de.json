@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} muss 1 oder 0 sein. Gefunden: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} braucht die ItemID des bestehenden Angebots.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "{0} Angebot(e) haben keine product-id (UPC/EAN/ASIN), daher kann Amazon sie nur aktualisieren, wenn die SKU bereits in deinem Konto existiert.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} Produkt(e) haben mehr als 3 Optionen; Shopify erlaubt 3, daher wurden nur die ersten 3 übernommen.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "{0} Produkt(e) mit Varianten wurden zu einzelnen Angeboten (niedrigster Preis, Bestand addiert). Füge Etsy-Variationen im Shop Manager hinzu.",
 "{0} should be a decimal number. Found '{1}'.": "{0} sollte eine Dezimalzahl sein. Gefunden: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} sollte eine ganze Zahl sein. Gefunden: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "{0} Quellspalte(n) haben keine Entsprechung im Zielformat und wurden weggelassen: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "{0} Tag(s) wurden weggelassen: Etsy erlaubt 13 Tags pro Angebot mit je höchstens 20 Zeichen.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} Titel sind länger als Etsys Grenze von 140 Zeichen.",
 "{0} title(s) are longer than eBay's 80-character limit.": "{0} Titel sind länger als eBays Grenze von 80 Zeichen.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "{0} Variante(n) ohne SKU wurden übersprungen; Amazon verlangt für jedes Angebot eine SKU.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} ist nicht in den RelationshipDetails der Elternzeile aufgeführt (Zeile {2})."

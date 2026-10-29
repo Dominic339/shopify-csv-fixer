@@ -80,11 +80,11 @@ function runDemo(slug: LandingSlug) {
 function Cell({ value, tone }: { value: string; tone?: "fixed" | "error" | "warning" }) {
   const cls =
     tone === "error"
-      ? "bg-red-500/15 text-red-300"
+      ? "bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-300"
       : tone === "warning"
-        ? "bg-amber-500/15 text-amber-200"
+        ? "bg-amber-500/15 text-amber-800 dark:text-amber-200"
         : tone === "fixed"
-          ? "bg-green-500/15 text-green-300"
+          ? "bg-emerald-500/10 text-emerald-700 dark:bg-green-500/15 dark:text-green-300"
           : "text-[var(--text)]";
   return (
     <td className="px-2 py-1.5 align-top">
@@ -98,13 +98,13 @@ function Cell({ value, tone }: { value: string; tone?: "fixed" | "error" | "warn
 function DemoTable({ caption, headers, rows, tone }: { caption: string; headers: string[]; rows: (string | { v: string; tone?: "fixed" | "error" | "warning" })[][]; tone: "before" | "after" }) {
   return (
     <figure className="min-w-0">
-      <figcaption className={`mb-2 text-xs font-bold uppercase tracking-widest ${tone === "before" ? "text-red-400" : "text-green-400"}`}>{caption}</figcaption>
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[rgba(4,10,22,0.6)]">
+      <figcaption className={`mb-2 text-xs font-bold uppercase tracking-widest ${tone === "before" ? "text-red-600 dark:text-red-400" : "text-emerald-700 dark:text-green-400"}`}>{caption}</figcaption>
+      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-[var(--border)]">
               {headers.map((h) => (
-                <th key={h} className="whitespace-nowrap px-3 py-2 text-[11px] font-semibold text-cyan-400/80">
+                <th key={h} className="whitespace-nowrap px-3 py-2 text-[11px] font-semibold text-[var(--muted)]">
                   {h}
                 </th>
               ))}
@@ -225,7 +225,7 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
           </div>
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-green-400">{fmt(L.fixedAuto, { count: demo.result.fixesApplied.length })}</h3>
+              <h3 className="text-sm font-semibold text-emerald-700 dark:text-green-400">{fmt(L.fixedAuto, { count: demo.result.fixesApplied.length })}</h3>
               <ul className={`mt-2 list-disc space-y-1 pl-5 text-sm ${muted}`}>
                 {demo.result.fixesApplied.slice(0, 6).map((f) => (
                   <li key={f}>{vt.msg(f)}</li>
@@ -233,7 +233,7 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
               </ul>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-red-400">{fmt(L.leftForYou, { count: demo.problems.length })}</h3>
+              <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">{fmt(L.leftForYou, { count: demo.problems.length })}</h3>
               <ul className={`mt-2 list-disc space-y-1 pl-5 text-sm ${muted}`}>
                 {demo.problems.slice(0, 6).map((i) => (
                   <li key={`${i.code}-${i.rowIndex}`}>
@@ -289,11 +289,11 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
           <ul className="mt-4 space-y-2 text-sm">
             {blockers.slice(0, 7).map((m) => (
               <li key={m.code} className="flex gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
                 <Link className="text-[var(--text)] hover:underline" href={href(`/guides/${p.guidePlatform}/${issueCodeToSlug(m.code)}`)}>
                   {m.title}
                 </Link>
-                {m.autoFixable && <span className="shrink-0 text-xs text-green-400">{L.autoFix}</span>}
+                {m.autoFixable && <span className="shrink-0 text-xs text-emerald-700 dark:text-green-400">{L.autoFix}</span>}
               </li>
             ))}
           </ul>

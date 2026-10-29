@@ -17,7 +17,10 @@ export default function CheckoutClient({ authByLocale }: Props) {
   const sp = useSearchParams();
   const router = useRouter();
   const status = sp.get("status"); // success/canceled
-  const plan = sp.get("plan"); // basic/advanced
+  const plan = sp.get("plan"); // basic/advanced/pass
+  const isPass = plan === "pass";
+  // A pass buyer goes straight back to the fixer, where their file is waiting.
+  const doneHref = localeHref(locale, isPass ? "/app" : "/profile");
 
   const [synced, setSynced] = useState(false);
   const redirected = useRef(false);
@@ -33,6 +36,20 @@ export default function CheckoutClient({ authByLocale }: Props) {
       for (let i = 0; i < 8; i++) {
         if (cancelled) return;
         try {
+          if (isPass) {
+            const r = await fetch("/api/quota/status", { cache: "no-store" });
+            const j = await r.json().catch(() => ({}));
+            if (j?.passExpiresAt) {
+              if (!cancelled && !redirected.current) {
+                redirected.current = true;
+                setSynced(true);
+                router.replace(doneHref);
+              }
+              return;
+            }
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
+          }
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
             const { data } = await supabase
@@ -44,7 +61,7 @@ export default function CheckoutClient({ authByLocale }: Props) {
               if (!cancelled && !redirected.current) {
                 redirected.current = true;
                 setSynced(true);
-                router.replace(localeHref(locale, "/profile"));
+                router.replace(doneHref);
               }
               return;
             }
@@ -55,11 +72,11 @@ export default function CheckoutClient({ authByLocale }: Props) {
         await new Promise((r) => setTimeout(r, 1500));
       }
 
-      // Timed out — still redirect to profile so the user isn't stuck
+      // Timed out — still redirect so the user isn't stuck
       if (!cancelled && !redirected.current) {
         redirected.current = true;
         setSynced(true);
-        router.replace(localeHref(locale, "/profile"));
+        router.replace(doneHref);
       }
     }
 
@@ -72,7 +89,7 @@ export default function CheckoutClient({ authByLocale }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [status, router, locale]);
+  }, [status, router, locale, isPass, doneHref]);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
@@ -81,8 +98,8 @@ export default function CheckoutClient({ authByLocale }: Props) {
       {status === "success" ? (
         <p className="mt-3 text-sm text-[var(--muted)]">
           {synced
-            ? t.checkoutActivated
-            : t.checkoutSyncing}
+            ? isPass ? t.checkoutPassActivated : t.checkoutActivated
+            : isPass ? t.checkoutPassSyncing : t.checkoutSyncing}
         </p>
       ) : status === "canceled" ? (
         <p className="mt-3 text-sm text-[var(--muted)]">{t.checkoutCanceled}</p>
@@ -90,7 +107,7 @@ export default function CheckoutClient({ authByLocale }: Props) {
         <p className="mt-3 text-sm text-[var(--muted)]">{t.checkoutPreparing}</p>
       )}
 
-      {plan && status !== "success" ? (
+      {plan && !isPass && status !== "success" ? (
         <p className="mt-2 text-sm text-[var(--muted)]">
           {fmt(t.planName, { plan })}
         </p>
@@ -99,9 +116,9 @@ export default function CheckoutClient({ authByLocale }: Props) {
       <div className="mt-6 flex gap-3">
         <Link
           className="rgb-btn border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-semibold hover:bg-[var(--surface-2)]"
-          href={localeHref(locale, "/profile")}
+          href={doneHref}
         >
-          {t.viewProfile}
+          {isPass ? t.backToFixer : t.viewProfile}
         </Link>
       </div>
     </main>

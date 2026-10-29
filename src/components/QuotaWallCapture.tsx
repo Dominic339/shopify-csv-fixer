@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { fmt } from "@/lib/i18n/fmt";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
 
 interface Props {
   t: Translations["app"];
@@ -12,6 +13,9 @@ interface Props {
   /** Localised link to the pricing section. */
   pricingHref: string;
   onDismiss: () => void;
+  /** Buy the 24-hour pass (signs the user in first if needed). */
+  onBuyPass: () => void;
+  passBusy: boolean;
 }
 
 /** First day of next month (UTC, matching the quota month key). */
@@ -19,7 +23,7 @@ function nextResetDate(now = new Date()) {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
 }
 
-export function QuotaWallCapture({ t, locale, limit, pricingHref, onDismiss }: Props) {
+export function QuotaWallCapture({ t, locale, limit, pricingHref, onDismiss, onBuyPass, passBusy }: Props) {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
 
@@ -63,10 +67,16 @@ export function QuotaWallCapture({ t, locale, limit, pricingHref, onDismiss }: P
           {t.quotaTitle}
         </h2>
         <p className="mt-2 text-sm text-[var(--muted)]">{fmt(t.quotaBody, { limit, date: resetDate })}</p>
-        <p className="mt-2 text-sm text-[var(--muted)]">{t.upsellBody}</p>
+        <p className="mt-2 text-sm text-[var(--muted)]">{fmt(t.smallFilesFree, { rows: FREE_ROWS_PER_EXPORT })}</p>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href={pricingHref} className="rg-btn" onClick={onDismiss}>
+        <button type="button" className="rg-btn is-secondary mt-5 w-full justify-center" onClick={onBuyPass} disabled={passBusy}>
+          {passBusy ? t.passStarting : fmt(t.passSignIn, { price: PASS_PRICE_LABEL })}
+        </button>
+
+        <p className="mt-4 text-sm text-[var(--muted)]">{t.upsellBody}</p>
+
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Link href={pricingHref} className="pill-btn" onClick={onDismiss}>
             {t.viewPlans}
           </Link>
           <Link href="/login?redirect=%2Fapp" className="pill-btn">

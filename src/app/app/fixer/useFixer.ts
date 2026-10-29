@@ -8,6 +8,8 @@ import { isValidLocale, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
 import { toCsv } from "@/lib/csv";
 import { processCsv } from "@/lib/processCsvClient";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
+import { exportCountsTowardLimit } from "@/lib/plans";
+import { clearPendingFile, loginHrefForHere, stashPendingFile, startPassCheckout, takePendingFile } from "@/lib/passCheckout";
 import { createClient } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
 
@@ -30,6 +32,7 @@ import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 // Phase 1: strict mode preference (Shopify)
 import { getStrictMode, setStrictMode } from "@/lib/validation/strictMode";
+import { readTextFile } from "@/lib/textFile";
 
 
 type SubStatus = {
@@ -654,6 +657,19 @@ export function useFixer(t: AppStrings) {
     return map;
   }, [issuesForDisplay]);
 
+  // Column order for the on-screen tables (export keeps the file's order): the columns
+  // that name the product, then the ones with issues, then everything else. Otherwise
+  // the problem cells are often far off to the right.
+  const displayHeaders = useMemo(() => {
+    const isName = (h: string) => /^\*?(title|name|url handle|handle|item[-_ ]name)$/i.test(h.trim());
+    const withIssues = new Set<string>();
+    for (const key of issueCellMap.keys()) withIssues.add(key.slice(key.indexOf("|||") + 3));
+    const names = tableHeaders.filter(isName);
+    const flagged = tableHeaders.filter((h) => !isName(h) && withIssues.has(h));
+    const rest = tableHeaders.filter((h) => !isName(h) && !withIssues.has(h));
+    return [...names, ...flagged, ...rest];
+  }, [tableHeaders, issueCellMap]);
+
   // Rows that should be auto-pinned for the *current filter scope*.
 // Important behavior:
 // - Auto-pins are "sticky" within the current filter: once a row is auto-pinned, it stays pinned
@@ -951,7 +967,7 @@ useEffect(() => {
     trackToolEvent("file_uploaded", { format: activeFormat?.id ?? null }, subStatus?.plan);
 
     try {
-      const text = await file.text();
+      const { text } = await readTextFile(file);
       setLastUploadedText(text);
 
       setIssues([]);
@@ -981,7 +997,7 @@ useEffect(() => {
       return handleFile(file);
     }
     const id = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const text = await file.text();
+    const { text } = await readTextFile(file);
     const doc: WorkspaceDoc = { id, name: file.name, text };
 
     setWorkspaceDocs((prev) => {
@@ -1006,6 +1022,22 @@ useEffect(() => {
       await runFormatOnText(activeFormat, doc.text, doc.name);
     }
   }
+
+  // Pick up a file stashed before sign-in / pass checkout.
+  const restoredPendingRef = useRef(false);
+  useEffect(() => {
+    if (restoredPendingRef.current || !allFormats.length) return;
+    restoredPendingRef.current = true;
+    const pending = takePendingFile("fixer");
+    if (!pending) return;
+    const format = allFormats.find((f) => f.id === pending.formatId) ?? activeFormat;
+    if (!format) return;
+    setFormatId(format.id);
+    setLastUploadedText(pending.text);
+    setFileName(pending.name);
+    void runFormatOnText(format, pending.text, pending.name).then(() => setInfoBanner(t.fileRestored));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFormats]);
 
   // Re-run when format changes
   useEffect(() => {
@@ -1048,7 +1080,7 @@ useEffect(() => {
     setErrorBanner(null);
     trackToolEvent("export_attempted", { format: activeFormat?.id ?? null }, subStatus?.plan);
     try {
-      await consumeExport();
+      await consumeExport(rows.length);
 
       const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
       const csv = toCsv(cols, rows);
@@ -1102,6 +1134,32 @@ useEffect(() => {
   const limit = isUnlimited ? null : Number(planLimits?.exportsPerMonth ?? quota?.limit ?? 3);
   const left = isUnlimited ? null : Math.max(0, Number(quota?.remaining ?? (Number(limit ?? 0) - used)));
   const quotaExceeded = !isUnlimited && left !== null && left <= 0;
+  // Small files never count, so only a large file is stopped by the limit.
+  const exportNeedsQuota = exportCountsTowardLimit(rows.length);
+  const passExpiresAt: string | null = (quota as { passExpiresAt?: string | null } | null)?.passExpiresAt ?? null;
+
+  const [passBusy, setPassBusy] = useState(false);
+
+  /** Keep the current (edited) file, then go to sign-in or Stripe for the pass. */
+  async function buyPass() {
+    if (activeFormat && rows.length) {
+      const cols = tableHeaders.length ? tableHeaders : Object.keys(rows[0] ?? {});
+      stashPendingFile({ tool: "fixer", formatId: activeFormat.id, name: fileName ?? "file.csv", text: toCsv(cols, rows) });
+    }
+    setPassBusy(true);
+    setErrorBanner(null);
+    trackToolEvent("pass_checkout_started", { format: activeFormat?.id ?? null, rows: rows.length }, subStatus?.plan);
+    const r = await startPassCheckout();
+    if (r === "signin") {
+      window.location.href = loginHrefForHere();
+      return;
+    }
+    if (r !== "redirected") {
+      clearPendingFile();
+      setPassBusy(false);
+      setErrorBanner(t.passError);
+    }
+  }
 
 
   const fixLogBase = safeBaseName(exportBaseName ?? fileName ?? "csv");
@@ -1115,6 +1173,7 @@ useEffect(() => {
     fileName,
     rows,
     tableHeaders,
+    displayHeaders,
     busy,
     handleFile,
     lastUploadedText,
@@ -1157,6 +1216,10 @@ useEffect(() => {
     fixLogBase,
     // export
     exportFixedCsv,
+    exportNeedsQuota,
+    passExpiresAt,
+    buyPass,
+    passBusy,
     lastExportStats,
     upsellDismissed,
     setUpsellDismissed,

@@ -49,7 +49,7 @@ describe("message templates", () => {
         for (const to of CONVERT_FORMAT_OPTIONS) {
           if (from.id === to.id) continue;
           try {
-            convertCsv(parsed.headers, parsed.rows, from.id, to.id, "advanced").warnings.forEach(check);
+            convertCsv(parsed.headers, parsed.rows, from.id, to.id).warnings.forEach(check);
           } catch {
             // Not every file is valid input for every source format.
           }

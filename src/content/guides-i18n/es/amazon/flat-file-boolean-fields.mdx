@@ -1,0 +1,160 @@
+---
+title: "Campos booleanos del archivo plano de Amazon: y/n, TRUE/FALSE y errores habituales"
+description: "Descubre qué campos booleanos de los archivos planos de Seller Central esperan 'y' o 'n' (no TRUE/FALSE ni 1/0), cómo corregir valores no válidos en bloque y cómo evitar el formato automático de la hoja de cálculo que estropea estas columnas."
+keywords: ["archivo plano amazon booleano", "campos booleanos csv amazon", "amazon y n csv", "archivo plano amazon true false", "seller central csv booleano", "amazon is_adult_product", "amazon batteries_required", "errores archivo plano amazon"]
+lastUpdated: "2026-03-04"
+kind: "curated"
+whatYouLearn:
+  - "Qué valores booleanos aceptan los archivos planos de Amazon (y/n, TRUE/FALSE o 1/0)"
+  - "Qué campos habituales del archivo plano son booleanos"
+  - "Cómo Excel y Google Sheets estropean sin avisar los valores y/n"
+  - "Cómo encontrar y corregir valores booleanos no válidos en cientos de filas"
+  - "Cómo evitar que los booleanos se estropeen en futuras exportaciones"
+bestFor: "Vendedores de Amazon que usan archivos planos de Seller Central para subir o actualizar anuncios en bloque, sobre todo los campos de seguridad, envío y estado del artículo"
+timeToComplete: "8 minutos"
+---
+
+## Valores booleanos en los archivos planos de Amazon
+
+Las plantillas de archivo plano por categoría de Amazon (que se descargan desde Seller Central) usan distintas convenciones booleanas según la columna. Equivocarse provoca errores de validación al subir el archivo o problemas de datos que pasan desapercibidos.
+
+Los tres formatos que encontrarás:
+
+| Formato | Ejemplo | Cuándo se usa |
+|---|---|---|
+| `y` / `n` | `y`, `n` | La mayoría de los campos booleanos de seguridad y envío |
+| `true` / `false` | `true`, `false` | Algunas versiones de plantilla; no distingue mayúsculas |
+| `1` / `0` | Poco común | Raro; algunos archivos planos personalizados |
+
+**El error más común:** usar `TRUE`/`FALSE` (la forma en que Excel muestra los booleanos) en una columna que espera `y`/`n`. Amazon los rechaza con un error de validación o ignora el campo sin avisar. En un Excel en español, estos valores aparecen como `VERDADERO`/`FALSO`, que tampoco son válidos.
+
+---
+
+## Campos booleanos habituales en los archivos planos de Amazon
+
+Estas columnas aparecen en muchas plantillas de categoría y requieren especial atención:
+
+| Nombre de columna | Valores esperados | Qué controla |
+|---|---|---|
+| `batteries_required` | `y` / `n` | Si el artículo necesita pilas |
+| `batteries_included` | `y` / `n` | Si las pilas vienen incluidas en el paquete |
+| `is_adult_product` | `y` / `n` | Clasificación como contenido para adultos |
+| `is_expiration_dated_product` | `y` / `n` | Si el producto tiene fecha de caducidad |
+| `item_package_quantity` | número entero | (No es booleano, pero se confunde a menudo) |
+| `hazmat_applicable` | `y` / `n` | Indicador de mercancía peligrosa |
+| `fragile` | `y` / `n` | Si el artículo es frágil para el envío |
+| `is_discontinued_by_manufacturer` | `y` / `n` | Indicador de producto descatalogado |
+| `generic_keywords` | texto | (No es booleano; se incluye para evitar confusiones) |
+
+> **Nota:** los nombres exactos de las columnas y los valores aceptados varían según la plantilla de categoría. Consulta siempre la pestaña de definiciones de datos de la plantilla que descargaste de Seller Central para tu categoría.
+
+---
+
+## Cómo estropean las hojas de cálculo los valores booleanos
+
+### La conversión automática de Excel
+
+Cuando escribes `y` en una celda, Excel la deja como texto. Pero surgen problemas cuando:
+
+1. **Abres un CSV que ya tiene valores y/n:** si Excel interpreta la columna como booleana y le aplica formato automático, `y` puede verse bien pero guardarse con otro valor al exportar.
+2. **Usas TRUE/FALSE:** si alguien escribe `TRUE` o `FALSE` (los valores lógicos propios de Excel; `VERDADERO` y `FALSO` en un Excel en español), Excel los guarda como booleanos. Al exportar a CSV, Excel escribe `TRUE` o `FALSE` (o su versión en el idioma de Excel) en mayúsculas, y Amazon los rechaza en las columnas `y`/`n`.
+3. **Hay fórmulas que devuelven TRUE/FALSE:** si se usa una fórmula como `=SI(A2>0; VERDADERO; FALSO)` para rellenar columnas booleanas, el resultado es `VERDADERO`/`FALSO`, no `y`/`n`.
+
+### Google Sheets
+
+Pasa lo mismo: el tipo booleano de Sheets usa `TRUE`/`FALSE`. Las fórmulas y las columnas de casillas de verificación producen esos valores, no `y`/`n`.
+
+---
+
+## Encontrar valores booleanos no válidos
+
+### En Excel
+
+1. Abre el CSV del archivo plano con **Datos → Desde el texto/CSV** para evitar el formato automático.
+2. En cada columna booleana (por ejemplo, `batteries_required`):
+   a. Haz clic en la flecha del filtro.
+   b. Busca valores distintos de `y` y `n`.
+   c. Marca cualquier fila con `TRUE`, `FALSE`, `1`, `0`, `yes`, `no` o vacía donde el valor sea obligatorio.
+
+### Con una fórmula en una columna auxiliar
+
+Añade una columna junto a cada campo booleano para validarlo:
+
+```
+=IF(OR(LOWER(A2)="y", LOWER(A2)="n", A2=""), "OK", "INVALID: "&A2)
+```
+
+En un Excel en español, la misma fórmula es `=SI(O(MINUSC(A2)="y"; MINUSC(A2)="n"; A2=""); "OK"; "INVALID: "&A2)`.
+
+Filtra las filas que muestran `INVALID` para encontrar todos los valores problemáticos.
+
+---
+
+## Corregir valores booleanos no válidos en bloque
+
+### Buscar y reemplazar en Excel
+
+1. Pulsa **Ctrl+L** (Buscar y reemplazar; **Ctrl+H** en algunas versiones).
+2. En **Buscar**, escribe `TRUE` (o `VERDADERO`).
+3. En **Reemplazar con**, escribe `y` (si TRUE debe corresponder a y) o `n`.
+4. Haz clic en **Opciones → Buscar en: Valores** para comparar los valores de las celdas, no las fórmulas.
+5. Haz clic en **Reemplazar todos**.
+6. Repite con `FALSE` → `n` (o `y`, según el significado del campo).
+
+> **Importante:** decide la correspondencia para cada campo: `TRUE` puede significar `y` en `batteries_included`, pero quizá no tenga sentido en `is_adult_product`. Revisa el significado del campo antes de reemplazar en bloque.
+
+### Sustituir los resultados de las fórmulas por valores
+
+Si tus columnas booleanas se calculan con fórmulas:
+
+1. Selecciona toda la columna.
+2. Copia (**Ctrl+C**).
+3. Clic derecho → **Pegado especial → Valores** (o usa el cuadro de diálogo Pegado especial).
+4. Las fórmulas se sustituyen por texto fijo.
+5. Ahora usa Buscar y reemplazar como antes para convertir `TRUE`/`FALSE` en `y`/`n`.
+
+### El equivalente en Google Sheets
+
+1. Selecciona la columna booleana.
+2. **Editar → Buscar y reemplazar** (Ctrl+H).
+3. Busca `TRUE` y reemplázalo por `y`. Aplícalo a «Esta hoja».
+4. Repite con `FALSE` → `n`.
+5. Marca «Distinguir mayúsculas de minúsculas» para no reemplazar fragmentos de texto por accidente.
+
+---
+
+## Evitar que los booleanos se estropeen en el futuro
+
+### No uses nunca celdas booleanas de Excel en columnas del archivo plano
+
+Da formato de **Texto** a las columnas booleanas (clic derecho → Formato de celdas → Texto) antes de introducir datos. Así Excel no interpreta `y`/`n` ni `TRUE`/`FALSE` como valores booleanos nativos.
+
+### Usa listas desplegables de validación de datos
+
+En Excel, crea una lista desplegable para las columnas booleanas:
+
+1. Selecciona las celdas de la columna (debajo del encabezado).
+2. Ve a **Datos → Validación de datos**.
+3. En «Permitir», elige **Lista**.
+4. En «Origen», escribe: `y;n` (en un Excel con separador de lista coma, `y,n`)
+5. Haz clic en Aceptar.
+
+Ahora en esas celdas solo se puede introducir `y` o `n`, lo que evita `TRUE`/`FALSE` accidentales o valores libres.
+
+### Comprueba antes de cada subida
+
+Antes de subir tu archivo plano a Seller Central:
+1. Abre el CSV final en un editor de texto (no en Excel) y revisa a simple vista las columnas booleanas.
+2. Confirma que solo ves `y` y `n` (o el formato que indique tu plantilla).
+3. Que no haya `TRUE`, `FALSE`, `Yes`, `No` ni celdas vacías donde el campo sea obligatorio.
+
+---
+
+## Errores de subida de Amazon relacionados con campos booleanos
+
+| Error | Causa probable |
+|---|---|
+| "Invalid value for batteries_required" | `TRUE` o `Yes` en lugar de `y` |
+| "batteries_required is required" | Campo vacío en un producto físico |
+| Fila ignorada sin avisar | Se usó `FALSE`: Amazon omite la actualización del campo |
+| "Value not in valid range" | Uso de `1`/`0` en una columna `y`/`n` |

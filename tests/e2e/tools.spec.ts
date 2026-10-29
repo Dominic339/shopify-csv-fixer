@@ -106,25 +106,19 @@ test("convert: page loads with upload and format selectors", async ({ page }) =>
 test("convert: upload WooCommerce file and convert to Shopify shows summary", async ({ page }) => {
   await page.goto("/convert");
 
-  const csvPath = path.join(__dirname, "fixtures", "woocommerce_minimal.csv");
-  const fileInput = page.locator('input[type="file"][accept=".csv,text/csv"]');
-  await fileInput.setInputFiles(csvPath);
-
-  // Select WooCommerce as source
+  // Pick the formats first; the file is converted as soon as it is chosen.
   const selects = page.locator("select");
   await selects.first().selectOption("woocommerce_products");
-
-  // Select Shopify as target
   await selects.nth(1).selectOption("shopify_products");
 
-  // Click convert
-  await page.getByRole("button", { name: /^Convert$/ }).click();
+  const csvPath = path.join(__dirname, "fixtures", "woocommerce_minimal.csv");
+  await page.locator('input[type="file"]').setInputFiles(csvPath);
 
-  // Conversion summary should appear
-  await expect(page.locator("text=Conversion summary")).toBeVisible({ timeout: 8_000 });
-
-  // Download button should appear
+  // Result card with a preview, the download and the hand-off to the fixer
+  await expect(page.getByRole("heading", { name: "Review and download" })).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByText(/Preview of the first/)).toBeVisible();
   await expect(page.getByRole("button", { name: /download converted/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Check it in the CSV Fixer \(Shopify\)/ })).toBeVisible();
 });
 
 // ---------------------------------------------------------------------------

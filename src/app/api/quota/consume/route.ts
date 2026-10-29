@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMonthKey } from "@/lib/month";
 import { getPlanLimit } from "@/lib/plans";
-import { consumeExports, loadEffectivePlan } from "@/lib/quotaServer";
+import { consumeExports, loadActivePassExpiry, loadEffectivePlan } from "@/lib/quotaServer";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -22,15 +22,19 @@ export async function POST(req: Request) {
     const monthKey = getMonthKey();
 
     const admin = createSupabaseAdminClient();
-    const plan = await loadEffectivePlan(admin, user.id);
+    const [plan, passExpiresAt] = await Promise.all([
+      loadEffectivePlan(admin, user.id),
+      loadActivePassExpiry(admin, user.id),
+    ]);
     const { unlimited, limit } = getPlanLimit(plan);
 
-    // Advanced is unlimited: never block, never count
-    if (unlimited) {
+    // Advanced and a running pass are unlimited: never block, never count
+    if (unlimited || passExpiresAt) {
       return NextResponse.json({
         ok: true,
         signedIn: true,
         plan,
+        passExpiresAt,
         unlimited: true,
         monthKey,
         used: 0,

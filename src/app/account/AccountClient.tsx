@@ -75,7 +75,7 @@ export default function AccountClient() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button
-                className="rgb-btn bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="rg-btn px-5 py-3 text-sm font-semibold disabled:opacity-50"
                 onClick={openPortal}
                 disabled={!email || busy || billingUnavailable}
                 type="button"

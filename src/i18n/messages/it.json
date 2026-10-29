@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} deve essere 1 o 0. Trovato: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} richiede l'ItemID dell'inserzione esistente.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "{0} offerta/e senza product-id (UPC/EAN/ASIN), quindi Amazon può aggiornarle solo se lo SKU esiste già nel tuo account.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} prodotti hanno più di 3 opzioni; Shopify ne consente 3, quindi sono state mantenute solo le prime 3.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "{0} prodotto/i con varianti sono diventati inserzioni singole (prezzo più basso, quantità sommata). Aggiungi le variazioni Etsy in Shop Manager.",
 "{0} should be a decimal number. Found '{1}'.": "{0} deve essere un numero decimale. Trovato: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} deve essere un numero intero. Trovato: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "{0} colonna/e di origine non hanno un equivalente nel formato di destinazione e sono state omesse: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "{0} tag sono stati esclusi: Etsy consente 13 tag per inserzione, ciascuno di massimo 20 caratteri.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} titoli superano il limite di 140 caratteri di Etsy.",
 "{0} title(s) are longer than eBay's 80-character limit.": "{0} titolo/i superano il limite di 80 caratteri di eBay.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "{0} variante/i senza SKU sono state saltate; Amazon richiede uno SKU per ogni offerta.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} non è elencato nel RelationshipDetails della riga principale (riga {2})."

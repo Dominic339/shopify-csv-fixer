@@ -34,7 +34,10 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "tagline": "Fix product CSV imports before they fail. Your files are processed in your browser.",
-    "language": "Language"
+    "language": "Language",
+    "themeDark": "Switch to dark mode",
+    "themeLight": "Switch to light mode",
+    "storeMigrations": "Store migrations"
   },
   "guide": {
     "whatYouLearn": "What you'll learn",
@@ -263,11 +266,11 @@
   "convert": {
     "title": "CSV Format Converter",
     "description": "Convert between Shopify, WooCommerce, Etsy, eBay, and Amazon CSV formats. Fields that cannot map perfectly are flagged as warnings.",
-    "uploadStep": "1. Upload CSV",
+    "uploadStep": "Upload CSV",
     "uploadDesc": "Upload the file you want to convert.",
     "chooseFile": "Choose file",
     "noFileChosen": "No file chosen",
-    "selectFormats": "2. Select formats",
+    "selectFormats": "Select formats",
     "sourceFormat": "Source format",
     "targetFormat": "Target format",
     "convert": "Convert",
@@ -304,7 +307,28 @@
     "linkFixer": "CSV Fixer",
     "linkMerger": "CSV Merger",
     "linkInspector": "CSV Inspector",
-    "linkTemplates": "Templates"
+    "linkTemplates": "Templates",
+    "swap": "Swap formats",
+    "uploadDescFrom": "Upload the file you exported from {platform}.",
+    "chooseAnother": "Choose another file",
+    "dropHint": "or drop a CSV file here",
+    "resultStep": "Review and download",
+    "rowsInFile": "Rows in your file",
+    "rowsOut": "Rows written",
+    "previewTitle": "Preview of the first {rows} rows",
+    "moreColumns": "+ {count} more columns in the download",
+    "checkInFixer": "Check it in the CSV Fixer ({platform})",
+    "freeNote": "Converting is free. Files with up to {rows} rows are always free to download; larger files use one of your free exports.",
+    "limitReached": "You've used this month's free exports.",
+    "popularMigrations": "Popular store migrations",
+    "routeLabel": "{from} to {to}",
+    "migrationGuide": "Step-by-step guide: {from} to {to}",
+    "passCta": "Unlimited exports for 24 hours: {price}",
+    "passSignIn": "Sign in to buy a 24-hour pass ({price})",
+    "passStarting": "Opening checkout…",
+    "passError": "Couldn't open checkout. Please try again.",
+    "viewPlans": "View plans",
+    "fileRestored": "Your file is loaded again, so you can download it now."
   },
   "merge": {
     "title": "CSV Merger & Deduplicator",
@@ -567,7 +591,15 @@
     "logUnknown": "unknown",
     "plan_free": "Free",
     "plan_basic": "Basic",
-    "plan_advanced": "Advanced"
+    "plan_advanced": "Advanced",
+    "passCta": "Unlimited exports for 24 hours: {price}",
+    "passSignIn": "Sign in to buy a 24-hour pass ({price})",
+    "passStarting": "Opening checkout…",
+    "passActive": "Unlimited exports until {time}.",
+    "passError": "Couldn't open checkout. Please try again.",
+    "smallFilesFree": "Files with up to {rows} rows are always free to download.",
+    "upsellPass": "Or get unlimited exports for 24 hours with a one-time {price} pass.",
+    "fileRestored": "Your file is loaded again, so you can download it now."
   },
   "profile": {
     "verifySubscription": "Verify your subscription and manage billing.",
@@ -638,7 +670,16 @@
     "close": "Close",
     "syncingBilling": "Syncing billing info…",
     "billingError": "Couldn't reach billing right now. Please try again in a minute.",
-    "allPlansFormats": "All plans include every built-in format: Shopify, WooCommerce, Etsy, eBay and Amazon."
+    "allPlansFormats": "All plans include every built-in format: Shopify, WooCommerce, Etsy, eBay and Amazon.",
+    "pass": "24-hour pass",
+    "oneTime": "one-time",
+    "passBullet1": "Unlimited exports for 24 hours",
+    "passBullet2": "No subscription, nothing to cancel",
+    "passBullet3": "Made for a store migration or one big catalogue",
+    "buyPass": "Buy pass",
+    "signInToBuy": "Sign in to buy",
+    "passActiveUntil": "Active until {time}",
+    "freeBulletSmall": "Files up to 100 rows are always free"
   },
   "inspector": {
     "title": "CSV Inspector",
@@ -735,7 +776,10 @@
     "checkoutCanceled": "Checkout was cancelled. You have not been charged.",
     "checkoutPreparing": "Preparing your checkout…",
     "planName": "Plan: {plan}",
-    "viewProfile": "View profile"
+    "viewProfile": "View profile",
+    "checkoutPassActivated": "Your 24-hour pass is active. Taking you back to the fixer…",
+    "checkoutPassSyncing": "Confirming your payment. You'll be taken back in a moment.",
+    "backToFixer": "Back to the fixer"
   },
   "formats": {
     "title": "Custom Formats",

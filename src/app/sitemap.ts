@@ -1,4 +1,5 @@
 // src/app/sitemap.ts
+import { CONVERT_ROUTES } from "@/lib/convertRoutes";
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "../lib/presets";
 import { getAllGuides, GUIDE_PLATFORMS } from "../lib/guidesRegistry";
@@ -45,6 +46,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/ebay-variations-csv-fixer", "monthly", 0.75),
     ...translated("/amazon-csv-fixer", "monthly", 0.8),
     english("/formats", "monthly", 0.7),
+
+    // Store-migration pages (English only)
+    english("/migrate", "monthly", 0.75),
+    ...CONVERT_ROUTES.map((r) => english(`/migrate/${r.slug}`, "monthly", 0.8)),
     ...translated("/about", "monthly", 0.4),
     ...translated("/privacy", "yearly", 0.2),
     ...translated("/terms", "yearly", 0.2),

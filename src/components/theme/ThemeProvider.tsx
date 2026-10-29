@@ -12,44 +12,49 @@ type ThemeCtx = {
 
 const ThemeContext = React.createContext<ThemeCtx | null>(null);
 
-function getPreferredTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+const STORAGE_KEY = "theme_v2";
 
-  const stored = localStorage.getItem("theme");
-  if (stored === "light" || stored === "dark") return stored;
+/**
+ * Runs in <head> before first paint so a dark-mode user never sees a light flash.
+ * Light is the default; dark only when the visitor chose it with the toggle.
+ */
+export const THEME_INIT_SCRIPT = `try{var t=localStorage.getItem("${STORAGE_KEY}");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light")}catch(e){document.documentElement.setAttribute("data-theme","light")}`;
 
-  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-  return prefersDark ? "dark" : "light";
+function getStoredTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = React.useState<Theme>("dark");
+  const [theme, setTheme] = React.useState<Theme>("light");
 
+  // THEME_INIT_SCRIPT has already set the attribute; just sync React's copy.
   React.useEffect(() => {
-    setTheme(getPreferredTheme());
+    setTheme(getStoredTheme());
   }, []);
 
-  React.useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    const root = document.documentElement;
-
-    // Your CSS variables key off this:
-    root.setAttribute("data-theme", theme);
-
-    // Tailwind dark: utilities key off this:
-    root.classList.toggle("dark", theme === "dark");
-
-    if (typeof window !== "undefined") localStorage.setItem("theme", theme);
-  }, [theme]);
+  const choose = React.useCallback((t: Theme) => {
+    setTheme(t);
+    // CSS variables and Tailwind's dark: variant both key off this.
+    document.documentElement.setAttribute("data-theme", t);
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      // Private mode: the choice lasts for this page only.
+    }
+  }, []);
 
   const value = React.useMemo<ThemeCtx>(
     () => ({
       theme,
-      setTheme,
-      toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+      setTheme: choose,
+      toggle: () => choose(theme === "dark" ? "light" : "dark"),
     }),
-    [theme]
+    [theme, choose]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -61,7 +66,7 @@ export function useTheme(): ThemeCtx {
   // Don’t crash builds if a route is evaluated without provider
   if (!ctx) {
     return {
-      theme: "dark",
+      theme: "light",
       setTheme: () => {},
       toggle: () => {},
     };

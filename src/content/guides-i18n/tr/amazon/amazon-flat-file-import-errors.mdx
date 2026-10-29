@@ -1,0 +1,163 @@
+---
+title: "Amazon düz dosya içe aktarma hataları: nedenleri ve çözümleri"
+description: "En yaygın Amazon düz dosya CSV içe aktarma hatalarını düzeltin: SKU sorunları, geçersiz durum kodları, fiyat biçimi, gönderim kanalı değerleri ve uyumsuz şablonlar."
+keywords: ["amazon düz dosya içe aktarma hatası", "amazon csv içe aktarma hataları", "amazon flat file hataları", "amazon csv düzeltme", "amazon inventory loader hataları", "amazon düz dosya doğrulama", "amazon toplu yükleme hataları"]
+lastUpdated: "2026-03-06"
+kind: "curated"
+whatYouLearn:
+  - "Amazon'un düz dosya CSV yüklemelerini nasıl doğruladığı ve hatalara neyin yol açtığı"
+  - "Inventory Loader ve yaygın düz dosya şablonları için zorunlu alanlar"
+  - "SKU, durum, fiyat, gönderim kanalı ve ASIN hatalarının nasıl düzeltileceği"
+  - "Hangi satırların başarısız olduğunu bulmak için Amazon işleme raporunun nasıl okunacağı"
+  - "Dosyanızın ürün kategorinize uygun Amazon şablonuyla nasıl eşleştirileceği"
+bestFor: "Seller Central'da düz dosya yükleyen ve işleme hataları ya da eksik içe aktarmalarla karşılaşan Amazon satıcıları"
+timeToComplete: "12 dakika"
+---
+
+## Amazon düz dosyaları nasıl doğrular
+
+Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun şemalarına uyan, sekmeyle veya virgülle ayrılmış CSV dosyalarıdır. Bir düz dosya yüklediğinizde Amazon onu bir dizi doğrulama adımından geçirir:
+
+1. **Şablon eşleşmesi**: sütun başlıklarınızın dosya türü için beklenen şablonla eşleştiğini kontrol eder
+2. **Zorunlu alan doğrulaması**: tüm zorunlu sütunlarda değer olduğunu doğrular
+3. **Veri türü doğrulaması**: sayıları, mantıksal değerleri ve sabit liste değerlerini kontrol eder
+4. **İş kuralları**: ASIN'leri, SKU'ları, durum kodlarını ve fiyat aralıklarını doğrular
+5. **Katalog kontrolü**: ürün kimliklerini Amazon kataloğuyla eşleştirir
+
+İşlemden sonra Amazon bir **işleme raporu** oluşturur (Seller Central'da Envanter → Yükleme yoluyla ürün ekle altında). İşleme raporunu her zaman inceleyin: başarısız olan her satırı ve hatanın kendisini listeler.
+
+---
+
+## Hata: geçersiz veya eksik seller_sku
+
+**Neden:** `seller_sku` boş, 40 karakterden uzun, geçersiz karakterler içeriyor ya da kataloğunuzdaki mevcut bir SKU'yu yineliyor.
+
+**seller_sku kuralları:**
+- En fazla 40 karakter
+- Boşluk yok (kısa çizgi veya alt çizgi kullanın)
+- Harf ve rakamlarla birlikte `-`, `_`, `.`
+- Amazon satıcı hesabınızın tamamında benzersiz olmalı
+
+**Çözüm:** Her satırın benzersiz bir SKU'su olduğundan emin olun. Yinelemeleri bulmak için `=EĞERSAY($A:$A; A2)` gibi bir formül kullanın. 40 karakteri aşan SKU'ları kısaltın.
+
+---
+
+## Hata: item_name eksik / başlık çok uzun
+
+**Neden:** `item_name` boş ya da Amazon'un başlık uzunluğu sınırını aşıyor (kategoriye göre değişir, genellikle 200–500 karakter).
+
+**Çözüm:**
+- Her ürün satırında `item_name` alanını doldurun
+- Kategorinizin sınırını aşan başlıkları bulmak için Excel'de `=UZUNLUK(B2)` kullanın
+- Tam karakter sınırı için kendi şablonunuzu kontrol edin
+
+---
+
+## Hata: geçersiz condition_type
+
+**Neden:** `condition_type` sütununda Amazon'un izin verdiği listede olmayan bir değer var.
+
+**Kabul edilen değerler:**
+
+| Değer | Açıklama |
+|---|---|
+| `New` | Yepyeni, fabrika ambalajında |
+| `UsedLikeNew` | Kullanılmış – yeni gibi |
+| `UsedVeryGood` | Kullanılmış – çok iyi |
+| `UsedGood` | Kullanılmış – iyi |
+| `UsedAcceptable` | Kullanılmış – kabul edilebilir |
+| `CollectibleLikeNew` | Koleksiyonluk – yeni gibi |
+| `CollectibleVeryGood` | Koleksiyonluk – çok iyi |
+| `CollectibleGood` | Koleksiyonluk – iyi |
+| `CollectibleAcceptable` | Koleksiyonluk – kabul edilebilir |
+| `Refurbished` | Satıcı tarafından yenilenmiş |
+| `Club` | Club (medya kategorisi) |
+
+**Çözüm:** Standart dışı durum değerlerini yukarıdaki listeden biriyle değiştirin. `New` büyük harfle başlamalıdır; `new` (küçük harf) reddedilir.
+
+---
+
+## Hata: geçersiz fiyat
+
+**Neden:** `price` sütunu bir para birimi simgesi (`$`) içeriyor, ondalık ayırıcı olarak virgül kullanıyor, sıfır, negatif ya da boş.
+
+**Amazon fiyat kuralları:**
+- Düz ondalık sayı: `19.99`
+- Para birimi simgesi yok
+- Pozitif olmalı (0'dan büyük)
+- Ondalık ayırıcı olarak nokta
+
+**Çözüm:** Para birimi simgelerini kaldırın ve ondalık virgülleri noktayla değiştirin. Türkçe Excel'de ondalık ayırıcı virgüldür; kaydettikten sonra fiyatların nokta kullandığını bir metin düzenleyicide kontrol edin.
+
+---
+
+## Hata: geçersiz fulfillment_center_id / gönderim kanalı
+
+**Neden:** Gönderim kanalı sütununda tanınmayan bir değer var.
+
+**Kabul edilen değerler:**
+
+| Değer | Açıklama |
+|---|---|
+| `DEFAULT` | Satıcı tarafından gönderim (FBM) |
+| `AMAZON_NA` (veya `AMAZON`) | Amazon tarafından gönderim (FBA) |
+
+Tam sütun adı ve kabul edilen değerler düz dosya şablonuna göre biraz değişir. Kendi şablonunuzu kontrol edin.
+
+**Çözüm:** FBM için `DEFAULT`, FBA için `AMAZON_NA` veya `AMAZON` kullanın. `FBA`, `FBM` ya da başka kısaltmalar kullanmayın.
+
+---
+
+## Hata: product_id / ASIN bulunamadı
+
+**Neden:** `product_id` (ASIN, UPC, EAN veya ISBN) Amazon kataloğundaki hiçbir ürünle eşleşmiyor ya da `product_id_type` verilen kimliğin türüyle uyuşmuyor.
+
+**product_id_type değerleri:**
+
+| Değer | Kimlik türü |
+|---|---|
+| `1` | ASIN |
+| `2` | ISBN |
+| `3` | UPC |
+| `4` | EAN |
+
+**Çözüm:**
+- Ürün kimliğinin doğru olduğunu ve Amazon kataloğunda etkin olduğunu doğrulayın
+- `product_id_type` değerini `product_id` içindeki kimlik türüyle eşleştirin
+- Henüz ASIN'i olmayan yeni ürünler için mevcut bir listelemeye stok eklemek yerine yeni bir listeleme oluşturmanız gerekebilir
+
+---
+
+## Hata: ürün kategorisi için yanlış şablon
+
+**Neden:** Kendine özgü bir düz dosya gerektiren bir kategori (ör. giyim, ayakkabı, takı) için genel Inventory Loader şablonunu kullandınız.
+
+Amazon'un ek zorunlu alanlar içeren kategoriye özel şablonları vardır. Yanlış şablon kullanıldığında kategoriye özel tüm zorunlu alanlar eksik kalır.
+
+**Çözüm:**
+- Seller Central'da Envanter → Yükleme yoluyla ürün ekle → Envanter dosyası indir bölümüne gidin
+- Doğru şablonu almak için ürün kategorinizi seçin
+- Kategoriye özel düz dosyayı indirin ve verilerinizi ona aktarın
+
+Kendi şablonu olan yaygın kategoriler: giyim, ayakkabı, takı, elektronik, kitap, müzik, video, spor ve outdoor.
+
+---
+
+## İşleme raporunu okuma
+
+Yüklemeden sonra işleme raporunu Seller Central'dan indirin (Envanter → Yükleme yoluyla ürün ekle → Yükleme durumunu izle → İşleme raporunu görüntüle).
+
+Raporun üç sekmesi vardır:
+- **Summary**: toplam satır, başarılı ve başarısız sayıları
+- **Results**: dosyanızdaki her kayıt için bir satır, durum ve hata mesajıyla
+- **Original**: ilk yüklediğiniz veriler
+
+Başarısız satırları bulmak için Results sekmesini `status` sütununa göre filtreleyin. `FAILURE` satırları, neyin yanlış gittiğini tam olarak açıklayan bir `error-code` ve `error-message` içerir.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+Amazon düz dosyanızı StriveFormats'a yükleyin. Doğrulayıcı SKU'ları, durum kodlarını, fiyatları, gönderim kanalı değerlerini ve zorunlu alanları kontrol eder, ardından sorunlu satır ve hücreleri tam olarak işaretler.
+
+[Amazon CSV Düzelticisini açın](/app?preset=amazon_inventory_loader) | [Amazon şablonunu görüntüleyin](/presets/amazon_inventory_loader)

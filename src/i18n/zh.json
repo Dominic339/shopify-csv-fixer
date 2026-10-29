@@ -34,7 +34,10 @@
     "privacy": "隐私",
     "terms": "条款",
     "tagline": "在导入失败之前修复商品 CSV。文件在您的浏览器中处理。",
-    "language": "语言"
+    "language": "语言",
+    "themeDark": "切换到深色模式",
+    "themeLight": "切换到浅色模式",
+    "storeMigrations": "店铺迁移"
   },
   "guide": {
     "whatYouLearn": "您将学到",
@@ -260,11 +263,11 @@
   "convert": {
     "title": "CSV格式转换器",
     "description": "在Shopify、WooCommerce、Etsy、eBay和Amazon CSV格式之间转换。无法完美映射的字段将被标记为警告。",
-    "uploadStep": "1. 上传CSV",
+    "uploadStep": "上传CSV",
     "uploadDesc": "上传要转换的文件。",
     "chooseFile": "选择文件",
     "noFileChosen": "未选择文件",
-    "selectFormats": "2. 选择格式",
+    "selectFormats": "选择格式",
     "sourceFormat": "源格式",
     "targetFormat": "目标格式",
     "convert": "转换",
@@ -301,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify（新模板）",
     "fmt_shopify_products_legacy": "Shopify（旧模板）",
-    "noEquivalent": "（目标格式中无对应列）："
+    "noEquivalent": "（目标格式中无对应列）：",
+    "swap": "互换格式",
+    "uploadDescFrom": "上传从 {platform} 导出的文件。",
+    "chooseAnother": "选择其他文件",
+    "dropHint": "或将 CSV 文件拖到此处",
+    "resultStep": "检查并下载",
+    "rowsInFile": "文件中的行数",
+    "rowsOut": "写出的行数",
+    "previewTitle": "前 {rows} 行预览",
+    "moreColumns": "下载文件中还有 {count} 列",
+    "checkInFixer": "在 CSV 修复工具中检查（{platform}）",
+    "freeNote": "转换免费。不超过 {rows} 行的文件始终可以免费下载；更大的文件会占用一次免费导出。",
+    "limitReached": "本月的免费导出次数已用完。",
+    "popularMigrations": "常见的店铺迁移",
+    "routeLabel": "从 {from} 到 {to}",
+    "migrationGuide": "分步指南：从 {from} 到 {to}",
+    "passCta": "24 小时无限导出：{price}",
+    "passSignIn": "登录以购买 24 小时通行证（{price}）",
+    "passStarting": "正在打开付款页面…",
+    "passError": "无法打开付款页面，请重试。",
+    "viewPlans": "查看套餐",
+    "fileRestored": "文件已重新载入，现在可以下载了。"
   },
   "merge": {
     "title": "CSV合并与去重工具",
@@ -564,7 +588,15 @@
     "logActions": "操作",
     "logSummary": "按类型汇总",
     "logFullList": "完整操作列表",
-    "logUnknown": "未知"
+    "logUnknown": "未知",
+    "passCta": "24 小时无限导出：{price}",
+    "passSignIn": "登录以购买 24 小时通行证（{price}）",
+    "passStarting": "正在打开付款页面…",
+    "passActive": "在 {time} 之前可无限导出。",
+    "passError": "无法打开付款页面，请重试。",
+    "smallFilesFree": "不超过 {rows} 行的文件始终可以免费下载。",
+    "upsellPass": "或者购买一次性 {price} 通行证，24 小时内无限导出。",
+    "fileRestored": "文件已重新载入，现在可以下载了。"
   },
   "profile": {
     "verifySubscription": "验证您的订阅并管理账单。",
@@ -689,7 +721,16 @@
     "close": "关闭",
     "syncingBilling": "正在同步结算信息…",
     "billingError": "暂时无法连接计费服务,请一分钟后重试。",
-    "allPlansFormats": "所有套餐都包含全部内置格式:Shopify、WooCommerce、Etsy、eBay 和 Amazon。"
+    "allPlansFormats": "所有套餐都包含全部内置格式:Shopify、WooCommerce、Etsy、eBay 和 Amazon。",
+    "pass": "24 小时通行证",
+    "oneTime": "一次性",
+    "passBullet1": "24 小时无限导出",
+    "passBullet2": "无需订阅，无需取消",
+    "passBullet3": "适合店铺迁移或一份大型商品目录",
+    "buyPass": "购买通行证",
+    "signInToBuy": "登录后购买",
+    "passActiveUntil": "有效期至 {time}",
+    "freeBulletSmall": "不超过 100 行的文件始终免费"
   },
   "auth": {
     "loginTitle": "登录",
@@ -735,7 +776,10 @@
     "checkoutCanceled": "结账已取消,未产生任何费用。",
     "checkoutPreparing": "正在准备结账…",
     "planName": "套餐:{plan}",
-    "viewProfile": "查看个人资料"
+    "viewProfile": "查看个人资料",
+    "checkoutPassActivated": "24 小时通行证已生效，正在返回修复工具…",
+    "checkoutPassSyncing": "正在确认付款，稍后将返回。",
+    "backToFixer": "返回修复工具"
   },
   "formats": {
     "title": "自定义格式",

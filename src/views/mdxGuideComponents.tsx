@@ -31,14 +31,14 @@ export const mdxGuideComponents = {
   li: ({ children }: C) => <li className="leading-relaxed">{children}</li>,
   code: ({ children, className }: C & { className?: string }) =>
     className ? (
-      <code className={`${className} text-sm text-[color:rgba(220,220,220,0.95)]`}>{children}</code>
+      <code className={`${className} text-sm text-[var(--code-text)]`}>{children}</code>
     ) : (
       <code className="break-words rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-1.5 py-0.5 font-mono text-sm text-[var(--text)]">
         {children}
       </code>
     ),
   pre: ({ children }: C) => (
-    <pre className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[color:rgba(0,0,0,0.45)] p-4 font-mono text-sm leading-relaxed text-[color:rgba(220,220,220,0.95)]">
+    <pre className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-4 font-mono text-sm leading-relaxed text-[var(--code-text)]">
       {children}
     </pre>
   ),

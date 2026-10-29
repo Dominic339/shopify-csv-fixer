@@ -34,7 +34,10 @@
     "privacy": "プライバシー",
     "terms": "利用規約",
     "tagline": "商品 CSV のインポートが失敗する前に修正。ファイルはブラウザー内で処理されます。",
-    "language": "言語"
+    "language": "言語",
+    "themeDark": "ダークモードに切り替え",
+    "themeLight": "ライトモードに切り替え",
+    "storeMigrations": "ストア移行"
   },
   "guide": {
     "whatYouLearn": "学べること",
@@ -260,11 +263,11 @@
   "convert": {
     "title": "CSV形式コンバーター",
     "description": "Shopify、WooCommerce、Etsy、eBay、Amazon CSV形式間で変換します。完全にマッピングできないフィールドは警告としてフラグが立てられます。",
-    "uploadStep": "1. CSVをアップロード",
+    "uploadStep": "CSVをアップロード",
     "uploadDesc": "変換するファイルをアップロードしてください。",
     "chooseFile": "ファイルを選択",
     "noFileChosen": "ファイルが選択されていません",
-    "selectFormats": "2. 形式を選択",
+    "selectFormats": "形式を選択",
     "sourceFormat": "ソース形式",
     "targetFormat": "ターゲット形式",
     "convert": "変換",
@@ -301,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify（新テンプレート）",
     "fmt_shopify_products_legacy": "Shopify（旧テンプレート）",
-    "noEquivalent": "（変換先フォーマットに対応する列なし）："
+    "noEquivalent": "（変換先フォーマットに対応する列なし）：",
+    "swap": "形式を入れ替える",
+    "uploadDescFrom": "{platform} からエクスポートしたファイルをアップロードしてください。",
+    "chooseAnother": "別のファイルを選ぶ",
+    "dropHint": "または CSV ファイルをここにドロップ",
+    "resultStep": "確認してダウンロード",
+    "rowsInFile": "ファイルの行数",
+    "rowsOut": "書き出した行数",
+    "previewTitle": "最初の {rows} 行のプレビュー",
+    "moreColumns": "ダウンロードにはさらに {count} 列あります",
+    "checkInFixer": "CSV 修正ツールでチェック（{platform}）",
+    "freeNote": "変換は無料です。{rows}行までのファイルはいつでも無料でダウンロードでき、それより大きいファイルは無料エクスポートを1回分使います。",
+    "limitReached": "今月の無料エクスポートを使い切りました。",
+    "popularMigrations": "よくあるストア移行",
+    "routeLabel": "{from} から {to} へ",
+    "migrationGuide": "手順ガイド：{from} から {to} へ",
+    "passCta": "24時間エクスポート無制限：{price}",
+    "passSignIn": "ログインして24時間パスを購入（{price}）",
+    "passStarting": "決済画面を開いています…",
+    "passError": "決済画面を開けませんでした。もう一度お試しください。",
+    "viewPlans": "プランを見る",
+    "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。"
   },
   "merge": {
     "title": "CSVマージャー＆重複排除ツール",
@@ -564,7 +588,15 @@
     "logActions": "操作",
     "logSummary": "種類別の概要",
     "logFullList": "すべての操作",
-    "logUnknown": "不明"
+    "logUnknown": "不明",
+    "passCta": "24時間エクスポート無制限：{price}",
+    "passSignIn": "ログインして24時間パスを購入（{price}）",
+    "passStarting": "決済画面を開いています…",
+    "passActive": "{time}までエクスポート無制限です。",
+    "passError": "決済画面を開けませんでした。もう一度お試しください。",
+    "smallFilesFree": "{rows}行までのファイルはいつでも無料でダウンロードできます。",
+    "upsellPass": "または、1回限りの{price}のパスで24時間エクスポート無制限にできます。",
+    "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。"
   },
   "profile": {
     "verifySubscription": "サブスクリプションを確認し、請求を管理します。",
@@ -689,7 +721,16 @@
     "close": "閉じる",
     "syncingBilling": "請求情報を同期中…",
     "billingError": "現在、請求サービスに接続できません。1分ほどしてからもう一度お試しください。",
-    "allPlansFormats": "すべてのプランで、Shopify、WooCommerce、Etsy、eBay、Amazonの組み込み形式をすべて使えます。"
+    "allPlansFormats": "すべてのプランで、Shopify、WooCommerce、Etsy、eBay、Amazonの組み込み形式をすべて使えます。",
+    "pass": "24時間パス",
+    "oneTime": "1回のみ",
+    "passBullet1": "24時間エクスポート無制限",
+    "passBullet2": "サブスクなし、解約手続きも不要",
+    "passBullet3": "ストアの移行や大きなカタログ1つに最適",
+    "buyPass": "パスを購入",
+    "signInToBuy": "ログインして購入",
+    "passActiveUntil": "{time}まで有効",
+    "freeBulletSmall": "100行までのファイルはいつでも無料"
   },
   "auth": {
     "loginTitle": "ログイン",
@@ -735,7 +776,10 @@
     "checkoutCanceled": "お支払いはキャンセルされました。料金は発生していません。",
     "checkoutPreparing": "お支払いの準備中…",
     "planName": "プラン:{plan}",
-    "viewProfile": "プロフィールを見る"
+    "viewProfile": "プロフィールを見る",
+    "checkoutPassActivated": "24時間パスが有効になりました。修正ツールに戻ります…",
+    "checkoutPassSyncing": "お支払いを確認しています。まもなく戻ります。",
+    "backToFixer": "修正ツールに戻る"
   },
   "formats": {
     "title": "独自形式",

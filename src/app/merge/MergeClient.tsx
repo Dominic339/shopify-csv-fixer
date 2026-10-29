@@ -21,6 +21,7 @@ import { fmt } from "@/lib/i18n/fmt";
 import { localeHref } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { useValidationText } from "@/lib/i18n/useValidationText";
+import { readTextFile } from "@/lib/textFile";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -98,7 +99,7 @@ export default function MergeClient({ t }: Props) {
   }
 
   async function loadFileData(file: File, setter: (d: FileData) => void) {
-    const text = await file.text();
+    const { text } = await readTextFile(file);
     const { headers, rows } = parseCsv(text);
     setter({ name: file.name, headers, rows });
     setResult(null);
@@ -153,7 +154,7 @@ export default function MergeClient({ t }: Props) {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="flex items-center gap-3 text-2xl font-semibold">
         {t.title}
-        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">{t.beta}</span>
+        <span className="rounded-full bg-[var(--secondary-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">{t.beta}</span>
       </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
         {t.description}

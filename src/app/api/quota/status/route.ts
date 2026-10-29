@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMonthKey } from "@/lib/month";
 import { FREE_EXPORTS_PER_MONTH, getPlanLimit } from "@/lib/plans";
-import { loadEffectivePlan, loadExportsUsed } from "@/lib/quotaServer";
+import { loadActivePassExpiry, loadEffectivePlan, loadExportsUsed } from "@/lib/quotaServer";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -27,13 +27,17 @@ export async function GET() {
   const monthKey = getMonthKey();
 
   try {
-    const plan = await loadEffectivePlan(admin, user.id);
+    const [plan, passExpiresAt] = await Promise.all([
+      loadEffectivePlan(admin, user.id),
+      loadActivePassExpiry(admin, user.id),
+    ]);
     const { unlimited, limit } = getPlanLimit(plan);
 
-    if (unlimited) {
+    if (unlimited || passExpiresAt) {
       return NextResponse.json({
         signedIn: true,
         plan,
+        passExpiresAt,
         unlimited: true,
         monthKey,
         used: 0,
@@ -47,6 +51,7 @@ export async function GET() {
     return NextResponse.json({
       signedIn: true,
       plan,
+      passExpiresAt: null,
       unlimited: false,
       monthKey,
       used,

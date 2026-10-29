@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} musi mieć wartość 1 lub 0. Znaleziono: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} wymaga ItemID istniejącej oferty.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "Oferty bez product-id (UPC/EAN/ASIN): {0}. Amazon zaktualizuje je tylko wtedy, gdy SKU już istnieje na Twoim koncie.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "Produkty z więcej niż 3 opcjami: {0}. Shopify pozwala na 3, więc zachowano tylko pierwsze 3.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "Produkty z wariantami zamienione na pojedyncze oferty (najniższa cena, łączna ilość): {0}. Dodaj warianty Etsy w Shop Manager.",
 "{0} should be a decimal number. Found '{1}'.": "{0} powinno być liczbą dziesiętną. Znaleziono: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} powinno być liczbą całkowitą. Znaleziono: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "Kolumny źródłowe bez odpowiednika w formacie docelowym, które pominięto ({0}): {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "Pominięto tagi: {0}. Etsy pozwala na 13 tagów na ofertę, każdy do 20 znaków.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "Tytuły dłuższe niż limit Etsy wynoszący 140 znaków: {0}.",
 "{0} title(s) are longer than eBay's 80-character limit.": "Tytuły dłuższe niż limit 80 znaków eBay: {0}.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "Pominięto warianty bez SKU: {0}. Amazon wymaga SKU dla każdej oferty.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} nie występuje w RelationshipDetails wiersza nadrzędnego (wiersz {2})."

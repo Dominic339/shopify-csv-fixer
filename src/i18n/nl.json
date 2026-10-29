@@ -34,7 +34,10 @@
     "privacy": "Privacy",
     "terms": "Voorwaarden",
     "tagline": "Repareer product-CSV’s voordat de import mislukt. Je bestanden worden in je browser verwerkt.",
-    "language": "Taal"
+    "language": "Taal",
+    "themeDark": "Overschakelen naar donkere modus",
+    "themeLight": "Overschakelen naar lichte modus",
+    "storeMigrations": "Winkelverhuizingen"
   },
   "guide": {
     "whatYouLearn": "Wat je leert",
@@ -260,11 +263,11 @@
   "convert": {
     "title": "CSV-formaatconverter",
     "description": "Converteer tussen Shopify, WooCommerce, Etsy, eBay en Amazon CSV-formaten. Velden die niet perfect kunnen worden toegewezen, worden als waarschuwingen gemarkeerd.",
-    "uploadStep": "1. CSV uploaden",
+    "uploadStep": "CSV uploaden",
     "uploadDesc": "Upload het bestand dat je wilt converteren.",
     "chooseFile": "Bestand kiezen",
     "noFileChosen": "Geen bestand gekozen",
-    "selectFormats": "2. Formaten selecteren",
+    "selectFormats": "Formaten selecteren",
     "sourceFormat": "Bronformaat",
     "targetFormat": "Doelformaat",
     "convert": "Converteren",
@@ -301,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify (nieuwe sjabloon)",
     "fmt_shopify_products_legacy": "Shopify (oude sjabloon)",
-    "noEquivalent": "(geen equivalent in het doelformaat):"
+    "noEquivalent": "(geen equivalent in het doelformaat):",
+    "swap": "Formaten omwisselen",
+    "uploadDescFrom": "Upload het bestand dat je uit {platform} hebt geëxporteerd.",
+    "chooseAnother": "Ander bestand kiezen",
+    "dropHint": "of sleep hier een CSV-bestand naartoe",
+    "resultStep": "Controleren en downloaden",
+    "rowsInFile": "Rijen in je bestand",
+    "rowsOut": "Geschreven rijen",
+    "previewTitle": "Voorbeeld van de eerste {rows} rijen",
+    "moreColumns": "+ {count} extra kolommen in de download",
+    "checkInFixer": "Controleren in de CSV-fixer ({platform})",
+    "freeNote": "Converteren is gratis. Bestanden tot {rows} rijen download je altijd gratis; grotere gebruiken een van je gratis exports.",
+    "limitReached": "Je hebt de gratis exports van deze maand gebruikt.",
+    "popularMigrations": "Populaire winkelverhuizingen",
+    "routeLabel": "Van {from} naar {to}",
+    "migrationGuide": "Stappenplan: van {from} naar {to}",
+    "passCta": "24 uur onbeperkt exporteren: {price}",
+    "passSignIn": "Log in om een pas van 24 uur te kopen ({price})",
+    "passStarting": "Betaalpagina openen…",
+    "passError": "De betaalpagina kon niet worden geopend. Probeer het opnieuw.",
+    "viewPlans": "Abonnementen bekijken",
+    "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden."
   },
   "merge": {
     "title": "CSV-samenvoeger en deduplicator",
@@ -564,7 +588,15 @@
     "logActions": "Acties",
     "logSummary": "Samenvatting per type",
     "logFullList": "Volledige lijst van acties",
-    "logUnknown": "onbekend"
+    "logUnknown": "onbekend",
+    "passCta": "24 uur onbeperkt exporteren: {price}",
+    "passSignIn": "Log in om een pas van 24 uur te kopen ({price})",
+    "passStarting": "Betaalpagina openen…",
+    "passActive": "Onbeperkt exporteren tot {time}.",
+    "passError": "De betaalpagina kon niet worden geopend. Probeer het opnieuw.",
+    "smallFilesFree": "Bestanden met maximaal {rows} rijen download je altijd gratis.",
+    "upsellPass": "Of exporteer 24 uur lang onbeperkt met een eenmalige pas van {price}.",
+    "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden."
   },
   "profile": {
     "verifySubscription": "Controleer je abonnement en beheer de facturering.",
@@ -689,7 +721,16 @@
     "close": "Sluiten",
     "syncingBilling": "Factureringsgegevens synchroniseren…",
     "billingError": "De facturatie is nu niet bereikbaar. Probeer het over een minuut opnieuw.",
-    "allPlansFormats": "Alle abonnementen bevatten alle ingebouwde formaten: Shopify, WooCommerce, Etsy, eBay en Amazon."
+    "allPlansFormats": "Alle abonnementen bevatten alle ingebouwde formaten: Shopify, WooCommerce, Etsy, eBay en Amazon.",
+    "pass": "Pas van 24 uur",
+    "oneTime": "eenmalig",
+    "passBullet1": "24 uur onbeperkt exporteren",
+    "passBullet2": "Geen abonnement, niets op te zeggen",
+    "passBullet3": "Ideaal voor een winkelverhuizing of één grote catalogus",
+    "buyPass": "Pas kopen",
+    "signInToBuy": "Log in om te kopen",
+    "passActiveUntil": "Actief tot {time}",
+    "freeBulletSmall": "Bestanden tot 100 rijen altijd gratis"
   },
   "auth": {
     "loginTitle": "Inloggen",
@@ -735,7 +776,10 @@
     "checkoutCanceled": "Het afrekenen is geannuleerd. Er is niets in rekening gebracht.",
     "checkoutPreparing": "Afrekenen wordt voorbereid…",
     "planName": "Abonnement: {plan}",
-    "viewProfile": "Profiel bekijken"
+    "viewProfile": "Profiel bekijken",
+    "checkoutPassActivated": "Je pas van 24 uur is actief. Terug naar de fixer…",
+    "checkoutPassSyncing": "Je betaling wordt bevestigd. Je gaat zo terug.",
+    "backToFixer": "Terug naar de fixer"
   },
   "formats": {
     "title": "Eigen formaten",

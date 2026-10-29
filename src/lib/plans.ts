@@ -13,6 +13,19 @@ export type PlanLimit = {
 export const FREE_EXPORTS_PER_MONTH = 3;
 export const BASIC_EXPORTS_PER_MONTH = 100;
 
+/** Exports of files this small never count against any limit. */
+export const FREE_ROWS_PER_EXPORT = 100;
+
+/** A one-time pass gives unlimited exports for this long. */
+export const PASS_HOURS = 24;
+/** Display price of the pass; the charged amount comes from STRIPE_PRICE_PASS. */
+export const PASS_PRICE_LABEL = "$2.99";
+
+/** Whether exporting `rows` data rows uses up one of the plan's exports. */
+export function exportCountsTowardLimit(rows: number): boolean {
+  return rows > FREE_ROWS_PER_EXPORT;
+}
+
 const PLAN_LIMITS: Record<Plan, PlanLimit> = {
   free: { limit: FREE_EXPORTS_PER_MONTH, unlimited: false },
   basic: { limit: BASIC_EXPORTS_PER_MONTH, unlimited: false },

@@ -26,7 +26,7 @@ type Props = {
   tPricing: Translations["pricing"];
 };
 
-const kicker = "text-xs font-bold uppercase tracking-widest text-cyan-400";
+const kicker = "text-xs font-bold uppercase tracking-widest text-[var(--secondary-text)]";
 const h2 = "text-3xl font-black tracking-tight sm:text-4xl";
 
 export default function HomeClient({ tHome: t, tPricing }: Props) {
@@ -88,9 +88,9 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
   const canAccessCustomFormats = ALLOW_CUSTOM_FORMATS_FOR_ALL || isAdvanced;
 
   const steps = [
-    { n: "01", title: t.step1Title, desc: t.step1Desc, tone: "text-green-500/25 group-hover:text-green-500/40" },
-    { n: "02", title: t.step2Title, desc: t.step2Desc, tone: "text-cyan-500/25 group-hover:text-cyan-500/40" },
-    { n: "03", title: t.step3Title, desc: t.step3Desc, tone: "text-blue-500/25 group-hover:text-blue-500/40" },
+    { n: "01", title: t.step1Title, desc: t.step1Desc, tone: "text-[rgba(var(--accent-rgb),0.3)] group-hover:text-[rgba(var(--accent-rgb),0.55)]" },
+    { n: "02", title: t.step2Title, desc: t.step2Desc, tone: "text-[rgba(var(--accent-rgb),0.3)] group-hover:text-[rgba(var(--accent-rgb),0.55)]" },
+    { n: "03", title: t.step3Title, desc: t.step3Desc, tone: "text-[rgba(var(--secondary-rgb),0.3)] group-hover:text-[rgba(var(--secondary-rgb),0.55)]" },
   ];
 
   const faqs = [
@@ -107,12 +107,10 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
 
       {/* ── Hero ── */}
       <section className="relative grid gap-10 md:grid-cols-2 md:items-center md:gap-12">
-        <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-green-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
-
+        
         <div className="relative z-10 min-w-0">
-          <p className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-300">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
+          <p className="inline-flex items-center gap-2 rounded-full border border-[rgba(var(--accent-rgb),0.3)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
             {t.heroBadge}
           </p>
 
@@ -134,7 +132,7 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
           <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs text-[var(--muted)]">
             {[t.trust1, t.trust2, fmt(t.trust3, { count: FREE_EXPORTS_PER_MONTH })].map((line) => (
               <li key={line} className="flex items-center gap-2">
-                <span className="h-1 w-1 rounded-full bg-green-400" />
+                <span className="h-1 w-1 rounded-full bg-[var(--accent)]" />
                 {line}
               </li>
             ))}
@@ -143,20 +141,19 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
 
         {/* CSV mock: what the fixer shows for a messy file */}
         <div className="relative min-w-0" aria-hidden="true">
-          <div className="pointer-events-none absolute inset-0 -m-6 rounded-3xl bg-gradient-to-br from-green-500/10 via-cyan-500/8 to-blue-500/5 blur-2xl" />
-          <div className="relative rounded-2xl border border-cyan-500/25 bg-[rgba(4,10,22,0.85)] p-4 font-mono text-[11px] text-slate-200 shadow-2xl backdrop-blur-sm sm:p-5 sm:text-xs">
+                    <div className="relative rounded-2xl border border-[#2b313f] bg-[#161a23] p-4 font-mono text-[11px] text-slate-200 shadow-xl sm:p-5 sm:text-xs">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="flex gap-1.5">
                 <div className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
                 <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
               </div>
-              <span className="hidden text-[10px] text-cyan-400/50 sm:inline">products.csv</span>
+              <span className="hidden text-[10px] text-slate-400 sm:inline">products.csv</span>
               <span className="rounded-full border border-red-500/35 bg-red-500/15 px-2 py-0.5 text-[10px] text-red-300">
                 {fmt(t.mockIssues, { count: 5 })}
               </span>
             </div>
-            <div className="mb-1 grid grid-cols-4 gap-2 border-b border-cyan-500/15 pb-2 text-[10px] font-semibold text-cyan-400/60">
+            <div className="mb-1 grid grid-cols-4 gap-2 border-b border-white/10 pb-2 text-[10px] font-semibold text-slate-400">
               <span>Handle</span>
               <span>Title</span>
               <span>Price</span>
@@ -182,7 +179,7 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
                 <span className="truncate text-green-300/75">Acme Co</span>
               </div>
               <div className="grid grid-cols-4 gap-2 py-1 opacity-30">
-                <span className="text-cyan-400">···</span>
+                <span className="text-slate-500">···</span>
               </div>
             </div>
             <div className="mt-3 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-[10px]">
@@ -226,8 +223,8 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
           <div className="grid md:grid-cols-2">
             <div className="border-b border-red-500/15 bg-red-500/5 p-6 sm:p-8 md:border-b-0 md:border-r">
               <div className="mb-6 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-red-400" />
-                <span className="text-xs font-bold uppercase tracking-widest text-red-400">{t.before}</span>
+                <div className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400">{t.before}</span>
               </div>
               <ul className="space-y-4">
                 {[t.before1, t.before2, t.before3, t.before4].map((item) => (
@@ -241,15 +238,15 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
               </ul>
             </div>
 
-            <div className="bg-green-500/5 p-6 sm:p-8">
+            <div className="bg-[var(--accent-soft)] p-6 sm:p-8">
               <div className="mb-6 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-400" />
-                <span className="text-xs font-bold uppercase tracking-widest text-green-400">{t.after}</span>
+                <div className="h-2 w-2 rounded-full bg-[var(--accent)]" />
+                <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-text)]">{t.after}</span>
               </div>
               <ul className="space-y-4">
                 {[t.after1, t.after2, t.after3, t.after4].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-[var(--text)]">
-                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
@@ -288,7 +285,7 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/8 to-[var(--bg)]">
+        <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="grid gap-8 p-6 sm:p-8 md:grid-cols-2 md:items-center md:gap-10">
             <div className="min-w-0 md:order-last">
               <p className={kicker}>{t.customFormatsLabel}</p>
@@ -329,9 +326,9 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
 
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            { tone: "border-green-500/20 bg-green-500/8", icon: "bg-green-500/20 text-green-400", d: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", title: t.safe1Title, desc: t.safe1Desc },
-            { tone: "border-cyan-500/20 bg-cyan-500/8", icon: "bg-cyan-500/20 text-cyan-400", d: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4", title: t.safe2Title, desc: t.safe2Desc },
-            { tone: "border-blue-500/20 bg-blue-500/8", icon: "bg-blue-500/20 text-blue-400", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", title: t.safe3Title, desc: t.safe3Desc },
+            { tone: "border-[var(--border)] bg-[var(--surface)]", icon: "bg-[var(--accent-soft)] text-[var(--accent-text)]", d: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", title: t.safe1Title, desc: t.safe1Desc },
+            { tone: "border-[var(--border)] bg-[var(--surface)]", icon: "bg-[var(--secondary-soft)] text-[var(--secondary-text)]", d: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4", title: t.safe2Title, desc: t.safe2Desc },
+            { tone: "border-[var(--border)] bg-[var(--surface)]", icon: "bg-[var(--accent-soft)] text-[var(--accent-text)]", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", title: t.safe3Title, desc: t.safe3Desc },
           ].map(({ tone, icon, d, title, desc }) => (
             <div key={title} className={`rounded-2xl border p-5 ${tone}`}>
               <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${icon}`}>
@@ -369,7 +366,7 @@ export default function HomeClient({ tHome: t, tPricing }: Props) {
               <summary className="flex cursor-pointer items-center justify-between text-sm font-bold text-[var(--text)]">
                 {q}
                 <svg
-                  className="ml-4 h-4 w-4 shrink-0 text-cyan-400 transition-transform group-open:rotate-180"
+                  className="ml-4 h-4 w-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -408,7 +405,7 @@ function FeatureList({ items, tinted }: { items: { icon: string; label: string; 
         <li
           key={label}
           className={`flex gap-4 rounded-2xl border p-4 ${
-            tinted ? "border-cyan-500/20 bg-[rgba(6,182,212,0.07)]" : "border-[var(--border)] bg-[var(--surface-2)]"
+            tinted ? "border-[rgba(var(--accent-rgb),0.25)] bg-[var(--accent-soft)]" : "border-[var(--border)] bg-[var(--surface-2)]"
           }`}
         >
           <span className="text-xl leading-none" aria-hidden="true">{icon}</span>

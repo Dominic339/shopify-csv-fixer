@@ -37,7 +37,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/shopify-csv-fixer",
     presetId: "shopify_products",
     guidePlatform: "shopify",
-    accent: { text: "text-green-500", soft: "bg-green-500/10", border: "border-green-500/30" },
+    accent: { text: "text-emerald-700 dark:text-green-400", soft: "bg-green-500/10", border: "border-green-500/30" },
     metaTitle: "Shopify CSV Fixer | Fix Shopify Product CSV Import Errors | StriveFormats",
     metaDescription:
       "Check a Shopify product CSV against the official template before you import. Prices, handles and true/false values are fixed automatically; variant and overwrite problems are pinned to the exact row.",
@@ -82,7 +82,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/woocommerce-csv-fixer",
     presetId: "woocommerce_products",
     guidePlatform: "woocommerce",
-    accent: { text: "text-purple-400", soft: "bg-purple-500/10", border: "border-purple-500/30" },
+    accent: { text: "text-purple-700 dark:text-purple-400", soft: "bg-purple-500/10", border: "border-purple-500/30" },
     metaTitle: "WooCommerce CSV Fixer | Fix WooCommerce Product Import Errors | StriveFormats",
     metaDescription:
       "Check a WooCommerce product CSV before you run the importer. Prices, booleans and stock values are normalised; duplicate SKUs and sale-price mistakes are flagged by row.",
@@ -123,7 +123,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/woocommerce-variable-csv-fixer",
     presetId: "woocommerce_variable_products",
     guidePlatform: "woocommerce",
-    accent: { text: "text-purple-400", soft: "bg-purple-500/10", border: "border-purple-500/30" },
+    accent: { text: "text-purple-700 dark:text-purple-400", soft: "bg-purple-500/10", border: "border-purple-500/30" },
     metaTitle: "WooCommerce Variable Product CSV Fixer | Variations & Attributes | StriveFormats",
     metaDescription:
       "Check WooCommerce variable products and variations before importing: parent references, attribute values and duplicate variation combinations, row by row.",
@@ -164,7 +164,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/etsy-csv-fixer",
     presetId: "etsy_listings",
     guidePlatform: "etsy",
-    accent: { text: "text-orange-400", soft: "bg-orange-500/10", border: "border-orange-500/30" },
+    accent: { text: "text-orange-700 dark:text-orange-400", soft: "bg-orange-500/10", border: "border-orange-500/30" },
     metaTitle: "Etsy CSV Fixer | Clean Up Etsy Listing CSVs | StriveFormats",
     metaDescription:
       "Clean up an Etsy listing CSV: prices, currency codes and tags are normalised, and tag limits, image URLs and missing details are flagged by row.",
@@ -205,7 +205,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/ebay-csv-fixer",
     presetId: "ebay_listings",
     guidePlatform: "ebay",
-    accent: { text: "text-sky-400", soft: "bg-sky-500/10", border: "border-sky-500/30" },
+    accent: { text: "text-sky-700 dark:text-sky-400", soft: "bg-sky-500/10", border: "border-sky-500/30" },
     metaTitle: "eBay CSV Fixer | Fix eBay File Exchange & Seller Hub Uploads | StriveFormats",
     metaDescription:
       "Check an eBay listing file before you upload it to Seller Hub reports or File Exchange: actions, condition IDs, durations, categories, prices and quantities.",
@@ -246,7 +246,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/ebay-variations-csv-fixer",
     presetId: "ebay_variations",
     guidePlatform: "ebay",
-    accent: { text: "text-sky-400", soft: "bg-sky-500/10", border: "border-sky-500/30" },
+    accent: { text: "text-sky-700 dark:text-sky-400", soft: "bg-sky-500/10", border: "border-sky-500/30" },
     metaTitle: "eBay Variations CSV Fixer | Check Multi-Variation Listings | StriveFormats",
     metaDescription:
       "Check eBay multi-variation listings before uploading: every variation's options must exist on the parent row, and no two variations may share a combination.",
@@ -287,7 +287,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     path: "/amazon-csv-fixer",
     presetId: "amazon_inventory_loader",
     guidePlatform: "amazon",
-    accent: { text: "text-amber-400", soft: "bg-amber-500/10", border: "border-amber-500/30" },
+    accent: { text: "text-amber-700 dark:text-amber-400", soft: "bg-amber-500/10", border: "border-amber-500/30" },
     metaTitle: "Amazon Inventory Loader CSV Fixer | Fix Amazon Offer Files | StriveFormats",
     metaDescription:
       "Check an Amazon Inventory Loader file before uploading: product ID types and condition codes are converted, and broken barcodes, quantities and price ranges are flagged.",

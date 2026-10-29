@@ -23,6 +23,7 @@ import { fmt } from "@/lib/i18n/fmt";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
 import type { Translations } from "@/lib/i18n/getTranslations";
+import { readTextFile } from "@/lib/textFile";
 
 type T = Translations["formats"];
 
@@ -202,7 +203,7 @@ export default function FormatsClient({ formatsByLocale }: Props) {
 
   async function onCsvFile(file: File) {
     try {
-      const parsed = parseCsv(await file.text());
+      const parsed = parseCsv((await readTextFile(file)).text);
       if (!parsed.headers.length) throw new Error("no headers");
       const next: Sample = { name: file.name, headers: parsed.headers, rows: parsed.rows };
       setSample(next);

@@ -86,6 +86,8 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
           limit={f.limit ?? 3}
           pricingHref={`${localeHref(f.currentLocale, "/")}#pricing`}
           onDismiss={() => f.setShowQuotaModal(false)}
+          onBuyPass={() => void f.buyPass()}
+          passBusy={f.passBusy}
         />
       )}
     </>

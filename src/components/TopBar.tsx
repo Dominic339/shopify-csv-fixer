@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { Logo } from "@/components/brand/Logo";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ALLOW_CUSTOM_FORMATS_FOR_ALL } from "@/lib/featureFlags";
 import { isValidLocale, DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
@@ -30,7 +30,7 @@ type Props = {
 };
 
 export default function TopBar({ navByLocale }: Props) {
-  const { theme } = useTheme();
+  const { theme, toggle: toggleTheme } = useTheme();
   const pathname = usePathname();
 
   // Derive the active locale from the URL path (e.g. /es/guides/... → "es")
@@ -50,10 +50,6 @@ export default function TopBar({ navByLocale }: Props) {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const toolsRef = useRef<HTMLDivElement | null>(null);
 
-  const logoSrc = useMemo(() => {
-    // ThemeProvider uses "light"/"dark"
-    return theme === "light" ? "/StriveFormatsLight.png" : "/StriveFormatsDark.png";
-  }, [theme]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -162,6 +158,8 @@ export default function TopBar({ navByLocale }: Props) {
     { path: "/convert", label: navT.formatConverter },
     { path: "/merge", label: navT.csvMerger },
     { path: "/csv-inspector", label: navT.csvInspector },
+    // English-only pages, so not prefixed with the reader's locale.
+    { path: "/migrate", label: navT.storeMigrations, englishOnly: true },
   ];
   const openCustomFormats = () => {
     setMenuOpen(false);
@@ -169,7 +167,7 @@ export default function TopBar({ navByLocale }: Props) {
     setUpgradeOpen(true);
   };
   const betaBadge = (
-    <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+    <span className="ml-2 rounded-full bg-[var(--secondary-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">
       {navT.beta}
     </span>
   );
@@ -237,11 +235,34 @@ export default function TopBar({ navByLocale }: Props) {
     </>
   );
 
+  const themeLabel = theme === "dark" ? navT.themeLight : navT.themeDark;
+  const themeIcon = theme === "dark" ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+    </svg>
+  );
+  const themeButton = (
+    <button
+      type="button"
+      className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--text)]"
+      onClick={toggleTheme}
+      aria-label={themeLabel}
+      title={themeLabel}
+    >
+      {themeIcon}
+    </button>
+  );
+
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 md:py-4">
         <Link href={href("/")} className="flex shrink-0 items-center gap-3">
-          <Image src={logoSrc} alt="StriveFormats" width={180} height={36} priority className="h-7 w-auto md:h-8" />
+          <Logo />
         </Link>
 
         {/* Desktop navigation */}
@@ -269,7 +290,7 @@ export default function TopBar({ navByLocale }: Props) {
                   {tools.map((tool) => (
                     <Link
                       key={tool.path}
-                      href={href(tool.path)}
+                      href={tool.englishOnly ? tool.path : href(tool.path)}
                       className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                       onClick={() => setToolsOpen(false)}
                     >
@@ -292,7 +313,9 @@ export default function TopBar({ navByLocale }: Props) {
             </button>
           )}
 
-          <Link href={href("/app")} className="btn-primary ml-2">
+          <span className="ml-1">{themeButton}</span>
+
+          <Link href={href("/app")} className="btn-primary ml-2 whitespace-nowrap px-5 py-2.5">
             {navT.csvFixer}
           </Link>
 
@@ -314,7 +337,7 @@ export default function TopBar({ navByLocale }: Props) {
 
         {/* Mobile: primary action + menu button */}
         <div className="flex items-center gap-2 md:hidden">
-          <Link href={href("/app")} className="btn-primary px-4 py-2 text-sm">
+          <Link href={href("/app")} className="btn-primary whitespace-nowrap px-4 py-2 text-sm">
             {navT.csvFixer}
           </Link>
           <button
@@ -349,7 +372,7 @@ export default function TopBar({ navByLocale }: Props) {
             {tools.map((tool) => (
               <Link
                 key={tool.path}
-                href={href(tool.path)}
+                href={tool.englishOnly ? tool.path : href(tool.path)}
                 className="flex items-center justify-between rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]"
               >
                 {tool.label}
@@ -369,6 +392,16 @@ export default function TopBar({ navByLocale }: Props) {
                 {navT.customFormats}
               </button>
             )}
+            <button
+              type="button"
+              className="flex items-center justify-between rounded-xl px-3 py-3 text-left text-base text-[var(--text)] hover:bg-[var(--surface-2)]"
+              onClick={toggleTheme}
+            >
+              {themeLabel}
+              <span className="pointer-events-none text-[var(--muted)]" aria-hidden="true">
+                {themeIcon}
+              </span>
+            </button>
             <div className="mt-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)]">{accountMenu}</div>
           </nav>
         </div>

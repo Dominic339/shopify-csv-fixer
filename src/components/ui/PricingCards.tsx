@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { createClient } from "@/lib/supabase/browser";
+import { PASS_PRICE_LABEL } from "@/lib/plans";
+import { startPassCheckout } from "@/lib/passCheckout";
 
 type SubStatus = {
   signedIn: boolean;
@@ -37,12 +39,17 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
   const [msg, setMsg] = useState<string>("");
   const [stripeEnabled, setStripeEnabled] = useState<boolean>(true);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [passExpiresAt, setPassExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAccessToken(session?.access_token ?? null);
     });
+    fetch("/api/quota/status", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => setPassExpiresAt(j?.passExpiresAt ?? null))
+      .catch(() => {});
   }, []);
 
   const billingUnavailable = stripeEnabled === false;
@@ -72,6 +79,22 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
     if (json?.url) window.location.href = json.url;
   }
 
+  async function buyPass() {
+    if (billingUnavailable) return;
+    setMsg("");
+    if (!sub?.signedIn) {
+      router.push("/login");
+      return;
+    }
+    setBusy("pass");
+    const r = await startPassCheckout();
+    if (r === "redirected") return;
+    setBusy(null);
+    if (r === "signin") router.push("/login");
+    else if (r === "unavailable") setStripeEnabled(false);
+    else setMsg(t.billingError);
+  }
+
   async function openPortal() {
     if (billingUnavailable) return;
     setMsg("");
@@ -92,6 +115,12 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
   // Advanced: always show
   const showFree = !activePlan;
   const showBasic = activePlan !== "advanced";
+  const showPass = activePlan !== "advanced";
+  const cardCount = 1 + Number(showFree) + Number(showBasic) + Number(showPass);
+  const gridCols = cardCount >= 4 ? "md:grid-cols-2 lg:grid-cols-4" : cardCount === 3 ? "md:grid-cols-3" : "md:grid-cols-2";
+  const passTime = passExpiresAt
+    ? new Intl.DateTimeFormat(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" }).format(new Date(passExpiresAt))
+    : null;
 
   return (
     <div className="mt-10">
@@ -100,9 +129,9 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
           {t.billingUnavailable}
         </div>
       )}
-      {msg && <div className="mb-4 text-sm text-red-400">{msg}</div>}
+      {msg && <div className="mb-4 text-sm text-red-600 dark:text-red-400">{msg}</div>}
 
-      <div className="grid gap-6 md:grid-cols-3" id="pricing">
+      <div className={`grid gap-6 ${gridCols}`}>
         {/* Free */}
         {showFree && (
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
@@ -111,6 +140,7 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
             <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
               <li>{t.freeBullet1}</li>
               <li>{t.freeBullet2}</li>
+              <li>{t.freeBulletSmall}</li>
               <li>{t.freeBullet4}</li>
             </ul>
             <button
@@ -119,6 +149,34 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
               type="button"
             >
               {t.startFree}
+            </button>
+          </div>
+        )}
+
+        {/* 24-hour pass */}
+        {showPass && (
+          <div className={`rounded-3xl border p-6 shadow-sm ${passTime ? "border-[var(--secondary)] bg-[var(--surface)]" : "border-[rgba(var(--secondary-rgb),0.35)] bg-[var(--surface)]"}`}>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-[var(--muted)]">{t.pass}</div>
+              {passTime && (
+                <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  {t.passActiveUntil.replace("{time}", passTime)}
+                </span>
+              )}
+            </div>
+            <div className="mt-2 text-3xl font-semibold text-[var(--text)]">{PASS_PRICE_LABEL} <span className="text-base font-normal text-[var(--muted)]">{t.oneTime}</span></div>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[var(--muted)]">
+              <li>{t.passBullet1}</li>
+              <li>{t.passBullet2}</li>
+              <li>{t.passBullet3}</li>
+            </ul>
+            <button
+              className="rg-btn is-secondary mt-6 w-full px-5 py-3 text-sm font-semibold disabled:opacity-50"
+              onClick={buyPass}
+              disabled={busy !== null || billingUnavailable}
+              type="button"
+            >
+              {busy === "pass" ? t.starting : sub?.signedIn ? t.buyPass : t.signInToBuy}
             </button>
           </div>
         )}

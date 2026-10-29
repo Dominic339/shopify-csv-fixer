@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const { plan } = (await cloned.json()) as { plan?: "basic" | "advanced" };
+    const { plan } = (await cloned.json()) as { plan?: "basic" | "advanced" | "pass" };
     if (!plan) {
       return NextResponse.json({ error: "Missing plan" }, { status: 400 });
     }
@@ -33,7 +33,9 @@ export async function POST(req: Request) {
         ? process.env.STRIPE_PRICE_BASIC
         : plan === "advanced"
           ? process.env.STRIPE_PRICE_ADVANCED
-          : null;
+          : plan === "pass"
+            ? process.env.STRIPE_PRICE_PASS
+            : null;
 
     if (!priceId) {
       return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
@@ -50,6 +52,27 @@ export async function POST(req: Request) {
 
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
 
+    const customer = stripeCustomerId
+      ? { customer: stripeCustomerId }
+      : user.email
+        ? { customer_email: user.email }
+        : {};
+
+    // The pass is a one-time payment; the webhook turns it into 24 hours of
+    // unlimited exports. /checkout sends the buyer back to the fixer.
+    if (plan === "pass") {
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${siteUrl}/checkout?status=success&plan=pass`,
+        cancel_url: `${siteUrl}/checkout?status=canceled&plan=pass`,
+        client_reference_id: user.id,
+        metadata: { user_id: user.id, plan },
+        ...customer,
+      });
+      return NextResponse.json({ url: session.url });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
@@ -61,11 +84,7 @@ export async function POST(req: Request) {
       subscription_data: {
         metadata: { user_id: user.id, plan },
       },
-      ...(stripeCustomerId
-        ? { customer: stripeCustomerId }
-        : user.email
-          ? { customer_email: user.email }
-          : {}),
+      ...customer,
     });
 
     return NextResponse.json({ url: session.url });

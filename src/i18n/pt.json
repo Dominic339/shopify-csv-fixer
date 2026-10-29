@@ -34,7 +34,10 @@
     "privacy": "Privacidade",
     "terms": "Termos",
     "tagline": "Corrija seus CSV de produtos antes que a importação falhe. Seus arquivos são processados no seu navegador.",
-    "language": "Idioma"
+    "language": "Idioma",
+    "themeDark": "Mudar para o modo escuro",
+    "themeLight": "Mudar para o modo claro",
+    "storeMigrations": "Migração de loja"
   },
   "guide": {
     "whatYouLearn": "O que você vai aprender",
@@ -260,11 +263,11 @@
   "convert": {
     "title": "Conversor de formato CSV",
     "description": "Converta entre os formatos CSV do Shopify, WooCommerce, Etsy, eBay e Amazon. Campos que não podem ser mapeados perfeitamente são sinalizados como avisos.",
-    "uploadStep": "1. Enviar CSV",
+    "uploadStep": "Enviar CSV",
     "uploadDesc": "Envie o arquivo que deseja converter.",
     "chooseFile": "Escolher arquivo",
     "noFileChosen": "Nenhum arquivo escolhido",
-    "selectFormats": "2. Selecionar formatos",
+    "selectFormats": "Selecionar formatos",
     "sourceFormat": "Formato de origem",
     "targetFormat": "Formato de destino",
     "convert": "Converter",
@@ -301,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify (modelo novo)",
     "fmt_shopify_products_legacy": "Shopify (modelo antigo)",
-    "noEquivalent": "(sem equivalente no formato de destino):"
+    "noEquivalent": "(sem equivalente no formato de destino):",
+    "swap": "Inverter formatos",
+    "uploadDescFrom": "Envie o arquivo que você exportou de {platform}.",
+    "chooseAnother": "Escolher outro arquivo",
+    "dropHint": "ou solte um arquivo CSV aqui",
+    "resultStep": "Revisar e baixar",
+    "rowsInFile": "Linhas no seu arquivo",
+    "rowsOut": "Linhas geradas",
+    "previewTitle": "Prévia das primeiras {rows} linhas",
+    "moreColumns": "+ {count} colunas a mais no download",
+    "checkInFixer": "Verificar no corretor de CSV ({platform})",
+    "freeNote": "Converter é grátis. Arquivos com até {rows} linhas sempre podem ser baixados de graça; os maiores usam uma das suas exportações gratuitas.",
+    "limitReached": "Você usou as exportações gratuitas deste mês.",
+    "popularMigrations": "Migrações de loja populares",
+    "routeLabel": "De {from} para {to}",
+    "migrationGuide": "Guia passo a passo: de {from} para {to}",
+    "passCta": "Exportações ilimitadas por 24 horas: {price}",
+    "passSignIn": "Entre na sua conta para comprar um passe de 24 horas ({price})",
+    "passStarting": "Abrindo o pagamento…",
+    "passError": "Não foi possível abrir o pagamento. Tente novamente.",
+    "viewPlans": "Ver planos",
+    "fileRestored": "Seu arquivo foi carregado de novo; você já pode baixá-lo."
   },
   "merge": {
     "title": "Mesclador e desduplicador de CSV",
@@ -564,7 +588,15 @@
     "logActions": "Ações",
     "logSummary": "Resumo por tipo",
     "logFullList": "Lista completa de ações",
-    "logUnknown": "desconhecido"
+    "logUnknown": "desconhecido",
+    "passCta": "Exportações ilimitadas por 24 horas: {price}",
+    "passSignIn": "Entre na sua conta para comprar um passe de 24 horas ({price})",
+    "passStarting": "Abrindo o pagamento…",
+    "passActive": "Exportações ilimitadas até {time}.",
+    "passError": "Não foi possível abrir o pagamento. Tente novamente.",
+    "smallFilesFree": "Arquivos com até {rows} linhas sempre podem ser baixados de graça.",
+    "upsellPass": "Ou tenha exportações ilimitadas por 24 horas com um passe avulso de {price}.",
+    "fileRestored": "Seu arquivo foi carregado de novo; você já pode baixá-lo."
   },
   "profile": {
     "verifySubscription": "Verifique sua assinatura e gerencie o faturamento.",
@@ -689,7 +721,16 @@
     "close": "Fechar",
     "syncingBilling": "Sincronizando informações de cobrança…",
     "billingError": "Não foi possível acessar o faturamento agora. Tente novamente em um minuto.",
-    "allPlansFormats": "Todos os planos incluem todos os formatos integrados: Shopify, WooCommerce, Etsy, eBay e Amazon."
+    "allPlansFormats": "Todos os planos incluem todos os formatos integrados: Shopify, WooCommerce, Etsy, eBay e Amazon.",
+    "pass": "Passe de 24 horas",
+    "oneTime": "pagamento único",
+    "passBullet1": "Exportações ilimitadas por 24 horas",
+    "passBullet2": "Sem assinatura, nada para cancelar",
+    "passBullet3": "Ideal para migrar uma loja ou um catálogo grande",
+    "buyPass": "Comprar passe",
+    "signInToBuy": "Entre para comprar",
+    "passActiveUntil": "Ativo até {time}",
+    "freeBulletSmall": "Arquivos de até 100 linhas sempre grátis"
   },
   "auth": {
     "loginTitle": "Entrar",
@@ -735,7 +776,10 @@
     "checkoutCanceled": "O pagamento foi cancelado. Nada foi cobrado.",
     "checkoutPreparing": "Preparando o pagamento…",
     "planName": "Plano: {plan}",
-    "viewProfile": "Ver perfil"
+    "viewProfile": "Ver perfil",
+    "checkoutPassActivated": "Seu passe de 24 horas está ativo. Voltando ao corretor…",
+    "checkoutPassSyncing": "Confirmando seu pagamento. Você voltará em instantes.",
+    "backToFixer": "Voltar ao corretor"
   },
   "formats": {
     "title": "Formatos personalizados",

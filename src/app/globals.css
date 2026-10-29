@@ -1,33 +1,95 @@
 @import "tailwindcss";
 
-/* The site has one dark identity whatever the OS setting, so `dark:` utilities always apply.
-   (By default they follow prefers-color-scheme, which left light-mode colours on a dark page.) */
-@custom-variant dark (&);
+/* `dark:` utilities follow the site's own theme switch (data-theme on <html>),
+   not the OS setting, so light is the default everywhere. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* ===== Brand Theme — single identity, green/cyan on deep dark ===== */
+/* ===== Brand theme: slate neutrals, teal leads, indigo supports ===== */
 :root,
-[data-theme="light"],
+[data-theme="light"] {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --border: #e2e5eb;
+  --border-rgb: 226, 229, 235;
+
+  --text: #1b2030;
+  --muted: #5c6377;
+  --muted-rgb: 92, 99, 119;
+
+  /* Teal: brand, main buttons, "good" */
+  --primary: #0f766e;
+  --primary-hover: #0d655e;
+  --on-primary: #ffffff;
+  --accent: #0f766e;
+  --accent-rgb: 15, 118, 110;
+  --accent-text: #0f766e;
+  --accent-soft: #e8f6f2;
+
+  /* Indigo: links, steps, small highlights, the pass */
+  --secondary: #4f46e5;
+  --secondary-hover: #4338ca;
+  --on-secondary: #ffffff;
+  --secondary-rgb: 79, 70, 229;
+  --secondary-text: #4338ca;
+  --secondary-soft: #eef0ff;
+
+  --brand: #0f766e;
+  --ring: rgba(79, 70, 229, 0.35);
+
+  --logo-tile: #0f766e;
+  --logo-lines: rgba(255, 255, 255, 0.42);
+  --logo-cell: #4f46e5;
+  --logo-check: #ffffff;
+
+  --popover: #ffffff;
+  --popover-border: #e2e5eb;
+  --code-bg: #f1f3f6;
+  --code-text: #1b2030;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
+
+  color-scheme: light;
+}
+
 [data-theme="dark"] {
-  --bg: #04080f;
-  --surface: rgba(6, 182, 212, 0.07);
-  --surface-2: rgba(6, 182, 212, 0.11);
-  --border: rgba(6, 182, 212, 0.18);
+  --bg: #0f1219;
+  --surface: #161a23;
+  --surface-2: #1c212c;
+  --border: #2b313f;
+  --border-rgb: 43, 49, 63;
 
-  --text: rgba(224, 242, 254, 0.94);
-  --muted: rgba(148, 210, 230, 0.62);
-  --muted-rgb: 148, 210, 230;
+  --text: #e5e8ef;
+  --muted: #979eb2;
+  --muted-rgb: 151, 158, 178;
 
-  --primary: #22c55e;
-  --primary-2: #06b6d4;
+  --primary: #2bb3a3;
+  --primary-hover: #36c4b3;
+  --on-primary: #06201d;
+  --accent: #2bb3a3;
+  --accent-rgb: 43, 179, 163;
+  --accent-text: #5fd0c2;
+  --accent-soft: #12302d;
 
-  --accent-1: #22c55e;
-  --accent-2: #06b6d4;
-  --accent-3: #3b82f6;
-  --accent-4: #a855f7;
-  --accent-5: #f97316;
+  --secondary: #818cf8;
+  --secondary-hover: #939cf9;
+  --on-secondary: #111320;
+  --secondary-rgb: 129, 140, 248;
+  --secondary-text: #a5b4fc;
+  --secondary-soft: #1d2140;
 
-  --popover: rgba(4, 10, 22, 0.97);
-  --popover-border: rgba(6, 182, 212, 0.24);
+  --brand: #2bb3a3;
+  --ring: rgba(129, 140, 248, 0.45);
+
+  --logo-tile: #2bb3a3;
+  --logo-lines: rgba(15, 18, 25, 0.35);
+  --logo-cell: #818cf8;
+  --logo-check: #0f1219;
+
+  --popover: #1a1f2a;
+  --popover-border: #2b313f;
+  --code-bg: #0b0e14;
+  --code-text: #dfe3ea;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 
   color-scheme: dark;
 }
@@ -39,17 +101,10 @@ body {
 }
 
 body {
-  background:
-    radial-gradient(ellipse 1100px 700px at 15% -5%, rgba(34, 197, 94, 0.20) 0%, transparent 55%),
-    radial-gradient(ellipse 900px 600px at 88% 6%, rgba(6, 182, 212, 0.18) 0%, transparent 50%),
-    radial-gradient(ellipse 700px 500px at 50% 95%, rgba(59, 130, 246, 0.12) 0%, transparent 48%),
-    #04080f;
+  background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
 }
 
 a {
@@ -58,27 +113,18 @@ a {
 }
 
 ::selection {
-  background: rgba(34, 197, 94, 0.28);
+  background: rgba(var(--secondary-rgb), 0.22);
 }
 
-/* ===== Gradient text utility ===== */
+/* ===== Highlighted words in headlines ===== */
 .gradient-text {
-  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 55%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-text);
 }
 
 /* ===== Section divider ===== */
 .section-divider {
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(6, 182, 212, 0.45) 30%,
-    rgba(34, 197, 94, 0.40) 70%,
-    transparent 100%
-  );
+  background: var(--border);
   margin: 0;
 }
 
@@ -91,113 +137,95 @@ a {
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* ===== Primary CTA button — solid green→cyan gradient fill ===== */
-.btn-primary {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  padding: 12px 28px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  user-select: none;
-  color: #04080f;
-  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
-  box-shadow: 0 0 28px rgba(34, 197, 94, 0.38), 0 8px 24px rgba(0, 0, 0, 0.4);
-  transition: filter 120ms ease, transform 120ms ease, box-shadow 120ms ease;
-}
-
-.btn-primary:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-  box-shadow: 0 0 40px rgba(34, 197, 94, 0.50), 0 12px 32px rgba(0, 0, 0, 0.5);
-}
-
-.btn-primary:active {
-  transform: translateY(1px) scale(0.99);
-  box-shadow: 0 0 16px rgba(34, 197, 94, 0.30), 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.btn-primary:focus-visible {
-  outline: 3px solid rgba(34, 197, 94, 0.45);
-  outline-offset: 3px;
-}
-
-.btn-primary:disabled {
-  opacity: 0.50;
-  cursor: not-allowed;
-}
-
-/* ===== Brand outline button — green/cyan border ===== */
-.rgb-btn,
-.rg-btn {
+/* ===== Buttons =====
+   .btn-primary / .rg-btn: filled teal, the main action on a screen.
+   .rgb-btn: quiet bordered button for everything else. */
+.btn-primary,
+.rg-btn,
+.rgb-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 14px;
-  font-weight: 700;
+  border-radius: 12px;
+  font-weight: 600;
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
-  transform: translateZ(0);
-  color: var(--text);
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
 }
 
-.rgb-btn::before,
-.rg-btn::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 60%, #3b82f6 100%);
-  opacity: 0.85;
-  z-index: -2;
+.btn-primary {
+  padding: 12px 24px;
+  font-size: 14px;
 }
 
-.rgb-btn::after,
-.rg-btn::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: var(--bg);
-  z-index: -1;
+.btn-primary,
+.rg-btn {
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow);
 }
 
-.rgb-btn:hover,
+.rg-btn {
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+.btn-primary:hover,
 .rg-btn:hover {
-  filter: brightness(1.06);
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.20), 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: var(--primary-hover);
 }
 
-.rgb-btn:active,
-.rg-btn:active {
-  transform: translateY(2px) scale(0.99);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+/* Indigo variant, used for the 24-hour pass offer. */
+.rg-btn.is-secondary {
+  background: var(--secondary);
+  color: var(--on-secondary);
 }
 
-.rgb-btn:focus-visible,
-.rg-btn:focus-visible {
-  outline: 3px solid rgba(6, 182, 212, 0.40);
-  outline-offset: 3px;
+.rg-btn.is-secondary:hover {
+  background: var(--secondary-hover);
 }
 
-.rgb-btn:disabled,
-.rg-btn:disabled {
-  opacity: 0.50;
+.rgb-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.rgb-btn:hover {
+  border-color: rgba(var(--accent-rgb), 0.55);
+  background: var(--surface-2);
+}
+
+.btn-primary:active,
+.rg-btn:active,
+.rgb-btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary:focus-visible,
+.rg-btn:focus-visible,
+.rgb-btn:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled,
+.rg-btn:disabled,
+.rgb-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* ===== Nav link — plain text style ===== */
 .nav-link {
   font-size: 14px;
-  font-weight: 600;
-  color: rgba(148, 210, 230, 0.72);
+  font-weight: 500;
+  color: var(--muted);
   padding: 6px 10px;
   border-radius: 8px;
   transition: color 120ms ease, background 120ms ease;
@@ -208,12 +236,14 @@ a {
 }
 
 .nav-link:hover {
-  color: rgba(224, 242, 254, 0.95);
-  background: rgba(6, 182, 212, 0.10);
+  color: var(--text);
+  background: var(--surface-2);
 }
 
 /* ===== Pill filter buttons ===== */
 .pill-btn {
+  display: inline-flex;
+  align-items: center;
   border-radius: 12px;
   border: 1px solid var(--border);
   padding: 8px 12px;
@@ -221,11 +251,11 @@ a {
   font-weight: 700;
   transition: transform 120ms ease, filter 120ms ease, background 120ms ease;
   color: var(--text);
-  background: transparent;
+  background: var(--surface);
 }
 
 .pill-btn:hover {
-  filter: brightness(1.06);
+  background: var(--surface-2);
 }
 
 .pill-btn:active {
@@ -247,8 +277,8 @@ a {
 }
 
 .pill-all.is-active {
-  background: rgba(59, 130, 246, 0.16);
-  border-color: rgba(59, 130, 246, 0.30);
+  background: var(--secondary-soft);
+  border-color: rgba(var(--secondary-rgb), 0.35);
 }
 
 /* ===== Issue boxes ===== */
@@ -269,8 +299,8 @@ a {
 }
 
 .issue-box.info {
-  background: rgba(59, 130, 246, 0.10);
-  border-color: rgba(59, 130, 246, 0.22);
+  background: var(--secondary-soft);
+  border-color: rgba(var(--secondary-rgb), 0.25);
 }
 
 /* ===== Per-field highlights ===== */
@@ -324,7 +354,7 @@ a {
 }
 
 .data-table tr:hover td {
-  background: rgba(6, 182, 212, 0.06);
+  background: rgba(var(--accent-rgb), 0.05);
 }
 
 .cell-error {
@@ -338,7 +368,7 @@ a {
 }
 
 .cell-editing {
-  outline: 2px solid rgba(6, 182, 212, 0.40);
+  outline: 2px solid rgba(var(--secondary-rgb), 0.5);
   outline-offset: -2px;
 }
 
@@ -346,13 +376,9 @@ summary::-webkit-details-marker {
   display: none;
 }
 
-/* ===== Native select dark mode ===== */
-select {
-  background-color: #0a1020;
-  color: rgba(224, 242, 254, 0.92);
-}
-
+/* ===== Native selects follow the theme ===== */
+select,
 select option {
-  background-color: #0a1020;
-  color: rgba(224, 242, 254, 0.92);
+  background-color: var(--surface);
+  color: var(--text);
 }
