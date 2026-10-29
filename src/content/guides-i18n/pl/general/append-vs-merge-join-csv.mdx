@@ -1,0 +1,168 @@
+---
+title: "Dołączanie, scalanie i łączenie: jak dobrze połączyć pliki CSV"
+description: "Poznaj różnicę między dopisywaniem wierszy, scalaniem plików o tej samej strukturze i łączeniem plików z powiązanymi danymi. Wybierz właściwe podejście do pracy z katalogiem sklepu."
+keywords: ["dołączanie plików csv", "scalanie plików csv", "łączenie plików csv", "połączyć csv", "dopisać wiersze csv", "wyszukaj.pionowo csv", "scalanie katalogu csv", "shopify csv dopisywanie wierszy"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Różnicę między dołączaniem, scalaniem i łączeniem plików CSV"
+  - "Kiedy stosować każde podejście przy pracy z katalogiem sklepu"
+  - "Jak poprawnie dopisywać wiersze bez podwajania nagłówków"
+  - "Jak połączyć dwa pliki CSV za pomocą wspólnej kolumny klucza"
+  - "Typowe błędy przy łączeniu plików CSV"
+bestFor: "Osoby zarządzające katalogiem, programiści i sprzedawcy, którzy łączą dane produktów z wielu źródeł, od dostawców lub z plików eksportu"
+timeToComplete: "10 minut"
+---
+
+## Trzy operacje, trzy znaczenia
+
+Gdy ktoś mówi „połączyć pliki CSV”, zwykle ma na myśli jedną z trzech różnych operacji. Wybór niewłaściwej prowadzi do utraty danych lub błędów struktury.
+
+| Operacja | Co się zmienia | Liczba wierszy | Liczba kolumn |
+|---|---|---|---|
+| **Dołączanie** | Dochodzą wiersze | Rośnie | Bez zmian |
+| **Scalanie** | Dwa pliki o tej samej strukturze stają się jednym | Rośnie | Bez zmian |
+| **Łączenie** | Dochodzą kolumny z powiązanego pliku | Bez zmian | Rośnie |
+
+---
+
+## Dołączanie: dopisywanie wierszy
+
+**Co robi:** wiersze z drugiego pliku CSV trafiają na koniec pierwszego. Oba pliki muszą mieć dokładnie te same kolumny.
+
+**Kiedy go używać:**
+- Do połączenia eksportów podzielonych na strony (plik 1 = wiersze 1–500, plik 2 = wiersze 501–1000).
+- Do dopisania nowej partii produktów do istniejącego pliku katalogu przed przesłaniem.
+- Do połączenia plików od różnych zespołów regionalnych, które eksportują w tym samym formacie.
+
+**Jak poprawnie dołączyć w Excelu:**
+
+1. Otwórz plik bazowy.
+2. Otwórz drugi plik.
+3. W drugim pliku **usuń wiersz nagłówka** (prawy przycisk myszy na wierszu 1 → Usuń).
+4. Zaznacz wszystkie pozostałe dane (Ctrl+A, a potem popraw, jeśli zaznaczy się za dużo).
+5. Skopiuj (Ctrl+C).
+6. Przejdź do pliku bazowego i kliknij pierwszą pustą komórkę pod ostatnim wierszem danych.
+7. Wklej (Ctrl+V).
+8. Zapisz jako CSV UTF-8.
+
+**Poważny błąd, którego trzeba unikać:** pominięcie kroku 3 (usunięcia nagłówka) tworzy zdublowane wiersze nagłówka w środku pliku, a na tym wykłada się każda platforma importu.
+
+**Jak dołączyć w Arkuszach Google:**
+
+Tak samo: usuń wiersz nagłówka drugiego pliku, skopiuj tylko wiersze danych i wklej je na dole arkusza bazowego.
+
+---
+
+## Scalanie: łączenie plików o tych samych kolumnach (z wielu źródeł)
+
+**Co robi:** w zasadzie to samo co dołączanie, ale o „scalaniu” mówi się zwykle, gdy pliki pochodzą z różnych źródeł i opisują ten sam rodzaj danych (na przykład dwie listy produktów od dostawców w tym samym formacie).
+
+**Kiedy go używać:**
+- Do połączenia w jeden plik do przesłania feedów produktów od dwóch różnych dostawców.
+- Do scalenia osobnych eksportów z działów, które korzystają z tego samego szablonu CSV platformy.
+
+**Na co dodatkowo uważać przy scalaniu (w porównaniu ze zwykłym dołączaniem):**
+- **Sprawdź zdublowane wiersze.** Jeśli oba pliki mają ten sam produkt, w scalonym pliku pojawi się on dwa razy. Duplikaty wykryjesz po Handle (Shopify), SKU (WooCommerce/Amazon) lub Item ID (eBay). W Excelu: **Dane → Usuń duplikaty** i wybierz kolumnę klucza.
+- **Ujednolić nazwy kolumn.** Jeśli dostawca A nazywa kolumnę `Barcode`, a dostawca B `UPC`, przed scaleniem musisz przejść na nazwę, której oczekuje platforma.
+- **Ujednolić wartości.** Ceny mogą być w różnych walutach, a statusy mogą mieć różny zapis (Published, TRUE albo 1).
+
+---
+
+## Łączenie: dodawanie kolumn z powiązanego pliku
+
+**Co robi:** kładzie dwa pliki obok siebie i dodaje do pierwszego kolumny z drugiego, dopasowując wiersze po wspólnej kolumnie klucza (np. SKU lub Handle).
+
+**Kiedy go używać:**
+- Masz listę produktów z systemu ERP (Handle, Title, SKU, Price) i osobny plik stanów magazynowych (SKU, Quantity, Warehouse Location) i chcesz dodać stan do każdego wiersza produktu.
+- Eksportujesz produkty bez zdjęć z jednego systemu i masz osobny plik z adresami URL zdjęć dopasowanymi po SKU.
+- Chcesz przed importem dodać do katalogu dane dostawcy (cenę zakupu, numer katalogowy dostawcy).
+
+### Łączenie za pomocą WYSZUKAJ.PIONOWO w Excelu
+
+Załóżmy:
+- **Plik A** (bazowy): kolumny A=Handle, B=Title, C=Price
+- **Plik B** (do wyszukiwania): kolumny A=Handle, B=Quantity
+
+Chcesz dodać Quantity z pliku B do pliku A.
+
+1. W pliku A dodaj nowy nagłówek kolumny: `Quantity` (w kolumnie D).
+2. W komórce D2 wpisz:
+   ```
+   =WYSZUKAJ.PIONOWO(A2;'[FileB.csv]FileB'!$A:$B;2;FAŁSZ)
+   ```
+3. Plik B musi być otwarty w Excelu. Gdy Excel otwiera plik CSV, nadaje arkuszowi nazwę pliku, więc `FileB.csv` ma arkusz o nazwie `FileB`. Jeśli klucz pasuje, Quantity zostaje wypełnione. Jeśli nie ma dopasowania, pojawia się `#N/D!`, co oznacza, że tego Handle nie ma w pliku B.
+4. Skopiuj formułę w dół do wszystkich wierszy.
+5. Gdy wszystko się zgadza, zaznacz kolumnę D, skopiuj ją i użyj **Wklej specjalnie → Wartości**, aby zastąpić formuły stałymi wartościami.
+6. Zamknij plik B.
+7. Zapisz plik A jako CSV UTF-8.
+
+### Łączenie w Arkuszach Google
+
+Użyj `WYSZUKAJ.PIONOWO` (lub `VLOOKUP`) z tą samą składnią. Możesz też pobrać dane z innego arkusza Google funkcją `IMPORTRANGE`, a potem skorzystać z kolumny pomocniczej.
+
+### Łączenie w Pythonie (duże pliki)
+
+```python
+import csv
+
+# Wczytanie pliku do wyszukiwania do słownika z Handle jako kluczem
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Dodanie Quantity do pliku bazowego
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Typowe błędy przy łączeniu plików CSV
+
+### Błąd 1: zdublowane wiersze nagłówka po dołączeniu
+
+**Objaw:** import przerywa się w środku pliku z błędami typu „nierozpoznany wiersz”.
+**Rozwiązanie:** przed dołączeniem zawsze usuwaj wiersz nagłówka z każdego pliku poza pierwszym.
+
+### Błąd 2: inna kolejność kolumn w dołączanych plikach
+
+**Objaw:** po dołączeniu dane trafiają do złych kolumn.
+**Rozwiązanie:** oba pliki muszą mieć tę samą kolejność kolumn, a nie tylko te same nazwy. Jeśli plik B ma kolumny w innej kolejności, przed dołączeniem ustaw je tak, jak w pliku A.
+
+### Błąd 3: łączenie po kluczu, który nie jest unikatowy
+
+**Objaw:** WYSZUKAJ.PIONOWO zwraca zły stan (bierze pierwsze dopasowanie i pomija duplikaty).
+**Rozwiązanie:** przed łączeniem upewnij się, że kolumna klucza (SKU, Handle) jest unikatowa w pliku do wyszukiwania. Użyj **Dane → Usuń duplikaty** lub sprawdź to funkcją LICZ.JEŻELI.
+
+### Błąd 4: różne kodowanie po połączeniu
+
+**Objaw:** krzaczki w wierszach pochodzących z jednego z plików źródłowych.
+**Rozwiązanie:** przed łączeniem zapisz wszystkie pliki źródłowe jako UTF-8. Każdy plik, który nie jest w UTF-8, przekoduj w VS Code (zobacz poradnik o kodowaniu).
+
+### Błąd 5: puste wiersze między dołączonymi częściami
+
+**Objaw:** import zatrzymuje się na pustym wierszu i pomija wszystkie kolejne.
+**Rozwiązanie:** po dołączeniu przewiń połączony plik i usuń puste wiersze między częściami.
+
+---
+
+## Szybka ściąga
+
+```
+Potrzebujesz więcej wierszy? → Dołączanie lub scalanie
+Potrzebujesz więcej kolumn? → Łączenie
+
+Pliki pochodzą z tego samego systemu i mają identyczne kolumny? → Dołączanie
+Pochodzą z różnych systemów, ale mają ten sam szablon kolumn? → Scalanie (sprawdź duplikaty)
+Dane produktów są w jednym pliku, a dane uzupełniające w drugim? → Łączenie
+```

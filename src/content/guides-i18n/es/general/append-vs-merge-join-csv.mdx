@@ -1,0 +1,168 @@
+---
+title: "Añadir, combinar o unir: cómo juntar archivos CSV correctamente"
+description: "Entiende la diferencia entre añadir filas, combinar archivos con la misma estructura y unir archivos con datos relacionados. Elige el enfoque adecuado para el flujo de trabajo de tu catálogo."
+keywords: ["añadir archivos csv", "combinar archivos csv", "unir archivos csv", "juntar csv", "juntar filas csv", "buscarv csv", "combinar catálogo csv", "shopify csv añadir filas"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "La diferencia entre añadir, combinar y unir archivos CSV"
+  - "Cuándo usar cada enfoque en el flujo de trabajo de un catálogo"
+  - "Cómo añadir filas correctamente sin duplicar encabezados"
+  - "Cómo unir dos archivos CSV mediante una columna clave común"
+  - "Errores habituales al juntar archivos CSV"
+bestFor: "Responsables de catálogo, desarrolladores y vendedores que juntan datos de productos de varias fuentes, proveedores o archivos exportados"
+timeToComplete: "10 minutos"
+---
+
+## Tres operaciones, tres significados
+
+Cuando alguien dice «juntar archivos CSV», suele referirse a una de tres operaciones distintas. Usar la equivocada provoca pérdida de datos o errores de estructura.
+
+| Operación | Qué cambia | Número de filas | Número de columnas |
+|---|---|---|---|
+| **Añadir** | Se agregan filas | Aumenta | Igual |
+| **Combinar** | Se juntan dos archivos con la misma estructura | Aumenta | Igual |
+| **Unir** | Se agregan columnas de un archivo relacionado | Igual | Aumenta |
+
+---
+
+## Añadir: agregar más filas
+
+**Qué hace:** toma las filas de un segundo CSV y las pone al final del primero. Ambos archivos deben tener exactamente las mismas columnas.
+
+**Cuándo usarlo:**
+- Para juntar exportaciones paginadas (archivo 1 = filas 1–500, archivo 2 = filas 501–1000).
+- Para agregar un nuevo lote de productos a un archivo de catálogo existente antes de subirlo.
+- Para juntar archivos de distintos equipos regionales que exportan en el mismo formato.
+
+**Cómo añadir correctamente en Excel:**
+
+1. Abre tu archivo base.
+2. Abre el segundo archivo.
+3. En el segundo archivo, **elimina la fila de encabezado** (clic derecho en la fila 1 → Eliminar).
+4. Selecciona todos los datos restantes (Ctrl+E en Excel en español, o Ctrl+A en otras versiones; ajusta si selecciona de más).
+5. Copia (Ctrl+C).
+6. Vuelve al archivo base y haz clic en la primera celda vacía debajo de la última fila de datos.
+7. Pega (Ctrl+V).
+8. Guarda como CSV UTF-8.
+
+**Error grave que debes evitar:** si te saltas el paso 3 (eliminar el encabezado), quedan filas de encabezado duplicadas en mitad del archivo, y eso hace fallar cualquier plataforma de importación.
+
+**Cómo añadir en Google Sheets:**
+
+El proceso es el mismo: elimina la fila de encabezado del segundo archivo, copia solo las filas de datos y pégalas al final de la hoja base.
+
+---
+
+## Combinar: juntar archivos con las mismas columnas (de varias fuentes)
+
+**Qué hace:** en esencia es lo mismo que añadir, pero se suele hablar de «combinar» cuando los archivos vienen de fuentes distintas y representan el mismo tipo de datos (por ejemplo, dos listas de productos de proveedores en el mismo formato).
+
+**Cuándo usarlo:**
+- Para juntar en un solo archivo de carga los feeds de productos de dos proveedores distintos.
+- Para combinar exportaciones de distintos departamentos que usan la misma plantilla CSV de la plataforma.
+
+**Aspectos adicionales al combinar (frente a añadir sin más):**
+- **Busca filas duplicadas.** Si los dos archivos tienen el mismo producto, el archivo combinado lo tendrá dos veces. Usa el Handle (Shopify), el SKU (WooCommerce/Amazon) o el Item ID (eBay) para detectar duplicados. En Excel: **Datos → Quitar duplicados** y selecciona la columna clave.
+- **Unifica los nombres de columna.** Si el proveedor A llama a una columna `Barcode` y el proveedor B la llama `UPC`, debes usar el nombre que espera la plataforma antes de combinar.
+- **Unifica los valores.** Los precios pueden estar en monedas distintas y los estados pueden seguir convenciones distintas (Published, TRUE o 1).
+
+---
+
+## Unir: agregar columnas de un archivo relacionado
+
+**Qué hace:** junta dos archivos lado a lado y agrega al primero columnas del segundo, emparejando las filas mediante una columna clave común (como el SKU o el Handle).
+
+**Cuándo usarlo:**
+- Tienes una lista de productos de tu ERP (Handle, Title, SKU, Price) y un archivo de inventario aparte (SKU, Quantity, Warehouse Location), y quieres agregar la cantidad a cada fila de producto.
+- Exportas productos sin imágenes desde un sistema y tienes un archivo aparte con URL de imágenes emparejadas por SKU.
+- Quieres agregar datos del proveedor (precio de coste, referencia del proveedor) a tu catálogo antes de importarlo.
+
+### Unir con BUSCARV en Excel
+
+Supongamos:
+- **Archivo A** (base): columnas A=Handle, B=Title, C=Price
+- **Archivo B** (búsqueda): columnas A=Handle, B=Quantity
+
+Quieres agregar Quantity del archivo B al archivo A.
+
+1. En el archivo A, agrega un nuevo encabezado de columna: `Quantity` (en la columna D).
+2. En D2, escribe:
+   ```
+   =BUSCARV(A2;'[FileB.csv]FileB'!$A:$B;2;FALSO)
+   ```
+3. El archivo B debe estar abierto en Excel. Cuando Excel abre un CSV, nombra la hoja como el archivo, así que `FileB.csv` tiene una hoja llamada `FileB`. Si la clave coincide, se rellena Quantity. Si no hay coincidencia, aparece `#N/D`, lo que significa que ese Handle no está en el archivo B.
+4. Copia la fórmula hacia abajo en todas las filas.
+5. Cuando estés conforme, selecciona la columna D, cópiala y usa **Pegado especial → Valores** para sustituir las fórmulas por valores fijos.
+6. Cierra el archivo B.
+7. Guarda el archivo A como CSV UTF-8.
+
+### Unir en Google Sheets
+
+Usa `BUSCARV` (o `VLOOKUP`) con la misma sintaxis. También puedes usar `IMPORTRANGE` para traer datos de otra hoja de Google y luego trabajar con una columna auxiliar.
+
+### Unir con Python (archivos grandes)
+
+```python
+import csv
+
+# Cargar el archivo de búsqueda en un diccionario con el Handle como clave
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Agregar Quantity al archivo base
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Errores habituales al juntar archivos CSV
+
+### Error 1: filas de encabezado duplicadas tras añadir
+
+**Síntoma:** la importación falla en mitad del archivo con errores de «fila no reconocida».
+**Solución:** antes de añadir, elimina siempre la fila de encabezado de todos los archivos menos el primero.
+
+### Error 2: distinto orden de columnas en los archivos añadidos
+
+**Síntoma:** tras añadir, los datos aparecen en columnas equivocadas.
+**Solución:** los dos archivos deben tener el mismo orden de columnas, no solo los mismos nombres. Si el archivo B tiene las columnas en otro orden, reordénalas para que coincidan con el archivo A antes de añadir.
+
+### Error 3: unir mediante una clave que no es única
+
+**Síntoma:** BUSCARV devuelve una cantidad equivocada (toma la primera coincidencia e ignora los duplicados).
+**Solución:** asegúrate de que la columna clave (SKU, Handle) sea única en el archivo de búsqueda antes de unir. Usa **Datos → Quitar duplicados** o comprueba con CONTAR.SI.
+
+### Error 4: codificación distinta tras juntar
+
+**Síntoma:** caracteres ilegibles en las filas de uno de los archivos de origen.
+**Solución:** guarda todos los archivos de origen como UTF-8 antes de juntarlos. Vuelve a codificar con VS Code cualquier archivo que no esté en UTF-8 (consulta la guía sobre codificación).
+
+### Error 5: filas en blanco entre las secciones añadidas
+
+**Síntoma:** la importación se detiene en la fila en blanco e ignora todas las filas siguientes.
+**Solución:** después de añadir, recorre el archivo combinado y elimina las filas en blanco que haya entre las secciones.
+
+---
+
+## Guía rápida para decidir
+
+```
+¿Necesitas más filas? → Añadir o combinar
+¿Necesitas más columnas? → Unir
+
+¿Los archivos vienen del mismo sistema con columnas idénticas? → Añadir
+¿Vienen de sistemas distintos con la misma plantilla de columnas? → Combinar (busca duplicados)
+¿Tienes los datos de productos en un archivo y datos complementarios en otro? → Unir
+```

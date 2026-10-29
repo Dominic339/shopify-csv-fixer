@@ -2,7 +2,7 @@
 title: "Append vs Merge vs Join: Combining CSV Files the Right Way"
 description: "Understand the difference between appending rows, merging files with the same structure, and joining files with related data. Choose the right approach for your ecommerce catalog workflow."
 keywords: ["append csv files", "merge csv files", "join csv files", "combine csv", "csv rows combine", "csv vlookup join", "csv catalog merge", "shopify csv append"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "The difference between append, merge, and join for CSV files"
@@ -89,9 +89,9 @@ You want to add Quantity from File B to File A.
 1. In File A, add a new column header: `Quantity` (in column D).
 2. In D2, enter:
    ```
-   =VLOOKUP(A2, '[FileB.csv]Sheet1'!$A:$B, 2, FALSE)
+   =VLOOKUP(A2, '[FileB.csv]FileB'!$A:$B, 2, FALSE)
    ```
-3. If the key matches, Quantity is filled in. If there's no match, `#N/A` appears, which means that Handle is not in File B.
+3. File B must be open in Excel. When Excel opens a CSV, it names the sheet after the file, so `FileB.csv` has a sheet called `FileB`. If the key matches, Quantity is filled in. If there's no match, `#N/A` appears, which means that Handle is not in File B.
 4. Copy the formula down to all rows.
 5. Once satisfied, select column D, copy, and **Paste Special → Values** to replace formulas with static values.
 6. Close File B.

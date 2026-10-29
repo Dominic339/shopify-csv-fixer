@@ -1,0 +1,168 @@
+---
+title: "Accodare, unire o collegare: come combinare correttamente i file CSV"
+description: "Capisci la differenza tra accodare righe, unire file con la stessa struttura e collegare file con dati correlati. Scegli l'approccio giusto per gestire il tuo catalogo e-commerce."
+keywords: ["accodare file csv", "unire file csv", "collegare file csv", "combinare csv", "unire righe csv", "cerca.vert csv", "unire catalogo csv", "shopify csv aggiungere righe"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "La differenza tra accodare, unire e collegare file CSV"
+  - "Quando usare ciascun approccio nella gestione di un catalogo e-commerce"
+  - "Come accodare righe senza duplicare le intestazioni"
+  - "Come collegare due file CSV tramite una colonna chiave comune"
+  - "Gli errori più comuni quando si combinano file CSV"
+bestFor: "Responsabili di catalogo, sviluppatori e venditori che combinano dati di prodotto da più fonti, fornitori o file esportati"
+timeToComplete: "10 minuti"
+---
+
+## Tre operazioni, tre significati
+
+Quando si dice «combinare file CSV», di solito si intende una di tre operazioni diverse. Usare quella sbagliata porta a perdite di dati o errori di struttura.
+
+| Operazione | Cosa cambia | Numero di righe | Numero di colonne |
+|---|---|---|---|
+| **Accodare** | Si aggiungono righe | Aumenta | Uguale |
+| **Unire** | Si combinano due file con la stessa struttura | Aumenta | Uguale |
+| **Collegare** | Si aggiungono colonne da un file correlato | Uguale | Aumenta |
+
+---
+
+## Accodare: aggiungere altre righe
+
+**Cosa fa:** prende le righe di un secondo CSV e le aggiunge in fondo al primo. I due file devono avere esattamente le stesse colonne.
+
+**Quando usarlo:**
+- Per combinare esportazioni suddivise in pagine (file 1 = righe 1–500, file 2 = righe 501–1000).
+- Per aggiungere un nuovo gruppo di prodotti a un file di catalogo esistente prima del caricamento.
+- Per combinare file di team regionali diversi che esportano nello stesso formato.
+
+**Come accodare correttamente in Excel:**
+
+1. Apri il file di base.
+2. Apri il secondo file.
+3. Nel secondo file, **elimina la riga di intestazione** (clic destro sulla riga 1 → Elimina).
+4. Seleziona tutti i dati rimanenti (Ctrl+A, poi correggi se seleziona troppo).
+5. Copia (Ctrl+C).
+6. Torna al file di base e fai clic sulla prima cella vuota sotto l'ultima riga di dati.
+7. Incolla (Ctrl+V).
+8. Salva come CSV UTF-8.
+
+**Errore grave da evitare:** saltare il passaggio 3 (eliminare l'intestazione) crea righe di intestazione duplicate a metà file, e questo fa fallire qualsiasi piattaforma di importazione.
+
+**Come accodare in Google Sheets:**
+
+Stesso procedimento: elimina la riga di intestazione del secondo file, copia solo le righe di dati e incollale in fondo al foglio di base.
+
+---
+
+## Unire: combinare file con le stesse colonne (da più fonti)
+
+**Cosa fa:** in sostanza è come accodare, ma si parla di «unire» quando i file arrivano da fonti diverse e rappresentano lo stesso tipo di dati (per esempio due elenchi di prodotti di fornitori nello stesso formato).
+
+**Quando usarlo:**
+- Per riunire in un unico file di caricamento i feed di prodotto di due fornitori diversi.
+- Per unire esportazioni di reparti diversi che usano tutte lo stesso modello CSV della piattaforma.
+
+**Cose in più da controllare quando unisci (rispetto al semplice accodamento):**
+- **Cerca le righe duplicate.** Se entrambi i file contengono lo stesso prodotto, il file unito lo avrà due volte. Usa l'Handle (Shopify), lo SKU (WooCommerce/Amazon) o l'Item ID (eBay) per trovare i duplicati. In Excel: **Dati → Rimuovi duplicati**, poi seleziona la colonna chiave.
+- **Uniforma i nomi delle colonne.** Se il fornitore A chiama una colonna `Barcode` e il fornitore B la chiama `UPC`, prima di unire devi usare il nome che la piattaforma si aspetta.
+- **Uniforma i valori.** I prezzi possono essere in valute diverse e gli stati possono seguire convenzioni diverse (Published, TRUE o 1).
+
+---
+
+## Collegare: aggiungere colonne da un file correlato
+
+**Cosa fa:** affianca due file e aggiunge al primo le colonne del secondo, abbinando le righe tramite una colonna chiave comune (come lo SKU o l'Handle).
+
+**Quando usarlo:**
+- Hai un elenco di prodotti dal tuo ERP (Handle, Title, SKU, Price) e un file di inventario separato (SKU, Quantity, Warehouse Location), e vuoi aggiungere la quantità a ogni riga di prodotto.
+- Esporti prodotti senza immagini da un sistema e hai un file separato di URL delle immagini abbinati per SKU.
+- Vuoi aggiungere al catalogo dati del fornitore (prezzo di costo, codice articolo del fornitore) prima dell'importazione.
+
+### Collegare con CERCA.VERT in Excel
+
+Supponiamo:
+- **File A** (base): colonne A=Handle, B=Title, C=Price
+- **File B** (ricerca): colonne A=Handle, B=Quantity
+
+Vuoi aggiungere Quantity dal file B al file A.
+
+1. Nel file A, aggiungi una nuova intestazione di colonna: `Quantity` (nella colonna D).
+2. In D2, inserisci:
+   ```
+   =CERCA.VERT(A2;'[FileB.csv]FileB'!$A:$B;2;FALSO)
+   ```
+3. Il file B deve essere aperto in Excel. Quando Excel apre un CSV, dà al foglio il nome del file, quindi `FileB.csv` ha un foglio chiamato `FileB`. Se la chiave corrisponde, Quantity viene compilato. Se non c'è corrispondenza, compare `#N/D`: quell'Handle non è nel file B.
+4. Copia la formula verso il basso su tutte le righe.
+5. Quando sei soddisfatto, seleziona la colonna D, copiala e usa **Incolla speciale → Valori** per sostituire le formule con valori fissi.
+6. Chiudi il file B.
+7. Salva il file A come CSV UTF-8.
+
+### Collegare in Google Sheets
+
+Usa `CERCA.VERT` (o `VLOOKUP`) con la stessa sintassi. In alternativa, usa `IMPORTRANGE` per prendere i dati da un altro foglio Google e poi una colonna di supporto.
+
+### Collegare con Python (file grandi)
+
+```python
+import csv
+
+# Caricare il file di ricerca in un dizionario con l'Handle come chiave
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Aggiungere Quantity al file di base
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Errori comuni quando si combinano file CSV
+
+### Errore 1: righe di intestazione duplicate dopo l'accodamento
+
+**Sintomo:** l'importazione si interrompe a metà file con errori di «riga non riconosciuta».
+**Soluzione:** prima di accodare, elimina sempre la riga di intestazione di ogni file tranne il primo.
+
+### Errore 2: ordine delle colonne diverso nei file accodati
+
+**Sintomo:** dopo l'accodamento i dati compaiono nelle colonne sbagliate.
+**Soluzione:** i due file devono avere lo stesso ordine di colonne, non solo gli stessi nomi. Se il file B ha le colonne in un ordine diverso, riordinale in modo che corrispondano al file A prima di accodare.
+
+### Errore 3: collegamento su una chiave non univoca
+
+**Sintomo:** CERCA.VERT restituisce la quantità sbagliata (prende la prima corrispondenza e ignora i duplicati).
+**Soluzione:** prima di collegare, assicurati che la colonna chiave (SKU, Handle) sia univoca nel file di ricerca. Usa **Dati → Rimuovi duplicati** o controlla con CONTA.SE.
+
+### Errore 4: codifica diversa dopo la combinazione
+
+**Sintomo:** caratteri illeggibili nelle righe provenienti da uno dei file di origine.
+**Soluzione:** salva tutti i file di origine in UTF-8 prima di combinarli. Ricodifica con VS Code qualsiasi file che non sia in UTF-8 (vedi la guida sulla codifica).
+
+### Errore 5: righe vuote tra le sezioni accodate
+
+**Sintomo:** l'importazione si ferma alla riga vuota e ignora tutte le righe successive.
+**Soluzione:** dopo l'accodamento, scorri il file combinato ed elimina le righe vuote tra le sezioni.
+
+---
+
+## Guida rapida alla scelta
+
+```
+Ti servono più righe? → Accodare o unire
+Ti servono più colonne? → Collegare
+
+I file arrivano dallo stesso sistema con colonne identiche? → Accodare
+Arrivano da sistemi diversi con lo stesso modello di colonne? → Unire (cerca i duplicati)
+Hai i dati di prodotto in un file e dati aggiuntivi in un altro? → Collegare
+```

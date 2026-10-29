@@ -1,0 +1,168 @@
+---
+title: "Anexar, mesclar ou unir: como combinar arquivos CSV do jeito certo"
+description: "Entenda a diferença entre anexar linhas, mesclar arquivos com a mesma estrutura e unir arquivos com dados relacionados. Escolha a abordagem certa para o fluxo do seu catálogo."
+keywords: ["anexar arquivos csv", "mesclar arquivos csv", "unir arquivos csv", "combinar csv", "juntar linhas csv", "procv csv", "mesclar catálogo csv", "shopify csv anexar linhas"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "A diferença entre anexar, mesclar e unir arquivos CSV"
+  - "Quando usar cada abordagem no fluxo de um catálogo de e-commerce"
+  - "Como anexar linhas corretamente sem duplicar cabeçalhos"
+  - "Como unir dois arquivos CSV por uma coluna-chave comum"
+  - "Erros comuns ao combinar arquivos CSV"
+bestFor: "Gestores de catálogo, desenvolvedores e vendedores que combinam dados de produtos de várias fontes, fornecedores ou arquivos exportados"
+timeToComplete: "10 minutos"
+---
+
+## Três operações, três significados
+
+Quando alguém fala em "combinar arquivos CSV", geralmente quer dizer uma de três operações diferentes. Usar a errada causa perda de dados ou erros de estrutura.
+
+| Operação | O que muda | Número de linhas | Número de colunas |
+|---|---|---|---|
+| **Anexar** | Entram mais linhas | Aumenta | Igual |
+| **Mesclar** | Dois arquivos com a mesma estrutura viram um | Aumenta | Igual |
+| **Unir** | Entram colunas de um arquivo relacionado | Igual | Aumenta |
+
+---
+
+## Anexar: adicionar mais linhas
+
+**O que faz:** pega as linhas de um segundo CSV e as coloca no fim do primeiro. Os dois arquivos precisam ter exatamente as mesmas colunas.
+
+**Quando usar:**
+- Para juntar exportações paginadas (arquivo 1 = linhas 1–500, arquivo 2 = linhas 501–1000).
+- Para acrescentar um novo lote de produtos a um arquivo de catálogo existente antes de enviá-lo.
+- Para juntar arquivos de equipes regionais diferentes que exportam no mesmo formato.
+
+**Como anexar corretamente no Excel:**
+
+1. Abra o arquivo base.
+2. Abra o segundo arquivo.
+3. No segundo arquivo, **exclua a linha de cabeçalho** (clique com o botão direito na linha 1 → Excluir).
+4. Selecione todos os dados restantes (Ctrl+T no Excel em português, Ctrl+A em outras versões; ajuste se selecionar demais).
+5. Copie (Ctrl+C).
+6. Volte ao arquivo base e clique na primeira célula vazia abaixo da última linha de dados.
+7. Cole (Ctrl+V).
+8. Salve como CSV UTF-8.
+
+**Erro grave a evitar:** pular o passo 3 (excluir o cabeçalho) cria linhas de cabeçalho duplicadas no meio do arquivo, o que faz qualquer plataforma de importação falhar.
+
+**Como anexar no Google Sheets:**
+
+O processo é o mesmo: exclua a linha de cabeçalho do segundo arquivo, copie só as linhas de dados e cole no fim da planilha base.
+
+---
+
+## Mesclar: combinar arquivos com as mesmas colunas (de várias fontes)
+
+**O que faz:** na prática é o mesmo que anexar, mas o termo "mesclar" costuma ser usado quando os arquivos vêm de fontes diferentes e representam o mesmo tipo de dado (por exemplo, duas listas de produtos de fornecedores no mesmo formato).
+
+**Quando usar:**
+- Para juntar num único arquivo de envio os feeds de produtos de dois fornecedores diferentes.
+- Para mesclar exportações de departamentos diferentes que usam o mesmo modelo de CSV da plataforma.
+
+**Cuidados extras ao mesclar (em comparação com só anexar):**
+- **Procure linhas duplicadas.** Se os dois arquivos têm o mesmo produto, o arquivo mesclado terá esse produto duas vezes. Use o Handle (Shopify), o SKU (WooCommerce/Amazon) ou o Item ID (eBay) para encontrar duplicatas. No Excel: **Dados → Remover Duplicatas** e selecione a coluna-chave.
+- **Padronize os nomes das colunas.** Se o fornecedor A chama uma coluna de `Barcode` e o fornecedor B de `UPC`, você precisa adotar o nome que a plataforma espera antes de mesclar.
+- **Padronize os valores.** Os preços podem estar em moedas diferentes e os status podem seguir convenções diferentes (Published, TRUE ou 1).
+
+---
+
+## Unir: adicionar colunas de um arquivo relacionado
+
+**O que faz:** coloca dois arquivos lado a lado e acrescenta ao primeiro colunas do segundo, combinando as linhas por uma coluna-chave comum (como o SKU ou o Handle).
+
+**Quando usar:**
+- Você tem uma lista de produtos do seu ERP (Handle, Title, SKU, Price) e um arquivo de estoque separado (SKU, Quantity, Warehouse Location), e quer acrescentar a quantidade a cada linha de produto.
+- Você exporta produtos sem imagens de um sistema e tem um arquivo separado de URLs de imagens associadas por SKU.
+- Você quer acrescentar ao catálogo dados do fornecedor (preço de custo, código do fornecedor) antes de importar.
+
+### Unir com PROCV no Excel
+
+Suponha:
+- **Arquivo A** (base): colunas A=Handle, B=Title, C=Price
+- **Arquivo B** (consulta): colunas A=Handle, B=Quantity
+
+Você quer trazer Quantity do arquivo B para o arquivo A.
+
+1. No arquivo A, adicione um novo cabeçalho de coluna: `Quantity` (na coluna D).
+2. Em D2, digite:
+   ```
+   =PROCV(A2;'[FileB.csv]FileB'!$A:$B;2;FALSO)
+   ```
+3. O arquivo B precisa estar aberto no Excel. Quando o Excel abre um CSV, dá à planilha o nome do arquivo, então `FileB.csv` tem uma planilha chamada `FileB`. Se a chave corresponder, Quantity é preenchido. Se não houver correspondência, aparece `#N/D`, o que significa que esse Handle não está no arquivo B.
+4. Copie a fórmula para baixo em todas as linhas.
+5. Quando estiver tudo certo, selecione a coluna D, copie e use **Colar Especial → Valores** para trocar as fórmulas por valores fixos.
+6. Feche o arquivo B.
+7. Salve o arquivo A como CSV UTF-8.
+
+### Unir no Google Sheets
+
+Use `PROCV` (ou `VLOOKUP`) com a mesma sintaxe. Outra opção é usar `IMPORTRANGE` para trazer dados de outra planilha do Google e depois trabalhar com uma coluna auxiliar.
+
+### Unir com Python (arquivos grandes)
+
+```python
+import csv
+
+# Carregar o arquivo de consulta num dicionário com o Handle como chave
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Acrescentar Quantity ao arquivo base
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Erros comuns ao combinar arquivos CSV
+
+### Erro 1: linhas de cabeçalho duplicadas depois de anexar
+
+**Sintoma:** a importação falha no meio do arquivo com erros de "linha não reconhecida".
+**Solução:** antes de anexar, sempre exclua a linha de cabeçalho de todos os arquivos, exceto o primeiro.
+
+### Erro 2: ordem das colunas diferente nos arquivos anexados
+
+**Sintoma:** depois de anexar, os dados aparecem nas colunas erradas.
+**Solução:** os dois arquivos precisam ter a mesma ordem de colunas, não só os mesmos nomes. Se o arquivo B tem as colunas em outra ordem, reorganize-as para bater com o arquivo A antes de anexar.
+
+### Erro 3: unir por uma chave que não é única
+
+**Sintoma:** o PROCV retorna a quantidade errada (pega a primeira correspondência e ignora as duplicatas).
+**Solução:** garanta que a coluna-chave (SKU, Handle) seja única no arquivo de consulta antes de unir. Use **Dados → Remover Duplicatas** ou confira com CONT.SE.
+
+### Erro 4: codificação diferente depois de combinar
+
+**Sintoma:** caracteres embaralhados nas linhas vindas de um dos arquivos de origem.
+**Solução:** salve todos os arquivos de origem como UTF-8 antes de combinar. Recodifique no VS Code qualquer arquivo que não esteja em UTF-8 (veja o guia sobre codificação).
+
+### Erro 5: linhas em branco entre as partes anexadas
+
+**Sintoma:** a importação para na linha em branco e ignora todas as linhas seguintes.
+**Solução:** depois de anexar, percorra o arquivo combinado e exclua as linhas em branco que aparecerem entre as partes.
+
+---
+
+## Guia rápido de decisão
+
+```
+Precisa de mais linhas? → Anexar ou mesclar
+Precisa de mais colunas? → Unir
+
+Os arquivos vêm do mesmo sistema com colunas idênticas? → Anexar
+Vêm de sistemas diferentes com o mesmo modelo de colunas? → Mesclar (procure duplicatas)
+Tem dados de produtos num arquivo e dados complementares em outro? → Unir
+```

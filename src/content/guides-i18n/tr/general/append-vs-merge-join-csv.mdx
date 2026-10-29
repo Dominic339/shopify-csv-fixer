@@ -1,0 +1,168 @@
+---
+title: "Ekleme, birleştirme ve eşleştirme: CSV dosyalarını doğru şekilde bir araya getirme"
+description: "Satır eklemek, aynı yapıdaki dosyaları birleştirmek ve ilişkili verileri içeren dosyaları eşleştirmek arasındaki farkı anlayın. E-ticaret kataloğunuz için doğru yaklaşımı seçin."
+keywords: ["csv dosyalarına satır ekleme", "csv dosyalarını birleştirme", "csv dosyalarını eşleştirme", "csv bir araya getirme", "csv satırlarını birleştirme", "düşeyara csv", "katalog csv birleştirme", "shopify csv satır ekleme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV dosyalarında ekleme, birleştirme ve eşleştirme arasındaki fark"
+  - "E-ticaret kataloğu işlerinde hangi yaklaşımın ne zaman kullanılacağı"
+  - "Başlıkları çoğaltmadan satırları doğru şekilde ekleme"
+  - "İki CSV dosyasını ortak bir anahtar sütun üzerinden eşleştirme"
+  - "CSV dosyalarını bir araya getirirken sık yapılan hatalar"
+bestFor: "Ürün verilerini birden fazla kaynaktan, tedarikçiden veya dışa aktarım dosyasından bir araya getiren katalog yöneticileri, geliştiriciler ve satıcılar"
+timeToComplete: "10 dakika"
+---
+
+## Üç işlem, üç anlam
+
+İnsanlar "CSV dosyalarını bir araya getirmek" dediğinde genellikle üç farklı işlemden birini kasteder. Yanlış olanı kullanmak veri kaybına veya yapı hatalarına yol açar.
+
+| İşlem | Ne değişir | Satır sayısı | Sütun sayısı |
+|---|---|---|---|
+| **Ekleme** | Satırlar eklenir | Artar | Aynı |
+| **Birleştirme** | Aynı yapıdaki iki dosya tek dosya olur | Artar | Aynı |
+| **Eşleştirme** | İlişkili bir dosyadan sütunlar eklenir | Aynı | Artar |
+
+---
+
+## Ekleme: daha fazla satır
+
+**Ne yapar:** ikinci bir CSV'nin satırlarını alıp birincinin sonuna ekler. İki dosyanın sütunları tamamen aynı olmalıdır.
+
+**Ne zaman kullanılır:**
+- Sayfalara bölünmüş dışa aktarımları birleştirmek için (dosya 1 = satır 1–500, dosya 2 = satır 501–1000).
+- Yüklemeden önce mevcut bir katalog dosyasına yeni bir ürün grubu eklemek için.
+- Aynı biçimde dışa aktaran farklı bölge ekiplerinin dosyalarını bir araya getirmek için.
+
+**Excel'de doğru şekilde ekleme:**
+
+1. Temel dosyanızı açın.
+2. İkinci dosyayı açın.
+3. İkinci dosyada **başlık satırını silin** (1. satıra sağ tıklayın → Sil).
+4. Kalan tüm verileri seçin (Ctrl+A; fazla seçerse düzeltin).
+5. Kopyalayın (Ctrl+C).
+6. Temel dosyaya geçin ve son veri satırının altındaki ilk boş hücreye tıklayın.
+7. Yapıştırın (Ctrl+V).
+8. CSV UTF-8 olarak kaydedin.
+
+**Kaçınılması gereken kritik hata:** 3. adımı (başlığı silmeyi) atlamak dosyanın ortasında yinelenen başlık satırları oluşturur ve bu, her içe aktarma platformunu bozar.
+
+**Google E-Tablolar'da ekleme:**
+
+Süreç aynıdır: ikinci dosyanın başlık satırını silin, yalnızca veri satırlarını kopyalayın ve temel sayfanın en altına yapıştırın.
+
+---
+
+## Birleştirme: aynı sütunlara sahip dosyaları bir araya getirme (birden fazla kaynaktan)
+
+**Ne yapar:** özünde eklemeyle aynıdır, ancak "birleştirme" terimi genellikle farklı kaynaklardan gelen ve aynı türde veriyi temsil eden dosyalar için kullanılır (örneğin aynı biçimdeki iki tedarikçi ürün listesi).
+
+**Ne zaman kullanılır:**
+- İki farklı tedarikçinin ürün akışlarını tek bir yükleme dosyasında toplamak için.
+- Platformun aynı CSV şablonunu kullanan farklı departman dışa aktarımlarını birleştirmek için.
+
+**Birleştirirken (basit eklemeye göre) ek dikkat edilecekler:**
+- **Yinelenen satırları kontrol edin.** İki dosyada da aynı ürün varsa birleştirilmiş dosyada iki kez yer alır. Yinelenenleri bulmak için Handle (Shopify), SKU (WooCommerce/Amazon) veya Item ID (eBay) kullanın. Excel'de: **Veri → Yinelenenleri Kaldır** ve anahtar sütunu seçin.
+- **Sütun adlarını standartlaştırın.** Tedarikçi A bir sütuna `Barcode`, tedarikçi B ise `UPC` diyorsa, birleştirmeden önce platformun beklediği sütun adına geçmeniz gerekir.
+- **Değerleri standartlaştırın.** Fiyatlar farklı para birimlerinde olabilir, durumlar farklı kurallarla yazılmış olabilir (Published, TRUE veya 1).
+
+---
+
+## Eşleştirme: ilişkili bir dosyadan sütun ekleme
+
+**Ne yapar:** iki dosyayı yan yana koyar ve ortak bir anahtar sütun (SKU veya Handle gibi) üzerinden eşleştirerek ikinci dosyanın sütunlarını birinciye ekler.
+
+**Ne zaman kullanılır:**
+- ERP'nizden bir ürün listeniz (Handle, Title, SKU, Price) ve ayrı bir stok dosyanız (SKU, Quantity, Warehouse Location) var ve her ürün satırına miktarı eklemek istiyorsunuz.
+- Bir sistemden ürünleri görselsiz dışa aktarıyorsunuz ve SKU ile eşleşen ayrı bir görsel URL dosyanız var.
+- İçe aktarmadan önce ürün kataloğunuza tedarikçiye özel veriler (maliyet fiyatı, tedarikçi parça numarası) eklemek istiyorsunuz.
+
+### Excel'de DÜŞEYARA ile eşleştirme
+
+Varsayalım:
+- **Dosya A** (temel): sütunlar A=Handle, B=Title, C=Price
+- **Dosya B** (arama): sütunlar A=Handle, B=Quantity
+
+Dosya B'deki Quantity'yi Dosya A'ya eklemek istiyorsunuz.
+
+1. Dosya A'ya yeni bir sütun başlığı ekleyin: `Quantity` (D sütununa).
+2. D2'ye şunu girin:
+   ```
+   =DÜŞEYARA(A2;'[FileB.csv]FileB'!$A:$B;2;YANLIŞ)
+   ```
+3. Dosya B Excel'de açık olmalıdır. Excel bir CSV'yi açtığında sayfaya dosyanın adını verir, yani `FileB.csv` dosyasında `FileB` adlı bir sayfa vardır. Anahtar eşleşirse Quantity doldurulur. Eşleşme yoksa `#YOK` görünür; bu, o Handle'ın Dosya B'de olmadığı anlamına gelir.
+4. Formülü tüm satırlara aşağı doğru kopyalayın.
+5. Sonuçtan emin olunca D sütununu seçin, kopyalayın ve formülleri sabit değerlerle değiştirmek için **Özel Yapıştır → Değerler**'i kullanın.
+6. Dosya B'yi kapatın.
+7. Dosya A'yı CSV UTF-8 olarak kaydedin.
+
+### Google E-Tablolar'da eşleştirme
+
+Aynı söz dizimiyle `DÜŞEYARA` (veya `VLOOKUP`) kullanın. Alternatif olarak başka bir Google E-Tablosundan veri çekmek için `IMPORTRANGE` kullanıp ardından bir yardımcı sütunla çalışabilirsiniz.
+
+### Python ile eşleştirme (büyük dosyalar)
+
+```python
+import csv
+
+# Arama dosyasını Handle anahtarlı bir sözlüğe yükle
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Temel dosyaya Quantity ekle
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## CSV dosyalarını bir araya getirirken sık yapılan hatalar
+
+### Hata 1: eklemeden sonra yinelenen başlık satırları
+
+**Belirti:** içe aktarma dosyanın ortasında "tanınmayan satır" hatalarıyla başarısız olur.
+**Çözüm:** eklemeden önce ilki dışındaki her dosyanın başlık satırını mutlaka silin.
+
+### Hata 2: eklenen dosyalarda farklı sütun sırası
+
+**Belirti:** eklemeden sonra veriler yanlış sütunlarda görünür.
+**Çözüm:** iki dosyanın yalnızca sütun adları değil, sütun sırası da aynı olmalıdır. Dosya B'nin sütunları farklı sıradaysa, eklemeden önce Dosya A'ya uyacak şekilde yeniden sıralayın.
+
+### Hata 3: benzersiz olmayan bir anahtarla eşleştirme
+
+**Belirti:** DÜŞEYARA yanlış miktarı döndürür (ilk eşleşmeyi alır, yinelenenleri yok sayar).
+**Çözüm:** eşleştirmeden önce anahtar sütunun (SKU, Handle) arama dosyasında benzersiz olduğundan emin olun. **Veri → Yinelenenleri Kaldır**'ı kullanın veya EĞERSAY ile kontrol edin.
+
+### Hata 4: bir araya getirdikten sonra kodlama uyumsuzluğu
+
+**Belirti:** kaynak dosyalardan birinden gelen satırlarda bozuk karakterler.
+**Çözüm:** bir araya getirmeden önce tüm kaynak dosyaları UTF-8 olarak kaydedin. UTF-8 olmayan her dosyayı VS Code ile yeniden kodlayın (kodlama rehberine bakın).
+
+### Hata 5: eklenen bölümler arasında boş satırlar
+
+**Belirti:** içe aktarma boş satırda durur ve sonraki tüm satırları yok sayar.
+**Çözüm:** eklemeden sonra birleştirilmiş dosyayı gözden geçirin ve bölümler arasındaki boş satırları silin.
+
+---
+
+## Hızlı karar rehberi
+
+```
+Daha fazla satıra mı ihtiyacınız var? → Ekleme veya birleştirme
+Daha fazla sütuna mı ihtiyacınız var? → Eşleştirme
+
+Dosyalar aynı sistemden mi ve sütunları aynı mı? → Ekleme
+Farklı sistemlerden ama aynı sütun şablonuyla mı? → Birleştirme (yinelenenleri kontrol edin)
+Ürün verileri bir dosyada, ek veriler başka bir dosyada mı? → Eşleştirme
+```
