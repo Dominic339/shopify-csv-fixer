@@ -38,6 +38,7 @@ Before fixing the problem, identify what encoding your file currently uses.
 **Python:**
 
 ```python
+# pip install chardet
 import chardet
 
 with open("products.csv", "rb") as f:
@@ -49,7 +50,7 @@ print(result)
 **Command line (Linux/macOS):**
 
 ```bash
-file -i products.csv
+file -i products.csv    # on macOS: file -I products.csv
 # products.csv: text/plain; charset=iso-8859-1
 ```
 
@@ -57,7 +58,7 @@ file -i products.csv
 
 ## Remove a UTF-8 BOM
 
-A **BOM** (Byte Order Mark) is a hidden 3-byte sequence (`EF BB BF`) at the start of the file. Excel on Windows adds it when you use "Save As > CSV UTF-8 (Comma delimited)". Shopify and WooCommerce handle it, but some importers and scripts read the extra bytes as part of the first column header. The column name becomes `﻿Handle` instead of `Handle`, and the tool can't match it.
+A **BOM** (Byte Order Mark) is a hidden 3-byte sequence (`EF BB BF`) at the start of the file. Excel on Windows adds it when you use "Save As > CSV UTF-8 (Comma delimited)". Shopify and WooCommerce handle it, but some importers and scripts read the extra bytes as part of the first column header. The column name becomes `\ufeffHandle` instead of `Handle`, and the tool can't match it.
 
 **Fix in VS Code:**
 1. Open the file
@@ -82,16 +83,17 @@ with open("output.csv", "w", encoding="utf-8") as f:
 
 ## Convert ANSI / Latin-1 / Windows-1252 to UTF-8
 
-These legacy encodings cover basic Western European characters but break on curly quotes, em dashes, and many accented characters common in product names.
+These legacy encodings only cover Western European characters, so they can't store Polish, Turkish, Cyrillic or Asian text and many symbols. Their accented letters also turn into garbage when a tool reads the file as UTF-8.
 
 **In VS Code:**
 1. Click the encoding label in the status bar
-2. Choose "Reopen with Encoding" and select the **current** encoding (e.g., `Windows 1252`)
+2. Choose "Reopen with Encoding" and select the file's **current** encoding (e.g., `Windows 1252`); check that the text now looks right
 3. Then click the label again, choose "Save with Encoding", and select **UTF-8**
 
 **In Python:**
 
 ```python
+# Use the encoding you identified above
 with open("input.csv", encoding="windows-1252") as f:
     content = f.read()
 with open("output.csv", "w", encoding="utf-8") as f:
@@ -111,14 +113,15 @@ If the garbled characters are already in the cell values (they were written to t
 
 | What you see | What it should be | Cause |
 |---|---|---|
-| `â€™` | `'` (curly apostrophe) | UTF-8 read as Latin-1 |
-| `â€"` | `—` (em dash) | UTF-8 read as Latin-1 |
-| `Ã©` | `é` | UTF-8 read as Latin-1 |
-| `Â£` | `£` | UTF-8 read as Latin-1 |
+| `â€™` | `’` (curly apostrophe) | UTF-8 read as Windows-1252 |
+| `â€”` | `—` (em dash) | UTF-8 read as Windows-1252 |
+| `Ã©` | `é` | UTF-8 read as Windows-1252 or Latin-1 |
+| `Â£` | `£` | UTF-8 read as Windows-1252 or Latin-1 |
 
 **Fix in Python (ftfy library):**
 
 ```python
+# pip install ftfy
 import ftfy
 
 with open("input.csv", encoding="utf-8") as f:
