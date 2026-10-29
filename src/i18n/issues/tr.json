@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay hazırlık süresini alıcılara gösterir. Geçersiz bir değer ilanın yüklenmesini engelleyebilir.",
 "howToFix": "1, 2 veya 3 gibi bir tam sayı kullanın (gönderime kadar geçen gün)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Elektronik tablonun bozduğu numara",
+"explanation": "Bir ürün numarası veya barkod (ItemID, UPC, EAN ya da ISBN) 1.23457E+11 gibi görünüyor: bir elektronik tablo onu bilimsel gösterime çevirdi.",
+"whyPlatformCares": "İlk birkaç basamaktan sonrası kaybolur, bu yüzden eBay düzenlenecek ilanı bulamaz veya ürünü eşleştiremez. eBay'in Seller Hub yardımı, kaydetmeden önce ürün numaralarının ondalıksız sayı olarak biçimlendirilmesini ister.",
+"howToFix": "Tam numarayı yeniden girin, ardından CSV'yi kaydetmeden önce sütunu 0 ondalık basamaklı Sayı (veya Metin) olarak biçimlendirin."
+},
 "ebay/duplicate_sku": {
 "title": "Yinelenen CustomLabel (SKU)",
 "explanation": "İki veya daha fazla satır aynı CustomLabel değerini paylaşıyor.",

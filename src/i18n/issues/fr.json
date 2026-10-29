@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay affiche le délai de traitement aux acheteurs. Une valeur non valide peut empêcher l'import de l'annonce.",
 "howToFix": "Utilisez un nombre entier comme 1, 2 ou 3 (jours avant expédition)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Numéro abîmé par un tableur",
+"explanation": "Un numéro d'objet ou un code-barres (ItemID, UPC, EAN ou ISBN) ressemble à 1.23457E+11 : un tableur l'a converti en notation scientifique.",
+"whyPlatformCares": "Les chiffres après les premiers sont perdus : eBay ne trouve plus l'annonce à modifier ou ne peut pas associer le produit. L'aide Seller Hub d'eBay demande de formater les numéros d'objet en nombres sans décimale avant d'enregistrer.",
+"howToFix": "Ressaisissez le numéro complet, puis formatez la colonne en Nombre avec 0 décimale (ou en Texte) avant d'enregistrer le CSV."
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) en double",
 "explanation": "Deux lignes ou plus partagent la même valeur CustomLabel.",

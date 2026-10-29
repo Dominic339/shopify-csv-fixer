@@ -647,6 +647,12 @@
 "whyPlatformCares": "O eBay mostra o prazo de manuseio aos compradores. Um valor inválido pode impedir o envio do anúncio.",
 "howToFix": "Use um número inteiro como 1, 2 ou 3 (dias até o despacho)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Número estragado pela planilha",
+"explanation": "Um número de item ou código de barras (ItemID, UPC, EAN ou ISBN) aparece como 1.23457E+11: uma planilha o converteu em notação científica.",
+"whyPlatformCares": "Os dígitos depois dos primeiros se perdem, então o eBay não encontra o anúncio a revisar nem consegue identificar o produto. A ajuda do Seller Hub do eBay pede que os números de item sejam formatados como números sem casas decimais antes de salvar.",
+"howToFix": "Digite de novo o número completo e, antes de salvar o CSV, formate a coluna como Número com 0 casas decimais (ou como Texto)."
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) duplicado",
 "explanation": "Duas ou mais linhas têm o mesmo valor de CustomLabel.",

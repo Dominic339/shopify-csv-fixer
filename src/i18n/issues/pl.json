@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay pokazuje kupującym czas realizacji. Nieprawidłowa wartość może uniemożliwić przesłanie oferty.",
 "howToFix": "Użyj liczby całkowitej, np. 1, 2 lub 3 (dni do wysyłki)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Numer uszkodzony przez arkusz kalkulacyjny",
+"explanation": "Numer przedmiotu lub kod kreskowy (ItemID, UPC, EAN lub ISBN) wygląda jak 1.23457E+11: arkusz kalkulacyjny zamienił go na notację naukową.",
+"whyPlatformCares": "Cyfry po kilku pierwszych przepadają, więc eBay nie znajdzie oferty do zmiany ani nie dopasuje produktu. Pomoc Seller Hub eBay zaleca, aby przed zapisaniem sformatować numery przedmiotów jako liczby bez miejsc po przecinku.",
+"howToFix": "Wpisz ponownie pełny numer, a przed zapisaniem pliku CSV ustaw format kolumny na Liczbowy z 0 miejscami po przecinku (lub Tekstowy)."
+},
 "ebay/duplicate_sku": {
 "title": "Zduplikowany CustomLabel (SKU)",
 "explanation": "Co najmniej dwa wiersze mają tę samą wartość CustomLabel.",

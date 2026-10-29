@@ -4,6 +4,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { processCsvText, resolveFormat } from "@/lib/processCsv";
+import { exportFileFor, parseCsv } from "@/lib/csv";
 
 function run(formatId: string, csv: string) {
   const format = resolveFormat({ kind: "builtin", id: formatId })!;
@@ -92,6 +93,46 @@ describe("eBay", () => {
     const res = run("ebay_listings", `${UK},*Title,*Category,*StartPrice,*Quantity,*ConditionID\nAdd,A,1,1,1,Used\nAdd,B,1,1,1,2990\nAdd,C,1,1,1,3010`);
     expect(res.fixedRows[0]["*ConditionID"]).toBe("3000");
     expect(res.issues).toEqual([]);
+  });
+});
+
+describe("eBay Seller Hub templates", () => {
+  const US = "*Action(SiteID=US|Country=US|Currency=USD|Version=1193|CC=UTF-8)";
+
+  it("reads the header below eBay's INFO lines and keeps them for export", () => {
+    const csv = [
+      "\u00ef\u00bb\u00bf#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US,,",
+      "#INFO Action and Category ID are required fields,,,,",
+      `${US},*Category,*Title,*StartPrice,*Quantity`,
+      "Add,15687,Band Tee,12.50,3",
+    ].join("\n");
+    const parsed = parseCsv(csv);
+    expect(parsed.preamble).toEqual(["#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US,,", "#INFO Action and Category ID are required fields,,,,"]);
+    const res = run("ebay_listings", csv);
+    expect(res.fixedHeaders[0]).toBe(US);
+    expect(codes(res, "error")).toEqual([]);
+    const out = exportFileFor("ebay_listings", res.fixedHeaders, res.fixedRows, parsed.preamble).text;
+    expect(out.startsWith("#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US,,\r\n#INFO Action")).toBe(true);
+  });
+
+  it("accepts the drafts template (Action=Draft, only Category required)", () => {
+    const res = run("ebay_listings", "Action(SiteID=US|Country=US|Currency=USD|Version=1193),Custom label (SKU),Category ID,Title,Condition ID,Item photo URL\nDraft,MUG-01,20625,,New,https://example.com/mug one.jpg\nDraft,MUG-02,,,,");
+    expect(res.issues.map((i) => [i.rowIndex, i.code])).toEqual([[1, "ebay/missing_category_id"]]);
+    expect(res.fixedRows[0]["Condition ID"]).toBe("1000");
+    expect(res.fixedRows[0]["Item photo URL"]).toBe("https://example.com/mug%20one.jpg");
+  });
+
+  it("flags item numbers and UPCs in scientific notation", () => {
+    const res = run("ebay_listings", `${US},Item number,P:UPC,*StartPrice\nRevise,1.23457E+11,012345678905,9.99\nRevise,123456789012,1.23457E+11,9.99`);
+    expect(res.issues.map((i) => [i.rowIndex, i.column, i.code])).toEqual([
+      [0, "Item number", "ebay/number_in_scientific_notation"],
+      [1, "P:UPC", "ebay/number_in_scientific_notation"],
+    ]);
+  });
+
+  it("converts eBay's own condition names", () => {
+    const res = run("ebay_listings", `${US},*Title,*Category,*StartPrice,*Quantity,*ConditionID\nAdd,A,1,1,1,Open box\nAdd,B,1,1,1,Pre-owned - Fair\nAdd,C,1,1,1,New with tags`);
+    expect(res.fixedRows.map((r) => r["*ConditionID"])).toEqual(["1500", "3010", "1000"]);
   });
 });
 

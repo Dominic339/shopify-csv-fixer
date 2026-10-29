@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay mostra i tempi di preparazione agli acquirenti. Un valore non valido può impedire il caricamento dell'inserzione.",
 "howToFix": "Usa un numero intero come 1, 2 o 3 (giorni prima della spedizione)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Numero rovinato da un foglio di calcolo",
+"explanation": "Un numero oggetto o un codice a barre (ItemID, UPC, EAN o ISBN) appare come 1.23457E+11: un foglio di calcolo lo ha convertito in notazione scientifica.",
+"whyPlatformCares": "Le cifre dopo le prime vanno perse, quindi eBay non trova l'inserzione da modificare o non riesce ad abbinare il prodotto. La guida di Seller Hub di eBay chiede di formattare i numeri oggetto come numeri senza decimali prima di salvare.",
+"howToFix": "Reinserisci il numero completo, poi formatta la colonna come Numero con 0 decimali (o come Testo) prima di salvare il CSV."
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) duplicato",
 "explanation": "Due o più righe hanno lo stesso valore CustomLabel.",

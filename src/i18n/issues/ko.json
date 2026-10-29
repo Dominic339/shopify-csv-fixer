@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay는 구매자에게 처리 기간을 보여줍니다. 값이 잘못되면 상품을 업로드하지 못할 수 있습니다.",
 "howToFix": "1, 2, 3 같은 정수를 사용하세요(발송까지 걸리는 일수)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "스프레드시트가 망가뜨린 번호",
+"explanation": "상품 번호나 바코드(ItemID, UPC, EAN, ISBN)가 1.23457E+11처럼 보입니다. 스프레드시트가 지수 표기로 바꿨습니다.",
+"whyPlatformCares": "앞의 몇 자리 이후 숫자가 사라져 eBay가 수정할 리스팅을 찾지 못하거나 상품을 매칭하지 못합니다. eBay Seller Hub 도움말은 저장하기 전에 상품 번호를 소수점 없는 숫자로 서식을 지정하라고 안내합니다.",
+"howToFix": "전체 번호를 다시 입력한 다음, CSV를 저장하기 전에 열 서식을 소수 자릿수 0인 숫자(또는 텍스트)로 지정하세요."
+},
 "ebay/duplicate_sku": {
 "title": "CustomLabel (SKU) 중복",
 "explanation": "두 개 이상의 행이 같은 CustomLabel 값을 사용합니다.",

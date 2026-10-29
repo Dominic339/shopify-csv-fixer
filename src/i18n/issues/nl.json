@@ -647,6 +647,12 @@
 "whyPlatformCares": "eBay toont de verwerkingstijd aan kopers. Een ongeldige waarde kan het uploaden van de listing verhinderen.",
 "howToFix": "Gebruik een geheel getal zoals 1, 2 of 3 (dagen tot verzending)."
 },
+"ebay/number_in_scientific_notation": {
+"title": "Nummer beschadigd door een spreadsheet",
+"explanation": "Een objectnummer of barcode (ItemID, UPC, EAN of ISBN) ziet eruit als 1.23457E+11: een spreadsheet heeft het omgezet naar wetenschappelijke notatie.",
+"whyPlatformCares": "De cijfers na de eerste paar gaan verloren, zodat eBay de advertentie die je wilt bijwerken niet vindt of het product niet kan koppelen. De Seller Hub-hulp van eBay vraagt om objectnummers vóór het opslaan op te maken als getallen zonder decimalen.",
+"howToFix": "Voer het volledige nummer opnieuw in en stel de kolom vóór het opslaan van de CSV in als Getal met 0 decimalen (of als Tekst)."
+},
 "ebay/duplicate_sku": {
 "title": "Dubbele CustomLabel (SKU)",
 "explanation": "Twee of meer rijen hebben dezelfde CustomLabel-waarde.",

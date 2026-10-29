@@ -16,7 +16,33 @@ export type ParseResult = {
   rows: CsvRow[];
   parseErrors: string[];
   parseIssues: ParseIssue[];
+  /** Lines above the header that were set aside (eBay's "#INFO" lines), to write back on export. */
+  preamble: string[];
 };
+
+/**
+ * eBay's Seller Hub templates start with lines like "#INFO,Version=1.0.0,Template=..." above
+ * the real header row. eBay needs the first of them on upload, so they are set aside rather
+ * than read as the header. Excel on a Mac can put stray characters before "INFO" on the first
+ * line, which breaks the upload, so those are dropped.
+ */
+export function splitPreamble(text: string): { preamble: string[]; body: string } {
+  const preamble: string[] = [];
+  let rest = text;
+  for (;;) {
+    const end = rest.search(/\r?\n/);
+    const line = end < 0 ? rest : rest.slice(0, end);
+    const cleaned = line.replace(/^[^#A-Za-z"]+/, "");
+    if (!/^"?#?INFO\b/i.test(cleaned)) break;
+    preamble.push(cleaned);
+    if (end < 0) {
+      rest = "";
+      break;
+    }
+    rest = rest.slice(end).replace(/^\r?\n/, "");
+  }
+  return { preamble, body: rest };
+}
 
 /**
  * Rows are rebuilt from the header on export, so extra cells are dropped and missing ones
@@ -62,7 +88,8 @@ export function parseCsv(text: string): ParseResult {
   const parseErrors: string[] = [];
   const parseIssues: ParseIssue[] = [];
 
-  const res = Papa.parse<Record<string, unknown>>(text, {
+  const { preamble, body } = splitPreamble(text);
+  const res = Papa.parse<Record<string, unknown>>(body, {
     header: true,
     skipEmptyLines: "greedy",
     dynamicTyping: false,
@@ -88,7 +115,7 @@ export function parseCsv(text: string): ParseResult {
   const headers =
     (res.meta?.fields?.map((h) => String(h)) ?? []).filter((h) => h.trim().length > 0);
 
-  return { headers, rows: data, parseErrors, parseIssues };
+  return { headers, rows: data, parseErrors, parseIssues, preamble };
 }
 
 /**
@@ -100,12 +127,16 @@ export function toTsv(headers: string[], rows: CsvRow[]): string {
   return [headers, ...rows.map((r) => headers.map((h) => r[h] ?? ""))].map((cells) => cells.map(clean).join("\t")).join("\r\n");
 }
 
-/** Amazon formats download as tab-delimited .txt; everything else as quoted CSV. */
-export function exportFileFor(formatId: string | null | undefined, headers: string[], rows: CsvRow[]) {
+/**
+ * Amazon formats download as tab-delimited .txt; everything else as quoted CSV, with any
+ * lines that sat above the header (eBay's "#INFO" lines) put back on top.
+ */
+export function exportFileFor(formatId: string | null | undefined, headers: string[], rows: CsvRow[], preamble: string[] = []) {
   if (formatId?.startsWith("amazon_")) {
     return { text: toTsv(headers, rows), extension: "txt", type: "text/tab-separated-values;charset=utf-8" };
   }
-  return { text: toCsv(headers, rows), extension: "csv", type: "text/csv;charset=utf-8" };
+  const top = preamble.length ? preamble.join("\r\n") + "\r\n" : "";
+  return { text: top + toCsv(headers, rows), extension: "csv", type: "text/csv;charset=utf-8" };
 }
 
 export function toCsv(headers: string[], rows: CsvRow[]): string {

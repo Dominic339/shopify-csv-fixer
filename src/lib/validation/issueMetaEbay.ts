@@ -145,6 +145,17 @@ export const EBAY_ISSUE_META: IssueMetaMap = {
     howToFix: "Use a whole number like 1, 2, or 3 (days to dispatch).",
   },
 
+  "ebay/number_in_scientific_notation": {
+    code: "ebay/number_in_scientific_notation",
+    title: "Number mangled by a spreadsheet",
+    category: "sku",
+    blocking: true,
+    autoFixable: false,
+    explanation: "An item number or barcode (ItemID, UPC, EAN or ISBN) looks like 1.23457E+11: a spreadsheet converted it to scientific notation.",
+    whyPlatformCares: "The digits after the first few are lost, so eBay can't find the listing to revise or match the product. eBay's Seller Hub help asks for item numbers to be formatted as numbers with no decimals before saving.",
+    howToFix: "Re-enter the full number, then format the column as Number with 0 decimal places (or as Text) before saving the CSV.",
+  },
+
   "ebay/duplicate_sku": {
     code: "ebay/duplicate_sku",
     title: "Duplicate CustomLabel (SKU)",
