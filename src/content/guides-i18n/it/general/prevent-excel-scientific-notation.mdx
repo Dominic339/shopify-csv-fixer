@@ -1,0 +1,145 @@
+---
+title: "Impedire a Excel di convertire SKU e codici a barre in notazione scientifica"
+description: "Evita che Excel trasformi SKU, codici EAN e UPC in notazione scientifica come 1.23456E+11. Formatta le colonne come testo prima di incollare, usa l'importazione guidata e ripara i file esistenti."
+keywords: ["excel notazione scientifica csv", "sku notazione scientifica", "codice a barre excel", "zeri iniziali csv", "formato testo excel", "upc ean excel", "correggere 1.23456e+11", "formato numero excel csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Perché Excel converte i numeri lunghi in notazione scientifica ed elimina gli zeri iniziali"
+  - "Come formattare le colonne come Testo prima di inserire i dati"
+  - "Come usare l'importazione guidata di Excel per impostare il tipo delle colonne"
+  - "Come correggere i valori in notazione scientifica in un CSV già salvato"
+  - "L'equivalente di ogni passaggio in Google Sheets"
+bestFor: "Venditori con cataloghi pieni di SKU, codici a barre (EAN-13, UPC-A), ISBN o qualsiasi codice numerico che deve restare esattamente com'è"
+timeToComplete: "8 minuti"
+---
+
+## Perché succede
+
+Excel è pensato per i dati finanziari. Quando vede un valore che sembra un numero, lo converte in formato numerico. Questo crea due problemi nei CSV per l'e-commerce:
+
+1. **Notazione scientifica:** un codice a barre EAN di 13 cifre come `4006381333931` diventa `4,00638E+12`. Quando esporti in CSV, Excel scrive `4,00638E+12` (o `4.00638E+12`), che non è un codice a barre valido.
+2. **Zeri iniziali persi:** uno SKU come `00714` diventa `714`. Un EAN-8 di 8 cifre come `01234565` diventa `1234565`. La piattaforma di importazione riceve un valore sbagliato.
+
+Queste conversioni avvengono senza avvisi. Potresti accorgertene solo quando l'importazione fallisce o il magazzino non torna.
+
+---
+
+## Campi interessati
+
+È a rischio qualsiasi campo che contiene lunghe sequenze di cifre o zeri iniziali:
+
+- **Codici a barre:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKU** con zeri iniziali (comuni nei cataloghi di moda e ferramenta)
+- **SKU delle varianti** ripresi dai codici articolo del produttore
+- **Colonna Variant Barcode** di Shopify
+- **ASIN / FNSKU di Amazon** (alfanumerici, ma in parte numerici)
+- **Colonna SKU** di WooCommerce
+
+---
+
+## Prevenzione: formattare le colonne come Testo prima di inserire i dati
+
+La soluzione più sicura è formattare la colonna come **Testo** prima di scrivere o incollare qualcosa.
+
+### In Excel (nuovo foglio)
+
+1. Seleziona l'intera colonna o le colonne che conterranno codici a barre o SKU (per esempio fai clic sulla lettera `C` per selezionare la colonna C).
+2. Clic destro → **Formato celle**.
+3. Nell'elenco **Categoria**, scegli **Testo**.
+4. Fai clic su **OK**.
+5. Ora scrivi o incolla i valori. Excel li tratterà come testo e li conserverà esattamente.
+
+> **Importante:** formattare una cella come Testo *dopo* aver inserito un numero non annulla la conversione. Devi prima formattare e poi inserire i dati. Se incolli in una colonna già formattata, incolla **solo i valori** (Ctrl+Maiusc+V o Incolla speciale → Valori) per non portare il formato numerico dalla fonte.
+
+### In Excel (con un apostrofo davanti)
+
+Un trucco veloce per singole celle: scrivi un apostrofo (`'`) prima del numero:
+
+```
+'4006381333931
+```
+
+Excel tratta come testo qualsiasi valore che inizia con `'`. L'apostrofo non viene salvato nel valore della cella; viene salvato solo il numero. Funziona cella per cella, ma è scomodo con molti dati.
+
+---
+
+## Riparare file esistenti: aprire un CSV con l'importazione guidata
+
+Se hai già un CSV in cui Excel ha rovinato i codici a barre, usa l'importazione guidata invece di aprirlo con un doppio clic:
+
+### Excel 2016+ (Recupera e trasforma)
+
+1. Apri una cartella di lavoro vuota.
+2. Vai su **Dati → Da testo/CSV**.
+3. Seleziona il file CSV.
+4. Si apre l'anteprima. Cerca la colonna dei codici a barre o degli SKU. Se mostra la notazione scientifica, il tipo è stato rilevato automaticamente come «Numero intero».
+5. Fai clic su **Trasforma dati** (si apre l'editor di Power Query).
+6. Seleziona le colonne interessate.
+7. Nella scheda **Home**, nell'elenco **Tipo di dati**, scegli **Testo**. Quando Power Query lo chiede, fai clic su **Sostituisci corrente**, così il cambio di tipo sostituisce la conversione automatica in numero e le cifre originali vengono mantenute.
+8. Chiudi e carica.
+9. Esporta di nuovo in CSV con **File → Salva con nome → CSV UTF-8**.
+
+### Excel (vecchia Importazione guidata testo)
+
+Se hai a disposizione la vecchia procedura guidata:
+
+1. Vai su **Dati → Da testo**, oppure rinomina il file da `.csv` a `.txt` e aprilo con **File → Apri**, che avvia la procedura guidata.
+2. Al **passaggio 3** della procedura, seleziona la colonna e imposta il tipo di dati su **Testo**.
+3. Completa l'importazione.
+
+---
+
+## Correggere la notazione scientifica in un CSV già salvato
+
+Se hai già un file CSV con valori come `4.00638E+12`:
+
+### Opzione A: riscrivere i valori (file piccoli)
+
+Una volta che il file CSV stesso contiene `4.00638E+12`, le cifre mancanti non sono più nel file e nessun editor di testo può recuperarle. Puoi solo riscrivere i valori corretti partendo dai tuoi dati, cosa praticabile al massimo per poche righe.
+
+### Opzione B: ricostruire dalla fonte
+
+Se i dati originali sono in un database, in un PIM o in un file del fornitore, esportali di nuovo senza aprirli in Excel. Molti portali dei fornitori permettono di scaricare in `.xlsx`. Apri quel file, formatta le colonne come Testo e poi salva in CSV.
+
+### Opzione C: usare una formula per tornare al testo
+
+Se la cartella di lavoro è ancora aperta in Excel (o salvata come .xlsx), Excel potrebbe avere ancora il numero completo, per esempio `4006381333931`, e solo mostrarlo in notazione scientifica:
+
+1. Aggiungi una colonna di supporto.
+2. Usa `=TESTO(A2;"0")` per convertire il numero in una stringa di testo senza notazione scientifica.
+3. Copia la colonna di supporto e incollala come **Valori** sopra quella originale.
+4. Elimina la colonna di supporto.
+5. Salva come CSV.
+
+> Funziona solo se Excel ha ancora il numero completo. Se il valore è stato troncato (più di 15 cifre significative), la precisione è persa per sempre e devi recuperare i dati originali dalla loro fonte.
+
+---
+
+## L'equivalente in Google Sheets
+
+Google Sheets ha lo stesso problema di conversione numerica:
+
+- **Formattare come testo normale prima di incollare:** seleziona la colonna → **Formato → Numero → Testo normale**.
+- **Importare con File → Importa:** nella finestra di importazione, deseleziona **Converti testo in numeri, date e formule** perché i codici restino testo, poi controlla che i codici a barre siano corretti dopo l'importazione.
+- **Correggere i valori esistenti:** usa `=TEXT(A2; "0")` come in Excel.
+
+---
+
+## Esportare in modo sicuro da Excel a CSV
+
+Dopo aver corretto o formattato bene le colonne:
+
+1. **File → Salva con nome → CSV UTF-8 (delimitato da virgole) (.csv)**.
+2. Excel potrebbe avvisare che il formato non supporta più fogli. Fai clic su **Sì/Mantieni il formato corrente**.
+3. **Non riaprire il CSV in Excel per controllarlo**: usa un editor di testo (VS Code, Notepad++) per verificare che i codici a barre siano semplici numeri, senza notazione scientifica.
+
+---
+
+## Checklist di prevenzione
+
+- [ ] Formattare le colonne di codici a barre e SKU come **Testo** prima di inserire i dati
+- [ ] Usare **Dati → Da testo/CSV** (non il doppio clic) per aprire i CSV esistenti
+- [ ] Impostare il tipo **Testo** nell'importazione guidata per le colonne che sembrano numeri
+- [ ] Controllare il CSV esportato in un editor di testo, non in Excel
+- [ ] In Google Sheets, impostare le colonne su **Testo normale** prima dell'importazione

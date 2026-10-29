@@ -84,7 +84,7 @@ If you already have a CSV where Excel has corrupted the barcodes, use the import
 
 If you have the legacy wizard available:
 
-1. Go to **Data → From Text** (or **File → Open** and change file type to `.txt`, then rename).
+1. Go to **Data → From Text**, or rename the file from `.csv` to `.txt` and open it with **File → Open**, which starts the wizard.
 2. In **Step 3** of the wizard, select the column and set its data type to **Text**.
 3. Finish the import.
 
@@ -94,7 +94,7 @@ If you have the legacy wizard available:
 
 If you already have a CSV file with `4.00638E+12` values:
 
-### Option A: Text editor find-and-replace (manual, small files)
+### Option A: Retype the values (small files)
 
 Once the CSV file itself contains `4.00638E+12`, the missing digits are gone from the file, so a text editor can't restore them. You can only type the correct values back in from your records, which is practical for a handful of rows at most.
 
@@ -121,7 +121,7 @@ If the workbook is still open in Excel (or saved as .xlsx), Excel may still hold
 Google Sheets has the same numeric conversion problem:
 
 - **Format as plain text before pasting:** Select the column → **Format → Number → Plain text**.
-- **Import via File → Import:** In the import dialog, the column type can be set. However, Sheets usually auto-detects, so confirm your barcodes look correct after import.
+- **Import via File → Import:** In the import dialog, untick **Convert text to numbers, dates, and formulas** so codes stay as text, then check that your barcodes look correct after import.
 - **Fix existing:** Use `=TEXT(A2, "0")` the same way as Excel.
 
 ---

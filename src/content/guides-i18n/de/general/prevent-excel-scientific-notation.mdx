@@ -1,0 +1,145 @@
+---
+title: "Verhindern, dass Excel SKUs und Barcodes in wissenschaftliche Schreibweise umwandelt"
+description: "So verhinderst du, dass Excel SKUs, EAN- und UPC-Codes in 1.23456E+11 verwandelt: Spalten vor dem Einfügen als Text formatieren, den Importassistenten nutzen und bestehende Dateien reparieren."
+keywords: ["excel wissenschaftliche schreibweise csv", "sku wissenschaftliche notation", "barcode excel", "führende nullen csv", "excel textformat", "upc ean excel", "1.23456e+11 beheben", "excel zahlenformat csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Warum Excel lange Zahlen in wissenschaftliche Schreibweise umwandelt und führende Nullen entfernt"
+  - "Wie du Spalten vor der Eingabe als Text formatierst"
+  - "Wie du im Excel-Importassistenten Spaltentypen festlegst"
+  - "Wie du wissenschaftliche Schreibweise in einer gespeicherten CSV reparierst"
+  - "Wie jeder Schritt in Google Tabellen funktioniert"
+bestFor: "Händler mit Produktkatalogen voller SKUs, Barcodes (EAN-13, UPC-A), ISBN-Nummern oder anderer Zahlencodes, die exakt erhalten bleiben müssen"
+timeToComplete: "8 Minuten"
+---
+
+## Warum das passiert
+
+Excel ist für Finanzdaten gemacht. Sieht ein Zellwert wie eine Zahl aus, wandelt Excel ihn in ein Zahlenformat um. Das verursacht bei E-Commerce-CSVs zwei Probleme:
+
+1. **Wissenschaftliche Schreibweise:** Ein 13-stelliger EAN-Barcode wie `4006381333931` wird zu `4,00638E+12`. Beim Export als CSV schreibt Excel `4,00638E+12` (bzw. `4.00638E+12`) in die Datei, und das ist als Barcode ungültig.
+2. **Verlorene führende Nullen:** Eine SKU wie `00714` wird zu `714`. Ein 8-stelliger EAN-8 wie `01234565` wird zu `1234565`. Die Importplattform sieht den falschen Wert.
+
+Diese Umwandlungen passieren unbemerkt. Oft fällt es erst auf, wenn der Import scheitert oder der Bestand falsch gezählt wird.
+
+---
+
+## Betroffene Felder
+
+Gefährdet ist jedes Feld mit langen Ziffernfolgen oder führenden Nullen:
+
+- **Barcodes:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKUs** mit führenden Nullen (häufig in Mode- und Baumarktkatalogen)
+- **Varianten-SKUs**, die von Herstellerartikelnummern übernommen wurden
+- **Spalte Variant Barcode** bei Shopify
+- **Amazon ASIN / FNSKU** (alphanumerisch, aber teilweise nur Ziffern)
+- **Spalte SKU** bei WooCommerce
+
+---
+
+## Vorbeugen: Spalten vor der Eingabe als Text formatieren
+
+Am sichersten ist es, die Spalte als **Text** zu formatieren, bevor du etwas eintippst oder einfügst.
+
+### In Excel (neue Tabelle)
+
+1. Markiere die ganze Spalte bzw. die Spalten für Barcodes oder SKUs (z. B. Klick auf den Spaltenbuchstaben `C`, um Spalte C zu markieren).
+2. Rechtsklick → **Zellen formatieren**.
+3. Wähle in der Liste **Kategorie** den Eintrag **Text**.
+4. Klicke auf **OK**.
+5. Tippe oder füge jetzt deine Werte ein. Excel behandelt sie als Text und behält sie exakt bei.
+
+> **Wichtig:** Eine Zelle *nach* der Eingabe einer Zahl als Text zu formatieren, macht die Umwandlung nicht rückgängig. Du musst zuerst formatieren und dann die Daten eingeben. Fügst du in eine vorformatierte Spalte ein, nutze **Nur Werte einfügen** (Strg+Umschalt+V oder Inhalte einfügen → Werte), damit kein Zahlenformat aus der Quelle mitkommt.
+
+### In Excel (mit vorangestelltem Hochkomma)
+
+Ein schneller Trick für einzelne Zellen: Tippe vor der Zahl ein Hochkomma (`'`):
+
+```
+'4006381333931
+```
+
+Excel behandelt jeden Wert, der mit `'` beginnt, als Text. Das Hochkomma wird nicht als Teil des Werts gespeichert, nur die Zahl. Das funktioniert pro Zelle, ist bei vielen Daten aber mühsam.
+
+---
+
+## Bestehende Dateien reparieren: eine CSV mit dem Importassistenten öffnen
+
+Hast du schon eine CSV, deren Barcodes Excel beschädigt hat, öffne sie mit dem Importassistenten statt per Doppelklick:
+
+### Excel 2016+ (Abrufen und transformieren)
+
+1. Öffne eine leere Arbeitsmappe.
+2. Gehe zu **Daten → Aus Text/CSV**.
+3. Wähle deine CSV-Datei.
+4. Der Vorschaudialog öffnet sich. Sieh dir die Barcode- oder SKU-Spalte an. Zeigt sie wissenschaftliche Schreibweise, wurde der Typ automatisch als „Ganze Zahl“ erkannt.
+5. Klicke auf **Daten transformieren** (der Power-Query-Editor öffnet sich).
+6. Markiere die betroffenen Spalten.
+7. Wähle auf der Registerkarte **Start** im Feld **Datentyp** den Eintrag **Text**. Fragt Power Query nach, klicke auf **Aktuelle ersetzen**, damit die Typänderung die automatische Zahlenumwandlung ersetzt und die ursprünglichen Ziffern erhalten bleiben.
+8. Schließen & laden.
+9. Exportiere wieder als CSV über **Datei → Speichern unter → CSV UTF-8**.
+
+### Excel (älterer Textimport-Assistent)
+
+Wenn du den älteren Assistenten zur Verfügung hast:
+
+1. Gehe zu **Daten → Aus Text**, oder benenne die Datei von `.csv` in `.txt` um und öffne sie über **Datei → Öffnen**, dann startet der Assistent.
+2. Wähle in **Schritt 3** des Assistenten die Spalte und setze ihren Datentyp auf **Text**.
+3. Schließe den Import ab.
+
+---
+
+## Wissenschaftliche Schreibweise in einer gespeicherten CSV reparieren
+
+Hast du bereits eine CSV mit Werten wie `4.00638E+12`:
+
+### Option A: Werte neu eintippen (kleine Dateien)
+
+Steht `4.00638E+12` erst einmal in der CSV-Datei selbst, fehlen die übrigen Ziffern in der Datei, und kein Texteditor kann sie wiederherstellen. Du kannst die richtigen Werte nur aus deinen Unterlagen neu eintragen, was höchstens für eine Handvoll Zeilen praktikabel ist.
+
+### Option B: Aus der Quelle neu erstellen
+
+Liegen die Originaldaten in einer Datenbank, einem PIM oder einer Lieferantendatei, exportiere sie neu, ohne sie in Excel zu öffnen. Viele Lieferantenportale bieten einen Download als `.xlsx`. Öffne diesen, formatiere die Spalten als Text und speichere dann als CSV.
+
+### Option C: Mit einer Formel zurückwandeln
+
+Ist die Arbeitsmappe noch in Excel geöffnet (oder als .xlsx gespeichert), hat Excel vielleicht noch die ganze Zahl gespeichert, zum Beispiel `4006381333931`, und zeigt sie nur in wissenschaftlicher Schreibweise an:
+
+1. Füge eine Hilfsspalte hinzu.
+2. Nutze `=TEXT(A2;"0")`, um die Zahl in eine Zeichenfolge ohne wissenschaftliche Schreibweise umzuwandeln.
+3. Kopiere die Hilfsspalte und füge sie als **Werte** über der ursprünglichen Spalte ein.
+4. Lösche die Hilfsspalte.
+5. Speichere als CSV.
+
+> Das funktioniert nur, wenn Excel die ganze Zahl noch gespeichert hat. Wurde der Wert abgeschnitten (mehr als 15 signifikante Stellen), ist die Genauigkeit endgültig verloren, und du musst die Originaldaten aus ihrer Quelle holen.
+
+---
+
+## So geht es in Google Tabellen
+
+Google Tabellen hat dasselbe Problem mit der Zahlenumwandlung:
+
+- **Vor dem Einfügen als Nur Text formatieren:** Spalte markieren → **Format → Zahl → Nur Text**.
+- **Über Datei → Importieren importieren:** Deaktiviere im Import-Dialog **Text in Zahlen, Datumsangaben und Formeln umwandeln**, damit Codes als Text bleiben, und prüfe nach dem Import, ob deine Barcodes richtig aussehen.
+- **Bestehende Werte reparieren:** Nutze `=TEXT(A2; "0")` wie in Excel.
+
+---
+
+## Sicher aus Excel als CSV exportieren
+
+Nachdem du deine Spalten repariert oder richtig formatiert hast:
+
+1. **Datei → Speichern unter → CSV UTF-8 (durch Trennzeichen getrennt) (.csv)**.
+2. Excel warnt eventuell, dass das Dateiformat keine mehreren Blätter unterstützt. Klicke auf **Ja/Aktuelles Format beibehalten**.
+3. **Öffne die CSV zur Kontrolle nicht wieder in Excel**: Prüfe mit einem Texteditor (VS Code, Notepad++), ob die Barcodes reine Zahlen sind und keine wissenschaftliche Schreibweise.
+
+---
+
+## Checkliste zur Vorbeugung
+
+- [ ] Barcode- und SKU-Spalten als **Text** formatieren, bevor du Daten eingibst
+- [ ] Bestehende CSVs über **Daten → Aus Text/CSV** öffnen (nicht per Doppelklick)
+- [ ] Im Importassistenten für Spalten, die wie Zahlen aussehen, den Typ **Text** wählen
+- [ ] Die exportierte CSV in einem Texteditor prüfen, nicht in Excel
+- [ ] In Google Tabellen die Spalten vor dem Import als **Nur Text** formatieren
