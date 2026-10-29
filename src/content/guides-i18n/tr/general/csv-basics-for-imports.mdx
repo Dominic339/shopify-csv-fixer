@@ -1,0 +1,328 @@
+---
+title: "E-ticaret içe aktarmaları için CSV temelleri"
+description: "İlk yüklemenizden önce başlıkları, UTF-8 kodlamayı, tırnak işaretlerini, satır sonlarını ve CSV içe aktarmalarını bozan en yaygın hataları öğrenin."
+keywords: ["csv temelleri", "csv kodlama utf-8", "csv başlıkları", "csv tırnak ve virgül", "csv satır sonları", "csv içe aktarma hataları", "csv dosyası düzeltme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV yapısının nasıl çalıştığı ve içe aktarmalar için neden önemli olduğu"
+  - "Kodlama, BOM ve satır sonu tuzakları"
+  - "Ayırıcı biçimleri ve aralarında nasıl dönüştürme yapılacağı"
+  - "Elektronik tabloların otomatik biçimlendirme tehlikeleri (baştaki sıfırlar, bilimsel gösterim, tarihler)"
+  - "Boş satırlar, satır sonundaki virgüller ve görünmez karakterler"
+bestFor: "İlk içe aktarma hatalarını gideren yeni satıcılar, katalog yöneticileri ve geliştiriciler"
+timeToComplete: "10 dakika"
+---
+
+## CSV dosyası nedir?
+
+CSV (Comma-Separated Values, virgülle ayrılmış değerler) dosyası, her satırın bir kayıt olduğu ve sütunların virgülle ayrıldığı düz bir metin dosyasıdır. İlk satır sütun adlarını (başlık satırını) içerir. Sonraki her satır veri içerir.
+
+En basit bir Shopify ürün CSV'si düz metin olarak şöyle görünür:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+CSV dosyaları basit görünür, ancak Shopify, WooCommerce, Etsy, eBay ve Amazon gibi platformlar, elektronik tabloların fark ettirmeden bozabildiği biçim ayrıntıları konusunda katıdır. Bu rehber, içe aktarmalarınızın ilk seferde sorunsuz geçmesi için her önemli kuralı açıklar.
+
+---
+
+## Başlık satırı
+
+Her CSV'nin ilk satırı sütun adlarını (başlıkları) içermelidir. Platformlar içe aktarma sırasında verilerinizi doğru alanlara eşlemek için bu adları kullanır.
+
+### Kurallar
+
+- **Adları büyük/küçük harf dahil tam olarak yazın.** Bazı içe aktarıcılar `Handle`, `handle` ve `HANDLE` değerlerini farklı ele alır, bu yüzden başlık adlarını platformun şablonundan kopyalayın.
+- **Başta veya sonda boşluk olmasın.** `" Title"` (başında boşluk olan) bir başlık `"Title"` ile eşleşmez. O sütundaki veriler sessizce yok sayılır.
+- **Yinelenen başlık olmasın.** İki sütun aynı adı taşıyorsa çoğu ayrıştırıcı yalnızca sonuncusunu kullanır.
+- **Bazı platformlarda sütun sırası önemlidir.** Bazı eBay ve Amazon şablonları sütunları şablondaki sırayla bekler, bu yüzden indirdiğiniz şablonun sırasını koruyun. Shopify sütunları herhangi bir yere eklemenize izin verir.
+
+### Nasıl kontrol edilir
+
+CSV'nizi Not Defteri (Windows), TextEdit (Mac) veya VS Code gibi düz bir metin düzenleyicide açın. 1. satıra bakın. Üstünde boş satır olmadan, virgülle ayrılmış adlardan oluşmalıdır:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+İlk satır başlık adlarından önce üç tuhaf karakterle başlıyorsa dosyanızda BOM vardır. Nasıl düzelteceğinizi aşağıdaki kodlama bölümünde bulabilirsiniz.
+
+---
+
+## UTF-8 kodlama
+
+Kodlama, metin karakterlerinin diskte bayt olarak nasıl saklandığını belirler. Yanlış kodlama bozuk metne yol açar. Örneğin UTF-8 olarak kaydedilip Latin-1 olarak okunan tipografik bir kesme işareti, çöp gibi görünen üç karakterlik bir diziye dönüşür.
+
+### Neden UTF-8
+
+UTF-8 her e-ticaret platformu için güvenli seçimdir. Shopify ve WooCommerce bunu bekler, eBay'in güncel şablonları da bunu Action başlığında belirtir (`CC=UTF-8`). UTF-8 olarak kaydetmek şunları sağlar:
+
+- Türkçe karakterler (ç, ğ, ı, ö, ş, ü) doğru görünür.
+- Para birimi simgeleri ve özel noktalama işaretleri bozulmaz.
+- Platformun içe aktarıcısı dosyayı reddetmeden okuyabilir.
+
+### BOM'lu veya BOM'suz
+
+BOM'lu UTF-8, dosyanın en başına gizli bir 3 baytlık dizi ekler. Windows'taki Excel, "Farklı Kaydet > CSV UTF-8 (Virgülle ayrılmış)" seçeneğini kullandığınızda bunu yazar. Shopify ve WooCommerce BOM'lu dosyaları doğru okur, ancak bazı araçlar ve betikler bu fazladan baytlar yüzünden ilk sütun başlığını yanlış okur.
+
+Dosyanızda BOM olup olmadığını anlamak için: dosyayı VS Code'da açın ve sağ alttaki durum çubuğuna bakın. "UTF-8 with BOM" yazıyorsa vardır.
+
+**VS Code'da düzeltme:** durum çubuğundaki kodlama göstergesine tıklayın, "Save with Encoding"i ve ardından "UTF-8"i (BOM'suz) seçin.
+
+**Excel'de düzeltme:** Excel UTF-8'i BOM'suz kaydedemez. BOM'dan kaçınmak için düz "CSV (Virgülle ayrılmış)" seçeneğine geçmeyin: bu seçenek sisteminizin eski kodlamasıyla (çoğunlukla Windows-1254 veya Windows-1252) kaydeder ve Türkçe karakterleri bozar. "CSV UTF-8"de kalın ve BOM'u yalnızca bir platform ilk sütunu yanlış okursa VS Code'da kaldırın.
+
+**Python ile düzeltme:**
+
+```python
+# utf-8-sig okurken BOM'u kaldırır; düz utf-8 BOM'suz yazar
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### Diğer araçlarda kodlama
+
+**Google E-Tablolar:** Dosya > İndir > Virgülle ayrılmış değerler, BOM'suz UTF-8 olarak dışa aktarır.
+
+**LibreOffice Calc:** CSV olarak kaydederken iletişim kutusunda "Unicode (UTF-8)" seçin.
+
+**Numbers (Mac):** Dosya > Dışa Aktar > CSV, güncel macOS sürümlerinde BOM'suz UTF-8 olarak dışa aktarır.
+
+---
+
+## Tırnak kuralları ve değerlerdeki virgüller
+
+Bir hücre değeri virgül içeriyorsa değerin tamamını çift tırnak içine alın. Bu, CSV standardıdır (RFC 4180).
+
+### Temel örnek
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Tırnaklar olmadan ayrıştırıcı üç yerine beş sütun görür ve verileri yanlış alanlara yerleştirir.
+
+### Tırnak içindeki değerde tırnak
+
+Değer çift tırnak karakteri içeriyorsa, tırnağı iki kez yazarak kaçış uygulayın:
+
+```
+"She said ""this is great"""
+```
+
+Bu şu metni temsil eder: She said "this is great"
+
+### Tırnağa ne zaman ihtiyaç duyulur?
+
+Değer şunlardan birini içeriyorsa çift tırnağa ihtiyacınız vardır:
+
+- Virgül
+- Çift tırnak karakteri
+- Değerin içinde satır sonu
+- HTML etiketleri (bazı ayrıştırıcılar tırnaksız açılı parantezleri yanlış okur)
+
+`29.99` veya `Active` gibi düz değerler için tırnak gerekmez. Her şeyi tırnak içine almak zararsızdır ve birçok araç bunu otomatik yapar.
+
+### Sık yapılan tırnak hataları
+
+| Hata | Yanlış örnek | Doğru |
+|---|---|---|
+| Değerde virgül, tırnak yok | `Wallet, Brown` | `"Wallet, Brown"` |
+| Tırnaksız HTML açıklaması | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Değerde satır sonu, tırnak yok | İki ayrı satır | Tek hücrede `"Line1\nLine2"` |
+| İçerideki tırnak için yanlış kaçış | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Satır sonları
+
+Satır sonları ayrıştırıcıya bir satırın nerede bitip sonrakinin nerede başladığını söyler. İki biçim vardır:
+
+| Biçim | Baytlar | Kullanan |
+|---|---|---|
+| CRLF | satır başı + satır besleme | Windows, Excel |
+| LF | yalnızca satır besleme | macOS, Linux, çoğu web aracı |
+
+Çoğu platform iki biçimi de kabul eder. Sorunlar, satır sonları karıştığında, yani bazı satırlar CRLF bazıları LF kullandığında çıkar. Karışık satır sonları, ayrıştırıcının fazladan boş satır görmesine veya çok satırlı değerleri yanlış okumasına yol açabilir.
+
+### Nasıl kontrol edilir ve düzeltilir
+
+Dosyayı VS Code'da açın. Durum çubuğu "CRLF" veya "LF" gösterir. Değiştirmek için tıklayın ve kaydedin.
+
+Python ile:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# LF'ye dönüştür
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## İçe aktarmaları en çok bozan hatalar
+
+**1. Fazladan boş satırlar**
+
+Birçok elektronik tablo aracı sona boş bir satır ekler. Platformlar boş satırları atlar veya hata verir. Dışa aktarmadan önce bunları silin. Excel'de son kullanılan hücreye gitmek için Ctrl+End'e basın. Boşsa verilerinizin altındaki boş satırları silin.
+
+**2. Özet veya toplam satırları**
+
+Sayfanın altındaki TOPLA() formülleri CSV'de ürün satırı olarak görünür. Dışa aktarmadan önce özet satırlarını silin.
+
+**3. Birleştirilmiş hücreler**
+
+Birleştirilmiş hücreler, ilk hücrede bir değer ve diğerlerinde boşluk olarak dışa aktarılır. İçe aktarıcı boş hücreleri doldurulmamış zorunlu alanlar olarak görür. Dışa aktarmadan önce tüm hücre birleştirmelerini kaldırın.
+
+**4. Formül hücreleri**
+
+Excel bir CSV kaydettiğinde her hücrenin gösterdiğini yazar: formülün güncel sonucunu, sayı biçimiyle birlikte. Para birimi olarak biçimlendirilmiş bir fiyat formülü `₺29,99` veya `$29.99` olarak, bozuk bir formül ise `#YOK` veya `#BAŞV!` olarak yazılır. Formül sütunlarını hatalara karşı kontrol edin, ardından CSV olarak kaydetmeden önce Özel Yapıştır > Değerler ile bunları sabit değerlere dönüştürün.
+
+**5. Başlık adlarının sonundaki boşluklar**
+
+`"Title "` (sonunda boşluk olan) `"Title"` ile aynı değildir. O sütundaki veriler içe aktarmada sessizce yok sayılır. Başlıkların sonundaki boşlukları kaldırmak için Bul ve Değiştir'i (Ctrl+H) kullanın.
+
+**6. .csv uzantılı yanlış dosya biçimi**
+
+`.xlsx` olarak kaydedip `.csv` adını vermek, aslında CSV olmayan bir dosya üretir. Dosyayı bir metin düzenleyicide açın. İkili karakterler görüyorsanız gerçek bir CSV değildir. Doğru kayıt biçimiyle yeniden dışa aktarın.
+
+**7. ANSI veya Latin-1 kodlama**
+
+Eski Excel sürümleri bazen ANSI (Windows-1254 veya Windows-1252) olarak kaydeder. Türkçe karakter içeren ürün adları içe aktarmada bozulur. Kaydederken her zaman açıkça UTF-8'i seçin.
+
+---
+
+## Ayırıcılar: virgüller, sekmeler ve noktalı virgüller
+
+"CSV" adı virgülü ima eder, ancak bazı dosyalar sekme (TSV) veya noktalı virgül kullanır. Çoğu e-ticaret platformu gerçekten virgülle ayrılmış dosyalar bekler. Noktalı virgülle ayrılmış bir dosyayı CSV gibi yüklemek, her satırın tek bir sütun olarak görünmesine yol açar.
+
+### Ayırıcıyı nasıl belirlersiniz
+
+Dosyayı düz bir metin düzenleyicide açın. İlk satıra bakın:
+
+- Sütun adları `,` ile ayrılmışsa dosya virgülle ayrılmıştır (standart CSV)
+- `;` ile ayrılmışsa noktalı virgülle ayrılmıştır (Türkçe dahil Avrupa bölge ayarlarını kullanan Excel'de yaygındır)
+- Geniş boşluklarla ayrılmışsa sekmeyle ayrılmıştır (TSV)
+
+### Noktalı virgüllü bir dosyayı virgülle ayrılmışa dönüştürme
+
+**Excel'de:** Dosya > Farklı Kaydet > CSV UTF-8 (Virgülle ayrılmış). Excel yine de noktalı virgülle kaydediyorsa (bölge ayarınız liste ayırıcısı olarak noktalı virgül kullandığı için), Windows Bölge ayarlarında liste ayırıcısını değiştirin veya aşağıdaki Python yöntemini kullanın.
+
+**Python'da:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Elektronik tabloların otomatik biçimlendirme tehlikeleri
+
+Excel ve Google E-Tablolar gibi uygulamalar, bir CSV'yi açtığınızda veya düzenlediğinizde bazı değerleri sessizce değiştirir. Bu değişiklikler, siz daha hiçbir düzenleme yapmadan verilerinizi bozabilir.
+
+### SKU ve kimliklerdeki baştaki sıfırların silinmesi
+
+Excel, sayı olarak yorumladığı değerlerdeki baştaki sıfırları kaldırır. `00123` gibi bir SKU `123` olur. `02110` gibi bir posta kodu `2110` olur.
+
+**Nasıl önlenir:**
+
+- Excel'de: CSV'yi içe aktarmadan önce metin içe aktarma sihirbazını (Veri > Metinden/CSV'den) kullanın ve baştaki sıfırların korunması gereken her sütunun türünü "Metin" olarak ayarlayın.
+- Google E-Tablolar'da: içe aktardıktan sonra, düzenlemeden önce etkilenen sütunu "Düz metin" olarak biçimlendirin (Biçim > Sayı > Düz metin).
+- Python ile: pandas kullanıyorsanız SKU ve kimlik sütunlarını her zaman `dtype=str` ile okuyun ya da türleri hiçbir zaman dönüştürmeyen standart `csv` modülünü kullanın.
+
+### Sayıların bilimsel gösterime dönüşmesi
+
+Uzun sayı dizileri (13 haneli barkodlar, EAN kodları) Excel'de `1,23457E+12` olarak görünebilir. CSV olarak kaydedildiğinde bu gösterim aynen yazılır ve içe aktarmada barkod doğrulaması başarısız olur.
+
+**Çözüm:** Excel'de etkilenen sütunu seçin, 0 ondalık basamaklı "Sayı" olarak biçimlendirin ("Bilimsel" değil) ve kaydedin. Alternatif olarak değerin önüne tek tırnak koyabilir (metin olarak ele alınmasını sağlar) veya değerleri yapıştırmadan önce sütunu metin olarak biçimlendirebilirsiniz.
+
+### Tarihlerin bölgesel biçime dönüşmesi
+
+`2024-01-15` içeren bir alan, bölge ayarınıza göre otomatik olarak `15.01.2024` veya `15 Ocak 2024` olabilir. ISO biçimini (`YYYY-MM-DD`) bekleyen platformlar yeniden biçimlendirilmiş değeri reddeder.
+
+**Çözüm:** dosyayı açtıktan sonra tarih sütunlarını seçip metin olarak biçimlendirin veya hiçbir tür dönüştürmesi yapmadan okuyup yazan Python `csv` modülünü kullanın.
+
+### Para birimi simgeli fiyatlar
+
+Excel bazen para birimi olarak biçimlendirilmiş bir hücreyi `19.99` yerine `$19.99` olarak kaydeder. Çoğu platform para birimi simgesi olmayan düz ondalık değerler bekler.
+
+**Çözüm:** Excel'de CSV olarak kaydetmeden önce fiyat sütunlarını "Sayı" olarak biçimlendirin ("Para Birimi" veya "Muhasebe" değil). Verilerde zaten varsa `$`, `EUR` veya diğer simgeleri Bul ve Değiştir (Ctrl+H) ile kaldırın.
+
+---
+
+## Boş satırlar, satır sonundaki virgüller ve görünmez sorunlar
+
+### Sondaki fazladan boş satırlar
+
+Birçok araç son veri satırından sonra boş bir satır ekler. Platformlar genellikle boş satırları atlar, ancak bazıları bunları geçersiz kayıt olarak reddeder. Dışa aktarmadan önce alttaki boş satırları her zaman silin.
+
+Excel'de: son kullanılan hücreye gitmek için Ctrl+End'e basın. Boşsa (verilerinizin altında boş bir satır), bu satırları seçip silin (sağ tıklayın > Sil).
+
+### Satır sonundaki virgüller
+
+Bazı dışa aktarma araçları her satırın sonuna bir virgül yazar: `value1,value2,`. Bu, fazladan boş bir sütun oluşturur. Çoğu ayrıştırıcı bunu sorunsuz işler, ancak katı doğrulayıcılar bunu yapısal bir sorun olarak işaretleyebilir.
+
+**Çözüm:** başlık dahil her satır fazladan bir virgülle bitiyorsa, her satırın sonundan tam olarak bir virgül kaldırın. Hepsini kaldırmak, bir satırın sonundaki gerçek boş hücreleri de siler:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Görünmez karakterler
+
+Bazı araçlar hücre değerlerinin içine sıfır genişlikli boşluklar (U+200B) veya bölünemez boşluklar (U+00A0) ekler. Bunlar elektronik tablo görünümünde görünmez, ancak içe aktarmada başlıkların eşleşmemesine veya değerlerin reddedilmesine neden olabilir.
+
+**Kontrol:** dosyayı VS Code'da açın ve Bul'u (Ctrl+F) normal ifade modunda kullanın. Bu karakterleri bulmak için `​` veya ` ` arayın.
+
+---
+
+## Platformlara özgü kurallar
+
+Her platform temel CSV standardının üzerine kendi gereksinimlerini ekler:
+
+- **Shopify:** Handle sütunu varyant satırlarını gruplar. Eksik veya geçersiz handle'lar ürün gruplamasını bozar.
+- **WooCommerce:** Ürün yapısını tanımlamak için bir Type sütunu (`simple`, `variable`, `variation`) kullanır.
+- **Etsy:** CSV yüklemesi yoktur. İlan dışa aktarımı düzenleme, yedekleme ve taşıma içindir; toplu yayınlama uygulamaları kendi sütunlarını belirler.
+- **eBay:** Her satırda Action sütununu (örneğin `Add`, `Revise`, `Relist` veya `End`) zorunlu tutar.
+- **Amazon:** Sütun adları ürün kategorisi şablonuna göre değişir; kategoriniz için tam şablonu Seller Central'dan indirin.
+
+---
+
+## İçe aktarma öncesi hızlı kontrol listesi
+
+- [ ] 1. satır başlıklardır ve üstünde boş satır yoktur
+- [ ] Başlıklar, büyük/küçük harf dahil, platformun beklediği sütun adlarıyla tam olarak eşleşir
+- [ ] Yinelenen sütun adı yoktur
+- [ ] Başlık adlarının başında veya sonunda boşluk yoktur
+- [ ] Dosya UTF-8 olarak kaydedilmiştir
+- [ ] Virgül, tırnak veya satır sonu içeren değerler çift tırnak içindedir
+- [ ] Altta fazladan boş satır yoktur
+- [ ] Özet satırı veya formül hücresi yoktur
+- [ ] Satır sonları tutarlıdır (hepsi CRLF veya hepsi LF)
+- [ ] Dosya uzantısı .csv'dir ve dosya virgülle ayrılmış düz metin içerir
+
+---
+
+## Sonraki adım: içe aktarmadan önce doğrulayın
+
+Dosyanızı hazırladıktan sonra otomatik doğrulama için CSV düzelticisine yükleyin. Başlıkları kontrol eder, kodlama sorunlarını işaretler, platforma özgü sorunları yakalar ve güvenli sorunları tek tıklamayla düzeltir.

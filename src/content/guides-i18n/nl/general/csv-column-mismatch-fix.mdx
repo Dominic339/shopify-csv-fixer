@@ -1,0 +1,152 @@
+---
+title: "CSV-kolommen die niet overeenkomen oplossen"
+description: "Hoe je kolomfouten in CSV-imports opspoort en oplost: verkeerde kolomnamen, verschillen in hoofdletters, extra spaties en problemen met de kolomvolgorde op verschillende platforms."
+keywords: ["csv kolommen komen niet overeen", "csv verkeerde kolomnaam", "csv kolomkop klopt niet", "csv import kolomfout", "csv kolommen herstellen", "csv kolomtoewijzing fout", "csv kolomkop niet herkend"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wat kolomfouten bij CSV-imports veroorzaakt"
+  - "Hoe je je kolomkoppen vergelijkt met de kolommen die het platform verwacht"
+  - "Hoe je hoofdletters, extra spaties en hernoemde kolommen herstelt"
+  - "Hoe je omgaat met extra of ontbrekende kolommen zonder de import te breken"
+  - "Hoe je het officiële sjabloon van het platform als startpunt gebruikt"
+bestFor: "Verkopers die mislukte imports oplossen waarbij het platform onbekende of ontbrekende kolommen meldt"
+timeToComplete: "7 minuten"
+---
+
+## Wat betekent het als kolommen niet overeenkomen?
+
+Kolommen komen niet overeen als de namen in de koprij van je CSV niet zijn wat het importplatform verwacht. Het platform koppelt je gegevens aan de juiste productvelden op basis van de kolomnamen. Is een kolomnaam fout, al is het maar één spatie of letter, dan negeert het platform de kolom (je gegevens verdwijnen zonder melding) of wijst het de hele import af.
+
+Dit is een van de meest voorkomende oorzaken van "er is niets geïmporteerd" of "alle velden leeg".
+
+---
+
+## Veelvoorkomende oorzaken
+
+### 1. Hernoemde kolommen
+
+Je hebt een verplichte kolom een naam gegeven die voor jou logisch is, maar niet voor het platform.
+
+| Wat je schreef | Wat het platform verwacht |
+|---|---|
+| `Product Title` | `Title` (Shopify) |
+| `product_name` | `Name` (WooCommerce) |
+| `Item Name` | `item_name` (Amazon) |
+| `Listing Title` | `TITLE` (Etsy-export) |
+| `Listing Title` | `Title` (eBay) |
+
+**Oplossing:** gebruik precies de kolomnaam van het platform. Voeg geen woorden toe en hernoem niets voor de duidelijkheid.
+
+### 2. Verkeerde hoofdletters
+
+Sommige importprogramma's vergelijken kolomnamen hoofdlettergevoelig, dus alleen de schrijfwijze van het sjabloon precies overnemen is veilig.
+
+| Fout | Goed |
+|---|---|
+| `handle` | `Handle` (Shopify) |
+| `TITLE` | `Title` (Shopify) |
+| `Variant price` | `Variant Price` (Shopify) |
+| `regular_price` | `Regular price` (WooCommerce) |
+
+**Oplossing:** vergelijk teken voor teken. Zelfs `Regular Price` tegenover `Regular price` (kleine p) kan uitmaken. WooCommerce toont tijdens de import een koppelscherm, waar je voor elke kolom die het niet herkent het juiste veld kunt kiezen.
+
+### 3. Spaties aan het begin of eind
+
+Spreadsheetprogramma's kunnen ongemerkt een spatie voor of na een kolomnaam zetten. Het platform ziet `" Title"` (met een spatie vooraan) als een totaal andere kolom dan `"Title"`.
+
+**Zo zie je het:** open de CSV in een teksteditor zonder opmaak (geen spreadsheetprogramma) en bekijk de eerste regel zoals die is. Elke spatie voor of na een kolomnaam is daar zichtbaar.
+
+**Oplossing in Excel:** gebruik geen Zoeken en vervangen op spaties, want dan verdwijnen ook de spaties binnen namen als `Variant Price`. Typ in plaats daarvan in een lege rij `=SPATIES.WISSEN(A1)` en vul die naar rechts door over alle kolommen. Kopieer die rij en gebruik Plakken speciaal > Waarden over rij 1. Verwijder daarna de hulprij.
+
+**Oplossing met Python:**
+
+```python
+import csv
+
+# utf-8-sig haalt ook een BOM weg, die strip() zou laten staan
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Spaties uit alle kolomnamen halen
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. Een BOM beschadigt de eerste kolomnaam
+
+Is je bestand opgeslagen als "UTF-8 met BOM", dan staan er 3 onzichtbare bytes vóór de eerste kolomnaam. Een kolomkop die in Excel op `Handle` lijkt, kan bij een tool die geen BOM verwacht aankomen als `﻿Handle`, en dan klopt hij niet meer.
+
+**Oplossing:** meldt een importprogramma dat het de eerste kolom niet herkent, sla het bestand dan opnieuw op zonder BOM. In VS Code: klik op de coderingsaanduiding → "Save with Encoding" → kies UTF-8 (zonder BOM).
+
+### 5. Problemen met de kolomvolgorde
+
+Sommige platforms vereisen kolommen in een bepaalde volgorde (eBay File Exchange, sommige Amazon-flatfilesjablonen). Kolommen omzetten in Excel kan die imports breken, ook als de kolomnamen kloppen.
+
+**Oplossing:** download een vers sjabloon van het platform en plak je gegevens daarin, in plaats van de kolomvolgorde van je eigen bestand te veranderen.
+
+---
+
+## Kolomkoppen vergelijken met het sjabloon van het platform
+
+1. Download het officiële CSV-sjabloon van het platform
+2. Open beide bestanden in een teksteditor (niet in Excel)
+3. Kopieer beide koprijen (rij 1) naar een vergelijkingstool of vergelijk ze met de hand
+4. Let op: andere tekst, extra spaties, andere hoofdletters, extra of ontbrekende kolommen
+
+**Online vergelijkingstools:** plak beide koprijen en vergelijk ze naast elkaar.
+
+**Vergelijken met Python:**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# utf-8-sig heeft de BOM al weggehaald; nu de spaties weghalen
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## Omgaan met extra kolommen
+
+Heeft je bestand extra kolommen die het platform niet kent:
+
+- **De meeste platforms** (Shopify, WooCommerce): extra kolommen worden zonder melding genegeerd, dus ze zijn geen probleem
+- **Amazon-flatfiles**: kolommen die niet in het sjabloon staan, kunnen worden afgewezen
+- **eBay File Exchange**: onbekende kolommen kunnen waarschuwingen of fouten opleveren
+
+**Oplossing voor strenge platforms:** verwijder elke kolom die niet in het officiële sjabloon staat.
+
+---
+
+## Omgaan met ontbrekende optionele kolommen
+
+Ontbreken er optionele kolommen in je bestand:
+
+- Het platform gebruikt voor die velden zijn standaardwaarde
+- Bij optionele velden is dat bijna altijd prima
+- Bij verplichte velden laat een ontbrekende kolom de import mislukken, en dan mislukt elke rij
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je CSV en StriveFormats vergelijkt je kolomkoppen met de kolommen die het gekozen platform verwacht. Het meldt ontbrekende verplichte kolommen, herkent extra kolommen en vindt BOM-markeringen en verschillen in hoofdletters.
+
+[CSV-fixer openen](/app) | [CSV-sjablonen bekijken](/presets)

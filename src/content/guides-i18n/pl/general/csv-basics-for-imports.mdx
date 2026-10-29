@@ -1,0 +1,328 @@
+---
+title: "Podstawy CSV przy importach e-commerce"
+description: "Poznaj nagłówki, kodowanie UTF-8, cudzysłowy, znaki końca wiersza i najczęstsze błędy, które psują importy CSV, zanim prześlesz pierwszy plik."
+keywords: ["podstawy csv", "kodowanie csv utf-8", "nagłówki csv", "cudzysłowy i przecinki csv", "znaki końca wiersza csv", "błędy importu csv", "naprawa pliku csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Jak zbudowany jest plik CSV i dlaczego ma to znaczenie przy imporcie"
+  - "Pułapki związane z kodowaniem, BOM i końcami wierszy"
+  - "Rodzaje separatorów i jak zamieniać jeden na drugi"
+  - "Zagrożenia automatycznego formatowania w arkuszach (zera wiodące, notacja naukowa, daty)"
+  - "Puste wiersze, przecinki na końcu wiersza i niewidoczne znaki"
+bestFor: "Początkujący sprzedawcy, osoby zarządzające katalogiem i programiści, którzy rozwiązują pierwsze błędy importu"
+timeToComplete: "10 minut"
+---
+
+## Czym jest plik CSV?
+
+Plik CSV (Comma-Separated Values, wartości rozdzielone przecinkami) to zwykły plik tekstowy, w którym każdy wiersz jest rekordem, a kolumny są rozdzielone przecinkami. Pierwszy wiersz zawiera nazwy kolumn (wiersz nagłówka). Każdy kolejny wiersz zawiera dane.
+
+Tak wygląda w postaci zwykłego tekstu najprostszy plik CSV z produktami Shopify:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Pliki CSV wyglądają prosto, ale platformy takie jak Shopify, WooCommerce, Etsy, eBay i Amazon są surowe wobec szczegółów formatu, które arkusze kalkulacyjne potrafią po cichu zepsuć. Ten poradnik wyjaśnia każdą ważną zasadę, aby import udał się za pierwszym razem.
+
+---
+
+## Wiersz nagłówka
+
+Pierwszy wiersz każdego pliku CSV musi zawierać nazwy kolumn (nagłówki). Platformy używają tych nazw, aby podczas importu przypisać dane do właściwych pól.
+
+### Zasady
+
+- **Zapisuj nazwy dokładnie, łącznie z wielkością liter.** Niektóre importery traktują `Handle`, `handle` i `HANDLE` inaczej, więc kopiuj nagłówki z szablonu platformy.
+- **Bez spacji na początku ani na końcu.** Nagłówek `" Title"` (ze spacją na początku) nie pasuje do `"Title"`. Dane w tej kolumnie są po cichu pomijane.
+- **Bez powtarzających się nagłówków.** Jeśli dwie kolumny mają tę samą nazwę, większość parserów używa tylko ostatniej.
+- **Na niektórych platformach liczy się kolejność kolumn.** Niektóre szablony eBay i Amazon oczekują kolumn w kolejności z szablonu, więc zachowaj kolejność pobranego szablonu. Shopify pozwala dodawać kolumny w dowolnym miejscu.
+
+### Jak to sprawdzić
+
+Otwórz plik CSV w zwykłym edytorze tekstu, takim jak Notatnik (Windows), TextEdit (Mac) lub VS Code. Spójrz na wiersz 1. Powinien zawierać nazwy rozdzielone przecinkami, bez pustego wiersza nad nim:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Jeśli pierwszy wiersz zaczyna się od trzech dziwnych znaków przed nazwami nagłówków, plik ma BOM. Jak to naprawić, opisuje sekcja o kodowaniu poniżej.
+
+---
+
+## Kodowanie UTF-8
+
+Kodowanie określa, jak znaki tekstu są zapisywane na dysku jako bajty. Złe kodowanie daje „krzaczki”. Na przykład typograficzny apostrof zapisany w UTF-8, ale odczytany jako Latin-1, zmienia się w ciąg trzech znaków, który wygląda jak śmieci.
+
+### Dlaczego UTF-8
+
+UTF-8 to bezpieczny wybór dla każdej platformy e-commerce. Shopify i WooCommerce go oczekują, a aktualne szablony eBay deklarują go w nagłówku Action (`CC=UTF-8`). Zapis w UTF-8 gwarantuje, że:
+
+- Polskie znaki i inne litery z akcentami wyświetlają się poprawnie.
+- Symbole walut i znaki specjalne się nie psują.
+- Importer platformy odczyta plik i go nie odrzuci.
+
+### Z BOM czy bez
+
+UTF-8 z BOM dodaje na samym początku pliku ukryty ciąg 3 bajtów. Excel w Windows zapisuje go, gdy wybierzesz „Zapisz jako > CSV UTF-8 (rozdzielany przecinkami)”. Shopify i WooCommerce poprawnie czytają pliki z BOM, ale niektóre narzędzia i skrypty przez te dodatkowe bajty źle odczytują nagłówek pierwszej kolumny.
+
+Jak sprawdzić, czy plik ma BOM: otwórz go w VS Code i spójrz na pasek stanu w prawym dolnym rogu. Jeśli widnieje tam „UTF-8 with BOM”, plik go ma.
+
+**Rozwiązanie w VS Code:** kliknij wskaźnik kodowania na pasku stanu, wybierz „Save with Encoding”, a potem „UTF-8” (bez BOM).
+
+**Rozwiązanie w Excelu:** Excel nie umie zapisać UTF-8 bez BOM. Nie przechodź na zwykły „CSV (rozdzielany przecinkami)”, żeby go uniknąć: ta opcja zapisuje w starym kodowaniu systemu (często Windows-1250 lub Windows-1252) i psuje polskie znaki. Zostań przy „CSV UTF-8”, a BOM usuń w VS Code tylko wtedy, gdy platforma źle odczytuje pierwszą kolumnę.
+
+**Rozwiązanie w Pythonie:**
+
+```python
+# utf-8-sig usuwa BOM przy odczycie; zwykłe utf-8 zapisuje bez BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### Kodowanie w innych programach
+
+**Arkusze Google:** Plik > Pobierz > Wartości rozdzielone przecinkami eksportuje UTF-8 bez BOM.
+
+**LibreOffice Calc:** przy zapisie jako CSV wybierz w oknie dialogowym „Unicode (UTF-8)”.
+
+**Numbers (Mac):** Plik > Eksportuj do > CSV eksportuje w aktualnych wersjach macOS do UTF-8 bez BOM.
+
+---
+
+## Zasady cudzysłowów i przecinki w wartościach
+
+Gdy wartość komórki zawiera przecinek, ujmij całą wartość w cudzysłów podwójny. To standard CSV (RFC 4180).
+
+### Prosty przykład
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Bez cudzysłowów parser widzi pięć kolumn zamiast trzech i wkłada dane do złych pól.
+
+### Cudzysłowy wewnątrz wartości w cudzysłowie
+
+Jeśli wartość sama zawiera cudzysłów podwójny, zabezpiecz go, podwajając:
+
+```
+"She said ""this is great"""
+```
+
+To oznacza tekst: She said "this is great"
+
+### Kiedy potrzebujesz cudzysłowów?
+
+Wartość trzeba ująć w cudzysłów podwójny, gdy zawiera:
+
+- Przecinek
+- Cudzysłów podwójny
+- Znak nowego wiersza wewnątrz wartości
+- Znaczniki HTML (niektóre parsery źle czytają nawiasy ostre bez cudzysłowów)
+
+Proste wartości, takie jak `29.99` czy `Active`, nie potrzebują cudzysłowów. Ujęcie wszystkiego w cudzysłów nie szkodzi, a wiele narzędzi robi to automatycznie.
+
+### Typowe błędy z cudzysłowami
+
+| Błąd | Zły przykład | Poprawnie |
+|---|---|---|
+| Przecinek w wartości, brak cudzysłowów | `Wallet, Brown` | `"Wallet, Brown"` |
+| Opis HTML bez cudzysłowów | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Nowy wiersz w wartości, brak cudzysłowów | Dwa osobne wiersze | `"Line1\nLine2"` w jednej komórce |
+| Złe zabezpieczenie cudzysłowu w środku | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Znaki końca wiersza
+
+Znaki końca wiersza mówią parserowi, gdzie kończy się jeden wiersz, a zaczyna następny. Są dwa formaty:
+
+| Format | Bajty | Kto używa |
+|---|---|---|
+| CRLF | powrót karetki + nowy wiersz | Windows, Excel |
+| LF | tylko nowy wiersz | macOS, Linux, większość narzędzi webowych |
+
+Większość platform akceptuje oba formaty. Problemy pojawiają się, gdy są wymieszane: część wierszy ma CRLF, a część LF. Wymieszane końce wierszy mogą sprawić, że parser zobaczy dodatkowe puste wiersze albo źle odczyta wartości wielowierszowe.
+
+### Jak to sprawdzić i naprawić
+
+Otwórz plik w VS Code. Pasek stanu pokazuje „CRLF” albo „LF”. Kliknij, aby przełączyć, i zapisz.
+
+W Pythonie:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Ujednolicenie do LF
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Błędy, które najczęściej psują import
+
+**1. Dodatkowe puste wiersze**
+
+Wiele arkuszy dodaje na końcu pusty wiersz. Platformy pomijają puste wiersze albo zgłaszają błąd. Usuń je przed eksportem. W Excelu naciśnij Ctrl+End, aby przejść do ostatniej używanej komórki. Jeśli jest pusta, usuń puste wiersze pod danymi.
+
+**2. Wiersze podsumowań lub sum**
+
+Formuły SUMA() na dole arkusza trafiają do pliku CSV jako wiersze produktów. Usuń wiersze podsumowań przed eksportem.
+
+**3. Scalone komórki**
+
+Scalone komórki eksportują się jako wartość w pierwszej komórce i puste miejsca w pozostałych. Importer widzi puste komórki jako niewypełnione pola wymagane. Rozdziel wszystkie scalone komórki przed eksportem.
+
+**4. Komórki z formułami**
+
+Gdy Excel zapisuje plik CSV, zapisuje to, co pokazuje każda komórka: bieżący wynik formuły razem z jej formatem liczbowym. Formuła ceny w formacie walutowym zostanie zapisana jako `29,99 zł` lub `$29.99`, a błędna jako `#N/D!` lub `#ADR!`. Sprawdź kolumny z formułami pod kątem błędów, a potem użyj Wklej specjalnie > Wartości, aby zamienić je na stałe wartości przed zapisem jako CSV.
+
+**5. Spacje na końcu nazw nagłówków**
+
+`"Title "` (ze spacją na końcu) to nie to samo co `"Title"`. Dane w tej kolumnie są po cichu pomijane przy imporcie. Usuń spacje z końca nagłówków funkcją Znajdź i zamień (Ctrl+H).
+
+**6. Zły format pliku z rozszerzeniem .csv**
+
+Zapisanie pliku jako `.xlsx` i nadanie mu nazwy `.csv` daje plik, który wcale nie jest CSV. Otwórz go w edytorze tekstu. Jeśli widzisz znaki binarne, to nie jest prawdziwy CSV. Wyeksportuj go ponownie we właściwym formacie.
+
+**7. Kodowanie ANSI lub Latin-1**
+
+Starsze wersje Excela czasem zapisują w ANSI (Windows-1250 lub Windows-1252). Nazwy produktów z polskimi znakami zamienią się przy imporcie w krzaczki. Przy zapisie zawsze wybieraj wprost UTF-8.
+
+---
+
+## Separatory: przecinki, tabulatory i średniki
+
+Nazwa „CSV” sugeruje przecinki, ale niektóre pliki używają tabulatorów (TSV) lub średników. Większość platform e-commerce oczekuje plików naprawdę rozdzielanych przecinkami. Jeśli prześlesz plik rozdzielany średnikami jako CSV, każdy wiersz pojawi się jako jedna kolumna.
+
+### Jak rozpoznać separator
+
+Otwórz plik w zwykłym edytorze tekstu. Spójrz na pierwszy wiersz:
+
+- Jeśli nazwy kolumn rozdziela `,`, plik jest rozdzielany przecinkami (standardowy CSV)
+- Jeśli rozdziela je `;`, plik jest rozdzielany średnikami (typowe dla Excela z europejskimi ustawieniami regionalnymi, także polskimi)
+- Jeśli rozdzielają je szerokie odstępy, plik jest rozdzielany tabulatorami (TSV)
+
+### Zamiana pliku ze średnikami na rozdzielany przecinkami
+
+**W Excelu:** Plik > Zapisz jako > CSV UTF-8 (rozdzielany przecinkami). Jeśli Excel nadal zapisuje średniki (bo ustawienia regionalne używają średnika jako separatora listy), zmień separator listy w ustawieniach regionalnych Windows albo użyj metody w Pythonie poniżej.
+
+**W Pythonie:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Zagrożenia automatycznego formatowania w arkuszach
+
+Arkusze kalkulacyjne takie jak Excel i Arkusze Google po cichu zmieniają niektóre wartości, gdy otwierasz lub edytujesz plik CSV. Te zmiany mogą zepsuć dane, zanim cokolwiek zmienisz.
+
+### Zera wiodące znikają z SKU i identyfikatorów
+
+Excel usuwa zera wiodące z wartości, które uznaje za liczby. SKU `00123` zmienia się w `123`. Kod pocztowy `02110` zmienia się w `2110`.
+
+**Jak temu zapobiec:**
+
+- W Excelu: zaimportuj plik CSV przez import tekstu (Dane > Z pliku tekstowego/CSV) i ustaw typ „Tekst” dla każdej kolumny, w której mają zostać zera wiodące.
+- W Arkuszach Google: po imporcie ustaw dla tej kolumny format „Zwykły tekst” (Format > Liczba > Zwykły tekst), zanim zaczniesz edytować.
+- W Pythonie: kolumny SKU i identyfikatorów zawsze wczytuj w pandas z `dtype=str` albo użyj standardowego modułu `csv`, który nigdy nie zmienia typów.
+
+### Liczby zamieniane na notację naukową
+
+Długie ciągi cyfr (13-cyfrowe kody kreskowe, kody EAN) mogą w Excelu wyglądać jak `1,23457E+12`. Przy zapisie jako CSV ta notacja trafia do pliku dosłownie, a sprawdzanie kodu kreskowego przy imporcie kończy się błędem.
+
+**Rozwiązanie:** zaznacz kolumnę w Excelu, ustaw format „Liczbowe” z 0 miejscami po przecinku (nie „Naukowe”) i zapisz. Możesz też poprzedzić wartość apostrofem (wymusza tekst) albo ustawić dla kolumny format tekstowy przed wklejeniem wartości.
+
+### Daty zamieniane na format regionalny
+
+Pole z `2024-01-15` może zostać automatycznie zmienione na `15.01.2024` lub `15 stycznia 2024`, zależnie od ustawień regionalnych. Platformy, które oczekują formatu ISO (`YYYY-MM-DD`), odrzucą zmienioną wartość.
+
+**Rozwiązanie:** po otwarciu pliku zaznacz kolumny z datami i ustaw format tekstowy albo użyj modułu `csv` w Pythonie, który czyta i zapisuje bez żadnej zmiany typów.
+
+### Ceny z symbolem waluty
+
+Excel czasem zapisuje komórkę w formacie walutowym jako `$19.99` zamiast `19.99`. Większość platform oczekuje zwykłych liczb dziesiętnych bez symbolu waluty.
+
+**Rozwiązanie:** w Excelu przed zapisem jako CSV ustaw dla kolumn cen format „Liczbowe” (nie „Walutowe” ani „Księgowe”). Usuń `$`, `EUR` lub inne symbole, które już są w danych, funkcją Znajdź i zamień (Ctrl+H).
+
+---
+
+## Puste wiersze, przecinki na końcu i niewidoczne problemy
+
+### Dodatkowe puste wiersze na końcu
+
+Wiele narzędzi dodaje pusty wiersz po ostatnim wierszu danych. Platformy zwykle pomijają puste wiersze, ale niektóre odrzucają je jako błędne rekordy. Zawsze usuwaj puste wiersze na dole przed eksportem.
+
+W Excelu: naciśnij Ctrl+End, aby przejść do ostatniej używanej komórki. Jeśli jest pusta (pusty wiersz pod danymi), zaznacz te wiersze i usuń je (prawy przycisk myszy > Usuń).
+
+### Przecinki na końcu wiersza
+
+Niektóre narzędzia eksportu zapisują przecinek na końcu każdego wiersza: `value1,value2,`. Tworzy to dodatkową pustą kolumnę. Większość parserów sobie z tym radzi, ale surowe walidatory mogą zgłosić to jako problem ze strukturą.
+
+**Rozwiązanie:** jeśli każdy wiersz, łącznie z nagłówkiem, kończy się dodatkowym przecinkiem, usuń dokładnie jeden przecinek z końca każdej linii. Usunięcie wszystkich skasowałoby też prawdziwe puste komórki na końcu wiersza:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Niewidoczne znaki
+
+Niektóre narzędzia wstawiają do wartości spacje o zerowej szerokości (U+200B) lub spacje nierozdzielające (U+00A0). W arkuszu są niewidoczne, ale przy imporcie mogą sprawić, że nagłówki nie pasują albo wartości są odrzucane.
+
+**Sprawdzenie:** otwórz plik w VS Code i użyj wyszukiwania (Ctrl+F) w trybie wyrażeń regularnych. Wyszukaj `​` lub ` `, aby znaleźć te znaki.
+
+---
+
+## Zasady poszczególnych platform
+
+Każda platforma dodaje własne wymagania ponad podstawowy standard CSV:
+
+- **Shopify:** kolumna Handle grupuje wiersze wariantów. Brakujące lub błędne Handle psują grupowanie produktów.
+- **WooCommerce:** używa kolumny Type (`simple`, `variable`, `variation`), aby określić budowę produktu.
+- **Etsy:** nie ma przesyłania CSV. Eksport ofert służy do edycji, kopii zapasowych i przenosin, a aplikacje do masowego wystawiania określają własne kolumny.
+- **eBay:** wymaga w każdym wierszu kolumny Action (np. `Add`, `Revise`, `Relist` lub `End`).
+- **Amazon:** nazwy kolumn zależą od szablonu kategorii; pobierz z Seller Central dokładnie ten szablon, który pasuje do Twojej kategorii.
+
+---
+
+## Szybka lista kontrolna przed importem
+
+- [ ] Wiersz 1 zawiera nagłówki, bez pustego wiersza nad nim
+- [ ] Nagłówki dokładnie odpowiadają nazwom, których oczekuje platforma, łącznie z wielkością liter
+- [ ] Brak powtarzających się nazw kolumn
+- [ ] Brak spacji na początku i końcu nazw nagłówków
+- [ ] Plik zapisany jako UTF-8
+- [ ] Wartości z przecinkami, cudzysłowami lub nowymi wierszami są w cudzysłowie podwójnym
+- [ ] Brak dodatkowych pustych wierszy na dole
+- [ ] Brak wierszy podsumowań i komórek z formułami
+- [ ] Spójne końce wierszy (wszystkie CRLF albo wszystkie LF)
+- [ ] Rozszerzenie to .csv, a plik zawiera zwykły tekst rozdzielany przecinkami
+
+---
+
+## Następny krok: sprawdź przed importem
+
+Gdy plik jest gotowy, prześlij go do korektora CSV, aby automatycznie go sprawdzić. Sprawdza nagłówki, zgłasza problemy z kodowaniem, wychwytuje problemy specyficzne dla platformy i jednym kliknięciem naprawia te, które da się naprawić bezpiecznie.

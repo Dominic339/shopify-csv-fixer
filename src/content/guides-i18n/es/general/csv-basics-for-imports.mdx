@@ -1,0 +1,328 @@
+---
+title: "Conceptos básicos de CSV para importaciones de ecommerce"
+description: "Entiende los encabezados, la codificación UTF-8, las comillas, los finales de línea y los errores más comunes que rompen las importaciones CSV, antes de tu primera subida."
+keywords: ["conceptos básicos csv", "codificación csv utf-8", "encabezados csv", "comillas y comas en csv", "finales de línea csv", "errores de importación csv", "arreglar archivo csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cómo está estructurado un CSV y por qué importa para las importaciones"
+  - "Trampas de la codificación, el BOM y los finales de línea"
+  - "Formatos de delimitador y cómo convertir entre ellos"
+  - "Riesgos del formato automático de las hojas de cálculo (ceros a la izquierda, notación científica, fechas)"
+  - "Filas en blanco, comas finales y caracteres invisibles"
+bestFor: "Vendedores nuevos, responsables de catálogo y desarrolladores que resuelven sus primeros errores de importación"
+timeToComplete: "10 minutos"
+---
+
+## ¿Qué es un archivo CSV?
+
+Un archivo CSV (Comma-Separated Values, valores separados por comas) es un archivo de texto plano en el que cada fila es un registro y las columnas se separan con comas. La primera fila contiene los nombres de las columnas (la fila de encabezado). Cada fila posterior contiene datos.
+
+Así se ve en texto plano un CSV mínimo de productos de Shopify:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Los CSV parecen sencillos, pero plataformas como Shopify, WooCommerce, Etsy, eBay y Amazon son estrictas con detalles de formato que las hojas de cálculo pueden estropear sin avisar. Esta guía explica cada regla importante para que tus importaciones salgan bien a la primera.
+
+---
+
+## La fila de encabezado
+
+La primera fila de todo CSV debe contener los nombres de las columnas (encabezados). Las plataformas usan esos nombres para asignar tus datos a los campos correctos durante la importación.
+
+### Reglas
+
+- **Escribe los nombres exactamente igual, incluidas mayúsculas y minúsculas.** Algunos importadores tratan `Handle`, `handle` y `HANDLE` de forma distinta, así que copia los encabezados de la plantilla de la plataforma.
+- **Sin espacios al principio ni al final.** Un encabezado `" Title"` (con un espacio delante) no coincide con `"Title"`. Los datos de esa columna se ignoran sin avisar.
+- **Sin encabezados duplicados.** Si dos columnas tienen el mismo nombre, la mayoría de los analizadores solo usa la última.
+- **En algunas plataformas importa el orden de las columnas.** Algunas plantillas de eBay y Amazon esperan las columnas en el orden de la plantilla, así que conserva el orden de la plantilla que descargaste. Shopify permite añadir columnas en cualquier posición.
+
+### Cómo comprobarlo
+
+Abre tu CSV en un editor de texto plano como el Bloc de notas (Windows), TextEdit (Mac) o VS Code. Mira la línea 1. Debe contener nombres separados por comas, sin ninguna fila en blanco encima:
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Si la primera línea empieza con tres caracteres raros antes de los nombres de los encabezados, tu archivo tiene BOM. Más abajo, en la sección de codificación, verás cómo arreglarlo.
+
+---
+
+## Codificación UTF-8
+
+La codificación es la forma en que los caracteres de texto se guardan como bytes en el disco. Una codificación equivocada produce texto ilegible. Por ejemplo, un apóstrofo tipográfico guardado como UTF-8 pero leído como Latin-1 se convierte en una secuencia de tres caracteres que parece basura.
+
+### Por qué UTF-8
+
+UTF-8 es la opción segura para cualquier plataforma de ecommerce. Shopify y WooCommerce lo esperan, y las plantillas actuales de eBay lo declaran en el encabezado Action (`CC=UTF-8`). Guardar como UTF-8 garantiza que:
+
+- Los caracteres acentuados y la ñ se muestran correctamente.
+- Los símbolos de moneda y la puntuación especial no se rompen.
+- El importador de la plataforma puede leer el archivo sin rechazarlo.
+
+### Con o sin BOM
+
+UTF-8 con BOM añade una secuencia oculta de 3 bytes al principio del archivo. Excel en Windows la escribe cuando usas «Guardar como > CSV UTF-8 (delimitado por comas)». Shopify y WooCommerce leen bien los archivos con BOM, pero algunas herramientas y scripts leen mal el primer encabezado por culpa de esos bytes extra.
+
+Cómo saber si tu archivo tiene BOM: ábrelo en VS Code y mira la barra de estado abajo a la derecha. Si pone «UTF-8 with BOM», lo tiene.
+
+**Solución en VS Code:** haz clic en el indicador de codificación de la barra de estado, elige «Save with Encoding» y luego «UTF-8» (sin BOM).
+
+**Solución en Excel:** Excel no puede guardar UTF-8 sin BOM. No cambies a «CSV (delimitado por comas)» para evitarlo: esa opción guarda con la codificación antigua de tu sistema (a menudo Windows-1252) y estropea los acentos. Quédate con «CSV UTF-8» y quita el BOM en VS Code solo si una plataforma lee mal la primera columna.
+
+**Solución con Python:**
+
+```python
+# utf-8-sig quita el BOM al leer; utf-8 a secas escribe sin BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### La codificación en otras herramientas
+
+**Google Sheets:** Archivo > Descargar > Valores separados por comas exporta UTF-8 sin BOM.
+
+**LibreOffice Calc:** al guardar como CSV, elige «Unicode (UTF-8)» en el cuadro de diálogo.
+
+**Numbers (Mac):** Archivo > Exportar a > CSV exporta UTF-8 sin BOM en las versiones actuales de macOS.
+
+---
+
+## Reglas de comillas y comas dentro de los valores
+
+Cuando el valor de una celda contiene una coma, rodea el valor completo con comillas dobles. Es el estándar CSV (RFC 4180).
+
+### Ejemplo básico
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Sin las comillas, el analizador ve cinco columnas en lugar de tres y pone los datos en los campos equivocados.
+
+### Comillas dentro de valores entrecomillados
+
+Si el valor contiene una comilla doble, escápala duplicándola:
+
+```
+"She said ""this is great"""
+```
+
+Esto representa el texto: She said "this is great"
+
+### ¿Cuándo necesitas comillas?
+
+Necesitas rodear el valor con comillas dobles cuando contiene:
+
+- Una coma
+- Una comilla doble
+- Un salto de línea dentro del valor
+- Etiquetas HTML (algunos analizadores leen mal los signos < y > sin comillas)
+
+No necesitas comillas para valores sencillos como `29.99` o `Active`. Poner comillas a todo no hace daño, y muchas herramientas lo hacen automáticamente.
+
+### Errores habituales con las comillas
+
+| Error | Ejemplo incorrecto | Correcto |
+|---|---|---|
+| Coma dentro del valor, sin comillas | `Wallet, Brown` | `"Wallet, Brown"` |
+| Descripción HTML sin comillas | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Salto de línea dentro del valor, sin comillas | Dos filas separadas | `"Line1\nLine2"` en una celda |
+| Escape incorrecto de una comilla interna | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Finales de línea
+
+Los finales de línea indican al analizador dónde termina una fila y empieza la siguiente. Hay dos formatos:
+
+| Formato | Bytes | Lo usan |
+|---|---|---|
+| CRLF | retorno de carro + salto de línea | Windows, Excel |
+| LF | solo salto de línea | macOS, Linux, la mayoría de herramientas web |
+
+La mayoría de las plataformas acepta los dos formatos. Los problemas aparecen cuando se mezclan, con unas filas en CRLF y otras en LF. Los finales mezclados pueden hacer que el analizador vea filas en blanco de más o lea mal los valores de varias líneas.
+
+### Cómo comprobarlo y arreglarlo
+
+Abre el archivo en VS Code. La barra de estado muestra «CRLF» o «LF». Haz clic para cambiarlo y guarda.
+
+Con Python:
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Normalizar a LF
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Los errores que más rompen las importaciones
+
+**1. Filas en blanco de más**
+
+Muchas hojas de cálculo añaden una fila en blanco al final. Las plataformas se saltan las filas en blanco o dan error con ellas. Elimínalas antes de exportar. En Excel, pulsa Ctrl+Fin para saltar a la última celda usada. Si está vacía, elimina las filas vacías que hay debajo de tus datos.
+
+**2. Filas de resumen o de totales**
+
+Las fórmulas SUMA() al final de una hoja aparecen en el CSV como filas de producto. Elimina las filas de resumen antes de exportar.
+
+**3. Celdas combinadas**
+
+Las celdas combinadas se exportan como un valor en la primera celda y celdas vacías en las demás. El importador ve esas celdas vacías como campos obligatorios sin rellenar. Separa todas las celdas combinadas antes de exportar.
+
+**4. Celdas con fórmulas**
+
+Cuando Excel guarda un CSV, escribe lo que muestra cada celda: el resultado actual de la fórmula, con su formato de número. Una fórmula de precio con formato de moneda se escribe como `$29.99`, y una rota como `#N/D` o `#¡REF!`. Revisa las columnas con fórmulas en busca de errores y luego usa Pegado especial > Valores para convertirlas en valores fijos antes de guardar como CSV.
+
+**5. Espacios al final de los encabezados**
+
+`"Title "` (con un espacio al final) no es lo mismo que `"Title"`. Los datos de esa columna se ignoran sin avisar al importar. Usa Buscar y reemplazar (Ctrl+L en Excel en español, Ctrl+H en otras versiones) para quitar los espacios finales de los encabezados.
+
+**6. Formato equivocado con extensión .csv**
+
+Guardar como `.xlsx` pero llamar al archivo `.csv` produce un archivo que en realidad no es CSV. Ábrelo en un editor de texto. Si ves caracteres binarios, no es un CSV de verdad. Vuelve a exportarlo con el formato correcto.
+
+**7. Codificación ANSI o Latin-1**
+
+Las versiones antiguas de Excel a veces guardan en ANSI (Windows-1252). Los nombres de producto con acentos se verán ilegibles al importar. Elige siempre UTF-8 de forma explícita al guardar.
+
+---
+
+## Delimitadores: comas, tabulaciones y punto y coma
+
+El nombre «CSV» habla de comas, pero algunos archivos usan tabulaciones (TSV) o punto y coma. La mayoría de las plataformas de ecommerce espera archivos realmente delimitados por comas. Si subes un archivo delimitado por punto y coma como si fuera CSV, cada fila aparece como una sola columna.
+
+### Cómo identificar el delimitador
+
+Abre el archivo en un editor de texto plano. Mira la primera fila:
+
+- Si los nombres de columna están separados por `,`, el archivo está delimitado por comas (CSV estándar)
+- Si están separados por `;`, está delimitado por punto y coma (habitual en Excel con configuración regional europea, incluida la española)
+- Si están separados por huecos anchos, está delimitado por tabulaciones (TSV)
+
+### Convertir un archivo con punto y coma a comas
+
+**En Excel:** Archivo > Guardar como > CSV UTF-8 (delimitado por comas). Si Excel sigue guardando con punto y coma (porque tu configuración regional usa el punto y coma como separador de listas), cambia el separador de listas en la configuración regional de Windows o usa el método de Python de abajo.
+
+**En Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Riesgos del formato automático de las hojas de cálculo
+
+Las hojas de cálculo como Excel y Google Sheets cambian ciertos valores sin avisar cuando abres o editas un CSV. Estos cambios pueden estropear tus datos incluso antes de que hagas ninguna edición.
+
+### Ceros a la izquierda eliminados de SKU e ID
+
+Excel quita los ceros a la izquierda de los valores que interpreta como números. Un SKU como `00123` se convierte en `123`. Un código postal como `02110` se convierte en `2110`.
+
+**Cómo evitarlo:**
+
+- En Excel: antes de importar el CSV, usa el asistente de importación de texto (Datos > Desde el texto/CSV) y define como «Texto» el tipo de cualquier columna que deba conservar los ceros a la izquierda.
+- En Google Sheets: después de importar, aplica a la columna afectada el formato «Texto sin formato» (Formato > Número > Texto sin formato) antes de editar.
+- Con Python: lee siempre las columnas de SKU e ID con `dtype=str` si usas pandas, o usa el módulo estándar `csv`, que nunca convierte tipos.
+
+### Números convertidos a notación científica
+
+Las cadenas numéricas largas (códigos de barras de 13 dígitos, códigos EAN) pueden mostrarse como `1,23457E+12` en Excel. Al guardar como CSV, esa notación se escribe tal cual, y la validación de códigos de barras falla al importar.
+
+**Solución:** selecciona la columna afectada en Excel, dale formato «Número» con 0 decimales (no «Científico») y guarda. También puedes anteponer al valor una comilla simple (lo fuerza a texto) o dar formato de texto a la columna antes de pegar los valores.
+
+### Fechas convertidas al formato regional
+
+Un campo con `2024-01-15` puede convertirse automáticamente en `15/01/2024` o `15 de enero de 2024` según tu configuración regional. Las plataformas que esperan el formato ISO (`YYYY-MM-DD`) rechazarán el valor reformateado.
+
+**Solución:** después de abrir el archivo, selecciona las columnas de fecha y dales formato de texto, o usa el módulo `csv` de Python para leer y escribir sin conversión de tipos.
+
+### Precios con símbolo de moneda
+
+Excel a veces guarda una celda con formato de moneda como `$19.99` en lugar de `19.99`. La mayoría de las plataformas espera valores decimales sencillos sin símbolo de moneda.
+
+**Solución:** en Excel, da a las columnas de precio el formato «Número» (no «Moneda» ni «Contabilidad») antes de guardar como CSV. Usa Buscar y reemplazar para quitar `$`, `EUR` u otros símbolos si ya están en los datos.
+
+---
+
+## Filas en blanco, comas finales y problemas invisibles
+
+### Filas en blanco de más al final
+
+Muchas herramientas añaden una fila en blanco después de la última fila de datos. Las plataformas suelen saltarse las filas en blanco, pero algunas las rechazan como registros no válidos. Elimina siempre las filas en blanco del final antes de exportar.
+
+En Excel: pulsa Ctrl+Fin para saltar a la última celda usada. Si está vacía (una fila vacía debajo de tus datos), selecciona esas filas y elimínalas (clic derecho > Eliminar filas).
+
+### Comas finales
+
+Algunas herramientas de exportación escriben una coma al final de cada fila: `value1,value2,`. Eso crea una columna vacía de más. La mayoría de los analizadores lo maneja bien, pero los validadores estrictos pueden marcarlo como problema de estructura.
+
+**Solución:** si todas las filas, incluido el encabezado, terminan con una coma de más, quita exactamente una coma del final de cada línea. Quitarlas todas borraría también celdas vacías reales al final de una fila:
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Caracteres invisibles
+
+Algunas herramientas insertan espacios de ancho cero (U+200B) o espacios de no separación (U+00A0) dentro de los valores. Son invisibles en la hoja de cálculo, pero pueden hacer que los encabezados no coincidan o que se rechacen valores al importar.
+
+**Comprobación:** abre el archivo en VS Code y usa Buscar (Ctrl+F) en modo de expresión regular. Busca `​` o ` ` para encontrar estos caracteres.
+
+---
+
+## Reglas de cada plataforma
+
+Cada plataforma añade sus propios requisitos además del estándar CSV básico:
+
+- **Shopify:** la columna Handle agrupa las filas de variantes. Los handles ausentes o no válidos rompen la agrupación de productos.
+- **WooCommerce:** usa una columna Type (`simple`, `variable`, `variation`) para definir la estructura del producto.
+- **Etsy:** no tiene subida de CSV. Su exportación de anuncios sirve para editar, hacer copias de seguridad y migrar, y las apps de publicación masiva definen sus propias columnas.
+- **eBay:** exige la columna Action (por ejemplo `Add`, `Revise`, `Relist` o `End`) en todas las filas.
+- **Amazon:** los nombres de columna dependen de la plantilla de la categoría; descarga desde Seller Central la plantilla exacta de tu categoría.
+
+---
+
+## Lista rápida antes de importar
+
+- [ ] La fila 1 son los encabezados, sin ninguna fila en blanco encima
+- [ ] Los encabezados coinciden exactamente con los nombres que espera la plataforma, incluidas mayúsculas y minúsculas
+- [ ] No hay nombres de columna duplicados
+- [ ] No hay espacios al principio ni al final de los encabezados
+- [ ] El archivo está guardado como UTF-8
+- [ ] Los valores con comas, comillas o saltos de línea están entre comillas dobles
+- [ ] No hay filas en blanco de más al final
+- [ ] No hay filas de resumen ni celdas con fórmulas
+- [ ] Los finales de línea son uniformes (todos CRLF o todos LF)
+- [ ] La extensión es .csv y el archivo contiene texto plano separado por comas
+
+---
+
+## Siguiente paso: valida antes de importar
+
+Cuando tengas el archivo preparado, súbelo al corrector de CSV para validarlo automáticamente. Revisa los encabezados, señala problemas de codificación, detecta problemas propios de cada plataforma y corrige con un clic los que se pueden arreglar sin riesgo.

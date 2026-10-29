@@ -1,0 +1,152 @@
+---
+title: "Nicht passende CSV-Spalten beheben"
+description: "So findest und behebst du Spaltenfehler in CSV-Importen: falsche Spaltennamen, Groß- und Kleinschreibung, zusätzliche Leerzeichen und falsche Reihenfolge auf allen E-Commerce-Plattformen."
+keywords: ["csv spalten passen nicht", "csv falscher spaltenname", "csv kopfzeile passt nicht", "csv import spaltenfehler", "csv spalten reparieren", "csv spaltenzuordnung fehler", "csv spaltenkopf nicht erkannt"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Was Spaltenfehler bei CSV-Importen verursacht"
+  - "Wie du deine Spaltenköpfe mit den erwarteten Spalten der Plattform vergleichst"
+  - "Wie du Groß- und Kleinschreibung, zusätzliche Leerzeichen und umbenannte Spalten korrigierst"
+  - "Wie du mit zusätzlichen oder fehlenden Spalten umgehst, ohne den Import zu zerstören"
+  - "Wie du die offizielle Vorlage der Plattform als Ausgangspunkt nutzt"
+bestFor: "Händler, die Importfehler beheben, bei denen die Plattform unbekannte oder fehlende Spalten meldet"
+timeToComplete: "7 Minuten"
+---
+
+## Was sind nicht passende Spalten?
+
+Spalten passen nicht, wenn die Namen in der Kopfzeile deiner CSV nicht dem entsprechen, was die Importplattform erwartet. Die Plattform ordnet deine Daten anhand der Spaltennamen den richtigen Produktfeldern zu. Ist ein Spaltenname falsch, auch nur um ein Leerzeichen oder einen Buchstaben, ignoriert die Plattform die Spalte (deine Daten fallen stillschweigend weg) oder lehnt den ganzen Import ab.
+
+Nicht passende Spalten sind eine der häufigsten Ursachen für „nichts importiert“ oder „alle Felder leer“.
+
+---
+
+## Häufige Ursachen
+
+### 1. Umbenannte Spalten
+
+Du hast eine Pflichtspalte so umbenannt, dass der Name für dich Sinn ergibt, aber nicht für die Plattform.
+
+| Was du geschrieben hast | Was die Plattform erwartet |
+|---|---|
+| `Product Title` | `Title` (Shopify) |
+| `product_name` | `Name` (WooCommerce) |
+| `Item Name` | `item_name` (Amazon) |
+| `Listing Title` | `TITLE` (Etsy-Export) |
+| `Listing Title` | `Title` (eBay) |
+
+**Lösung:** Verwende genau den Spaltennamen der Plattform. Füge keine Wörter hinzu und benenne nichts der Verständlichkeit halber um.
+
+### 2. Falsche Groß- und Kleinschreibung
+
+Manche Importer vergleichen Spaltennamen unter Beachtung der Groß- und Kleinschreibung. Sicher bist du also nur, wenn die Schreibweise genau der Vorlage entspricht.
+
+| Falsch | Richtig |
+|---|---|
+| `handle` | `Handle` (Shopify) |
+| `TITLE` | `Title` (Shopify) |
+| `Variant price` | `Variant Price` (Shopify) |
+| `regular_price` | `Regular price` (WooCommerce) |
+
+**Lösung:** Vergleiche Zeichen für Zeichen. Selbst `Regular Price` und `Regular price` (kleines p) können einen Unterschied machen. WooCommerce zeigt beim Import eine Zuordnungsseite, auf der du für jede nicht erkannte Spalte das richtige Feld auswählen kannst.
+
+### 3. Leerzeichen am Anfang oder Ende
+
+Tabellenprogramme können unbemerkt ein Leerzeichen vor oder nach einem Spaltennamen einfügen. Die Plattform sieht `" Title"` (mit Leerzeichen am Anfang) als völlig andere Spalte als `"Title"`.
+
+**So erkennst du es:** Öffne die CSV in einem reinen Texteditor (keinem Tabellenprogramm) und sieh dir die erste Zeile an. Jedes Leerzeichen vor oder nach einem Spaltennamen ist dort sichtbar.
+
+**Lösung in Excel:** Nutze kein Suchen und Ersetzen für Leerzeichen: Damit verschwinden auch die Leerzeichen in Namen wie `Variant Price`. Gib stattdessen in einer leeren Zeile `=GLÄTTEN(A1)` ein und ziehe die Formel nach rechts über alle Spalten. Kopiere diese Zeile und füge sie mit Inhalte einfügen > Werte über Zeile 1 ein. Lösche danach die Hilfszeile.
+
+**Lösung mit Python:**
+
+```python
+import csv
+
+# utf-8-sig entfernt auch ein BOM, das strip() stehen lassen würde
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Leerzeichen aus allen Spaltennamen entfernen
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. BOM verfälscht den ersten Spaltennamen
+
+Wurde deine Datei als „UTF-8 mit BOM“ gespeichert, stehen vor dem ersten Spaltennamen 3 unsichtbare Bytes. Ein Spaltenkopf, der in Excel wie `Handle` aussieht, kann bei einem Tool, das kein BOM erwartet, als `﻿Handle` ankommen und passt dann nicht mehr.
+
+**Lösung:** Meldet ein Importer die erste Spalte als unbekannt, speichere die Datei ohne BOM neu. In VS Code: Klicke auf die Kodierungsanzeige → „Save with Encoding“ → wähle UTF-8 (ohne BOM).
+
+### 5. Probleme mit der Spaltenreihenfolge
+
+Manche Plattformen verlangen Spalten in einer bestimmten Reihenfolge (eBay File Exchange, manche Amazon-Flatfile-Vorlagen). Wer in Excel Spalten umsortiert, kann diese Importe zerstören, selbst wenn die Spaltennamen stimmen.
+
+**Lösung:** Lade eine frische Vorlage von der Plattform herunter und füge deine Daten dort ein, statt die Spaltenreihenfolge deiner eigenen Datei zu ändern.
+
+---
+
+## Spaltenköpfe mit der Vorlage der Plattform vergleichen
+
+1. Lade die offizielle CSV-Vorlage der Plattform herunter
+2. Öffne beide Dateien in einem Texteditor (nicht in Excel)
+3. Kopiere beide Kopfzeilen (Zeile 1) in ein Vergleichstool oder vergleiche sie von Hand
+4. Achte auf: anderen Text, zusätzliche Leerzeichen, andere Groß- und Kleinschreibung, zusätzliche oder fehlende Spalten
+
+**Online-Vergleichstools:** Füge beide Kopfzeilen ein und vergleiche sie nebeneinander.
+
+**Vergleich mit Python:**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# utf-8-sig hat ein BOM schon entfernt; jetzt Leerzeichen entfernen
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## Umgang mit zusätzlichen Spalten
+
+Hat deine Datei zusätzliche Spalten, die die Plattform nicht kennt:
+
+- **Die meisten Plattformen** (Shopify, WooCommerce): Zusätzliche Spalten werden stillschweigend ignoriert und sind kein Problem
+- **Amazon-Flatfiles**: Spalten, die nicht in der Vorlage stehen, können abgelehnt werden
+- **eBay File Exchange**: Nicht erkannte Spalten können Warnungen oder Fehler auslösen
+
+**Lösung für strenge Plattformen:** Entferne jede Spalte, die nicht in der offiziellen Vorlage steht.
+
+---
+
+## Umgang mit fehlenden optionalen Spalten
+
+Fehlen deiner Datei optionale Spalten:
+
+- Die Plattform nutzt für diese Felder ihren Standardwert
+- Bei optionalen Feldern ist das fast immer in Ordnung
+- Bei Pflichtfeldern führen fehlende Spalten zum Scheitern des Imports, und zwar in jeder Zeile
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine CSV hoch, und StriveFormats vergleicht deine Spaltenköpfe mit den erwarteten Spalten der gewählten Plattform. Es meldet fehlende Pflichtspalten, erkennt zusätzliche Spalten und findet BOM-Markierungen und Unterschiede bei der Groß- und Kleinschreibung.
+
+[CSV-Fixer öffnen](/app) | [CSV-Vorlagen ansehen](/presets)

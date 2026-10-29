@@ -1,0 +1,135 @@
+---
+title: "Pola tak/nie w plikach płaskich Amazon: true/false, y/n i typowe pułapki"
+description: "Wartości akceptowane przez kolumny tak/nie w Amazonie zależą od pliku: szablony kategorii używają wartości z karty Valid Values (zwykle true/false), a Inventory Loader używa y/n lub 1/2. Dowiedz się, jak sprawdzać, poprawiać i chronić te kolumny."
+keywords: ["amazon plik płaski boolean", "amazon csv pola logiczne", "amazon y n csv", "amazon plik płaski true false", "amazon seller central csv tak nie", "amazon batteries_required", "amazon karta valid values", "błędy pliku płaskiego amazon"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Dlaczego wartości tak/nie w Amazonie zależą od przesyłanego pliku"
+  - "Gdzie znaleźć dokładne wartości akceptowane przez Twój szablon"
+  - "Jak działają kolumny wysyłki w Inventory Loader"
+  - "Jak Excel i Arkusze Google zmieniają wartości tak/nie bez pytania"
+  - "Jak znaleźć i poprawić nieprawidłowe wartości w setkach wierszy"
+bestFor: "Sprzedawcy Amazon, którzy masowo przesyłają lub aktualizują oferty plikami płaskimi z Seller Central, zwłaszcza pola dotyczące baterii, bezpieczeństwa i wysyłki"
+timeToComplete: "7 minut"
+---
+
+## Wartości tak/nie zależą od pliku
+
+Amazon nie używa jednego formatu tak/nie we wszystkich plikach do przesyłania. To, co akceptuje kolumna, zależy od pliku, który wypełniasz:
+
+| Plik | Przykładowe kolumny | Akceptowane wartości |
+|---|---|---|
+| Szablon kategorii (pobrany z Seller Central dla Twojego typu produktu) | `batteries_required`, `are_batteries_included` | To, co karta **Valid Values** szablonu podaje dla tej kolumny. Dla pól o bateriach zwykle `true` / `false` |
+| Inventory Loader (plik ofert z `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` lub `1` tylko dla USA, `y` lub `2` dla wysyłki międzynarodowej |
+| Inventory Loader | `expedited-shipping` | Nie tak/nie: lista opcji wysyłki (zobacz niżej) |
+
+Przewodnik Amazon po Inventory Loader podaje `batteries_required` i `are_batteries_included` z opcjami `true` lub `false`, a Listings API Amazon również przechowuje je jako true/false.
+
+**Najczęstszy błąd:** wpisanie słowa, którego nie ma na liście szablonu, na przykład `Yes`, `Y` lub `1` w kolumnie, dla której karta Valid Values podaje `true` / `false`, albo przeniesienie konwencji z jednego pliku Amazon do innego.
+
+---
+
+## Najpierw sprawdź kartę Valid Values
+
+Każdy szablon kategorii pobrany z Seller Central ma dwie karty, które rozstrzygają tę kwestię dla Twojego pliku:
+
+1. **Data Definitions:** opisuje każdą kolumnę i mówi, czy jest wymagana.
+2. **Valid Values:** podaje dokładne wartości, które akceptuje każda kolumna z listą rozwijaną.
+
+Znajdź nazwę kolumny na karcie Valid Values i skopiuj stamtąd wartości, zapisane dokładnie tak, jak tam widnieją. Szablony zmieniają się z czasem i różnią się między kategoriami i rynkami, więc sprawdzaj wersję, którą zamierzasz przesłać, a nie tę zapisaną kilka miesięcy temu. Jeśli w szablonie brakuje kolumny, której się spodziewałeś, Twój typ produktu jej nie używa.
+
+---
+
+## Kolumny wysyłki w Inventory Loader
+
+Jeśli aktualizujesz oferty plikiem Inventory Loader (tym z kolumnami `sku`, `product-id` i `add-delete`), dwie kolumny wysyłki wyglądają jak pola tak/nie, ale mają własne zasady. Przewodnik Amazon po Inventory Loader definiuje je tak:
+
+| Nazwa kolumny | Oczekiwane wartości | Za co odpowiada |
+|---|---|---|
+| `will-ship-internationally` | `n` lub `1` tylko dla USA, `y` lub `2` dla wysyłki międzynarodowej | Czy wysyłasz ofertę poza USA |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` i `Plus`, oddzielone przecinkami, lub `N`, jeśli żadna | Jakie szybsze opcje wysyłki oferujesz |
+
+`expedited-shipping` nie jest więc polem tak/nie, a `y` w nim nie pasuje do żadnej opcji. Wpisz `Next,Second`, aby oferować wysyłkę w jeden i dwa dni, lub zostaw komórkę pustą, jeśli nie oferujesz żadnej.
+
+---
+
+## Jak arkusze kalkulacyjne zmieniają wartości tak/nie
+
+### Excel
+
+1. **Pola wyboru i formuły:** komórki z polami wyboru i formuły takie jak `=IF(A2>0, TRUE, FALSE)` dają Excelowe `TRUE` / `FALSE` (w polskim Excelu wyświetlane jako PRAWDA / FAŁSZ). Działa to tylko wtedy, gdy lista Twojego szablonu zawiera true/false, i nigdy w kolumnie `will-ship-internationally` z Inventory Loader.
+2. **Wpisane słowa:** ręcznie wpisane `Yes`, `No` czy `Y` zostają takie, jak je wpisano, więc plik kończy z mieszanką zapisów.
+3. **Bezpośrednie otwieranie CSV:** po dwukrotnym kliknięciu pliku CSV Excel zgaduje typy kolumn. Tekst taki jak `true` może zamienić się w wartość logiczną Excela i zostać zapisany jako `TRUE`.
+
+### Google Sheets
+
+Arkusze Google działają tak samo: kolumny z polami wyboru i formuły dają `TRUE` / `FALSE`, niezależnie od tego, czego oczekuje kolumna docelowa.
+
+---
+
+## Znajdowanie nieprawidłowych wartości
+
+### Filtruj każdą kolumnę
+
+1. Otwórz plik przez **Dane → Z pliku tekstowego/CSV**, aby Excel go nie przeformatował.
+2. Kliknij przycisk filtra w kolumnie tak/nie (na przykład `batteries_required`).
+3. Porównaj wyświetlone wartości z kartą Valid Values. Każda inna wartość to problem, podobnie jak pusta komórka w kolumnie, którą karta Data Definitions oznacza jako wymaganą.
+
+### Formuła w kolumnie pomocniczej
+
+Dodaj kolumnę obok pola i wypisz w formule akceptowane wartości. Dla kolumny true/false:
+
+```
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
+```
+
+W polskim Excelu funkcje nazywają się JEŻELI, LUB i LITERY.MAŁE. Dla `will-ship-internationally` z Inventory Loader sprawdzaj zamiast tego `y`, `n`, `1` i `2`. Przefiltruj wiersze z `INVALID`, aby znaleźć wszystkie problematyczne wartości.
+
+---
+
+## Masowe poprawianie nieprawidłowych wartości
+
+### Znajdź i zamień w Excelu
+
+1. Naciśnij **Ctrl+H** (Znajdowanie i zamienianie).
+2. W polu **Znajdź** wpisz błędną wartość, na przykład `Yes`.
+3. W polu **Zamień na** wpisz wartość z karty Valid Values, na przykład `true`.
+4. Kliknij **Opcje** i zaznacz **Dopasuj do całej zawartości komórki**, aby zmieniły się tylko całe komórki.
+5. Kliknij **Zamień wszystko**, a potem powtórz dla `No` i każdego innego znalezionego zapisu.
+
+> **Ważne:** przed zamianą ustal, co oznacza każda wartość. `Yes` w `batteries_required` i `Yes` w innej kolumnie mogą wymagać innych zamian.
+
+### Zamień wyniki formuł na wartości
+
+Jeśli kolumny tak/nie są obliczane formułami:
+
+1. Zaznacz kolumnę i skopiuj ją (**Ctrl+C**).
+2. Prawy przycisk myszy → **Wklej specjalnie → Wartości**.
+3. Formuły stają się zwykłym tekstem, który możesz potem poprawić funkcją Znajdź i zamień.
+
+### Google Sheets
+
+1. Zaznacz kolumnę.
+2. **Edytuj → Znajdź i zamień** (Ctrl+H).
+3. Zaznacz **Rozróżniaj wielkość liter** i **Dopasuj całą zawartość komórki**, wyszukaj błędną wartość i zamień ją na akceptowaną.
+
+---
+
+## Jak uniknąć problemów następnym razem
+
+### Używaj list rozwijanych szablonu
+
+Szablony kategorii Amazon mają listy rozwijane zbudowane na podstawie karty Valid Values. Wprowadzaj dane bezpośrednio w szablonie, zamiast wklejać na niego CSV, a listy rozwijane utrzymają wartości na liście.
+
+### Dodaj własną listę rozwijaną
+
+W pliku bez list rozwijanych zaznacz komórki kolumny pod nagłówkiem, przejdź do **Dane → Poprawność danych**, wybierz **Lista** i wpisz akceptowane wartości, na przykład `true,false` (lub `y,n,1,2` dla `will-ship-internationally`).
+
+### Sprawdzaj przed każdym przesłaniem
+
+1. Otwórz gotowy plik w edytorze tekstu (nie w Excelu) i przejrzyj kolumny tak/nie.
+2. Upewnij się, że każda wartość jest na liście dla tej kolumny.
+3. Wypełnij każdą kolumnę, którą karta Data Definitions oznacza jako wymaganą.
+
+Jeśli przesyłasz pliki przez Inventory Loader, korektor StriveFormats sprawdza za Ciebie `will-ship-internationally` i `expedited-shipping` zgodnie z przewodnikiem Amazon.

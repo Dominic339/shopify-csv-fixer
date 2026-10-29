@@ -1,0 +1,168 @@
+---
+title: "Anhängen, Zusammenführen oder Verknüpfen: CSV-Dateien richtig kombinieren"
+description: "Der Unterschied zwischen dem Anhängen von Zeilen, dem Zusammenführen gleich aufgebauter Dateien und dem Verknüpfen verwandter Daten, und welcher Weg zu deinem Katalog passt."
+keywords: ["csv dateien anhängen", "csv dateien zusammenführen", "csv dateien verknüpfen", "csv kombinieren", "csv zeilen zusammenfügen", "csv sverweis", "produktkatalog csv zusammenführen", "shopify csv anhängen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Den Unterschied zwischen Anhängen, Zusammenführen und Verknüpfen bei CSV-Dateien"
+  - "Wann du welchen Weg in deinem Katalog-Workflow nutzt"
+  - "Wie du Zeilen richtig anhängst, ohne Kopfzeilen zu verdoppeln"
+  - "Wie du zwei CSV-Dateien über eine gemeinsame Schlüsselspalte verknüpfst"
+  - "Typische Fehler beim Kombinieren von CSV-Dateien"
+bestFor: "Katalogverantwortliche, Entwickler und Händler, die Produktdaten aus mehreren Quellen, von Lieferanten oder aus Exportdateien zusammenbringen"
+timeToComplete: "10 Minuten"
+---
+
+## Drei Vorgänge, drei Bedeutungen
+
+Wer „CSV-Dateien kombinieren“ sagt, meint meist einen von drei verschiedenen Vorgängen. Wer den falschen wählt, verliert Daten oder zerstört die Struktur.
+
+| Vorgang | Was sich ändert | Zeilenzahl | Spaltenzahl |
+|---|---|---|---|
+| **Anhängen** | Mehr Zeilen | Steigt | Gleich |
+| **Zusammenführen** | Zwei gleich aufgebaute Dateien vereinen | Steigt | Gleich |
+| **Verknüpfen** | Spalten aus einer verwandten Datei ergänzen | Gleich | Steigt |
+
+---
+
+## Anhängen: mehr Zeilen hinzufügen
+
+**Was es tut:** Die Zeilen einer zweiten CSV werden ans Ende der ersten gesetzt. Beide Dateien müssen genau dieselben Spalten haben.
+
+**Wann du es nutzt:**
+- Exporte, die in Seiten aufgeteilt sind (Datei 1 = Zeilen 1–500, Datei 2 = Zeilen 501–1000).
+- Einen neuen Schwung Produkte vor dem Hochladen an eine bestehende Katalogdatei anhängen.
+- Dateien verschiedener regionaler Teams zusammenbringen, die im selben Format exportieren.
+
+**So hängst du in Excel richtig an:**
+
+1. Öffne deine Basisdatei.
+2. Öffne die zweite Datei.
+3. **Lösche in der zweiten Datei die Kopfzeile** (Rechtsklick auf Zeile 1 → Zellen löschen).
+4. Markiere alle übrigen Daten (Strg+A, dann anpassen, falls zu viel markiert ist).
+5. Kopiere sie (Strg+C).
+6. Wechsle zur Basisdatei und klicke in die erste leere Zelle unter der letzten Datenzeile.
+7. Füge ein (Strg+V).
+8. Speichere als CSV UTF-8.
+
+**Kritischer Fehler:** Wer Schritt 3 (Kopfzeile löschen) auslässt, erzeugt doppelte Kopfzeilen mitten in der Datei, und daran scheitert jede Importplattform.
+
+**So hängst du in Google Tabellen an:**
+
+Genauso: Lösche die Kopfzeile der zweiten Datei, kopiere nur die Datenzeilen und füge sie unten im Basisblatt ein.
+
+---
+
+## Zusammenführen: gleich aufgebaute Dateien aus mehreren Quellen vereinen
+
+**Was es tut:** Im Grunde dasselbe wie Anhängen. Von „Zusammenführen“ spricht man meist, wenn Dateien aus verschiedenen Quellen dieselbe Art von Daten enthalten (zum Beispiel zwei Produktlisten von Lieferanten im selben Format).
+
+**Wann du es nutzt:**
+- Produktfeeds von zwei verschiedenen Lieferanten in eine Upload-Datei bringen.
+- Getrennte Exporte von Abteilungen zusammenführen, die alle dieselbe CSV-Vorlage der Plattform nutzen.
+
+**Worauf du beim Zusammenführen zusätzlich achten musst (im Vergleich zum einfachen Anhängen):**
+- **Auf doppelte Zeilen prüfen.** Haben beide Dateien dasselbe Produkt, steht es in der zusammengeführten Datei zweimal. Erkenne Duplikate am Handle (Shopify), an der SKU (WooCommerce/Amazon) oder an der Item ID (eBay). In Excel: **Daten → Duplikate entfernen** und die Schlüsselspalte auswählen.
+- **Spaltennamen vereinheitlichen.** Nennt Lieferant A eine Spalte `Barcode` und Lieferant B `UPC`, musst du vor dem Zusammenführen auf den Spaltennamen umstellen, den die Plattform erwartet.
+- **Werte vereinheitlichen.** Preise können in verschiedenen Währungen stehen, Status können unterschiedlich geschrieben sein (Published, TRUE oder 1).
+
+---
+
+## Verknüpfen: Spalten aus einer verwandten Datei ergänzen
+
+**Was es tut:** Zwei Dateien werden nebeneinandergelegt. Die erste bekommt Spalten aus der zweiten, abgeglichen über eine gemeinsame Schlüsselspalte (etwa SKU oder Handle).
+
+**Wann du es nutzt:**
+- Du hast eine Produktliste aus deinem ERP (Handle, Title, SKU, Price) und eine eigene Bestandsdatei (SKU, Quantity, Warehouse Location) und möchtest jeder Produktzeile den Bestand hinzufügen.
+- Du exportierst Produkte ohne Bilder aus einem System und hast eine eigene Datei mit Bild-URLs, die über die SKU zugeordnet sind.
+- Du möchtest deinem Produktkatalog vor dem Import lieferantenspezifische Daten hinzufügen (Einkaufspreis, Artikelnummer des Lieferanten).
+
+### Verknüpfen mit SVERWEIS in Excel
+
+Angenommen:
+- **Datei A** (Basis): Spalten A=Handle, B=Title, C=Price
+- **Datei B** (Nachschlagen): Spalten A=Handle, B=Quantity
+
+Du möchtest Quantity aus Datei B in Datei A übernehmen.
+
+1. Füge in Datei A eine neue Spaltenüberschrift hinzu: `Quantity` (in Spalte D).
+2. Gib in D2 ein:
+   ```
+   =SVERWEIS(A2;'[FileB.csv]FileB'!$A:$B;2;FALSCH)
+   ```
+3. Datei B muss in Excel geöffnet sein. Öffnet Excel eine CSV, benennt es das Tabellenblatt nach der Datei, also hat `FileB.csv` ein Blatt namens `FileB`. Passt der Schlüssel, wird Quantity eingetragen. Gibt es keinen Treffer, erscheint `#NV`: Dieses Handle steht nicht in Datei B.
+4. Ziehe die Formel nach unten über alle Zeilen.
+5. Wenn alles stimmt, markiere Spalte D, kopiere sie und wähle **Inhalte einfügen → Werte**, um die Formeln durch feste Werte zu ersetzen.
+6. Schließe Datei B.
+7. Speichere Datei A als CSV UTF-8.
+
+### Verknüpfen in Google Tabellen
+
+Nutze `SVERWEIS` (englisch `VLOOKUP`) mit derselben Syntax. Alternativ holst du mit `IMPORTRANGE` Daten aus einer anderen Google-Tabelle und arbeitest dann mit einer Hilfsspalte.
+
+### Verknüpfen mit Python (große Dateien)
+
+```python
+import csv
+
+# Nachschlagedatei in ein Dictionary mit dem Handle als Schlüssel laden
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Quantity zur Basisdatei hinzufügen
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Typische Fehler beim Kombinieren von CSV-Dateien
+
+### Fehler 1: doppelte Kopfzeilen nach dem Anhängen
+
+**Symptom:** Der Import bricht mitten in der Datei mit Fehlern wie „unbekannte Zeile“ ab.
+**Lösung:** Lösche vor dem Anhängen immer die Kopfzeile jeder Datei außer der ersten.
+
+### Fehler 2: unterschiedliche Spaltenreihenfolge in angehängten Dateien
+
+**Symptom:** Nach dem Anhängen stehen Daten in den falschen Spalten.
+**Lösung:** Beide Dateien brauchen dieselbe Spaltenreihenfolge, nicht nur dieselben Spaltennamen. Hat Datei B ihre Spalten in anderer Reihenfolge, ordne sie vor dem Anhängen so um, dass sie zu Datei A passen.
+
+### Fehler 3: Verknüpfen über einen nicht eindeutigen Schlüssel
+
+**Symptom:** SVERWEIS liefert den falschen Bestand (er nimmt den ersten Treffer und ignoriert Duplikate).
+**Lösung:** Stelle vor dem Verknüpfen sicher, dass die Schlüsselspalte (SKU, Handle) in der Nachschlagedatei eindeutig ist. Nutze **Daten → Duplikate entfernen** oder prüfe mit ZÄHLENWENN.
+
+### Fehler 4: unterschiedliche Kodierung nach dem Kombinieren
+
+**Symptom:** Zeichensalat in den Zeilen aus einer der Quelldateien.
+**Lösung:** Speichere alle Quelldateien vor dem Kombinieren als UTF-8. Kodiere jede Datei, die nicht UTF-8 ist, mit VS Code neu (siehe Leitfaden zur Kodierung).
+
+### Fehler 5: Leerzeilen zwischen angehängten Abschnitten
+
+**Symptom:** Der Import stoppt an der Leerzeile und ignoriert alle folgenden Zeilen.
+**Lösung:** Scrolle nach dem Anhängen durch die kombinierte Datei und lösche alle Leerzeilen zwischen den Abschnitten.
+
+---
+
+## Kurze Entscheidungshilfe
+
+```
+Brauchst du mehr Zeilen? → Anhängen oder Zusammenführen
+Brauchst du mehr Spalten? → Verknüpfen
+
+Stammen die Quelldateien aus demselben System mit identischen Spalten? → Anhängen
+Stammen sie aus verschiedenen Systemen mit derselben Spaltenvorlage? → Zusammenführen (auf Duplikate prüfen)
+Hast du Produktdaten in einer Datei und ergänzende Daten in einer anderen? → Verknüpfen
+```

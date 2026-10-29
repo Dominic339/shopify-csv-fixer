@@ -1,0 +1,328 @@
+---
+title: "Les bases du CSV pour les imports e-commerce"
+description: "Comprenez les en-têtes, l'encodage UTF-8, les guillemets, les fins de ligne et les erreurs les plus courantes qui font échouer les imports CSV, avant même votre premier envoi."
+keywords: ["bases du csv", "encodage csv utf-8", "en-têtes csv", "guillemets et virgules csv", "fins de ligne csv", "erreurs import csv", "réparer fichier csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Comment un CSV est structuré et pourquoi c'est important pour les imports"
+  - "Les pièges de l'encodage, du BOM et des fins de ligne"
+  - "Les formats de séparateur et comment passer de l'un à l'autre"
+  - "Les risques de la mise en forme automatique des tableurs (zéros en tête, notation scientifique, dates)"
+  - "Lignes vides, virgules en fin de ligne et caractères invisibles"
+bestFor: "Nouveaux vendeurs, responsables catalogue et développeurs qui résolvent leurs premières erreurs d'import"
+timeToComplete: "10 minutes"
+---
+
+## Qu'est-ce qu'un fichier CSV ?
+
+Un fichier CSV (Comma-Separated Values, valeurs séparées par des virgules) est un fichier texte brut dans lequel chaque ligne est un enregistrement et les colonnes sont séparées par des virgules. La première ligne contient les noms de colonnes (la ligne d'en-tête). Chaque ligne suivante contient des données.
+
+Voici à quoi ressemble, en texte brut, un CSV produits Shopify minimal :
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Les CSV ont l'air simples, mais des plateformes comme Shopify, WooCommerce, Etsy, eBay et Amazon sont strictes sur des détails de format que les tableurs peuvent abîmer sans prévenir. Ce guide explique chaque règle importante pour que vos imports passent du premier coup.
+
+---
+
+## La ligne d'en-tête
+
+La première ligne de tout CSV doit contenir les noms des colonnes (les en-têtes). Les plateformes s'en servent pour associer vos données aux bons champs pendant l'import.
+
+### Règles
+
+- **Respectez l'orthographe exacte, majuscules comprises.** Certains outils d'import traitent `Handle`, `handle` et `HANDLE` différemment : copiez les noms d'en-tête depuis le modèle de la plateforme.
+- **Pas d'espace au début ni à la fin.** Un en-tête `" Title"` (avec une espace au début) ne correspond pas à `"Title"`. Les données de cette colonne sont ignorées sans avertissement.
+- **Pas d'en-têtes en double.** Si deux colonnes portent le même nom, la plupart des analyseurs n'utilisent que la dernière.
+- **L'ordre des colonnes compte sur certaines plateformes.** Certains modèles eBay et Amazon attendent les colonnes dans l'ordre du modèle : gardez l'ordre du modèle téléchargé. Shopify permet d'ajouter des colonnes n'importe où.
+
+### Comment vérifier
+
+Ouvrez votre CSV dans un éditeur de texte brut comme le Bloc-notes (Windows), TextEdit (Mac) ou VS Code. Regardez la ligne 1. Elle doit contenir des noms séparés par des virgules, sans ligne vide au-dessus :
+
+```
+Handle,Title,Body (HTML),Vendor,Type,Tags,...
+```
+
+Si la première ligne commence par trois caractères étranges avant les noms d'en-tête, votre fichier contient un BOM. La section sur l'encodage ci-dessous explique comment le corriger.
+
+---
+
+## L'encodage UTF-8
+
+L'encodage, c'est la façon dont les caractères sont stockés sous forme d'octets sur le disque. Un mauvais encodage donne du texte illisible. Par exemple, une apostrophe typographique enregistrée en UTF-8 mais lue en Latin-1 devient une suite de trois caractères qui ressemble à du charabia.
+
+### Pourquoi l'UTF-8
+
+L'UTF-8 est le choix sûr pour toutes les plateformes e-commerce. Shopify et WooCommerce l'attendent, et les modèles eBay actuels le déclarent dans l'en-tête Action (`CC=UTF-8`). Enregistrer en UTF-8 garantit que :
+
+- Les caractères accentués s'affichent correctement.
+- Les symboles monétaires et la ponctuation spéciale ne sont pas abîmés.
+- L'outil d'import de la plateforme peut lire le fichier sans le rejeter.
+
+### Avec ou sans BOM
+
+L'UTF-8 avec BOM ajoute une séquence cachée de 3 octets tout au début du fichier. Excel sous Windows l'écrit quand vous utilisez « Enregistrer sous > CSV UTF-8 (délimité par des virgules) ». Shopify et WooCommerce lisent correctement les fichiers avec BOM, mais certains outils et scripts lisent mal le premier en-tête à cause de ces octets en plus.
+
+Pour savoir si votre fichier a un BOM : ouvrez-le dans VS Code et regardez la barre d'état en bas à droite. Si elle indique « UTF-8 with BOM », il en a un.
+
+**Correction dans VS Code :** cliquez sur l'indicateur d'encodage dans la barre d'état, choisissez « Save with Encoding », puis « UTF-8 » (sans BOM).
+
+**Correction dans Excel :** Excel ne sait pas enregistrer en UTF-8 sans BOM. Ne passez pas au simple « CSV (séparateur : point-virgule) » ou « CSV (délimité par des virgules) » pour l'éviter : ces options enregistrent dans l'ancien encodage du système (souvent Windows-1252) et abîment les accents. Gardez « CSV UTF-8 », et ne retirez le BOM dans VS Code que si une plateforme lit mal la première colonne.
+
+**Correction avec Python :**
+
+```python
+# utf-8-sig retire le BOM à la lecture ; utf-8 seul écrit sans BOM
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+### L'encodage dans d'autres outils
+
+**Google Sheets :** Fichier > Télécharger > Valeurs séparées par des virgules exporte en UTF-8 sans BOM.
+
+**LibreOffice Calc :** lors de l'enregistrement en CSV, choisissez « Unicode (UTF-8) » dans la boîte de dialogue.
+
+**Numbers (Mac) :** Fichier > Exporter vers > CSV exporte en UTF-8 sans BOM sur les versions récentes de macOS.
+
+---
+
+## Règles des guillemets et virgules dans les valeurs
+
+Quand la valeur d'une cellule contient une virgule, entourez toute la valeur de guillemets doubles. C'est la norme CSV (RFC 4180).
+
+### Exemple simple
+
+```
+Title,Price,Description
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships in 2 days"
+```
+
+Sans les guillemets, l'analyseur voit cinq colonnes au lieu de trois et place les données dans les mauvais champs.
+
+### Guillemets dans une valeur entre guillemets
+
+Si la valeur contient elle-même un guillemet double, échappez-le en le doublant :
+
+```
+"She said ""this is great"""
+```
+
+Cela représente le texte : She said "this is great"
+
+### Quand faut-il des guillemets ?
+
+Il faut entourer la valeur de guillemets doubles quand elle contient :
+
+- Une virgule
+- Un guillemet double
+- Un saut de ligne dans la valeur
+- Des balises HTML (certains analyseurs lisent mal les chevrons sans guillemets)
+
+Pas besoin de guillemets pour des valeurs simples comme `29.99` ou `Active`. Mettre des guillemets partout ne pose aucun problème, et beaucoup d'outils le font automatiquement.
+
+### Erreurs courantes avec les guillemets
+
+| Erreur | Mauvais exemple | Correct |
+|---|---|---|
+| Virgule dans la valeur, sans guillemets | `Wallet, Brown` | `"Wallet, Brown"` |
+| Description HTML sans guillemets | `<p>Great item</p>` | `"<p>Great item</p>"` |
+| Saut de ligne dans la valeur, sans guillemets | Deux lignes séparées | `"Line1\nLine2"` dans une seule cellule |
+| Mauvais échappement d'un guillemet interne | `"She said \"great\""` | `"She said ""great"""` |
+
+---
+
+## Fins de ligne
+
+Les fins de ligne indiquent à l'analyseur où une ligne se termine et où commence la suivante. Il existe deux formats :
+
+| Format | Octets | Utilisé par |
+|---|---|---|
+| CRLF | retour chariot + saut de ligne | Windows, Excel |
+| LF | saut de ligne seul | macOS, Linux, la plupart des outils web |
+
+La plupart des plateformes acceptent les deux. Les problèmes apparaissent quand ils sont mélangés, avec certaines lignes en CRLF et d'autres en LF. Des fins de ligne mélangées peuvent faire voir à l'analyseur des lignes vides en trop ou lui faire mal lire les valeurs sur plusieurs lignes.
+
+### Comment vérifier et corriger
+
+Ouvrez le fichier dans VS Code. La barre d'état affiche « CRLF » ou « LF ». Cliquez dessus pour changer, puis enregistrez.
+
+Avec Python :
+
+```python
+with open("input.csv", newline="", encoding="utf-8") as f:
+    content = f.read()
+# Uniformiser en LF
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Les erreurs qui font le plus échouer les imports
+
+**1. Lignes vides en trop**
+
+Beaucoup de tableurs ajoutent une ligne vide à la fin. Les plateformes ignorent les lignes vides ou renvoient une erreur. Supprimez-les avant l'export. Dans Excel, appuyez sur Ctrl+Fin pour aller à la dernière cellule utilisée. Si elle est vide, supprimez les lignes vides sous vos données.
+
+**2. Lignes de synthèse ou de total**
+
+Les formules SOMME() en bas d'une feuille apparaissent dans le CSV comme des lignes de produit. Supprimez les lignes de synthèse avant l'export.
+
+**3. Cellules fusionnées**
+
+Les cellules fusionnées s'exportent avec une valeur dans la première cellule et des cases vides dans les autres. L'outil d'import voit ces cases vides comme des champs obligatoires non remplis. Annulez toutes les fusions avant l'export.
+
+**4. Cellules avec formules**
+
+Quand Excel enregistre un CSV, il écrit ce que chaque cellule affiche : le résultat actuel de la formule, avec son format de nombre. Une formule de prix au format monétaire est écrite `29,99 $` ou `$29.99`, et une formule cassée `#N/A` ou `#REF!`. Vérifiez les colonnes de formules, puis utilisez Collage spécial > Valeurs pour les transformer en valeurs fixes avant d'enregistrer en CSV.
+
+**5. Espaces à la fin des en-têtes**
+
+`"Title "` (avec une espace à la fin) n'est pas la même chose que `"Title"`. Les données de cette colonne sont ignorées sans avertissement à l'import. Utilisez Rechercher et remplacer (Ctrl+H) pour retirer les espaces à la fin des en-têtes.
+
+**6. Mauvais format avec une extension .csv**
+
+Enregistrer en `.xlsx` mais nommer le fichier `.csv` produit un fichier qui n'est pas vraiment un CSV. Ouvrez-le dans un éditeur de texte. Si vous voyez des caractères binaires, ce n'est pas un vrai CSV. Réexportez-le dans le bon format.
+
+**7. Encodage ANSI ou Latin-1**
+
+Les anciennes versions d'Excel enregistrent parfois en ANSI (Windows-1252). Les noms de produits accentués deviennent illisibles à l'import. Choisissez toujours explicitement l'UTF-8 à l'enregistrement.
+
+---
+
+## Séparateurs : virgules, tabulations et points-virgules
+
+Le nom « CSV » parle de virgules, mais certains fichiers utilisent des tabulations (TSV) ou des points-virgules. La plupart des plateformes e-commerce attendent de vrais fichiers séparés par des virgules. Si vous envoyez un fichier séparé par des points-virgules comme un CSV, chaque ligne apparaît dans une seule colonne.
+
+### Comment identifier le séparateur
+
+Ouvrez le fichier dans un éditeur de texte brut. Regardez la première ligne :
+
+- Si les noms de colonnes sont séparés par `,`, le fichier est séparé par des virgules (CSV standard)
+- S'ils sont séparés par `;`, il est séparé par des points-virgules (courant avec Excel en paramètres régionaux européens, dont le français)
+- S'ils sont séparés par de larges espaces, il est séparé par des tabulations (TSV)
+
+### Convertir un fichier à points-virgules en fichier à virgules
+
+**Dans Excel :** Fichier > Enregistrer sous > CSV UTF-8 (délimité par des virgules). Si Excel enregistre quand même avec des points-virgules (parce que vos paramètres régionaux utilisent le point-virgule comme séparateur de liste), changez le séparateur de liste dans les paramètres régionaux de Windows ou utilisez la méthode Python ci-dessous.
+
+**En Python :**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f, delimiter=";")
+    rows = list(reader)
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerows(rows)
+```
+
+---
+
+## Les risques de la mise en forme automatique
+
+Les tableurs comme Excel et Google Sheets modifient certaines valeurs sans prévenir quand vous ouvrez ou modifiez un CSV. Ces changements peuvent abîmer vos données avant même que vous ayez fait la moindre modification.
+
+### Zéros en tête supprimés des SKU et des identifiants
+
+Excel supprime les zéros en tête des valeurs qu'il prend pour des nombres. Un SKU comme `00123` devient `123`. Un code postal comme `02110` devient `2110`.
+
+**Comment l'éviter :**
+
+- Dans Excel : avant d'importer le CSV, passez par l'import de texte (Données > À partir d'un fichier texte/CSV) et définissez le type « Texte » pour chaque colonne qui doit garder ses zéros en tête.
+- Dans Google Sheets : après l'import, appliquez le format « Texte brut » (Format > Nombre > Texte brut) à la colonne concernée avant de la modifier.
+- Avec Python : lisez toujours les colonnes de SKU et d'identifiants avec `dtype=str` si vous utilisez pandas, ou utilisez le module standard `csv`, qui ne convertit jamais les types.
+
+### Nombres convertis en notation scientifique
+
+Les longues suites de chiffres (codes-barres à 13 chiffres, codes EAN) peuvent s'afficher sous la forme `1,23457E+12` dans Excel. À l'enregistrement en CSV, cette notation est écrite telle quelle, et la validation des codes-barres échoue à l'import.
+
+**Correction :** sélectionnez la colonne concernée dans Excel, appliquez le format « Nombre » avec 0 décimale (pas « Scientifique »), puis enregistrez. Vous pouvez aussi faire précéder la valeur d'une apostrophe (cela force le texte) ou mettre la colonne au format texte avant de coller les valeurs.
+
+### Dates converties au format régional
+
+Un champ contenant `2024-01-15` peut être converti automatiquement en `15/01/2024` ou `15 janvier 2024` selon vos paramètres régionaux. Les plateformes qui attendent le format ISO (`YYYY-MM-DD`) rejettent la valeur reformatée.
+
+**Correction :** après l'ouverture du fichier, sélectionnez les colonnes de date et mettez-les au format texte, ou utilisez le module Python `csv` pour lire et écrire sans aucune conversion de type.
+
+### Prix avec symbole monétaire
+
+Excel enregistre parfois une cellule au format monétaire sous la forme `$19.99` au lieu de `19.99`. La plupart des plateformes attendent des valeurs décimales simples sans symbole monétaire.
+
+**Correction :** dans Excel, mettez les colonnes de prix au format « Nombre » (pas « Monétaire » ni « Comptabilité ») avant d'enregistrer en CSV. Utilisez Rechercher et remplacer (Ctrl+H) pour retirer `$`, `EUR` ou d'autres symboles déjà présents dans les données.
+
+---
+
+## Lignes vides, virgules en fin de ligne et problèmes invisibles
+
+### Lignes vides en trop à la fin
+
+Beaucoup d'outils ajoutent une ligne vide après la dernière ligne de données. Les plateformes ignorent généralement les lignes vides, mais certaines les rejettent comme enregistrements invalides. Supprimez toujours les lignes vides en bas avant l'export.
+
+Dans Excel : appuyez sur Ctrl+Fin pour aller à la dernière cellule utilisée. Si elle est vide (une ligne vide sous vos données), sélectionnez ces lignes et supprimez-les (clic droit > Supprimer).
+
+### Virgules en fin de ligne
+
+Certains outils d'export écrivent une virgule à la fin de chaque ligne : `value1,value2,`. Cela crée une colonne vide en plus. La plupart des analyseurs s'en accommodent, mais les validateurs stricts peuvent le signaler comme un problème de structure.
+
+**Correction :** si chaque ligne, en-tête compris, se termine par une virgule en trop, retirez exactement une virgule à la fin de chaque ligne. Les retirer toutes supprimerait aussi de vraies cellules vides en fin de ligne :
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+### Caractères invisibles
+
+Certains outils insèrent des espaces de largeur nulle (U+200B) ou des espaces insécables (U+00A0) dans les valeurs. Ils sont invisibles dans le tableur, mais peuvent empêcher des en-têtes de correspondre ou faire rejeter des valeurs à l'import.
+
+**Vérification :** ouvrez le fichier dans VS Code et utilisez Rechercher (Ctrl+F) en mode expression régulière. Recherchez `​` ou ` ` pour trouver ces caractères.
+
+---
+
+## Les règles de chaque plateforme
+
+Chaque plateforme ajoute ses propres exigences à la norme CSV de base :
+
+- **Shopify :** la colonne Handle regroupe les lignes de variantes. Des handles manquants ou invalides cassent le regroupement des produits.
+- **WooCommerce :** utilise une colonne Type (`simple`, `variable`, `variation`) pour définir la structure du produit.
+- **Etsy :** n'a pas d'envoi de CSV. Son export des annonces sert à modifier, sauvegarder et migrer, et les applications de mise en ligne en masse définissent leurs propres colonnes.
+- **eBay :** exige la colonne Action (par exemple `Add`, `Revise`, `Relist` ou `End`) sur chaque ligne.
+- **Amazon :** les noms de colonnes dépendent du modèle de la catégorie ; téléchargez depuis Seller Central le modèle exact de votre catégorie.
+
+---
+
+## Liste de contrôle rapide avant l'import
+
+- [ ] La ligne 1 contient les en-têtes, sans ligne vide au-dessus
+- [ ] Les en-têtes correspondent exactement aux noms attendus par la plateforme, majuscules comprises
+- [ ] Aucun nom de colonne en double
+- [ ] Aucune espace au début ou à la fin des en-têtes
+- [ ] Fichier enregistré en UTF-8
+- [ ] Les valeurs contenant des virgules, des guillemets ou des sauts de ligne sont entre guillemets doubles
+- [ ] Aucune ligne vide en trop à la fin
+- [ ] Aucune ligne de synthèse ni cellule avec formule
+- [ ] Des fins de ligne homogènes (toutes CRLF ou toutes LF)
+- [ ] L'extension est .csv et le fichier contient du texte brut séparé par des virgules
+
+---
+
+## Étape suivante : validez avant d'importer
+
+Une fois votre fichier prêt, envoyez-le dans le correcteur CSV pour une validation automatique. Il vérifie les en-têtes, signale les problèmes d'encodage, repère les problèmes propres à chaque plateforme et corrige en un clic ceux qui peuvent l'être sans risque.

@@ -1,0 +1,168 @@
+---
+title: "Ajouter, fusionner ou joindre : bien combiner des fichiers CSV"
+description: "Comprenez la différence entre ajouter des lignes, fusionner des fichiers de même structure et joindre des fichiers aux données liées. Choisissez la bonne approche pour gérer votre catalogue e-commerce."
+keywords: ["ajouter fichiers csv", "fusionner fichiers csv", "joindre fichiers csv", "combiner csv", "assembler lignes csv", "recherchev csv", "fusion catalogue csv", "shopify csv ajouter lignes"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "La différence entre ajouter, fusionner et joindre des fichiers CSV"
+  - "Quand utiliser chaque approche dans la gestion d'un catalogue e-commerce"
+  - "Comment ajouter des lignes sans dupliquer les en-têtes"
+  - "Comment joindre deux fichiers CSV sur une colonne clé commune"
+  - "Les erreurs courantes quand on combine des fichiers CSV"
+bestFor: "Responsables catalogue, développeurs et vendeurs qui combinent des données produits venant de plusieurs sources, fournisseurs ou exports"
+timeToComplete: "10 minutes"
+---
+
+## Trois opérations, trois sens
+
+Quand on parle de « combiner des fichiers CSV », on désigne en général l'une de trois opérations différentes. Choisir la mauvaise entraîne des pertes de données ou des erreurs de structure.
+
+| Opération | Ce qui change | Nombre de lignes | Nombre de colonnes |
+|---|---|---|---|
+| **Ajouter** | On ajoute des lignes | Augmente | Identique |
+| **Fusionner** | On combine deux fichiers de même structure | Augmente | Identique |
+| **Joindre** | On ajoute des colonnes d'un fichier lié | Identique | Augmente |
+
+---
+
+## Ajouter : mettre plus de lignes
+
+**Ce que ça fait :** les lignes d'un second CSV sont placées à la fin du premier. Les deux fichiers doivent avoir exactement les mêmes colonnes.
+
+**Quand l'utiliser :**
+- Pour assembler des exports paginés (fichier 1 = lignes 1–500, fichier 2 = lignes 501–1000).
+- Pour ajouter un nouveau lot de produits à un fichier catalogue existant avant de l'importer.
+- Pour assembler les fichiers de plusieurs équipes régionales qui exportent dans le même format.
+
+**Comment ajouter correctement dans Excel :**
+
+1. Ouvrez votre fichier de base.
+2. Ouvrez le second fichier.
+3. Dans le second fichier, **supprimez la ligne d'en-tête** (clic droit sur la ligne 1 → Supprimer).
+4. Sélectionnez toutes les données restantes (Ctrl+A, puis ajustez si la sélection est trop large).
+5. Copiez (Ctrl+C).
+6. Revenez au fichier de base et cliquez sur la première cellule vide sous la dernière ligne de données.
+7. Collez (Ctrl+V).
+8. Enregistrez au format CSV UTF-8.
+
+**Erreur grave à éviter :** sauter l'étape 3 (supprimer l'en-tête) crée des lignes d'en-tête en double au milieu du fichier, ce qui fait échouer toutes les plateformes d'import.
+
+**Comment ajouter dans Google Sheets :**
+
+Même méthode : supprimez la ligne d'en-tête du second fichier, copiez uniquement les lignes de données et collez-les en bas de la feuille de base.
+
+---
+
+## Fusionner : combiner des fichiers aux mêmes colonnes (de plusieurs sources)
+
+**Ce que ça fait :** c'est au fond la même chose qu'ajouter, mais on parle plutôt de « fusion » quand les fichiers viennent de sources différentes et décrivent le même type de données (par exemple deux listes de produits fournisseurs au même format).
+
+**Quand l'utiliser :**
+- Pour réunir dans un seul fichier d'import les flux produits de deux fournisseurs différents.
+- Pour fusionner les exports de plusieurs services qui utilisent tous le même modèle CSV de la plateforme.
+
+**Points supplémentaires pour une fusion (par rapport à un simple ajout) :**
+- **Cherchez les lignes en double.** Si les deux fichiers contiennent le même produit, le fichier fusionné l'aura deux fois. Utilisez le Handle (Shopify), le SKU (WooCommerce/Amazon) ou l'Item ID (eBay) pour repérer les doublons. Dans Excel : **Données → Supprimer les doublons**, puis sélectionnez la colonne clé.
+- **Uniformisez les noms de colonnes.** Si le fournisseur A appelle une colonne `Barcode` et le fournisseur B l'appelle `UPC`, vous devez adopter le nom attendu par la plateforme avant de fusionner.
+- **Uniformisez les valeurs.** Les prix peuvent être dans des devises différentes, et les statuts suivre des conventions différentes (Published, TRUE ou 1).
+
+---
+
+## Joindre : ajouter des colonnes d'un fichier lié
+
+**Ce que ça fait :** on place deux fichiers côte à côte et on ajoute au premier des colonnes du second, en faisant correspondre les lignes grâce à une colonne clé commune (comme le SKU ou le Handle).
+
+**Quand l'utiliser :**
+- Vous avez une liste de produits issue de votre ERP (Handle, Title, SKU, Price) et un fichier de stock séparé (SKU, Quantity, Warehouse Location), et vous voulez ajouter la quantité à chaque ligne de produit.
+- Vous exportez des produits sans images depuis un système et vous avez un fichier séparé d'URL d'images associées par SKU.
+- Vous voulez ajouter des données fournisseur (prix d'achat, référence fournisseur) à votre catalogue avant l'import.
+
+### Joindre avec RECHERCHEV dans Excel
+
+Supposons :
+- **Fichier A** (base) : colonnes A=Handle, B=Title, C=Price
+- **Fichier B** (recherche) : colonnes A=Handle, B=Quantity
+
+Vous voulez ajouter Quantity du fichier B au fichier A.
+
+1. Dans le fichier A, ajoutez un nouvel en-tête de colonne : `Quantity` (en colonne D).
+2. En D2, saisissez :
+   ```
+   =RECHERCHEV(A2;'[FileB.csv]FileB'!$A:$B;2;FAUX)
+   ```
+3. Le fichier B doit être ouvert dans Excel. Quand Excel ouvre un CSV, il donne à la feuille le nom du fichier : `FileB.csv` contient donc une feuille appelée `FileB`. Si la clé correspond, Quantity est rempli. S'il n'y a pas de correspondance, `#N/A` s'affiche : ce Handle n'est pas dans le fichier B.
+4. Recopiez la formule vers le bas sur toutes les lignes.
+5. Une fois satisfait, sélectionnez la colonne D, copiez-la et utilisez **Collage spécial → Valeurs** pour remplacer les formules par des valeurs fixes.
+6. Fermez le fichier B.
+7. Enregistrez le fichier A au format CSV UTF-8.
+
+### Joindre dans Google Sheets
+
+Utilisez `RECHERCHEV` (ou `VLOOKUP`) avec la même syntaxe. Vous pouvez aussi utiliser `IMPORTRANGE` pour récupérer les données d'une autre feuille Google, puis passer par une colonne auxiliaire.
+
+### Joindre avec Python (gros fichiers)
+
+```python
+import csv
+
+# Charger le fichier de recherche dans un dictionnaire indexé par Handle
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Ajouter Quantity au fichier de base
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Erreurs courantes quand on combine des fichiers CSV
+
+### Erreur 1 : lignes d'en-tête en double après un ajout
+
+**Symptôme :** l'import échoue au milieu du fichier avec des erreurs de « ligne non reconnue ».
+**Solution :** avant d'ajouter, supprimez toujours la ligne d'en-tête de chaque fichier sauf le premier.
+
+### Erreur 2 : ordre des colonnes différent dans les fichiers ajoutés
+
+**Symptôme :** après l'ajout, les données apparaissent dans les mauvaises colonnes.
+**Solution :** les deux fichiers doivent avoir le même ordre de colonnes, pas seulement les mêmes noms. Si le fichier B a ses colonnes dans un autre ordre, réorganisez-les pour qu'elles correspondent au fichier A avant d'ajouter.
+
+### Erreur 3 : jointure sur une clé non unique
+
+**Symptôme :** RECHERCHEV renvoie la mauvaise quantité (elle prend la première correspondance et ignore les doublons).
+**Solution :** vérifiez que la colonne clé (SKU, Handle) est unique dans le fichier de recherche avant la jointure. Utilisez **Données → Supprimer les doublons** ou vérifiez avec NB.SI.
+
+### Erreur 4 : encodage différent après la combinaison
+
+**Symptôme :** caractères illisibles dans les lignes provenant de l'un des fichiers sources.
+**Solution :** enregistrez tous les fichiers sources en UTF-8 avant de les combiner. Réencodez avec VS Code tout fichier qui n'est pas en UTF-8 (voir le guide sur l'encodage).
+
+### Erreur 5 : lignes vides entre les sections ajoutées
+
+**Symptôme :** l'import s'arrête à la ligne vide et ignore toutes les lignes suivantes.
+**Solution :** après l'ajout, parcourez le fichier combiné et supprimez les lignes vides qui apparaissent entre les sections.
+
+---
+
+## Guide de décision rapide
+
+```
+Besoin de plus de lignes ? → Ajouter ou fusionner
+Besoin de plus de colonnes ? → Joindre
+
+Les fichiers viennent du même système avec des colonnes identiques ? → Ajouter
+Ils viennent de systèmes différents avec le même modèle de colonnes ? → Fusionner (cherchez les doublons)
+Données produits dans un fichier et données complémentaires dans un autre ? → Joindre
+```

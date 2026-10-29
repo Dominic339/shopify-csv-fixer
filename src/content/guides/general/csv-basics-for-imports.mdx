@@ -36,10 +36,10 @@ The first row of every CSV must contain column names (headers). Platforms use th
 
 ### Rules
 
-- **Headers are case-sensitive** on most platforms. `Handle` is not the same as `handle` or `HANDLE`.
+- **Match the spelling exactly, including case.** Some importers treat `Handle`, `handle` and `HANDLE` differently, so copy header names from the platform's template.
 - **No leading or trailing spaces.** A header of `" Title"` (with a leading space) will not match `"Title"`. Data in that column is silently ignored.
 - **No duplicate headers.** If two columns share the same name, most parsers use only the last one.
-- **Column order matters for some platforms.** Shopify, for example, expects specific columns in a specific order in its product template.
+- **Column order matters for some platforms.** Some eBay and Amazon templates expect the columns in the template's order, so keep the order of the template you downloaded. Shopify lets you add columns anywhere.
 
 ### How to Check
 
@@ -182,9 +182,9 @@ SUM() formulas at the bottom of a sheet appear in the CSV as product rows. Delet
 
 Merged cells export as a value in the first cell and blanks in all others. The importer sees the blank cells as empty required fields. Un-merge all cells before exporting.
 
-**4. Formula results that export unexpectedly**
+**4. Formula cells**
 
-A cell showing `$29.99` from a formula might export as `29.99` or as the raw formula text. Use Paste Special > Values in Excel to replace all formulas with plain numbers before saving as CSV.
+When Excel saves a CSV, it writes what each cell displays: the formula's current result, with its number format. A price formula formatted as currency is written as `$29.99`, and a broken one as `#N/A` or `#REF!`. Check formula columns for errors, then use Paste Special > Values to turn them into plain values before saving as CSV.
 
 **5. Trailing spaces in header names**
 
@@ -210,11 +210,11 @@ Open the file in a plain text editor. Look at the first row:
 
 - If column names are separated by `,`, the file is comma-delimited (standard CSV)
 - If they are separated by `;`, it is semicolon-delimited (common in European Excel locales)
-- If there are no separators and each row is one long string, the file may be tab-delimited and you opened it in a tool that replaced tabs with nothing
+- If they are separated by wide gaps, it is tab-delimited (TSV)
 
 ### Converting a Semicolon File to Comma-Delimited
 
-**In Excel:** File > Save As > CSV (Comma delimited). If Excel still saves with semicolons (because your system locale uses semicolons as the list separator), change the list separator in your Windows Region settings, or use the Python method below.
+**In Excel:** File > Save As > CSV UTF-8 (Comma delimited). If Excel still saves with semicolons (because your system locale uses semicolons as the list separator), change the list separator in your Windows Region settings, or use the Python method below.
 
 **In Python:**
 
@@ -278,30 +278,32 @@ In Excel: press Ctrl+End to jump to the last used cell. If it is blank (an empty
 
 Some export tools write a trailing comma at the end of every row: `value1,value2,`. This creates an implicit empty extra column. Most parsers handle this gracefully, but strict validators may flag it as a structural issue.
 
-**Fix:** If trailing commas are present throughout the file, use a Python one-liner to strip them:
+**Fix:** If every row, including the header, ends with an extra comma, remove exactly one comma from the end of each line. Removing all of them would also delete real empty cells at the end of a row:
 
 ```python
-with open("input.csv", encoding="utf-8") as f:
-    lines = f.readlines()
-with open("output.csv", "w", encoding="utf-8") as f:
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
     for line in lines:
-        f.write(line.rstrip(",\r\n") + "\n")
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
 ```
 
 ### Invisible Characters
 
 Some tools insert zero-width spaces (U+200B) or non-breaking spaces (U+00A0) inside cell values. These are invisible in spreadsheet views but can cause header mismatches or value rejections on import.
 
-**Check:** Open the file in VS Code and use Find (Ctrl+F) with regex mode. Search for `\x{200B}` or `\x{00A0}` to find these characters.
+**Check:** Open the file in VS Code and use Find (Ctrl+F) with regex mode. Search for `\u200B` or `\u00A0` to find these characters.
 
 ---
+
+## Platform-Specific Rules
 
 Each platform adds specific requirements on top of the basic CSV standard:
 
 - **Shopify:** The Handle column groups variant rows. Missing or invalid handles break product grouping.
 - **WooCommerce:** Uses a Type column (`simple`, `variable`, `variation`) to define product structure.
-- **Etsy:** Requires specific allowed values for fields like `when_made` and `who_made`.
-- **eBay:** Requires the Action column (`Add`, `Revise`, `Delete`, `End`) on every row.
+- **Etsy:** Has no CSV upload. Its listing export is for editing, backups and migrations, and bulk-listing apps set their own columns.
+- **eBay:** Requires the Action column (such as `Add`, `Revise`, `Relist` or `End`) on every row.
 - **Amazon:** Column names vary by product category template; download the exact template for your category from Seller Central.
 
 ---
@@ -309,7 +311,7 @@ Each platform adds specific requirements on top of the basic CSV standard:
 ## Quick Pre-Import Checklist
 
 - [ ] Row 1 is headers, with no blank row above it
-- [ ] Headers match the platform's expected column names exactly (case-sensitive)
+- [ ] Headers match the platform's expected column names exactly, including case
 - [ ] No duplicate column names
 - [ ] No leading or trailing spaces in header names
 - [ ] File saved as UTF-8

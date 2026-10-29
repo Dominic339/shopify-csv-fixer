@@ -1,0 +1,196 @@
+---
+title: "Opmaakregels voor CSV bij e-commerce-imports"
+description: "De exacte opmaakregels waaraan je CSV moet voldoen om door de imports van e-commerceplatforms te komen: scheidingstekens, aanhalingstekens, regeleinden, codering en kolomkoppen."
+keywords: ["csv opmaakregels", "csv formaateisen", "csv importformaat", "csv bestandsformaat e-commerce", "csv regels aanhalingstekens", "csv regels scheidingsteken", "csv opmaken voor import"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "De verplichte opmaakregels waaraan elke e-commerce-CSV moet voldoen"
+  - "Hoe aanhalingstekens werken en wanneer je ze gebruikt"
+  - "Eisen voor scheidingstekens, regeleinden en codering"
+  - "Hoe spreadsheetprogramma's de CSV-opmaak ongemerkt kapotmaken"
+  - "Een korte checklist om je bestand vóór het uploaden te controleren"
+bestFor: "Verkopers die hun eerste importbestand voorbereiden en ontwikkelaars die CSV-exportscripts schrijven"
+timeToComplete: "9 minuten"
+---
+
+## De CSV-standaard die e-commerceplatforms volgen
+
+De meeste e-commerceplatforms (Shopify, WooCommerce, eBay en de exports van Etsy) verwachten bestanden volgens **RFC 4180**, de gangbare CSV-standaard. Die standaard legt precies vast hoe rijen, kolommen, aanhalingstekens en regeleinden moeten zijn opgebouwd. De Inventory Loader van Amazon is de uitzondering: die gebruikt tabgescheiden tekst (.txt).
+
+Deze handleiding behandelt elke regel die bepaalt of een import slaagt. Overtreed je er een, dan krijg je parserfouten, verkeerd gekoppelde kolommen of ongemerkt beschadigde gegevens.
+
+---
+
+## Regel 1: de komma is het scheidingsteken
+
+Scheid kolommen met komma's. Gebruik geen puntkomma's (gebruikelijk bij Excel met Europese landinstellingen), tabs (TSV-formaat) of verticale strepen (`|`).
+
+**Goed:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Fout (puntkomma's):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Gebruikt je Excel standaard puntkomma's (omdat je landinstelling de komma als decimaalteken gebruikt, zoals in het Nederlands), zet het lijstscheidingsteken van het systeem dan op een komma of exporteer via Google Spreadsheets, dat altijd kommagescheiden bestanden maakt.
+
+---
+
+## Regel 2: de eerste rij bevat alleen kolomkoppen
+
+Rij 1 moet de kolomnamen bevatten en verder niets. Geen lege rijen erboven, geen titelrijen, geen samengevoegde kopcellen.
+
+**Goed:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Fout:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+Het platform leest rij 1 als kolomkoppen. Staat daar iets anders, dan wordt dat als kolomnamen gelezen en klopt geen enkele kolomkop meer.
+
+Er zijn twee uitzonderingen: categoriesjablonen van Amazon hebben sjabloonrijen boven de kolomnamen, en eBay-sjablonen kunnen beginnen met `Info`-regels. Laat die rijen precies staan zoals ze in het gedownloade sjabloon staan.
+
+---
+
+## Regel 3: kolomkoppen moeten exact zijn
+
+Kolomnamen moeten precies overeenkomen met wat het platform verwacht:
+
+- **Zelfde hoofdletters:** sommige importprogramma's zien `Handle`, `handle` en `HANDLE` als verschillende kolommen
+- **Geen spaties aan het begin of eind:** ` Title` (met een spatie ervoor) komt niet overeen met `Title`
+- **Geen regeleinden in kolomkoppen:** een kopcel moet uit één regel bestaan
+- **Geen dubbele kolomkoppen:** hebben twee kolommen dezelfde naam, dan gebruiken de meeste parsers alleen de laatste
+
+---
+
+## Regel 4: aanhalingstekens bij komma's, aanhalingstekens en regeleinden
+
+Bevat een celwaarde een komma, een dubbel aanhalingsteken of een regeleinde, zet dan de hele waarde tussen dubbele aanhalingstekens.
+
+**Goed:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Aanhalingstekens escapen binnen een waarde tussen aanhalingstekens:** verdubbel het binnenste aanhalingsteken:
+
+```
+"She said ""great product"""
+```
+
+Dit staat voor: She said "great product"
+
+| Situatie | Juiste opmaak |
+|---|---|
+| Waarde met komma | `"value, with comma"` |
+| Waarde met dubbel aanhalingsteken | `"value ""with"" quotes"` |
+| Waarde met HTML | `"<p>Description here</p>"` |
+| Waarde met regeleinde | `"Line one\nLine two"` (binnen de aanhalingstekens) |
+| Gewoon getal | `19.99` (geen aanhalingstekens nodig) |
+
+---
+
+## Regel 5: UTF-8-codering
+
+Sla je bestand op als **UTF-8**. De Excel-optie "CSV UTF-8" voegt een BOM (Byte Order Mark) toe: Shopify en WooCommerce lezen die zonder problemen, maar haal hem weg als een platform de eerste kolom niet herkent.
+
+- UTF-8 kan overweg met letters met accenten, symbolen en elke taal
+- Oude coderingen (Windows-1252, ISO 8859-1) maken die tekens bij de import onleesbaar
+- ANSI-, Latin-1- en Windows-1252-bestanden geven onleesbare tekens bij letters met accenten, gekrulde aanhalingstekens en valutasymbolen
+
+**Controleren:** open het bestand in VS Code. De statusbalk toont de codering. Daar moet `UTF-8` (of `UTF-8 with BOM`) staan, niet `Windows 1252` of `ISO 8859-1`.
+
+---
+
+## Regel 6: overal dezelfde regeleinden
+
+Gebruik in het hele bestand óf CRLF (`\r\n`, Windows) óf LF (`\n`, Unix/macOS). Meng ze nooit.
+
+Door gemengde regeleinden zien sommige parsers lege rijen tussen de rijen met gegevens, of tellen ze kolommen in waarden over meerdere regels verkeerd.
+
+**Controleren in VS Code:** de statusbalk toont `CRLF` of `LF`. Klik erop om het regeleinde te veranderen en sla op.
+
+---
+
+## Regel 7: één rij per record (behalve bij platforms met producten over meerdere rijen)
+
+Elke rij is één record, maar op verschillende platforms beslaat één product meerdere rijen:
+
+- **Shopify:** rijen voor varianten en extra afbeeldingen herhalen de `Handle` van het product
+- **WooCommerce:** elke variatie heeft een eigen rij, gekoppeld aan het variabele product via `Parent`
+- **eBay:** aanbiedingen met variaties hebben extra `Relationship`-rijen onder de hoofdrij
+- **Amazon:** hoofd- en subartikelen zijn aparte rijen, gekoppeld via de SKU van het hoofdartikel
+
+Volg de opbouw die de documentatie van het platform beschrijft, en voeg daarbuiten geen rijen samen en splits ze niet.
+
+---
+
+## Regel 8: geen lege rijen
+
+Lege rijen tussen of na de rijen met gegevens zorgen ervoor dat parsers:
+
+- Lege records aan de import toevoegen
+- Het aantal producten verkeerd tellen
+- Stoppen bij de eerste lege rij (op sommige platforms)
+
+Verwijder vóór het opslaan alle lege rijen. Druk in Excel op `Ctrl+End` om naar de laatst gebruikte cel te springen. Ligt die voorbij je gegevens, dan zijn er lege rijen die je moet verwijderen.
+
+---
+
+## Regel 9: geen samenvattings- of formulerijen
+
+Verwijder alle rijen die geen productgegevens zijn:
+
+- Totaal- en subtotaalrijen onderaan
+- Rijen met SOM()-formules
+- Notities of instructies onder de gegevens
+- Scheidingsrijen tussen secties
+
+Deze rijen verschijnen in de import als productrecords en veroorzaken typefouten (tekst waar getallen worden verwacht, ontbrekende verplichte velden enzovoort).
+
+---
+
+## Regel 10: geen samengevoegde cellen
+
+Samengevoegde cellen in Excel worden geëxporteerd met een waarde in de cel linksboven en lege tekst in alle andere. Het importprogramma ziet in elke rij na de eerste ontbrekende verplichte velden.
+
+**Oplossing:** alles selecteren → samenvoeging van cellen opheffen → lege cellen met de juiste waarden vullen voordat je als CSV opslaat.
+
+---
+
+## Korte controlechecklist
+
+- [ ] Kommagescheiden (geen puntkomma's of verticale strepen; Amazon-bestanden zijn tabgescheiden)
+- [ ] Rij 1 bevat alleen kolomkoppen, zonder lege rijen erboven
+- [ ] Kolomkoppen komen precies overeen met de namen die het platform verwacht (hoofdletters en spaties)
+- [ ] Geen dubbele kolomnamen
+- [ ] Waarden met komma's of aanhalingstekens staan tussen dubbele aanhalingstekens
+- [ ] De codering van het bestand is UTF-8
+- [ ] Regeleinden zijn overal gelijk (allemaal CRLF of allemaal LF)
+- [ ] Nergens in het bestand lege rijen
+- [ ] Geen samenvattingsrijen, formulerijen of samengevoegde cellen
+- [ ] Het bestand heeft de extensie `.csv` en is platte tekst (geen hernoemde `.xlsx`)
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je CSV en StriveFormats controleert automatisch elke regel hierboven. Het meldt overtredingen met de exacte rij en kolom, herstelt veilige problemen automatisch en exporteert een schoon bestand.
+
+[CSV-fixer openen](/app) | [CSV-sjablonen bekijken](/presets)

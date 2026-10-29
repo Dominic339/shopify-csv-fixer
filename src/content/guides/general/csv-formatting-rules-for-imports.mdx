@@ -63,13 +63,15 @@ Handle,Title,Variant Price
 
 The platform reads row 1 as headers. Any non-header content in row 1 is treated as column names, causing every header to be mismatched.
 
+There are two exceptions: Amazon category templates have template rows above the column names, and eBay templates can start with `Info` lines. Keep those rows exactly as the downloaded template has them.
+
 ---
 
 ## Rule 3: Headers Are Exact
 
 Column names must match the platform's expected names exactly:
 
-- **Case-sensitive:** `Handle` is not the same as `handle` or `HANDLE` on Shopify
+- **Same case:** some importers treat `Handle`, `handle` and `HANDLE` as different columns
 - **No leading/trailing spaces:** ` Title` (space before) will not match `Title`
 - **No line breaks inside headers:** a header cell must be a single line
 - **No duplicate headers:** if two columns have the same name, most parsers use only the last
@@ -128,9 +130,14 @@ Mixed line endings cause some parsers to see blank rows between data rows, or to
 
 ## Rule 7: One Row Per Record (Except Platforms With Multi-Row Products)
 
-Each row is one independent record. The exception: Shopify uses multiple rows sharing the same `Handle` to represent a product with variants.
+Each row is one record, but on several platforms one product spans several rows:
 
-For all other platforms, a row = one product. Multi-row product structures only apply where the platform's official documentation explicitly describes them.
+- **Shopify:** variant and extra image rows repeat the product's `Handle`
+- **WooCommerce:** each variation has its own row, linked to the variable product by `Parent`
+- **eBay:** variation listings add `Relationship` rows under the parent row
+- **Amazon:** parent and child items are separate rows, linked by the parent SKU
+
+Follow the structure the platform's documentation describes, and don't merge or split rows outside it.
 
 ---
 
@@ -152,7 +159,7 @@ Remove any rows that are not product data:
 
 - Total/subtotal rows at the bottom
 - SUM() formula rows
-- Filter header rows added by Excel's auto-filter
+- Notes or instructions typed below the data
 - Section dividers
 
 These rows appear as product records in the import and cause type errors (text where numbers are expected, missing required fields, etc.).

@@ -1,0 +1,168 @@
+---
+title: "Toevoegen, samenvoegen of koppelen: CSV-bestanden goed combineren"
+description: "Begrijp het verschil tussen rijen toevoegen, bestanden met dezelfde structuur samenvoegen en bestanden met gerelateerde gegevens koppelen. Kies de juiste aanpak voor je catalogus."
+keywords: ["csv bestanden toevoegen", "csv bestanden samenvoegen", "csv bestanden koppelen", "csv combineren", "csv rijen samenvoegen", "vert.zoeken csv", "catalogus csv samenvoegen", "shopify csv rijen toevoegen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Het verschil tussen toevoegen, samenvoegen en koppelen van CSV-bestanden"
+  - "Wanneer je welke aanpak gebruikt bij het beheren van een webwinkelcatalogus"
+  - "Hoe je rijen goed toevoegt zonder koprijen te verdubbelen"
+  - "Hoe je twee CSV-bestanden koppelt via een gemeenschappelijke sleutelkolom"
+  - "Veelgemaakte fouten bij het combineren van CSV-bestanden"
+bestFor: "Catalogusbeheerders, ontwikkelaars en verkopers die productgegevens uit meerdere bronnen, van leveranciers of uit exportbestanden combineren"
+timeToComplete: "10 minuten"
+---
+
+## Drie bewerkingen, drie betekenissen
+
+Wie het over "CSV-bestanden combineren" heeft, bedoelt meestal een van drie verschillende bewerkingen. Kies je de verkeerde, dan raak je gegevens kwijt of gaat de structuur stuk.
+
+| Bewerking | Wat verandert | Aantal rijen | Aantal kolommen |
+|---|---|---|---|
+| **Toevoegen** | Er komen rijen bij | Neemt toe | Gelijk |
+| **Samenvoegen** | Twee bestanden met dezelfde structuur worden één | Neemt toe | Gelijk |
+| **Koppelen** | Er komen kolommen uit een gerelateerd bestand bij | Gelijk | Neemt toe |
+
+---
+
+## Toevoegen: meer rijen erbij
+
+**Wat het doet:** de rijen van een tweede CSV komen onder aan de eerste. Beide bestanden moeten precies dezelfde kolommen hebben.
+
+**Wanneer je het gebruikt:**
+- Om exports te combineren die in pagina's zijn opgesplitst (bestand 1 = rijen 1–500, bestand 2 = rijen 501–1000).
+- Om een nieuwe reeks producten aan een bestaand catalogusbestand toe te voegen voordat je uploadt.
+- Om bestanden van verschillende regionale teams te combineren die in hetzelfde formaat exporteren.
+
+**Zo voeg je in Excel goed toe:**
+
+1. Open je basisbestand.
+2. Open het tweede bestand.
+3. **Verwijder in het tweede bestand de koprij** (klik met de rechtermuisknop op rij 1 → Verwijderen).
+4. Selecteer alle overige gegevens (Ctrl+A, en pas aan als er te veel geselecteerd is).
+5. Kopieer (Ctrl+C).
+6. Ga naar het basisbestand en klik op de eerste lege cel onder de laatste rij met gegevens.
+7. Plak (Ctrl+V).
+8. Sla op als CSV UTF-8.
+
+**Ernstige fout om te vermijden:** sla je stap 3 (koprij verwijderen) over, dan staan er dubbele koprijen midden in het bestand, en daar loopt elk importplatform op vast.
+
+**Zo voeg je toe in Google Spreadsheets:**
+
+Op dezelfde manier: verwijder de koprij van het tweede bestand, kopieer alleen de rijen met gegevens en plak ze onder aan het basisblad.
+
+---
+
+## Samenvoegen: bestanden met dezelfde kolommen combineren (uit meerdere bronnen)
+
+**Wat het doet:** in wezen hetzelfde als toevoegen, maar je spreekt van "samenvoegen" als bestanden uit verschillende bronnen komen en hetzelfde soort gegevens bevatten (bijvoorbeeld twee productlijsten van leveranciers in hetzelfde formaat).
+
+**Wanneer je het gebruikt:**
+- Om productfeeds van twee verschillende leveranciers in één uploadbestand te zetten.
+- Om losse exports van afdelingen samen te voegen die allemaal hetzelfde CSV-sjabloon van het platform gebruiken.
+
+**Extra aandachtspunten bij samenvoegen (vergeleken met gewoon toevoegen):**
+- **Controleer op dubbele rijen.** Staat hetzelfde product in beide bestanden, dan staat het twee keer in het samengevoegde bestand. Herken dubbele rijen aan de Handle (Shopify), de SKU (WooCommerce/Amazon) of de Item ID (eBay). In Excel: **Gegevens → Dubbele waarden verwijderen** en kies de sleutelkolom.
+- **Maak kolomnamen gelijk.** Noemt leverancier A een kolom `Barcode` en leverancier B `UPC`, dan moet je vóór het samenvoegen overstappen op de kolomnaam die het platform verwacht.
+- **Maak waarden gelijk.** Prijzen kunnen in verschillende valuta staan en statussen kunnen verschillend geschreven zijn (Published, TRUE of 1).
+
+---
+
+## Koppelen: kolommen uit een gerelateerd bestand toevoegen
+
+**Wat het doet:** twee bestanden worden naast elkaar gelegd. Het eerste krijgt kolommen uit het tweede, gekoppeld via een gemeenschappelijke sleutelkolom (zoals SKU of Handle).
+
+**Wanneer je het gebruikt:**
+- Je hebt een productlijst uit je ERP (Handle, Title, SKU, Price) en een apart voorraadbestand (SKU, Quantity, Warehouse Location), en je wilt bij elke productrij de voorraad zetten.
+- Je exporteert producten zonder afbeeldingen uit een systeem en hebt een apart bestand met afbeeldings-URL's die via de SKU gekoppeld zijn.
+- Je wilt vóór de import leveranciersgegevens (inkoopprijs, artikelnummer van de leverancier) aan je catalogus toevoegen.
+
+### Koppelen met VERT.ZOEKEN in Excel
+
+Stel:
+- **Bestand A** (basis): kolommen A=Handle, B=Title, C=Price
+- **Bestand B** (opzoeken): kolommen A=Handle, B=Quantity
+
+Je wilt Quantity uit bestand B in bestand A zetten.
+
+1. Voeg in bestand A een nieuwe kolomkop toe: `Quantity` (in kolom D).
+2. Typ in D2:
+   ```
+   =VERT.ZOEKEN(A2;'[FileB.csv]FileB'!$A:$B;2;ONWAAR)
+   ```
+3. Bestand B moet in Excel geopend zijn. Als Excel een CSV opent, krijgt het werkblad de naam van het bestand, dus `FileB.csv` heeft een blad met de naam `FileB`. Komt de sleutel overeen, dan wordt Quantity ingevuld. Is er geen overeenkomst, dan verschijnt `#N/B`: die Handle staat niet in bestand B.
+4. Kopieer de formule omlaag naar alle rijen.
+5. Klopt alles, selecteer dan kolom D, kopieer die en kies **Plakken speciaal → Waarden** om de formules door vaste waarden te vervangen.
+6. Sluit bestand B.
+7. Sla bestand A op als CSV UTF-8.
+
+### Koppelen in Google Spreadsheets
+
+Gebruik `VERT.ZOEKEN` (of `VLOOKUP`) met dezelfde syntaxis. Je kunt ook met `IMPORTRANGE` gegevens uit een ander Google-spreadsheet ophalen en daarna met een hulpkolom werken.
+
+### Koppelen met Python (grote bestanden)
+
+```python
+import csv
+
+# Het opzoekbestand laden in een dictionary met de Handle als sleutel
+lookup = {}
+with open("inventory.csv", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        lookup[row["Handle"]] = row["Quantity"]
+
+# Quantity aan het basisbestand toevoegen
+with open("products.csv", encoding="utf-8") as infile, \
+     open("products_with_qty.csv", "w", newline="", encoding="utf-8") as outfile:
+    reader = csv.DictReader(infile)
+    fieldnames = reader.fieldnames + ["Quantity"]
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in reader:
+        row["Quantity"] = lookup.get(row["Handle"], "")
+        writer.writerow(row)
+```
+
+---
+
+## Veelgemaakte fouten bij het combineren van CSV-bestanden
+
+### Fout 1: dubbele koprijen na het toevoegen
+
+**Symptoom:** de import mislukt midden in het bestand met fouten als "onbekende rij".
+**Oplossing:** verwijder vóór het toevoegen altijd de koprij van elk bestand behalve het eerste.
+
+### Fout 2: andere kolomvolgorde in toegevoegde bestanden
+
+**Symptoom:** na het toevoegen staan gegevens in de verkeerde kolommen.
+**Oplossing:** beide bestanden moeten dezelfde kolomvolgorde hebben, niet alleen dezelfde kolomnamen. Staan de kolommen van bestand B in een andere volgorde, zet ze dan vóór het toevoegen in dezelfde volgorde als bestand A.
+
+### Fout 3: koppelen via een sleutel die niet uniek is
+
+**Symptoom:** VERT.ZOEKEN geeft de verkeerde voorraad (het neemt de eerste overeenkomst en negeert dubbele waarden).
+**Oplossing:** zorg vóór het koppelen dat de sleutelkolom (SKU, Handle) uniek is in het opzoekbestand. Gebruik **Gegevens → Dubbele waarden verwijderen** of controleer met AANTAL.ALS.
+
+### Fout 4: verschillende codering na het combineren
+
+**Symptoom:** onleesbare tekens in de rijen uit een van de bronbestanden.
+**Oplossing:** sla alle bronbestanden op als UTF-8 voordat je ze combineert. Codeer elk bestand dat geen UTF-8 is opnieuw met VS Code (zie de handleiding over codering).
+
+### Fout 5: lege rijen tussen toegevoegde delen
+
+**Symptoom:** de import stopt bij de lege rij en negeert alle rijen daarna.
+**Oplossing:** scrol na het toevoegen door het gecombineerde bestand en verwijder lege rijen tussen de delen.
+
+---
+
+## Snelle keuzehulp
+
+```
+Heb je meer rijen nodig? → Toevoegen of samenvoegen
+Heb je meer kolommen nodig? → Koppelen
+
+Komen de bestanden uit hetzelfde systeem met identieke kolommen? → Toevoegen
+Komen ze uit verschillende systemen met hetzelfde kolomsjabloon? → Samenvoegen (controleer op dubbele rijen)
+Staan productgegevens in het ene bestand en aanvullende gegevens in het andere? → Koppelen
+```

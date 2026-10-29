@@ -1,0 +1,196 @@
+---
+title: "Regras de formatação de CSV para importações de e-commerce"
+description: "As regras de formatação exatas que seu CSV precisa seguir para passar nas importações das plataformas de e-commerce: delimitadores, aspas, quebras de linha, codificação e cabeçalhos."
+keywords: ["regras de formatação csv", "requisitos de formato csv", "formato de importação csv", "formato de arquivo csv e-commerce", "regras de aspas csv", "regras de delimitador csv", "como formatar csv para importar"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "As regras de formatação obrigatórias para todo CSV de e-commerce"
+  - "Como funcionam as aspas e quando usá-las"
+  - "Requisitos de delimitador, quebra de linha e codificação"
+  - "Como as planilhas quebram o formato CSV sem avisar"
+  - "Um checklist rápido para validar o arquivo antes de enviar"
+bestFor: "Vendedores preparando o primeiro arquivo de importação e desenvolvedores escrevendo scripts de exportação CSV"
+timeToComplete: "9 minutos"
+---
+
+## O padrão CSV seguido pelas plataformas de e-commerce
+
+A maioria das plataformas de e-commerce (Shopify, WooCommerce, eBay e as exportações da Etsy) espera arquivos que sigam a **RFC 4180**, o padrão CSV comum. Esse padrão define exatamente como linhas, colunas, aspas e quebras de linha devem ser estruturadas. O Inventory Loader da Amazon é a exceção: ele usa texto separado por tabulação (.txt).
+
+Este guia cobre todas as regras que afetam o sucesso da importação. Violar qualquer uma delas causa erros de leitura, colunas mapeadas errado ou dados corrompidos sem aviso.
+
+---
+
+## Regra 1: a vírgula é o delimitador
+
+Use vírgulas para separar as colunas. Não use ponto e vírgula (comum no Excel com configuração regional do Brasil e de países europeus), tabulações (formato TSV) nem barras verticais (`|`).
+
+**Correto:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Errado (ponto e vírgula):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Se o seu Excel usa ponto e vírgula por padrão (porque a configuração regional usa a vírgula como separador decimal, como no Brasil), mude o separador de lista do sistema para vírgula ou exporte pelo Google Sheets, que sempre gera arquivos separados por vírgula.
+
+---
+
+## Regra 2: a primeira linha tem só os cabeçalhos
+
+A linha 1 precisa conter os nomes das colunas e mais nada. Nada de linhas em branco acima, linhas de título ou células de cabeçalho mescladas.
+
+**Correto:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Errado:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+A plataforma lê a linha 1 como cabeçalhos. Qualquer conteúdo que não seja cabeçalho na linha 1 é tratado como nome de coluna, e nenhum cabeçalho corresponde.
+
+Há duas exceções: os modelos de categoria da Amazon têm linhas de modelo acima dos nomes das colunas, e os modelos do eBay podem começar com linhas `Info`. Mantenha essas linhas exatamente como vieram no modelo baixado.
+
+---
+
+## Regra 3: os cabeçalhos precisam ser exatos
+
+Os nomes das colunas precisam corresponder exatamente aos que a plataforma espera:
+
+- **Mesmas maiúsculas e minúsculas:** alguns importadores tratam `Handle`, `handle` e `HANDLE` como colunas diferentes
+- **Sem espaços no início ou no fim:** ` Title` (com espaço antes) não corresponde a `Title`
+- **Sem quebras de linha dentro dos cabeçalhos:** a célula de cabeçalho precisa ter uma linha só
+- **Sem cabeçalhos duplicados:** se duas colunas têm o mesmo nome, a maioria dos leitores usa só a última
+
+---
+
+## Regra 4: aspas obrigatórias para vírgulas, aspas e quebras de linha
+
+Sempre que o valor de uma célula tiver vírgula, aspas duplas ou quebra de linha, coloque o valor inteiro entre aspas duplas.
+
+**Correto:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Escapar aspas dentro de um valor entre aspas:** duplique a aspa interna:
+
+```
+"She said ""great product"""
+```
+
+Isso representa: She said "great product"
+
+| Situação | Formato correto |
+|---|---|
+| Valor com vírgula | `"value, with comma"` |
+| Valor com aspas duplas | `"value ""with"" quotes"` |
+| Valor com HTML | `"<p>Description here</p>"` |
+| Valor com quebra de linha | `"Line one\nLine two"` (dentro das aspas) |
+| Número simples | `19.99` (não precisa de aspas) |
+
+---
+
+## Regra 5: codificação UTF-8
+
+Salve o arquivo em **UTF-8**. A opção "CSV UTF-8" do Excel acrescenta um BOM (Byte Order Mark): Shopify e WooCommerce leem sem problemas, mas remova-o se uma plataforma não reconhecer a primeira coluna.
+
+- UTF-8 lida com letras acentuadas, ç, símbolos e qualquer idioma
+- Codificações antigas (Windows-1252, ISO 8859-1) embaralham esses caracteres na importação
+- Arquivos ANSI, Latin-1 e Windows-1252 geram caracteres embaralhados em letras acentuadas, aspas tipográficas e símbolos de moeda
+
+**Como conferir:** abra o arquivo no VS Code. A barra de status mostra a codificação. Deve aparecer `UTF-8` (ou `UTF-8 with BOM`), não `Windows 1252` nem `ISO 8859-1`.
+
+---
+
+## Regra 6: quebras de linha uniformes
+
+Use no arquivo inteiro ou CRLF (`\r\n`, Windows) ou LF (`\n`, Unix/macOS). Nunca misture.
+
+Quebras de linha misturadas fazem alguns leitores enxergarem linhas em branco entre as linhas de dados ou contarem errado as colunas em valores de várias linhas.
+
+**Como conferir no VS Code:** a barra de status mostra `CRLF` ou `LF`. Clique para trocar a quebra de linha e salve.
+
+---
+
+## Regra 7: uma linha por registro (exceto plataformas com produtos em várias linhas)
+
+Cada linha é um registro, mas em várias plataformas um produto ocupa várias linhas:
+
+- **Shopify:** as linhas de variantes e de imagens extras repetem o `Handle` do produto
+- **WooCommerce:** cada variação tem a própria linha, ligada ao produto variável pela coluna `Parent`
+- **eBay:** anúncios com variações acrescentam linhas `Relationship` abaixo da linha principal
+- **Amazon:** itens pai e filho são linhas separadas, ligadas pelo SKU pai
+
+Siga a estrutura que a documentação da plataforma descreve e não junte nem divida linhas fora dela.
+
+---
+
+## Regra 8: sem linhas em branco
+
+Linhas em branco entre as linhas de dados ou depois delas fazem os leitores:
+
+- Inserir registros vazios na importação
+- Contar errado o número de produtos
+- Parar de processar na primeira linha em branco (em algumas plataformas)
+
+Exclua todas as linhas em branco antes de salvar. No Excel, pressione `Ctrl+End` para ir à última célula usada. Se ela estiver além dos seus dados, há linhas em branco que precisam ser excluídas.
+
+---
+
+## Regra 9: sem linhas de resumo ou de fórmulas
+
+Remova todas as linhas que não sejam dados de produto:
+
+- Linhas de total ou subtotal no fim
+- Linhas com fórmulas SOMA()
+- Notas ou instruções digitadas abaixo dos dados
+- Divisores de seção
+
+Essas linhas aparecem como produtos na importação e causam erros de tipo (texto onde se espera número, campos obrigatórios faltando etc.).
+
+---
+
+## Regra 10: sem células mescladas
+
+Células mescladas do Excel são exportadas com o valor na célula do canto superior esquerdo e textos vazios em todas as outras. O importador enxerga campos obrigatórios faltando em todas as linhas depois da primeira.
+
+**Solução:** selecionar tudo → desfazer a mesclagem → preencher as células vazias com os valores certos antes de salvar como CSV.
+
+---
+
+## Checklist rápido de validação
+
+- [ ] Separado por vírgulas (não por ponto e vírgula nem barras verticais; arquivos da Amazon são separados por tabulação)
+- [ ] A linha 1 tem só os cabeçalhos, sem linhas em branco acima
+- [ ] Os cabeçalhos correspondem exatamente aos nomes que a plataforma espera (maiúsculas e espaços)
+- [ ] Nenhum nome de coluna duplicado
+- [ ] Valores com vírgulas ou aspas estão entre aspas duplas
+- [ ] A codificação do arquivo é UTF-8
+- [ ] Quebras de linha uniformes (todas CRLF ou todas LF)
+- [ ] Nenhuma linha em branco em nenhuma parte do arquivo
+- [ ] Nenhuma linha de resumo, linha de fórmula ou célula mesclada
+- [ ] O arquivo tem extensão `.csv` e é texto simples (não um `.xlsx` renomeado para `.csv`)
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu CSV e o StriveFormats confere automaticamente cada uma das regras acima. Ele aponta as violações com a linha e a coluna exatas, corrige automaticamente os problemas seguros e exporta um arquivo limpo.
+
+[Abrir o corretor de CSV](/app) | [Ver modelos de CSV](/presets)
