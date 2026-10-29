@@ -2,7 +2,7 @@
 title: "CSV Import Errors Explained"
 description: "A plain-English breakdown of the most common CSV import error messages across Shopify, WooCommerce, Etsy, eBay, and Amazon, and how to fix each one."
 keywords: ["csv import errors explained", "csv import error messages", "csv import failed", "csv upload error", "ecommerce csv errors", "fix csv import", "csv import troubleshooting"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "What each common CSV import error message actually means"
@@ -49,7 +49,7 @@ A data row has more or fewer commas than the header row. Common causes:
 
 ### "Unexpected header" / "Unrecognized column"
 
-Your file contains a column the platform doesn't recognize. This is usually a warning, not a blocker, because the platform ignores extra columns. But on strict importers (Amazon flat files, eBay File Exchange), unknown columns can cause the entire row to fail.
+Your file contains a column the platform doesn't recognize. This is usually a warning, not a blocker, because the platform ignores extra columns. Stricter importers can reject a column they don't know, so check the platform's own template when a file fails for no obvious reason.
 
 **Fix:** Remove columns not in the official template, or check whether the column name needs to be spelled differently.
 

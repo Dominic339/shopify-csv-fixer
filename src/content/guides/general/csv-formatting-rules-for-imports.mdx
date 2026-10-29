@@ -2,7 +2,7 @@
 title: "CSV Formatting Rules for Ecommerce Imports"
 description: "The exact formatting rules your CSV must follow to pass ecommerce platform imports: delimiters, quoting, line endings, encoding, and header requirements."
 keywords: ["csv formatting rules", "csv format requirements", "csv import format", "csv file format ecommerce", "csv quoting rules", "csv delimiter rules", "how to format csv for import"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "The mandatory formatting rules every ecommerce CSV must follow"
@@ -16,7 +16,7 @@ timeToComplete: "9 minutes"
 
 ## The CSV Standard Ecommerce Platforms Follow
 
-All major ecommerce platforms (Shopify, WooCommerce, Etsy, eBay, Amazon) expect files that follow **RFC 4180**, the common CSV standard. That standard defines exactly how rows, columns, quoting, and line endings must be structured.
+Most ecommerce platforms (Shopify, WooCommerce, eBay, and Etsy's exports) expect files that follow **RFC 4180**, the common CSV standard. That standard defines exactly how rows, columns, quoting, and line endings must be structured. Amazon's Inventory Loader is the exception: it takes tab-delimited text (.txt).
 
 This guide covers every rule that affects import success. Violating any of these causes parsing errors, wrong column mapping, or silent data corruption.
 
@@ -104,15 +104,15 @@ This represents: She said "great product"
 
 ---
 
-## Rule 5: UTF-8 Without BOM
+## Rule 5: UTF-8 Encoding
 
-Save your file as **UTF-8 encoding, without a BOM** (Byte Order Mark).
+Save your file as **UTF-8**. Excel's "CSV UTF-8" option adds a BOM (Byte Order Mark): Shopify and WooCommerce read it fine, but remove it if a platform doesn't recognise the first column.
 
-- UTF-8 is the only encoding all platforms accept
-- The BOM (added by Excel on Windows) corrupts the first column header name
+- UTF-8 handles accented letters, symbols and every language
+- Legacy encodings (Windows-1252, ISO 8859-1) garble those characters on import
 - ANSI, Latin-1, and Windows-1252 files produce garbled characters for accented letters, curly quotes, and currency symbols
 
-**Check:** Open the file in VS Code. The status bar shows the encoding. It should say `UTF-8`, not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
+**Check:** Open the file in VS Code. The status bar shows the encoding. It should say `UTF-8` (or `UTF-8 with BOM`), not `Windows 1252` or `ISO 8859-1`.
 
 ---
 
@@ -169,12 +169,12 @@ Merged cells in Excel export as a value in the top-left cell and empty strings i
 
 ## Quick Validation Checklist
 
-- [ ] Comma-delimited (not semicolons, tabs, or pipes)
+- [ ] Comma-delimited (not semicolons or pipes; Amazon files are tab-delimited)
 - [ ] Row 1 is column headers only, with no blank rows above it
 - [ ] Headers match platform's expected column names exactly (case and spaces)
 - [ ] No duplicate column names
 - [ ] Values with commas or quotes are wrapped in double quotes
-- [ ] File encoding is UTF-8 without BOM
+- [ ] File encoding is UTF-8
 - [ ] Line endings are consistent (all CRLF or all LF)
 - [ ] No blank rows anywhere in the file
 - [ ] No summary rows, formula rows, or merged cells

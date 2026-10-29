@@ -2,7 +2,7 @@
 title: "CSV Basics for Ecommerce Imports"
 description: "Understand headers, UTF-8 encoding, quoting, line endings, and the most common mistakes that break ecommerce CSV imports, before your first upload."
 keywords: ["csv basics", "csv encoding utf-8", "csv headers", "csv quoting commas", "csv line endings", "csv import errors", "fix csv file"]
-lastUpdated: "2026-03-03"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "How CSV structure works and why it matters for imports"
@@ -59,7 +59,7 @@ Encoding is how text characters are stored as bytes on disk. The wrong encoding 
 
 ### Why UTF-8
 
-UTF-8 is the universal standard for ecommerce platforms. Shopify, WooCommerce, Etsy, eBay, and Amazon all require UTF-8. Saving as UTF-8 ensures that:
+UTF-8 is the safe choice for every ecommerce platform. Shopify and WooCommerce expect it, and eBay's current templates declare it in the Action header (`CC=UTF-8`). Saving as UTF-8 ensures that:
 
 - Accented characters display correctly.
 - Currency symbols and special punctuation do not break.
@@ -67,13 +67,13 @@ UTF-8 is the universal standard for ecommerce platforms. Shopify, WooCommerce, E
 
 ### BOM vs No-BOM
 
-UTF-8 with BOM adds a hidden 3-byte sequence at the very start of the file. Excel on Windows writes this by default when you use "Save As > CSV UTF-8 (Comma delimited)". Most platforms either reject files with a BOM or misread the first column header because of the extra bytes.
+UTF-8 with BOM adds a hidden 3-byte sequence at the very start of the file. Excel on Windows writes this when you use "Save As > CSV UTF-8 (Comma delimited)". Shopify and WooCommerce read files with a BOM correctly, but some tools and scripts misread the first column header because of the extra bytes.
 
 How to tell if your file has a BOM: open it in VS Code and check the bottom-right status bar. If it says "UTF-8 with BOM", you have one.
 
 **Fix in VS Code:** Click the encoding indicator in the status bar, choose "Save with Encoding", then select "UTF-8" (without BOM).
 
-**Fix in Excel:** Choose "CSV (Comma delimited)" when saving, not "CSV UTF-8 (Comma delimited)". The plain "CSV (Comma delimited)" option saves without a BOM on most Windows Excel versions.
+**Fix in Excel:** Excel has no option to save UTF-8 without a BOM. Don't switch to plain "CSV (Comma delimited)" to avoid it: that option saves in your system's legacy encoding (often Windows-1252) and garbles accented characters. Keep "CSV UTF-8", and remove the BOM in VS Code only if a platform misreads the first column.
 
 **Fix with Python:**
 
@@ -87,7 +87,7 @@ with open("output.csv", "w", encoding="utf-8") as f:
 
 ### Encoding in Other Tools
 
-**Google Sheets:** File > Download > Comma Separated Values exports as UTF-8. Some versions add a BOM. If you see garbled characters at the start of your file, re-save it in VS Code without a BOM.
+**Google Sheets:** File > Download > Comma Separated Values exports UTF-8 without a BOM.
 
 **LibreOffice Calc:** When saving as CSV, choose "Unicode (UTF-8)" in the dialog box.
 
@@ -312,7 +312,7 @@ Each platform adds specific requirements on top of the basic CSV standard:
 - [ ] Headers match the platform's expected column names exactly (case-sensitive)
 - [ ] No duplicate column names
 - [ ] No leading or trailing spaces in header names
-- [ ] File saved as UTF-8 without BOM
+- [ ] File saved as UTF-8
 - [ ] Values with commas, quotes, or newlines wrapped in double quotes
 - [ ] No extra blank rows at the bottom
 - [ ] No summary rows or formula cells
