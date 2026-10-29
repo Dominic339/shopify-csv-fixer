@@ -1,0 +1,149 @@
+---
+title: "CSV-importfouten uitgelegd"
+description: "Een heldere uitleg van de meest voorkomende CSV-importfoutmeldingen bij Shopify, WooCommerce, Etsy, eBay en Amazon, en hoe je ze elk oplost."
+keywords: ["csv importfouten uitgelegd", "csv import foutmeldingen", "csv import mislukt", "csv upload fout", "e-commerce csv fouten", "csv import herstellen", "csv import problemen oplossen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wat elke veelvoorkomende CSV-importfoutmelding echt betekent"
+  - "Het verschil tussen blokkerende fouten en waarschuwingen"
+  - "Hoe je foutrapporten van platforms leest om de oorzaak te vinden"
+  - "Welke fouten automatisch te herstellen zijn en welke handwerk vragen"
+  - "Hoe je voorkomt dat dezelfde fouten terugkomen"
+bestFor: "Iedereen die een CSV-importfout kreeg en wil begrijpen wat er misging voordat hij opnieuw uploadt"
+timeToComplete: "10 minuten"
+---
+
+## Waarom CSV-imports mislukken
+
+Elk e-commerceplatform haalt je CSV door een reeks controles voordat het bestand wordt geaccepteerd. Die controleren de opbouw (kolomkoppen, aantal kolommen), gegevenstypen (getallen, ja/nee-waarden, verplichte velden), bedrijfsregels (geldige categoriecodes, prijsbereiken) en de codering. Mislukt een controle, dan stopt de import helemaal of wordt maar een deel van de rijen geïmporteerd en de rest overgeslagen.
+
+Wie de foutmeldingen begrijpt, komt het snelst tot een schone import. Deze handleiding legt de meest voorkomende uit.
+
+---
+
+## Structuurfouten
+
+Deze fouten betekenen dat de vorm van het bestand niet klopt, nog voordat het platform naar je gegevens kijkt.
+
+### "Missing required column" / "Column not found"
+
+Het platform verwachtte een kolomnaam die niet in je koprij staat. Veelvoorkomende oorzaken:
+
+- Je hebt een verplichte kolom hernoemd (bijvoorbeeld `product_title` in plaats van `Title`)
+- Er staat een spatie aan het begin of eind van de kolomkop (` Title` in plaats van `Title`)
+- Het bestand heeft een BOM die verborgen bytes vóór de eerste kolomnaam zet
+- Je gebruikt het sjabloon van een ander platform
+
+**Oplossing:** vergelijk je koprij met het officiële sjabloon van het platform. De vergelijking moet exact zijn, ook qua hoofdletters, spelling en spaties.
+
+### "Column count mismatch" / "Wrong number of columns"
+
+Een rij met gegevens heeft meer of minder velden dan de koprij. Veelvoorkomende oorzaken:
+
+- Een waarde bevat een komma zonder aanhalingstekens: `Wallet, Brown` moet `"Wallet, Brown"` zijn
+- Een HTML-beschrijving zonder aanhalingstekens bevat komma's (bijvoorbeeld in een `style`-attribuut)
+- Een losse komma aan het eind van sommige rijen (die maakt een spookkolom)
+
+**Oplossing:** open het bestand in een teksteditor en bekijk de rij met het probleem. Tel de velden, en onthoud dat komma's binnen waarden tussen aanhalingstekens geen kolommen scheiden. Elke waarde met een komma moet tussen dubbele aanhalingstekens staan.
+
+### "Unexpected header" / "Unrecognized column"
+
+Je bestand bevat een kolom die het platform niet kent. Meestal is dat een waarschuwing en geen blokkade, omdat het platform extra kolommen negeert. Strengere importprogramma's kunnen een onbekende kolom wel afwijzen, dus bekijk het sjabloon van het platform als een bestand zonder duidelijke reden mislukt.
+
+**Oplossing:** verwijder kolommen die niet in het officiële sjabloon staan, of controleer of de kolomnaam anders gespeld moet worden.
+
+---
+
+## Fouten bij verplichte velden
+
+### "Required field is blank" / "Field cannot be empty"
+
+Een verplichte kolom staat in de koprij, maar is op een of meer rijen leeg. Verplichte velden die vaak leeg blijven:
+
+- **Shopify:** Handle op elke rij, en Title op de eerste rij van elk product
+- **WooCommerce:** Name bij nieuwe producten, en Parent op variatierijen
+- **Etsy (apps voor bulkplaatsing):** wat het sjabloon van de app als verplicht aanmerkt, vaak who_made, when_made en is_supply
+- **eBay:** Action, plus Title, Category, StartPrice en ConditionID bij het toevoegen van aanbiedingen
+- **Amazon (Inventory Loader):** sku, product-id, product-id-type en add-delete, plus price, item-condition en quantity bij het toevoegen van aanbiedingen
+
+**Oplossing:** filter of sorteer het bestand om rijen met lege verplichte kolommen te vinden en vul de ontbrekende gegevens aan. Is het lege veld bewust (een variantrij die een waarde van het product overneemt), controleer dan de regels van het platform. Bij Shopify laten variantrijen Title bijvoorbeeld terecht leeg.
+
+### "SKU is required"
+
+Sommige bestanden herkennen elk product aan de SKU. De Inventory Loader van Amazon doet dat altijd, en update-imports op andere platforms koppelen rijen vaak via de SKU. Rijen zonder SKU mislukken daar.
+
+**Oplossing:** geef elke rij die er een nodig heeft een SKU. Gebruik een vaste opbouw: letters en cijfers, geen spaties, binnen de limiet van het platform (40 tekens bij Amazon).
+
+---
+
+## Fouten in gegevenstype en notatie
+
+### "Invalid price" / "Price must be a number"
+
+Het prijsveld bevat een waarde die geen getal is. Veelvoorkomende oorzaken:
+
+- Valutasymbool in de waarde: `$19.99` in plaats van `19.99`
+- Komma als decimaalteken: `19,99` in plaats van `19.99` (gebruikelijk bij Europese landinstellingen, ook de Nederlandse)
+- Lege tekst of een streepje waar een getal wordt verwacht
+- Excel gaf de cel een valutanotatie en exporteerde het symbool mee
+
+**Oplossing:** haal valutasymbolen weg en vervang decimale komma's door punten. Geef de kolom in Excel de notatie "Getal" voordat je opslaat.
+
+### "Invalid boolean" / "Must be true or false"
+
+Een ja/nee-veld bevat een onverwachte waarde. Platforms zijn streng op deze notaties:
+
+- **Shopify:** verwacht `true` of `false`, zoals in Shopifys eigen sjabloon
+- **WooCommerce:** gebruikt `1` / `0` (velden als `Backorders allowed?` accepteren ook `notify`)
+- **Amazon:** hangt af van het bestand. Categoriesjablonen gebruiken de waarden uit hun tabblad Valid Values (meestal `true` / `false`); `will-ship-internationally` in de Inventory Loader accepteert `y` / `n` of `1` / `2`
+
+**Oplossing:** vervang alle varianten (Yes, yes, Y, 1, true) door de notatie die elk platform verwacht. Gebruik Zoeken en vervangen in je spreadsheet.
+
+### "Invalid date format"
+
+Een datumveld heeft de verkeerde notatie. De meeste platforms verwachten `YYYY-MM-DD`. Excel zet datums vaak automatisch om naar regionale notaties als `15-1-2024` of `15 jan. 2024`.
+
+**Oplossing:** geef datumkolommen in Excel de notatie tekst voordat je ze bewerkt, of gebruik de Python-module `csv`, die geen typen omzet. Zet datums vóór het opslaan om naar `YYYY-MM-DD`.
+
+---
+
+## Fouten in bedrijfsregels
+
+### "Duplicate SKU" / "Handle already exists"
+
+Een unieke code komt meer dan eens voor in het bestand. Bij Shopify worden dubbele Handles bewust voor varianten gebruikt, maar staat een Handle in twee losse productgroepen, dan is dat een fout. Bij WooCommerce en Amazon wijzen dubbele SKU's altijd op een probleem.
+
+**Oplossing:** sorteer het bestand op de kolom met de code en zoek naar onbedoelde dubbele waarden. Met een formule (`AANTAL.ALS`) vind je exacte dubbele waarden automatisch.
+
+### "Invalid category ID" / "Category not recognized"
+
+De categoriecode die je gebruikt, bestaat niet in de taxonomie van het platform.
+
+- **eBay:** categorie-ID's zijn getallen en moeten uit de actuele categorieboom van eBay komen
+- **Amazon:** browse nodes en producttypen moeten overeenkomen met de huidige taxonomie in Seller Central
+- **Etsy (apps voor bulkplaatsing):** taxonomie-ID's komen uit de Etsy-API en moeten overeenkomen met de actuele lijst
+
+**Oplossing:** zoek de juiste categorie-ID op in de officiële categoriebrowser of de taxonomiedownload van het platform. Gebruik geen ID's uit oude sjablonen, want die veranderen.
+
+---
+
+## Waarschuwingen en blokkerende fouten in het importresultaat
+
+De meeste platforms maken onderscheid tussen **blokkerende fouten** (de rij of het bestand wordt afgewezen) en **waarschuwingen** (de rij wordt geïmporteerd, maar gemarkeerd). Ken je het verschil, dan kun je beter prioriteren:
+
+| Ernst | Betekenis | Voorbeeld |
+|---|---|---|
+| Blokkerend | Rij of bestand overgeslagen | Ontbrekend verplicht veld, verkeerd aantal kolommen |
+| Waarschuwing | Geïmporteerd met markering | Onbekend optioneel veld, lange beschrijving |
+| Info | Alleen ter informatie | Veld kreeg de standaardwaarde van het platform |
+
+Los alle blokkerende fouten op voordat je opnieuw uploadt. Waarschuwingen kun je vaak in een tweede ronde aanpakken.
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je CSV naar StriveFormats voor een automatische controle. Het vindt alle blokkerende fouten en waarschuwingen, toont bij elk probleem de exacte cel en herstelt veilige problemen met één klik.
+
+[CSV-fixer openen](/app) | [CSV-sjablonen bekijken](/presets)
