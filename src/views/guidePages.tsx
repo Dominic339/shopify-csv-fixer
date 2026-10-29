@@ -7,7 +7,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { SheetFix } from "@/components/guides/SheetFix";
+import { Screenshot } from "@/components/ui/Screenshot";
 import { sheetExampleFor } from "@/lib/guides/sheetExamples";
 
 import JsonLd from "@/components/JsonLd";
@@ -517,8 +519,8 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                   source={curated.rawMdx}
                   // rehype plugin typing differs between unified versions
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  options={{ mdxOptions: { rehypePlugins: [rehypeWrapSections as any] } }}
-                  components={mdxGuideComponentsFor(locale)}
+                  options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeWrapSections as any] } }}
+                  components={mdxGuideComponentsFor(locale, { csvSheets: platform !== "general" })}
                 />
               </div>
               {toc.length > 0 && (
@@ -531,6 +533,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
             <div className={`${card} mt-6 rounded-3xl p-6`}>
               <div className="text-base font-semibold text-[var(--text)]">{t.guide.needHelp}</div>
               <p className={`mt-1 text-sm ${muted}`}>{t.guide.uploadDescription}</p>
+              <Screenshot name="hero" alt={t.home.heroShotAlt} className="mt-5" sizes="(min-width: 1024px) 720px, 100vw" />
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link className="rg-btn" href={href("/app")}>
                   {t.guide.openCsvFixer}
