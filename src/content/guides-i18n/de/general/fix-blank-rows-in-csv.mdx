@@ -1,0 +1,145 @@
+---
+title: "Leere Zeilen in einer CSV entfernen"
+description: "So findest und löschst du leere Zeilen in einer CSV, bevor du sie zu Shopify, WooCommerce, Etsy, eBay oder Amazon importierst, mit Excel, Google Sheets oder Python."
+keywords: ["leere zeilen csv entfernen", "leerzeilen csv löschen", "csv leerzeile fehler", "leere zeilen csv excel", "csv import leerzeile", "leerzeilen in csv", "excel csv leere zeilen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Warum leere Zeilen in CSV-Dateien entstehen und wie sie Importe zerstören"
+  - "Wie du leere Zeilen in Excel, Google Tabellen und Python findest und löschst"
+  - "Wie du mit der typischen Leerzeile am Dateiende umgehst"
+  - "Wie du Zeilen erkennst, die nur leer aussehen (Zeilen mit nur Leerzeichen)"
+  - "Wie du verhinderst, dass leere Zeilen in deinen Exporten wieder auftauchen"
+bestFor: "Händler, die wegen leerer Zeilen in ihrer CSV Importfehler oder unerwartete leere Produkte sehen"
+timeToComplete: "6 Minuten"
+---
+
+## Warum leere Zeilen Importprobleme verursachen
+
+Eine leere Zeile in einer CSV ist eine Zeile, in der alle Felder leer sind (oder die nur aus Kommas ohne Werte besteht). Viele Importer überspringen eine ganz leere Zeile einfach, aber je nach Plattform kann eine leere Zeile stattdessen:
+
+- **Einen leeren Produktdatensatz anlegen** (Title leer, Price leer), der an der Prüfung der Pflichtfelder scheitert
+- **Den Import stoppen**, und zwar an der leeren Zeile, wobei alles danach stillschweigend ignoriert wird
+- **Einen Prüffehler melden**, für jedes Pflichtfeld, das in der leeren Zeile fehlt
+
+Hier entstehen leere Zeilen am häufigsten:
+
+- Am **Dateiende** (Tabellenprogramme fügen oft automatisch eine hinzu)
+- **Zwischen Produkten** (du hast eine Zeile gelöscht, aber eine Leerzeile stehen lassen)
+- **Zwischen Abschnitten**, wenn du deine Tabelle mit optischen Lücken gegliedert hast
+- **Nach dem Löschen von Zellinhalten**: Entf leert die Zellen einer Zeile, lässt die leere Zeile aber stehen
+
+---
+
+## Leere Zeilen finden
+
+### Im Texteditor
+
+Öffne die Datei in VS Code oder im Editor. Leere Zeilen sind leicht zu erkennen: Es sind Zeilen, die nur aus Kommas bestehen oder ganz leer sind:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← leere Zeile (nur Kommas oder leer)
+red-shirt,Red T-Shirt,21.99
+```
+
+### In Excel
+
+Drücke `Strg+Ende`, um zur letzten Zelle des benutzten Bereichs zu springen. Liegt die letzte Zeile hinter deinen Daten (eine leere Zeile), hat Excel leere Zeilen in den benutzten Bereich aufgenommen.
+
+Um alle leeren Zeilen zu finden, füge hinter deiner letzten Spalte eine Hilfsspalte ein, gib in Zeile 2 `=ANZAHL2(A2:Z2)` ein (erweitere den Bereich auf alle deine Spalten) und ziehe die Formel nach unten. Zeilen mit `0` sind vollständig leer.
+
+Suche nicht in einer einzelnen Spalte wie `Title` nach Lücken: In einer Shopify-Datei lassen Variantenzeilen `Title` bewusst leer, und das sind keine leeren Zeilen.
+
+---
+
+## Leere Zeilen in Excel löschen
+
+**Methode 1: Leerzeilen am Ende löschen**
+
+1. Drücke `Strg+Ende`, um zu sehen, wo Excel das Ende der Daten vermutet
+2. Liegt es hinter deiner letzten Datenzeile, markiere die zusätzlichen Zeilen unter deinen Daten
+3. Rechtsklick → Zellen löschen (ganze Zeilen)
+4. Drücke erneut `Strg+Ende`, um zu prüfen, ob der benutzte Bereich jetzt stimmt
+
+**Methode 2: Alle leeren Zeilen mit einer Hilfsspalte löschen**
+
+1. Füge die oben beschriebene Hilfsspalte mit `=ANZAHL2(A2:Z2)` ein
+2. Aktiviere einen Filter (Daten → Filtern) und zeige nur Zeilen an, in denen die Hilfsspalte `0` ist
+3. Markiere diese Zeilen, Rechtsklick → Zeile löschen
+4. Entferne den Filter und lösche die Hilfsspalte
+
+Vermeide Inhalte auswählen → Leerzellen in einer einzelnen Spalte: Damit löschst du jede Zeile, in der diese Spalte zufällig leer ist, auch gültige Variantenzeilen.
+
+---
+
+## Leere Zeilen in Google Tabellen löschen
+
+Nutze dieselbe Hilfsspalte und einen Filter:
+
+1. Füge eine Hilfsspalte mit `=ANZAHL2(A2:Z2)` hinzu und ziehe sie nach unten
+2. Füge einen Filter hinzu (Daten → Filter erstellen)
+3. Zeige im Filter der Hilfsspalte nur `0` an
+4. Markiere die sichtbaren Zeilen und lösche sie (Rechtsklick → Ausgewählte Zeilen löschen)
+5. Schalte den Filter aus und lösche die Hilfsspalte
+
+Auch Sortieren verschiebt leere Zeilen nach unten, aber sortiere nur Dateien, bei denen die Reihenfolge der Zeilen egal ist. Shopify-Produkte, WooCommerce-Varianten und eBay-Angebote mit Varianten sind darauf angewiesen, dass ihre Zeilen in der richtigen Reihenfolge bleiben.
+
+---
+
+## Leere Zeilen mit Python löschen
+
+Bei großen Dateien ist Python der schnellste Weg:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Zeile behalten, wenn ein Feld einen Wert hat, der nicht nur aus Leerraum besteht
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Damit werden auch Zeilen mit nur Leerzeichen erfasst (Zeilen, die leer aussehen, aber Leerzeichen oder Tabulatoren enthalten).
+
+---
+
+## Zeilen mit nur Leerzeichen
+
+Manche Zeilen sehen in der Tabelle leer aus, enthalten aber in einer oder mehreren Zellen Leerzeichen oder Tabulatoren. Eine einfache Prüfung „ist die Zeile leer?“ findet sie nicht.
+
+**So findest du sie mit Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+Die Lösung aus dem vorherigen Abschnitt (mit `cell.strip()`) entfernt solche Zeilen automatisch.
+
+---
+
+## Leere Zeilen in künftigen Exporten verhindern
+
+- **In Excel:** Drücke vor dem Speichern als CSV `Strg+Ende` und prüfe, ob die letzte Zeile mit Daten wirklich die letzte benutzte Zeile ist. Lösche alle Zeilen darunter.
+- **In Google Tabellen:** Der CSV-Download enthält jede Zeile bis zur letzten nicht leeren Zelle, also halte deine Daten kompakt.
+- **Beim Löschen von Zeilen:** Klicke in Excel mit der rechten Maustaste auf die Zeilennummern → Zellen löschen (drücke nicht nur Entf auf den Zellinhalten, sonst bleibt eine leere Zeile stehen).
+- **Nach dem Filtern:** Der CSV-Export von Excel enthält auch Zeilen, die ein Filter ausblendet. Entferne also Filter und prüfe, was wirklich im Blatt steht, bevor du exportierst.
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine CSV in StriveFormats hoch. Die Prüfung findet leere Zeilen, Zeilen mit nur Leerzeichen und Zeilen, in denen alle Pflichtfelder leer sind. Sie zeigt dir die genauen Stellen, damit du sie vor dem Import entfernen kannst.
+
+[CSV-Fixer öffnen](/app) | [CSV-Vorlagen ansehen](/presets)

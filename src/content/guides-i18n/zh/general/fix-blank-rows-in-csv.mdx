@@ -1,0 +1,145 @@
+---
+title: "删除 CSV 文件中的空行"
+description: "在导入 Shopify、WooCommerce、Etsy、eBay 或 Amazon 之前，如何用 Excel、Google 表格或 Python 查找并删除 CSV 文件中的空行。"
+keywords: ["修复 csv 空行", "删除 csv 空行", "csv 空行错误", "去除 csv 空行", "csv 导入空行", "csv 空白行", "excel csv 空行"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV 文件为什么会出现空行，以及空行如何破坏导入"
+  - "如何在 Excel、Google 表格和 Python 中查找并删除空行"
+  - "如何处理文件末尾常见的空行"
+  - "如何发现看似空白、其实并不空的行（只含空格的行）"
+  - "如何防止导出文件再次出现空行"
+bestFor: "因 CSV 中的空行而遇到导入错误或意外空商品的卖家"
+timeToComplete: "6 分钟"
+---
+
+## 为什么空行会导致导入问题
+
+CSV 文件中的空行，是指所有字段都为空（或只有逗号、没有值）的行。许多导入程序会直接跳过完全空白的行，但视平台而定，空行也可能会：
+
+- **生成一条空的商品记录**（Title 为空、Price 为空），无法通过必填字段校验
+- **使导入停止**，在空行处中断，并悄悄忽略之后的所有内容
+- **报告校验错误**，空行上缺少的每个必填字段都会报错
+
+空行最常出现的位置：
+
+- **文件末尾**（电子表格软件常常会自动加一行）
+- **商品之间**（你删除了一行，却留下了一个空行）
+- **各部分之间**（如果你为了好看而在表格中留了间隔）
+- **清除单元格内容之后**：按 Delete 键只会清空一行的单元格，空行本身仍然留着
+
+---
+
+## 查找空行
+
+### 在文本编辑器中
+
+用 VS Code 或记事本打开文件，空行很容易看出来：它们是只有逗号或完全空白的行：
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← 空行（只有逗号或什么都没有）
+red-shirt,Red T-Shirt,21.99
+```
+
+### 在 Excel 中
+
+按 `Ctrl+End` 跳到已用区域的最后一个单元格。如果最后一行在数据下方（是空行），说明 Excel 把空行算进了已用区域。
+
+要找出所有空行，在最后一列之后添加一个辅助列，在第 2 行输入 `=COUNTA(A2:Z2)`（把范围扩大到覆盖所有列），然后向下填充。显示 `0` 的行就是完全空白的行。
+
+不要只在 `Title` 这样的单列中查找空值：在 Shopify 文件里，多属性行会有意留空 `Title`，它们并不是空行。
+
+---
+
+## 在 Excel 中删除空行
+
+**方法 1：删除末尾的空行**
+
+1. 按 `Ctrl+End`，查看 Excel 认为数据在哪里结束
+2. 如果在最后一行数据之后，选中数据下方多出来的行
+3. 右键 → 删除
+4. 再按一次 `Ctrl+End`，确认已用区域现在正确
+
+**方法 2：用辅助列删除所有空行**
+
+1. 添加上面介绍的 `=COUNTA(A2:Z2)` 辅助列
+2. 开启筛选（数据 → 筛选），只显示辅助列为 `0` 的行
+3. 选中这些行，右键 → 删除行
+4. 清除筛选并删除辅助列
+
+不要对单独一列使用"定位条件 → 空值"：它会删除该列恰好为空的每一行，包括有效的多属性行。
+
+---
+
+## 在 Google 表格中删除空行
+
+使用同样的辅助列和筛选：
+
+1. 添加一个 `=COUNTA(A2:Z2)` 辅助列并向下填充
+2. 添加筛选器（数据 → 创建过滤器）
+3. 在辅助列的筛选中只显示 `0`
+4. 选中可见的行并删除（右键 → 删除所选行）
+5. 关闭筛选并删除辅助列
+
+排序也能把空行移到底部，但只对行顺序无关紧要的文件排序。Shopify 商品、WooCommerce 变体和 eBay 多属性刊登都依赖行保持原有顺序。
+
+---
+
+## 用 Python 删除空行
+
+对于大文件，Python 是最快的方法：
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # 只要有一个字段含有非空白的值，就保留该行
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+这也能处理只含空格的行（看起来是空的，但包含空格或制表符的行）。
+
+---
+
+## 只含空格的行
+
+有些行在电子表格中看起来是空的，但实际上一个或多个单元格中有空格或制表符。简单的"这一行是否为空？"检查发现不了它们。
+
+**用 Python 检测**：
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+上一节的方法（使用 `cell.strip()`）会自动删除这些行。
+
+---
+
+## 防止以后导出时出现空行
+
+- **在 Excel 中**：保存为 CSV 前按 `Ctrl+End`，确认最后一行数据确实是最后一个已用行。删除它下方的所有行。
+- **在 Google 表格中**：CSV 下载会包含直到最后一个非空单元格的所有行，所以请让数据保持紧凑。
+- **删除行时**：在 Excel 中右键点击行号 → 删除（不要只在单元格内容上按 Delete，那样会留下空行）。
+- **筛选之后**：Excel 导出 CSV 时会包含被筛选隐藏的行，所以导出前请清除筛选，并检查工作表中实际有哪些内容。
+
+---
+
+## 用 StriveFormats 自动修复
+
+把你的 CSV 上传到 StriveFormats。校验器会找出空行、只含空格的行以及所有必填字段都为空的行，并显示它们的准确位置，方便你在导入前删除。
+
+[打开 CSV 修复工具](/app) | [查看 CSV 模板](/presets)

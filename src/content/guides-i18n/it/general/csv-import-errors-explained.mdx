@@ -1,0 +1,149 @@
+---
+title: "Gli errori di importazione CSV spiegati"
+description: "Una spiegazione semplice dei messaggi di errore di importazione CSV più comuni su Shopify, WooCommerce, Etsy, eBay e Amazon, e come correggere ciascuno."
+keywords: ["errori importazione csv spiegati", "messaggi di errore importazione csv", "importazione csv fallita", "errore caricamento csv", "errori csv e-commerce", "correggere importazione csv", "risoluzione problemi importazione csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cosa significa davvero ogni messaggio di errore comune nelle importazioni CSV"
+  - "La differenza tra errori bloccanti e avvisi"
+  - "Come leggere i report di errore delle piattaforme per trovare la causa"
+  - "Quali errori si correggono in automatico e quali richiedono modifiche manuali"
+  - "Come evitare che gli stessi errori si ripetano"
+bestFor: "Chiunque abbia ricevuto un errore di importazione CSV e voglia capire cosa è andato storto prima di ricaricare il file"
+timeToComplete: "10 minuti"
+---
+
+## Perché le importazioni CSV falliscono
+
+Ogni piattaforma e-commerce fa passare il tuo CSV attraverso una serie di controlli prima di accettarlo. Vengono controllati la struttura (intestazioni, numero di colonne), i tipi di dati (numeri, valori sì/no, campi obbligatori), le regole di business (codici di categoria validi, intervalli di prezzo) e la codifica. Se un controllo fallisce, l'importazione si interrompe del tutto oppure importa solo una parte delle righe e salta le altre.
+
+Capire i messaggi di errore è la strada più rapida verso un'importazione pulita. Questa guida spiega i più comuni.
+
+---
+
+## Errori di struttura
+
+Questi errori indicano che la forma del file è sbagliata, ancora prima che la piattaforma guardi i tuoi dati.
+
+### «Missing required column» / «Column not found»
+
+La piattaforma si aspettava un nome di colonna che non è nella tua riga di intestazione. Cause comuni:
+
+- Hai rinominato una colonna obbligatoria (per esempio `product_title` invece di `Title`)
+- C'è uno spazio all'inizio o alla fine dell'intestazione (` Title` invece di `Title`)
+- Il file ha un BOM che aggiunge byte nascosti davanti al primo nome di colonna
+- Stai usando il modello di un'altra piattaforma
+
+**Soluzione:** confronta la tua riga di intestazione con il modello ufficiale della piattaforma. Il confronto deve essere esatto, comprese maiuscole, grafia e spazi.
+
+### «Column count mismatch» / «Wrong number of columns»
+
+Una riga di dati ha più o meno campi della riga di intestazione. Cause comuni:
+
+- Un valore contiene una virgola senza virgolette: `Wallet, Brown` deve diventare `"Wallet, Brown"`
+- Una descrizione HTML senza virgolette contiene virgole (per esempio in un attributo `style`)
+- Una virgola di troppo alla fine di alcune righe (crea una colonna fantasma)
+
+**Soluzione:** apri il file in un editor di testo e guarda la riga problematica. Conta i suoi campi, ricordando che le virgole dentro valori tra virgolette non separano colonne. Ogni valore che contiene una virgola deve stare tra virgolette doppie.
+
+### «Unexpected header» / «Unrecognized column»
+
+Il tuo file contiene una colonna che la piattaforma non riconosce. Di solito è un avviso e non un blocco, perché la piattaforma ignora le colonne in più. Gli importatori più rigidi possono però rifiutare una colonna sconosciuta, quindi controlla il modello della piattaforma quando un file fallisce senza un motivo evidente.
+
+**Soluzione:** elimina le colonne che non sono nel modello ufficiale, oppure verifica se il nome della colonna va scritto in un altro modo.
+
+---
+
+## Errori nei campi obbligatori
+
+### «Required field is blank» / «Field cannot be empty»
+
+Una colonna obbligatoria è presente nell'intestazione ma è vuota in una o più righe. Campi obbligatori che spesso restano vuoti:
+
+- **Shopify:** Handle in ogni riga, e Title nella prima riga di ogni prodotto
+- **WooCommerce:** Name per i prodotti nuovi, e Parent nelle righe delle variazioni
+- **Etsy (app di pubblicazione in blocco):** ciò che il modello dell'app indica come obbligatorio, spesso who_made, when_made e is_supply
+- **eBay:** Action, più Title, Category, StartPrice e ConditionID quando crei inserzioni
+- **Amazon (Inventory Loader):** sku, product-id, product-id-type e add-delete, più price, item-condition e quantity quando crei offerte
+
+**Soluzione:** filtra o ordina il file per trovare le righe con valori vuoti nelle colonne obbligatorie e completa i dati mancanti. Se il vuoto è voluto (una riga di variante che eredita un valore dal prodotto), controlla le regole della piattaforma. In Shopify, per esempio, le righe delle varianti lasciano Title vuoto in modo del tutto regolare.
+
+### «SKU is required»
+
+Alcuni file identificano ogni prodotto tramite lo SKU. L'Inventory Loader di Amazon lo fa sempre, e le importazioni di aggiornamento su altre piattaforme spesso abbinano le righe per SKU. Lì le righe senza SKU falliscono.
+
+**Soluzione:** aggiungi uno SKU a ogni riga che ne ha bisogno. Usa un formato coerente: lettere e numeri, senza spazi, entro il limite della piattaforma (40 caratteri su Amazon).
+
+---
+
+## Errori di tipo di dato e di formato
+
+### «Invalid price» / «Price must be a number»
+
+Il campo del prezzo contiene un valore non numerico. Cause comuni:
+
+- Simbolo di valuta nel valore: `$19.99` invece di `19.99`
+- Virgola come separatore decimale: `19,99` invece di `19.99` (frequente con le impostazioni regionali europee, compresa quella italiana)
+- Testo vuoto o un trattino dove serve un numero
+- Excel ha formattato la cella come valuta ed esportato il simbolo
+
+**Soluzione:** togli i simboli di valuta e sostituisci le virgole decimali con i punti. Formatta la colonna come «Numero» in Excel prima di salvare.
+
+### «Invalid boolean» / «Must be true or false»
+
+Un campo sì/no contiene un valore inatteso. Le piattaforme sono rigide su questi formati:
+
+- **Shopify:** si aspetta `true` o `false`, come nel modello ufficiale di Shopify
+- **WooCommerce:** usa `1` / `0` (campi come `Backorders allowed?` accettano anche `notify`)
+- **Amazon:** dipende dal file. I modelli di categoria usano i valori della scheda Valid Values (di solito `true` / `false`); `will-ship-internationally` dell'Inventory Loader accetta `y` / `n` o `1` / `2`
+
+**Soluzione:** sostituisci tutte le varianti (Yes, yes, Y, 1, true) con il formato che ogni piattaforma si aspetta. Usa Trova e sostituisci nel foglio di calcolo.
+
+### «Invalid date format»
+
+Un campo data usa un formato sbagliato. La maggior parte delle piattaforme si aspetta `YYYY-MM-DD`. Excel spesso converte le date in formati regionali come `15/01/2024` o `15-gen-2024`.
+
+**Soluzione:** formatta le colonne delle date come testo in Excel prima di modificarle, oppure usa il modulo `csv` di Python, che non converte i tipi. Converti le date in `YYYY-MM-DD` prima di salvare.
+
+---
+
+## Errori nelle regole di business
+
+### «Duplicate SKU» / «Handle already exists»
+
+Un identificativo univoco compare più di una volta nel file. In Shopify gli Handle duplicati servono di proposito per le varianti, ma se un Handle compare in due gruppi di prodotti non collegati è un errore. In WooCommerce e Amazon, gli SKU duplicati indicano sempre un problema.
+
+**Soluzione:** ordina il file per la colonna dell'identificativo e cerca i duplicati involontari. Usa una formula (`CONTA.SE`) per trovare automaticamente i duplicati esatti.
+
+### «Invalid category ID» / «Category not recognized»
+
+Il codice di categoria che hai usato non esiste nella tassonomia della piattaforma.
+
+- **eBay:** gli ID categoria sono numerici e devono venire dall'albero delle categorie attuale di eBay
+- **Amazon:** browse node e tipi di prodotto devono corrispondere alla tassonomia attuale di Seller Central
+- **Etsy (app di pubblicazione in blocco):** gli ID della tassonomia vengono dall'API di Etsy e devono corrispondere al suo elenco attuale
+
+**Soluzione:** cerca l'ID categoria corretto nello strumento ufficiale di ricerca delle categorie della piattaforma o nel suo file della tassonomia. Non usare ID presi da modelli vecchi, perché cambiano.
+
+---
+
+## Avvisi ed errori bloccanti nel risultato dell'importazione
+
+La maggior parte delle piattaforme distingue tra **errori bloccanti** (la riga o il file viene rifiutato) e **avvisi** (la riga viene importata ma segnalata). Conoscere la differenza aiuta a decidere le priorità:
+
+| Gravità | Significato | Esempio |
+|---|---|---|
+| Bloccante | Riga o file saltato | Campo obbligatorio mancante, numero di colonne sbagliato |
+| Avviso | Importato con segnalazione | Campo facoltativo non riconosciuto, descrizione lunga |
+| Info | Solo informativo | Campo impostato sul valore predefinito della piattaforma |
+
+Correggi tutti gli errori bloccanti prima di ricaricare il file. Gli avvisi si possono spesso affrontare in un secondo passaggio.
+
+---
+
+## Correggilo automaticamente con StriveFormats
+
+Carica il tuo CSV in StriveFormats per una convalida automatica. Individua tutti gli errori bloccanti e gli avvisi, mostra la cella esatta di ogni problema e corregge con un clic quelli risolvibili senza rischi.
+
+[Apri il correttore CSV](/app) | [Vedi i modelli CSV](/presets)

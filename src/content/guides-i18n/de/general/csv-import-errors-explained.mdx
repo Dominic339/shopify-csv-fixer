@@ -1,0 +1,149 @@
+---
+title: "CSV-Importfehler erklärt"
+description: "Die häufigsten Fehlermeldungen beim CSV-Import von Shopify, WooCommerce, Etsy, eBay und Amazon in einfachen Worten, und wie du jede behebst."
+keywords: ["csv importfehler erklärt", "csv import fehlermeldungen", "csv import fehlgeschlagen", "csv upload fehler", "e-commerce csv fehler", "csv import reparieren", "csv import fehlerbehebung"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Was die häufigsten Fehlermeldungen beim CSV-Import wirklich bedeuten"
+  - "Den Unterschied zwischen blockierenden Fehlern und Warnungen"
+  - "Wie du Fehlerberichte der Plattformen liest, um die Ursache zu finden"
+  - "Welche Fehler sich automatisch beheben lassen und welche Handarbeit brauchen"
+  - "Wie du verhinderst, dass dieselben Fehler wieder auftreten"
+bestFor: "Alle, die beim CSV-Import einen Fehler bekommen haben und verstehen wollen, was schiefging, bevor sie erneut hochladen"
+timeToComplete: "10 Minuten"
+---
+
+## Warum CSV-Importe scheitern
+
+Jede E-Commerce-Plattform schickt deine CSV vor der Annahme durch eine Prüfkette. Sie prüft den Aufbau (Spaltenköpfe, Spaltenzahl), Datentypen (Zahlen, Ja/Nein-Werte, Pflichtfelder), Geschäftsregeln (gültige Kategoriecodes, Preisbereiche) und die Kodierung. Schlägt eine Prüfung fehl, bricht der Import ganz ab oder importiert nur einen Teil der Zeilen und überspringt den Rest.
+
+Wer die Fehlermeldungen versteht, kommt am schnellsten zu einem sauberen Import. Dieser Leitfaden erklärt die häufigsten.
+
+---
+
+## Strukturfehler
+
+Diese Fehler bedeuten, dass die Form der Datei falsch ist, noch bevor die Plattform deine Daten überhaupt ansieht.
+
+### „Missing required column“ / „Column not found“
+
+Die Plattform erwartet einen Spaltennamen, der nicht in deiner Kopfzeile steht. Häufige Ursachen:
+
+- Du hast eine Pflichtspalte umbenannt (z. B. `product_title` statt `Title`)
+- Im Spaltenkopf steht ein Leerzeichen am Anfang oder Ende (` Title` statt `Title`)
+- Die Datei hat ein BOM, das dem ersten Spaltennamen versteckte Bytes voranstellt
+- Du nutzt die Vorlage einer anderen Plattform
+
+**Lösung:** Vergleiche deine Kopfzeile mit der offiziellen Vorlage der Plattform. Der Vergleich muss exakt sein, auch bei Groß- und Kleinschreibung, Schreibweise und Leerzeichen.
+
+### „Column count mismatch“ / „Wrong number of columns“
+
+Eine Datenzeile hat mehr oder weniger Felder als die Kopfzeile. Häufige Ursachen:
+
+- Ein Wert enthält ein Komma ohne Anführungszeichen: `Wallet, Brown` muss `"Wallet, Brown"` sein
+- Eine HTML-Beschreibung ohne Anführungszeichen enthält Kommas (etwa in einem `style`-Attribut)
+- In manchen Zeilen steht ein überzähliges Komma am Ende (das erzeugt eine Phantomspalte)
+
+**Lösung:** Öffne die Datei in einem Texteditor und sieh dir die betroffene Zeile an. Zähle ihre Felder und denk daran, dass Kommas in Werten mit Anführungszeichen keine Spalten trennen. Jeder Wert mit Komma muss in doppelten Anführungszeichen stehen.
+
+### „Unexpected header“ / „Unrecognized column“
+
+Deine Datei enthält eine Spalte, die die Plattform nicht kennt. Meist ist das nur eine Warnung und kein Abbruch, weil die Plattform zusätzliche Spalten ignoriert. Strengere Importer können eine unbekannte Spalte aber ablehnen, also prüfe die Vorlage der Plattform, wenn eine Datei ohne erkennbaren Grund scheitert.
+
+**Lösung:** Entferne Spalten, die nicht in der offiziellen Vorlage stehen, oder prüfe, ob der Spaltenname anders geschrieben werden muss.
+
+---
+
+## Fehler bei Pflichtfeldern
+
+### „Required field is blank“ / „Field cannot be empty“
+
+Eine Pflichtspalte steht in der Kopfzeile, ist aber in einer oder mehreren Zeilen leer. Pflichtfelder, die oft leer bleiben:
+
+- **Shopify:** Handle in jeder Zeile und Title in der ersten Zeile jedes Produkts
+- **WooCommerce:** Name bei neuen Produkten und Parent in Variantenzeilen
+- **Etsy (Apps für Massen-Einstellungen):** was die Vorlage der App als Pflicht markiert, oft who_made, when_made und is_supply
+- **eBay:** Action, dazu Title, Category, StartPrice und ConditionID beim Anlegen von Angeboten
+- **Amazon (Inventory Loader):** sku, product-id, product-id-type und add-delete, dazu price, item-condition und quantity beim Anlegen von Angeboten
+
+**Lösung:** Filtere oder sortiere die Datei, um Zeilen mit leeren Pflichtspalten zu finden, und ergänze die fehlenden Daten. Ist die Lücke gewollt (eine Variantenzeile übernimmt einen Wert vom Produkt), prüfe die Regeln der Plattform. Bei Shopify bleibt Title in Variantenzeilen zum Beispiel ganz regulär leer.
+
+### „SKU is required“
+
+Manche Dateien identifizieren jedes Produkt über die SKU. Der Inventory Loader von Amazon tut das immer, und Aktualisierungsimporte auf anderen Plattformen ordnen Zeilen oft über die SKU zu. Zeilen ohne SKU scheitern dort.
+
+**Lösung:** Ergänze in jeder Zeile, die eine braucht, eine SKU. Nutze ein einheitliches Format: Buchstaben und Ziffern, keine Leerzeichen, innerhalb der Grenze der Plattform (40 Zeichen bei Amazon).
+
+---
+
+## Fehler bei Datentypen und Formaten
+
+### „Invalid price“ / „Price must be a number“
+
+Das Preisfeld enthält einen Wert, der keine Zahl ist. Häufige Ursachen:
+
+- Währungssymbol im Wert: `$19.99` statt `19.99`
+- Komma als Dezimaltrennzeichen: `19,99` statt `19.99` (typisch für europäische Ländereinstellungen, auch deutsche)
+- Leerer Text oder ein Strich, wo eine Zahl erwartet wird
+- Excel hat die Zelle als Währung formatiert und das Symbol mit exportiert
+
+**Lösung:** Entferne Währungssymbole und ersetze Dezimalkommas durch Punkte. Formatiere die Spalte in Excel vor dem Speichern als „Zahl“.
+
+### „Invalid boolean“ / „Must be true or false“
+
+Ein Ja/Nein-Feld enthält einen unerwarteten Wert. Plattformen sind bei Ja/Nein-Formaten streng:
+
+- **Shopify:** erwartet `true` oder `false`, wie in Shopifys eigener Vorlage
+- **WooCommerce:** nutzt `1` / `0` (Felder wie `Backorders allowed?` nehmen auch `notify`)
+- **Amazon:** hängt von der Datei ab. Kategorievorlagen nutzen die Werte aus ihrem Tabellenblatt Valid Values (meist `true` / `false`); `will-ship-internationally` im Inventory Loader nimmt `y` / `n` oder `1` / `2`
+
+**Lösung:** Ersetze alle Varianten (Yes, yes, Y, 1, true) durch das Format, das die jeweilige Plattform erwartet. Nutze Suchen und Ersetzen in deinem Tabellenprogramm.
+
+### „Invalid date format“
+
+Ein Datumsfeld hat das falsche Format. Die meisten Plattformen erwarten `YYYY-MM-DD`. Excel formatiert Datumswerte oft automatisch in regionale Formate wie `15.01.2024` oder `15. Jan. 2024` um.
+
+**Lösung:** Formatiere Datumsspalten vor dem Bearbeiten in Excel als Text, oder nutze das Python-Modul `csv`, das keine Typen umwandelt. Wandle Datumswerte vor dem Speichern in `YYYY-MM-DD` um.
+
+---
+
+## Fehler bei Geschäftsregeln
+
+### „Duplicate SKU“ / „Handle already exists“
+
+Eine eindeutige Kennung kommt in der Datei mehr als einmal vor. Bei Shopify werden doppelte Handles bewusst für Varianten genutzt, aber taucht ein Handle in zwei unabhängigen Produktgruppen auf, ist das ein Fehler. Bei WooCommerce und Amazon zeigen doppelte SKUs immer ein Problem an.
+
+**Lösung:** Sortiere die Datei nach der Kennungsspalte und suche nach ungewollten Duplikaten. Mit einer Formel (`ZÄHLENWENN`) findest du exakte Duplikate automatisch.
+
+### „Invalid category ID“ / „Category not recognized“
+
+Der verwendete Kategoriecode existiert in der Taxonomie der Plattform nicht.
+
+- **eBay:** Kategorie-IDs sind Zahlen und müssen aus dem aktuellen Kategoriebaum von eBay stammen
+- **Amazon:** Browse Nodes und Produkttypen müssen zur aktuellen Taxonomie in Seller Central passen
+- **Etsy (Apps für Massen-Einstellungen):** Taxonomie-IDs stammen aus der Etsy-API und müssen zur aktuellen Liste passen
+
+**Lösung:** Schlage die richtige Kategorie-ID im offiziellen Kategoriebrowser oder Taxonomie-Download der Plattform nach. Nutze keine IDs aus alten Vorlagen, denn sie ändern sich.
+
+---
+
+## Warnungen und blockierende Fehler im Importergebnis
+
+Die meisten Plattformen unterscheiden zwischen **blockierenden Fehlern** (die Zeile oder Datei wird abgelehnt) und **Warnungen** (die Zeile wird importiert, aber markiert). Wer den Unterschied kennt, kann besser priorisieren:
+
+| Schweregrad | Bedeutung | Beispiel |
+|---|---|---|
+| Blockierend | Zeile oder Datei übersprungen | Fehlendes Pflichtfeld, falsche Spaltenzahl |
+| Warnung | Mit Markierung importiert | Unbekanntes optionales Feld, lange Beschreibung |
+| Info | Nur zur Information | Feld auf den Standardwert der Plattform gesetzt |
+
+Behebe vor dem erneuten Hochladen alle blockierenden Fehler. Warnungen kannst du oft in einem zweiten Durchgang angehen.
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine CSV zur automatischen Prüfung in StriveFormats hoch. Es findet alle blockierenden Fehler und Warnungen, zeigt für jedes Problem die genaue Zelle und behebt sichere Probleme mit einem Klick.
+
+[CSV-Fixer öffnen](/app) | [CSV-Vorlagen ansehen](/presets)

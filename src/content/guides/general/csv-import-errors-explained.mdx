@@ -39,13 +39,13 @@ The platform expected a column name that isn't in your header row. Common causes
 
 ### "Column count mismatch" / "Wrong number of columns"
 
-A data row has more or fewer commas than the header row. Common causes:
+A data row has more or fewer fields than the header row. Common causes:
 
 - A value contains an unquoted comma: `Wallet, Brown` should be `"Wallet, Brown"`
-- An HTML description contains a `<div>` attribute with commas
+- An unquoted HTML description contains commas (for example inside a `style` attribute)
 - A stray comma at the end of some rows (trailing comma creates a phantom column)
 
-**Fix:** Open the file in a text editor and look at the problematic row. Count the commas. Every value that contains a comma must be wrapped in double quotes.
+**Fix:** Open the file in a text editor and look at the problematic row. Count its fields, remembering that commas inside quoted values don't separate columns. Every value that contains a comma must be wrapped in double quotes.
 
 ### "Unexpected header" / "Unrecognized column"
 
@@ -61,19 +61,19 @@ Your file contains a column the platform doesn't recognize. This is usually a wa
 
 A required column exists in the header but has an empty value on one or more rows. Common required fields that go blank:
 
-- **Shopify:** Title, Handle, Variant Price
-- **WooCommerce:** SKU, Regular price, Name (for simple products)
-- **Etsy:** title, price, quantity, when_made, who_made, is_supply
-- **eBay:** Action, Title, Category, StartPrice, Condition
-- **Amazon:** seller_sku, item_name, price, quantity
+- **Shopify:** Handle on every row, and Title on each product's first row
+- **WooCommerce:** Name for new products, and Parent on variation rows
+- **Etsy (bulk-listing apps):** whatever the app's template marks as required, often who_made, when_made and is_supply
+- **eBay:** Action, plus Title, Category, StartPrice and ConditionID when adding listings
+- **Amazon (Inventory Loader):** sku, product-id, product-id-type and add-delete, plus price, item-condition and quantity when adding offers
 
 **Fix:** Filter or sort the file to find rows with blank values in the required columns. Fill in the missing data. If the blank is intentional (a variant row inheriting a parent value), check the platform's rules. Shopify variant rows, for example, legitimately leave Title blank.
 
 ### "SKU is required"
 
-Every product row must have a unique identifier. If you export products without SKUs and try to reimport, this error appears.
+Some files identify every product by SKU. Amazon's Inventory Loader always does, and update imports on other platforms often match rows by SKU. Rows without one fail there.
 
-**Fix:** Add a SKU to every row. Use a consistent format: alphanumeric, no spaces, under the platform's character limit (usually 40-50 characters).
+**Fix:** Add a SKU to every row that needs one. Use a consistent format: letters and numbers, no spaces, within the platform's limit (40 characters on Amazon).
 
 ---
 
@@ -95,8 +95,8 @@ The price field contains a non-numeric value. Common causes:
 A yes/no field contains an unexpected value. Platforms are strict about boolean formats:
 
 - **Shopify:** expects `true` or `false`, as written in Shopify's own template
-- **WooCommerce:** uses `1` / `0` or `yes` / `no`
-- **Amazon:** uses `y` / `n`
+- **WooCommerce:** uses `1` / `0` (fields such as `Backorders allowed?` also take `notify`)
+- **Amazon:** depends on the file. Category templates use the values in their Valid Values tab (usually `true` / `false`); the Inventory Loader's `will-ship-internationally` takes `y` / `n` or `1` / `2`
 
 **Fix:** Replace all variants (Yes, yes, Y, 1, true) with the format each platform expects. Use Find and Replace in your spreadsheet tool.
 
@@ -122,7 +122,7 @@ The category code you used doesn't exist in the platform's taxonomy.
 
 - **eBay:** Category IDs are numeric and must be from eBay's live category tree
 - **Amazon:** Browse nodes and product types must match the current Seller Central taxonomy
-- **Etsy:** Category paths must match Etsy's taxonomy exactly
+- **Etsy (bulk-listing apps):** taxonomy IDs come from Etsy's API and must match its current list
 
 **Fix:** Look up the correct category ID from the platform's official category browser or taxonomy download. Do not use IDs from old templates, because they change.
 

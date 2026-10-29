@@ -1,0 +1,149 @@
+---
+title: "Błędy importu CSV wyjaśnione"
+description: "Proste wyjaśnienie najczęstszych komunikatów o błędach importu CSV w Shopify, WooCommerce, Etsy, eBay i Amazon oraz sposobów ich naprawy."
+keywords: ["błędy importu csv wyjaśnione", "komunikaty błędów importu csv", "import csv nie powiódł się", "błąd przesyłania csv", "błędy csv e-commerce", "naprawa importu csv", "rozwiązywanie problemów z importem csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Co naprawdę oznacza każdy częsty komunikat o błędzie importu CSV"
+  - "Różnicę między błędami blokującymi a ostrzeżeniami"
+  - "Jak czytać raporty błędów platform, aby znaleźć przyczynę"
+  - "Które błędy naprawiają się automatycznie, a które wymagają ręcznej poprawki"
+  - "Jak zapobiec powtarzaniu się tych samych błędów"
+bestFor: "Każdy, kto dostał błąd importu CSV i chce zrozumieć, co poszło nie tak, zanim prześle plik ponownie"
+timeToComplete: "10 minut"
+---
+
+## Dlaczego importy CSV się nie udają
+
+Każda platforma e-commerce przepuszcza plik CSV przez szereg kontroli, zanim go przyjmie. Sprawdza strukturę (nagłówki, liczbę kolumn), typy danych (liczby, wartości tak/nie, pola wymagane), reguły biznesowe (poprawne kody kategorii, zakresy cen) i kodowanie. Jeśli którakolwiek kontrola się nie powiedzie, import zatrzymuje się całkowicie albo przyjmuje tylko część wierszy, a resztę pomija.
+
+Zrozumienie komunikatów o błędach to najszybsza droga do czystego importu. Ten poradnik wyjaśnia najczęstsze z nich.
+
+---
+
+## Błędy struktury
+
+Te błędy oznaczają, że kształt pliku jest zły, zanim platforma w ogóle spojrzy na dane.
+
+### „Missing required column” / „Column not found”
+
+Platforma oczekiwała nazwy kolumny, której nie ma w wierszu nagłówka. Częste przyczyny:
+
+- Zmieniłeś nazwę wymaganej kolumny (np. `product_title` zamiast `Title`)
+- W nagłówku jest spacja na początku lub końcu (` Title` zamiast `Title`)
+- Plik ma BOM, który dokleja ukryte bajty przed nazwę pierwszej kolumny
+- Używasz szablonu innej platformy
+
+**Rozwiązanie:** porównaj wiersz nagłówka z oficjalnym szablonem platformy. Porównanie musi być dokładne, łącznie z wielkością liter, pisownią i spacjami.
+
+### „Column count mismatch” / „Wrong number of columns”
+
+Wiersz danych ma więcej lub mniej pól niż wiersz nagłówka. Częste przyczyny:
+
+- Wartość zawiera przecinek bez cudzysłowu: `Wallet, Brown` powinno być `"Wallet, Brown"`
+- Opis HTML bez cudzysłowu zawiera przecinki (np. w atrybucie `style`)
+- Zbędny przecinek na końcu niektórych wierszy (tworzy kolumnę-widmo)
+
+**Rozwiązanie:** otwórz plik w edytorze tekstu i spójrz na problematyczny wiersz. Policz jego pola, pamiętając, że przecinki w wartościach w cudzysłowie nie rozdzielają kolumn. Każda wartość z przecinkiem musi być w cudzysłowie podwójnym.
+
+### „Unexpected header” / „Unrecognized column”
+
+Plik zawiera kolumnę, której platforma nie rozpoznaje. Zwykle to ostrzeżenie, a nie blokada, bo platforma pomija dodatkowe kolumny. Surowsze importery mogą jednak odrzucić nieznaną kolumnę, więc sprawdź szablon platformy, gdy plik nie przechodzi bez wyraźnego powodu.
+
+**Rozwiązanie:** usuń kolumny, których nie ma w oficjalnym szablonie, albo sprawdź, czy nazwa kolumny nie powinna być zapisana inaczej.
+
+---
+
+## Błędy pól wymaganych
+
+### „Required field is blank” / „Field cannot be empty”
+
+Wymagana kolumna jest w nagłówku, ale w jednym lub kilku wierszach ma pustą wartość. Pola wymagane, które często zostają puste:
+
+- **Shopify:** Handle w każdym wierszu i Title w pierwszym wierszu każdego produktu
+- **WooCommerce:** Name przy nowych produktach i Parent w wierszach odmian
+- **Etsy (aplikacje do masowego wystawiania):** to, co szablon aplikacji oznacza jako wymagane, często who_made, when_made i is_supply
+- **eBay:** Action, a przy dodawaniu ofert także Title, Category, StartPrice i ConditionID
+- **Amazon (Inventory Loader):** sku, product-id, product-id-type i add-delete, a przy dodawaniu ofert także price, item-condition i quantity
+
+**Rozwiązanie:** przefiltruj lub posortuj plik, aby znaleźć wiersze z pustymi wymaganymi kolumnami, i uzupełnij brakujące dane. Jeśli pusta wartość jest zamierzona (wiersz wariantu dziedziczy wartość z produktu), sprawdź zasady platformy. W Shopify wiersze wariantów zostawiają na przykład Title puste zupełnie poprawnie.
+
+### „SKU is required”
+
+Niektóre pliki identyfikują każdy produkt po SKU. Inventory Loader Amazon robi to zawsze, a importy aktualizujące na innych platformach często dopasowują wiersze po SKU. Wiersze bez SKU nie przechodzą.
+
+**Rozwiązanie:** dodaj SKU do każdego wiersza, który go potrzebuje. Używaj spójnego formatu: litery i cyfry, bez spacji, w limicie platformy (40 znaków w Amazon).
+
+---
+
+## Błędy typów danych i formatu
+
+### „Invalid price” / „Price must be a number”
+
+Pole ceny zawiera wartość, która nie jest liczbą. Częste przyczyny:
+
+- Symbol waluty w wartości: `$19.99` zamiast `19.99`
+- Przecinek jako separator dziesiętny: `19,99` zamiast `19.99` (typowe dla europejskich ustawień regionalnych, także polskich)
+- Pusty tekst lub myślnik tam, gdzie oczekiwana jest liczba
+- Excel ustawił w komórce format walutowy i wyeksportował symbol
+
+**Rozwiązanie:** usuń symbole walut i zamień przecinki dziesiętne na kropki. Przed zapisem ustaw w Excelu dla kolumny format „Liczbowe”.
+
+### „Invalid boolean” / „Must be true or false”
+
+Pole tak/nie zawiera nieoczekiwaną wartość. Platformy są surowe wobec takich formatów:
+
+- **Shopify:** oczekuje `true` lub `false`, jak w szablonie Shopify
+- **WooCommerce:** używa `1` / `0` (pola takie jak `Backorders allowed?` przyjmują też `notify`)
+- **Amazon:** zależy od pliku. Szablony kategorii używają wartości z karty Valid Values (zwykle `true` / `false`); `will-ship-internationally` w Inventory Loader przyjmuje `y` / `n` lub `1` / `2`
+
+**Rozwiązanie:** zamień wszystkie warianty (Yes, yes, Y, 1, true) na format, którego oczekuje dana platforma. Użyj funkcji Znajdź i zamień w arkuszu.
+
+### „Invalid date format”
+
+Pole daty ma zły format. Większość platform oczekuje `YYYY-MM-DD`. Excel często zamienia daty na formaty regionalne, takie jak `15.01.2024` lub `15 sty 2024`.
+
+**Rozwiązanie:** przed edycją ustaw w Excelu format tekstowy dla kolumn z datami albo użyj modułu `csv` w Pythonie, który nie zmienia typów. Przed zapisem zamień daty na `YYYY-MM-DD`.
+
+---
+
+## Błędy reguł biznesowych
+
+### „Duplicate SKU” / „Handle already exists”
+
+Unikatowy identyfikator występuje w pliku więcej niż raz. W Shopify powtarzające się Handle są celowo używane dla wariantów, ale jeśli Handle pojawia się w dwóch niezwiązanych grupach produktów, to błąd. W WooCommerce i Amazon zdublowane SKU zawsze oznaczają problem.
+
+**Rozwiązanie:** posortuj plik według kolumny identyfikatora i poszukaj niezamierzonych duplikatów. Formuła (`LICZ.JEŻELI`) automatycznie znajdzie dokładne duplikaty.
+
+### „Invalid category ID” / „Category not recognized”
+
+Użyty kod kategorii nie istnieje w taksonomii platformy.
+
+- **eBay:** identyfikatory kategorii są liczbowe i muszą pochodzić z aktualnego drzewa kategorii eBay
+- **Amazon:** węzły przeglądania i typy produktów muszą pasować do aktualnej taksonomii Seller Central
+- **Etsy (aplikacje do masowego wystawiania):** identyfikatory taksonomii pochodzą z API Etsy i muszą pasować do aktualnej listy
+
+**Rozwiązanie:** znajdź właściwy identyfikator kategorii w oficjalnej wyszukiwarce kategorii platformy lub w pobranym pliku taksonomii. Nie używaj identyfikatorów ze starych szablonów, bo się zmieniają.
+
+---
+
+## Ostrzeżenia i błędy blokujące w wyniku importu
+
+Większość platform odróżnia **błędy blokujące** (wiersz lub plik zostaje odrzucony) od **ostrzeżeń** (wiersz zostaje zaimportowany, ale oznaczony). Znajomość tej różnicy pomaga ustalić kolejność poprawek:
+
+| Waga | Znaczenie | Przykład |
+|---|---|---|
+| Blokujący | Wiersz lub plik pominięty | Brak pola wymaganego, zła liczba kolumn |
+| Ostrzeżenie | Zaimportowany z oznaczeniem | Nierozpoznane pole opcjonalne, długi opis |
+| Informacja | Tylko do wiadomości | Pole ustawione na wartość domyślną platformy |
+
+Przed ponownym przesłaniem napraw wszystkie błędy blokujące. Ostrzeżeniami często można zająć się w drugim podejściu.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV do StriveFormats, aby automatycznie go sprawdzić. Znajduje wszystkie błędy blokujące i ostrzeżenia, pokazuje dokładną komórkę każdego problemu i jednym kliknięciem naprawia te, które da się naprawić bezpiecznie.
+
+[Otwórz korektor CSV](/app) | [Zobacz szablony CSV](/presets)

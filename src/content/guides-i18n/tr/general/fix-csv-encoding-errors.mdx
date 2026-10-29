@@ -1,0 +1,155 @@
+---
+title: "CSV kodlama hatalarını düzeltme"
+description: "CSV dosyalarındaki UTF-8 kodlama sorunlarını teşhis edip düzeltin: bozuk karakterler, BOM işaretleri, mojibake ve içe aktarmaları bozan ANSI dosyaları."
+keywords: ["csv kodlama hatalarını düzeltme", "csv utf-8 kodlama", "csv bozuk karakterler", "csv bom kaldırma", "mojibake csv", "csv kodlama içe aktarma hatası", "utf-8 csv düzeltme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Bir CSV dosyasındaki kodlama sorunlarını nasıl tanıyacağınız"
+  - "UTF-8 BOM'un ne olduğu ve ne zaman sorun çıkardığı"
+  - "ANSI, Latin-1 ve diğer kodlamaları UTF-8'e nasıl dönüştüreceğiniz"
+  - "VS Code, Python ve Excel'de BOM'u nasıl kaldıracağınız"
+  - "Elektronik tablolarda düzenlerken kodlamanın bozulmasını nasıl önleyeceğiniz"
+bestFor: "Kodlama sorunlarından kaynaklanan bozuk karakterleri veya reddedilen içe aktarmaları gideren satıcılar ve geliştiriciler"
+timeToComplete: "8 dakika"
+---
+
+## CSV kodlama hataları nedir?
+
+Kodlama hataları, CSV dosyanızdaki baytlar yanlış karakter kümesiyle okunduğunda ortaya çıkar. En yaygın belirti **bozuk metindir**: ürün adları, açıklamalar veya diğer alanlarda kesme işaretleri, aksanlı ya da Türkçe harfler veya para birimi simgeleri yerine `â€™`, `Ã©`, `Â£` veya `ÅŸ` gibi tuhaf diziler görünür.
+
+Shopify ve WooCommerce **UTF-8** bekler ve bu, diğer tüm platformlar için de güvenli seçimdir. Dosyanız başka bir kodlamayla (ANSI, Latin-1, Windows-1254, Windows-1252) kaydedildiğinde içe aktarıcılar dosyayı ya doğrudan reddeder ya da karakterleri sessizce bozar.
+
+### Yaygın belirtiler
+
+- Kesme işaretleri ve tırnaklar çok karakterli anlamsız diziler olarak görünür
+- `é`, `ü`, `ñ` gibi harfler `Ã©`, `Ã¼`, `Ã±` olarak, `ş` gibi Türkçe harfler `ÅŸ` olarak görünür
+- İçe aktarma "invalid character" veya "encoding error" gibi bir mesajla başarısız olur
+- İlk sütun başlığının önünde tuhaf karakterler vardır (BOM)
+
+---
+
+## Dosyanızın kodlamasını belirleme
+
+Sorunu düzeltmeden önce dosyanızın şu anda hangi kodlamayı kullandığını bulun.
+
+**VS Code:** dosyayı açın. Kodlama sağ alttaki durum çubuğunda görünür. `UTF-8 with BOM`, `Windows 1254`, `Windows 1252` veya `ISO 8859-9` yazıyorsa dönüştürmeniz gerekir.
+
+**Python:**
+
+```python
+# pip install chardet
+import chardet
+
+with open("products.csv", "rb") as f:
+    result = chardet.detect(f.read(10_000))
+print(result)
+# örneğin {'encoding': 'Windows-1252', 'confidence': 0.73}
+```
+
+**Komut satırı (Linux/macOS):**
+
+```bash
+file -i products.csv    # macOS'ta: file -I products.csv
+# products.csv: text/plain; charset=iso-8859-1
+```
+
+---
+
+## UTF-8 BOM'unu kaldırma
+
+**BOM** (Byte Order Mark), dosyanın en başındaki gizli 3 baytlık bir dizidir (`EF BB BF`). Windows'taki Excel, "Farklı Kaydet > CSV UTF-8 (Virgülle ayrılmış)" seçeneğini kullandığınızda bunu ekler. Shopify ve WooCommerce bununla başa çıkar, ancak bazı içe aktarıcılar ve betikler fazladan baytları ilk sütun başlığının parçası olarak okur. Sütun adı `Handle` yerine `﻿Handle` olur ve araç onu tanımaz.
+
+**VS Code'da düzeltme:**
+1. Dosyayı açın
+2. Sağ alttaki durum çubuğunda kodlama göstergesine tıklayın
+3. "Save with Encoding"i seçin
+4. **UTF-8**'i (BOM'suz) seçin
+
+**Excel'de düzeltme:**
+Excel UTF-8'i BOM'suz kaydedemez. Bundan kaçınmak için düz **"CSV (Virgülle ayrılmış)"** seçeneğini kullanmayın: bu seçenek sisteminizin eski kodlamasıyla (genellikle Windows-1254) kaydeder ve diğer platformlarda Türkçe karakterleri bozar. "CSV UTF-8" olarak kaydedin, bir araç gerektiriyorsa BOM'u sonra VS Code'da kaldırın.
+
+**Python ile düzeltme:**
+
+```python
+# utf-8-sig okurken BOM'u kaldırır; yazma düz utf-8 ile (BOM'suz) yapılır
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## ANSI, Latin-1 veya Windows-1252'yi UTF-8'e dönüştürme
+
+Bu eski kodlamalar yalnızca tek bir bölgenin karakterlerini kapsar: Windows-1252 ve Latin-1'de `ş`, `ğ`, `ı` gibi Türkçe harfler yoktur, Windows-1254'te ise Kiril veya Asya yazıları yoktur. Ayrıca bu kodlamaların özel harfleri, bir araç dosyayı UTF-8 olarak okuduğunda bozuk karakterlere dönüşür.
+
+**VS Code'da:**
+1. Durum çubuğundaki kodlama etiketine tıklayın
+2. "Reopen with Encoding"i seçin ve dosyanın **mevcut** kodlamasını seçin (örneğin `Windows 1254`); metnin artık doğru göründüğünü kontrol edin
+3. Etikete yeniden tıklayın, "Save with Encoding"i seçin ve **UTF-8**'i seçin
+
+**Python'da:**
+
+```python
+# Yukarıda belirlediğiniz kodlamayı kullanın (Türkçe ANSI dosyaları genellikle windows-1254'tür)
+with open("input.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+**LibreOffice Calc'ta:**
+LibreOffice bir dosyayı açarken kodlamayı sorar. Doğru kaynak kodlamayı seçin. Kaydederken iletişim kutusunda "Unicode (UTF-8)" seçin.
+
+---
+
+## Verilerde zaten bulunan bozuk karakterleri (mojibake) düzeltme
+
+Bozuk karakterler zaten hücre değerlerine yazılmışsa (dosya yanlış okunup yeniden kaydedildiğinde yazıldılarsa), yalnızca dönüştürmek işe yaramaz. Bozulmayı geri almanız gerekir.
+
+**Yaygın mojibake kalıpları:**
+
+| Gördüğünüz | Olması gereken | Neden |
+|---|---|---|
+| `â€™` | `’` (tipografik kesme işareti) | UTF-8, Windows-1252 olarak okunmuş |
+| `â€”` | `—` (uzun tire) | UTF-8, Windows-1252 olarak okunmuş |
+| `Ã©` | `é` | UTF-8, Windows-1252 veya Latin-1 olarak okunmuş |
+| `Â£` | `£` | UTF-8, Windows-1252 veya Latin-1 olarak okunmuş |
+
+**Python'da düzeltme (ftfy kütüphanesi):**
+
+```python
+# pip install ftfy
+import ftfy
+
+with open("input.csv", encoding="utf-8") as f:
+    content = f.read()
+
+fixed = ftfy.fix_text(content)
+
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(fixed)
+```
+
+**Bilinen kalıpları elle düzeltme:**
+VS Code'da veya normal ifade destekleyen bir metin düzenleyicide Bul ve Değiştir'i kullanın. Bozuk diziyi doğru karakterle değiştirin.
+
+---
+
+## Kodlama sorunlarını önleme
+
+- **Google E-Tablolar'dan her zaman** Dosya > İndir > CSV ile dışa aktarın. Temiz UTF-8 üretir
+- **Windows'taki Excel'de**, eski bir kodlama kullanan düz "CSV (Virgülle ayrılmış)" yerine "CSV UTF-8 (Virgülle ayrılmış)" olarak kaydedin
+- **Kaydettikten sonra dosyanızı** VS Code'da kontrol edin. Durum çubuğu kodlamayı doğrular
+- **Bir UTF-8 CSV'yi** eski Excel sürümlerinde, kaydederken açıkça UTF-8 seçmeden asla açıp yeniden kaydetmeyin
+- **Betikle yapılan dışa aktarımlarda** Python `csv` modülünü veya `encoding="utf-8"` ile pandas'ı kullanın
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı BOM işaretlerini bulur, kodlama yüzünden eşleşmeyen başlıkları işaretler ve hangi hücrelerde şüpheli karakter dizileri olduğunu gösterir. Düzelttikten sonra içe aktarmaya hazır, temiz bir UTF-8 dosyası dışa aktarın.
+
+[CSV düzelticisini aç](/app) | [CSV şablonlarını görüntüle](/presets)

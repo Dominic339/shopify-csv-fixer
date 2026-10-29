@@ -1,0 +1,158 @@
+---
+title: "Checklist di importazione CSV per le piattaforme e-commerce"
+description: "Una checklist completa da seguire prima di importare file CSV in Shopify, WooCommerce, Etsy, eBay e Amazon: codifica, intestazioni, tipi di dati e regole specifiche di ogni piattaforma."
+keywords: ["checklist importazione csv", "checklist caricamento csv", "checklist csv e-commerce", "controllare csv prima di importare", "checklist csv shopify", "checklist csv woocommerce", "preparare importazione csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Una checklist generale valida per tutte le piattaforme"
+  - "Controlli specifici per Shopify, WooCommerce, Etsy, eBay e Amazon"
+  - "Come convalidare tipi di dati, campi obbligatori e codifica prima del caricamento"
+  - "Come fare una prova con pochi prodotti prima di importare tutto il catalogo"
+  - "Cosa fare se l'importazione fallisce anche dopo la checklist"
+bestFor: "Qualsiasi venditore che prepara un'importazione CSV e vuole evitare gli errori più comuni prima del caricamento"
+timeToComplete: "12 minuti"
+---
+
+## Checklist generale prima dell'importazione
+
+Esegui questi controlli su ogni CSV, qualunque sia la piattaforma.
+
+### Struttura del file
+
+- [ ] Il file ha estensione `.csv` ed è testo semplice separato da virgole (non un `.xlsx` rinominato in `.csv`; aprilo in un editor di testo per controllare)
+- [ ] La riga 1 contiene le intestazioni delle colonne, senza righe vuote o di titolo sopra
+- [ ] Nessuna riga vuota in nessun punto del file (per trovarle in Excel, aggiungi una colonna di supporto con `=CONTA.VALORI(A2:Z2)` e filtra per 0; non usare Vai a formato speciale > Celle vuote, che seleziona ogni cella vuota e non solo le righe vuote)
+- [ ] Nessuna riga di riepilogo, totale o formula in fondo
+- [ ] Nessuna cella unita (le celle unite vengono esportate vuote in tutte le celle tranne la prima)
+- [ ] Ogni riga ha lo stesso numero di campi dell'intestazione (conta i campi, non le virgole: le virgole dentro valori tra virgolette non separano colonne)
+
+### Codifica
+
+- [ ] Il file è salvato in **UTF-8** (controlla nella barra di stato di VS Code)
+- [ ] Nessun carattere illeggibile (â€™, Ã©, Â£) nei valori dei campi
+- [ ] Se la piattaforma non riconosce la prima colonna, controlla in un editor di testo se la sua intestazione ha un BOM invisibile davanti
+
+### Intestazioni
+
+- [ ] I nomi delle colonne corrispondono esattamente alla grafia della piattaforma, maiuscole e minuscole comprese
+- [ ] Nessuno spazio all'inizio o alla fine dei nomi delle colonne
+- [ ] Nessun nome di colonna duplicato
+- [ ] Ci sono tutte le colonne obbligatorie (vedi le checklist per piattaforma più sotto)
+
+### Tipi di dati
+
+- [ ] Le colonne dei prezzi contengono solo numeri (niente `$`, `EUR` o altri simboli)
+- [ ] I campi sì/no usano il formato corretto per la piattaforma (TRUE/FALSE, 1/0, y/n)
+- [ ] I campi di testo obbligatori non sono vuoti in nessuna riga
+- [ ] I campi SKU e identificativi sono univoci in tutto il file
+- [ ] Gli URL delle immagini sono assoluti (iniziano con `https://`) e accessibili pubblicamente
+
+---
+
+## Checklist per Shopify
+
+- [ ] `Handle` è presente e non vuoto in ogni riga
+- [ ] Le righe delle varianti hanno lo stesso `Handle` della riga del prodotto
+- [ ] `Title` è presente nella prima riga di ogni prodotto; può essere vuoto nelle righe delle varianti
+- [ ] `Variant Price` è un numero semplice senza simbolo di valuta (un prezzo vuoto viene importato come 0.00)
+- [ ] I campi sì/no (`Published`, `Requires Shipping`, `Gift Card`) usano `true` o `false`
+- [ ] I prodotti con varianti hanno `Option1 Name` nella prima riga e un `Option1 Value` in ogni riga di variante
+- [ ] Nessuna colonna di opzione in più senza valori (per esempio `Option3 Name` senza `Option3 Value`)
+- [ ] Gli URL delle immagini sono link pubblici `https://` a file di immagine (JPEG, PNG, GIF o WebP)
+- [ ] Il campo `Tags` separa i tag con virgole (tra virgolette se presenti)
+
+[Apri il correttore CSV per Shopify](/app?preset=shopify_products) | [Vedi il modello Shopify](/presets/shopify_products)
+
+---
+
+## Checklist per WooCommerce
+
+- [ ] La colonna `Type` contiene un valore valido: `simple`, `variable`, `variation`, `grouped` o `external`
+- [ ] I valori di `SKU` sono univoci (lo SKU è facoltativo, ma i duplicati falliscono)
+- [ ] `Regular price` è un numero decimale semplice (senza simboli di valuta)
+- [ ] `In stock?` usa `1` o `0`, e `Backorders allowed?` usa `1`, `0` o `notify`
+- [ ] Le righe delle variazioni hanno un valore `Parent`: lo SKU del prodotto variabile, oppure `id:` seguito dal suo ID prodotto
+- [ ] Le colonne degli attributi seguono lo schema `Attribute 1 name` / `Attribute 1 value(s)`
+- [ ] `Tax status` è `taxable`, `shipping` o `none`
+- [ ] Gli URL delle immagini sono URL HTTPS assoluti
+
+[Apri il correttore CSV per WooCommerce](/app?preset=woocommerce_products) | [Vedi il modello WooCommerce](/presets/woocommerce_products)
+
+---
+
+## Checklist per Etsy
+
+Etsy non ha un caricamento CSV. Questi controlli riguardano un'esportazione delle inserzioni che modificherai, migrerai o darai a un'app di pubblicazione in blocco.
+
+- [ ] `TITLE` non è vuoto e ha al massimo 140 caratteri
+- [ ] `PRICE` è un numero positivo semplice senza simbolo di valuta
+- [ ] `QUANTITY` è un numero intero fino a 999
+- [ ] `TAGS` contiene al massimo 13 tag separati da virgole, ciascuno di al massimo 20 caratteri
+- [ ] `MATERIALS` contiene al massimo 13 voci
+- [ ] Le colonne delle immagini (`IMAGE1`, `IMAGE2`, ...) contengono URL `https://` completi
+- [ ] I valori di `SKU` sono univoci, se usi gli SKU
+- [ ] Le colonne aggiunte da un'app di pubblicazione in blocco (come `who_made`, `when_made` e `is_supply`) usano i valori del modello di quell'app
+
+[Apri il correttore CSV per Etsy](/app?preset=etsy_listings) | [Vedi il modello Etsy](/presets/etsy_listings)
+
+---
+
+## Checklist per eBay
+
+- [ ] La colonna `Action` ha un valore in ogni riga, come `Add`, `Revise`, `Relist` o `End`
+- [ ] `Category` è un ID categoria eBay numerico valido
+- [ ] `Title` ha al massimo 80 caratteri
+- [ ] `StartPrice` è un numero decimale positivo (senza simboli di valuta)
+- [ ] `ConditionID` usa gli ID numerici delle condizioni di eBay (per esempio `1000` per Nuovo, `3000` per Usato)
+- [ ] `Duration` usa un valore consentito (`GTC` per le inserzioni a prezzo fisso; `Days_3`, `Days_5`, `Days_7` o `Days_10` per le aste)
+- [ ] `PicURL` contiene URL HTTPS delle immagini separati da una barra verticale `|` (fino a 24)
+- [ ] `Quantity` è un numero intero positivo
+
+[Apri il correttore CSV per eBay](/app?preset=ebay_listings) | [Vedi il modello eBay](/presets/ebay_listings)
+
+---
+
+## Checklist per Amazon
+
+Questi controlli riguardano il file delle offerte dell'Inventory Loader. I modelli di categoria hanno colonne proprie, descritte nella scheda Data Definitions del modello.
+
+- [ ] Il file è salvato come testo delimitato da tabulazioni (`.txt`), non come CSV
+- [ ] `sku` non è vuoto, è univoco e ha al massimo 40 caratteri
+- [ ] `product-id` e `product-id-type` sono coerenti (`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
+- [ ] `price` è un numero decimale positivo (senza simboli di valuta)
+- [ ] `quantity` è un numero intero (0 o più) e resta vuoto per le offerte FBA
+- [ ] `item-condition` usa i codici numerici di Amazon (`11` = Nuovo, `10` = Ricondizionato, da `1` a `8` per usato e da collezione)
+- [ ] `add-delete` è `a` (aggiungi o aggiorna), `d` (elimina l'offerta) o `x` (elimina l'offerta e i dati del prodotto)
+- [ ] `fulfillment-center-id` è `DEFAULT` per le offerte che spedisci tu, oppure il valore FBA della tua area (come `AMAZON_EU`)
+
+[Apri il correttore CSV per Amazon](/app?preset=amazon_inventory_loader) | [Vedi il modello Amazon](/presets/amazon_inventory_loader)
+
+---
+
+## Prova prima con pochi prodotti
+
+Prima di caricare l'intero catalogo, fai una prova con 3-5 righe:
+
+1. Copia 3 righe di dati in un nuovo file (con la stessa riga di intestazione)
+2. Carica il piccolo file di prova
+3. Controlla il risultato dell'importazione: verifica che tutti i campi siano stati associati correttamente e che i prodotti siano giusti
+4. Se va tutto bene, importa il file completo
+
+Una prova con pochi prodotti rende molto più facile individuare i problemi prima che riguardino centinaia di righe.
+
+---
+
+## Cosa fare se l'importazione fallisce ancora
+
+1. Leggi con attenzione il messaggio di errore. I report di errore delle piattaforme di solito indicano la colonna o la riga che ha dato problemi
+2. Cerca il messaggio di errore esatto insieme al nome della piattaforma per trovare la documentazione specifica
+3. Carica il file in StriveFormats per una convalida automatica. Individua problemi che i messaggi di errore della piattaforma non spiegano chiaramente
+
+---
+
+## Controlla tutto automaticamente con StriveFormats
+
+Esegui tutta questa checklist in automatico. StriveFormats convalida tutte le regole generali e specifiche di ogni piattaforma, segnala le celle esatte con problemi e corregge in automatico quelli sicuri.
+
+[Apri il correttore CSV](/app) | [Vedi i modelli CSV](/presets)

@@ -1,0 +1,155 @@
+---
+title: "Correggere gli errori di codifica dei CSV"
+description: "Diagnostica e correggi i problemi di codifica UTF-8 nei file CSV: caratteri illeggibili, marcatori BOM, mojibake e file ANSI che fanno fallire le importazioni."
+keywords: ["correggere errori codifica csv", "codifica utf-8 csv", "caratteri strani csv", "rimuovere bom csv", "mojibake csv", "errore codifica importazione csv", "sistemare csv utf-8"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Come riconoscere i problemi di codifica in un file CSV"
+  - "Che cos'è un BOM UTF-8 e quando crea problemi"
+  - "Come convertire ANSI, Latin-1 e altre codifiche in UTF-8"
+  - "Come rimuovere il BOM in VS Code, Python ed Excel"
+  - "Come evitare che i fogli di calcolo rovinino la codifica durante la modifica"
+bestFor: "Venditori e sviluppatori alle prese con caratteri illeggibili o importazioni rifiutate per problemi di codifica"
+timeToComplete: "8 minuti"
+---
+
+## Cosa sono gli errori di codifica dei CSV?
+
+Gli errori di codifica si verificano quando i byte del tuo CSV vengono letti con il set di caratteri sbagliato. Il sintomo più comune è il **testo illeggibile**: nomi di prodotto, descrizioni o altri campi con sequenze strane come `â€™`, `Ã©` o `Â£` al posto di apostrofi, lettere accentate o simboli di valuta.
+
+Shopify e WooCommerce si aspettano **UTF-8**, ed è la scelta sicura anche per tutte le altre piattaforme. Quando il file è salvato in un'altra codifica (ANSI, Latin-1, Windows-1252), gli importatori lo rifiutano oppure rovinano i caratteri senza avvisare.
+
+### Sintomi comuni
+
+- Apostrofi e virgolette compaiono come sequenze di più caratteri senza senso
+- Lettere come `é`, `ü`, `ñ` vengono mostrate come `Ã©`, `Ã¼`, `Ã±`
+- L'importazione fallisce con un messaggio «invalid character» o «encoding error»
+- La prima intestazione di colonna inizia con caratteri strani (BOM)
+
+---
+
+## Capire la codifica del tuo file
+
+Prima di correggere il problema, scopri quale codifica usa il file.
+
+**VS Code:** apri il file. La codifica è indicata nella barra di stato in basso a destra. Se dice `UTF-8 with BOM`, `Windows 1252` o `ISO 8859-1`, devi convertirlo.
+
+**Python:**
+
+```python
+# pip install chardet
+import chardet
+
+with open("products.csv", "rb") as f:
+    result = chardet.detect(f.read(10_000))
+print(result)
+# per es. {'encoding': 'Windows-1252', 'confidence': 0.73}
+```
+
+**Riga di comando (Linux/macOS):**
+
+```bash
+file -i products.csv    # su macOS: file -I products.csv
+# products.csv: text/plain; charset=iso-8859-1
+```
+
+---
+
+## Rimuovere un BOM UTF-8
+
+Un **BOM** (Byte Order Mark) è una sequenza nascosta di 3 byte (`EF BB BF`) all'inizio del file. Excel su Windows lo aggiunge quando usi «Salva con nome > CSV UTF-8 (delimitato da virgole)». Shopify e WooCommerce lo gestiscono, ma alcuni importatori e script leggono i byte in più come parte della prima intestazione. Il nome della colonna diventa `﻿Handle` invece di `Handle`, e lo strumento non lo riconosce.
+
+**Correzione in VS Code:**
+1. Apri il file
+2. Fai clic sull'indicatore di codifica nella barra di stato in basso a destra
+3. Scegli «Save with Encoding»
+4. Seleziona **UTF-8** (senza BOM)
+
+**Correzione in Excel:**
+Excel non può salvare UTF-8 senza BOM. Non usare il semplice **«CSV (delimitato dal separatore di elenco)»** per evitarlo: salva nella vecchia codifica del sistema e rovina gli accenti. Salva come «CSV UTF-8», poi rimuovi il BOM in VS Code se uno strumento lo richiede.
+
+**Correzione con Python:**
+
+```python
+# utf-8-sig legge e rimuove il BOM; si scrive in utf-8 semplice (senza BOM)
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## Convertire ANSI, Latin-1 o Windows-1252 in UTF-8
+
+Queste vecchie codifiche coprono solo i caratteri dell'Europa occidentale, quindi non possono contenere testo polacco, turco, cirillico o asiatico né molti simboli. Inoltre le loro lettere accentate diventano illeggibili quando uno strumento legge il file come UTF-8.
+
+**In VS Code:**
+1. Fai clic sull'etichetta della codifica nella barra di stato
+2. Scegli «Reopen with Encoding» e seleziona la codifica **attuale** del file (per esempio `Windows 1252`); controlla che il testo ora sia corretto
+3. Fai di nuovo clic sull'etichetta, scegli «Save with Encoding» e seleziona **UTF-8**
+
+**In Python:**
+
+```python
+# Usa la codifica che hai individuato sopra
+with open("input.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+**In LibreOffice Calc:**
+Quando apri un file, LibreOffice chiede la codifica. Scegli la codifica di origine corretta. Quando salvi, scegli «Unicode (UTF-8)» nella finestra di dialogo.
+
+---
+
+## Correggere i caratteri illeggibili (mojibake) già presenti nei dati
+
+Se i caratteri illeggibili sono già nei valori delle celle (sono stati scritti nel file dopo una lettura sbagliata e un nuovo salvataggio), la sola conversione non basta. Devi annullare la storpiatura.
+
+**Schemi di mojibake comuni:**
+
+| Cosa vedi | Cosa dovrebbe essere | Causa |
+|---|---|---|
+| `â€™` | `’` (apostrofo tipografico) | UTF-8 letto come Windows-1252 |
+| `â€”` | `—` (lineetta) | UTF-8 letto come Windows-1252 |
+| `Ã©` | `é` | UTF-8 letto come Windows-1252 o Latin-1 |
+| `Â£` | `£` | UTF-8 letto come Windows-1252 o Latin-1 |
+
+**Correzione in Python (libreria ftfy):**
+
+```python
+# pip install ftfy
+import ftfy
+
+with open("input.csv", encoding="utf-8") as f:
+    content = f.read()
+
+fixed = ftfy.fix_text(content)
+
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(fixed)
+```
+
+**Correzione manuale degli schemi noti:**
+Usa Trova e sostituisci in VS Code o in un editor di testo che supporti le espressioni regolari. Sostituisci la sequenza illeggibile con il carattere corretto.
+
+---
+
+## Prevenire i problemi di codifica
+
+- **Esporta sempre da Google Sheets** con File > Scarica > CSV. Ottieni un UTF-8 pulito
+- **In Excel su Windows**, salva come «CSV UTF-8 (delimitato da virgole)», non come semplice «CSV», che usa una vecchia codifica
+- **Controlla il file** in VS Code dopo il salvataggio. La barra di stato conferma la codifica
+- **Non aprire e risalvare mai** un CSV UTF-8 con versioni vecchie di Excel senza impostare esplicitamente UTF-8 al salvataggio
+- **Usa il modulo `csv` di Python** o pandas con `encoding="utf-8"` per le esportazioni da script
+
+---
+
+## Correggilo automaticamente con StriveFormats
+
+Carica il tuo CSV in StriveFormats. Il validatore rileva i BOM, segnala le intestazioni che non corrispondono per problemi di codifica e mostra quali celle contengono sequenze di caratteri sospette. Poi esporta un file UTF-8 pulito, pronto per l'importazione.
+
+[Apri il correttore CSV](/app) | [Vedi i modelli CSV](/presets)

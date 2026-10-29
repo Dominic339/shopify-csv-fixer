@@ -22,10 +22,10 @@ Run through these checks on every CSV, regardless of platform.
 
 - [ ] The file has a `.csv` extension and is plain comma-separated text (not `.xlsx` renamed to `.csv`; open it in a text editor to check)
 - [ ] Row 1 contains column headers, with no blank rows or title row above it
-- [ ] No blank rows anywhere in the file (delete them in Excel with Ctrl+G > Special > Blanks)
+- [ ] No blank rows anywhere in the file (to find them in Excel, add a helper column with `=COUNTA(A2:Z2)` and filter for 0; don't use Go To Special > Blanks, which selects every empty cell, not just empty rows)
 - [ ] No summary, total, or formula rows at the bottom
 - [ ] No merged cells (merged cells export as blanks in all cells except the first)
-- [ ] Column count is the same on every row (every row has the same number of commas)
+- [ ] Every row has the same number of fields as the header (count fields, not commas: commas inside quoted values don't separate columns)
 
 ### Encoding
 
@@ -35,7 +35,7 @@ Run through these checks on every CSV, regardless of platform.
 
 ### Headers
 
-- [ ] Column names match the platform's exact spelling (case-sensitive)
+- [ ] Column names match the platform's exact spelling, including case
 - [ ] No leading or trailing spaces in any column name
 - [ ] No duplicate column names
 - [ ] Required columns are present (see platform-specific checklists below)
@@ -55,11 +55,11 @@ Run through these checks on every CSV, regardless of platform.
 - [ ] `Handle` is present and non-blank on every row
 - [ ] Variant rows share the same `Handle` as the parent product row
 - [ ] `Title` is present on the parent (first) row for each product; blank on variant rows is OK
-- [ ] `Variant Price` is a positive decimal number on every row
+- [ ] `Variant Price` is a plain number with no currency symbol (a blank price imports as 0.00)
 - [ ] Boolean fields (`Published`, `Requires Shipping`, `Gift Card`) use `true` or `false`
-- [ ] `Option1 Name`, `Option1 Value` are present on all rows for variable products
+- [ ] Products with variants have `Option1 Name` on the first row and an `Option1 Value` on every variant row
 - [ ] No extra option columns without values (e.g., `Option3 Name` without `Option3 Value`)
-- [ ] Image URLs end in `.jpg`, `.jpeg`, `.png`, `.gif`, or `.webp`
+- [ ] Image URLs are public `https://` links to image files (JPEG, PNG, GIF or WebP)
 - [ ] `Tags` field uses commas to separate tags (wrapped in quotes if present)
 
 [Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)
@@ -69,10 +69,10 @@ Run through these checks on every CSV, regardless of platform.
 ## WooCommerce-Specific Checklist
 
 - [ ] `Type` column contains a valid value: `simple`, `variable`, `variation`, `grouped`, or `external`
-- [ ] `SKU` is non-blank and unique for simple products; variation rows inherit parent SKU if left blank
+- [ ] `SKU` values are unique (SKU is optional, but duplicates fail)
 - [ ] `Regular price` is a plain decimal number (no currency symbols)
-- [ ] Boolean fields (`In stock?`, `Backorders allowed?`) use `1` or `0`
-- [ ] Variation rows have a `Parent` value matching the parent product's `ID` or `SKU`
+- [ ] `In stock?` uses `1` or `0`, and `Backorders allowed?` uses `1`, `0` or `notify`
+- [ ] Variation rows have a `Parent` value: the variable product's SKU, or `id:` followed by its product ID
 - [ ] Attribute columns follow the `Attribute 1 name` / `Attribute 1 value(s)` naming pattern
 - [ ] `Tax status` is `taxable`, `shipping`, or `none`
 - [ ] Image URLs are absolute HTTPS URLs
@@ -83,14 +83,16 @@ Run through these checks on every CSV, regardless of platform.
 
 ## Etsy-Specific Checklist
 
-- [ ] `title` is non-blank and under 140 characters
-- [ ] `price` is a positive decimal number
-- [ ] `quantity` is a whole positive integer
-- [ ] `when_made` uses an allowed value from Etsy's enum (e.g., `made_to_order`, `2020_2024`)
-- [ ] `who_made` is `i_did`, `someone_else`, or `collective`
-- [ ] `is_supply` is `true` or `false`
-- [ ] `tags` contains 13 or fewer comma-separated tags, each under 20 characters
-- [ ] `image1` URL is a publicly accessible HTTPS URL
+Etsy has no CSV upload. These checks are for a listing export you'll edit, migrate or hand to a bulk-listing app.
+
+- [ ] `TITLE` is non-blank and 140 characters or fewer
+- [ ] `PRICE` is a plain positive number with no currency symbol
+- [ ] `QUANTITY` is a whole number up to 999
+- [ ] `TAGS` holds 13 or fewer comma-separated tags, each 20 characters or fewer
+- [ ] `MATERIALS` holds 13 or fewer entries
+- [ ] Image columns (`IMAGE1`, `IMAGE2`, ...) hold full `https://` URLs
+- [ ] `SKU` values are unique, if you use SKUs
+- [ ] Columns a bulk-listing app adds (such as `who_made`, `when_made` and `is_supply`) use the values in that app's template
 
 [Open Etsy CSV Fixer](/app?preset=etsy_listings) | [View Etsy Template](/presets/etsy_listings)
 
@@ -98,13 +100,13 @@ Run through these checks on every CSV, regardless of platform.
 
 ## eBay-Specific Checklist
 
-- [ ] `Action` column is present on every row: `Add`, `Revise`, `Relist`, `End`, or `Delete`
+- [ ] The `Action` column has a value on every row, such as `Add`, `Revise`, `Relist` or `End`
 - [ ] `Category` is a valid numeric eBay category ID
 - [ ] `Title` is 80 characters or fewer
 - [ ] `StartPrice` is a positive decimal number (no currency symbols)
-- [ ] `Condition` uses eBay's allowed condition IDs (e.g., `1000` for New, `3000` for Used)
-- [ ] `Duration` uses an allowed value: `Days_3`, `Days_5`, `Days_7`, `GTC`, etc.
-- [ ] `PicURL` contains a semicolon-separated list of HTTPS image URLs
+- [ ] `ConditionID` uses eBay's numeric condition IDs (e.g., `1000` for New, `3000` for Used)
+- [ ] `Duration` uses an allowed value (`GTC` for fixed-price listings; `Days_3`, `Days_5`, `Days_7` or `Days_10` for auctions)
+- [ ] `PicURL` holds HTTPS image URLs, separated by a pipe `|` (up to 24)
 - [ ] `Quantity` is a whole positive integer
 
 [Open eBay CSV Fixer](/app?preset=ebay_listings) | [View eBay Template](/presets/ebay_listings)
@@ -113,14 +115,16 @@ Run through these checks on every CSV, regardless of platform.
 
 ## Amazon-Specific Checklist
 
-- [ ] `seller_sku` is non-blank, unique, and under 40 characters
-- [ ] `item_name` is non-blank and under 500 characters
+These checks are for the Inventory Loader offer file. Category listing templates have their own columns, listed in the template's Data Definitions tab.
+
+- [ ] The file is saved as tab-delimited text (`.txt`), not CSV
+- [ ] `sku` is non-blank, unique, and 40 characters or fewer
+- [ ] `product-id` and `product-id-type` agree (`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
 - [ ] `price` is a positive decimal number (no currency symbols)
-- [ ] `quantity` is a whole number (0 or positive)
-- [ ] `condition_type` uses an allowed value: `New`, `Used`, `Refurbished`, etc.
-- [ ] `fulfillment_center_id` is `AMAZON` (FBA) or `DEFAULT` (FBM)
-- [ ] The template matches the correct product type (clothing flat files differ from electronics)
-- [ ] `product_id` and `product_id_type` are present and consistent (ASIN, UPC, EAN, etc.)
+- [ ] `quantity` is a whole number (0 or more), left blank for FBA offers
+- [ ] `item-condition` uses Amazon's numeric codes (`11` = New, `10` = Refurbished, `1` to `8` for used and collectible)
+- [ ] `add-delete` is `a` (add or update), `d` (delete the offer) or `x` (delete the offer and its product data)
+- [ ] `fulfillment-center-id` is `DEFAULT` for offers you ship yourself, or the FBA value for your region (such as `AMAZON_NA`)
 
 [Open Amazon CSV Fixer](/app?preset=amazon_inventory_loader) | [View Amazon Template](/presets/amazon_inventory_loader)
 

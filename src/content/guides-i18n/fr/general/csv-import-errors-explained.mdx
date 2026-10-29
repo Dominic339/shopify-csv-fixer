@@ -1,0 +1,149 @@
+---
+title: "Les erreurs d'import CSV expliquées"
+description: "Une explication en langage clair des messages d'erreur d'import CSV les plus courants sur Shopify, WooCommerce, Etsy, eBay et Amazon, et comment corriger chacun d'eux."
+keywords: ["erreurs import csv expliquées", "messages d'erreur import csv", "import csv échoué", "erreur envoi csv", "erreurs csv e-commerce", "corriger import csv", "dépannage import csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Ce que signifie vraiment chaque message d'erreur d'import CSV courant"
+  - "La différence entre erreurs bloquantes et avertissements"
+  - "Comment lire les rapports d'erreur des plateformes pour trouver la cause"
+  - "Quelles erreurs se corrigent automatiquement et lesquelles demandent une modification manuelle"
+  - "Comment éviter que les mêmes erreurs reviennent"
+bestFor: "Toute personne qui a reçu une erreur d'import CSV et veut comprendre ce qui s'est passé avant de renvoyer le fichier"
+timeToComplete: "10 minutes"
+---
+
+## Pourquoi les imports CSV échouent
+
+Chaque plateforme e-commerce fait passer votre CSV par une chaîne de validation avant de l'accepter. Elle vérifie la structure (en-têtes, nombre de colonnes), les types de données (nombres, valeurs oui/non, champs obligatoires), les règles métier (codes de catégorie valides, plages de prix) et l'encodage. Dès qu'une vérification échoue, l'import s'arrête complètement ou n'importe qu'une partie des lignes en ignorant le reste.
+
+Comprendre les messages d'erreur est le moyen le plus rapide d'obtenir un import propre. Ce guide explique les plus courants.
+
+---
+
+## Erreurs de structure
+
+Ces erreurs signifient que la forme du fichier est incorrecte, avant même que la plateforme regarde vos données.
+
+### « Missing required column » / « Column not found »
+
+La plateforme attendait un nom de colonne absent de votre ligne d'en-tête. Causes courantes :
+
+- Vous avez renommé une colonne obligatoire (par exemple `product_title` au lieu de `Title`)
+- L'en-tête commence ou finit par une espace (` Title` au lieu de `Title`)
+- Le fichier a un BOM qui ajoute des octets cachés devant le premier nom de colonne
+- Vous utilisez le modèle d'une autre plateforme
+
+**Solution :** comparez votre ligne d'en-tête au modèle officiel de la plateforme. La comparaison doit être exacte, casse, orthographe et espaces compris.
+
+### « Column count mismatch » / « Wrong number of columns »
+
+Une ligne de données a plus ou moins de champs que la ligne d'en-tête. Causes courantes :
+
+- Une valeur contient une virgule sans guillemets : `Wallet, Brown` doit devenir `"Wallet, Brown"`
+- Une description HTML sans guillemets contient des virgules (par exemple dans un attribut `style`)
+- Une virgule en trop à la fin de certaines lignes (elle crée une colonne fantôme)
+
+**Solution :** ouvrez le fichier dans un éditeur de texte et regardez la ligne concernée. Comptez ses champs, en vous rappelant que les virgules dans des valeurs entre guillemets ne séparent pas de colonnes. Toute valeur contenant une virgule doit être entre guillemets doubles.
+
+### « Unexpected header » / « Unrecognized column »
+
+Votre fichier contient une colonne que la plateforme ne reconnaît pas. C'est généralement un avertissement et non un blocage, car la plateforme ignore les colonnes en trop. Les outils d'import plus stricts peuvent refuser une colonne inconnue : vérifiez le modèle de la plateforme quand un fichier échoue sans raison évidente.
+
+**Solution :** supprimez les colonnes absentes du modèle officiel, ou vérifiez si le nom de la colonne doit s'écrire autrement.
+
+---
+
+## Erreurs de champs obligatoires
+
+### « Required field is blank » / « Field cannot be empty »
+
+Une colonne obligatoire figure dans l'en-tête mais est vide sur une ou plusieurs lignes. Les champs obligatoires qui restent souvent vides :
+
+- **Shopify :** Handle sur chaque ligne, et Title sur la première ligne de chaque produit
+- **WooCommerce :** Name pour les nouveaux produits, et Parent sur les lignes de variation
+- **Etsy (applications de mise en ligne en masse) :** ce que le modèle de l'application marque comme obligatoire, souvent who_made, when_made et is_supply
+- **eBay :** Action, plus Title, Category, StartPrice et ConditionID quand vous créez des annonces
+- **Amazon (Inventory Loader) :** sku, product-id, product-id-type et add-delete, plus price, item-condition et quantity quand vous créez des offres
+
+**Solution :** filtrez ou triez le fichier pour trouver les lignes où les colonnes obligatoires sont vides, puis complétez les données manquantes. Si le vide est voulu (une ligne de variante qui reprend une valeur du produit), vérifiez les règles de la plateforme. Sur Shopify, par exemple, les lignes de variantes laissent légitimement Title vide.
+
+### « SKU is required »
+
+Certains fichiers identifient chaque produit par son SKU. L'Inventory Loader d'Amazon le fait toujours, et les imports de mise à jour d'autres plateformes associent souvent les lignes par SKU. Les lignes sans SKU y échouent.
+
+**Solution :** ajoutez un SKU à chaque ligne qui en a besoin. Utilisez un format cohérent : lettres et chiffres, sans espaces, dans la limite de la plateforme (40 caractères sur Amazon).
+
+---
+
+## Erreurs de type de données et de format
+
+### « Invalid price » / « Price must be a number »
+
+Le champ de prix contient une valeur non numérique. Causes courantes :
+
+- Symbole monétaire dans la valeur : `$19.99` au lieu de `19.99`
+- Virgule comme séparateur décimal : `19,99` au lieu de `19.99` (courant avec les paramètres régionaux européens, dont le français)
+- Texte vide ou tiret là où un nombre est attendu
+- Excel a mis la cellule au format monétaire et a exporté le symbole
+
+**Solution :** retirez les symboles monétaires et remplacez les virgules décimales par des points. Mettez la colonne au format « Nombre » dans Excel avant d'enregistrer.
+
+### « Invalid boolean » / « Must be true or false »
+
+Un champ oui/non contient une valeur inattendue. Les plateformes sont strictes sur ces formats :
+
+- **Shopify :** attend `true` ou `false`, comme dans le modèle de Shopify
+- **WooCommerce :** utilise `1` / `0` (des champs comme `Backorders allowed?` acceptent aussi `notify`)
+- **Amazon :** cela dépend du fichier. Les modèles de catégorie utilisent les valeurs de leur onglet Valid Values (le plus souvent `true` / `false`) ; `will-ship-internationally` dans l'Inventory Loader prend `y` / `n` ou `1` / `2`
+
+**Solution :** remplacez toutes les variantes (Yes, yes, Y, 1, true) par le format attendu par chaque plateforme. Utilisez Rechercher et remplacer dans votre tableur.
+
+### « Invalid date format »
+
+Un champ de date utilise un mauvais format. La plupart des plateformes attendent `YYYY-MM-DD`. Excel convertit souvent les dates dans des formats régionaux comme `15/01/2024` ou `15 janv. 2024`.
+
+**Solution :** mettez les colonnes de date au format texte dans Excel avant de les modifier, ou utilisez le module Python `csv`, qui ne convertit pas les types. Convertissez les dates en `YYYY-MM-DD` avant d'enregistrer.
+
+---
+
+## Erreurs de règles métier
+
+### « Duplicate SKU » / « Handle already exists »
+
+Un identifiant unique apparaît plusieurs fois dans le fichier. Sur Shopify, les Handle en double servent volontairement aux variantes, mais si un Handle apparaît dans deux groupes de produits sans rapport, c'est une erreur. Sur WooCommerce et Amazon, des SKU en double signalent toujours un problème.
+
+**Solution :** triez le fichier sur la colonne d'identifiant et repérez les doublons involontaires. Utilisez une formule (`NB.SI`) pour trouver automatiquement les doublons exacts.
+
+### « Invalid category ID » / « Category not recognized »
+
+Le code de catégorie utilisé n'existe pas dans la taxonomie de la plateforme.
+
+- **eBay :** les ID de catégorie sont numériques et doivent venir de l'arborescence de catégories actuelle d'eBay
+- **Amazon :** les nœuds de navigation et les types de produits doivent correspondre à la taxonomie actuelle de Seller Central
+- **Etsy (applications de mise en ligne en masse) :** les ID de taxonomie viennent de l'API Etsy et doivent correspondre à sa liste actuelle
+
+**Solution :** cherchez le bon ID de catégorie dans l'outil officiel de navigation des catégories de la plateforme ou dans son téléchargement de taxonomie. N'utilisez pas d'ID tirés d'anciens modèles, car ils changent.
+
+---
+
+## Avertissements et erreurs bloquantes dans le résultat d'import
+
+La plupart des plateformes distinguent les **erreurs bloquantes** (la ligne ou le fichier est rejeté) des **avertissements** (la ligne est importée, mais signalée). Connaître la différence aide à prioriser les corrections :
+
+| Gravité | Signification | Exemple |
+|---|---|---|
+| Bloquant | Ligne ou fichier ignoré | Champ obligatoire manquant, mauvais nombre de colonnes |
+| Avertissement | Importé avec un signalement | Champ facultatif inconnu, description longue |
+| Info | Simple information | Champ mis à la valeur par défaut de la plateforme |
+
+Corrigez toutes les erreurs bloquantes avant de renvoyer le fichier. Les avertissements peuvent souvent être traités dans un second temps.
+
+---
+
+## Corrigez-le automatiquement avec StriveFormats
+
+Envoyez votre CSV dans StriveFormats pour une validation automatique. Il repère toutes les erreurs bloquantes et tous les avertissements, indique la cellule exacte de chaque problème et corrige en un clic ceux qui peuvent l'être sans risque.
+
+[Ouvrir le correcteur CSV](/app) | [Voir les modèles CSV](/presets)

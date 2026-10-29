@@ -1,0 +1,145 @@
+---
+title: "Eliminar filas vacías de un archivo CSV"
+description: "Cómo encontrar y eliminar filas vacías de un archivo CSV antes de importarlo en Shopify, WooCommerce, Etsy, eBay o Amazon, con Excel, Google Sheets o Python."
+keywords: ["eliminar filas vacías csv", "quitar filas en blanco csv", "error fila en blanco csv", "borrar filas vacías csv", "importar csv fila en blanco", "líneas en blanco csv", "excel csv filas vacías"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Por qué aparecen filas vacías en los CSV y cómo rompen las importaciones"
+  - "Cómo encontrar y eliminar filas vacías en Excel, Google Sheets y Python"
+  - "Cómo tratar la fila vacía que suele quedar al final del archivo"
+  - "Cómo detectar filas que parecen vacías pero no lo están (solo espacios)"
+  - "Cómo evitar que las filas vacías vuelvan a aparecer en tus exportaciones"
+bestFor: "Vendedores que ven errores de importación o productos vacíos inesperados por culpa de filas vacías en su CSV"
+timeToComplete: "6 minutos"
+---
+
+## Por qué las filas vacías causan problemas al importar
+
+Una fila vacía en un CSV es una fila en la que todos los campos están vacíos (o que solo tiene comas sin valores). Muchos importadores simplemente se saltan una fila totalmente vacía, pero según la plataforma, una fila vacía puede en cambio:
+
+- **Crear un registro de producto vacío** (Title vacío, Price vacío), que no pasa la validación de campos obligatorios
+- **Detener la importación** en la fila vacía, ignorando sin avisar todo lo que viene después
+- **Dar un error de validación** por cada campo obligatorio que falta en la fila vacía
+
+Los lugares donde más aparecen filas vacías:
+
+- Al **final del archivo** (las hojas de cálculo suelen añadir una automáticamente)
+- **Entre productos** (eliminaste una fila, pero dejaste una línea en blanco)
+- **Entre secciones**, si organizaste la hoja con huecos visuales
+- **Después de borrar el contenido de las celdas**: la tecla Supr vacía las celdas de una fila, pero deja la fila vacía en su sitio
+
+---
+
+## Encontrar filas vacías
+
+### En un editor de texto
+
+Abre el archivo en VS Code o en el Bloc de notas. Las filas vacías se ven enseguida: son líneas con solo comas o líneas totalmente vacías:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← fila vacía (solo comas o nada)
+red-shirt,Red T-Shirt,21.99
+```
+
+### En Excel
+
+Pulsa `Ctrl+Fin` para saltar a la última celda del rango usado. Si la última fila está más allá de tus datos (una fila vacía), Excel ha incluido filas vacías en el rango usado.
+
+Para encontrar todas las filas vacías, añade una columna auxiliar después de tu última columna, escribe `=CONTARA(A2:Z2)` en la fila 2 (amplía el rango para cubrir todas tus columnas) y cópiala hacia abajo. Las filas que muestran `0` están completamente vacías.
+
+No busques huecos en una sola columna como `Title`: en un archivo de Shopify, las filas de variantes dejan `Title` vacío a propósito y no son filas vacías.
+
+---
+
+## Eliminar filas vacías en Excel
+
+**Método 1: eliminar las filas vacías del final**
+
+1. Pulsa `Ctrl+Fin` para ver dónde cree Excel que terminan los datos
+2. Si está más allá de tu última fila de datos, selecciona las filas sobrantes debajo de tus datos
+3. Clic derecho → Eliminar
+4. Pulsa `Ctrl+Fin` otra vez para confirmar que el rango usado ya es correcto
+
+**Método 2: eliminar todas las filas vacías con una columna auxiliar**
+
+1. Añade la columna auxiliar con `=CONTARA(A2:Z2)` descrita arriba
+2. Activa un filtro (Datos → Filtro) y muestra solo las filas en las que la columna auxiliar vale `0`
+3. Selecciona esas filas, clic derecho → Eliminar fila
+4. Quita el filtro y elimina la columna auxiliar
+
+Evita Ir a especial → Celdas en blanco sobre una sola columna: elimina todas las filas en las que esa columna esté vacía, incluidas filas de variantes válidas.
+
+---
+
+## Eliminar filas vacías en Google Sheets
+
+Usa la misma columna auxiliar y un filtro:
+
+1. Añade una columna auxiliar con `=CONTARA(A2:Z2)` y cópiala hacia abajo
+2. Añade un filtro (Datos → Crear un filtro)
+3. En el filtro de la columna auxiliar, muestra solo `0`
+4. Selecciona las filas visibles y elimínalas (clic derecho → Eliminar filas seleccionadas)
+5. Desactiva el filtro y elimina la columna auxiliar
+
+Ordenar también lleva las filas vacías al final, pero solo ordena un archivo en el que el orden de las filas no importe. Los productos de Shopify, las variaciones de WooCommerce y los anuncios con variaciones de eBay dependen de que sus filas sigan en orden.
+
+---
+
+## Eliminar filas vacías con Python
+
+Con archivos grandes, Python es lo más rápido:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Conservar la fila si algún campo tiene un valor que no sea solo espacios
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Esto también elimina las filas con solo espacios (filas que parecen vacías pero contienen espacios o tabulaciones).
+
+---
+
+## Filas con solo espacios
+
+Algunas filas parecen vacías en la hoja de cálculo, pero en realidad tienen espacios o tabulaciones en una o varias celdas. Una comprobación simple de «¿está vacía la fila?» no las detecta.
+
+**Detectarlas con Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+La solución de la sección anterior (con `cell.strip()`) las elimina automáticamente.
+
+---
+
+## Evitar filas vacías en futuras exportaciones
+
+- **En Excel:** antes de guardar como CSV, pulsa `Ctrl+Fin` y comprueba que la última fila con datos sea de verdad la última fila usada. Elimina las filas que haya debajo.
+- **En Google Sheets:** la descarga en CSV incluye todas las filas hasta la última celda no vacía, así que mantén los datos compactos.
+- **Al eliminar filas:** en Excel, haz clic derecho en los números de fila → Eliminar (no te limites a pulsar Supr sobre el contenido, que deja una fila vacía).
+- **Después de filtrar:** la exportación a CSV de Excel incluye las filas ocultas por un filtro, así que quita los filtros y comprueba lo que hay realmente en la hoja antes de exportar.
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+Sube tu CSV a StriveFormats. El validador detecta filas vacías, filas con solo espacios y filas en las que todos los campos obligatorios están vacíos. Te muestra su ubicación exacta para que puedas quitarlas antes de importar.
+
+[Abrir el corrector de CSV](/app) | [Ver plantillas CSV](/presets)

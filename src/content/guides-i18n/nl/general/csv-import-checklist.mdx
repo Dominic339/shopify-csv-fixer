@@ -1,0 +1,158 @@
+---
+title: "CSV-importchecklist voor e-commerceplatforms"
+description: "Een complete checklist vóór het importeren van CSV-bestanden in Shopify, WooCommerce, Etsy, eBay en Amazon: codering, kolomkoppen, gegevenstypen en regels per platform."
+keywords: ["csv import checklist", "csv upload checklist", "e-commerce csv checklist", "csv controleren voor import", "shopify csv checklist", "woocommerce csv checklist", "csv import voorbereiden"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Een algemene checklist vóór de import die voor alle platforms geldt"
+  - "Controles per platform voor Shopify, WooCommerce, Etsy, eBay en Amazon"
+  - "Hoe je gegevenstypen, verplichte velden en codering controleert voordat je uploadt"
+  - "Hoe je eerst test met een kleine reeks voordat je je hele catalogus importeert"
+  - "Wat je doet als de import na de checklist nog steeds mislukt"
+bestFor: "Elke verkoper die een CSV-import voorbereidt en de meest voorkomende fouten vóór het uploaden wil voorkomen"
+timeToComplete: "12 minuten"
+---
+
+## Algemene checklist vóór de import
+
+Loop deze punten na bij elke CSV, voor welk platform ook.
+
+### Opbouw van het bestand
+
+- [ ] Het bestand heeft de extensie `.csv` en is platte, kommagescheiden tekst (geen hernoemde `.xlsx`; open het in een teksteditor om te controleren)
+- [ ] Rij 1 bevat de kolomkoppen, zonder lege rij of titelrij erboven
+- [ ] Nergens in het bestand lege rijen (vind ze in Excel met een hulpkolom `=AANTALARG(A2:Z2)` en filter op 0; gebruik niet Selecteren speciaal > Lege waarden, want dat selecteert elke lege cel, niet alleen lege rijen)
+- [ ] Geen samenvattings-, totaal- of formulerijen onderaan
+- [ ] Geen samengevoegde cellen (die worden leeg geëxporteerd in alle cellen behalve de eerste)
+- [ ] Elke rij heeft evenveel velden als de koprij (tel velden, geen komma's: komma's binnen waarden tussen aanhalingstekens scheiden geen kolommen)
+
+### Codering
+
+- [ ] Het bestand is opgeslagen als **UTF-8** (controleer de statusbalk van VS Code)
+- [ ] Er zijn nergens onleesbare tekens (â€™, Ã©, Â£) te zien
+- [ ] Herkent het platform de eerste kolom niet, controleer dan in een teksteditor of de kolomkop een onzichtbare BOM ervoor heeft
+
+### Kolomkoppen
+
+- [ ] De kolomnamen volgen precies de schrijfwijze van het platform, ook qua hoofdletters
+- [ ] Geen spaties aan het begin of eind van een kolomnaam
+- [ ] Geen dubbele kolomnamen
+- [ ] Alle verplichte kolommen zijn aanwezig (zie de checklists per platform hieronder)
+
+### Gegevenstypen
+
+- [ ] Prijskolommen bevatten alleen getallen (geen `$`, `EUR` of andere symbolen)
+- [ ] Ja/nee-velden gebruiken de juiste notatie voor het platform (TRUE/FALSE, 1/0, y/n)
+- [ ] Verplichte tekstvelden zijn op geen enkele rij leeg
+- [ ] SKU- en ID-velden zijn uniek in het hele bestand
+- [ ] Afbeeldings-URL's zijn absoluut (beginnen met `https://`) en openbaar bereikbaar
+
+---
+
+## Checklist voor Shopify
+
+- [ ] `Handle` staat op elke rij en is niet leeg
+- [ ] Variantrijen hebben dezelfde `Handle` als de rij van het product
+- [ ] `Title` staat op de eerste rij van elk product; leeg op variantrijen is prima
+- [ ] `Variant Price` is een gewoon getal zonder valutasymbool (een lege prijs wordt geïmporteerd als 0.00)
+- [ ] Ja/nee-velden (`Published`, `Requires Shipping`, `Gift Card`) gebruiken `true` of `false`
+- [ ] Producten met varianten hebben `Option1 Name` op de eerste rij en een `Option1 Value` op elke variantrij
+- [ ] Geen extra optiekolommen zonder waarden (bijvoorbeeld `Option3 Name` zonder `Option3 Value`)
+- [ ] Afbeeldings-URL's zijn openbare `https://`-links naar afbeeldingsbestanden (JPEG, PNG, GIF of WebP)
+- [ ] Het veld `Tags` scheidt tags met komma's (tussen aanhalingstekens als die er zijn)
+
+[Shopify-CSV-fixer openen](/app?preset=shopify_products) | [Shopify-sjabloon bekijken](/presets/shopify_products)
+
+---
+
+## Checklist voor WooCommerce
+
+- [ ] De kolom `Type` bevat een geldige waarde: `simple`, `variable`, `variation`, `grouped` of `external`
+- [ ] `SKU`-waarden zijn uniek (de SKU is optioneel, maar dubbele mislukken)
+- [ ] `Regular price` is een gewoon decimaal getal (zonder valutasymbool)
+- [ ] `In stock?` gebruikt `1` of `0`, en `Backorders allowed?` gebruikt `1`, `0` of `notify`
+- [ ] Variatierijen hebben een waarde in `Parent`: de SKU van het variabele product, of `id:` gevolgd door het product-ID
+- [ ] Attribuutkolommen volgen het patroon `Attribute 1 name` / `Attribute 1 value(s)`
+- [ ] `Tax status` is `taxable`, `shipping` of `none`
+- [ ] Afbeeldings-URL's zijn absolute HTTPS-URL's
+
+[WooCommerce-CSV-fixer openen](/app?preset=woocommerce_products) | [WooCommerce-sjabloon bekijken](/presets/woocommerce_products)
+
+---
+
+## Checklist voor Etsy
+
+Etsy heeft geen CSV-upload. Deze controles gelden voor een export van aanbiedingen die je gaat bewerken, verhuizen of aan een app voor bulkplaatsing geeft.
+
+- [ ] `TITLE` is niet leeg en heeft hoogstens 140 tekens
+- [ ] `PRICE` is een gewoon positief getal zonder valutasymbool
+- [ ] `QUANTITY` is een geheel getal tot 999
+- [ ] `TAGS` bevat hoogstens 13 kommagescheiden tags van elk hoogstens 20 tekens
+- [ ] `MATERIALS` bevat hoogstens 13 items
+- [ ] Afbeeldingskolommen (`IMAGE1`, `IMAGE2`, ...) bevatten volledige `https://`-URL's
+- [ ] `SKU`-waarden zijn uniek, als je SKU's gebruikt
+- [ ] Kolommen die een app voor bulkplaatsing toevoegt (zoals `who_made`, `when_made` en `is_supply`) gebruiken de waarden uit het sjabloon van die app
+
+[Etsy-CSV-fixer openen](/app?preset=etsy_listings) | [Etsy-sjabloon bekijken](/presets/etsy_listings)
+
+---
+
+## Checklist voor eBay
+
+- [ ] De kolom `Action` heeft op elke rij een waarde, zoals `Add`, `Revise`, `Relist` of `End`
+- [ ] `Category` is een geldig numeriek eBay-categorie-ID
+- [ ] `Title` heeft hoogstens 80 tekens
+- [ ] `StartPrice` is een positief decimaal getal (zonder valutasymbool)
+- [ ] `ConditionID` gebruikt de numerieke staat-ID's van eBay (bijvoorbeeld `1000` voor Nieuw, `3000` voor Gebruikt)
+- [ ] `Duration` gebruikt een toegestane waarde (`GTC` voor aanbiedingen met vaste prijs; `Days_3`, `Days_5`, `Days_7` of `Days_10` voor veilingen)
+- [ ] `PicURL` bevat HTTPS-afbeeldings-URL's, gescheiden door een verticale streep `|` (tot 24)
+- [ ] `Quantity` is een positief geheel getal
+
+[eBay-CSV-fixer openen](/app?preset=ebay_listings) | [eBay-sjabloon bekijken](/presets/ebay_listings)
+
+---
+
+## Checklist voor Amazon
+
+Deze controles gelden voor het aanbiedingsbestand van de Inventory Loader. Categoriesjablonen hebben eigen kolommen, die in het tabblad Data Definitions van het sjabloon staan.
+
+- [ ] Het bestand is opgeslagen als tabgescheiden tekst (`.txt`), niet als CSV
+- [ ] `sku` is niet leeg, uniek en heeft hoogstens 40 tekens
+- [ ] `product-id` en `product-id-type` passen bij elkaar (`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
+- [ ] `price` is een positief decimaal getal (zonder valutasymbool)
+- [ ] `quantity` is een geheel getal (0 of meer) en blijft leeg bij FBA-aanbiedingen
+- [ ] `item-condition` gebruikt de cijfercodes van Amazon (`11` = Nieuw, `10` = Gereviseerd, `1` tot en met `8` voor gebruikt en verzamelobjecten)
+- [ ] `add-delete` is `a` (toevoegen of bijwerken), `d` (aanbieding verwijderen) of `x` (aanbieding en productgegevens verwijderen)
+- [ ] `fulfillment-center-id` is `DEFAULT` voor aanbiedingen die je zelf verzendt, of de FBA-waarde voor jouw regio (zoals `AMAZON_EU`)
+
+[Amazon-CSV-fixer openen](/app?preset=amazon_inventory_loader) | [Amazon-sjabloon bekijken](/presets/amazon_inventory_loader)
+
+---
+
+## Test eerst met een kleine reeks
+
+Test met 3 tot 5 rijen voordat je je hele catalogus uploadt:
+
+1. Kopieer 3 rijen met gegevens naar een nieuw bestand (met dezelfde koprij)
+2. Upload het kleine testbestand
+3. Bekijk het resultaat van de import: zijn alle velden goed gekoppeld en zien de producten er goed uit?
+4. Gaat het goed, importeer dan het hele bestand
+
+Met een kleine testreeks vind je problemen veel makkelijker voordat ze honderden rijen raken.
+
+---
+
+## Wat te doen als de import nog steeds mislukt
+
+1. Lees de foutmelding zorgvuldig. Foutrapporten van platforms noemen meestal de kolom of rij die mislukte
+2. Zoek op de exacte foutmelding plus de naam van het platform om de juiste documentatie te vinden
+3. Upload het bestand naar StriveFormats voor een automatische controle. Het vindt problemen die de foutmeldingen van het platform niet duidelijk uitleggen
+
+---
+
+## Alles automatisch controleren met StriveFormats
+
+Laat deze hele checklist automatisch doorlopen. StriveFormats controleert alle algemene en platformspecifieke regels, markeert precies de cellen met problemen en herstelt veilige problemen automatisch.
+
+[CSV-fixer openen](/app) | [CSV-sjablonen bekijken](/presets)

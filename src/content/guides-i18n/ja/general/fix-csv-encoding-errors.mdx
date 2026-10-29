@@ -1,0 +1,155 @@
+---
+title: "CSV のエンコーディングエラーを直す"
+description: "CSV ファイルの UTF-8 エンコーディングの問題を診断して直します。文字化け、BOM、mojibake、インポートを失敗させる ANSI ファイルなどを扱います。"
+keywords: ["csv 文字化け 直す", "csv utf-8 文字コード", "csv 文字化け", "csv bom 削除", "mojibake csv", "csv 文字コード インポート エラー", "utf-8 csv 修正"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV ファイルの文字コードの問題を見分ける方法"
+  - "UTF-8 の BOM とは何か、どんなときに問題になるか"
+  - "ANSI（Shift_JIS）、Latin-1 などの文字コードを UTF-8 に変換する方法"
+  - "VS Code、Python、Excel で BOM を取り除く方法"
+  - "スプレッドシートで編集するときに文字コードが壊れるのを防ぐ方法"
+bestFor: "文字化けや、文字コードが原因のインポート拒否に対処しているセラーと開発者"
+timeToComplete: "8 分"
+---
+
+## CSV の文字コードのエラーとは
+
+文字コードのエラーは、CSV ファイルのバイトが間違った文字セットで読まれたときに起こります。最もよくある症状は**文字化け**です。商品名や説明などの項目で、アポストロフィ、アクセント付きの文字、日本語、通貨記号の代わりに `â€™`、`Ã©`、`Â£`、`ç¸`、`繧` のような奇妙な文字列が表示されます。
+
+Shopify と WooCommerce は **UTF-8** を前提としており、ほかのすべてのプラットフォームでも UTF-8 が安全な選択です。ファイルが別の文字コード（Shift_JIS、Latin-1、Windows-1252 など）で保存されていると、インポート機能はファイルを拒否するか、文字を黙って壊します。
+
+### よくある症状
+
+- アポストロフィや引用符が、意味のない数文字の並びになる
+- `é`、`ü`、`ñ` のような文字が `Ã©`、`Ã¼`、`Ã±` と表示され、日本語は読めない漢字や記号の列になる
+- 「invalid character」や「encoding error」といったメッセージでインポートが失敗する
+- 1 列目の見出しの前に奇妙な文字が付いている（BOM）
+
+---
+
+## ファイルの文字コードを確かめる
+
+直す前に、ファイルが今どの文字コードかを調べます。
+
+**VS Code**：ファイルを開くと、右下のステータスバーに文字コードが表示されます。`UTF-8 with BOM`、`Shift JIS`、`Windows 1252`、`ISO 8859-1` と表示されていれば変換が必要です。
+
+**Python**：
+
+```python
+# pip install chardet
+import chardet
+
+with open("products.csv", "rb") as f:
+    result = chardet.detect(f.read(10_000))
+print(result)
+# 例：{'encoding': 'Windows-1252', 'confidence': 0.73}
+```
+
+**コマンドライン（Linux/macOS）**：
+
+```bash
+file -i products.csv    # macOS では: file -I products.csv
+# products.csv: text/plain; charset=iso-8859-1
+```
+
+---
+
+## UTF-8 の BOM を取り除く
+
+**BOM**（バイトオーダーマーク）は、ファイルの先頭にある隠れた 3 バイトの並び（`EF BB BF`）です。Windows の Excel で「名前を付けて保存 > CSV UTF-8 (コンマ区切り)」を使うと付きます。Shopify と WooCommerce は問題なく扱えますが、一部のインポート機能やスクリプトは、この余分なバイトを 1 列目の見出しの一部として読みます。列名が `Handle` ではなく `﻿Handle` になり、ツールが認識できなくなります。
+
+**VS Code での直し方**：
+1. ファイルを開きます
+2. 右下のステータスバーの文字コード表示をクリックします
+3. 「Save with Encoding」を選びます
+4. **UTF-8**（BOM なし）を選びます
+
+**Excel での直し方**：
+Excel には BOM なしの UTF-8 で保存するオプションがありません。BOM を避けるために普通の **「CSV (コンマ区切り)」** を使ってはいけません。システムの古い文字コード（日本語版では Shift_JIS）で保存され、ほかのプラットフォームで文字化けします。「CSV UTF-8」で保存し、ツールが必要とする場合だけ VS Code で BOM を取り除きます。
+
+**Python での直し方**：
+
+```python
+# utf-8-sig は読み込み時に BOM を取り除き、書き込みは BOM なしの utf-8
+with open("input.csv", encoding="utf-8-sig") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+---
+
+## ANSI、Latin-1、Windows-1252 を UTF-8 に変換する
+
+これらの古い文字コードは、特定の地域の文字しか扱えません。Windows-1252 や Latin-1 には日本語がなく、Shift_JIS には多くの記号やほかの言語の文字がありません。さらに、ツールがファイルを UTF-8 として読むと、これらの文字はすべて文字化けします。
+
+**VS Code の場合**：
+1. ステータスバーの文字コード表示をクリックします
+2. 「Reopen with Encoding」を選び、ファイルの**現在の**文字コード（`Shift JIS` など）を選びます。文字が正しく表示されることを確認します
+3. もう一度表示をクリックし、「Save with Encoding」を選んで **UTF-8** を選びます
+
+**Python の場合**：
+
+```python
+# 上で調べた文字コードを指定する（日本語版 Excel の CSV は多くの場合 cp932 = Shift_JIS）
+with open("input.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+**LibreOffice Calc の場合**：
+ファイルを開くときに、LibreOffice が文字コードを尋ねます。正しい元の文字コードを選びます。保存するときは、ダイアログで「Unicode (UTF-8)」を選びます。
+
+---
+
+## データにすでに入ってしまった文字化け（mojibake）を直す
+
+文字化けがすでにセルの値に入っている場合（間違って読んだまま保存し直したため、ファイルに書き込まれた場合）、変換だけでは直りません。文字化けを元に戻す必要があります。
+
+**よくある文字化けのパターン**：
+
+| 表示されている文字 | 本来の文字 | 原因 |
+|---|---|---|
+| `â€™` | `’`（曲がったアポストロフィ） | UTF-8 を Windows-1252 として読んだ |
+| `â€”` | `—`（ダッシュ） | UTF-8 を Windows-1252 として読んだ |
+| `Ã©` | `é` | UTF-8 を Windows-1252 または Latin-1 として読んだ |
+| `Â£` | `£` | UTF-8 を Windows-1252 または Latin-1 として読んだ |
+
+**Python での直し方（ftfy ライブラリ）**：
+
+```python
+# pip install ftfy
+import ftfy
+
+with open("input.csv", encoding="utf-8") as f:
+    content = f.read()
+
+fixed = ftfy.fix_text(content)
+
+with open("output.csv", "w", encoding="utf-8") as f:
+    f.write(fixed)
+```
+
+**決まったパターンを手で直す**：
+VS Code や正規表現が使えるテキストエディタで検索と置換を使い、文字化けした並びを正しい文字に置き換えます。
+
+---
+
+## 文字コードの問題を防ぐ
+
+- **Google スプレッドシートからは**、常にファイル > ダウンロード > CSV で書き出します。きれいな UTF-8 になります
+- **Windows の Excel では**、古い文字コードを使う普通の「CSV (コンマ区切り)」ではなく、「CSV UTF-8 (コンマ区切り)」で保存します
+- **保存したら**、VS Code でファイルを確認します。ステータスバーで文字コードがわかります
+- **UTF-8 の CSV を**、古い Excel で開いて保存し直すときは、必ず保存時に UTF-8 を明示的に選びます
+- **スクリプトで書き出すときは**、Python の `csv` モジュールか、`encoding="utf-8"` を指定した pandas を使います
+
+---
+
+## StriveFormats で自動的に直す
+
+CSV を StriveFormats にアップロードしてください。検証ツールが BOM を見つけ、文字コードが原因で一致しない見出しを指摘し、怪しい文字列を含むセルを示します。直したら、インポートできるきれいな UTF-8 ファイルを書き出せます。
+
+[CSV 修正ツールを開く](/app) | [CSV テンプレートを見る](/presets)

@@ -18,16 +18,16 @@ timeToComplete: "6 minutes"
 
 A blank row in a CSV file is a row where all fields are empty (or just commas with no values). Many importers simply skip a fully blank row, but depending on the platform, a blank row can instead:
 
-- **Creates an empty product record** (Title blank, Price blank), which fails required field validation
-- **Stops importing** at the blank row, silently ignoring everything after it
-- **Reports a validation error** for each required field that's missing on the blank row
+- **Create an empty product record** (Title blank, Price blank), which fails required field validation
+- **Stop the import** at the blank row, silently ignoring everything after it
+- **Report a validation error** for each required field that's missing on the blank row
 
 The most common places blank rows appear:
 
 - At the **end of the file** (spreadsheet editors often add one automatically)
 - **Between products** (you deleted a row but left a blank line)
 - **Between sections** if you organized your spreadsheet with visual gaps
-- **After filtering**: hidden rows in Excel sometimes export as blank rows
+- **After deleting cell contents**: pressing Delete clears a row's cells but leaves the empty row in place
 
 ---
 
@@ -48,7 +48,9 @@ red-shirt,Red T-Shirt,21.99
 
 Press `Ctrl+End` to jump to the last cell in the used range. If the last row is beyond your data (an empty row), Excel has included blank rows in the used range.
 
-To find all blank rows: select a column that should always have a value (like `Handle` or `Title`), go to Home → Find & Select → Go To Special → Blanks. This selects all blank cells in that column, and those rows are your blank rows.
+To find all blank rows, add a helper column after your last column, enter `=COUNTA(A2:Z2)` in row 2 (widen the range to cover all your columns) and fill it down. Rows showing `0` are completely blank.
+
+Don't look for blanks in a single column such as `Title`: in a Shopify file, variant rows leave `Title` empty on purpose, and they are not blank rows.
 
 ---
 
@@ -61,26 +63,28 @@ To find all blank rows: select a column that should always have a value (like `H
 3. Right-click → Delete Rows
 4. Press `Ctrl+End` again to confirm the used range is now correct
 
-**Method 2: Delete all blank rows with Go To Special**
+**Method 2: Delete all blank rows with a helper column**
 
-1. Select column A (or any column that's always filled for valid rows)
-2. Home → Find & Select → Go To Special → Blanks
-3. Right-click any selected cell → Delete → Entire Row
-4. This removes every row where column A was blank
+1. Add the `=COUNTA(A2:Z2)` helper column described above
+2. Turn on a filter (Data → Filter) and show only rows where the helper column is `0`
+3. Select those rows, right-click → Delete Row
+4. Clear the filter and delete the helper column
+
+Avoid Go To Special → Blanks on a single column: it deletes every row where that column happens to be empty, including valid variant rows.
 
 ---
 
 ## Delete Blank Rows in Google Sheets
 
-Google Sheets doesn't have Go To Special, but you can filter:
+Use the same helper column and a filter:
 
-1. Add a filter (Data → Create a Filter)
-2. Click the filter dropdown on the `Title` (or Handle) column
-3. Uncheck "Blanks"
-4. Select all visible rows with data, then disable the filter
-5. You'll now see only the blank rows. Delete them (right-click → Delete rows)
+1. Add a helper column with `=COUNTA(A2:Z2)` and fill it down
+2. Add a filter (Data → Create a filter)
+3. In the helper column's filter, show only `0`
+4. Select the visible rows and delete them (right-click → Delete selected rows)
+5. Turn off the filter and delete the helper column
 
-Alternatively, sort by the key column: blank rows sort to the bottom, making them easy to select and delete.
+Sorting also moves blank rows to the bottom, but only sort a file whose row order doesn't matter. Shopify products, WooCommerce variations and eBay variation listings depend on their rows staying in order.
 
 ---
 
@@ -112,6 +116,8 @@ Some rows look blank in a spreadsheet but actually contain spaces or tab charact
 **Detect them in Python:**
 
 ```python
+import csv
+
 with open("input.csv", newline="", encoding="utf-8") as f:
     reader = csv.reader(f)
     for i, row in enumerate(reader, 1):
@@ -128,7 +134,7 @@ The fix from the previous section (using `cell.strip()`) handles these automatic
 - **In Excel:** Before saving as CSV, press `Ctrl+End` and verify the last row with data is the actual last used row. Delete any rows below it.
 - **In Google Sheets:** the CSV download includes every row down to the last non-empty cell, so keep your data compact.
 - **After deleting rows:** In Excel, right-click the row numbers → Delete (not just pressing Delete on the cell contents, which leaves a blank row).
-- **After filtering:** Always clear filters before exporting, or confirm that the exported file doesn't include hidden rows.
+- **After filtering:** Excel's CSV export includes rows hidden by a filter, so clear filters and check what's really in the sheet before exporting.
 
 ---
 

@@ -1,0 +1,149 @@
+---
+title: "CSV içe aktarma hataları açıklandı"
+description: "Shopify, WooCommerce, Etsy, eBay ve Amazon'daki en yaygın CSV içe aktarma hata mesajlarının sade bir açıklaması ve her birinin çözümü."
+keywords: ["csv içe aktarma hataları açıklaması", "csv içe aktarma hata mesajları", "csv içe aktarma başarısız", "csv yükleme hatası", "e-ticaret csv hataları", "csv içe aktarmayı düzeltme", "csv içe aktarma sorun giderme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Yaygın CSV içe aktarma hata mesajlarının gerçekte ne anlama geldiği"
+  - "Engelleyen hatalar ile uyarılar arasındaki fark"
+  - "Kök nedeni bulmak için platform hata raporlarının nasıl okunacağı"
+  - "Hangi hataların otomatik düzeldiği, hangilerinin elle düzenleme gerektirdiği"
+  - "Aynı hataların tekrarlanmasının nasıl önleneceği"
+bestFor: "CSV içe aktarmada hata alan ve yeniden yüklemeden önce neyin yanlış gittiğini anlamak isteyen herkes"
+timeToComplete: "10 dakika"
+---
+
+## CSV içe aktarmaları neden başarısız olur
+
+Her e-ticaret platformu CSV'nizi kabul etmeden önce bir doğrulama sürecinden geçirir. Bu süreç yapıyı (başlıklar, sütun sayısı), veri türlerini (sayılar, evet/hayır değerleri, zorunlu alanlar), iş kurallarını (geçerli kategori kodları, fiyat aralıkları) ve kodlamayı kontrol eder. Herhangi bir kontrol başarısız olursa içe aktarma ya tamamen durur ya da satırların bir kısmını içe aktarıp gerisini atlar.
+
+Hata mesajlarını anlamak temiz bir içe aktarmaya giden en hızlı yoldur. Bu rehber en yaygın olanları açıklar.
+
+---
+
+## Yapısal hatalar
+
+Bu hatalar, platform verilerinize bakmadan önce dosyanın biçiminin yanlış olduğunu gösterir.
+
+### "Missing required column" / "Column not found"
+
+Platform başlık satırınızda olmayan bir sütun adı bekliyordu. Yaygın nedenler:
+
+- Zorunlu bir sütunu yeniden adlandırdınız (örneğin `Title` yerine `product_title`)
+- Başlığın başında veya sonunda boşluk var (`Title` yerine ` Title`)
+- Dosyada ilk sütun adının önüne gizli baytlar ekleyen bir BOM var
+- Başka bir platformun şablonunu kullanıyorsunuz
+
+**Çözüm:** başlık satırınızı o platformun resmi şablonuyla karşılaştırın. Karşılaştırma büyük/küçük harf, yazım ve boşluklar dahil tam olmalıdır.
+
+### "Column count mismatch" / "Wrong number of columns"
+
+Bir veri satırında başlık satırından daha fazla veya daha az alan var. Yaygın nedenler:
+
+- Bir değerde tırnaksız virgül var: `Wallet, Brown` değeri `"Wallet, Brown"` olmalı
+- Tırnaksız bir HTML açıklaması virgül içeriyor (örneğin bir `style` niteliğinin içinde)
+- Bazı satırların sonunda fazladan bir virgül var (hayalet bir sütun oluşturur)
+
+**Çözüm:** dosyayı bir metin düzenleyicide açın ve sorunlu satıra bakın. Tırnak içindeki değerlerde bulunan virgüllerin sütun ayırmadığını unutmadan alanlarını sayın. Virgül içeren her değer çift tırnak içinde olmalıdır.
+
+### "Unexpected header" / "Unrecognized column"
+
+Dosyanızda platformun tanımadığı bir sütun var. Platform fazla sütunları yok saydığı için bu genellikle engel değil, uyarıdır. Daha katı içe aktarıcılar tanımadıkları bir sütunu reddedebilir; bu yüzden bir dosya belirgin bir neden olmadan başarısız olursa platformun kendi şablonuna bakın.
+
+**Çözüm:** resmi şablonda olmayan sütunları kaldırın veya sütun adının farklı yazılması gerekip gerekmediğini kontrol edin.
+
+---
+
+## Zorunlu alan hataları
+
+### "Required field is blank" / "Field cannot be empty"
+
+Zorunlu bir sütun başlıkta var, ancak bir veya daha fazla satırda boş. Sık boş kalan zorunlu alanlar:
+
+- **Shopify:** her satırda Handle ve her ürünün ilk satırında Title
+- **WooCommerce:** yeni ürünlerde Name ve varyasyon satırlarında Parent
+- **Etsy (toplu yayınlama uygulamaları):** uygulamanın şablonunun zorunlu işaretlediği alanlar, çoğu zaman who_made, when_made ve is_supply
+- **eBay:** Action, ilan eklerken ayrıca Title, Category, StartPrice ve ConditionID
+- **Amazon (Inventory Loader):** sku, product-id, product-id-type ve add-delete, teklif eklerken ayrıca price, item-condition ve quantity
+
+**Çözüm:** zorunlu sütunlarda boş değer olan satırları bulmak için dosyayı filtreleyin veya sıralayın ve eksik verileri doldurun. Boşluk kasıtlıysa (bir varyant satırı üründen bir değer devralıyorsa), platformun kurallarını kontrol edin. Örneğin Shopify'da varyant satırlarında Title'ın boş kalması tamamen normaldir.
+
+### "SKU is required"
+
+Bazı dosyalar her ürünü SKU ile tanımlar. Amazon'un Inventory Loader'ı bunu her zaman yapar, diğer platformlardaki güncelleme içe aktarmaları da satırları çoğunlukla SKU ile eşleştirir. Orada SKU'su olmayan satırlar başarısız olur.
+
+**Çözüm:** SKU gereken her satıra bir SKU ekleyin. Tutarlı bir biçim kullanın: harf ve rakam, boşluk yok, platformun sınırı içinde (Amazon'da 40 karakter).
+
+---
+
+## Veri türü ve biçim hataları
+
+### "Invalid price" / "Price must be a number"
+
+Fiyat alanında sayı olmayan bir değer var. Yaygın nedenler:
+
+- Değerde para birimi simgesi: `19.99` yerine `$19.99`
+- Ondalık ayırıcı olarak virgül: `19.99` yerine `19,99` (Türkçe dahil Avrupa bölge ayarlarında yaygındır)
+- Sayı beklenen yerde boş metin veya tire
+- Excel hücreyi para birimi olarak biçimlendirmiş ve simgeyi de dışa aktarmış
+
+**Çözüm:** para birimi simgelerini kaldırın ve ondalık virgülleri noktaya çevirin. Kaydetmeden önce Excel'de sütunu "Sayı" olarak biçimlendirin.
+
+### "Invalid boolean" / "Must be true or false"
+
+Bir evet/hayır alanında beklenmeyen bir değer var. Platformlar bu biçimler konusunda katıdır:
+
+- **Shopify:** Shopify'ın kendi şablonundaki gibi `true` veya `false` bekler
+- **WooCommerce:** `1` / `0` kullanır (`Backorders allowed?` gibi alanlar `notify` de kabul eder)
+- **Amazon:** dosyaya bağlıdır. Kategori şablonları Valid Values sekmesindeki değerleri kullanır (genellikle `true` / `false`); Inventory Loader'daki `will-ship-internationally` ise `y` / `n` veya `1` / `2` kabul eder
+
+**Çözüm:** tüm varyantları (Yes, yes, Y, 1, true) her platformun beklediği biçimle değiştirin. Elektronik tablonuzda Bul ve Değiştir'i kullanın.
+
+### "Invalid date format"
+
+Bir tarih alanı yanlış biçimde. Çoğu platform `YYYY-MM-DD` bekler. Excel tarihleri çoğu zaman `15.01.2024` veya `15 Oca 2024` gibi bölgesel biçimlere çevirir.
+
+**Çözüm:** düzenlemeden önce Excel'de tarih sütunlarını metin olarak biçimlendirin veya türleri dönüştürmeyen Python `csv` modülünü kullanın. Kaydetmeden önce tarihleri `YYYY-MM-DD` biçimine çevirin.
+
+---
+
+## İş kuralı hataları
+
+### "Duplicate SKU" / "Handle already exists"
+
+Benzersiz bir tanımlayıcı dosyada birden fazla kez geçiyor. Shopify'da yinelenen Handle'lar varyantlar için bilerek kullanılır, ancak bir Handle iki ilgisiz ürün grubunda geçiyorsa bu bir hatadır. WooCommerce ve Amazon'da yinelenen SKU'lar her zaman bir soruna işaret eder.
+
+**Çözüm:** dosyayı tanımlayıcı sütununa göre sıralayın ve istenmeyen yinelenenleri arayın. Tam yinelenenleri otomatik bulmak için bir formül (`EĞERSAY`) kullanın.
+
+### "Invalid category ID" / "Category not recognized"
+
+Kullandığınız kategori kodu platformun sınıflandırmasında yok.
+
+- **eBay:** kategori kimlikleri sayısaldır ve eBay'in güncel kategori ağacından gelmelidir
+- **Amazon:** gezinme düğümleri ve ürün türleri Seller Central'ın güncel sınıflandırmasıyla eşleşmelidir
+- **Etsy (toplu yayınlama uygulamaları):** sınıflandırma kimlikleri Etsy'nin API'sinden gelir ve güncel listeyle eşleşmelidir
+
+**Çözüm:** doğru kategori kimliğini platformun resmi kategori tarayıcısından veya sınıflandırma indirmesinden bulun. Eski şablonlardaki kimlikleri kullanmayın, çünkü değişirler.
+
+---
+
+## İçe aktarma sonucunda uyarılar ve engelleyen hatalar
+
+Çoğu platform **engelleyen hataları** (satır veya dosya reddedilir) ve **uyarıları** (satır içe aktarılır ama işaretlenir) birbirinden ayırır. Farkı anlamak düzeltmelere öncelik vermenize yardımcı olur:
+
+| Önem | Anlamı | Örnek |
+|---|---|---|
+| Engelleyen | Satır veya dosya atlandı | Eksik zorunlu alan, yanlış sütun sayısı |
+| Uyarı | İşaretlenerek içe aktarıldı | Tanınmayan isteğe bağlı alan, uzun açıklama |
+| Bilgi | Yalnızca bilgilendirme | Alana platformun varsayılan değeri verildi |
+
+Yeniden yüklemeden önce tüm engelleyen hataları düzeltin. Uyarılar çoğu zaman ikinci bir turda ele alınabilir.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+Otomatik doğrulama için CSV'nizi StriveFormats'a yükleyin. Tüm engelleyen hataları ve uyarıları bulur, her sorunun tam hücresini gösterir ve güvenli sorunları tek tıklamayla düzeltir.
+
+[CSV düzelticisini aç](/app) | [CSV şablonlarını görüntüle](/presets)
