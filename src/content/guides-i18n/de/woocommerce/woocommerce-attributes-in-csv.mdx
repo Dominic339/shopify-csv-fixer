@@ -16,7 +16,7 @@ timeToComplete: "10 Minuten"
 
 ## Wie WooCommerce-Attribute in der CSV funktionieren
 
-WooCommerce-Produktattribute legen fest, in welchen Dimensionen sich ein Produkt unterscheidet – typischerweise Größe, Farbe oder Material. Beim CSV-Import werden Attribute als nummerierte Spaltengruppen dargestellt. Jede Gruppe aus vier Spalten deckt ein Attribut ab.
+WooCommerce-Produktattribute legen fest, in welchen Dimensionen sich ein Produkt unterscheidet, typischerweise Größe, Farbe oder Material. Beim CSV-Import werden Attribute als nummerierte Spaltengruppen dargestellt. Jede Gruppe aus vier Spalten deckt ein Attribut ab.
 
 Das Namensmuster der Spalten lautet:
 - `Attribute 1 name`
@@ -75,7 +75,7 @@ Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 vi
 ,variation,TSHIRT-XL,20.00,Size,XL,1,1
 ```
 
-Die Spalte `Name` bleibt in Variationszeilen leer – WooCommerce bildet den Variationsnamen aus den Attributwerten.
+Die Spalte `Name` bleibt in Variationszeilen leer. WooCommerce bildet den Variationsnamen aus den Attributwerten.
 
 ---
 
@@ -125,7 +125,7 @@ Lokale Attribute lassen sich weder zum Filtern von Variationen noch für die meh
 
 ### Attributspalten werden nicht erkannt
 
-**Ursache:** Die Spaltennamen folgen nicht genau dem Muster – falsche Leerzeichen, falsche Nummerierung oder abgekürzte Namen.
+**Ursache:** Die Spaltennamen folgen nicht genau dem Muster: falsche Leerzeichen, falsche Nummerierung oder abgekürzte Namen.
 
 Falsch: `Attribute1 name`, `attribute 1 name`, `Attr 1 name`
 Richtig: `Attribute 1 name`
@@ -148,6 +148,6 @@ Richtig: `Attribute 1 name`
 
 ## Automatisch beheben mit StriveFormats
 
-Lade deine WooCommerce-CSV in StriveFormats hoch. Der Validator prüft die Benennung der Attributspalten, die Übereinstimmung der Attribute zwischen Eltern- und Variationszeilen und die Formatierung der Trennstriche – und meldet Probleme mit genauer Zeile und Spalte.
+Lade deine WooCommerce-CSV in StriveFormats hoch. Der Validator prüft die Benennung der Attributspalten, die Übereinstimmung der Attribute zwischen Eltern- und Variationszeilen und die Formatierung der Trennstriche und meldet Probleme mit genauer Zeile und Spalte.
 
 [WooCommerce-CSV-Fixer öffnen](/app?preset=woocommerce_products) | [WooCommerce-Vorlage ansehen](/presets/woocommerce_products)

@@ -1,6 +1,6 @@
 ---
 title: "Shopify Product CSV Template Explained"
-description: "A column-by-column explanation of every field in the official Shopify product CSV template — what each column does, what values it accepts, and which are required."
+description: "A column-by-column explanation of every field in the official Shopify product CSV template: what each column does, what values it accepts, and which are required."
 keywords: ["shopify product csv template", "shopify csv columns explained", "shopify csv template guide", "shopify import template", "shopify csv fields", "shopify product import columns", "shopify csv reference"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -16,7 +16,7 @@ timeToComplete: "15 minutes"
 
 ## Template Overview
 
-The official Shopify product CSV template has two categories of columns: **product-level** (set once per product, on the first/parent row) and **variant-level** (set on every row for that product). When a product has multiple variants, it occupies multiple rows in the file — all sharing the same Handle.
+The official Shopify product CSV template has two categories of columns: **product-level** (set once per product, on the first/parent row) and **variant-level** (set on every row for that product). When a product has multiple variants, it takes up multiple rows in the file, all sharing the same Handle.
 
 Download the current template from your Shopify admin: Products → Import → Download sample CSV.
 
@@ -51,7 +51,7 @@ The brand or supplier name. Plain text.
 
 ### Type
 
-Your custom product type (for organization). Not Shopify's product category — this is a freeform string used for filtering.
+Your custom product type (for organization). This is not Shopify's product category; it's a freeform string used for filtering.
 
 ### Tags
 
@@ -67,8 +67,8 @@ A comma-separated list of tags. If a tag contains a comma, the entire Tags cell 
 
 Whether the product is visible to customers. Accepts `TRUE` or `FALSE` (uppercase).
 
-- `TRUE` — product is active and visible
-- `FALSE` — product is a draft (hidden from the storefront)
+- `TRUE`: product is active and visible
+- `FALSE`: product is a draft (hidden from the storefront)
 
 ### Published Scope
 
@@ -87,7 +87,7 @@ These columns define the variant dimensions (Size, Color, Material, etc.).
 Rules:
 - `Option1 Name` should be the same on every row for the same product
 - `Option1 Value` changes per variant row
-- If you have only one option, use Option1 only — don't include Option2 or Option3 columns unless you have a second or third option
+- If you have only one option, use Option1 only. Don't include Option2 or Option3 columns unless you have a second or third option
 
 ### Option2 Name / Option2 Value (Optional)
 
@@ -105,11 +105,11 @@ These columns apply to every row (both parent and variant rows).
 
 ### Variant SKU
 
-A unique identifier for this specific variant. Optional — but if you use inventory tracking, SKUs must be unique. Leave blank if you don't use SKU-based tracking.
+A unique identifier for this specific variant. It's optional, but if you use inventory tracking, SKUs must be unique. Leave it blank if you don't use SKU-based tracking.
 
 ### Variant Price (Required)
 
-The selling price for this variant. Plain decimal number — no currency symbols, no thousands separators.
+The selling price for this variant. A plain decimal number, with no currency symbols or thousands separators.
 
 **Example:** `19.99`
 
@@ -139,7 +139,7 @@ How the variant is fulfilled. `manual` for standard fulfillment, or the API name
 
 ### Variant Barcode
 
-UPC, EAN, or ISBN barcode. Plain text. Not validated by Shopify — just stored.
+UPC, EAN, or ISBN barcode. Plain text. Shopify doesn't validate it; it's just stored.
 
 ### Variant Weight / Variant Weight Unit
 
@@ -196,6 +196,6 @@ The meta description for the product page. Under 160 characters recommended.
 
 ## Fix This Automatically with StriveFormats
 
-Upload your Shopify template to StriveFormats for column-by-column validation. It checks required fields, boolean formats, variant structure, and image URLs — then exports a clean, import-ready file.
+Upload your Shopify template to StriveFormats for column-by-column validation. It checks required fields, boolean formats, variant structure, and image URLs, then exports a clean, import-ready file.
 
 [Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)

@@ -18,12 +18,12 @@ timeToComplete: "12 Minuten"
 
 Wenn du eine Produkt-CSV importierst, durchläuft jede Zeile bei Shopify mehrere Prüfschritte:
 
-1. **Kopfzeilenprüfung** – kontrolliert, ob die Pflichtspalten vorhanden sind
-2. **Gruppierung nach Handle** – fasst Zeilen mit demselben Handle zu einem Produkt zusammen
-3. **Feldprüfung** – kontrolliert Datentypen, Pflichtwerte und zulässige Werte
-4. **Konflikterkennung** – sucht nach Handle- und SKU-Konflikten mit bestehenden Produkten
+1. **Kopfzeilenprüfung**: kontrolliert, ob die Pflichtspalten vorhanden sind
+2. **Gruppierung nach Handle**: fasst Zeilen mit demselben Handle zu einem Produkt zusammen
+3. **Feldprüfung**: kontrolliert Datentypen, Pflichtwerte und zulässige Werte
+4. **Konflikterkennung**: sucht nach Handle- und SKU-Konflikten mit bestehenden Produkten
 
-Ein Fehler in einem dieser Schritte lässt Zeilen scheitern. Shopify importiert oft die gültigen Zeilen und überspringt die fehlerhaften – wenn du nicht vorher alle Fehler behebst, landet am Ende nur ein Teil deiner Produkte im Shop.
+Ein Fehler in einem dieser Schritte lässt Zeilen scheitern. Shopify importiert oft die gültigen Zeilen und überspringt die fehlerhaften. Wenn du nicht vorher alle Fehler behebst, landet am Ende nur ein Teil deiner Produkte im Shop.
 
 ---
 
@@ -113,11 +113,11 @@ blue-shirt,,Size,Large,21.99
 
 **Meldung:** Produkte überschreiben sich gegenseitig oder die Gruppierung der Varianten bricht
 
-**Ursache:** Zwei unabhängige Produkte teilen sich denselben Handle. Shopify fasst alle Zeilen mit demselben Handle zu einem Produkt zusammen – ein doppelter Handle verschmilzt also Produkte, die nichts miteinander zu tun haben.
+**Ursache:** Zwei unabhängige Produkte teilen sich denselben Handle. Shopify fasst alle Zeilen mit demselben Handle zu einem Produkt zusammen, ein doppelter Handle verschmilzt also Produkte, die nichts miteinander zu tun haben.
 
 **Lösung:** Gib jedem Produkt einen eindeutigen Handle. Handles müssen URL-tauglich sein: nur Kleinbuchstaben, Ziffern und Bindestriche, keine Leer- oder Sonderzeichen.
 
-Wenn du ein bestehendes Produkt aktualisierst und der Handle in Shopify schon existiert, ist das gewollt – der Import aktualisiert dieses Produkt. Teilt ein neues Produkt aber versehentlich den Handle eines bestehenden, werden dessen Daten überschrieben.
+Wenn du ein bestehendes Produkt aktualisierst und der Handle in Shopify schon existiert, ist das gewollt: Der Import aktualisiert dieses Produkt. Teilt ein neues Produkt aber versehentlich den Handle eines bestehenden, werden dessen Daten überschrieben.
 
 ---
 
@@ -125,7 +125,7 @@ Wenn du ein bestehendes Produkt aktualisierst und der Handle in Shopify schon ex
 
 **Meldung:** Die Produkte werden importiert, aber der Lagerbestand stimmt nicht oder SKUs werden als doppelt gemeldet
 
-**Ursache:** Dieselbe SKU steht in zwei verschiedenen Zeilen (oder bei zwei verschiedenen Produkten). Shopify nutzt SKUs für die Bestandsführung – doppelte SKUs führen dazu, dass Bestände falsch zusammengeführt werden.
+**Ursache:** Dieselbe SKU steht in zwei verschiedenen Zeilen (oder bei zwei verschiedenen Produkten). Shopify nutzt SKUs für die Bestandsführung, daher führen doppelte SKUs dazu, dass Bestände falsch zusammengeführt werden.
 
 **Lösung:** Sorge dafür, dass jede Variantenzeile eine eindeutige SKU hat. Wenn du keine SKU-basierte Bestandsführung nutzt, darfst du die SKU leer lassen, aber sie darf nicht in mehreren Zeilen gleich sein.
 
@@ -140,12 +140,12 @@ Wenn du ein bestehendes Produkt aktualisierst und der Handle in Shopify schon ex
 - Die URL enthält Leer- oder Sonderzeichen, die kodiert werden müssten
 - Das Bildformat wird nicht unterstützt (Shopify akzeptiert JPG, JPEG, PNG, GIF, WEBP)
 
-**Lösung:** Öffne jede Bild-URL im Browser – das Bild sollte direkt laden. Bilder in Google Drive, Dropbox oder auf localhost müssen vor dem Import auf einen öffentlichen Hoster verschoben werden.
+**Lösung:** Öffne jede Bild-URL im Browser. Das Bild sollte direkt laden. Bilder in Google Drive, Dropbox oder auf localhost müssen vor dem Import auf einen öffentlichen Hoster verschoben werden.
 
 ---
 
 ## Automatisch beheben mit StriveFormats
 
-Lade deine Shopify-CSV in StriveFormats hoch. Der Validator prüft alle Pflichtspalten, Wahrheitswerte, die Variantenstruktur, Preisfelder und die Eindeutigkeit der Handles – und behebt sichere Probleme mit einem Klick.
+Lade deine Shopify-CSV in StriveFormats hoch. Der Validator prüft alle Pflichtspalten, Wahrheitswerte, die Variantenstruktur, Preisfelder und die Eindeutigkeit der Handles und behebt sichere Probleme mit einem Klick.
 
 [Shopify-CSV-Reparateur öffnen](/app?preset=shopify_products) | [Shopify-Vorlage ansehen](/presets/shopify_products)

@@ -1,6 +1,6 @@
 ---
 title: "CSV Import Errors Explained"
-description: "A plain-English breakdown of the most common CSV import error messages across Shopify, WooCommerce, Etsy, eBay, and Amazon — and how to fix each one."
+description: "A plain-English breakdown of the most common CSV import error messages across Shopify, WooCommerce, Etsy, eBay, and Amazon, and how to fix each one."
 keywords: ["csv import errors explained", "csv import error messages", "csv import failed", "csv upload error", "ecommerce csv errors", "fix csv import", "csv import troubleshooting"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -24,7 +24,7 @@ Understanding error messages is the fastest path to a clean import. This guide e
 
 ## Structural Errors
 
-These errors mean the shape of the file is wrong — before the platform even looks at your data.
+These errors mean the shape of the file is wrong, before the platform even looks at your data.
 
 ### "Missing required column" / "Column not found"
 
@@ -35,7 +35,7 @@ The platform expected a column name that isn't in your header row. Common causes
 - The file has a BOM marker that prepends hidden bytes to the first column name
 - You are using a different platform's template
 
-**Fix:** Compare your header row to the official template for that platform. The comparison must be exact — case, spelling, and spaces.
+**Fix:** Compare your header row to the official template for that platform. The comparison must be exact, including case, spelling, and spaces.
 
 ### "Column count mismatch" / "Wrong number of columns"
 
@@ -49,7 +49,7 @@ A data row has more or fewer commas than the header row. Common causes:
 
 ### "Unexpected header" / "Unrecognized column"
 
-Your file contains a column the platform doesn't recognize. This is usually a warning, not a blocker — the platform ignores extra columns. But on strict importers (Amazon flat files, eBay File Exchange), unknown columns can cause the entire row to fail.
+Your file contains a column the platform doesn't recognize. This is usually a warning, not a blocker, because the platform ignores extra columns. But on strict importers (Amazon flat files, eBay File Exchange), unknown columns can cause the entire row to fail.
 
 **Fix:** Remove columns not in the official template, or check whether the column name needs to be spelled differently.
 
@@ -67,7 +67,7 @@ A required column exists in the header but has an empty value on one or more row
 - **eBay:** Action, Title, Category, StartPrice, Condition
 - **Amazon:** seller_sku, item_name, price, quantity
 
-**Fix:** Filter or sort the file to find rows with blank values in the required columns. Fill in the missing data. If the blank is intentional (a variant row inheriting a parent value), check the platform's rules — Shopify variant rows, for example, legitimately leave Title blank.
+**Fix:** Filter or sort the file to find rows with blank values in the required columns. Fill in the missing data. If the blank is intentional (a variant row inheriting a parent value), check the platform's rules. Shopify variant rows, for example, legitimately leave Title blank.
 
 ### "SKU is required"
 
@@ -112,7 +112,7 @@ A date field uses the wrong format. Most platforms expect `YYYY-MM-DD`. Excel of
 
 ### "Duplicate SKU" / "Handle already exists"
 
-A unique identifier appears more than once in the file. In Shopify, duplicate Handles are used intentionally for variants — but if the Handle appears in two unrelated product groups, that's an error. In WooCommerce and Amazon, duplicate SKUs always indicate a problem.
+A unique identifier appears more than once in the file. In Shopify, duplicate Handles are used on purpose for variants, but if the Handle appears in two unrelated product groups, that's an error. In WooCommerce and Amazon, duplicate SKUs always indicate a problem.
 
 **Fix:** Sort the file by the identifier column and visually scan for unintended duplicates. Use a formula (`COUNTIF`) to find exact duplicates automatically.
 
@@ -124,7 +124,7 @@ The category code you used doesn't exist in the platform's taxonomy.
 - **Amazon:** Browse nodes and product types must match the current Seller Central taxonomy
 - **Etsy:** Category paths must match Etsy's taxonomy exactly
 
-**Fix:** Look up the correct category ID from the platform's official category browser or taxonomy download. Do not use IDs from old templates — they change.
+**Fix:** Look up the correct category ID from the platform's official category browser or taxonomy download. Do not use IDs from old templates, because they change.
 
 ---
 

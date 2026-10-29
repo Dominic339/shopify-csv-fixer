@@ -50,7 +50,7 @@ When people say "combine CSV files," they usually mean one of three distinct ope
 
 **How to append in Google Sheets:**
 
-Same process — delete the header row of the second file, copy data rows only, paste at the bottom of the base sheet.
+Same process: delete the header row of the second file, copy the data rows only, and paste them at the bottom of the base sheet.
 
 ---
 
@@ -71,10 +71,10 @@ Same process — delete the header row of the second file, copy data rows only, 
 
 ## Join: Adding Columns from a Related File
 
-**What it does:** Combines two files horizontally — adding columns from a second file to the first, matched on a shared key column (like a SKU or Handle).
+**What it does:** Combines two files side by side, adding columns from a second file to the first, matched on a shared key column (like a SKU or Handle).
 
 **When to use it:**
-- You have a product list from your ERP (Handle, Title, SKU, Price) and a separate inventory file (SKU, Quantity, Warehouse Location) — you want to add quantity to each product row.
+- You have a product list from your ERP (Handle, Title, SKU, Price) and a separate inventory file (SKU, Quantity, Warehouse Location), and you want to add the quantity to each product row.
 - You export products without images from one system and have a separate image URL file matched by SKU.
 - You want to add supplier-specific data (cost price, supplier part number) to your product catalog before import.
 
@@ -91,7 +91,7 @@ You want to add Quantity from File B to File A.
    ```
    =VLOOKUP(A2, '[FileB.csv]Sheet1'!$A:$B, 2, FALSE)
    ```
-3. If the key matches, Quantity is filled in. If no match, `#N/A` appears — which means that Handle is not in File B.
+3. If the key matches, Quantity is filled in. If there's no match, `#N/A` appears, which means that Handle is not in File B.
 4. Copy the formula down to all rows.
 5. Once satisfied, select column D, copy, and **Paste Special → Values** to replace formulas with static values.
 6. Close File B.

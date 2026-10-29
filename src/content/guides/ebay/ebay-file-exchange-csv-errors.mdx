@@ -1,6 +1,6 @@
 ---
 title: "eBay File Exchange CSV Errors: Causes and Fixes"
-description: "Fix common eBay File Exchange CSV errors — invalid Action values, category ID problems, title length violations, condition codes, price formatting, and image URL issues."
+description: "Fix common eBay File Exchange CSV errors: invalid Action values, category ID problems, title length violations, condition codes, price formatting, and image URL issues."
 keywords: ["ebay file exchange csv errors", "ebay csv import errors", "ebay file exchange errors", "fix ebay csv", "ebay csv upload error", "ebay listing csv errors", "ebay bulk upload errors"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -18,13 +18,13 @@ timeToComplete: "12 minutes"
 
 eBay File Exchange is a bulk listing tool that accepts CSV (and flat text) files. When you upload a file, eBay runs it through a validation pipeline that checks:
 
-1. **Required columns** — certain columns must exist in every file
-2. **Action column** — every row must specify what to do with the listing
-3. **Data type validation** — prices as numbers, quantities as integers, URLs as valid URLs
-4. **Business rules** — valid category IDs, allowed condition codes, valid duration values
-5. **Content rules** — title length limits, prohibited content
+1. **Required columns**: certain columns must exist in every file
+2. **Action column**: every row must specify what to do with the listing
+3. **Data type validation**: prices as numbers, quantities as integers, URLs as valid URLs
+4. **Business rules**: valid category IDs, allowed condition codes, valid duration values
+5. **Content rules**: title length limits, prohibited content
 
-After upload, eBay emails you an error report (or shows it in the File Exchange dashboard) listing which rows failed and why. Always check this report — eBay often imports some rows successfully while silently skipping others.
+After upload, eBay emails you an error report (or shows it in the File Exchange dashboard) listing which rows failed and why. Always check this report, because eBay often imports some rows successfully while silently skipping others.
 
 ---
 
@@ -43,7 +43,7 @@ Accepted values:
 | `Delete` | Remove the file record (not the live listing) |
 | `AddOrRevise` | Add if new, revise if existing (matched by ItemID or custom label) |
 
-**Fix:** Add an `Action` column. Every row must have one of the above values. `add` (lowercase) is not accepted — use `Add`.
+**Fix:** Add an `Action` column. Every row must have one of the above values. `add` (lowercase) is not accepted; use `Add`.
 
 ---
 
@@ -55,8 +55,8 @@ eBay category IDs are numeric (e.g., `15273` for Men's Shoes). They change perio
 
 **Fix:**
 - Look up the correct category ID in eBay's category tree (accessible via the eBay category lookup tool)
-- Do not copy category IDs from old templates — verify they're still active
-- Some categories require additional required fields — check eBay's field requirements for the category
+- Do not copy category IDs from old templates. Check that they're still active.
+- Some categories require additional fields, so check eBay's field requirements for the category
 
 ---
 
@@ -135,12 +135,12 @@ Note: Available condition codes vary by category. Electronics and clothing have 
 
 ## Error: Image URL Not Accessible
 
-**Cause:** The `PicURL` field contains a URL that eBay can't download — the image is behind authentication, on localhost, uses HTTP (not HTTPS), or is a redirect URL.
+**Cause:** The `PicURL` field contains a URL that eBay can't download. The image is behind a login, on localhost, uses HTTP (not HTTPS), or is a redirect URL.
 
 eBay accepts up to 12 images per listing separated by a pipe character `|`.
 
 **Fix:**
-- Test each URL in a browser — it should load the image directly, no login required
+- Test each URL in a browser. It should load the image directly, with no login required
 - Use HTTPS URLs
 - Avoid URL shorteners or redirect services
 - Image format must be JPG, PNG, GIF, TIFF, or BMP; minimum 500x500 pixels recommended
@@ -163,10 +163,10 @@ eBay sends an error report (TSV or text file) after processing your upload. The 
 - The item identifier (if applicable)
 
 Common error codes:
-- `21916585` — Invalid category or category ID
-- `21916288` — Title too long
-- `21919067` — Invalid condition for category
-- `21916790` — Invalid price
+- `21916585`: Invalid category or category ID
+- `21916288`: Title too long
+- `21919067`: Invalid condition for category
+- `21916790`: Invalid price
 
 Search for the error code in eBay's File Exchange documentation for the exact fix.
 
@@ -174,6 +174,6 @@ Search for the error code in eBay's File Exchange documentation for the exact fi
 
 ## Fix This Automatically with StriveFormats
 
-Upload your eBay CSV to StriveFormats. The validator checks all required columns, Action values, price formats, title lengths, condition codes, and image URLs — then flags exact rows and cells with issues.
+Upload your eBay CSV to StriveFormats. The validator checks all required columns, Action values, price formats, title lengths, condition codes, and image URLs, then flags the exact rows and cells with issues.
 
 [Open eBay CSV Fixer](/app?preset=ebay_listings) | [View eBay Template](/presets/ebay_listings)

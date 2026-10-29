@@ -10,7 +10,7 @@ whatYouLearn:
   - "Wie Excel und Google Sheets y/n-Werte unbemerkt verfälschen"
   - "Wie du ungültige Ja/Nein-Werte in Hunderten von Zeilen findest und korrigierst"
   - "Wie du verhinderst, dass diese Werte bei künftigen Exporten verfälscht werden"
-bestFor: "Amazon-Verkäufer, die Angebote mit Seller-Central-Flatfiles in großen Mengen hochladen oder aktualisieren – vor allem Felder zu Produktsicherheit, Versand und Artikelzustand"
+bestFor: "Amazon-Verkäufer, die Angebote mit Seller-Central-Flatfiles in großen Mengen hochladen oder aktualisieren, vor allem Felder zu Produktsicherheit, Versand und Artikelzustand"
 timeToComplete: "8 Minuten"
 ---
 
@@ -26,7 +26,7 @@ Diese drei Formate begegnen dir:
 | `true` / `false` | `true`, `false` | Manche Vorlagenversionen, Groß-/Kleinschreibung egal |
 | `1` / `0` | Selten | Selten; einige individuelle Flatfiles |
 
-**Der häufigste Fehler:** `TRUE`/`FALSE` (so zeigt Excel Wahrheitswerte an) in einer Spalte, die `y`/`n` erwartet. Amazon lehnt diese Werte mit einem Validierungsfehler ab oder ignoriert das Feld stillschweigend. In einem deutschen Excel erscheinen sie als `WAHR`/`FALSCH` – auch das ist ungültig.
+**Der häufigste Fehler:** `TRUE`/`FALSE` (so zeigt Excel Wahrheitswerte an) in einer Spalte, die `y`/`n` erwartet. Amazon lehnt diese Werte mit einem Validierungsfehler ab oder ignoriert das Feld stillschweigend. In einem deutschen Excel erscheinen sie als `WAHR`/`FALSCH`, und auch das ist ungültig.
 
 ---
 
@@ -44,7 +44,7 @@ Diese Spalten kommen in vielen Kategorievorlagen vor und verdienen besondere Auf
 | `hazmat_applicable` | `y` / `n` | Kennzeichen für Gefahrgut |
 | `fragile` | `y` / `n` | Ob der Artikel beim Versand zerbrechlich ist |
 | `is_discontinued_by_manufacturer` | `y` / `n` | Kennzeichen für ausgelaufene Produkte |
-| `generic_keywords` | Text | (Kein Ja/Nein-Feld – nur zur Abgrenzung aufgeführt) |
+| `generic_keywords` | Text | (Kein Ja/Nein-Feld, nur zur Abgrenzung aufgeführt) |
 
 > **Hinweis:** Die genauen Spaltennamen und erlaubten Werte unterscheiden sich je nach Kategorievorlage. Sieh immer im Tabellenblatt mit den Datendefinitionen der Vorlage nach, die du für deine Kategorie aus Seller Central heruntergeladen hast.
 
@@ -57,7 +57,7 @@ Diese Spalten kommen in vielen Kategorievorlagen vor und verdienen besondere Auf
 Wenn du `y` in eine Zelle tippst, lässt Excel es als Text stehen. Probleme entstehen aber, wenn:
 
 1. **du eine CSV öffnest, die bereits y/n-Werte enthält:** Interpretiert Excel die Spalte als Wahrheitswerte und formatiert sie automatisch, wird `y` zwar richtig angezeigt, beim Export aber womöglich als anderer Wert gespeichert.
-2. **TRUE/FALSE verwendet werden:** Gibt jemand `TRUE` oder `FALSE` ein (in deutschem Excel `WAHR` oder `FALSCH`, die eingebauten Wahrheitswerte), speichert Excel sie als Wahrheitswerte. Beim CSV-Export schreibt Excel sie in Großbuchstaben in der Sprache von Excel – und Amazon lehnt sie in `y`/`n`-Spalten ab.
+2. **TRUE/FALSE verwendet werden:** Gibt jemand `TRUE` oder `FALSE` ein (in deutschem Excel `WAHR` oder `FALSCH`, die eingebauten Wahrheitswerte), speichert Excel sie als Wahrheitswerte. Beim CSV-Export schreibt Excel sie in Großbuchstaben in der Sprache von Excel, und Amazon lehnt sie in `y`/`n`-Spalten ab.
 3. **Formeln TRUE/FALSE liefern:** Wird eine Formel wie `=WENN(A2>0; WAHR; FALSCH)` zum Befüllen von Ja/Nein-Spalten verwendet, lautet das Ergebnis `WAHR`/`FALSCH`, nicht `y`/`n`.
 
 ### Google Sheets
@@ -101,7 +101,7 @@ Filtere nach Zeilen mit `INVALID`, um alle problematischen Werte zu finden.
 5. Klicke auf **Alle ersetzen**.
 6. Wiederhole das für `FALSCH` → `n` (oder `y`, je nach Bedeutung des Felds).
 
-> **Wichtig:** Lege die Zuordnung für jedes Feld einzeln fest – `WAHR` kann bei `batteries_included` für `y` stehen, ergibt bei `is_adult_product` aber womöglich keinen Sinn. Prüfe die Bedeutung des Felds, bevor du alles auf einmal ersetzt.
+> **Wichtig:** Lege die Zuordnung für jedes Feld einzeln fest. `WAHR` kann bei `batteries_included` für `y` stehen, ergibt bei `is_adult_product` aber womöglich keinen Sinn. Prüfe die Bedeutung des Felds, bevor du alles auf einmal ersetzt.
 
 ### Formelergebnisse durch Werte ersetzen
 
@@ -139,7 +139,7 @@ Richte in Excel ein Dropdown für Ja/Nein-Spalten ein:
 4. Gib bei „Quelle“ ein: `y;n`
 5. Klicke auf OK.
 
-Jetzt lassen sich in diesen Zellen nur `y` oder `n` eingeben – versehentliche `WAHR`/`FALSCH` oder freie Eingaben sind ausgeschlossen.
+Jetzt lassen sich in diesen Zellen nur `y` oder `n` eingeben. Versehentliche `WAHR`/`FALSCH` oder freie Eingaben sind ausgeschlossen.
 
 ### Vor jedem Upload prüfen
 
@@ -156,5 +156,5 @@ Bevor du dein Flatfile in Seller Central hochlädst:
 |---|---|
 | "Invalid value for batteries_required" | `TRUE` oder `Yes` statt `y` |
 | "batteries_required is required" | Feld bei einem physischen Produkt leer gelassen |
-| Zeile wird stillschweigend ignoriert | `FALSE` verwendet – Amazon überspringt die Aktualisierung des Felds |
+| Zeile wird stillschweigend ignoriert | `FALSE` verwendet, daher überspringt Amazon die Aktualisierung des Felds |
 | "Value not in valid range" | `1`/`0` in einer `y`/`n`-Spalte |

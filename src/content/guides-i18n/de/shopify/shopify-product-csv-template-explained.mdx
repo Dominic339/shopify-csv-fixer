@@ -16,7 +16,7 @@ timeToComplete: "15 Minuten"
 
 ## Die Vorlage im Überblick
 
-Die offizielle Shopify-Produkt-CSV hat zwei Arten von Spalten: **Produktebene** (einmal pro Produkt, in der ersten bzw. übergeordneten Zeile) und **Variantenebene** (in jeder Zeile dieses Produkts). Hat ein Produkt mehrere Varianten, belegt es mehrere Zeilen in der Datei – alle mit demselben Handle.
+Die offizielle Shopify-Produkt-CSV hat zwei Arten von Spalten: **Produktebene** (einmal pro Produkt, in der ersten bzw. übergeordneten Zeile) und **Variantenebene** (in jeder Zeile dieses Produkts). Hat ein Produkt mehrere Varianten, belegt es mehrere Zeilen in der Datei, alle mit demselben Handle.
 
 Lade die aktuelle Vorlage im Shopify-Adminbereich herunter: Produkte → Importieren → Beispiel-CSV herunterladen.
 
@@ -67,8 +67,8 @@ Eine kommagetrennte Liste von Tags. Enthält ein Tag ein Komma, muss der ganze I
 
 Ob das Produkt für Kunden sichtbar ist. Akzeptiert `TRUE` oder `FALSE` (großgeschrieben).
 
-- `TRUE` – das Produkt ist aktiv und sichtbar
-- `FALSE` – das Produkt ist ein Entwurf (im Shop ausgeblendet)
+- `TRUE`: das Produkt ist aktiv und sichtbar
+- `FALSE`: das Produkt ist ein Entwurf (im Shop ausgeblendet)
 
 ### Published Scope
 
@@ -87,7 +87,7 @@ Diese Spalten legen die Varianten-Dimensionen fest (Größe, Farbe, Material usw
 Regeln:
 - `Option1 Name` sollte in jeder Zeile desselben Produkts gleich sein
 - `Option1 Value` ändert sich von Variantenzeile zu Variantenzeile
-- Hast du nur eine Option, nutze nur Option1 – nimm die Spalten Option2 und Option3 nur auf, wenn es eine zweite oder dritte Option gibt
+- Hast du nur eine Option, nutze nur Option1. Nimm die Spalten Option2 und Option3 nur auf, wenn es eine zweite oder dritte Option gibt
 
 ### Option2 Name / Option2 Value (optional)
 
@@ -105,11 +105,11 @@ Diese Spalten gelten für jede Zeile (übergeordnete Zeilen und Variantenzeilen)
 
 ### Variant SKU
 
-Eine eindeutige Kennung für genau diese Variante. Optional – nutzt du aber eine Bestandsführung, müssen SKUs eindeutig sein. Lass das Feld leer, wenn du keine SKU-basierte Bestandsführung nutzt.
+Eine eindeutige Kennung für genau diese Variante. Sie ist optional, aber wenn du eine Bestandsführung nutzt, müssen SKUs eindeutig sein. Lass das Feld leer, wenn du keine SKU-basierte Bestandsführung nutzt.
 
 ### Variant Price (Pflicht)
 
-Der Verkaufspreis dieser Variante. Eine einfache Dezimalzahl – ohne Währungssymbole und ohne Tausendertrennzeichen.
+Der Verkaufspreis dieser Variante. Eine einfache Dezimalzahl ohne Währungssymbole und ohne Tausendertrennzeichen.
 
 **Beispiel:** `19.99`
 
@@ -196,6 +196,6 @@ Nur `TRUE`, wenn dieses Produkt ein Geschenkgutschein ist. Bei den meisten Produ
 
 ## Automatisch beheben mit StriveFormats
 
-Lade deine Shopify-Vorlage in StriveFormats hoch und lass sie Spalte für Spalte prüfen. Pflichtfelder, Wahrheitswerte, die Variantenstruktur und Bild-URLs werden kontrolliert – danach exportierst du eine saubere, importfertige Datei.
+Lade deine Shopify-Vorlage in StriveFormats hoch und lass sie Spalte für Spalte prüfen. Pflichtfelder, Wahrheitswerte, die Variantenstruktur und Bild-URLs werden kontrolliert. Danach exportierst du eine saubere, importfertige Datei.
 
 [Shopify-CSV-Reparateur öffnen](/app?preset=shopify_products) | [Shopify-Vorlage ansehen](/presets/shopify_products)

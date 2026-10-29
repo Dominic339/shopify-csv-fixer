@@ -1,6 +1,6 @@
 ---
 title: "Fix Blank Rows in a CSV File"
-description: "How to find and delete blank rows in a CSV file before importing to Shopify, WooCommerce, Etsy, eBay, or Amazon — in Excel, Google Sheets, and Python."
+description: "How to find and delete blank rows in a CSV file before importing to Shopify, WooCommerce, Etsy, eBay, or Amazon, in Excel, Google Sheets, and Python."
 keywords: ["fix blank rows csv", "remove blank rows csv", "csv blank row error", "delete empty rows csv", "csv import blank row", "blank lines csv", "excel csv blank rows"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -18,7 +18,7 @@ timeToComplete: "6 minutes"
 
 A blank row in a CSV file is a row where all fields are empty (or just commas with no values). When an ecommerce platform parses your file and encounters a blank row, it either:
 
-- **Creates an empty product record** (Title blank, Price blank — fails required field validation)
+- **Creates an empty product record** (Title blank, Price blank), which fails required field validation
 - **Stops importing** at the blank row, silently ignoring everything after it
 - **Reports a validation error** for each required field that's missing on the blank row
 
@@ -27,7 +27,7 @@ The most common places blank rows appear:
 - At the **end of the file** (spreadsheet editors often add one automatically)
 - **Between products** (you deleted a row but left a blank line)
 - **Between sections** if you organized your spreadsheet with visual gaps
-- **After filtering** — hidden rows in Excel sometimes export as blank rows
+- **After filtering**: hidden rows in Excel sometimes export as blank rows
 
 ---
 
@@ -35,7 +35,7 @@ The most common places blank rows appear:
 
 ### In a text editor
 
-Open the file in VS Code or Notepad. Blank rows are easy to spot — they're lines with only commas or completely empty lines:
+Open the file in VS Code or Notepad. Blank rows are easy to spot. They're lines with only commas, or completely empty lines:
 
 ```
 Handle,Title,Price
@@ -48,20 +48,20 @@ red-shirt,Red T-Shirt,21.99
 
 Press `Ctrl+End` to jump to the last cell in the used range. If the last row is beyond your data (an empty row), Excel has included blank rows in the used range.
 
-To find all blank rows: select a column that should always have a value (like `Handle` or `Title`), go to Home → Find & Select → Go To Special → Blanks. This selects all blank cells in that column — these rows are your blank rows.
+To find all blank rows: select a column that should always have a value (like `Handle` or `Title`), go to Home → Find & Select → Go To Special → Blanks. This selects all blank cells in that column, and those rows are your blank rows.
 
 ---
 
 ## Delete Blank Rows in Excel
 
-**Method 1 — Delete trailing blank rows:**
+**Method 1: Delete trailing blank rows**
 
 1. Press `Ctrl+End` to see where Excel thinks the data ends
 2. If it's beyond your last data row, select the extra rows below your data
 3. Right-click → Delete Rows
 4. Press `Ctrl+End` again to confirm the used range is now correct
 
-**Method 2 — Delete all blank rows via Go To Special:**
+**Method 2: Delete all blank rows with Go To Special**
 
 1. Select column A (or any column that's always filled for valid rows)
 2. Home → Find & Select → Go To Special → Blanks
@@ -78,7 +78,7 @@ Google Sheets doesn't have Go To Special, but you can filter:
 2. Click the filter dropdown on the `Title` (or Handle) column
 3. Uncheck "Blanks"
 4. Select all visible rows with data, then disable the filter
-5. You'll now see only the blank rows — delete them (right-click → Delete rows)
+5. You'll now see only the blank rows. Delete them (right-click → Delete rows)
 
 Alternatively, sort by the key column: blank rows sort to the bottom, making them easy to select and delete.
 
@@ -126,7 +126,7 @@ The fix from the previous section (using `cell.strip()`) handles these automatic
 ## Prevent Blank Rows in Future Exports
 
 - **In Excel:** Before saving as CSV, press `Ctrl+End` and verify the last row with data is the actual last used row. Delete any rows below it.
-- **In Google Sheets:** CSV download includes all rows down to the last non-empty cell — keep your data compact.
+- **In Google Sheets:** the CSV download includes every row down to the last non-empty cell, so keep your data compact.
 - **After deleting rows:** In Excel, right-click the row numbers → Delete (not just pressing Delete on the cell contents, which leaves a blank row).
 - **After filtering:** Always clear filters before exporting, or confirm that the exported file doesn't include hidden rows.
 

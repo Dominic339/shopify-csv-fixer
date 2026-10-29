@@ -1,6 +1,6 @@
 ---
 title: "CSV Formatting Rules for Ecommerce Imports"
-description: "The exact formatting rules your CSV must follow to pass ecommerce platform imports — delimiters, quoting, line endings, encoding, and header requirements."
+description: "The exact formatting rules your CSV must follow to pass ecommerce platform imports: delimiters, quoting, line endings, encoding, and header requirements."
 keywords: ["csv formatting rules", "csv format requirements", "csv import format", "csv file format ecommerce", "csv quoting rules", "csv delimiter rules", "how to format csv for import"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -16,7 +16,7 @@ timeToComplete: "9 minutes"
 
 ## The CSV Standard Ecommerce Platforms Follow
 
-All major ecommerce platforms — Shopify, WooCommerce, Etsy, eBay, Amazon — expect files that follow **RFC 4180**, the common CSV standard. That standard defines exactly how rows, columns, quoting, and line endings must be structured.
+All major ecommerce platforms (Shopify, WooCommerce, Etsy, eBay, Amazon) expect files that follow **RFC 4180**, the common CSV standard. That standard defines exactly how rows, columns, quoting, and line endings must be structured.
 
 This guide covers every rule that affects import success. Violating any of these causes parsing errors, wrong column mapping, or silent data corruption.
 
@@ -86,7 +86,7 @@ Whenever a cell value contains a comma, double-quote character, or newline, wrap
 "Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
 ```
 
-**Escaping quotes inside a quoted value** — double the inner quote character:
+**Escaping quotes inside a quoted value:** double the inner quote character:
 
 ```
 "She said ""great product"""
@@ -112,7 +112,7 @@ Save your file as **UTF-8 encoding, without a BOM** (Byte Order Mark).
 - The BOM (added by Excel on Windows) corrupts the first column header name
 - ANSI, Latin-1, and Windows-1252 files produce garbled characters for accented letters, curly quotes, and currency symbols
 
-**Check:** Open the file in VS Code. The status bar shows the encoding. It should say `UTF-8` — not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
+**Check:** Open the file in VS Code. The status bar shows the encoding. It should say `UTF-8`, not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
 
 ---
 
@@ -142,7 +142,7 @@ Blank rows between or after data rows cause parsers to:
 - Miscount the number of products
 - Stop processing at the first blank row (some platforms)
 
-Delete all blank rows before saving. In Excel, press `Ctrl+End` to jump to the last used cell — if it's beyond your data, blank rows exist and must be deleted.
+Delete all blank rows before saving. In Excel, press `Ctrl+End` to jump to the last used cell. If it's beyond your data, blank rows exist and must be deleted.
 
 ---
 
@@ -170,7 +170,7 @@ Merged cells in Excel export as a value in the top-left cell and empty strings i
 ## Quick Validation Checklist
 
 - [ ] Comma-delimited (not semicolons, tabs, or pipes)
-- [ ] Row 1 is column headers only — no blank rows above it
+- [ ] Row 1 is column headers only, with no blank rows above it
 - [ ] Headers match platform's expected column names exactly (case and spaces)
 - [ ] No duplicate column names
 - [ ] Values with commas or quotes are wrapped in double quotes

@@ -163,10 +163,10 @@ export default function MergeClient({ t }: Props) {
       <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
         {t.yourPlan}: <span className="font-semibold">{t[`plan_${plan}`]}</span>
         {rowLimit !== null ? (
-          <> — {t.upTo}{" "}
+          <> · {t.upTo}{" "}
           <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t.combinedRows}</>
         ) : (
-          <> — <span className="font-semibold">{t.planUnlimited}</span></>
+          <> · <span className="font-semibold">{t.planUnlimited}</span></>
         )}
         {plan === "free" && (
           <>{" "}<a href="/profile?upgrade=basic" className="underline hover:no-underline">

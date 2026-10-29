@@ -16,7 +16,7 @@ timeToComplete: "12 minutes"
 
 ## How Shopify Represents Variants in CSV
 
-In Shopify's product CSV, a product with multiple variants is represented as **multiple rows sharing the same Handle**. The first row is the "parent" row — it contains the product-level data. Each subsequent row with the same Handle is a variant row.
+In Shopify's product CSV, a product with multiple variants is represented as **multiple rows sharing the same Handle**. The first row is the "parent" row, which contains the product-level data. Each following row with the same Handle is a variant row.
 
 ### Minimal example: T-shirt with two sizes
 
@@ -58,7 +58,7 @@ The first row for a given Handle is the parent row. It sets product-level fields
 
 Each row after the first with the same Handle is a variant row. Variant rows:
 - Share the same Handle as the parent.
-- Have a blank Title (or the same Title — Shopify ignores it for non-parent rows).
+- Have a blank Title (or the same Title, since Shopify ignores it for non-parent rows).
 - Have their own Option1 Value (and Option2 Value, Option3 Value if applicable).
 - Have their own Variant Price, Variant SKU, Variant Inventory Qty, etc.
 
@@ -128,7 +128,7 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Symptom:** Import fails with "Variant Price is required" or variants are created with $0.00 price.
 
-**Fix:** Variant Price is required for every row. There is no inheritance — even if all variants share the same price, each row must specify it.
+**Fix:** Variant Price is required for every row. There is no inheritance. Even if all variants share the same price, each row must specify it.
 
 ### Mistake 6: Adding a new variant overwrites existing variants
 

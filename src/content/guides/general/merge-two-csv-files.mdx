@@ -1,12 +1,12 @@
 ---
 title: "How to Merge Two CSV Files"
-description: "Step-by-step guide to combining two CSV files into one using Excel Power Query, Google Sheets, or a simple command-line approach -- no programming experience required."
+description: "Step-by-step guide to combining two CSV files into one using Excel Power Query, Google Sheets, or a simple command-line approach. No programming experience required."
 keywords: ["merge csv files", "combine csv", "join two csv", "excel power query csv", "google sheets merge csv", "append csv", "stack csv files"]
 lastUpdated: "2026-03-03"
 kind: "curated"
 whatYouLearn:
   - "Four methods to merge CSV files (Excel, Sheets, CLI, Python)"
-  - "When NOT to merge -- and what to do instead"
+  - "When NOT to merge, and what to do instead"
   - "Fixing header mismatches and column ordering differences"
   - "Removing duplicate header rows from merged files"
   - "Handling encoding and delimiter mismatches between files"
@@ -43,7 +43,7 @@ If the headers are in different orders, reorder the columns in one file before m
 
 ---
 
-## Method 1: Excel Power Query (Windows -- Recommended)
+## Method 1: Excel Power Query (Windows, recommended)
 
 Excel's Power Query appends multiple CSVs without formulas or macros. It handles encoding and line-ending differences between files automatically, and it never repeats the header row.
 
@@ -84,7 +84,7 @@ Google Sheets is a quick option if you do not have Excel. It works well for file
 
 - Google Sheets sometimes adds a BOM on export. If your platform rejects the merged file, open it in VS Code and re-save as UTF-8 without BOM.
 - Very large files (100,000+ rows) can cause Sheets to slow down or freeze. Use the CLI or Python method instead.
-- Double-check that the pasted rows align with the columns correctly -- one off-by-one column shift corrupts the entire merge.
+- Double-check that the pasted rows line up with the columns. A single off-by-one column shift corrupts the entire merge.
 
 ---
 
@@ -125,7 +125,7 @@ After merging on the command line, open the result in a text editor and confirm:
 
 ## Method 4: Python (Cross-Platform, Handles Mismatched Columns)
 
-Python's `csv.DictWriter` is the most reliable merge method. It handles different encodings, different column orders, and large files. You do not need to be a programmer -- just install Python and run the script below.
+Python's `csv.DictWriter` is the most reliable merge method. It handles different encodings, different column orders, and large files. You do not need to be a programmer. Just install Python and run the script below.
 
 ### The Script
 
@@ -161,7 +161,7 @@ python merge.py
 
 - Works on Windows, Mac, and Linux.
 - Handles files with different encodings (utf-8-sig strips BOM automatically).
-- Handles columns in a different order -- DictWriter maps by column name, not position.
+- Handles columns in a different order, because DictWriter maps by column name, not position.
 - Processes files row by row without loading everything into memory, so it works on very large files.
 
 ---
@@ -279,7 +279,7 @@ with open("file2_utf8.csv", "w", encoding="utf-8") as f:
     f.write(content)
 ```
 
-If both files use the same encoding but different delimiters (commas vs semicolons), convert the delimiter in one file before merging -- see the Delimiters section of the CSV Basics guide.
+If both files use the same encoding but different delimiters (commas vs semicolons), convert the delimiter in one file before merging. See the Delimiters section of the CSV Basics guide.
 
 ---
 

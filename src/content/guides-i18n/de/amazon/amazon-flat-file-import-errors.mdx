@@ -24,7 +24,7 @@ Amazon-Flatfiles sind tabulator- oder kommagetrennte CSV-Dateien, die strengen, 
 4. **Geschäftsregeln**: prüft ASINs, validiert SKUs und kontrolliert Zustandscodes und Preisspannen
 5. **Katalogabgleich**: gleicht Produkt-IDs mit dem Amazon-Katalog ab
 
-Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller Central unter Lagerbestand → Produkte über Upload hinzufügen). Sieh dir den Verarbeitungsbericht immer an – er listet jede fehlgeschlagene Zeile mit dem konkreten Fehler auf.
+Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller Central unter Lagerbestand → Produkte über Upload hinzufügen). Sieh dir den Verarbeitungsbericht immer an. Er listet jede fehlgeschlagene Zeile mit dem konkreten Fehler auf.
 
 ---
 
@@ -62,14 +62,14 @@ Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller 
 | Wert | Beschreibung |
 |---|---|
 | `New` | Neu, originalverpackt |
-| `UsedLikeNew` | Gebraucht – wie neu |
-| `UsedVeryGood` | Gebraucht – sehr gut |
-| `UsedGood` | Gebraucht – gut |
-| `UsedAcceptable` | Gebraucht – akzeptabel |
-| `CollectibleLikeNew` | Sammlerstück – wie neu |
-| `CollectibleVeryGood` | Sammlerstück – sehr gut |
-| `CollectibleGood` | Sammlerstück – gut |
-| `CollectibleAcceptable` | Sammlerstück – akzeptabel |
+| `UsedLikeNew` | Gebraucht, wie neu |
+| `UsedVeryGood` | Gebraucht, sehr gut |
+| `UsedGood` | Gebraucht, gut |
+| `UsedAcceptable` | Gebraucht, akzeptabel |
+| `CollectibleLikeNew` | Sammlerstück, wie neu |
+| `CollectibleVeryGood` | Sammlerstück, sehr gut |
+| `CollectibleGood` | Sammlerstück, gut |
+| `CollectibleAcceptable` | Sammlerstück, akzeptabel |
 | `Refurbished` | Vom Verkäufer generalüberholt |
 | `Club` | Club (Medienkategorie) |
 
@@ -158,6 +158,6 @@ So findest du fehlgeschlagene Zeilen: Filtere die Registerkarte Results nach der
 
 ## Automatisch beheben mit StriveFormats
 
-Lade dein Amazon-Flatfile in StriveFormats hoch. Der Validator prüft SKUs, Zustandscodes, Preise, Werte für den Versandkanal und Pflichtfelder – und markiert die genauen Zeilen und Zellen mit Problemen.
+Lade dein Amazon-Flatfile in StriveFormats hoch. Der Validator prüft SKUs, Zustandscodes, Preise, Werte für den Versandkanal und Pflichtfelder und markiert die genauen Zeilen und Zellen mit Problemen.
 
 [Amazon-CSV-Fixer öffnen](/app?preset=amazon_inventory_loader) | [Amazon-Vorlage ansehen](/presets/amazon_inventory_loader)

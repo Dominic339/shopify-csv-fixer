@@ -795,7 +795,7 @@
 "title": "Ungültige item-condition",
 "explanation": "Der Code in item-condition ist kein bekannter Amazon-Zustandswert.",
 "whyPlatformCares": "Amazon zeigt Käufern den Zustand an und ordnet Angebote danach ein. Ein unbekannter Code kann abgelehnt werden.",
-"howToFix": "Verwende einen numerischen Amazon-Zustandscode: 11=Neu, 10=Generalüberholt, 1=Gebraucht – wie neu, 2=Gebraucht – sehr gut, 3=Gebraucht – gut, 4=Gebraucht – akzeptabel."
+"howToFix": "Verwende einen numerischen Amazon-Zustandscode: 11=Neu, 10=Generalüberholt, 1=Gebraucht (wie neu), 2=Gebraucht (sehr gut), 3=Gebraucht (gut), 4=Gebraucht (akzeptabel)."
 },
 "amazon/min_above_max_price": {
 "title": "Mindestpreis über dem Höchstpreis",

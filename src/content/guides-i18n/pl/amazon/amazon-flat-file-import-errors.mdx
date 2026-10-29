@@ -18,13 +18,13 @@ timeToComplete: "12 minut"
 
 Pliki płaskie Amazon to pliki CSV rozdzielane tabulatorami lub przecinkami, które muszą trzymać się ścisłych schematów kolumn określonych dla każdej kategorii produktów. Gdy przesyłasz plik płaski, Amazon przepuszcza go przez kilka etapów walidacji:
 
-1. **Zgodność z szablonem** — sprawdza, czy nagłówki kolumn odpowiadają szablonowi oczekiwanemu dla danego typu pliku
-2. **Pola wymagane** — sprawdza, czy wszystkie wymagane kolumny mają wartości
-3. **Typy danych** — sprawdza liczby, wartości logiczne i wartości z list wyboru
-4. **Reguły biznesowe** — sprawdza ASIN-y, SKU, kody stanu i zakresy cen
-5. **Kontrola katalogu** — dopasowuje identyfikatory produktów do katalogu Amazon
+1. **Zgodność z szablonem**: sprawdza, czy nagłówki kolumn odpowiadają szablonowi oczekiwanemu dla danego typu pliku
+2. **Pola wymagane**: sprawdza, czy wszystkie wymagane kolumny mają wartości
+3. **Typy danych**: sprawdza liczby, wartości logiczne i wartości z list wyboru
+4. **Reguły biznesowe**: sprawdza ASIN-y, SKU, kody stanu i zakresy cen
+5. **Kontrola katalogu**: dopasowuje identyfikatory produktów do katalogu Amazon
 
-Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekcji Magazyn → Dodaj produkty przez przesłanie pliku). Zawsze przeglądaj raport przetwarzania — zawiera każdy nieudany wiersz wraz z konkretnym błędem.
+Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekcji Magazyn → Dodaj produkty przez przesłanie pliku). Zawsze przeglądaj raport przetwarzania. Zawiera każdy nieudany wiersz wraz z konkretnym błędem.
 
 ---
 
@@ -62,14 +62,14 @@ Po przetworzeniu Amazon tworzy **raport przetwarzania** (w Seller Central w sekc
 | Wartość | Opis |
 |---|---|
 | `New` | Fabrycznie nowy, zapakowany |
-| `UsedLikeNew` | Używany — jak nowy |
-| `UsedVeryGood` | Używany — bardzo dobry |
-| `UsedGood` | Używany — dobry |
-| `UsedAcceptable` | Używany — dopuszczalny |
-| `CollectibleLikeNew` | Kolekcjonerski — jak nowy |
-| `CollectibleVeryGood` | Kolekcjonerski — bardzo dobry |
-| `CollectibleGood` | Kolekcjonerski — dobry |
-| `CollectibleAcceptable` | Kolekcjonerski — dopuszczalny |
+| `UsedLikeNew` | Używany, jak nowy |
+| `UsedVeryGood` | Używany, bardzo dobry |
+| `UsedGood` | Używany, dobry |
+| `UsedAcceptable` | Używany, dopuszczalny |
+| `CollectibleLikeNew` | Kolekcjonerski, jak nowy |
+| `CollectibleVeryGood` | Kolekcjonerski, bardzo dobry |
+| `CollectibleGood` | Kolekcjonerski, dobry |
+| `CollectibleAcceptable` | Kolekcjonerski, dopuszczalny |
 | `Refurbished` | Odnowiony przez sprzedawcę |
 | `Club` | Club (kategoria multimediów) |
 
@@ -148,9 +148,9 @@ Popularne kategorie z własnymi szablonami: odzież, obuwie, biżuteria, elektro
 Po przesłaniu pobierz raport przetwarzania z Seller Central (Magazyn → Dodaj produkty przez przesłanie pliku → Monitoruj stan przesyłania → Wyświetl raport przetwarzania).
 
 Raport ma trzy karty:
-- **Summary** — łączna liczba wierszy, sukcesów i błędów
-- **Results** — jeden wiersz na każdy rekord z pliku, ze statusem i komunikatem błędu
-- **Original** — twoje pierwotnie przesłane dane
+- **Summary**: łączna liczba wierszy, sukcesów i błędów
+- **Results**: jeden wiersz na każdy rekord z pliku, ze statusem i komunikatem błędu
+- **Original**: twoje pierwotnie przesłane dane
 
 Aby znaleźć nieudane wiersze, odfiltruj kartę Results według kolumny `status`. Wiersze `FAILURE` zawierają `error-code` i `error-message`, które dokładnie wyjaśniają, co poszło nie tak.
 

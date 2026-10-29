@@ -18,8 +18,8 @@ timeToComplete: "10 Minuten"
 
 Der Handle ist die eindeutige Kennung eines Produkts in Shopifys Produkt-CSV. Er hat zwei Aufgaben:
 
-1. **Er gruppiert Variantenzeilen** – alle Zeilen desselben Produkts müssen denselben Handle haben. Shopify liest die Spalte Handle, um zu erkennen, welche Zeilen zusammengehören.
-2. **Er bestimmt die Produkt-URL** – der Handle wird zum URL-Pfad: `yourstore.com/products/<handle>`
+1. **Er gruppiert Variantenzeilen**: alle Zeilen desselben Produkts müssen denselben Handle haben. Shopify liest die Spalte Handle, um zu erkennen, welche Zeilen zusammengehören.
+2. **Er bestimmt die Produkt-URL**: der Handle wird zum URL-Pfad: `yourstore.com/products/<handle>`
 
 Der Handle ist die wichtigste Spalte der Shopify-CSV. Fehler im Handle verursachen mehr Importprobleme als jedes andere Feld.
 
@@ -33,7 +33,7 @@ Ein gültiger Shopify-Handle muss:
 - nur **Kleinbuchstaben, Ziffern und Bindestriche** enthalten
 - **keine Leerzeichen** enthalten (nutze stattdessen Bindestriche)
 - **keine Sonderzeichen** enthalten: kein `&`, `%`, `?`, `/`, `@` und keine Unicode-Zeichen
-- in jeder Zeile **ausgefüllt** sein – leere Handles sind nicht erlaubt
+- in jeder Zeile **ausgefüllt** sein (leere Handles sind nicht erlaubt)
 
 | Gültig | Ungültig | Grund |
 |---|---|---|
@@ -94,7 +94,7 @@ Wenn Shopify diese Datei liest:
 
 **Lösung:** Shopify schreibt Handles in manchen Fällen automatisch klein und ersetzt Leerzeichen durch Bindestriche, aber für CSV-Importe ist es besser, Handles vorher selbst zu formatieren, um unvorhersehbare Umwandlungen zu vermeiden.
 
-**Python – Handles vereinheitlichen:**
+**Python: Handles vereinheitlichen**
 
 ```python
 import re
@@ -113,7 +113,7 @@ print(to_shopify_handle("Blue Leather Wallet!"))
 
 **Symptom:** Shopify importiert jede Variantenzeile als eigenes Produkt (mit jeweils 0 oder 1 Variante).
 
-**Ursache:** Der Handle ist in Zeilen, die zum selben Produkt gehören sollen, unterschiedlich – oft wegen eines Tippfehlers oder eines zusätzlichen Leerzeichens.
+**Ursache:** Der Handle ist in Zeilen, die zum selben Produkt gehören sollen, unterschiedlich, oft wegen eines Tippfehlers oder eines zusätzlichen Leerzeichens.
 
 **Lösung:** Sortiere deine CSV nach Handle und suche nach Zeilen, die denselben Handle haben sollten, es aber nicht tun. Ein Leerzeichen am Ende (`blue-wallet ` statt `blue-wallet`) ist der häufigste Übeltäter.
 
@@ -133,6 +133,6 @@ Der Handle wird zur Produkt-URL: `yourstore.com/products/<handle>`. Einen Handle
 
 ## Automatisch beheben mit StriveFormats
 
-StriveFormats prüft jeden Handle in deiner Datei – auf leere Werte, ungültige Zeichen und doppelte Handles innerhalb der Datei. Zeilen, deren Handle-Gruppierung nicht Shopifys Regeln für Varianten folgt, werden markiert.
+StriveFormats prüft jeden Handle in deiner Datei auf leere Werte, ungültige Zeichen und doppelte Handles innerhalb der Datei. Zeilen, deren Handle-Gruppierung nicht Shopifys Regeln für Varianten folgt, werden markiert.
 
 [Shopify-CSV-Reparateur öffnen](/app?preset=shopify_products) | [Shopify-Vorlage ansehen](/presets/shopify_products)

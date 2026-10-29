@@ -115,7 +115,7 @@ For files too large for Excel (over ~100,000 rows), use VS Code or Notepad++:
 6. Click **Replace All**.
 7. After removing all duplicates, manually add the header back as the first line.
 
-> Be careful with regex replacement — always keep the original file as a backup and check that the header appears exactly once after replacing.
+> Be careful with regex replacement. Always keep the original file as a backup and check that the header appears exactly once after replacing.
 
 **Notepad++ (Windows):**
 1. Open file → **Search → Replace** (Ctrl+H).
@@ -130,7 +130,7 @@ For files too large for Excel (over ~100,000 rows), use VS Code or Notepad++:
 Once the file is clean:
 
 1. Verify the header appears exactly once, on line 1.
-2. Count your rows — the count should equal the original row count minus the number of duplicate headers you removed.
+2. Count your rows. The count should equal the original row count minus the number of duplicate headers you removed.
 3. Spot-check a few rows near where the duplicates were to confirm data is intact.
 4. Save as **CSV UTF-8** (in Excel: **File → Save As → CSV UTF-8**).
 

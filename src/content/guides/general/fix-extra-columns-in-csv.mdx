@@ -18,11 +18,11 @@ timeToComplete: "6 minutes"
 
 Extra columns appear in CSV files for several common reasons:
 
-- **Spreadsheet formulas or helper columns** — columns you added for your own calculations that were never meant to be imported
-- **Notes or internal tracking columns** — columns like `Internal Notes`, `Last Edited By`, or `Status`
-- **Export artifacts** — your inventory system exports more fields than the import platform needs
-- **Merged platform files** — you combined columns from two different templates and the result has duplicates or extras
-- **Trailing comma on every row** — creates an invisible empty column at the end
+- **Spreadsheet formulas or helper columns**: columns you added for your own calculations that were never meant to be imported
+- **Notes or internal tracking columns**: columns like `Internal Notes`, `Last Edited By`, or `Status`
+- **Export artifacts**: your inventory system exports more fields than the import platform needs
+- **Merged platform files**: you combined columns from two different templates and the result has duplicates or extras
+- **Trailing comma on every row**: creates an invisible empty column at the end
 
 ---
 
@@ -32,8 +32,8 @@ The behavior varies by platform:
 
 | Platform | Extra columns behavior |
 |---|---|
-| Shopify | Silently ignored — not a problem |
-| WooCommerce | Silently ignored — not a problem |
+| Shopify | Silently ignored, not a problem |
+| WooCommerce | Silently ignored, not a problem |
 | Etsy | Unknown columns may cause row-level errors |
 | eBay File Exchange | Can cause row or file parse failures |
 | Amazon flat files | Extra columns cause row validation errors |
@@ -51,7 +51,7 @@ If you're on Shopify or WooCommerce, extra columns are usually harmless. If you'
 3. Compare row 1 (headers) between the two files
 4. Any column in your file that is not in the template is an extra
 
-**Python — list extra columns:**
+**Python: list extra columns**
 
 ```python
 import csv
@@ -74,7 +74,7 @@ print("Extra columns:", extras)
 2. Click the column letter of each extra column to select it
 3. Right-click → Delete
 4. For multiple non-adjacent columns: hold Ctrl and click each column letter, then right-click → Delete
-5. Save as CSV (comma delimited) — not XLSX
+5. Save as CSV (comma delimited), not XLSX
 
 **Remove the last column if it's blank (trailing comma artifact):**
 

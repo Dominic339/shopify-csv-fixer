@@ -76,7 +76,7 @@
     "technicalDetail": "Technische Details",
     "viewTemplate": "Vorlage ansehen",
     "readyToFix": "Bereit, deine CSV zu reparieren? Lade sie hoch und erhalte sofort eine Prüfung und automatische Korrekturen.",
-    "autoFixableCta": "Dieses Problem wird automatisch behoben – lade deine CSV hoch, um es jetzt zu korrigieren.",
+    "autoFixableCta": "Dieses Problem wird automatisch behoben. Lade deine CSV hoch, um es jetzt zu korrigieren.",
     "checkCta": "Lade deine CSV hoch, um sie auf dieses Problem zu prüfen und eine saubere Datei zu exportieren.",
     "fixNow": "Jetzt beheben",
     "autoFixableBadge": "Automatisch behebbar",
@@ -269,7 +269,7 @@
     "ctaConverter": "Konverter öffnen",
     "aiLabel": "Warum nicht einfach eine KI fragen?",
     "aiTitle": "Gebaut für die Aufgabe, an der ein Chatbot scheitert",
-    "aiDesc": "Eine Produktdatei in einen KI-Chat zu kopieren, wirkt wie eine Abkürzung. Aber ein Chatbot schreibt deine Datei neu, indem er Text vorhersagt – und der Import lehnt alles ab, was auch nur ein bisschen abweicht.",
+    "aiDesc": "Eine Produktdatei in einen KI-Chat zu kopieren, wirkt wie eine Abkürzung. Aber ein Chatbot schreibt deine Datei neu, indem er Text vorhersagt, und der Import lehnt alles ab, was auch nur ein bisschen abweicht.",
     "aiUs": "StriveFormats",
     "aiThem": "Allgemeiner KI-Chatbot",
     "aiRow1Topic": "Lange Dateien",
@@ -289,7 +289,7 @@
     "aiRow5Them": "Dein Katalog wird zu einem Drittanbieter hochgeladen.",
     "aiNote": "KI ist super, um Produktbeschreibungen zu schreiben. Damit eine Datei durch den Import kommt, brauchst du etwas, das die Regeln exakt befolgt.",
     "faq6Q": "Kann ich nicht einfach ChatGPT oder eine andere KI meine CSV korrigieren lassen?",
-    "faq6A": "Du kannst es versuchen, aber Chatbots schreiben Dateien neu, indem sie Text vorhersagen. Lange Dateien werden oft abgeschnitten, Werte wie Preise und SKUs können sich unbemerkt ändern, und die Importregeln der Plattform werden geraten statt geprüft. StriveFormats führt für jede Plattform feste Prüfungen auf jeder Zeile aus, listet jede Änderung auf und lädt deine Datei nie hoch. Für Beschreibungen ist KI weiterhin praktisch – mit StriveFormats stellst du sicher, dass die Datei importiert wird."
+    "faq6A": "Du kannst es versuchen, aber Chatbots schreiben Dateien neu, indem sie Text vorhersagen. Lange Dateien werden oft abgeschnitten, Werte wie Preise und SKUs können sich unbemerkt ändern, und die Importregeln der Plattform werden geraten statt geprüft. StriveFormats führt für jede Plattform feste Prüfungen auf jeder Zeile aus, listet jede Änderung auf und lädt deine Datei nie hoch. Für Beschreibungen ist KI weiterhin praktisch. Mit StriveFormats stellst du sicher, dass die Datei importiert wird."
   },
   "presets": {
     "title": "Vorlagenformate",
@@ -344,7 +344,7 @@
     "outputColumns": "Ausgabespalten",
     "warnings": "Warnungen",
     "allMapped": "Alle Quellfelder erfolgreich zugeordnet. Die Ausgabe sollte importbereit sein.",
-    "convertedWithWarnings": "Mit Warnungen konvertiert – prüfe die weggelassenen Spalten vor dem Import.",
+    "convertedWithWarnings": "Mit Warnungen konvertiert. Prüfe die weggelassenen Spalten vor dem Import.",
     "droppedColumns": "Verworfene Spalten (kein Äquivalent im Zielformat)",
     "downloadConverted": "Konvertierte CSV herunterladen",
     "upgradeForLarger": "Upgrade für größere Dateien.",
@@ -391,7 +391,7 @@
     "passStarting": "Bezahlseite wird geöffnet…",
     "passError": "Die Bezahlseite konnte nicht geöffnet werden. Bitte versuche es noch einmal.",
     "viewPlans": "Tarife ansehen",
-    "fileRestored": "Deine Datei ist wieder geladen – du kannst sie jetzt herunterladen."
+    "fileRestored": "Deine Datei ist wieder geladen. Du kannst sie jetzt herunterladen."
   },
   "merge": {
     "title": "CSV-Zusammenführer & Deduplizierer",
@@ -405,7 +405,7 @@
     "appendMode": "Anfügen (alle Zeilen kombinieren)",
     "dedupeMode": "Deduplizieren (Duplikate entfernen)",
     "dedupeKey": "Deduplizierungsschlüssel-Spalte",
-    "chooseColumn": "— Spalte auswählen —",
+    "chooseColumn": "Spalte auswählen",
     "noSharedColumns": "Keine gemeinsamen Spalten gefunden. Alle Spalten aus beiden Dateien werden angezeigt.",
     "whenDuplicate": "Wenn ein Duplikat gefunden wird",
     "keepFirst": "Version von Datei A behalten",
@@ -533,7 +533,7 @@
     "downloadFixLog": "Korrekturprotokoll herunterladen",
     "share": "Teilen",
     "copied": "Kopiert!",
-    "shareText": "{fixes} Probleme in {rows} Zeilen behoben (Bewertung {score}/100) mit StriveFormats — striveformats.com",
+    "shareText": "{fixes} Probleme in {rows} Zeilen behoben (Bewertung {score}/100) mit StriveFormats: striveformats.com",
     "limitReachedAccount": "Du hast alle {limit} Exporte dieses Monats genutzt.",
     "limitReachedDevice": "Du hast die {limit} kostenlosen Exporte dieses Geräts für diesen Monat genutzt.",
     "viewPlans": "Tarife ansehen",
@@ -662,7 +662,7 @@
     "passError": "Die Bezahlseite konnte nicht geöffnet werden. Bitte versuche es noch einmal.",
     "smallFilesFree": "Dateien mit bis zu {rows} Zeilen lädst du immer kostenlos herunter.",
     "upsellPass": "Oder exportiere 24 Stunden lang unbegrenzt mit einem einmaligen Pass für {price}.",
-    "fileRestored": "Deine Datei ist wieder geladen – du kannst sie jetzt herunterladen."
+    "fileRestored": "Deine Datei ist wieder geladen. Du kannst sie jetzt herunterladen."
   },
   "profile": {
     "verifySubscription": "Dein Abonnement prüfen und die Abrechnung verwalten.",

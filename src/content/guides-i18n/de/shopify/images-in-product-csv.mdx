@@ -44,7 +44,7 @@ Die Variantenzeilen (zweite und weitere Zeilen mit demselben Handle) haben eine 
 
 ## Mehrere Bilder pro Produkt
 
-Für mehr als ein Bild fügst du **weitere Zeilen mit demselben Handle** hinzu, die nur die Bilddaten enthalten. Diese Zeilen haben einen leeren Title und leere Variantenfelder – sie dienen nur dazu, zusätzliche Bild-URLs zu transportieren.
+Für mehr als ein Bild fügst du **weitere Zeilen mit demselben Handle** hinzu, die nur die Bilddaten enthalten. Diese Zeilen haben einen leeren Title und leere Variantenfelder. Sie dienen nur dazu, zusätzliche Bild-URLs zu transportieren.
 
 ```
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
@@ -58,7 +58,7 @@ Die wichtigsten Regeln:
 - Pro Produkt werden bis zu **250 Bilder** unterstützt.
 - Jede Bild-URL steht in einer eigenen Zeile mit demselben Handle.
 - Reine Bildzeilen haben einen leeren Variant Price, leere Optionswerte und einen leeren Title.
-- Nutze nicht dieselbe Zeile für eine Variante und ein weiteres Bild – eine Zeile, ein Zweck.
+- Nutze nicht dieselbe Zeile für eine Variante und ein weiteres Bild. Eine Zeile, ein Zweck.
 
 ---
 
@@ -112,7 +112,7 @@ Shopify lädt die Bilder beim Import von der angegebenen URL herunter. Die URL m
 
 ### Bilder landen beim falschen Produkt
 
-**Ursache:** Tippfehler im Handle – die Bildzeile nutzte einen etwas anderen Handle als die Produktzeile.
+**Ursache:** Ein Tippfehler im Handle. Die Bildzeile nutzte einen etwas anderen Handle als die Produktzeile.
 
 **Lösung:** Achte auf exakt gleiche Handles. Schon ein zusätzliches Leerzeichen oder eine andere Großschreibung erzeugt ein neues Produkt.
 

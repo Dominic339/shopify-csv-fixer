@@ -44,7 +44,7 @@ Wiersze wariantów (drugi i kolejne z tym samym Handle) mają pustą kolumnę Im
 
 ## Wiele zdjęć na produkt
 
-Aby dodać do produktu więcej niż jedno zdjęcie, dodaj **dodatkowe wiersze z tym samym Handle**, zawierające tylko dane zdjęcia. Te wiersze mają puste Title i puste pola wariantu – służą wyłącznie do przekazania dodatkowych adresów zdjęć.
+Aby dodać do produktu więcej niż jedno zdjęcie, dodaj **dodatkowe wiersze z tym samym Handle**, zawierające tylko dane zdjęcia. Te wiersze mają puste Title i puste pola wariantu. Służą wyłącznie do przekazania dodatkowych adresów zdjęć.
 
 ```
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
@@ -58,7 +58,7 @@ Najważniejsze zasady:
 - Jeden produkt może mieć do **250 zdjęć**.
 - Każdy adres zdjęcia jest w osobnym wierszu z tym samym Handle.
 - Wiersze tylko ze zdjęciem mają puste Variant Price, wartości opcji i Title.
-- Nie używaj tego samego wiersza dla wariantu i dodatkowego zdjęcia – jeden wiersz, jedno zadanie.
+- Nie używaj tego samego wiersza dla wariantu i dodatkowego zdjęcia. Jeden wiersz, jedno zadanie.
 
 ---
 
@@ -112,7 +112,7 @@ Shopify pobiera zdjęcia z podanego adresu w trakcie importu. Adres musi spełni
 
 ### Zdjęcia trafiają do złego produktu
 
-**Przyczyna:** Literówka w Handle – wiersz zdjęcia miał nieco inny Handle niż wiersz produktu.
+**Przyczyna:** Literówka w Handle. Wiersz zdjęcia miał nieco inny Handle niż wiersz produktu.
 
 **Rozwiązanie:** Upewnij się, że Handle są identyczne. Nawet jedna dodatkowa spacja lub inna wielkość litery tworzy nowy produkt.
 

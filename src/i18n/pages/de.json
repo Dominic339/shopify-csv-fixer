@@ -13,7 +13,7 @@
     "run": [
       { "lead": "Erst testen, dann anmelden.", "text": "Alle Prüfungen und Korrekturen funktionieren ohne Konto, und du bekommst {count} kostenlose Exporte pro Monat auf jedem Gerät." },
       { "lead": "Nichts ändert sich heimlich.", "text": "Jede automatische Änderung steht in einem Korrekturprotokoll, das du zusammen mit der Datei herunterladen kannst." },
-      { "lead": "Klein und unabhängig.", "text": "Das Tool arbeitet in deinem Browser. Das hält es schnell, privat und günstig im Betrieb – und den kostenlosen Tarif kostenlos." }
+      { "lead": "Klein und unabhängig.", "text": "Das Tool arbeitet in deinem Browser. Das hält es schnell, privat und günstig im Betrieb, und so bleibt der kostenlose Tarif kostenlos." }
     ],
     "whereTitle": "Was wo läuft",
     "dataFlow": [
@@ -149,7 +149,7 @@
         "alt": "Die Problemtabelle mit doppelten Optionswerten in Rot, einer doppelten SKU in Gelb und der Liste der manuellen Korrekturen darunter",
         "notes": [
           "Filtere die Tabelle nach Fehlern, Warnungen oder Tipps.",
-          "Rote Zellen sind Fehler, gelbe Zellen Warnungen. Klick auf eine Zelle, um sie zu bearbeiten – die Prüfungen laufen sofort erneut.",
+          "Rote Zellen sind Fehler, gelbe Zellen Warnungen. Klick auf eine Zelle, um sie zu bearbeiten. Die Prüfungen laufen sofort erneut.",
           "Zeilen mit Problemen werden unter „Manuelle Korrekturen“ angeheftet, jeweils mit einer Erklärung, was falsch ist und wie du es behebst."
         ]
       },

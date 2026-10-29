@@ -36,7 +36,7 @@ The CSV requires a **number** (the CategoryID), not the human-readable category 
 | Cameras & Photo > Digital Cameras | 31388 |
 | Health & Beauty > Vitamins & Dietary Supplements | 180959 |
 
-You cannot use the path text in the CSV — it must be the numeric ID.
+You cannot use the path text in the CSV. It must be the numeric ID.
 
 ---
 
@@ -59,7 +59,7 @@ Always assign the most specific category possible (the deepest leaf category tha
 2. In the "Category" step, use the search box to find your product type.
 3. eBay suggests categories based on your keywords.
 4. Select the most specific matching category.
-5. Note the category name — use it to look up the ID via the eBay category tree or the File Exchange download.
+5. Note the category name and use it to look up the ID in the eBay category tree or the File Exchange download.
 
 ### Method 2: eBay Category Tree Download
 
@@ -99,7 +99,7 @@ Add,Women's Running Shoes,63889,45.00,...
 
 **Rules:**
 - The value must be a positive integer matching a valid eBay leaf category.
-- Parent/intermediate categories are generally not accepted — use the most specific (deepest) category.
+- Parent/intermediate categories are generally not accepted. Use the most specific (deepest) category.
 - The category must be valid for your eBay site (US categories differ from UK, DE, AU, etc.).
 
 ---
@@ -139,7 +139,7 @@ Or build a reference table (product type → CategoryID) and use VLOOKUP:
 
 ## Verifying CategoryID Before Upload
 
-A wrong CategoryID creates listings in the wrong category — a common and hard-to-catch mistake:
+A wrong CategoryID creates listings in the wrong category. It's a common mistake and hard to catch:
 
 1. **Spot check:** Take 5 CategoryID values from your CSV and look them up on eBay to confirm they map to the expected category path.
 2. **Check against your product type reference:** Maintain a simple table of product type → CategoryID and review it when adding new product types.
@@ -155,4 +155,4 @@ A wrong CategoryID creates listings in the wrong category — a common and hard-
 | "Category is required" | CategoryID column is blank |
 | "Invalid category" | ID is not a valid eBay leaf category |
 | "Category not allowed for this listing type" | Fixed-price vs auction category restriction |
-| Item specifics errors after upload | Wrong category — specifics don't match your items |
+| Item specifics errors after upload | Wrong category, so the specifics don't match your items |

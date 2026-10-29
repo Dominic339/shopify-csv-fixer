@@ -32,7 +32,7 @@ If your CSV contains sequences like these, you have an encoding problem:
 
 ## Why Encoding Mismatches Happen
 
-Modern platforms — Shopify, WooCommerce, Amazon — expect **UTF-8** encoded files. But many tools produce files in other encodings:
+Modern platforms such as Shopify, WooCommerce and Amazon expect **UTF-8** encoded files. But many tools produce files in other encodings:
 
 - **Microsoft Excel (Windows)** saves `.csv` in the system locale encoding (often Windows-1252 or Latin-1) unless you specifically choose UTF-8.
 - **Older export tools** may default to ISO-8859-1 / Latin-1.
@@ -71,7 +71,7 @@ Get-Content yourfile.csv -Encoding Byte -TotalCount 3
 
 The UTF-8 BOM (Byte Order Mark) is a three-byte sequence (`EF BB BF`) that some tools prepend to UTF-8 files. Windows Notepad and Excel sometimes add it automatically.
 
-**Why it matters:** Import tools — including Shopify's product CSV importer — may interpret the BOM as literal characters in the first column name, turning `Handle` into `ï»¿Handle`. That column is then not recognized and the entire import fails silently.
+**Why it matters:** Import tools, including Shopify's product CSV importer, may read the BOM as literal characters in the first column name, turning `Handle` into `ï»¿Handle`. That column is then not recognized and the entire import fails silently.
 
 ---
 
@@ -85,7 +85,7 @@ Excel is the most common cause of encoding problems. Follow these steps precisel
 2. Click **File → Save As**.
 3. In the "Save as type" dropdown, choose **CSV UTF-8 (Comma delimited) (.csv)**.
    - This option is available in Excel 2016 and later on Windows and Mac.
-   - Do **not** choose plain "CSV (Comma delimited)" — that saves in the system locale encoding.
+   - Do **not** choose plain "CSV (Comma delimited)". That saves in the system locale encoding.
 4. Click **Save**.
 
 ### Re-open a mojibake file in Excel
@@ -120,13 +120,13 @@ If you received a garbled file that Sheets is displaying incorrectly:
 VS Code gives you full control over encoding and is free:
 
 1. Open VS Code and drag your CSV file into it.
-2. Look at the bottom-right status bar — it shows the detected encoding (e.g., `UTF-8`, `Windows 1252`).
+2. Look at the bottom-right status bar. It shows the detected encoding (e.g., `UTF-8`, `Windows 1252`).
 3. Click the encoding label.
 4. Choose **"Reopen with Encoding"** and select the encoding the file was actually saved in (often `Western (Windows 1252)` or `ISO 8859-1`).
 5. The garbled text should now display correctly.
 6. Click the encoding label again and choose **"Save with Encoding → UTF-8"**.
 
-This two-step process — reopen with the original encoding, save as UTF-8 — is the most reliable method for any tool.
+This two-step process (reopen with the original encoding, then save as UTF-8) is the most reliable method for any tool.
 
 ---
 
