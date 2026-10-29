@@ -5,8 +5,8 @@
 "description": "Corrija os erros mais comuns de importação de arquivos planos CSV da Amazon: problemas de SKU, códigos de condição inválidos, formato de preço, valores do canal de fulfillment e modelos incompatíveis."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Campos booleanos do arquivo plano da Amazon: y/n, TRUE/FALSE e armadilhas comuns",
-"description": "Saiba quais campos booleanos dos arquivos planos do Seller Central esperam 'y' ou 'n' (e não TRUE/FALSE ou 1/0), como corrigir valores inválidos em massa e como evitar a formatação automática da planilha que estraga essas colunas."
+"title": "Campos de sim/não nos arquivos flat da Amazon: true/false, y/n e armadilhas comuns",
+"description": "Os valores aceitos pelas colunas de sim/não da Amazon dependem do arquivo: os modelos de categoria usam os valores da aba Valid Values (geralmente true/false), e o Inventory Loader usa y/n ou 1/2. Saiba como verificar, corrigir e proteger essas colunas."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "CategoryID do eBay e File Exchange: o que é e como definir",

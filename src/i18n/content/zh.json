@@ -5,8 +5,8 @@
 "description": "解决最常见的 Amazon 平面文件 CSV 导入错误：SKU 问题、无效的状况代码、价格格式、配送渠道值和模板不匹配。"
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Amazon 平面文件布尔字段：y/n、TRUE/FALSE 与常见误区",
-"description": "了解 Seller Central 平面文件中哪些布尔字段需要 'y' 或 'n'（而不是 TRUE/FALSE 或 1/0），如何批量修正无效值，以及如何避免电子表格自动格式化破坏这些列。"
+"title": "Amazon 平面文件中的是/否字段：true/false、y/n 与常见陷阱",
+"description": "Amazon 是/否列接受的值取决于文件：类目模板使用其 Valid Values 选项卡中的值（通常是 true/false），Inventory Loader 使用 y/n 或 1/2。了解如何检查、修正和保护这些列。"
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "eBay CategoryID 与 File Exchange：含义与设置方法",

@@ -5,8 +5,8 @@
 "description": "Amazon 플랫 파일 CSV에서 가장 흔한 가져오기 오류를 해결하세요. SKU 문제, 잘못된 상태 코드, 가격 형식, 주문 처리 채널 값, 템플릿 불일치를 다룹니다."
 },
 "amazon/flat-file-boolean-fields": {
-"title": "Amazon 플랫 파일의 참/거짓 필드: y/n, TRUE/FALSE와 흔한 실수",
-"description": "Seller Central 플랫 파일에서 'y' 또는 'n'(TRUE/FALSE나 1/0이 아님)을 요구하는 참/거짓 필드, 잘못된 값을 한꺼번에 고치는 방법, 이 열을 망가뜨리는 스프레드시트 자동 서식을 피하는 방법을 알아보세요."
+"title": "Amazon 플랫 파일 예/아니요 필드: true/false, y/n과 흔한 실수",
+"description": "Amazon 예/아니요 열이 허용하는 값은 파일마다 다릅니다. 카테고리 템플릿은 Valid Values 탭의 값(대개 true/false)을, Inventory Loader는 y/n 또는 1/2를 사용합니다. 이 열을 확인하고 고치고 보호하는 방법을 알아보세요."
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "eBay CategoryID와 File Exchange: 개념과 설정 방법",

@@ -1,52 +1,43 @@
 ---
-title: "Ja/Nein-Felder in Amazon-Flatfiles: y/n, TRUE/FALSE und typische Fallen"
-description: "Welche Ja/Nein-Felder in Amazon-Flatfiles 'y' oder 'n' erwarten (nicht TRUE/FALSE oder 1/0), wie du ungültige Werte in großen Mengen korrigierst und wie du verhinderst, dass Tabellenkalkulationen diese Spalten verfälschen."
-keywords: ["amazon flatfile boolesch", "amazon csv ja nein felder", "amazon y n csv", "amazon flatfile true false", "amazon seller central csv wahr falsch", "amazon is_adult_product", "amazon batteries_required", "amazon flatfile fehler"]
+title: "Ja/Nein-Felder in Amazon-Flatfiles: true/false, y/n und typische Fallen"
+description: "Welche Werte Amazons Ja/Nein-Spalten akzeptieren, hängt von der Datei ab: Kategorievorlagen nutzen die Werte aus ihrem Tabellenblatt Valid Values (meist true/false), der Inventory Loader nutzt y/n oder 1/2. So prüfst, korrigierst und schützt du diese Spalten."
+keywords: ["amazon flatfile boolesch", "amazon csv ja nein felder", "amazon y n csv", "amazon flatfile true false", "amazon seller central csv wahr falsch", "amazon batteries_required", "amazon valid values", "amazon flatfile fehler"]
 lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
-  - "Welche Ja/Nein-Werte Amazon-Flatfiles akzeptieren (y/n, TRUE/FALSE oder 1/0)"
-  - "Welche gängigen Flatfile-Felder Ja/Nein-Felder sind"
-  - "Wie Excel und Google Sheets y/n-Werte unbemerkt verfälschen"
-  - "Wie du ungültige Ja/Nein-Werte in Hunderten von Zeilen findest und korrigierst"
-  - "Wie du verhinderst, dass diese Werte bei künftigen Exporten verfälscht werden"
-bestFor: "Amazon-Verkäufer, die Angebote mit Seller-Central-Flatfiles in großen Mengen hochladen oder aktualisieren, vor allem Felder zu Produktsicherheit, Versand und Artikelzustand"
-timeToComplete: "8 Minuten"
+  - "Warum Amazons Ja/Nein-Werte von der hochgeladenen Datei abhängen"
+  - "Wo du die genau erlaubten Werte für deine Vorlage findest"
+  - "Wie die Versandspalten des Inventory Loaders funktionieren"
+  - "Wie Excel und Google Sheets Ja/Nein-Werte ungefragt ändern"
+  - "Wie du ungültige Werte in Hunderten von Zeilen findest und korrigierst"
+bestFor: "Amazon-Verkäufer, die Angebote mit Seller-Central-Flatfiles in großen Mengen hochladen oder aktualisieren, vor allem Felder zu Batterien, Sicherheit und Versand"
+timeToComplete: "7 Minuten"
 ---
 
-## Ja/Nein-Werte in Amazon-Flatfiles
+## Ja/Nein-Werte hängen von der Datei ab
 
-Amazons kategoriespezifische Flatfile-Vorlagen (Download in Seller Central) verwenden je nach Spalte unterschiedliche Konventionen für Ja/Nein-Werte. Wer hier danebenliegt, bekommt Validierungsfehler beim Upload oder unbemerkte Datenprobleme.
+Amazon verwendet nicht in allen Upload-Dateien dasselbe Ja/Nein-Format. Was eine Spalte akzeptiert, hängt davon ab, welche Datei du ausfüllst:
 
-Diese drei Formate begegnen dir:
-
-| Format | Beispiel | Wann verwendet |
+| Datei | Beispielspalten | Erlaubte Werte |
 |---|---|---|
-| `y` / `n` | `y`, `n` | Die meisten Ja/Nein-Felder zu Sicherheit und Versand |
-| `true` / `false` | `true`, `false` | Manche Vorlagenversionen, Groß-/Kleinschreibung egal |
-| `1` / `0` | Selten | Selten; einige individuelle Flatfiles |
+| Kategorievorlage (in Seller Central für deinen Produkttyp heruntergeladen) | `batteries_required`, `are_batteries_included` | Was das Tabellenblatt **Valid Values** der Vorlage für diese Spalte auflistet. Bei Batteriefeldern ist das meist `true` / `false` |
+| Inventory Loader (Angebotsdatei mit `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` oder `1` für nur USA, `y` oder `2` für international |
+| Inventory Loader | `expedited-shipping` | Kein Ja/Nein-Feld, sondern eine Liste von Versandoptionen (siehe unten) |
 
-**Der häufigste Fehler:** `TRUE`/`FALSE` (so zeigt Excel Wahrheitswerte an) in einer Spalte, die `y`/`n` erwartet. Amazon lehnt diese Werte mit einem Validierungsfehler ab oder ignoriert das Feld stillschweigend. In einem deutschen Excel erscheinen sie als `WAHR`/`FALSCH`, und auch das ist ungültig.
+Auch Amazons Listings API speichert `batteries_required` als true/false-Wert, was zu dem passt, was Verkäufer in ihren Kategorievorlagen sehen.
+
+**Der häufigste Fehler:** ein Wort einzutragen, das nicht auf der Liste der Vorlage steht, etwa `Yes`, `Y` oder `1` in einer Spalte, für die das Tabellenblatt Valid Values `true` / `false` angibt, oder eine Konvention aus einer Amazon-Datei in eine andere zu übernehmen.
 
 ---
 
-## Gängige Ja/Nein-Felder in Amazon-Flatfiles
+## Zuerst das Tabellenblatt Valid Values prüfen
 
-Diese Spalten kommen in vielen Kategorievorlagen vor und verdienen besondere Aufmerksamkeit:
+Jede Kategorievorlage, die du aus Seller Central herunterlädst, hat zwei Tabellenblätter, die die Frage für deine Datei klären:
 
-| Spaltenname | Erwartete Werte | Was es steuert |
-|---|---|---|
-| `batteries_required` | `y` / `n` | Ob der Artikel Batterien benötigt |
-| `batteries_included` | `y` / `n` | Ob Batterien im Lieferumfang enthalten sind |
-| `is_adult_product` | `y` / `n` | Kennzeichnung als Erwachseneninhalt |
-| `is_expiration_dated_product` | `y` / `n` | Ob das Produkt ein Ablaufdatum hat |
-| `item_package_quantity` | Ganzzahl | (Kein Ja/Nein-Feld, wird aber oft verwechselt) |
-| `hazmat_applicable` | `y` / `n` | Kennzeichen für Gefahrgut |
-| `fragile` | `y` / `n` | Ob der Artikel beim Versand zerbrechlich ist |
-| `is_discontinued_by_manufacturer` | `y` / `n` | Kennzeichen für ausgelaufene Produkte |
-| `generic_keywords` | Text | (Kein Ja/Nein-Feld, nur zur Abgrenzung aufgeführt) |
+1. **Data Definitions:** beschreibt jede Spalte und sagt, ob sie Pflicht ist.
+2. **Valid Values:** listet die genauen Werte auf, die jede Auswahlspalte akzeptiert.
 
-> **Hinweis:** Die genauen Spaltennamen und erlaubten Werte unterscheiden sich je nach Kategorievorlage. Sieh immer im Tabellenblatt mit den Datendefinitionen der Vorlage nach, die du für deine Kategorie aus Seller Central heruntergeladen hast.
+Suche den Spaltennamen im Tabellenblatt Valid Values und kopiere die Werte von dort, genau so geschrieben wie angezeigt. Vorlagen ändern sich mit der Zeit und unterscheiden sich je nach Kategorie und Marktplatz. Prüfe also die Version, die du gleich hochlädst, und nicht eine, die du vor Monaten gespeichert hast. Fehlt eine erwartete Spalte in deiner Vorlage, nutzt dein Produkttyp sie nicht.
 
 ---
 
@@ -63,111 +54,82 @@ Wenn du Angebote mit der Inventory-Loader-Datei aktualisierst (die mit den Spalt
 
 ---
 
-## Wie Tabellenkalkulationen Ja/Nein-Werte verfälschen
+## Wie Tabellenkalkulationen Ja/Nein-Werte ändern
 
-### Die automatische Umwandlung in Excel
+### Excel
 
-Wenn du `y` in eine Zelle tippst, lässt Excel es als Text stehen. Probleme entstehen aber, wenn:
-
-1. **du eine CSV öffnest, die bereits y/n-Werte enthält:** Interpretiert Excel die Spalte als Wahrheitswerte und formatiert sie automatisch, wird `y` zwar richtig angezeigt, beim Export aber womöglich als anderer Wert gespeichert.
-2. **TRUE/FALSE verwendet werden:** Gibt jemand `TRUE` oder `FALSE` ein (in deutschem Excel `WAHR` oder `FALSCH`, die eingebauten Wahrheitswerte), speichert Excel sie als Wahrheitswerte. Beim CSV-Export schreibt Excel sie in Großbuchstaben in der Sprache von Excel, und Amazon lehnt sie in `y`/`n`-Spalten ab.
-3. **Formeln TRUE/FALSE liefern:** Wird eine Formel wie `=WENN(A2>0; WAHR; FALSCH)` zum Befüllen von Ja/Nein-Spalten verwendet, lautet das Ergebnis `WAHR`/`FALSCH`, nicht `y`/`n`.
+1. **Kontrollkästchen und Formeln:** Kontrollkästchen und Formeln wie `=IF(A2>0, TRUE, FALSE)` erzeugen Excels eigenes `TRUE` / `FALSE` (in deutschem Excel als WAHR / FALSCH angezeigt). Das funktioniert nur, wenn die Liste deiner Vorlage true/false enthält, und in der Inventory-Loader-Spalte `will-ship-internationally` nie.
+2. **Getippte Wörter:** ein von Hand getipptes `Yes`, `No` oder `Y` bleibt so stehen, sodass die Datei am Ende gemischte Schreibweisen enthält.
+3. **CSV direkt öffnen:** Beim Doppelklick auf eine CSV rät Excel die Spaltentypen. Text wie `true` kann zu einem Excel-Wahrheitswert werden und wird als `TRUE` gespeichert.
 
 ### Google Sheets
 
-Gleiches Verhalten: Der Wahrheitswert-Typ von Sheets verwendet `TRUE`/`FALSE`. Formeln und Kontrollkästchen-Spalten liefern diese Werte, nicht `y`/`n`.
+Sheets verhält sich genauso: Kontrollkästchen und Formeln erzeugen `TRUE` / `FALSE`, egal was die Zielspalte erwartet.
 
 ---
 
-## Ungültige Ja/Nein-Werte finden
+## Ungültige Werte finden
 
-### In Excel
+### Jede Spalte filtern
 
-1. Öffne die Flatfile-CSV über **Daten → Aus Text/CSV**, damit nichts automatisch formatiert wird.
-2. Für jede Ja/Nein-Spalte (z. B. `batteries_required`):
-   a. Klicke auf den Filterpfeil.
-   b. Achte auf Werte außer `y` und `n`.
-   c. Markiere jede Zeile mit `TRUE`, `FALSE`, `WAHR`, `FALSCH`, `1`, `0`, `yes`, `no` oder einer leeren Zelle, wo ein Wert Pflicht ist.
+1. Öffne deine Datei über **Daten → Aus Text/CSV**, damit Excel sie nicht umformatiert.
+2. Klicke auf den Filterpfeil einer Ja/Nein-Spalte (zum Beispiel `batteries_required`).
+3. Vergleiche die angezeigten Werte mit dem Tabellenblatt Valid Values. Alles andere ist ein Problem, ebenso eine leere Zelle in einer Spalte, die Data Definitions als Pflicht markiert.
 
-### Mit einer Hilfsspalten-Formel
+### Formel in einer Hilfsspalte
 
-Füge neben jedem Ja/Nein-Feld eine Spalte zur Prüfung ein:
+Füge neben dem Feld eine Spalte hinzu und trage die erlaubten Werte in die Formel ein. Für eine true/false-Spalte:
 
 ```
-=IF(OR(LOWER(A2)="y", LOWER(A2)="n", A2=""), "OK", "INVALID: "&A2)
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
 ```
 
-In einem deutschen Excel lautet dieselbe Formel `=WENN(ODER(KLEIN(A2)="y"; KLEIN(A2)="n"; A2=""); "OK"; "INVALID: "&A2)`.
-
-Filtere nach Zeilen mit `INVALID`, um alle problematischen Werte zu finden.
+Für `will-ship-internationally` im Inventory Loader prüfst du stattdessen auf `y`, `n`, `1` und `2`. Filtere nach Zeilen mit `INVALID`, um alle Problemwerte zu finden.
 
 ---
 
-## Ungültige Ja/Nein-Werte in großen Mengen korrigieren
+## Ungültige Werte in großen Mengen korrigieren
 
 ### Suchen und Ersetzen in Excel
 
 1. Drücke **Strg+H** (Suchen und Ersetzen).
-2. Gib bei **Suchen nach** `WAHR` (oder `TRUE`) ein.
-3. Gib bei **Ersetzen durch** `y` ein (wenn WAHR für y stehen soll) oder `n`.
-4. Klicke auf **Optionen → Suchen in: Werte**, damit Zellwerte statt Formeln verglichen werden.
-5. Klicke auf **Alle ersetzen**.
-6. Wiederhole das für `FALSCH` → `n` (oder `y`, je nach Bedeutung des Felds).
+2. Gib bei **Suchen nach** den falschen Wert ein, zum Beispiel `Yes`.
+3. Gib bei **Ersetzen durch** den Wert aus dem Tabellenblatt Valid Values ein, zum Beispiel `true`.
+4. Klicke auf **Optionen** und aktiviere **Gesamten Zellinhalt vergleichen**, damit nur ganze Zellen geändert werden.
+5. Klicke auf **Alle ersetzen** und wiederhole das für `No` und alle anderen gefundenen Schreibweisen.
 
-> **Wichtig:** Lege die Zuordnung für jedes Feld einzeln fest. `WAHR` kann bei `batteries_included` für `y` stehen, ergibt bei `is_adult_product` aber womöglich keinen Sinn. Prüfe die Bedeutung des Felds, bevor du alles auf einmal ersetzt.
+> **Wichtig:** Überlege vor dem Ersetzen, was jeder Wert bedeutet. Ein `Yes` in `batteries_required` und ein `Yes` in einer anderen Spalte brauchen eventuell unterschiedliche Ersetzungen.
 
 ### Formelergebnisse durch Werte ersetzen
 
 Wenn deine Ja/Nein-Spalten per Formel berechnet werden:
 
-1. Markiere die ganze Spalte.
-2. Kopiere sie (**Strg+C**).
-3. Rechtsklick → **Inhalte einfügen → Werte** (oder über das Dialogfeld „Inhalte einfügen“).
-4. Die Formeln werden durch festen Text ersetzt.
-5. Wandle nun wie oben mit Suchen und Ersetzen `WAHR`/`FALSCH` in `y`/`n` um.
+1. Markiere die Spalte und kopiere sie (**Strg+C**).
+2. Rechtsklick → **Inhalte einfügen → Werte**.
+3. Die Formeln werden zu reinem Text, den du dann mit Suchen und Ersetzen korrigieren kannst.
 
-### Dasselbe in Google Sheets
+### Google Sheets
 
-1. Markiere die Ja/Nein-Spalte.
+1. Markiere die Spalte.
 2. **Bearbeiten → Suchen und ersetzen** (Strg+H).
-3. Suche nach `TRUE` (bzw. `WAHR`) und ersetze durch `y`. Wähle „Dieses Tabellenblatt“.
-4. Wiederhole das für `FALSE` → `n`.
-5. Aktiviere „Groß-/Kleinschreibung beachten“, damit keine Teile anderer Texte versehentlich ersetzt werden.
+3. Aktiviere **Groß-/Kleinschreibung beachten** und **Gesamten Zelleninhalt abgleichen**, suche den falschen Wert und ersetze ihn durch den erlaubten.
 
 ---
 
-## Verfälschung in Zukunft verhindern
+## Probleme beim nächsten Mal vermeiden
 
-### Niemals Excel-Wahrheitswerte für Flatfile-Spalten verwenden
+### Die Auswahllisten der Vorlage nutzen
 
-Formatiere die Ja/Nein-Spalten als **Text** (Rechtsklick → Zellen formatieren → Text), bevor du Daten eingibst. So deutet Excel `y`/`n` oder `TRUE`/`FALSE` nicht als eigene Wahrheitswerte.
+Amazons Kategorievorlagen enthalten Auswahllisten, die aus dem Tabellenblatt Valid Values erstellt werden. Trage die Daten direkt in die Vorlage ein, statt eine CSV darüber einzufügen, dann halten die Auswahllisten die Werte auf der Liste.
 
-### Dropdown-Listen per Datenüberprüfung
+### Eigene Auswahlliste anlegen
 
-Richte in Excel ein Dropdown für Ja/Nein-Spalten ein:
-
-1. Markiere die Zellen der Spalte (unterhalb der Überschrift).
-2. Gehe zu **Daten → Datenüberprüfung**.
-3. Wähle unter „Zulassen“ **Liste**.
-4. Gib bei „Quelle“ ein: `y;n`
-5. Klicke auf OK.
-
-Jetzt lassen sich in diesen Zellen nur `y` oder `n` eingeben. Versehentliche `WAHR`/`FALSCH` oder freie Eingaben sind ausgeschlossen.
+Bei einer Datei ohne Auswahllisten markierst du die Zellen unter der Überschrift, gehst zu **Daten → Datenüberprüfung**, wählst **Liste** und gibst die erlaubten Werte ein, zum Beispiel `true,false` (oder `y,n,1,2` für `will-ship-internationally`).
 
 ### Vor jedem Upload prüfen
 
-Bevor du dein Flatfile in Seller Central hochlädst:
-1. Öffne die fertige CSV in einem Texteditor (nicht in Excel) und sieh dir die Ja/Nein-Spalten an.
-2. Stelle sicher, dass dort nur `y` und `n` stehen (oder das Format, das deine Vorlage vorgibt).
-3. Keine `TRUE`, `FALSE`, `WAHR`, `FALSCH`, `Yes`, `No` und keine leeren Zellen, wo das Feld Pflicht ist.
+1. Öffne die fertige Datei in einem Texteditor (nicht in Excel) und sieh dir die Ja/Nein-Spalten an.
+2. Prüfe, dass jeder Wert auf der Liste für diese Spalte steht.
+3. Fülle jede Spalte aus, die Data Definitions als Pflicht markiert.
 
----
-
-## Amazon-Uploadfehler bei Ja/Nein-Feldern
-
-| Fehler | Wahrscheinliche Ursache |
-|---|---|
-| "Invalid value for batteries_required" | `TRUE` oder `Yes` statt `y` |
-| "batteries_required is required" | Feld bei einem physischen Produkt leer gelassen |
-| Zeile wird stillschweigend ignoriert | `FALSE` verwendet, daher überspringt Amazon die Aktualisierung des Felds |
-| "Value not in valid range" | `1`/`0` in einer `y`/`n`-Spalte |
+Wenn du mit dem Inventory Loader hochlädst, prüft der StriveFormats-Fixer `will-ship-internationally` und `expedited-shipping` für dich anhand von Amazons Anleitung.
