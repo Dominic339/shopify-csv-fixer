@@ -2,7 +2,7 @@
 title: "Importfouten in WooCommerce-product-CSV's: oorzaken en oplossingen"
 description: "Los de meest voorkomende importfouten in WooCommerce-product-CSV's op: ontbrekende SKU's, ongeldige typen, problemen met variatierijen, prijsnotatie en attribuutkolommen."
 keywords: ["woocommerce csv importfout", "woocommerce productimport mislukt", "woocommerce csv fouten", "woocommerce csv repareren", "woocommerce import problemen", "woocommerce csv controleren", "woocommerce product uploadfout"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "De meest voorkomende CSV-importfouten in WooCommerce en wat ze betekenen"
@@ -53,25 +53,25 @@ WooCommerce gebruikt de SKU als unieke ID om geïmporteerde rijen aan bestaande 
 
 **Oplossing:**
 - Geef elke productrij een unieke SKU (eenvoudige producten en hoofdrijen van variabele producten)
-- Variatierijen kunnen de SKU van het hoofdproduct overnemen of een eigen hebben, maar mogen de SKU van een ander product niet dupliceren
+- Variatierijen kunnen de SKU leeg laten of een eigen SKU hebben, maar mogen de SKU van een ander product niet herhalen
 - Zoek dubbele SKU's in Excel met `AANTAL.ALS`: `=AANTAL.ALS($A:$A; A2)`; elke waarde boven 1 is een duplicaat
 
 ---
 
 ## Fout: ongeldige normale prijs
 
-**Oorzaak:** `Regular price` bevat een valutasymbool (`€`, `$`), gebruikt een komma als decimaalteken (`19,99`) of is leeg bij een eenvoudig of variabel product.
+**Oorzaak:** `Regular price` bevat een valutateken (`€`, `$`), gebruikt een komma als decimaalteken (`19,99`) of is leeg bij een eenvoudig product of een variatie.
 
 **Oplossing:**
 - Verwijder valutasymbolen: wis `$`, `€` en `£` met Zoeken en vervangen
 - Vervang komma's als decimaalteken door punten: `19,99` → `19.99`
-- Zorg dat elk eenvoudig en variabel product een prijs heeft; variatierijen kunnen die van het hoofdproduct overnemen
+- Geef elk eenvoudig product en elke variatie een prijs. De hoofdrij van een variabel product heeft er geen nodig, en variaties nemen hem niet over
 
 ---
 
 ## Fout: ongeldig booleaans veld
 
-**Oorzaak:** De booleaanse kolommen van WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) accepteren `1` (waar) of `0` (onwaar). Waarden als `yes`, `TRUE` of `Y` geven controlefouten.
+**Oorzaak:** het importschema van WooCommerce noemt `1` (ja) en `0` (nee) voor de ja/nee-kolommen (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` accepteert ook `notify`, en `Published` gebruikt `1` (gepubliceerd), `0` (privé) en `-1` (concept). Schrijfwijzen als `yes`, `TRUE` of `Y` horen niet bij het schema, dus zet ze om.
 
 **Oplossing:** vervang alle booleaanse waarden:
 
@@ -88,11 +88,11 @@ Gebruik Zoeken en vervangen met "Volledige celinhoud vergelijken" ingeschakeld.
 
 **Oorzaak:** Een rij met `Type: variation` verwijst naar een hoofdproduct dat niet in het importbestand en niet in de database bestaat.
 
-Variatierijen in WooCommerce hebben een hoofdproduct nodig. De koppeling loopt via de kolom `Parent` (die de ID van het hoofdproduct uit de database moet bevatten) of doordat het hoofdproduct in hetzelfde importbestand staat.
+Variatierijen hebben in WooCommerce een hoofdproduct nodig. De kolom `Parent` bevat de SKU of de ID (geschreven als `id:123`) van het hoofdproduct, en dat hoofdproduct moet in hetzelfde importbestand staan of al in je winkel bestaan.
 
 **Oplossing:**
 - Neem de rij van het hoofdproduct op in hetzelfde CSV-bestand
-- Zet in de kolom `Parent` van variatierijen de WooCommerce-product-ID van het hoofdproduct (het nummer in de WordPress-beheeromgeving)
+- Zet `Parent` in variatierijen op de SKU van het hoofdproduct, of op de WooCommerce-product-ID geschreven als `id:123`
 - Zorg dat de hoofdrij `Type: variable` gebruikt, niet `Type: simple`
 
 ---
@@ -104,7 +104,7 @@ Variatierijen in WooCommerce hebben een hoofdproduct nodig. De koppeling loopt v
 **Opmaak van attribuutkolommen in WooCommerce:**
 
 - `Attribute 1 name`: de naam van het eerste attribuut (bijv. `Color`)
-- `Attribute 1 value(s)`: de waarde(n) voor deze rij (bijv. `Blue`, of `Blue | Red` bij meerdere)
+- `Attribute 1 value(s)`: de waarde(n) voor deze rij (bijv. `Blue`, of `Blue, Red` voor meerdere)
 - `Attribute 1 visible`: `1` als het op de productpagina wordt getoond, `0` als het verborgen is
 - `Attribute 1 global`: `1` bij een globaal attribuut, `0` bij een lokaal
 
@@ -117,13 +117,13 @@ Variatierijen in WooCommerce hebben een hoofdproduct nodig. De koppeling loopt v
 
 ## Fout: afbeeldings-URL niet bereikbaar
 
-**Oorzaak:** De afbeeldings-URL in de kolom `Images` is geen openbaar bereikbare HTTPS-URL, zit achter een login of gebruikt een ander protocol dan HTTPS.
+**Oorzaak:** de afbeeldings-URL in de kolom `Images` kan niet worden gedownload: hij is niet openbaar, zit achter een login of is geen volledig webadres.
 
 WooCommerce downloadt afbeeldingen tijdens de import en slaat ze op in je mediabibliotheek.
 
 **Oplossing:**
 - Test elke afbeeldings-URL in de browser: de afbeelding moet direct laden, zonder in te loggen
-- Gebruik HTTPS-URL's (geen HTTP)
+- Gebruik volledige URL's die beginnen met `https://`
 - Gebruik voor afbeeldingen in Google Drive of Dropbox directe downloadlinks (geen deellinks)
 - Staan de afbeeldingen op localhost of een testserver, verplaats ze dan eerst naar een openbaar bereikbare plek
 

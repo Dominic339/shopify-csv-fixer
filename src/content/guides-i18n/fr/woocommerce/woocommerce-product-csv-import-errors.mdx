@@ -2,7 +2,7 @@
 title: "Erreurs d'import CSV produit WooCommerce : causes et solutions"
 description: "Corrigez les erreurs d'import CSV produit WooCommerce les plus courantes : SKU manquants, types non valides, problèmes de lignes de variation, format des prix et colonnes d'attributs."
 keywords: ["erreur import csv woocommerce", "erreur importation produits woocommerce", "erreurs csv woocommerce", "corriger csv woocommerce", "problème import woocommerce", "vérifier csv woocommerce", "erreur téléversement produits woocommerce"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Les erreurs d'import CSV WooCommerce les plus courantes et leur signification"
@@ -53,25 +53,25 @@ WooCommerce utilise le SKU comme identifiant unique pour associer les lignes imp
 
 **Solution :**
 - Donnez un SKU unique à chaque ligne produit (produits simples et lignes parent des produits variables)
-- Les lignes de variation peuvent reprendre le SKU du parent ou avoir le leur, mais ne doivent pas dupliquer le SKU d'un autre produit
+- Les lignes de variation peuvent laisser le SKU vide ou en avoir un propre, mais ne doivent pas reprendre le SKU d'un autre produit
 - Repérez les SKU en double dans Excel avec `NB.SI` : `=NB.SI($A:$A; A2)` ; toute valeur supérieure à 1 est un doublon
 
 ---
 
 ## Erreur : prix normal non valide
 
-**Cause :** `Regular price` contient un symbole monétaire (`€`, `$`), utilise la virgule comme séparateur décimal (`19,99`), ou est vide pour un produit simple ou variable.
+**Cause :** `Regular price` contient un symbole monétaire (`€`, `$`), utilise une virgule comme séparateur décimal (`19,99`) ou est vide sur un produit simple ou une variation.
 
 **Solution :**
 - Supprimez les symboles monétaires : effacez `$`, `€`, `£` avec Rechercher et remplacer
 - Remplacez la virgule décimale par un point : `19,99` → `19.99`
-- Vérifiez que chaque produit simple et variable a un prix ; les lignes de variation peuvent le reprendre du parent
+- Donnez un prix à chaque produit simple et à chaque variation. La ligne parent d'un produit variable n'en a pas besoin, et les variations n'en héritent pas
 
 ---
 
 ## Erreur : champ booléen non valide
 
-**Cause :** Les colonnes booléennes de WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) acceptent `1` (vrai) ou `0` (faux). Des valeurs comme `yes`, `TRUE` ou `Y` provoquent des erreurs de validation.
+**Cause :** le schéma d'import de WooCommerce prévoit `1` (oui) et `0` (non) pour ses colonnes oui/non (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` accepte aussi `notify`, et `Published` utilise `1` (publié), `0` (privé) et `-1` (brouillon). Des écritures comme `yes`, `TRUE` ou `Y` ne font pas partie du schéma : convertissez-les.
 
 **Solution :** remplacez toutes les valeurs booléennes :
 
@@ -88,11 +88,11 @@ Utilisez Rechercher et remplacer avec « Totalité du contenu de la cellule » a
 
 **Cause :** Une ligne avec `Type: variation` renvoie à un produit parent qui n'existe ni dans le fichier d'import ni dans la base de données.
 
-Les lignes de variation WooCommerce ont besoin d'un parent. Le lien se fait via la colonne `Parent` (qui doit contenir l'ID du produit parent dans la base de données), ou en plaçant le produit parent dans le même fichier d'import.
+Dans WooCommerce, les lignes de variation ont besoin d'un parent. La colonne `Parent` contient le SKU du parent ou son ID (écrit `id:123`), et le parent doit figurer dans le même fichier d'import ou exister déjà dans votre boutique.
 
 **Solution :**
 - Incluez la ligne du produit parent dans le même fichier CSV
-- Renseignez la colonne `Parent` des lignes de variation avec l'ID produit WooCommerce du parent (le numéro visible dans l'administration WordPress)
+- Indiquez dans `Parent` le SKU du parent, ou son ID de produit WooCommerce écrit `id:123`
 - Vérifiez que la ligne parent utilise `Type: variable` et non `Type: simple`
 
 ---
@@ -104,7 +104,7 @@ Les lignes de variation WooCommerce ont besoin d'un parent. Le lien se fait via 
 **Format des colonnes d'attributs WooCommerce :**
 
 - `Attribute 1 name` : le nom du premier attribut (par ex. `Color`)
-- `Attribute 1 value(s)` : la ou les valeurs de cette ligne (par ex. `Blue`, ou `Blue | Red` s'il y en a plusieurs)
+- `Attribute 1 value(s)` : la ou les valeurs de cette ligne (par ex. `Blue`, ou `Blue, Red` pour plusieurs)
 - `Attribute 1 visible` : `1` s'il est affiché sur la page produit, `0` s'il est masqué
 - `Attribute 1 global` : `1` pour un attribut global, `0` pour un attribut local
 
@@ -117,13 +117,13 @@ Les lignes de variation WooCommerce ont besoin d'un parent. Le lien se fait via 
 
 ## Erreur : URL d'image inaccessible
 
-**Cause :** L'URL de l'image dans la colonne `Images` n'est pas une URL HTTPS accessible publiquement, se trouve derrière une authentification ou utilise un autre protocole que HTTPS.
+**Cause :** l'URL de l'image dans la colonne `Images` ne peut pas être téléchargée : elle n'est pas publique, elle est derrière une connexion ou ce n'est pas une adresse web complète.
 
 WooCommerce télécharge les images pendant l'import et les enregistre dans votre médiathèque.
 
 **Solution :**
 - Testez chaque URL d'image dans un navigateur : l'image doit s'afficher directement, sans connexion
-- Utilisez des URL HTTPS (pas HTTP)
+- Utilisez des URL complètes qui commencent par `https://`
 - Pour les images sur Google Drive ou Dropbox, utilisez des liens de téléchargement direct (pas des liens de partage)
 - Si les images sont sur localhost ou un serveur de préproduction, déplacez-les d'abord vers un emplacement public
 

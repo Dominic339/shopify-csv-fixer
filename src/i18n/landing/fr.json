@@ -103,7 +103,7 @@
   "gotchas": [
    {
     "title": "13 tags, pas plus",
-    "body": "Etsy garde les 13 premiers tags et supprime les autres. Le correcteur les compte pour chaque annonce et normalise les séparateurs."
+    "body": "Etsy autorise 13 tags par annonce, de 20 caractères maximum chacun. Le correcteur les compte pour chaque annonce, signale les tags trop longs et normalise les séparateurs."
    },
    {
     "title": "Des prix sans symbole",

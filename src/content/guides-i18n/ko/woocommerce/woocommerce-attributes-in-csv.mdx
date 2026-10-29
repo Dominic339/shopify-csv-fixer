@@ -2,7 +2,7 @@
 title: "CSV로 다루는 WooCommerce 상품 속성: 완전 가이드"
 description: "CSV 파일에서 WooCommerce 상품 속성을 올바르게 작성하는 방법입니다. 속성 이름 짓기, 전역 속성과 로컬 속성, 변형 속성, 흔한 실수를 다룹니다."
 keywords: ["woocommerce 속성 csv", "woocommerce 상품 속성 가져오기", "woocommerce 속성 열 csv", "woocommerce 변형 속성", "woocommerce csv 속성 형식", "woocommerce 전역 속성 csv", "woocommerce 속성 가져오기 오류"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "CSV에서 WooCommerce 속성 열의 이름과 번호를 매기는 방식"
@@ -35,7 +35,7 @@ WordPress를 한국어로 쓰고 있다면 내보내기 파일의 열 이름이 
 | 열 | 형식 | 설명 |
 |---|---|---|
 | `Attribute N name` | 텍스트 | 속성 이름(예: `Color`, `Size`) |
-| `Attribute N value(s)` | 세로 막대로 구분한 텍스트 | 이 행의 값(예: `Blue` 또는 `Blue | Red`) |
+| `Attribute N value(s)` | 텍스트, 쉼표로 구분 | 이 행의 값(예: `Blue` 또는 `Blue, Red`) |
 | `Attribute N visible` | `1` 또는 `0` | `1` = 상품 페이지에 표시, `0` = 숨김 |
 | `Attribute N global` | `1` 또는 `0` | `1` = 전역 분류 속성, `0` = 로컬 속성 |
 
@@ -43,11 +43,11 @@ WordPress를 한국어로 쓰고 있다면 내보내기 파일의 열 이름이 
 
 ## 속성 값이 여러 개인 단순 상품
 
-여러 색상으로 판매하지만 별도 변형으로 나누지 않는 단순 상품이라면, `Attribute 1 value(s)` 열에 모든 값을 세로 막대 `|`로 구분해 나열하세요.
+여러 색상이 있지만 별도 변형으로 나누지 않는 단순 상품은 `Attribute 1 value(s)` 열에 모든 값을 쉼표로 구분해 넣으세요. 그러면 셀에 쉼표가 있으므로 큰따옴표로 감쌉니다(스프레드시트가 저장할 때 자동으로 처리합니다):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 이렇게 하면 상품 페이지에 세 가지 색상 값을 모두 보여 주는 Color 속성이 있는 상품 하나가 만들어집니다.
@@ -62,7 +62,7 @@ Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **변형 행(Type: variation):**
@@ -87,7 +87,7 @@ Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 vi
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **변형 행:**
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-각 변형 행에는 속성마다 정확히 값 하나를 넣습니다(세로 막대로 구분한 목록이 아닙니다).
+각 변형 행은 속성마다 값을 정확히 하나만 지정합니다. 목록이 아닙니다. 여러 개가 있으면 WooCommerce는 첫 번째 값을 씁니다.
 
 ---
 
@@ -117,7 +117,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 
 로컬 속성은 한 상품에만 해당합니다. 다른 상품에는 적용되지 않는 그 상품만의 사양에 쓰세요(예: 특정 상품의 `Material: 100% cashmere`).
 
-로컬 속성은 변형 필터링이나 계층형 탐색에 쓸 수 없습니다.
+로컬 속성도 변형에는 쓸 수 있지만, 계층형 탐색 필터에는 쓸 수 없습니다.
 
 ---
 
@@ -138,16 +138,16 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 
 **해결 방법:** 속성 이름은 상위 행과 변형 행에서 똑같아야 합니다. 변형 값은 상위 행에 나열한 값 중 하나여야 합니다.
 
-### 앞뒤에 공백이 있는 세로 막대 구분자
+### 세로 막대로 구분된 값
 
-**원인:** ` | `(막대 앞뒤에 공백)와 `|`(공백 없음)를 섞어 썼습니다. WooCommerce는 값 앞뒤의 공백을 잘라내지만, 일관성이 없으면 불일치가 생길 수 있습니다.
+**원인:** WooCommerce 관리 화면에 보이는 대로 값 사이에 `|`를 썼습니다(`Blue | Red`). CSV 가져오기는 쉼표로 값을 나누므로 `Blue | Red`는 "Blue | Red"라는 값 하나가 됩니다.
 
-**해결 방법:** 앞뒤 공백 유무와 관계없이 파일 전체에서 `|`를 일관되게 쓰세요. WooCommerce는 각 값 앞뒤의 공백을 잘라냅니다.
+**해결 방법:** 값은 쉼표로 구분하세요: `Blue, Red`. 값 안에 쉼표를 넣으려면 `\,`로 쓰세요. StriveFormats가 세로 막대로 구분된 값을 쉼표로 바꿔 줍니다.
 
 ---
 
 ## StriveFormats로 자동 수정
 
-WooCommerce CSV를 StriveFormats에 업로드하세요. 검사기가 속성 열 이름, 상위 상품과 변형 사이의 속성 일관성, 세로 막대 구분자 형식을 확인하고 문제를 정확한 행과 열 위치와 함께 알려 줍니다.
+WooCommerce CSV를 StriveFormats에 업로드하세요. 세로 막대로 구분된 속성 값을 쉼표로 바꾸고, 각 변형의 속성을 확인하며 중복 조합을 찾아내고, 문제를 정확한 행과 열 위치와 함께 표시합니다.
 
 [WooCommerce CSV 수정기 열기](/app?preset=woocommerce_products) | [WooCommerce 템플릿 보기](/presets/woocommerce_products)

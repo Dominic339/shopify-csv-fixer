@@ -2,7 +2,7 @@
 title: "Błędy importu CSV produktów WooCommerce: przyczyny i rozwiązania"
 description: "Napraw najczęstsze błędy importu CSV produktów WooCommerce: brakujące SKU, nieprawidłowe typy, problemy z wierszami wariantów, format cen i kolumny atrybutów."
 keywords: ["błąd importu csv woocommerce", "import produktów woocommerce nie działa", "błędy csv woocommerce", "naprawa csv woocommerce", "problemy z importem woocommerce", "sprawdzanie csv woocommerce", "błąd przesyłania produktów woocommerce"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Najczęstsze błędy importu CSV w WooCommerce i co oznaczają"
@@ -53,25 +53,25 @@ WooCommerce używa SKU jako unikalnego identyfikatora, żeby dopasować importow
 
 **Rozwiązanie:**
 - Nadaj unikalne SKU każdemu wierszowi produktu (produktom prostym i wierszom nadrzędnym produktów zmiennych)
-- Wiersze wariantów mogą dziedziczyć SKU produktu nadrzędnego albo mieć własne, ale nie mogą powielać SKU innego produktu
+- Wiersze wariantów mogą mieć puste SKU albo własne, ale nie mogą powtarzać SKU innego produktu
 - Duplikaty SKU znajdziesz w Excelu funkcją `LICZ.JEŻELI`: `=LICZ.JEŻELI($A:$A; A2)`. Każda wartość większa od 1 to duplikat
 
 ---
 
 ## Błąd: nieprawidłowa cena regularna
 
-**Przyczyna:** `Regular price` zawiera symbol waluty (`€`, `$`), używa przecinka jako separatora dziesiętnego (`19,99`) albo jest puste dla produktu prostego lub zmiennego.
+**Przyczyna:** `Regular price` zawiera symbol waluty (`€`, `$`), używa przecinka jako separatora dziesiętnego (`19,99`) albo jest pusta w produkcie prostym lub wariancie.
 
 **Rozwiązanie:**
 - Usuń symbole walut: skasuj `$`, `€`, `£` za pomocą „Znajdź i zamień”
 - Zamień przecinek dziesiętny na kropkę: `19,99` → `19.99`
-- Upewnij się, że każdy produkt prosty i zmienny ma cenę; wiersze wariantów mogą dziedziczyć ją z produktu nadrzędnego
+- Nadaj cenę każdemu produktowi prostemu i każdemu wariantowi. Wiersz nadrzędny produktu zmiennego jej nie potrzebuje, a warianty jej nie dziedziczą
 
 ---
 
 ## Błąd: nieprawidłowe pole logiczne
 
-**Przyczyna:** Kolumny logiczne WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) przyjmują `1` (prawda) lub `0` (fałsz). Wartości takie jak `yes`, `TRUE` czy `Y` powodują błędy walidacji.
+**Przyczyna:** schemat importu WooCommerce przewiduje `1` (tak) i `0` (nie) dla kolumn tak/nie (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` przyjmuje też `notify`, a `Published` używa `1` (opublikowany), `0` (prywatny) i `-1` (szkic). Zapisy w rodzaju `yes`, `TRUE` czy `Y` nie należą do schematu, więc je zamień.
 
 **Rozwiązanie:** zamień wszystkie wartości logiczne:
 
@@ -88,11 +88,11 @@ Użyj „Znajdź i zamień” z włączoną opcją „Uwzględnij całą zawarto
 
 **Przyczyna:** Wiersz z `Type: variation` odwołuje się do produktu nadrzędnego, którego nie ma ani w pliku importu, ani w bazie danych.
 
-Wiersze wariantów w WooCommerce potrzebują produktu nadrzędnego. Powiązanie odbywa się przez kolumnę `Parent` (która powinna zawierać ID produktu nadrzędnego z bazy danych) albo przez umieszczenie produktu nadrzędnego w tym samym pliku importu.
+W WooCommerce wiersze wariantów potrzebują produktu nadrzędnego. Kolumna `Parent` zawiera jego SKU albo ID (zapisane jako `id:123`), a produkt nadrzędny musi być w tym samym pliku importu albo już istnieć w sklepie.
 
 **Rozwiązanie:**
 - Umieść wiersz produktu nadrzędnego w tym samym pliku CSV
-- W kolumnie `Parent` wierszy wariantów wpisz ID produktu nadrzędnego w WooCommerce (numer widoczny w panelu WordPress)
+- Ustaw `Parent` w wierszach wariantów na SKU produktu nadrzędnego albo na jego ID produktu WooCommerce zapisane jako `id:123`
 - Upewnij się, że wiersz nadrzędny ma `Type: variable`, a nie `Type: simple`
 
 ---
@@ -104,7 +104,7 @@ Wiersze wariantów w WooCommerce potrzebują produktu nadrzędnego. Powiązanie 
 **Format kolumn atrybutów w WooCommerce:**
 
 - `Attribute 1 name`: nazwa pierwszego atrybutu (np. `Color`)
-- `Attribute 1 value(s)`: wartość lub wartości w danym wierszu (np. `Blue` albo `Blue | Red` przy kilku)
+- `Attribute 1 value(s)`: wartość lub wartości dla tego wiersza (np. `Blue` albo `Blue, Red` dla kilku)
 - `Attribute 1 visible`: `1`, jeśli jest widoczny na stronie produktu, `0`, jeśli ukryty
 - `Attribute 1 global`: `1` dla atrybutu globalnego, `0` dla lokalnego
 
@@ -117,13 +117,13 @@ Wiersze wariantów w WooCommerce potrzebują produktu nadrzędnego. Powiązanie 
 
 ## Błąd: adres zdjęcia jest niedostępny
 
-**Przyczyna:** Adres zdjęcia w kolumnie `Images` nie jest publicznie dostępnym adresem HTTPS, jest chroniony logowaniem albo używa innego protokołu niż HTTPS.
+**Przyczyna:** adresu URL obrazu w kolumnie `Images` nie da się pobrać: nie jest publiczny, wymaga logowania albo nie jest pełnym adresem internetowym.
 
 WooCommerce pobiera zdjęcia w trakcie importu i zapisuje je w bibliotece mediów.
 
 **Rozwiązanie:**
 - Sprawdź każdy adres zdjęcia w przeglądarce. Zdjęcie powinno się wczytać od razu, bez logowania
-- Używaj adresów HTTPS (nie HTTP)
+- Używaj pełnych adresów URL zaczynających się od `https://`
 - Dla zdjęć z Google Drive lub Dropboxa używaj bezpośrednich linków do pobrania (nie linków do udostępniania)
 - Jeśli zdjęcia są na localhoście lub serwerze testowym, najpierw przenieś je w publicznie dostępne miejsce
 

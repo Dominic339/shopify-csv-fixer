@@ -1,76 +1,72 @@
 ---
 title: "Etsy CSV Template Guide: Fields, Formats, and Common Errors"
-description: "A complete guide to the Etsy listing CSV template: every field explained, accepted values for dropdowns, required vs optional columns, and how to fix common import errors."
-keywords: ["etsy csv template guide", "etsy listing csv", "etsy csv fields", "etsy csv import", "etsy bulk upload csv", "etsy csv format", "etsy listing template explained"]
-lastUpdated: "2026-03-06"
+description: "What's in Etsy's listing CSV export, what Etsy does and doesn't let you do with it, the limits each field must respect (titles, tags, quantity), and how to fix the errors spreadsheets introduce."
+keywords: ["etsy csv template guide", "etsy listing csv", "etsy csv fields", "etsy csv import", "etsy bulk upload csv", "etsy csv format", "etsy listing template explained", "etsy download listings csv"]
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
-  - "Every field in the Etsy listing CSV and what it controls"
-  - "The exact accepted values for when_made, who_made, and other enum fields"
-  - "Required vs optional fields and what Etsy defaults when fields are blank"
-  - "How to format prices, quantities, tags, and images correctly"
-  - "How to fix the most common Etsy CSV validation errors"
-bestFor: "Etsy sellers preparing a bulk listing upload or editing existing listings via CSV"
-timeToComplete: "12 minutes"
+  - "How to download your Etsy listings as a CSV and what it contains"
+  - "Why Etsy has no CSV upload, and what sellers use the file for instead"
+  - "The limits for titles, tags, materials and quantity"
+  - "How to format prices, tags and image URLs correctly"
+  - "How to fix the errors that spreadsheet edits introduce"
+bestFor: "Etsy sellers editing, auditing or migrating their listings in a spreadsheet, or preparing a file for a bulk listing app"
+timeToComplete: "9 minutes"
 ---
 
-## How Etsy CSV Imports Work
+## What Etsy's Listing CSV Is (and Isn't)
 
-Etsy allows sellers to export their listings as a CSV, edit the file, and re-import it to update multiple listings at once. The CSV import is for **updating existing listings**. You cannot create brand-new listings from scratch via CSV import. The listing ID must match an existing draft or active listing.
+Etsy lets you download your active listings as a CSV: open **Shop Manager → Settings → Options → Download Data** and choose the CSV download for your listings. According to Etsy's help, the file includes each listing's:
 
-For new listings at scale, Etsy's bulk listing tool in the Seller Dashboard is the supported workflow.
+- Title
+- Description
+- Price and currency code
+- Quantity
+- Tags
+- Materials
+- Image URLs
+- SKU (if you've added SKUs to your listings)
+
+**Etsy has no CSV upload for listings.** Editing the file doesn't change anything in your shop, and Etsy doesn't offer a way to import it back. Sellers use the export to:
+
+- Audit and clean up listing data in a spreadsheet
+- Keep a backup of their catalogue
+- Move listings to another platform, such as Shopify or WooCommerce
+- Feed a third-party bulk listing app that works through Etsy's API
+
+For bulk changes inside Etsy itself, use the bulk editing options in Shop Manager's Listings page.
 
 ---
 
-## Required Fields
+## The Columns in the Export
 
-These fields must be non-blank for every row:
+In the file, each field has its own column, with headers such as `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` and `SKU`. Photos get one column each (`IMAGE1`, `IMAGE2` and so on), holding the image's URL.
 
-| Column | Description | Notes |
+| Column | What it holds | Format |
 |---|---|---|
-| `title` | Listing title | Max 140 characters |
-| `description` | Listing description | HTML is not rendered |
-| `price` | Selling price | Decimal, no currency symbol |
-| `quantity` | Available quantity | Whole positive integer |
-| `when_made` | When the item was made | Must use an exact allowed value |
-| `who_made` | Who made the item | Must use an exact allowed value |
-| `is_supply` | Is it a craft supply? | `true` or `false` |
+| `TITLE` | Listing title | Up to 140 characters |
+| `DESCRIPTION` | Listing description | Plain text |
+| `PRICE` | Price in your shop currency | Plain number, like `14.99` |
+| `CURRENCY_CODE` | Shop currency | Three-letter code, like `USD` |
+| `QUANTITY` | Quantity available | Whole number, up to 999 |
+| `TAGS` | Search tags | Comma-separated, up to 13 |
+| `MATERIALS` | Materials | Comma-separated, up to 13 |
+| `IMAGE1`, `IMAGE2`, ... | Photo URLs | Full `https://` URLs |
+| `SKU` | Your SKU | Text |
+
+Keep the column names exactly as they are if a tool will read the file back.
 
 ---
 
-## Enum Fields: Exact Allowed Values
+## Limits Each Field Must Respect
 
-Etsy uses strict enum values for several fields. Using any value not in the allowed list causes that row to fail.
+These are the limits Etsy's listing editor enforces. A file that breaks them can't be turned back into valid listings, whichever tool you use:
 
-### when_made
-
-| Value | Meaning |
-|---|---|
-| `made_to_order` | Made to order |
-| `2020_2024` | 2020-2024 |
-| `2010_2019` | 2010-2019 |
-| `2000_2009` | 2000-2009 |
-| `1990s` | 1990s |
-| `1980s` | 1980s |
-| `1970s` | 1970s |
-| `1960s` | 1960s |
-| `1950s` | 1950s |
-| `before_1950` | Before 1950 |
-
-### who_made
-
-| Value | Meaning |
-|---|---|
-| `i_did` | I did |
-| `someone_else` | A member of my shop or another company |
-| `collective` | A collective I'm part of |
-
-### is_supply
-
-| Value | Meaning |
-|---|---|
-| `true` | It is a craft supply or tool |
-| `false` | It is a finished product |
+- **Title:** 140 characters at most. Etsy search shows only the start of it, so put the most important words first.
+- **Tags:** up to 13 per listing, each 20 characters or fewer, including spaces. Stick to letters, numbers and spaces; Etsy refuses most symbols in tags.
+- **Materials:** up to 13 per listing.
+- **Quantity:** a whole number up to 999 per listing.
+- **Price:** a plain number in your shop currency, with no currency symbol.
 
 ---
 
@@ -78,91 +74,63 @@ Etsy uses strict enum values for several fields. Using any value not in the allo
 
 - Use a plain decimal number: `14.99`
 - No currency symbols (`$`, `€`, `£`)
-- Use a period (not comma) as the decimal separator regardless of locale
-- Prices must be positive and within Etsy's allowed range
-
----
-
-## Quantity
-
-- Whole positive integer: `1`, `5`, `100`
-- `0` is not allowed for active listings (Etsy auto-deactivates listings when quantity hits 0)
-- Maximum quantity varies by listing type
+- Use a period (not a comma) as the decimal separator, even if your spreadsheet uses commas
+- The currency is set by your shop, and `CURRENCY_CODE` only records it
 
 ---
 
 ## Tags
 
-- Comma-separated list of up to 13 tags
-- Each tag must be 20 characters or fewer
-- No special characters in tags (letters, numbers, spaces only)
-- Example: `handmade,gift for her,leather wallet,birthday gift`
-
-Tags are stored as a list. If your tags value contains commas, make sure the entire field is wrapped in double quotes in the CSV:
+Tags sit in one cell, separated by commas:
 
 ```
-"handmade,gift for her,leather wallet"
+handmade,gift for her,leather wallet,birthday gift
 ```
 
----
+Because the cell contains commas, it must be wrapped in double quotes in the CSV. Spreadsheet apps do this for you when they save. Problems to watch for:
 
-## Images
-
-| Column | Description |
-|---|---|
-| `image1` | Main listing image URL |
-| `image2` through `image10` | Additional images |
-
-Image URLs must be publicly accessible HTTPS URLs. Etsy downloads the images at import time.
-
-Note: Etsy has specific image requirements. At least 2000px on the longest side is recommended, in JPEG or PNG format. Images that don't meet requirements may be rejected at upload.
+- More than 13 tags in the cell
+- A tag longer than 20 characters
+- Double commas or spaces around commas left behind after editing
 
 ---
 
-## Shipping Profiles
+## Fields a Bulk Listing App May Ask For
 
-The `shipping_profile_id` column links a listing to a pre-configured shipping profile in your Etsy account. Find your shipping profile IDs in your Etsy Shop Manager. If left blank, Etsy may use your default profile or reject the row.
-
----
-
-## Sections
-
-The `section_id` column links a listing to a shop section. Find section IDs in your Etsy Shop Manager → Sections. It's optional; listings without a section are not grouped.
+Etsy's export doesn't include every listing setting. Third-party apps that create listings through Etsy's API often ask for extra columns, such as who made the item (`who_made`), when it was made (`when_made`), whether it's a craft supply (`is_supply`), the shipping profile and the shop section. Their accepted values come from Etsy's API and change over time (for example, the year ranges for `when_made`), so use the exact values listed in that app's own template.
 
 ---
 
-## Common Etsy CSV Errors
+## Common Problems After Editing in a Spreadsheet
 
-### "when_made value not recognized"
+### Prices with symbols or commas
 
-You used a value that doesn't match Etsy's enum exactly. Common mistakes:
-- `2020-2024` instead of `2020_2024` (underscores, not hyphens)
-- `made to order` instead of `made_to_order` (underscores, no spaces)
+A price like `$14.99` or `14,99` isn't a plain number.
 
-**Fix:** Use the exact allowed values from the table above.
+**Fix:** Use Find & Replace to remove `$`, `€`, `£`, and change comma decimal separators to periods.
 
-### "Title too long"
+### Title too long
 
-The `title` field exceeds 140 characters.
+The title is over 140 characters.
 
-**Fix:** In Excel, add a helper column with `=LEN(A2)` to find titles over 140 characters. Trim them manually.
+**Fix:** In Excel, add a helper column with `=LEN(A2)` to find titles over 140 characters, then shorten them.
 
-### "Tags too long" or "Too many tags"
+### Too many tags, or tags too long
 
-A tag exceeds 20 characters, or you have more than 13 tags.
+A listing has more than 13 tags, or a tag is over 20 characters.
 
-**Fix:** Count tags (commas + 1) and ensure each tag is under 20 characters.
+**Fix:** Count the tags (commas + 1) and keep each tag to 20 characters or fewer.
 
-### "Price must be a number"
+### Broken image links
 
-The price field contains a currency symbol or non-numeric characters.
+An image cell holds something like `mug.jpg` or a link without `https://`.
 
-**Fix:** Use Find & Replace to remove `$`, `€`, `£`, and any comma decimal separators.
+**Fix:** Use the full image URL, starting with `https://`.
 
 ---
 
 ## Fix This Automatically with StriveFormats
 
-Upload your Etsy CSV to StriveFormats. The validator checks all enum fields, price formats, title lengths, tag counts, and required fields, then flags issues with exact row locations.
+Upload your Etsy listing CSV to StriveFormats. It normalises prices, currency codes and tag lists, and flags long titles, too many tags, tags over 20 characters, quantities over 999, broken image URLs and duplicate SKUs, with the exact row for each.
 
 [Open Etsy CSV Fixer](/app?preset=etsy_listings) | [View Etsy Template](/presets/etsy_listings)

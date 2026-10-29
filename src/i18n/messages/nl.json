@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "Categorie '{0}' moet een numerieke eBay-categorie-ID zijn.",
 "Category is blank. New listings need an eBay category number.": "Category is leeg. Nieuwe listings hebben een eBay-categorienummer nodig.",
 "Change to \"true\" or \"false\".": "Wijzig in \"true\" of \"false\".",
+"Changed the | separators in {0} to commas": "De |-scheidingstekens in {0} zijn vervangen door komma's",
+"Changed the | separators in {0} to commas on row {1}": "De |-scheidingstekens in {0} zijn op rij {1} vervangen door komma's",
 "Check the ASIN on the product's Amazon page.": "Controleer de ASIN op de Amazon-pagina van het product.",
 "Check the barcode number.": "Controleer het barcodenummer.",
 "Cleaned Image URLs list": "Lijst Image URLs opgeschoond",

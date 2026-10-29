@@ -351,7 +351,7 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
     ["12.5", "12"],
     ["twenty", "20"],
   ]),
-  "woocommerce/invalid_bool": woo("Published", [
+  "woocommerce/invalid_bool": woo("Is featured?", [
     ["yes", "1"],
     ["False", "0"],
   ]),

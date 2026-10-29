@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "Ungültiger Wahr/Falsch-Wert",
-"explanation": "Felder wie Published, In stock? und Is featured? erwarten 1/0 oder true/false.",
+"explanation": "Ja/Nein-Felder wie Is featured?, Sold individually? und Allow customer reviews? erwarten 1 oder 0.",
 "whyPlatformCares": "Der WooCommerce-Importer kann unerwartete Werte falsch deuten, sodass Produkte versteckt oder falsch eingerichtet werden.",
 "howToFix": "Verwende 1 (ja) oder 0 (nein). Übliche Varianten (yes, no, true, false) können wir automatisch umwandeln."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "Variation hat mehrere Werte",
 "explanation": "Eine Variationszeile enthält mehr als einen Wert für ein Attribut.",
-"whyPlatformCares": "Jede WooCommerce-Variation ist eine bestimmte Kombination und hat daher einen Wert pro Attribut.",
+"whyPlatformCares": "Jede WooCommerce-Variation ist eine bestimmte Kombination. Der WooCommerce-Import übernimmt nur den ersten Wert und ignoriert den Rest, sodass die Variation womöglich nicht die ist, die du meintest.",
 "howToFix": "Behalte alle Werte in der Elternzeile und einen Wert in jeder Variationszeile."
 },
 "woocommerce/parent_not_in_file": {

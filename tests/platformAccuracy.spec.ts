@@ -230,3 +230,31 @@ describe("Etsy", () => {
     expect(codes(res)).toContain("etsy/invalid_quantity");
   });
 });
+
+describe("WooCommerce import schema", () => {
+  const H = "Type,SKU,Name,Published,Download limit,Download expiry days,Parent,Attribute 1 name,Attribute 1 value(s),ID";
+
+  it("uses -1 for draft and 0 for private, as WooCommerce does", () => {
+    const res = run("woocommerce_products", `${H}\nsimple,A,Mug,draft,,,,,,\nsimple,B,Cup,private,,,,,,\nsimple,C,Jug,no,,,,,,`);
+    expect(res.fixedRows.map((r) => r.Published)).toEqual(["-1", "0", "-1"]);
+  });
+
+  it("accepts n/a download limits and bare parent IDs", () => {
+    const res = run(
+      "woocommerce_variable_products",
+      `${H}\nvariable,TEE,Tee,1,n/a,N/A,,Size,"S, M",50\nvariation,TEE-S,Tee S,1,,,50,Size,S,`
+    );
+    expect(codes(res)).toEqual([]);
+  });
+
+  it("changes pipe-separated attribute values to commas", () => {
+    const res = run("woocommerce_variable_products", `${H}\nvariable,TEE,Tee,1,,,,Size,S | M | L,\nvariation,TEE-S,Tee S,1,,,TEE,Size,S,`);
+    expect(res.fixedRows[0]["Attribute 1 value(s)"]).toBe("S, M, L");
+    expect(res.fixedRows[1]["Attribute 1 value(s)"]).toBe("S");
+  });
+
+  it("warns (not errors) when a variation lists several values, since WooCommerce keeps the first", () => {
+    const res = run("woocommerce_variable_products", `${H}\nvariable,TEE,Tee,1,,,,Size,"S, M",\nvariation,TEE-S,Tee S,1,,,TEE,Size,"S, M",`);
+    expect(res.issues.filter((i) => i.code === "woocommerce/variation_multiple_values").map((i) => i.severity)).toEqual(["warning"]);
+  });
+});

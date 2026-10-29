@@ -2,7 +2,7 @@
 title: "Variabele WooCommerce-producten in CSV: hoofd- en variatierijen"
 description: "Begrijp hoe de productimporter van WooCommerce variabele producten weergeeft met hoofd- en subrijen (variaties): attribuutkolommen, verplichte velden per rijtype en de meest voorkomende valkuilen bij het importeren."
 keywords: ["woocommerce variabel product csv", "woocommerce variaties importeren", "woocommerce hoofd sub csv", "woocommerce attributen csv", "woocommerce csv import variaties", "variabel product woocommerce", "woocommerce productimporter"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Hoe WooCommerce variabele producten verdeelt over hoofdrijen en variatierijen"
@@ -39,9 +39,9 @@ De hoofdrij legt de velden op productniveau vast en geeft aan welke attributen h
 | Type | `variable` | Moet precies `variable` zijn |
 | SKU | `SHIRT-BLUE` | Unieke SKU van het hoofdproduct |
 | Name | `Blue Cotton T-Shirt` | Productnaam |
-| Published | `1` | 1 = gepubliceerd, 0 = concept |
+| Published | `1` | 1 = gepubliceerd, 0 = privé, -1 = concept |
 | Attribute 1 name | `Size` | Naam van de dimensie |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | Alle beschikbare waarden, gescheiden door verticale streepjes |
+| Attribute 1 value(s) | `Small, Medium, Large` | Alle beschikbare waarden, gescheiden door komma's |
 | Attribute 1 visible | `1` | Tonen op de productpagina |
 | Attribute 1 global | `1` | Globaal (gedeeld) attribuut gebruiken |
 
@@ -62,7 +62,7 @@ Elke variatierij staat voor één koopbare combinatie van opties en moet naar he
 | Type | `variation` | Moet precies `variation` zijn |
 | SKU | `SHIRT-BLUE-SM` | Uniek per variatie |
 | Name | `Blue Cotton T-Shirt` | Hoort gelijk te zijn aan de naam van het hoofdproduct |
-| Parent | `id:123` of `sku:SHIRT-BLUE` | Koppelt via ID of SKU aan het hoofdproduct |
+| Parent | `id:123` of `SHIRT-BLUE` | Koppelt aan het hoofdproduct via ID of SKU |
 | Regular price | `19.99` | Verplicht voor elke variatie |
 | Attribute 1 name | `Size` | Moet gelijk zijn aan de attribuutnaam van het hoofdproduct |
 | Attribute 1 value(s) | `Small` | Eén waarde voor precies deze variatie |
@@ -73,23 +73,23 @@ Elke variatierij staat voor één koopbare combinatie van opties en moet naar he
 
 De kolom `Parent` accepteert twee notaties:
 - **Via database-ID:** `id:123`, als je de WooCommerce-product-ID kent.
-- **Via SKU:** `sku:SHIRT-BLUE`, beter overdraagbaar en handig voor nieuwe producten die nog geen ID hebben.
+- **Via SKU:** `SHIRT-BLUE`, de SKU van het hoofdproduct precies zoals die is. Dit is beter overdraagbaar; gebruik het bij nieuwe producten die nog geen ID hebben.
 
-Maak je nieuwe variabele producten vanaf nul aan, gebruik dan de notatie `sku:PARENT_SKU`. Importeer eerst de hoofdrij (of zet die in hetzelfde bestand boven de variaties).
+Maak je nieuwe variabele producten vanaf nul, zet dan de SKU van het hoofdproduct in `Parent`. Zet de rij van het hoofdproduct in hetzelfde bestand boven de variaties, of importeer die eerst.
 
 ---
 
 ## Volledig voorbeeld: variabel T-shirt
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> Let op: de kolom `Parent` is hier voor de beknoptheid weggelaten. In de praktijk horen de variatierijen `Parent: sku:SHIRT-BLUE` te bevatten.
+> Let op: `Parent` bevat de SKU van het hoofdproduct, `SHIRT-BLUE`. De waardelijst van het hoofdproduct bevat komma's en staat daarom tussen dubbele aanhalingstekens.
 
 ---
 
@@ -100,9 +100,9 @@ Voor een tweede attribuut (kleur) voeg je de kolommen van Attribute 2 toe aan de
 **Hoofdrij:**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **Variatie (Small, Blue):**
@@ -129,13 +129,13 @@ Voor 2 maten × 2 kleuren heb je 4 variatierijen nodig.
 
 **Symptoom:** de variaties worden als losse eenvoudige producten aangemaakt in plaats van aan het hoofdproduct te worden gekoppeld.
 
-**Oplossing:** zorg dat elke variatierij in de kolom `Parent` een waarde heeft in de notatie `sku:PARENT_SKU` of `id:123`. Ontbrekende of onjuiste verwijzingen leveren losse variaties op.
+**Oplossing:** zorg dat elke variatierij een waarde in `Parent` heeft: de SKU van het hoofdproduct (bijvoorbeeld `SHIRT-BLUE`) of de ID geschreven als `id:123`. Ontbrekende of foute verwijzingen leveren losse variaties op.
 
-### Fout 3: attribuutwaarden in de hoofdrij niet gescheiden door verticale streepjes
+### Fout 3: attribuutwaarden gescheiden door verticale strepen
 
-**Symptoom:** de productpagina toont maar één optie in de keuzelijst, of de knop "Toevoegen aan winkelwagen" ontbreekt.
+**Symptoom:** de productpagina toont één optie zoals "Small | Medium | Large" in plaats van aparte keuzes, of de variaties passen bij geen enkele optie.
 
-**Oplossing:** zet in de hoofdrij alle mogelijke attribuutwaarden, gescheiden door ` | ` (spatie, verticaal streepje, spatie): `Small | Medium | Large`. WooCommerce vult met deze lijst de keuzelijst.
+**Oplossing:** scheid de waarden op de rij van het hoofdproduct met komma's: `Small, Medium, Large`. De streep `|` gebruikt het beheerscherm van WooCommerce, maar de CSV-importer splitst waarden bij komma's. StriveFormats zet de strepen voor je om in komma's.
 
 ### Fout 4: attribuutnaam verschilt tussen hoofdrij en variatie
 

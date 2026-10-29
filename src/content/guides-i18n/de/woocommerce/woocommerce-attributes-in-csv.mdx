@@ -2,7 +2,7 @@
 title: "WooCommerce-Produktattribute in der CSV: vollständiger Leitfaden"
 description: "So formatierst du WooCommerce-Produktattribute richtig in einer CSV: Benennung, globale und lokale Attribute, Variationsattribute und häufige Fehler."
 keywords: ["woocommerce attribute csv", "woocommerce produktattribute importieren", "woocommerce attributspalten csv", "woocommerce variationsattribute", "woocommerce csv attributformat", "woocommerce globale attribute csv", "woocommerce attribut importfehler"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Wie WooCommerce-Attributspalten in der CSV benannt und nummeriert werden"
@@ -35,7 +35,7 @@ Läuft WordPress auf Deutsch, verwendet der Export deutsche Spaltennamen; der Im
 | Spalte | Format | Beschreibung |
 |---|---|---|
 | `Attribute N name` | Text | Name des Attributs (z. B. `Color`, `Size`) |
-| `Attribute N value(s)` | Text, durch senkrechte Striche getrennt | Wert(e) für diese Zeile (z. B. `Blue` oder `Blue | Red`) |
+| `Attribute N value(s)` | Text, durch Kommas getrennt | Der Wert bzw. die Werte für diese Zeile (z. B. `Blue` oder `Blue, Red`) |
 | `Attribute N visible` | `1` oder `0` | `1` = auf der Produktseite angezeigt; `0` = ausgeblendet |
 | `Attribute N global` | `1` oder `0` | `1` = globales Taxonomie-Attribut; `0` = lokales Attribut |
 
@@ -43,11 +43,11 @@ Läuft WordPress auf Deutsch, verwendet der Export deutsche Spaltennamen; der Im
 
 ## Einfache Produkte mit mehreren Attributwerten
 
-Für ein einfaches Produkt, das in mehreren Farben erhältlich ist (aber nicht als eigene Variationen), führst du alle Werte in der Spalte `Attribute 1 value(s)` getrennt durch einen senkrechten Strich `|` auf:
+Für ein einfaches Produkt, das es in mehreren Farben gibt (aber nicht als eigene Variationen), führst du alle Werte in der Spalte `Attribute 1 value(s)` durch Kommas getrennt auf. Die Zelle enthält dann Kommas und steht deshalb in doppelten Anführungszeichen (Tabellenprogramme erledigen das beim Speichern):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 So entsteht ein Produkt mit einem Attribut Color, das auf der Produktseite alle drei Farbwerte anzeigt.
@@ -62,7 +62,7 @@ Bei variablen Produkten funktionieren Attribute anders. Die Elternzeile führt a
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **Variationszeilen (Type: variation):**
@@ -87,7 +87,7 @@ Für ein Produkt mit zwei Attributdimensionen:
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **Variationszeilen:**
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-Jede Variationszeile gibt pro Attribut genau einen Wert an (keine durch senkrechte Striche getrennte Liste).
+Jede Variationszeile gibt pro Attribut genau einen Wert an, keine Liste. Stehen mehrere da, verwendet WooCommerce den ersten.
 
 ---
 
@@ -117,7 +117,7 @@ Beim Import mit `global: 1` legt WooCommerce den Attributbegriff an, falls er no
 
 Lokale Attribute gehören zu genau einem Produkt. Verwende sie für produktspezifische Angaben, die anderswo nicht gelten (z. B. `Material: 100% cashmere` bei einem bestimmten Produkt).
 
-Lokale Attribute lassen sich weder zum Filtern von Variationen noch für die mehrstufige Navigation verwenden.
+Lokale Attribute lassen sich trotzdem für Variationen verwenden, aber nicht in Filtern der Layered Navigation.
 
 ---
 
@@ -138,16 +138,16 @@ Richtig: `Attribute 1 name`
 
 **Lösung:** Die Attributnamen müssen in Eltern- und Variationszeilen identisch sein. Die Werte der Variationen müssen in der Werteliste der Elternzeile enthalten sein.
 
-### Senkrechter Strich mit Leerzeichen
+### Werte durch senkrechte Striche getrennt
 
-**Ursache:** ` | ` (mit Leerzeichen um den Strich) und `|` (ohne Leerzeichen) werden gemischt. WooCommerce entfernt zwar Leerzeichen an den Werten, aber Uneinheitlichkeiten können zu Abweichungen führen.
+**Ursache:** Zwischen den Werten steht `|`, so wie die WooCommerce-Verwaltung sie anzeigt (`Blue | Red`). Der CSV-Import trennt Werte an Kommas, also wird `Blue | Red` zu einem einzigen Wert namens „Blue | Red“.
 
-**Lösung:** Verwende `|` mit oder ohne umgebende Leerzeichen einheitlich in der ganzen Datei. WooCommerce entfernt die Leerzeichen rund um jeden Wert.
+**Lösung:** Trenne Werte durch Kommas: `Blue, Red`. Ein Komma innerhalb eines Werts schreibst du als `\,`. StriveFormats wandelt durch senkrechte Striche getrennte Werte für dich in Kommas um.
 
 ---
 
 ## Automatisch beheben mit StriveFormats
 
-Lade deine WooCommerce-CSV in StriveFormats hoch. Der Validator prüft die Benennung der Attributspalten, die Übereinstimmung der Attribute zwischen Eltern- und Variationszeilen und die Formatierung der Trennstriche und meldet Probleme mit genauer Zeile und Spalte.
+Lade deine WooCommerce-CSV in StriveFormats hoch. Es wandelt durch senkrechte Striche getrennte Attributwerte in Kommas um, prüft die Attribute jeder Variation und findet doppelte Kombinationen, und markiert Probleme mit genauer Zeile und Spalte.
 
 [WooCommerce-CSV-Fixer öffnen](/app?preset=woocommerce_products) | [WooCommerce-Vorlage ansehen](/presets/woocommerce_products)

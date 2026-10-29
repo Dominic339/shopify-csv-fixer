@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "Geçersiz mantıksal değer",
-"explanation": "Published, In stock? ve Is featured? gibi mantıksal alanlar 1/0 veya true/false bekler.",
+"explanation": "Is featured?, Sold individually? ve Allow customer reviews? gibi evet/hayır alanları 1 veya 0 bekler.",
 "whyPlatformCares": "WooCommerce içe aktarıcısı beklenmeyen değerleri yanlış yorumlayabilir; bu da ürünlerin gizlenmesine veya yanlış yapılandırılmasına neden olur.",
 "howToFix": "1 (evet/doğru) veya 0 (hayır/yanlış) kullanın. Yaygın varyantları (yes, no, true, false) otomatik olarak normalleştirebiliriz."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "Varyasyonda birden çok değer var",
 "explanation": "Bir varyasyon satırı bir nitelik için birden fazla değer listeliyor.",
-"whyPlatformCares": "Her WooCommerce varyasyonu belirli bir kombinasyondur; bu yüzden nitelik başına tek değer alır.",
+"whyPlatformCares": "Her WooCommerce varyasyonu belirli bir kombinasyondur. WooCommerce içe aktarıcısı yalnızca ilk değeri alır ve gerisini yok sayar; bu yüzden varyasyon istediğiniz gibi olmayabilir.",
 "howToFix": "Tüm değerleri ana satırda, her varyasyon satırında ise tek bir değer tutun."
 },
 "woocommerce/parent_not_in_file": {

@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV şablonu rehberi: alanlar, biçimler ve yaygın hatalar",
-"description": "Etsy ilan CSV şablonu için eksiksiz bir rehber: her alanın açıklaması, açılır listelerde kabul edilen değerler, zorunlu ve isteğe bağlı sütunlar ve yaygın içe aktarma hatalarının çözümü."
+"description": "Etsy'nin ilan CSV dışa aktarımında neler olduğu, Etsy'nin bu dosyayla neye izin verip vermediği, her alanın sınırları (başlık, etiket, miktar) ve elektronik tabloların yol açtığı hataların nasıl düzeltileceği."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Ekleme, birleştirme ve eşleştirme: CSV dosyalarını doğru şekilde bir araya getirme",

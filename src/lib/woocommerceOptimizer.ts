@@ -135,12 +135,13 @@ function enumValue(raw: string, aliases: Record<string, string>): string | null 
   return aliases[s] ?? null;
 }
 
-// Published: 1 = published, 0 = draft, -1 = private.
+// Published: 1 = published, 0 = private, -1 = draft (WooCommerce's CSV import schema).
+// The importer itself reads "false" as -1, so no/false mean draft too.
 const PUBLISHED: Record<string, string> = {
   "1": "1", "0": "0", "-1": "-1",
   yes: "1", true: "1", publish: "1", published: "1",
-  no: "0", false: "0", draft: "0",
-  private: "-1",
+  no: "-1", false: "-1", draft: "-1",
+  private: "0",
 };
 // In stock?: 1 = in stock, 0 = out of stock, backorder = on backorder.
 const STOCK_STATUS: Record<string, string> = {
@@ -314,7 +315,7 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
       });
     }
 
-    enumCheck(out, rowIndex, "Published", PUBLISHED, "1 (published), 0 (draft), or -1 (private)");
+    enumCheck(out, rowIndex, "Published", PUBLISHED, "1 (published), 0 (private), or -1 (draft)");
     enumCheck(out, rowIndex, "In stock?", STOCK_STATUS, "1 (in stock), 0 (out of stock), or backorder");
     enumCheck(out, rowIndex, "Backorders allowed?", BACKORDERS, "1, 0, or notify");
     enumCheck(
@@ -350,6 +351,8 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
     for (const col of ["Stock", "Low stock amount", "Download limit", "Download expiry days", "Position"]) {
       if (!(col in out) || isEmpty(out[col])) continue;
       const raw = out[col].trim();
+      // The import schema allows "n/a" (no limit) for the download columns.
+      if (col.startsWith("Download") && raw.toLowerCase() === "n/a") continue;
       const n = parseShopifyMoney(raw);
       if (n == null || !Number.isInteger(n)) {
         issues.push({
@@ -423,6 +426,18 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
       });
     }
 
+    // Attribute values: the importer splits them at commas. Pipes are what WooCommerce's
+    // admin screen uses ("S | M | L"), so a pasted pipe list becomes one value; convert it.
+    for (const n of attrIdx) {
+      const col = `Attribute ${n} value(s)`;
+      const raw = out[col] ?? "";
+      if (!raw.includes("|") || splitList(raw).length > 1) continue;
+      const items = raw.split("|").map((s) => s.trim()).filter(Boolean);
+      if (items.length < 2) continue;
+      out[col] = items.join(", ");
+      fixesApplied.push(`Changed the | separators in ${col} to commas on row ${rowIndex + 1}`);
+    }
+
     // Categories / Tags (escaped "\," stays inside one item)
     if ("Categories" in out && !isEmpty(out["Categories"])) {
       const before = out["Categories"];
@@ -494,7 +509,7 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
           issues.push({
             rowIndex,
             column: `Attribute ${n} value(s)`,
-            severity: "error",
+            severity: "warning",
             code: "woocommerce/variation_multiple_values",
             message: `Variation has several values for ${out[`Attribute ${n} name`]} ('${v}'); a variation takes one.`,
             suggestion: "List all values on the parent row, and one value per variation row.",
@@ -536,7 +551,11 @@ export function validateAndFixWooCommerceProducts(headers: string[], rows: CsvRo
   const fileParents = new Set<string>();
   for (const r of outRows) {
     if (r["SKU"]?.trim()) fileParents.add(r["SKU"].trim().toLowerCase());
-    if (r["ID"]?.trim()) fileParents.add(`id:${r["ID"].trim()}`);
+    if (r["ID"]?.trim()) {
+      // Parent can be "id:100" or the bare ID.
+      fileParents.add(`id:${r["ID"].trim()}`);
+      fileParents.add(r["ID"].trim());
+    }
   }
   const seen = new Map<string, number[]>();
   for (let i = 0; i < outRows.length; i++) {

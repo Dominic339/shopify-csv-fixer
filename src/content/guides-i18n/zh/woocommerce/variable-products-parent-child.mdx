@@ -2,7 +2,7 @@
 title: "CSV 中的 WooCommerce 可变商品：父行与变体行"
 description: "了解 WooCommerce 商品导入器如何用父行和子行（变体）表示可变商品：属性列、各类行的必填字段，以及最常见的导入陷阱。"
 keywords: ["woocommerce 可变商品 csv", "woocommerce 变体导入", "woocommerce 父子商品 csv", "woocommerce 属性 csv", "woocommerce csv 导入变体", "可变商品 woocommerce", "woocommerce 商品导入工具"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "WooCommerce 如何用父行和变体行表示可变商品"
@@ -39,9 +39,9 @@ timeToComplete: "12 分钟"
 | Type | `variable` | 必须正好是 `variable` |
 | SKU | `SHIRT-BLUE` | 唯一的父商品 SKU |
 | Name | `Blue Cotton T-Shirt` | 商品名称 |
-| Published | `1` | 1 = 已发布，0 = 草稿 |
+| Published | `1` | 1 = 已发布，0 = 私密，-1 = 草稿 |
 | Attribute 1 name | `Size` | 规格维度的名称 |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | 用竖线分隔的全部可选值 |
+| Attribute 1 value(s) | `Small, Medium, Large` | 所有可选值，用逗号分隔 |
 | Attribute 1 visible | `1` | 在商品页面显示 |
 | Attribute 1 global | `1` | 使用全局（共享）属性 |
 
@@ -62,7 +62,7 @@ timeToComplete: "12 分钟"
 | Type | `variation` | 必须正好是 `variation` |
 | SKU | `SHIRT-BLUE-SM` | 每个变体唯一 |
 | Name | `Blue Cotton T-Shirt` | 应与父商品名称一致 |
-| Parent | `id:123` 或 `sku:SHIRT-BLUE` | 通过 ID 或 SKU 关联到父商品 |
+| Parent | `id:123` 或 `SHIRT-BLUE` | 通过 ID 或 SKU 关联父商品 |
 | Regular price | `19.99` | 每个变体都必须填写 |
 | Attribute 1 name | `Size` | 必须与父商品的属性名称一致 |
 | Attribute 1 value(s) | `Small` | 该变体对应的单个值 |
@@ -73,23 +73,23 @@ timeToComplete: "12 分钟"
 
 `Parent` 列接受两种格式：
 - **按数据库 ID**：`id:123`，在您知道 WooCommerce 商品 ID 时使用。
-- **按 SKU**：`sku:SHIRT-BLUE`，更便于迁移；在导入尚未分配 ID 的新商品时使用。
+- **按 SKU：** `SHIRT-BLUE`，即父商品的 SKU 原样填写。这种方式更便于迁移，适合导入还没有 ID 的新商品。
 
-从零开始创建新的可变商品时，请使用 `sku:PARENT_SKU` 格式。先导入父行（或者把父行放在同一文件中、位于变体之上）。
+从零创建新的可变商品时，在 `Parent` 中填写父商品的 SKU。把父商品行放在同一文件中其变体的上方，或者先导入父商品。
 
 ---
 
 ## 完整示例：可变 T 恤
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> 注意：为简洁起见，这里省略了 `Parent` 列。实际使用时，变体行应包含 `Parent: sku:SHIRT-BLUE`。
+> 注意：`Parent` 中是父商品的 SKU，即 `SHIRT-BLUE`。父商品的值列表含有逗号，所以用双引号括起来。
 
 ---
 
@@ -100,9 +100,9 @@ ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),A
 **父行**：
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **变体（Small、Blue**）：
@@ -129,13 +129,13 @@ Attribute 2 value(s): Blue
 
 **症状**：变体被创建为独立的简单商品，而没有挂到父商品下。
 
-**解决方法**：确保每个变体行的 `Parent` 列都有 `sku:PARENT_SKU` 或 `id:123` 格式的值。缺少父商品引用或格式错误会产生孤立变体。
+**解决方法：** 确保每个变体行的 `Parent` 都有值：父商品的 SKU（例如 `SHIRT-BLUE`），或写成 `id:123` 的 ID。缺失或格式错误的引用会产生孤立的变体。
 
-### 错误 3：父行的属性值没有用竖线分隔
+### 错误 3：属性值用竖线分隔
 
-**症状**：商品页面的下拉菜单中只有一个选项，或者“加入购物车”按钮不见了。
+**症状：** 商品页面只显示一个类似“Small | Medium | Large”的选项，而不是分开的选项，或者变体与任何选项都对不上。
 
-**解决方法**：在父行中，用 ` | `（空格、竖线、空格）分隔列出属性的所有可能值：`Small | Medium | Large`。WooCommerce 用这个列表填充下拉菜单。
+**解决方法：** 在父商品行中用逗号分隔这些值：`Small, Medium, Large`。竖线 `|` 是 WooCommerce 后台界面使用的分隔符，但 CSV 导入器按逗号拆分值。StriveFormats 会为你把竖线换成逗号。
 
 ### 错误 4：父行与变体的属性名称不一致
 

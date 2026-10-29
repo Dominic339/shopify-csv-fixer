@@ -176,7 +176,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
     gotchas: [
       {
         title: "13 tags, no more",
-        body: "Etsy keeps the first 13 tags and drops the rest. The fixer counts them for every listing and normalises the separators.",
+        body: "Etsy allows 13 tags per listing, each up to 20 characters. The fixer counts them for every listing, flags long tags and normalises the separators.",
       },
       {
         title: "Prices without symbols",

@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "'{0}' kategorisi sayısal bir eBay kategori kimliği olmalıdır.",
 "Category is blank. New listings need an eBay category number.": "Category boş. Yeni ilanlar için bir eBay kategori numarası gerekir.",
 "Change to \"true\" or \"false\".": "\"true\" veya \"false\" olarak değiştirin.",
+"Changed the | separators in {0} to commas": "{0} içindeki | ayırıcılar virgülle değiştirildi",
+"Changed the | separators in {0} to commas on row {1}": "{1}. satırda {0} içindeki | ayırıcılar virgülle değiştirildi",
 "Check the ASIN on the product's Amazon page.": "ASIN'i ürünün Amazon sayfasında kontrol edin.",
 "Check the barcode number.": "Barkod numarasını kontrol edin.",
 "Cleaned Image URLs list": "Image URLs listesi temizlendi",

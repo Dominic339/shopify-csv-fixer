@@ -73,7 +73,8 @@ describe("Shopify legacy export → other platforms", () => {
     expect(parent.Description).toContain('"ready"');
     const wrap = out.rows.find((r) => r.SKU === "GW-1")!;
     expect(wrap.Type).toBe("simple");
-    expect(wrap.Published).toBe("0");
+    // A Shopify draft becomes a WooCommerce draft (-1); 0 would import it as private.
+    expect(wrap.Published).toBe("-1");
   });
 
   it("→ Etsy: plain-text description, lowest price, combined stock", () => {

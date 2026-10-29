@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Guida al modello CSV di Etsy: campi, formati ed errori comuni",
-"description": "Una guida completa al modello CSV delle inserzioni Etsy: ogni campo spiegato, i valori accettati negli elenchi, le colonne obbligatorie e facoltative, e come correggere gli errori di importazione più comuni."
+"description": "Cosa contiene l'esportazione CSV delle inserzioni Etsy, cosa Etsy permette di farci e cosa no, i limiti di ogni campo (titoli, tag, quantità) e come correggere gli errori introdotti dai fogli di calcolo."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Accodare, unire o collegare: come combinare correttamente i file CSV",

@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV 模板指南：字段、格式与常见错误",
-"description": "Etsy 刊登 CSV 模板的完整指南：逐一说明每个字段、下拉选项允许的值、必填与选填列，以及如何修复常见的导入错误。"
+"description": "Etsy 商品 CSV 导出包含哪些内容、Etsy 允许和不允许用它做什么、各字段的限制（标题、标签、数量），以及如何修复电子表格带来的错误。"
 },
 "general/append-vs-merge-join-csv": {
 "title": "追加、合并与连接：正确组合 CSV 文件",

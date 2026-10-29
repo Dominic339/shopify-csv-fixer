@@ -2,7 +2,7 @@
 title: "CSV'de WooCommerce ürün nitelikleri: eksiksiz rehber"
 description: "WooCommerce ürün niteliklerini bir CSV dosyasında doğru biçimlendirme: nitelik adlandırma, genel ve yerel nitelikler, varyasyon nitelikleri ve yaygın hatalar."
 keywords: ["woocommerce nitelikler csv", "woocommerce ürün nitelikleri içe aktarma", "woocommerce nitelik sütunları csv", "woocommerce varyasyon nitelikleri", "woocommerce csv nitelik biçimi", "woocommerce genel nitelikler csv", "woocommerce nitelik içe aktarma hatası"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "WooCommerce nitelik sütunlarının CSV'de nasıl adlandırılıp numaralandırıldığı"
@@ -35,7 +35,7 @@ WordPress Türkçe ise dışa aktarma Türkçe sütun adları kullanır; içe ak
 | Sütun | Biçim | Açıklama |
 |---|---|---|
 | `Attribute N name` | Metin | Niteliğin adı (ör. `Color`, `Size`) |
-| `Attribute N value(s)` | Dikey çizgiyle ayrılmış metin | Bu satırın değeri veya değerleri (ör. `Blue` ya da `Blue | Red`) |
+| `Attribute N value(s)` | Metin, virgülle ayrılmış | Bu satırın değeri veya değerleri (ör. `Blue` veya `Blue, Red`) |
 | `Attribute N visible` | `1` veya `0` | `1` = ürün sayfasında gösterilir; `0` = gizli |
 | `Attribute N global` | `1` veya `0` | `1` = genel taksonomi niteliği; `0` = yerel nitelik |
 
@@ -43,11 +43,11 @@ WordPress Türkçe ise dışa aktarma Türkçe sütun adları kullanır; içe ak
 
 ## Birden çok nitelik değerine sahip basit ürünler
 
-Birden çok renkte satılan (ama ayrı varyasyonlar olarak değil) basit bir ürün için tüm değerleri `Attribute 1 value(s)` sütununda dikey çizgi `|` ile ayırarak yazın:
+Birden fazla renkte bulunan (ama ayrı varyasyonlar olarak satılmayan) basit bir ürün için tüm değerleri `Attribute 1 value(s)` sütununa virgülle ayırarak yazın. Hücrede virgül olacağı için çift tırnak içine alınır (elektronik tablolar kaydederken bunu yapar):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 Bu, ürün sayfasında üç renk değerini de gösteren Color niteliğine sahip tek bir ürün oluşturur.
@@ -62,7 +62,7 @@ Değişken ürünlerde nitelikler farklı çalışır. Ana satır, niteliğin ol
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **Varyasyon satırları (Type: variation):**
@@ -87,7 +87,7 @@ Varyasyon satırlarında `Name` sütunu boştur; WooCommerce varyasyon adını n
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **Varyasyon satırları:**
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-Her varyasyon satırı nitelik başına tam olarak bir değer belirtir (dikey çizgiyle ayrılmış bir liste değil).
+Her varyasyon satırı nitelik başına tam olarak bir değer belirtir, liste değil. Bir varyasyonda birden fazla değer varsa WooCommerce ilkini kullanır.
 
 ---
 
@@ -117,7 +117,7 @@ Genel nitelikler WooCommerce'in nitelik taksonomisinde tanımlanır (WordPress y
 
 Yerel nitelikler tek bir ürüne özgüdür. Başka yerde geçerli olmayan, ürüne özel özellikler için kullanın (ör. belirli bir üründe `Material: 100% cashmere`).
 
-Yerel nitelikler varyasyon filtrelemede veya katmanlı gezinmede kullanılamaz.
+Yerel nitelikler yine de varyasyonlarda kullanılabilir, ancak katmanlı gezinme filtrelerinde kullanılamaz.
 
 ---
 
@@ -138,16 +138,16 @@ Doğru: `Attribute 1 name`
 
 **Çözüm:** Nitelik adları ana satırlarda ve varyasyon satırlarında aynı olmalıdır. Varyasyon değerleri, ana satırda listelenen değerler arasında yer almalıdır.
 
-### Boşluklu dikey çizgi ayırıcı
+### Dikey çizgiyle ayrılmış değerler
 
-**Neden:** ` | ` (çizginin etrafında boşluklarla) ve `|` (boşluksuz) karışık kullanılıyor. WooCommerce değerlerdeki boşlukları kırpar, ancak tutarsızlıklar uyuşmazlıklara yol açabilir.
+**Neden:** Değerlerin arasında WooCommerce yönetim ekranında göründüğü gibi `|` kullanmak (`Blue | Red`). CSV içe aktarıcısı değerleri virgülden böler, bu yüzden `Blue | Red` "Blue | Red" adlı tek bir değere dönüşür.
 
-**Çözüm:** `|` işaretini, etrafında boşluk olsun ya da olmasın, tüm dosyada tutarlı biçimde kullanın. WooCommerce her değerin etrafındaki boşlukları kırpar.
+**Çözüm:** Değerleri virgülle ayırın: `Blue, Red`. Bir değerin içinde virgül kullanmak için `\,` yazın. StriveFormats dikey çizgiyle ayrılmış değerleri sizin için virgüle çevirir.
 
 ---
 
 ## StriveFormats ile otomatik düzeltin
 
-WooCommerce CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı nitelik sütunlarının adlarını, ana ürün ile varyasyonlar arasındaki nitelik tutarlılığını ve dikey çizgi ayırıcıların biçimini kontrol eder, sorunları tam satır ve sütun konumlarıyla işaretler.
+WooCommerce CSV'nizi StriveFormats'a yükleyin. Dikey çizgiyle ayrılmış nitelik değerlerini virgüle çevirir, her varyasyonun niteliklerini kontrol eder ve yinelenen kombinasyonları bulur, ardından sorunları tam satır ve sütunuyla işaretler.
 
 [WooCommerce CSV Düzelticisini açın](/app?preset=woocommerce_products) | [WooCommerce şablonunu görüntüleyin](/presets/woocommerce_products)

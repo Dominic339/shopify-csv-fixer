@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "カテゴリ '{0}' は数値の eBay カテゴリ ID である必要があります。",
 "Category is blank. New listings need an eBay category number.": "Category が空欄です。新規出品には eBay のカテゴリ番号が必要です。",
 "Change to \"true\" or \"false\".": "\"true\" または \"false\" に変更してください。",
+"Changed the | separators in {0} to commas": "{0} の | 区切りをカンマに変更しました",
+"Changed the | separators in {0} to commas on row {1}": "{1} 行目の {0} の | 区切りをカンマに変更しました",
 "Check the ASIN on the product's Amazon page.": "Amazon の商品ページで ASIN を確認してください。",
 "Check the barcode number.": "バーコード番号を確認してください。",
 "Cleaned Image URLs list": "Image URLs のリストを整理しました",

@@ -2,7 +2,7 @@
 title: "WooCommerce ürün CSV içe aktarma hataları: nedenleri ve çözümleri"
 description: "En yaygın WooCommerce ürün CSV içe aktarma hatalarını düzeltin: eksik SKU'lar, geçersiz türler, varyasyon satırı sorunları, fiyat biçimi ve nitelik sütunları."
 keywords: ["woocommerce csv içe aktarma hatası", "woocommerce ürün içe aktarma başarısız", "woocommerce csv hataları", "woocommerce csv düzeltme", "woocommerce içe aktarma sorunları", "woocommerce csv kontrol", "woocommerce ürün yükleme hatası"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "En yaygın WooCommerce CSV içe aktarma hataları ve her birinin anlamı"
@@ -53,25 +53,25 @@ WooCommerce, içe aktarılan satırları mevcut ürünlerle eşleştirmek için 
 
 **Çözüm:**
 - Her ürün satırına (basit ürünler ve değişken ürünlerin ana satırları) benzersiz bir SKU verin
-- Varyasyon satırları ana ürünün SKU'sunu devralabilir veya kendi SKU'larına sahip olabilir, ancak başka bir ürünün SKU'sunu yinelememelidir
+- Varyasyon satırları SKU'yu boş bırakabilir veya kendi SKU'larına sahip olabilir, ancak başka bir ürünün SKU'sunu tekrarlamamalıdır
 - Yinelenen SKU'ları Excel'de `EĞERSAY` ile bulun: `=EĞERSAY($A:$A; A2)`; 1'den büyük her değer bir yinelemedir
 
 ---
 
 ## Hata: geçersiz normal fiyat
 
-**Neden:** `Regular price` bir para birimi simgesi (`€`, `$`) içeriyor, ondalık ayırıcı olarak virgül kullanıyor (`19,99`) veya basit ya da değişken bir üründe boş.
+**Neden:** `Regular price` bir para birimi simgesi (`€`, `$`) içeriyor, ondalık ayırıcı olarak virgül kullanıyor (`19,99`) veya basit bir üründe ya da varyasyonda boş.
 
 **Çözüm:**
 - Para birimi simgelerini kaldırın: `$`, `€`, `£` simgelerini Bul ve Değiştir ile silin
 - Ondalık virgülü noktayla değiştirin: `19,99` → `19.99`
-- Her basit ve değişken ürünün bir fiyatı olduğundan emin olun; varyasyon satırları fiyatı ana üründen devralabilir
+- Her basit ürüne ve her varyasyona bir fiyat verin. Değişken ürünün ana satırının fiyata ihtiyacı yoktur ve varyasyonlar onu devralmaz
 
 ---
 
 ## Hata: geçersiz mantıksal alan
 
-**Neden:** WooCommerce'in mantıksal sütunları (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) `1` (doğru) veya `0` (yanlış) kabul eder. `yes`, `TRUE` veya `Y` gibi değerler doğrulama hatalarına yol açar.
+**Neden:** WooCommerce'in içe aktarma şeması evet/hayır sütunları (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`) için `1` (evet) ve `0` (hayır) değerlerini belirtir. `Backorders allowed?` ayrıca `notify` kabul eder, `Published` ise `1` (yayında), `0` (özel) ve `-1` (taslak) kullanır. `yes`, `TRUE` veya `Y` gibi yazımlar şemada yoktur, bu yüzden bunları dönüştürün.
 
 **Çözüm:** Tüm mantıksal değerleri değiştirin:
 
@@ -88,11 +88,11 @@ WooCommerce, içe aktarılan satırları mevcut ürünlerle eşleştirmek için 
 
 **Neden:** `Type: variation` olan bir satır, ne içe aktarma dosyasında ne de veritabanında bulunan bir ana ürüne başvuruyor.
 
-WooCommerce varyasyon satırlarının bir ana ürüne ihtiyacı vardır. Bağlantı, `Parent` sütunuyla (ana ürünün veritabanındaki kimliğini içermelidir) ya da ana ürünü aynı içe aktarma dosyasına koyarak kurulur.
+WooCommerce'te varyasyon satırlarının bir ana ürüne ihtiyacı vardır. `Parent` sütunu ana ürünün SKU'sunu veya ID'sini (`id:123` biçiminde) içerir ve ana ürün aynı içe aktarma dosyasında olmalı ya da mağazanızda zaten bulunmalıdır.
 
 **Çözüm:**
 - Ana ürün satırını aynı CSV dosyasına ekleyin
-- Varyasyon satırlarındaki `Parent` sütununu ana ürünün WooCommerce ürün kimliğiyle (WordPress yönetim panelindeki numara) doldurun
+- Varyasyon satırlarındaki `Parent` sütununa ana ürünün SKU'sunu veya `id:123` biçiminde yazılmış WooCommerce ürün ID'sini girin
 - Ana satırın `Type: simple` değil `Type: variable` kullandığından emin olun
 
 ---
@@ -104,7 +104,7 @@ WooCommerce varyasyon satırlarının bir ana ürüne ihtiyacı vardır. Bağlan
 **WooCommerce nitelik sütunu biçimi:**
 
 - `Attribute 1 name`: ilk niteliğin adı (ör. `Color`)
-- `Attribute 1 value(s)`: bu satırın değeri veya değerleri (ör. `Blue` ya da birden çok için `Blue | Red`)
+- `Attribute 1 value(s)`: bu satırın değeri veya değerleri (ör. `Blue` ya da birden fazlası için `Blue, Red`)
 - `Attribute 1 visible`: ürün sayfasında gösteriliyorsa `1`, gizliyse `0`
 - `Attribute 1 global`: genel bir nitelik kullanılıyorsa `1`, yerel ise `0`
 
@@ -117,13 +117,13 @@ WooCommerce varyasyon satırlarının bir ana ürüne ihtiyacı vardır. Bağlan
 
 ## Hata: görsel URL'sine erişilemiyor
 
-**Neden:** `Images` sütunundaki görsel URL'si herkese açık bir HTTPS URL'si değil, bir girişin arkasında ya da HTTPS dışında bir protokol kullanıyor.
+**Neden:** `Images` sütunundaki görsel URL'si indirilemiyor: herkese açık değil, giriş gerektiriyor veya tam bir web adresi değil.
 
 WooCommerce görselleri içe aktarma sırasında indirir ve ortam kitaplığınıza kaydeder.
 
 **Çözüm:**
 - Her görsel URL'sini tarayıcıda deneyin: görsel giriş yapmadan doğrudan yüklenmeli
-- HTTPS URL'leri kullanın (HTTP değil)
+- `https://` ile başlayan tam URL'ler kullanın
 - Google Drive veya Dropbox'taki görseller için paylaşım bağlantıları değil, doğrudan indirme bağlantıları kullanın
 - Görseller localhost'ta veya bir test sunucusundaysa önce herkese açık bir konuma taşıyın
 

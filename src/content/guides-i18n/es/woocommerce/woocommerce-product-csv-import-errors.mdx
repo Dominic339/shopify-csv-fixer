@@ -2,7 +2,7 @@
 title: "Errores de importación CSV de productos de WooCommerce: causas y soluciones"
 description: "Corrige los errores más comunes al importar productos por CSV en WooCommerce: SKU que faltan, tipos no válidos, problemas en filas de variación, formato de precios y columnas de atributos."
 keywords: ["error al importar csv woocommerce", "errores importación csv woocommerce", "importar productos woocommerce csv error", "corregir csv woocommerce", "problemas importación woocommerce", "validar csv woocommerce", "error al subir productos woocommerce"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Los errores de importación CSV de WooCommerce más comunes y qué significa cada uno"
@@ -53,25 +53,25 @@ WooCommerce usa la SKU como identificador único para asociar las filas importad
 
 **Solución:**
 - Pon una SKU única en cada fila de producto (productos simples y filas principales de productos variables)
-- Las filas de variación pueden heredar la SKU del principal o tener la suya, pero no pueden duplicar la SKU de otro producto
+- Las filas de variación pueden dejar el SKU vacío o tener uno propio, pero no deben repetir el SKU de otro producto
 - Busca SKU duplicadas en Excel con `CONTAR.SI`: `=CONTAR.SI($A:$A; A2)`; cualquier valor mayor que 1 es un duplicado
 
 ---
 
 ## Error: precio normal no válido
 
-**Causa:** `Regular price` contiene un símbolo de moneda (`€`, `$`), usa la coma como separador decimal (`19,99`) o está vacío en un producto simple o variable.
+**Causa:** `Regular price` contiene un símbolo de moneda (`€`, `$`), usa una coma como separador decimal (`19,99`) o está vacío en un producto simple o una variación.
 
 **Solución:**
 - Quita los símbolos de moneda: elimina `$`, `€` y `£` con Buscar y reemplazar
 - Cambia la coma decimal por punto: `19,99` → `19.99`
-- Asegúrate de que cada producto simple y variable tenga precio; las filas de variación pueden heredarlo del principal
+- Pon precio a cada producto simple y a cada variación. La fila padre de un producto variable no lo necesita, y las variaciones no lo heredan
 
 ---
 
 ## Error: campo booleano no válido
 
-**Causa:** Las columnas booleanas de WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) aceptan `1` (verdadero) o `0` (falso). Valores como `yes`, `TRUE` o `Y` provocan errores de validación.
+**Causa:** el esquema de importación de WooCommerce documenta `1` (sí) y `0` (no) para sus columnas de sí/no (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` admite además `notify`, y `Published` usa `1` (publicado), `0` (privado) y `-1` (borrador). Formas como `yes`, `TRUE` o `Y` no forman parte del esquema, así que conviértelas.
 
 **Solución:** Sustituye todos los valores booleanos:
 
@@ -88,11 +88,11 @@ Usa Buscar y reemplazar con «Coincidir con el contenido de toda la celda» acti
 
 **Causa:** Una fila con `Type: variation` hace referencia a un producto principal que no existe ni en el archivo de importación ni en la base de datos.
 
-Las filas de variación de WooCommerce necesitan un producto principal. Se vinculan mediante la columna `Parent` (que debe contener el ID del producto principal en la base de datos) o incluyendo el producto principal en el mismo archivo de importación.
+En WooCommerce, las filas de variación necesitan un padre. La columna `Parent` contiene el SKU del padre o su ID (escrito como `id:123`), y el padre debe estar en el mismo archivo de importación o existir ya en tu tienda.
 
 **Solución:**
 - Incluye la fila del producto principal en el mismo archivo CSV
-- Pon en la columna `Parent` de las filas de variación el ID de producto de WooCommerce del principal (el número que aparece en el panel de WordPress)
+- Pon en la columna `Parent` de las variaciones el SKU del padre, o su ID de producto de WooCommerce escrito como `id:123`
 - Comprueba que la fila principal usa `Type: variable` y no `Type: simple`
 
 ---
@@ -104,7 +104,7 @@ Las filas de variación de WooCommerce necesitan un producto principal. Se vincu
 **Formato de las columnas de atributos de WooCommerce:**
 
 - `Attribute 1 name`: el nombre del primer atributo (p. ej., `Color`)
-- `Attribute 1 value(s)`: el valor o valores de esa fila (p. ej., `Blue`, o `Blue | Red` si hay varios)
+- `Attribute 1 value(s)`: el valor o valores de esta fila (p. ej., `Blue`, o `Blue, Red` para varios)
 - `Attribute 1 visible`: `1` si se muestra en la página del producto, `0` si está oculto
 - `Attribute 1 global`: `1` si usa un atributo global, `0` si es local
 
@@ -117,13 +117,13 @@ Las filas de variación de WooCommerce necesitan un producto principal. Se vincu
 
 ## Error: la URL de la imagen no es accesible
 
-**Causa:** La URL de la columna `Images` no es una URL HTTPS de acceso público, está protegida por inicio de sesión o usa un protocolo distinto de HTTPS.
+**Causa:** la URL de la imagen en la columna `Images` no se puede descargar: no es pública, está detrás de un inicio de sesión o no es una dirección web completa.
 
 WooCommerce descarga las imágenes durante la importación y las guarda en tu biblioteca de medios.
 
 **Solución:**
 - Prueba cada URL de imagen en el navegador: debe cargar la imagen directamente, sin iniciar sesión
-- Usa URL HTTPS (no HTTP)
+- Usa URLs completas que empiecen por `https://`
 - Para imágenes de Google Drive o Dropbox, usa enlaces de descarga directa (no enlaces para compartir)
 - Si las imágenes están en localhost o en un servidor de pruebas, muévelas antes a un lugar de acceso público
 

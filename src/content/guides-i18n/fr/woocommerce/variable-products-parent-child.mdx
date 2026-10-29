@@ -2,7 +2,7 @@
 title: "Produits variables WooCommerce en CSV : lignes parent et variation"
 description: "Comprenez comment l'importateur de produits WooCommerce représente les produits variables avec des lignes parent et enfant (variation) : colonnes d'attributs, champs requis selon le type de ligne et pièges d'import les plus courants."
 keywords: ["csv produit variable woocommerce", "importer variations woocommerce", "csv parent enfant woocommerce", "attributs woocommerce csv", "import csv variations woocommerce", "produit variable woocommerce", "importateur de produits woocommerce"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Comment WooCommerce répartit un produit variable entre ligne parent et lignes de variation"
@@ -39,9 +39,9 @@ La ligne parent définit les champs au niveau du produit et déclare les attribu
 | Type | `variable` | Doit être exactement `variable` |
 | SKU | `SHIRT-BLUE` | SKU parent unique |
 | Name | `Blue Cotton T-Shirt` | Nom du produit |
-| Published | `1` | 1 = publié, 0 = brouillon |
+| Published | `1` | 1 = publié, 0 = privé, -1 = brouillon |
 | Attribute 1 name | `Size` | Nom de la dimension |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | Liste de toutes les valeurs disponibles, séparées par des barres verticales |
+| Attribute 1 value(s) | `Small, Medium, Large` | Toutes les valeurs disponibles, séparées par des virgules |
 | Attribute 1 visible | `1` | Afficher sur la page produit |
 | Attribute 1 global | `1` | Utiliser un attribut global (partagé) |
 
@@ -62,7 +62,7 @@ Chaque ligne de variation représente une combinaison d'options achetable et doi
 | Type | `variation` | Doit être exactement `variation` |
 | SKU | `SHIRT-BLUE-SM` | Unique pour chaque variation |
 | Name | `Blue Cotton T-Shirt` | Doit correspondre au nom du parent |
-| Parent | `id:123` ou `sku:SHIRT-BLUE` | Relie au parent par ID ou par SKU |
+| Parent | `id:123` ou `SHIRT-BLUE` | Relie au parent par son ID ou son SKU |
 | Regular price | `19.99` | Requis pour chaque variation |
 | Attribute 1 name | `Size` | Doit correspondre au nom d'attribut du parent |
 | Attribute 1 value(s) | `Small` | Une seule valeur pour cette variation précise |
@@ -73,23 +73,23 @@ Chaque ligne de variation représente une combinaison d'options achetable et doi
 
 La colonne `Parent` accepte deux formats :
 - **Par ID de base de données :** `id:123`, à utiliser quand vous connaissez l'ID du produit WooCommerce.
-- **Par SKU :** `sku:SHIRT-BLUE`, plus portable ; à utiliser pour les nouveaux produits qui n'ont pas encore d'ID.
+- **Par SKU :** `SHIRT-BLUE`, le SKU du parent tel quel. C'est plus portable ; utilisez-le pour importer de nouveaux produits qui n'ont pas encore d'ID.
 
-Pour créer de nouveaux produits variables de zéro, utilisez le format `sku:PARENT_SKU`. Importez d'abord la ligne parent (ou placez-la dans le même fichier, au-dessus des variations).
+Pour créer des produits variables de zéro, indiquez le SKU du parent dans `Parent`. Placez la ligne du parent dans le même fichier, au-dessus de ses variations, ou importez-la d'abord.
 
 ---
 
 ## Exemple complet : t-shirt variable
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> Remarque : la colonne `Parent` est omise ici par souci de concision. En pratique, les lignes de variation doivent contenir `Parent: sku:SHIRT-BLUE`.
+> Remarque : `Parent` contient le SKU du parent, `SHIRT-BLUE`. La liste de valeurs du parent contient des virgules, elle est donc entourée de guillemets doubles.
 
 ---
 
@@ -100,9 +100,9 @@ Pour ajouter un second attribut (couleur), ajoutez les colonnes Attribute 2 à l
 **Parent :**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **Variation (Small, Blue) :**
@@ -129,13 +129,13 @@ Il vous faut 4 lignes de variation pour 2 tailles × 2 couleurs.
 
 **Symptôme :** les variations sont créées comme des produits simples indépendants au lieu d'être rattachées au parent.
 
-**Solution :** vérifiez que chaque ligne de variation a une valeur dans la colonne `Parent` au format `sku:PARENT_SKU` ou `id:123`. Des références au parent manquantes ou mal formées créent des variations orphelines.
+**Solution :** vérifiez que chaque ligne de variation a une valeur dans `Parent` : le SKU du parent (par exemple `SHIRT-BLUE`) ou son ID écrit `id:123`. Les références absentes ou mal formées créent des variations orphelines.
 
-### Erreur 3 : valeurs d'attribut non séparées par des barres verticales sur la ligne parent
+### Erreur 3 : valeurs d'attribut séparées par des barres verticales
 
-**Symptôme :** la page produit n'affiche qu'une seule option dans la liste déroulante, ou le bouton « Ajouter au panier » est absent.
+**Symptôme :** la page produit affiche une seule option comme « Small | Medium | Large » au lieu de choix séparés, ou les variations ne correspondent à aucune option.
 
-**Solution :** sur la ligne parent, listez toutes les valeurs possibles de l'attribut séparées par ` | ` (espace, barre verticale, espace) : `Small | Medium | Large`. WooCommerce utilise cette liste pour remplir la liste déroulante.
+**Solution :** sur la ligne du parent, séparez les valeurs par des virgules : `Small, Medium, Large`. La barre `|` est celle de l'interface d'administration de WooCommerce, mais l'importateur CSV sépare les valeurs aux virgules. StriveFormats remplace les barres par des virgules pour vous.
 
 ### Erreur 4 : nom d'attribut différent entre parent et variation
 

@@ -2,7 +2,7 @@
 title: "CSV 中的 WooCommerce 商品属性：完整指南"
 description: "如何在 CSV 文件中正确设置 WooCommerce 商品属性：属性命名、全局属性与本地属性、变体属性以及常见错误。"
 keywords: ["woocommerce 属性 csv", "woocommerce 商品属性导入", "woocommerce 属性列 csv", "woocommerce 变体属性", "woocommerce csv 属性格式", "woocommerce 全局属性 csv", "woocommerce 属性导入错误"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "WooCommerce 属性列在 CSV 中如何命名和编号"
@@ -35,7 +35,7 @@ WooCommerce 商品属性定义了商品在哪些维度上有所不同，通常�
 | 列 | 格式 | 说明 |
 |---|---|---|
 | `Attribute N name` | 文本 | 属性名称（例如 `Color`、`Size`） |
-| `Attribute N value(s)` | 文本，用竖线分隔 | 该行的值（例如 `Blue` 或 `Blue | Red`） |
+| `Attribute N value(s)` | 文本，逗号分隔 | 本行的值（例如 `Blue` 或 `Blue, Red`） |
 | `Attribute N visible` | `1` 或 `0` | `1` = 在商品页面显示；`0` = 隐藏 |
 | `Attribute N global` | `1` 或 `0` | `1` = 全局分类法属性；`0` = 本地属性 |
 
@@ -43,11 +43,11 @@ WooCommerce 商品属性定义了商品在哪些维度上有所不同，通常�
 
 ## 有多个属性值的简单商品
 
-对于有多种颜色（但不作为单独变体）的简单商品，请在 `Attribute 1 value(s)` 列中列出所有值，并用竖线 `|` 分隔：
+对于有多种颜色（但不作为单独变体）的简单商品，在 `Attribute 1 value(s)` 列中列出所有值，用逗号分隔。这样单元格中会有逗号，因此要用双引号括起来（电子表格保存时会自动处理）：
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 这样会创建一个带有 Color 属性的商品，并在商品页面显示全部三种颜色。
@@ -62,7 +62,7 @@ Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **变体行（Type: variation**）：
@@ -87,7 +87,7 @@ Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 vi
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **变体行**：
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-每个变体行的每个属性只填写一个值（而不是用竖线分隔的列表）。
+每个变体行的每个属性只填一个值，而不是列表。如果填了多个，WooCommerce 使用第一个。
 
 ---
 
@@ -117,7 +117,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 
 本地属性只属于某一个商品。请把它用于不适用于其他商品的特定规格（例如某个商品的 `Material: 100% cashmere`）。
 
-本地属性不能用于变体筛选或分层导航。
+本地属性仍可用于变体，但不能用于分层导航筛选。
 
 ---
 
@@ -138,16 +138,16 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 
 **解决方法**：父行和变体行的属性名称必须完全相同。变体的值必须是父行所列值中的一个。
 
-### 带空格的竖线分隔符
+### 用竖线分隔的值
 
-**原因**：混用了 ` | `（竖线前后有空格）和 `|`（没有空格）。WooCommerce 会去掉值前后的空格，但写法不统一仍可能导致匹配失败。
+**原因：** 照着 WooCommerce 后台的显示方式在值之间用了 `|`（`Blue | Red`）。CSV 导入器按逗号拆分值，所以 `Blue | Red` 会变成一个名为“Blue | Red”的值。
 
-**解决方法**：无论前后是否加空格，都要在整个文件中统一使用 `|`。WooCommerce 会去掉每个值前后的空格。
+**解决方法：** 用逗号分隔值：`Blue, Red`。如果值本身含有逗号，写成 `\,`。StriveFormats 会为你把竖线分隔的值换成逗号。
 
 ---
 
 ## 用 StriveFormats 自动修复
 
-将您的 WooCommerce CSV 上传到 StriveFormats。验证器会检查属性列的命名、父商品与变体之间的属性一致性以及竖线分隔符的格式，并标出问题所在的具体行和列。
+把你的 WooCommerce CSV 上传到 StriveFormats。它会把用竖线分隔的属性值换成逗号，检查每个变体的属性并找出重复的组合，然后标出问题所在的具体行和列。
 
 [打开 WooCommerce CSV 修复工具](/app?preset=woocommerce_products) | [查看 WooCommerce 模板](/presets/woocommerce_products)

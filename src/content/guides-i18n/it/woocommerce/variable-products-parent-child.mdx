@@ -2,7 +2,7 @@
 title: "Prodotti variabili WooCommerce nel CSV: righe principali e di variazione"
 description: "Capisci come l'importatore di prodotti WooCommerce rappresenta i prodotti variabili con righe principali e figlie (variazioni): colonne degli attributi, campi obbligatori per tipo di riga e le trappole di importazione più comuni."
 keywords: ["csv prodotto variabile woocommerce", "importare variazioni woocommerce", "csv padre figlio woocommerce", "attributi woocommerce csv", "importazione csv variazioni woocommerce", "prodotto variabile woocommerce", "importatore prodotti woocommerce"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Come WooCommerce rappresenta i prodotti variabili con righe principali e righe di variazione"
@@ -39,9 +39,9 @@ La riga principale definisce i campi a livello di prodotto e dichiara quali attr
 | Type | `variable` | Deve essere esattamente `variable` |
 | SKU | `SHIRT-BLUE` | SKU principale univoco |
 | Name | `Blue Cotton T-Shirt` | Nome del prodotto |
-| Published | `1` | 1 = pubblicato, 0 = bozza |
+| Published | `1` | 1 = pubblicato, 0 = privato, -1 = bozza |
 | Attribute 1 name | `Size` | Il nome della dimensione |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | Elenco di tutti i valori disponibili separati da barre verticali |
+| Attribute 1 value(s) | `Small, Medium, Large` | Tutti i valori disponibili, separati da virgole |
 | Attribute 1 visible | `1` | Mostra nella pagina del prodotto |
 | Attribute 1 global | `1` | Usa un attributo globale (condiviso) |
 
@@ -62,7 +62,7 @@ Ogni riga di variazione rappresenta una combinazione di opzioni acquistabile e d
 | Type | `variation` | Deve essere esattamente `variation` |
 | SKU | `SHIRT-BLUE-SM` | Univoco per ogni variazione |
 | Name | `Blue Cotton T-Shirt` | Deve corrispondere al nome del principale |
-| Parent | `id:123` o `sku:SHIRT-BLUE` | Collega al principale tramite ID o SKU |
+| Parent | `id:123` o `SHIRT-BLUE` | Collega al genitore tramite ID o SKU |
 | Regular price | `19.99` | Obbligatorio per ogni variazione |
 | Attribute 1 name | `Size` | Deve corrispondere al nome dell'attributo del principale |
 | Attribute 1 value(s) | `Small` | Un solo valore per questa specifica variazione |
@@ -73,23 +73,23 @@ Ogni riga di variazione rappresenta una combinazione di opzioni acquistabile e d
 
 La colonna `Parent` accetta due formati:
 - **Tramite ID del database:** `id:123`, da usare quando conosci l'ID del prodotto WooCommerce.
-- **Tramite SKU:** `sku:SHIRT-BLUE`, più portabile; da usare quando importi prodotti nuovi che non hanno ancora un ID.
+- **Tramite SKU:** `SHIRT-BLUE`, lo SKU del genitore così com'è. È più portabile; usalo quando importi prodotti nuovi che non hanno ancora un ID.
 
-Quando crei da zero nuovi prodotti variabili, usa il formato `sku:PARENT_SKU`. Importa prima la riga principale (oppure inseriscila nello stesso file, sopra le variazioni).
+Se crei prodotti variabili da zero, inserisci lo SKU del genitore in `Parent`. Metti la riga del genitore nello stesso file sopra le sue variazioni, oppure importala prima.
 
 ---
 
 ## Esempio completo: maglietta variabile
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> Nota: qui la colonna `Parent` è omessa per brevità. In pratica, le righe di variazione dovrebbero includere `Parent: sku:SHIRT-BLUE`.
+> Nota: `Parent` contiene lo SKU del genitore, `SHIRT-BLUE`. L'elenco di valori del genitore contiene virgole, quindi è racchiuso tra virgolette doppie.
 
 ---
 
@@ -100,9 +100,9 @@ Per aggiungere un secondo attributo (colore), inserisci le colonne di Attribute 
 **Principale:**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **Variazione (Small, Blue):**
@@ -129,13 +129,13 @@ Per 2 taglie × 2 colori servono 4 righe di variazione.
 
 **Sintomo:** le variazioni vengono create come prodotti semplici indipendenti invece di essere associate al principale.
 
-**Soluzione:** assicurati che ogni riga di variazione abbia un valore nella colonna `Parent` nel formato `sku:PARENT_SKU` o `id:123`. Riferimenti al principale mancanti o malformati creano variazioni orfane.
+**Soluzione:** assicurati che ogni riga di variazione abbia un valore in `Parent`: lo SKU del genitore (per esempio `SHIRT-BLUE`) o il suo ID scritto come `id:123`. Riferimenti mancanti o errati creano variazioni orfane.
 
-### Errore 3: valori dell'attributo non separati da barre verticali nella riga principale
+### Errore 3: valori degli attributi separati da barre verticali
 
-**Sintomo:** la pagina del prodotto mostra una sola opzione nel menu a discesa, oppure manca il pulsante "Aggiungi al carrello".
+**Sintomo:** la pagina del prodotto mostra una sola opzione come "Small | Medium | Large" invece di scelte separate, oppure le variazioni non corrispondono a nessuna opzione.
 
-**Soluzione:** nella riga principale, elenca tutti i valori possibili dell'attributo separati da ` | ` (spazio, barra verticale, spazio): `Small | Medium | Large`. WooCommerce usa questo elenco per riempire il menu a discesa.
+**Soluzione:** nella riga del genitore separa i valori con virgole: `Small, Medium, Large`. La barra `|` è quella usata dal pannello di WooCommerce, ma l'importatore CSV separa i valori alle virgole. StriveFormats sostituisce le barre con virgole per te.
 
 ### Errore 4: nome dell'attributo diverso tra principale e variazione
 
