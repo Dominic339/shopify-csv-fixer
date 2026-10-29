@@ -2,7 +2,7 @@
 title: "Campos booleanos del archivo plano de Amazon: y/n, TRUE/FALSE y errores habituales"
 description: "Descubre qué campos booleanos de los archivos planos de Seller Central esperan 'y' o 'n' (no TRUE/FALSE ni 1/0), cómo corregir valores no válidos en bloque y cómo evitar el formato automático de la hoja de cálculo que estropea estas columnas."
 keywords: ["archivo plano amazon booleano", "campos booleanos csv amazon", "amazon y n csv", "archivo plano amazon true false", "seller central csv booleano", "amazon is_adult_product", "amazon batteries_required", "errores archivo plano amazon"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Qué valores booleanos aceptan los archivos planos de Amazon (y/n, TRUE/FALSE o 1/0)"
@@ -47,6 +47,19 @@ Estas columnas aparecen en muchas plantillas de categoría y requieren especial 
 | `generic_keywords` | texto | (No es booleano; se incluye para evitar confusiones) |
 
 > **Nota:** los nombres exactos de las columnas y los valores aceptados varían según la plantilla de categoría. Consulta siempre la pestaña de definiciones de datos de la plantilla que descargaste de Seller Central para tu categoría.
+
+---
+
+## Columnas de envío del Inventory Loader
+
+Si actualizas ofertas con el archivo Inventory Loader (el que tiene las columnas `sku`, `product-id` y `add-delete`), dos columnas de envío parecen campos de sí/no pero siguen sus propias reglas. La guía del Inventory Loader de Amazon las define así:
+
+| Nombre de columna | Valores esperados | Qué controla |
+|---|---|---|
+| `will-ship-internationally` | `n` o `1` para solo EE. UU., `y` o `2` para internacional | Si envías la oferta fuera de EE. UU. |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` y `Plus`, separados por comas, o `N` para ninguno | Qué opciones de envío rápido ofreces |
+
+Así que `expedited-shipping` no es un campo de sí/no, y una `y` ahí no coincide con ninguna opción. Escribe `Next,Second` para ofrecer envío en un día y en dos días, o deja la celda vacía si no ofreces ninguno.
 
 ---
 

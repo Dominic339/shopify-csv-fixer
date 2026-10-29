@@ -129,6 +129,30 @@ describe("Amazon Inventory Loader", () => {
     const res = run("amazon_inventory_loader", "sku,product-id,product-id-type,price,quantity\nA,1.23457E+11,3,1,1\nB,01234567890,3,1,1");
     expect(codes(res)).toEqual(["amazon/product_id_scientific_notation", "amazon/invalid_product_id"]);
   });
+
+  // Amazon's Inventory Loader guide: will-ship-internationally takes 1/n (US only) or
+  // 2/y (international); expedited-shipping lists Next, Second, Domestic, International,
+  // Plus separated by commas, or N for none.
+  it("accepts every documented shipping value", () => {
+    const res = run(
+      "amazon_inventory_loader",
+      "sku,product-id,product-id-type,price,quantity,will-ship-internationally,expedited-shipping\nA,B08XYZABCD,1,10,1,2,\"Next,Second\"\nB,B08XYZABCE,1,10,1,1,N\nC,B08XYZABCF,1,10,1,Y,\"domestic, international\"\nD,B08XYZABCG,1,10,1,n,"
+    );
+    expect(codes(res)).toEqual([]);
+  });
+
+  it("flags yes/no words in the shipping fields", () => {
+    const res = run(
+      "amazon_inventory_loader",
+      "sku,product-id,product-id-type,price,quantity,will-ship-internationally,expedited-shipping\nA,B08XYZABCD,1,10,1,yes,y\nB,B08XYZABCE,1,10,1,3,\"Next,Standard\""
+    );
+    expect(res.issues.map((i) => [i.rowIndex, i.column, i.code])).toEqual([
+      [0, "will-ship-internationally", "amazon/invalid_boolean_field"],
+      [0, "expedited-shipping", "amazon/invalid_expedited_shipping"],
+      [1, "will-ship-internationally", "amazon/invalid_boolean_field"],
+      [1, "expedited-shipping", "amazon/invalid_expedited_shipping"],
+    ]);
+  });
 });
 
 describe("Etsy", () => {

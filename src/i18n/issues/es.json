@@ -840,10 +840,16 @@
 "howToFix": "Acorta brand-name a 50 caracteres o menos."
 },
 "amazon/invalid_boolean_field": {
-"title": "Valor de campo booleano no válido",
-"explanation": "Un campo de envío booleano (will-ship-internationally o expedited-shipping) contiene un valor distinto de 'y' o 'n'.",
-"whyPlatformCares": "El procesador de archivos planos de Amazon espera exactamente 'y', 'n' o vacío en estos campos. Los valores no válidos se ignoran sin aviso o hacen que se rechace la fila.",
-"howToFix": "Usa 'y' para activar o 'n' para desactivar la opción de envío, o deja el campo vacío para usar la configuración predeterminada de tu cuenta."
+"title": "Valor de will-ship-internationally no válido",
+"explanation": "El campo will-ship-internationally contiene un valor distinto de 1, 2, y o n.",
+"whyPlatformCares": "El Inventory Loader de Amazon interpreta 1 o n como envío solo dentro de EE. UU. y 2 o y como envío internacional. Cualquier otro valor no se puede leer, así que la fila puede rechazarse o el ajuste ignorarse.",
+"howToFix": "Usa n o 1 para enviar solo dentro de EE. UU., o y o 2 para enviar al extranjero. Deja la celda vacía si no quieres definirlo."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Valor de expedited-shipping no válido",
+"explanation": "El campo expedited-shipping contiene algo distinto de los nombres de opciones de envío de Amazon.",
+"whyPlatformCares": "El Inventory Loader de Amazon espera una lista separada por comas de las opciones de envío rápido que ofreces: Next (un día), Second (dos días), Domestic, International y Plus. N o una celda vacía significa ninguna. Palabras como yes o true, o cualquier otra cosa, no corresponden a ninguna opción.",
+"howToFix": "Enumera las opciones que ofreces separadas por comas, por ejemplo Next,Second. Usa N o deja la celda vacía si no ofreces envío urgente."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Código de barras estropeado por una hoja de cálculo",

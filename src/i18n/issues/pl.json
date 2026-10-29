@@ -840,10 +840,16 @@
 "howToFix": "Skróć brand-name do 50 znaków lub mniej."
 },
 "amazon/invalid_boolean_field": {
-"title": "Nieprawidłowa wartość pola logicznego",
-"explanation": "Logiczne pole wysyłki (will-ship-internationally lub expedited-shipping) zawiera wartość inną niż 'y' lub 'n'.",
-"whyPlatformCares": "Procesor plików płaskich Amazon oczekuje w tych polach dokładnie 'y', 'n' lub pustej wartości. Nieprawidłowe wartości są po cichu ignorowane albo powodują odrzucenie wiersza.",
-"howToFix": "Użyj 'y', aby włączyć, lub 'n', aby wyłączyć opcję wysyłki, albo zostaw pole puste, by użyć ustawień domyślnych konta."
+"title": "Nieprawidłowa wartość will-ship-internationally",
+"explanation": "Pole will-ship-internationally zawiera wartość inną niż 1, 2, y lub n.",
+"whyPlatformCares": "Inventory Loader Amazona odczytuje 1 lub n jako wysyłkę tylko na terenie USA, a 2 lub y jako wysyłkę międzynarodową. Innych wartości nie da się odczytać, więc wiersz może zostać odrzucony albo ustawienie pominięte.",
+"howToFix": "Użyj n lub 1 dla wysyłki tylko na terenie USA albo y lub 2 dla wysyłki międzynarodowej. Zostaw komórkę pustą, jeśli nie chcesz tego ustawiać."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Nieprawidłowa wartość expedited-shipping",
+"explanation": "Pole expedited-shipping zawiera coś innego niż nazwy opcji wysyłki Amazona.",
+"whyPlatformCares": "Inventory Loader Amazona oczekuje listy szybszych opcji wysyłki, które oferujesz, oddzielonych przecinkami: Next (jeden dzień), Second (dwa dni), Domestic, International i Plus. N lub pusta komórka oznacza brak. Słów takich jak yes czy true ani innych wartości nie da się dopasować do żadnej opcji.",
+"howToFix": "Wymień oferowane opcje oddzielone przecinkami, na przykład Next,Second. Wpisz N lub zostaw komórkę pustą, jeśli nie oferujesz szybkiej wysyłki."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Kod kreskowy zepsuty przez arkusz kalkulacyjny",

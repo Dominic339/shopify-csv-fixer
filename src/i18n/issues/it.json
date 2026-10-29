@@ -840,10 +840,16 @@
 "howToFix": "Accorcia brand-name a 50 caratteri o meno."
 },
 "amazon/invalid_boolean_field": {
-"title": "Valore di campo booleano non valido",
-"explanation": "Un campo di spedizione booleano (will-ship-internationally o expedited-shipping) contiene un valore diverso da 'y' o 'n'.",
-"whyPlatformCares": "Il processore dei file flat di Amazon si aspetta esattamente 'y', 'n' o vuoto in questi campi. I valori non validi vengono ignorati senza avviso o fanno rifiutare la riga.",
-"howToFix": "Usa 'y' per attivare o 'n' per disattivare l'opzione di spedizione, oppure lascia il campo vuoto per usare le impostazioni predefinite del tuo account."
+"title": "Valore di will-ship-internationally non valido",
+"explanation": "Il campo will-ship-internationally contiene un valore diverso da 1, 2, y o n.",
+"whyPlatformCares": "L'Inventory Loader di Amazon legge 1 o n come spedizione solo negli Stati Uniti e 2 o y come spedizione internazionale. Qualsiasi altro valore non è leggibile, quindi la riga può essere rifiutata o l'impostazione ignorata.",
+"howToFix": "Usa n o 1 per spedire solo negli Stati Uniti, oppure y o 2 per spedire all'estero. Lascia la cella vuota se non vuoi impostarlo."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Valore di expedited-shipping non valido",
+"explanation": "Il campo expedited-shipping contiene qualcosa di diverso dai nomi delle opzioni di spedizione di Amazon.",
+"whyPlatformCares": "L'Inventory Loader di Amazon si aspetta un elenco separato da virgole delle opzioni di spedizione veloce che offri: Next (un giorno), Second (due giorni), Domestic, International e Plus. N o una cella vuota significa nessuna. Parole come yes o true, o qualsiasi altra cosa, non corrispondono a nessuna opzione.",
+"howToFix": "Elenca le opzioni che offri separate da virgole, ad esempio Next,Second. Usa N o lascia la cella vuota se non offri la spedizione rapida."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Codice a barre rovinato da un foglio di calcolo",

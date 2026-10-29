@@ -2,7 +2,7 @@
 title: "Amazon Flat File Boolean Fields: y/n, TRUE/FALSE, and Common Pitfalls"
 description: "Learn which boolean fields in Amazon Seller Central Flat Files expect 'y' or 'n' (not TRUE/FALSE or 1/0), how to fix invalid values in bulk, and how to avoid spreadsheet auto-formatting that corrupts boolean columns."
 keywords: ["amazon flat file boolean", "amazon csv boolean fields", "amazon y n csv", "amazon flat file true false", "amazon seller central csv boolean", "amazon is_adult_product", "amazon batteries_required", "amazon flat file errors"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Which boolean values Amazon Flat Files accept (y/n vs TRUE/FALSE vs 1/0)"
@@ -47,6 +47,19 @@ These columns appear in many category templates and require careful attention:
 | `generic_keywords` | text | (Not boolean; listed here to avoid confusion) |
 
 > **Note:** The exact column names and accepted values vary by category template. Always refer to the data definitions tab in the template you downloaded from Seller Central for your specific category.
+
+---
+
+## Inventory Loader Shipping Columns
+
+If you update offers with the Inventory Loader file (the one with `sku`, `product-id` and `add-delete` columns), two shipping columns look like yes/no fields but follow their own rules. Amazon's Inventory Loader guide defines them like this:
+
+| Column name | Expected values | What it controls |
+|---|---|---|
+| `will-ship-internationally` | `n` or `1` for US only, `y` or `2` for international | Whether you ship the offer outside the US |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` and `Plus`, separated by commas, or `N` for none | Which faster shipping options you offer |
+
+So `expedited-shipping` isn't a yes/no field, and a `y` there doesn't match any option. Write `Next,Second` to offer one-day and two-day shipping, or leave the cell blank if you offer none.
 
 ---
 

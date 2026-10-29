@@ -203,13 +203,24 @@ export const AMAZON_ISSUE_META: IssueMetaMap = {
 
   "amazon/invalid_boolean_field": {
     code: "amazon/invalid_boolean_field",
-    title: "Invalid boolean field value",
+    title: "Invalid will-ship-internationally value",
     category: "compliance",
     blocking: false,
     autoFixable: false,
-    explanation: "A boolean shipping field (will-ship-internationally or expedited-shipping) contains a value other than 'y' or 'n'.",
-    whyPlatformCares: "Amazon's flat-file processor expects these fields to be exactly 'y', 'n', or blank. Invalid values are silently ignored or cause the row to be rejected.",
-    howToFix: "Use 'y' to enable or 'n' to disable the shipping option, or leave the field blank to use your account defaults.",
+    explanation: "The will-ship-internationally field contains a value other than 1, 2, y or n.",
+    whyPlatformCares: "Amazon's Inventory Loader reads 1 or n as US shipping only and 2 or y as international shipping. Any other value can't be read, so the row may be rejected or the setting ignored.",
+    howToFix: "Use n or 1 to ship within the US only, or y or 2 to ship internationally. Leave the cell blank if you don't want to set it.",
+  },
+
+  "amazon/invalid_expedited_shipping": {
+    code: "amazon/invalid_expedited_shipping",
+    title: "Invalid expedited-shipping value",
+    category: "compliance",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The expedited-shipping field contains something other than Amazon's shipping option names.",
+    whyPlatformCares: "Amazon's Inventory Loader expects a comma-separated list of the faster shipping options you offer: Next (one day), Second (two day), Domestic, International and Plus. N or a blank cell means none. Words like yes or true, or anything else, can't be matched to an option.",
+    howToFix: "List the options you offer separated by commas, for example Next,Second. Use N or leave the cell blank if you offer no expedited shipping.",
   },
 
   "amazon/product_id_scientific_notation": {

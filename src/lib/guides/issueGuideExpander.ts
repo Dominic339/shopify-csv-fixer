@@ -70,6 +70,8 @@ const englishTr: Tr = fillTemplate;
 // ---------------------------------------------------------------------------
 
 const COLUMN_NAME_MAP: Record<string, string> = {
+  invalid_boolean_field: "will-ship-internationally",
+  invalid_expedited_shipping: "expedited-shipping",
   blank_handle: "Handle",
   invalid_handle: "Handle",
   duplicate_handle: "Handle",
@@ -119,6 +121,7 @@ export function classifyIssue(input: IssueInput): IssueType {
   const suffix = issueCode.includes("/") ? issueCode.split("/").slice(1).join("/") : issueCode;
 
   if (suffix === "missing_required_header" || suffix === "extra_column") return "required_header";
+  if (suffix === "invalid_expedited_shipping") return "enum";
 
   if (
     suffix.includes("boolean") ||
@@ -187,7 +190,7 @@ function booleanValues(platform: string, tr: Tr): string[] {
     case "woocommerce":
       return [tr("1 (true)"), tr("0 (false)"), tr("(the fixer normalizes common variants like yes/no)")];
     case "amazon":
-      return [tr("y  (lowercase, means true)"), tr("n  (lowercase, means false)")];
+      return [tr("y or 2 (ships internationally)"), tr("n or 1 (ships within the US only)")];
     default:
       return ["true", "false"];
   }
@@ -221,6 +224,8 @@ const ENUM_BY_CODE: Record<string, string[]> = {
   "etsy/invalid_who_made": ["i_did", "someone_else", "collective"],
   "etsy/invalid_is_supply": ["TRUE", "FALSE"],
   "amazon/invalid_add_delete": ["a (add/update)", "d (delete)"],
+  // Amazon's Inventory Loader guide: a comma-separated list of these, or N for none.
+  "amazon/invalid_expedited_shipping": ["Next", "Second", "Domestic", "International", "Plus", "N"],
 };
 
 /** The character limit named in the rule's (English) explanation, if any. */
@@ -289,7 +294,7 @@ function getExamples(type: IssueType, input: IssueInput, tr: Tr): Example[] {
     case "boolean":
       if (input.platform === "amazon") {
         return [
-          { bad: "yes", good: "y", note: tr("Amazon uses lowercase y/n") },
+          { bad: "yes", good: "y", note: tr("Amazon also accepts 2 for y and 1 for n") },
           { bad: "TRUE", good: "y" },
           { bad: "No", good: "n" },
           { bad: "FALSE", good: "n" },
@@ -666,7 +671,7 @@ function getPreventTips(type: IssueType, input: IssueInput, tr: Tr): string[] {
     case "boolean":
       return [
         isAmazon
-          ? tr("Always type y or n (lowercase). Don't use spreadsheet checkboxes; export them as text instead.")
+          ? tr("Always type y or n (or 2 or 1). Don't use spreadsheet checkboxes; export them as text instead.")
           : input.platform === "woocommerce"
             ? tr("Always type 1 or 0. Don't use spreadsheet checkboxes; export them as text instead.")
             : tr("Always type true or false in lowercase, as in Shopify's own template. Don't use spreadsheet checkboxes; export them as text instead."),
@@ -770,10 +775,13 @@ function getPlatformNote(type: IssueType, input: IssueInput, tr: Tr): string | n
     if (platform === "shopify")
       return tr("Shopify's template uses lowercase true and false. A blank cell uses the column's default: true for Published on online store, Charge tax and Requires shipping, and false for Gift card. Values like Yes, No, 1 or 0 aren't valid, but StriveFormats converts them to true or false for you.");
     if (platform === "amazon")
-      return tr("Amazon flat files use lowercase y for true and lowercase n for false. This is different from most other platforms that use TRUE/FALSE.");
+      return tr("In Amazon's Inventory Loader, will-ship-internationally takes y or 2 to ship internationally and n or 1 to ship within the US only. Amazon's guide shows these in lowercase, which is what StriveFormats suggests. Words like Yes, TRUE or FALSE aren't on the list.");
     if (platform === "woocommerce")
       return tr("WooCommerce Product CSV supports 1 and 0 as well as yes and no for boolean fields. The StriveFormats fixer normalizes these to the correct format automatically.");
   }
+
+  if (issueCode === "amazon/invalid_expedited_shipping")
+    return tr("expedited-shipping isn't a yes/no field. It lists the faster shipping options you offer, separated by commas: Next (one day), Second (two day), Domestic, International and Plus. For example, Next,Second offers one-day and two-day shipping. Use N, or leave the cell blank, if you offer none.");
 
   if (type === "enum" && issueCode.includes("category_id"))
     return tr("eBay CategoryIDs are numeric codes from eBay's category taxonomy. Find the ID by browsing eBay to the correct category and looking at the number in the URL (e.g., /b/.../{id}), or by using the eBay Category Lookup API. Using the wrong category ID causes listings to be placed in the wrong section or rejected entirely.");
@@ -818,6 +826,8 @@ function getDetectionNote(type: IssueType, input: IssueInput, column: string, tr
     case "length_limit":
       return tr("StriveFormats measures the character length of every cell in the {column} column and compares it against {platform}'s documented limit. Rows exceeding the limit are individually flagged with the actual character count.", v);
     case "enum":
+      if (input.issueCode === "amazon/invalid_expedited_shipping")
+        return tr("StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.");
       return tr("StriveFormats checks the {column} column against the exact list of accepted values for {platform}. The comparison is case-sensitive, so any difference in capitalization or spelling is flagged as an invalid value.", v);
     case "duplicate":
       return tr("StriveFormats builds a frequency map of all values in the {column} column as it parses the file. Any value that appears more than once is flagged on every row where it occurs.", v);
@@ -835,7 +845,7 @@ function getTechnicalDetail(type: IssueType, input: IssueInput, column: string, 
   switch (type) {
     case "boolean":
       if (input.platform === "amazon")
-        return tr(`Amazon flat files require the literal lowercase strings "y" and "n" for boolean fields. This differs from most other platforms. Spreadsheet applications often export boolean cells as "TRUE"/"FALSE", "Yes"/"No", or "1"/"0", none of which Amazon's importer accepts. Even a correctly-spelled "Y" (uppercase) will be rejected because Amazon's parser is case-sensitive for these values.`);
+        return tr(`Amazon's Inventory Loader guide defines will-ship-internationally with two codes for each choice: "n" or "1" means you ship within the US only, and "y" or "2" means you ship internationally. Spreadsheets often turn yes/no cells into "TRUE"/"FALSE" or "Yes"/"No", which aren't on that list. StriveFormats accepts the four documented codes in any capitalization and flags everything else.`);
       if (input.platform === "woocommerce")
         return tr(`WooCommerce's CSV importer accepts "1" for true and "0" for false. Some export tools produce "yes", "no", "TRUE", or "FALSE" instead. WooCommerce's built-in importer handles some of these, but third-party migration tools and staging sites often don't, so sticking to "1" and "0" avoids surprises.`);
       return tr(`Shopify's product CSV documentation lists true and false, in lowercase, for its boolean columns, and that is what StriveFormats writes. Spreadsheets often produce other spellings: Excel checkboxes export as TRUE/FALSE, and hand-typed files contain "Yes", "1" or "checked". StriveFormats converts capitals and yes/no/1/0 to true or false, and flags anything it can't map. A blank cell takes the column's default, which is true for Published on online store, Charge tax and Requires shipping, and false for Gift card.`, v);

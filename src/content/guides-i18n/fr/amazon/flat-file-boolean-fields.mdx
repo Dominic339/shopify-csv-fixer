@@ -2,7 +2,7 @@
 title: "Champs booléens du fichier plat Amazon : y/n, TRUE/FALSE et pièges courants"
 description: "Découvrez quels champs booléens des fichiers plats Seller Central attendent 'y' ou 'n' (et non TRUE/FALSE ou 1/0), comment corriger les valeurs non valides en masse et comment éviter la mise en forme automatique du tableur qui abîme ces colonnes."
 keywords: ["fichier plat amazon booléen", "champs booléens csv amazon", "amazon y n csv", "fichier plat amazon true false", "seller central csv vrai faux", "amazon is_adult_product", "amazon batteries_required", "erreurs fichier plat amazon"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Quelles valeurs booléennes les fichiers plats Amazon acceptent (y/n, TRUE/FALSE ou 1/0)"
@@ -47,6 +47,19 @@ Ces colonnes figurent dans de nombreux modèles de catégorie et demandent une a
 | `generic_keywords` | texte | (Pas un booléen ; cité pour éviter toute confusion) |
 
 > **Remarque :** les noms exacts des colonnes et les valeurs acceptées varient selon le modèle de catégorie. Consultez toujours l'onglet des définitions de données du modèle que vous avez téléchargé depuis Seller Central pour votre catégorie.
+
+---
+
+## Colonnes d'expédition de l'Inventory Loader
+
+Si vous mettez à jour des offres avec le fichier Inventory Loader (celui qui contient les colonnes `sku`, `product-id` et `add-delete`), deux colonnes d'expédition ressemblent à des champs oui/non mais suivent leurs propres règles. Le guide de l'Inventory Loader d'Amazon les définit ainsi :
+
+| Nom de colonne | Valeurs attendues | Ce qu'elle contrôle |
+|---|---|---|
+| `will-ship-internationally` | `n` ou `1` pour les États-Unis uniquement, `y` ou `2` pour l'international | Si vous expédiez l'offre hors des États-Unis |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` et `Plus`, séparés par des virgules, ou `N` pour aucune | Les options de livraison rapide que vous proposez |
+
+`expedited-shipping` n'est donc pas un champ oui/non, et un `y` n'y correspond à aucune option. Écrivez `Next,Second` pour proposer la livraison en un jour et en deux jours, ou laissez la cellule vide si vous n'en proposez aucune.
 
 ---
 

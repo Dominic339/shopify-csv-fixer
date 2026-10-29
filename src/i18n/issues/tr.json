@@ -840,10 +840,16 @@
 "howToFix": "brand-name değerini 50 karakter veya daha kısa olacak şekilde kısaltın."
 },
 "amazon/invalid_boolean_field": {
-"title": "Geçersiz mantıksal alan değeri",
-"explanation": "Mantıksal bir kargo alanı (will-ship-internationally veya expedited-shipping) 'y' veya 'n' dışında bir değer içeriyor.",
-"whyPlatformCares": "Amazon'un düz dosya işleyicisi bu alanların tam olarak 'y', 'n' veya boş olmasını bekler. Geçersiz değerler sessizce yok sayılır veya satırın reddedilmesine neden olur.",
-"howToFix": "Kargo seçeneğini etkinleştirmek için 'y', devre dışı bırakmak için 'n' kullanın ya da hesap varsayılanlarınızı kullanmak için alanı boş bırakın."
+"title": "Geçersiz will-ship-internationally değeri",
+"explanation": "will-ship-internationally alanı 1, 2, y veya n dışında bir değer içeriyor.",
+"whyPlatformCares": "Amazon Inventory Loader, 1 veya n değerini yalnızca ABD içine gönderim, 2 veya y değerini uluslararası gönderim olarak okur. Başka bir değer okunamaz; bu yüzden satır reddedilebilir veya ayar yok sayılabilir.",
+"howToFix": "Yalnızca ABD içine gönderim için n veya 1, uluslararası gönderim için y veya 2 kullanın. Ayarlamak istemiyorsanız hücreyi boş bırakın."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Geçersiz expedited-shipping değeri",
+"explanation": "expedited-shipping alanı Amazon'un gönderim seçeneği adları dışında bir şey içeriyor.",
+"whyPlatformCares": "Amazon Inventory Loader, sunduğunuz hızlı gönderim seçeneklerinin virgülle ayrılmış bir listesini bekler: Next (bir gün), Second (iki gün), Domestic, International ve Plus. N veya boş hücre hiçbiri anlamına gelir. yes veya true gibi sözcükler ya da başka bir değer hiçbir seçenekle eşleşmez.",
+"howToFix": "Sunduğunuz seçenekleri virgülle ayırarak yazın, örneğin Next,Second. Hızlı gönderim sunmuyorsanız N kullanın veya hücreyi boş bırakın."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Barkod bir elektronik tablo tarafından bozulmuş",

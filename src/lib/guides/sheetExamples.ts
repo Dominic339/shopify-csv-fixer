@@ -665,6 +665,10 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
     ["yes", "y"],
     ["FALSE", "n"],
   ]),
+  "amazon/invalid_expedited_shipping": amz("expedited-shipping", [
+    ["y", "Next,Second"],
+    ["no", "N"],
+  ]),
   "amazon/brand_name_too_long": amz("brand-name", [["Acme Handmade Ceramics and Home Goods Company International", "Acme Ceramics"]]),
   "amazon/min_above_max_price": {
     cols: [...A, "minimum-seller-allowed-price", "maximum-seller-allowed-price"],

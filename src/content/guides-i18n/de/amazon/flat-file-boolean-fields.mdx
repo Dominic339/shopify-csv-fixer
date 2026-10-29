@@ -2,7 +2,7 @@
 title: "Ja/Nein-Felder in Amazon-Flatfiles: y/n, TRUE/FALSE und typische Fallen"
 description: "Welche Ja/Nein-Felder in Amazon-Flatfiles 'y' oder 'n' erwarten (nicht TRUE/FALSE oder 1/0), wie du ungültige Werte in großen Mengen korrigierst und wie du verhinderst, dass Tabellenkalkulationen diese Spalten verfälschen."
 keywords: ["amazon flatfile boolesch", "amazon csv ja nein felder", "amazon y n csv", "amazon flatfile true false", "amazon seller central csv wahr falsch", "amazon is_adult_product", "amazon batteries_required", "amazon flatfile fehler"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Welche Ja/Nein-Werte Amazon-Flatfiles akzeptieren (y/n, TRUE/FALSE oder 1/0)"
@@ -47,6 +47,19 @@ Diese Spalten kommen in vielen Kategorievorlagen vor und verdienen besondere Auf
 | `generic_keywords` | Text | (Kein Ja/Nein-Feld, nur zur Abgrenzung aufgeführt) |
 
 > **Hinweis:** Die genauen Spaltennamen und erlaubten Werte unterscheiden sich je nach Kategorievorlage. Sieh immer im Tabellenblatt mit den Datendefinitionen der Vorlage nach, die du für deine Kategorie aus Seller Central heruntergeladen hast.
+
+---
+
+## Versandspalten im Inventory Loader
+
+Wenn du Angebote mit der Inventory-Loader-Datei aktualisierst (die mit den Spalten `sku`, `product-id` und `add-delete`), sehen zwei Versandspalten wie Ja/Nein-Felder aus, folgen aber eigenen Regeln. Amazons Inventory-Loader-Anleitung legt sie so fest:
+
+| Spaltenname | Erwartete Werte | Was sie steuert |
+|---|---|---|
+| `will-ship-internationally` | `n` oder `1` für nur USA, `y` oder `2` für international | Ob du das Angebot außerhalb der USA versendest |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` und `Plus`, durch Kommas getrennt, oder `N` für keine | Welche schnelleren Versandoptionen du anbietest |
+
+`expedited-shipping` ist also kein Ja/Nein-Feld, und ein `y` passt dort zu keiner Option. Schreibe `Next,Second`, um Versand in einem und in zwei Tagen anzubieten, oder lass die Zelle leer, wenn du keine anbietest.
 
 ---
 

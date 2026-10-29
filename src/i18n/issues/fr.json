@@ -840,10 +840,16 @@
 "howToFix": "Raccourcissez brand-name à 50 caractères maximum."
 },
 "amazon/invalid_boolean_field": {
-"title": "Valeur de champ booléen non valide",
-"explanation": "Un champ d'expédition booléen (will-ship-internationally ou expedited-shipping) contient une valeur autre que 'y' ou 'n'.",
-"whyPlatformCares": "Le traitement des fichiers plats d'Amazon attend exactement 'y', 'n' ou vide pour ces champs. Les valeurs non valides sont ignorées sans avertissement ou font rejeter la ligne.",
-"howToFix": "Utilisez 'y' pour activer ou 'n' pour désactiver l'option d'expédition, ou laissez vide pour utiliser les réglages par défaut de votre compte."
+"title": "Valeur will-ship-internationally non valide",
+"explanation": "Le champ will-ship-internationally contient une valeur autre que 1, 2, y ou n.",
+"whyPlatformCares": "L'Inventory Loader d'Amazon lit 1 ou n comme une expédition uniquement aux États-Unis et 2 ou y comme une expédition à l'international. Toute autre valeur est illisible : la ligne peut être refusée ou le réglage ignoré.",
+"howToFix": "Utilisez n ou 1 pour expédier uniquement aux États-Unis, ou y ou 2 pour expédier à l'international. Laissez la cellule vide si vous ne voulez pas le définir."
+},
+"amazon/invalid_expedited_shipping": {
+"title": "Valeur expedited-shipping non valide",
+"explanation": "Le champ expedited-shipping contient autre chose que les noms d'options de livraison d'Amazon.",
+"whyPlatformCares": "L'Inventory Loader d'Amazon attend une liste, séparée par des virgules, des options de livraison rapide que vous proposez : Next (un jour), Second (deux jours), Domestic, International et Plus. N ou une cellule vide signifie aucune. Des mots comme yes ou true, ou toute autre valeur, ne correspondent à aucune option.",
+"howToFix": "Indiquez les options proposées séparées par des virgules, par exemple Next,Second. Utilisez N ou laissez la cellule vide si vous ne proposez pas de livraison express."
 },
 "amazon/product_id_scientific_notation": {
 "title": "Code-barres abîmé par un tableur",
