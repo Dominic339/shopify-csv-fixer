@@ -1,0 +1,196 @@
+---
+title: "Reglas de formato CSV para importaciones de ecommerce"
+description: "Las reglas de formato exactas que debe cumplir tu CSV para superar las importaciones de las plataformas de ecommerce: separadores, comillas, finales de línea, codificación y encabezados."
+keywords: ["reglas de formato csv", "requisitos de formato csv", "formato de importación csv", "formato de archivo csv ecommerce", "reglas de comillas csv", "reglas de delimitador csv", "cómo dar formato a un csv para importar"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Las reglas de formato obligatorias que todo CSV de ecommerce debe cumplir"
+  - "Cómo funcionan las comillas y cuándo aplicarlas"
+  - "Requisitos de delimitador, finales de línea y codificación"
+  - "Cómo las hojas de cálculo rompen el formato CSV sin avisar"
+  - "Una lista rápida para validar tu archivo antes de subirlo"
+bestFor: "Vendedores que preparan su primer archivo de importación y desarrolladores que escriben scripts de exportación CSV"
+timeToComplete: "9 minutos"
+---
+
+## El estándar CSV que siguen las plataformas de ecommerce
+
+La mayoría de las plataformas de ecommerce (Shopify, WooCommerce, eBay y las exportaciones de Etsy) esperan archivos que sigan **RFC 4180**, el estándar CSV habitual. Ese estándar define exactamente cómo deben estructurarse filas, columnas, comillas y finales de línea. El Inventory Loader de Amazon es la excepción: usa texto delimitado por tabulaciones (.txt).
+
+Esta guía cubre todas las reglas que afectan al éxito de una importación. Incumplir cualquiera de ellas provoca errores de análisis, columnas mal asignadas o datos corrompidos sin avisar.
+
+---
+
+## Regla 1: la coma es el delimitador
+
+Usa comas para separar las columnas. No uses punto y coma (habitual en Excel con configuración regional europea), tabulaciones (formato TSV) ni barras verticales (`|`).
+
+**Correcto:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Incorrecto (punto y coma):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Si tu Excel usa punto y coma por defecto (porque tu configuración regional usa la coma como separador decimal), cambia el separador de listas del sistema a coma o exporta desde Google Sheets, que siempre genera archivos delimitados por comas.
+
+---
+
+## Regla 2: la primera fila contiene solo encabezados
+
+La fila 1 debe contener los nombres de las columnas y nada más. Sin filas en blanco encima, sin filas de título y sin celdas de encabezado combinadas.
+
+**Correcto:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Incorrecto:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+La plataforma lee la fila 1 como encabezados. Cualquier contenido que no sea un encabezado en la fila 1 se toma como nombres de columna, y ningún encabezado coincide.
+
+Hay dos excepciones: las plantillas de categoría de Amazon tienen filas de plantilla encima de los nombres de columna, y las plantillas de eBay pueden empezar con líneas `Info`. Deja esas filas tal como vienen en la plantilla descargada.
+
+---
+
+## Regla 3: los encabezados deben ser exactos
+
+Los nombres de columna deben coincidir exactamente con los que espera la plataforma:
+
+- **Mismas mayúsculas y minúsculas:** algunos importadores tratan `Handle`, `handle` y `HANDLE` como columnas distintas
+- **Sin espacios al principio ni al final:** ` Title` (con un espacio delante) no coincide con `Title`
+- **Sin saltos de línea dentro de los encabezados:** una celda de encabezado debe ocupar una sola línea
+- **Sin encabezados duplicados:** si dos columnas tienen el mismo nombre, la mayoría de los analizadores solo usa la última
+
+---
+
+## Regla 4: comillas obligatorias para comas, comillas y saltos de línea
+
+Siempre que el valor de una celda contenga una coma, una comilla doble o un salto de línea, rodea el valor completo con comillas dobles.
+
+**Correcto:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Escapar comillas dentro de un valor entrecomillado:** duplica la comilla interna:
+
+```
+"She said ""great product"""
+```
+
+Esto representa: She said "great product"
+
+| Situación | Formato correcto |
+|---|---|
+| Valor con coma | `"value, with comma"` |
+| Valor con comilla doble | `"value ""with"" quotes"` |
+| Valor con HTML | `"<p>Description here</p>"` |
+| Valor con salto de línea | `"Line one\nLine two"` (dentro de las comillas) |
+| Número simple | `19.99` (no necesita comillas) |
+
+---
+
+## Regla 5: codificación UTF-8
+
+Guarda tu archivo como **UTF-8**. La opción «CSV UTF-8» de Excel añade un BOM (Byte Order Mark): Shopify y WooCommerce lo leen sin problemas, pero quítalo si una plataforma no reconoce la primera columna.
+
+- UTF-8 admite letras acentuadas, la ñ, símbolos y cualquier idioma
+- Las codificaciones antiguas (Windows-1252, ISO 8859-1) estropean esos caracteres al importar
+- Los archivos ANSI, Latin-1 y Windows-1252 producen caracteres ilegibles en letras acentuadas, comillas tipográficas y símbolos de moneda
+
+**Comprobación:** abre el archivo en VS Code. La barra de estado muestra la codificación. Debe poner `UTF-8` (o `UTF-8 with BOM`), no `Windows 1252` ni `ISO 8859-1`.
+
+---
+
+## Regla 6: finales de línea uniformes
+
+Usa en todo el archivo o bien CRLF (`\r\n`, Windows) o bien LF (`\n`, Unix/macOS). Nunca los mezcles.
+
+Los finales de línea mezclados hacen que algunos analizadores vean filas en blanco entre las filas de datos o cuenten mal las columnas en valores de varias líneas.
+
+**Comprobación en VS Code:** la barra de estado muestra `CRLF` o `LF`. Haz clic para cambiar el final de línea y guarda.
+
+---
+
+## Regla 7: una fila por registro (salvo plataformas con productos de varias filas)
+
+Cada fila es un registro, pero en varias plataformas un producto ocupa varias filas:
+
+- **Shopify:** las filas de variantes y de imágenes adicionales repiten el `Handle` del producto
+- **WooCommerce:** cada variación tiene su propia fila, vinculada al producto variable mediante `Parent`
+- **eBay:** los anuncios con variaciones añaden filas `Relationship` debajo de la fila principal
+- **Amazon:** los artículos principales y secundarios son filas separadas, vinculadas por el SKU principal
+
+Sigue la estructura que describe la documentación de la plataforma y no combines ni dividas filas fuera de ella.
+
+---
+
+## Regla 8: sin filas en blanco
+
+Las filas en blanco entre las filas de datos o después de ellas hacen que los analizadores:
+
+- Inserten registros vacíos en la importación
+- Cuenten mal el número de productos
+- Dejen de procesar en la primera fila en blanco (en algunas plataformas)
+
+Elimina todas las filas en blanco antes de guardar. En Excel, pulsa `Ctrl+Fin` para saltar a la última celda usada. Si queda más allá de tus datos, hay filas en blanco que debes eliminar.
+
+---
+
+## Regla 9: sin filas de resumen ni de fórmulas
+
+Elimina cualquier fila que no sea un dato de producto:
+
+- Filas de total o subtotal al final
+- Filas con fórmulas SUMA()
+- Notas o instrucciones escritas debajo de los datos
+- Separadores de sección
+
+Estas filas aparecen como registros de producto en la importación y provocan errores de tipo (texto donde se esperan números, campos obligatorios vacíos, etc.).
+
+---
+
+## Regla 10: sin celdas combinadas
+
+Las celdas combinadas de Excel se exportan como un valor en la celda superior izquierda y cadenas vacías en todas las demás. El importador ve campos obligatorios vacíos en todas las filas después de la primera.
+
+**Solución:** seleccionar todo → separar celdas → rellenar las celdas vacías con los valores adecuados antes de guardar como CSV.
+
+---
+
+## Lista rápida de validación
+
+- [ ] Delimitado por comas (no por punto y coma ni barras verticales; los archivos de Amazon van delimitados por tabulaciones)
+- [ ] La fila 1 contiene solo los encabezados, sin filas en blanco encima
+- [ ] Los encabezados coinciden exactamente con los nombres que espera la plataforma (mayúsculas y espacios)
+- [ ] No hay nombres de columna duplicados
+- [ ] Los valores con comas o comillas están entre comillas dobles
+- [ ] La codificación del archivo es UTF-8
+- [ ] Los finales de línea son uniformes (todos CRLF o todos LF)
+- [ ] No hay filas en blanco en ninguna parte del archivo
+- [ ] No hay filas de resumen, filas de fórmulas ni celdas combinadas
+- [ ] El archivo tiene extensión `.csv` y es texto plano (no un `.xlsx` renombrado a `.csv`)
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+Sube tu CSV y StriveFormats comprueba automáticamente cada una de las reglas anteriores. Señala los incumplimientos con la fila y la columna exactas, corrige automáticamente los problemas seguros y exporta un archivo limpio.
+
+[Abrir el corrector de CSV](/app) | [Ver plantillas CSV](/presets)

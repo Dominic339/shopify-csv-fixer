@@ -1,0 +1,196 @@
+---
+title: "Règles de format CSV pour les imports e-commerce"
+description: "Les règles de format exactes que votre CSV doit respecter pour passer les imports des plateformes e-commerce : séparateurs, guillemets, fins de ligne, encodage et en-têtes."
+keywords: ["règles de format csv", "exigences format csv", "format d'import csv", "format de fichier csv e-commerce", "règles guillemets csv", "règles séparateur csv", "comment formater un csv pour l'import"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Les règles de format obligatoires que tout CSV e-commerce doit respecter"
+  - "Comment fonctionnent les guillemets et quand les utiliser"
+  - "Les exigences de séparateur, de fins de ligne et d'encodage"
+  - "Comment les tableurs cassent le format CSV sans prévenir"
+  - "Une liste de contrôle rapide pour valider votre fichier avant l'envoi"
+bestFor: "Vendeurs qui préparent leur premier fichier d'import et développeurs qui écrivent des scripts d'export CSV"
+timeToComplete: "9 minutes"
+---
+
+## La norme CSV suivie par les plateformes e-commerce
+
+La plupart des plateformes e-commerce (Shopify, WooCommerce, eBay et les exports d'Etsy) attendent des fichiers conformes à la **RFC 4180**, la norme CSV courante. Elle définit précisément la structure des lignes, des colonnes, des guillemets et des fins de ligne. L'Inventory Loader d'Amazon fait exception : il prend du texte séparé par des tabulations (.txt).
+
+Ce guide couvre toutes les règles qui conditionnent la réussite d'un import. Enfreindre l'une d'elles entraîne des erreurs d'analyse, des colonnes mal associées ou des données corrompues sans avertissement.
+
+---
+
+## Règle 1 : la virgule est le séparateur
+
+Séparez les colonnes par des virgules. N'utilisez pas de points-virgules (courants avec Excel en paramètres régionaux européens), de tabulations (format TSV) ni de barres verticales (`|`).
+
+**Correct :**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Incorrect (points-virgules) :**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Si votre Excel utilise les points-virgules par défaut (parce que vos paramètres régionaux utilisent la virgule comme séparateur décimal, comme en français), changez le séparateur de liste du système en virgule ou exportez depuis Google Sheets, qui produit toujours des fichiers séparés par des virgules.
+
+---
+
+## Règle 2 : la première ligne ne contient que les en-têtes
+
+La ligne 1 doit contenir les noms de colonnes et rien d'autre. Pas de ligne vide au-dessus, pas de ligne de titre, pas de cellules d'en-tête fusionnées.
+
+**Correct :**
+
+```
+Handle,Title,Variant Price
+```
+
+**Incorrect :**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+La plateforme lit la ligne 1 comme les en-têtes. Tout contenu autre en ligne 1 est pris pour des noms de colonnes, et aucun en-tête ne correspond plus.
+
+Il y a deux exceptions : les modèles de catégorie Amazon comportent des lignes de modèle au-dessus des noms de colonnes, et les modèles eBay peuvent commencer par des lignes `Info`. Gardez ces lignes exactement comme dans le modèle téléchargé.
+
+---
+
+## Règle 3 : les en-têtes doivent être exacts
+
+Les noms de colonnes doivent correspondre exactement à ceux qu'attend la plateforme :
+
+- **Même casse :** certains outils d'import traitent `Handle`, `handle` et `HANDLE` comme des colonnes différentes
+- **Pas d'espace au début ni à la fin :** ` Title` (avec une espace devant) ne correspond pas à `Title`
+- **Pas de saut de ligne dans les en-têtes :** une cellule d'en-tête doit tenir sur une seule ligne
+- **Pas d'en-têtes en double :** si deux colonnes portent le même nom, la plupart des analyseurs n'utilisent que la dernière
+
+---
+
+## Règle 4 : guillemets obligatoires pour les virgules, guillemets et sauts de ligne
+
+Dès qu'une valeur contient une virgule, un guillemet double ou un saut de ligne, entourez toute la valeur de guillemets doubles.
+
+**Correct :**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Échapper des guillemets dans une valeur entre guillemets :** doublez le guillemet intérieur :
+
+```
+"She said ""great product"""
+```
+
+Cela représente : She said "great product"
+
+| Situation | Format correct |
+|---|---|
+| Valeur avec une virgule | `"value, with comma"` |
+| Valeur avec un guillemet double | `"value ""with"" quotes"` |
+| Valeur avec du HTML | `"<p>Description here</p>"` |
+| Valeur avec un saut de ligne | `"Line one\nLine two"` (entre les guillemets) |
+| Nombre simple | `19.99` (pas besoin de guillemets) |
+
+---
+
+## Règle 5 : encodage UTF-8
+
+Enregistrez votre fichier en **UTF-8**. L'option « CSV UTF-8 » d'Excel ajoute un BOM (Byte Order Mark) : Shopify et WooCommerce le lisent sans problème, mais retirez-le si une plateforme ne reconnaît pas la première colonne.
+
+- L'UTF-8 gère les lettres accentuées, les symboles et toutes les langues
+- Les anciens encodages (Windows-1252, ISO 8859-1) abîment ces caractères à l'import
+- Les fichiers ANSI, Latin-1 et Windows-1252 produisent des caractères illisibles pour les lettres accentuées, les guillemets typographiques et les symboles monétaires
+
+**Vérification :** ouvrez le fichier dans VS Code. La barre d'état affiche l'encodage. Elle doit indiquer `UTF-8` (ou `UTF-8 with BOM`), pas `Windows 1252` ni `ISO 8859-1`.
+
+---
+
+## Règle 6 : des fins de ligne homogènes
+
+Utilisez dans tout le fichier soit CRLF (`\r\n`, Windows), soit LF (`\n`, Unix/macOS). Ne les mélangez jamais.
+
+Des fins de ligne mélangées font voir à certains analyseurs des lignes vides entre les lignes de données, ou leur font mal compter les colonnes dans les valeurs sur plusieurs lignes.
+
+**Vérification dans VS Code :** la barre d'état affiche `CRLF` ou `LF`. Cliquez dessus pour changer la fin de ligne, puis enregistrez.
+
+---
+
+## Règle 7 : une ligne par enregistrement (sauf plateformes à produits sur plusieurs lignes)
+
+Chaque ligne est un enregistrement, mais sur plusieurs plateformes un produit s'étend sur plusieurs lignes :
+
+- **Shopify :** les lignes de variantes et d'images supplémentaires répètent le `Handle` du produit
+- **WooCommerce :** chaque variation a sa propre ligne, reliée au produit variable par `Parent`
+- **eBay :** les annonces avec variantes ajoutent des lignes `Relationship` sous la ligne parente
+- **Amazon :** les articles parents et enfants sont des lignes distinctes, reliées par le SKU parent
+
+Suivez la structure décrite par la documentation de la plateforme, et ne fusionnez ni ne divisez de lignes en dehors de celle-ci.
+
+---
+
+## Règle 8 : pas de lignes vides
+
+Des lignes vides entre les lignes de données ou après elles poussent les analyseurs à :
+
+- Insérer des enregistrements vides dans l'import
+- Mal compter le nombre de produits
+- S'arrêter à la première ligne vide (sur certaines plateformes)
+
+Supprimez toutes les lignes vides avant d'enregistrer. Dans Excel, appuyez sur `Ctrl+Fin` pour aller à la dernière cellule utilisée. Si elle se trouve au-delà de vos données, il reste des lignes vides à supprimer.
+
+---
+
+## Règle 9 : pas de lignes de synthèse ni de formules
+
+Supprimez toutes les lignes qui ne sont pas des données produit :
+
+- Lignes de total et de sous-total en bas
+- Lignes de formules SOMME()
+- Notes ou instructions saisies sous les données
+- Séparateurs de section
+
+Ces lignes apparaissent comme des produits dans l'import et provoquent des erreurs de type (du texte là où un nombre est attendu, des champs obligatoires manquants, etc.).
+
+---
+
+## Règle 10 : pas de cellules fusionnées
+
+Les cellules fusionnées d'Excel s'exportent avec une valeur dans la cellule en haut à gauche et des chaînes vides dans toutes les autres. L'outil d'import voit des champs obligatoires manquants sur chaque ligne après la première.
+
+**Solution :** tout sélectionner → annuler la fusion des cellules → remplir les cellules vides avec les bonnes valeurs avant d'enregistrer en CSV.
+
+---
+
+## Liste de contrôle rapide
+
+- [ ] Séparé par des virgules (pas de points-virgules ni de barres verticales ; les fichiers Amazon sont séparés par des tabulations)
+- [ ] La ligne 1 ne contient que les en-têtes, sans ligne vide au-dessus
+- [ ] Les en-têtes correspondent exactement aux noms attendus par la plateforme (casse et espaces)
+- [ ] Aucun nom de colonne en double
+- [ ] Les valeurs contenant des virgules ou des guillemets sont entre guillemets doubles
+- [ ] L'encodage du fichier est l'UTF-8
+- [ ] Des fins de ligne homogènes (toutes CRLF ou toutes LF)
+- [ ] Aucune ligne vide nulle part dans le fichier
+- [ ] Aucune ligne de synthèse, ligne de formules ni cellule fusionnée
+- [ ] Le fichier a l'extension `.csv` et est du texte brut (pas un `.xlsx` renommé en `.csv`)
+
+---
+
+## Corrigez-le automatiquement avec StriveFormats
+
+Envoyez votre CSV et StriveFormats vérifie automatiquement chacune des règles ci-dessus. Il signale les infractions avec la ligne et la colonne exactes, corrige automatiquement les problèmes sans risque et exporte un fichier propre.
+
+[Ouvrir le correcteur CSV](/app) | [Voir les modèles CSV](/presets)

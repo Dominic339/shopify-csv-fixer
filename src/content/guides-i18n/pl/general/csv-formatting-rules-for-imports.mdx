@@ -1,0 +1,196 @@
+---
+title: "Zasady formatowania CSV przy importach e-commerce"
+description: "Dokładne zasady formatowania, które musi spełniać Twój plik CSV, żeby przejść importy platform e-commerce: separatory, cudzysłowy, końce wierszy, kodowanie i nagłówki."
+keywords: ["zasady formatowania csv", "wymagania formatu csv", "format importu csv", "format pliku csv e-commerce", "zasady cudzysłowów csv", "zasady separatora csv", "jak sformatować csv do importu"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Obowiązkowe zasady formatowania, które musi spełniać każdy plik CSV dla e-commerce"
+  - "Jak działają cudzysłowy i kiedy ich używać"
+  - "Wymagania dotyczące separatora, końców wierszy i kodowania"
+  - "Jak arkusze kalkulacyjne po cichu psują format CSV"
+  - "Krótka lista kontrolna do sprawdzenia pliku przed przesłaniem"
+bestFor: "Sprzedawcy przygotowujący pierwszy plik do importu i programiści piszący skrypty eksportu CSV"
+timeToComplete: "9 minut"
+---
+
+## Standard CSV, którego trzymają się platformy e-commerce
+
+Większość platform e-commerce (Shopify, WooCommerce, eBay i eksporty Etsy) oczekuje plików zgodnych z **RFC 4180**, popularnym standardem CSV. Określa on dokładnie, jak mają być zbudowane wiersze, kolumny, cudzysłowy i końce wierszy. Wyjątkiem jest Inventory Loader Amazon: przyjmuje tekst rozdzielany tabulatorami (.txt).
+
+Ten poradnik omawia każdą zasadę, od której zależy powodzenie importu. Złamanie którejkolwiek z nich prowadzi do błędów parsowania, złego przypisania kolumn albo po cichu uszkodzonych danych.
+
+---
+
+## Zasada 1: separatorem jest przecinek
+
+Rozdzielaj kolumny przecinkami. Nie używaj średników (typowych dla Excela z europejskimi ustawieniami regionalnymi), tabulatorów (format TSV) ani pionowych kresek (`|`).
+
+**Dobrze:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Źle (średniki):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Jeśli Twój Excel domyślnie używa średników (bo ustawienia regionalne używają przecinka jako separatora dziesiętnego, jak w Polsce), zmień separator listy w systemie na przecinek albo eksportuj przez Arkusze Google, które zawsze tworzą pliki rozdzielane przecinkami.
+
+---
+
+## Zasada 2: pierwszy wiersz zawiera tylko nagłówki
+
+Wiersz 1 musi zawierać nazwy kolumn i nic więcej. Bez pustych wierszy nad nim, bez wierszy tytułowych, bez scalonych komórek nagłówka.
+
+**Dobrze:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Źle:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+Platforma czyta wiersz 1 jako nagłówki. Wszystko inne w wierszu 1 zostanie potraktowane jak nazwy kolumn i żaden nagłówek nie będzie pasował.
+
+Są dwa wyjątki: szablony kategorii Amazon mają wiersze szablonu nad nazwami kolumn, a szablony eBay mogą zaczynać się od wierszy `Info`. Zostaw te wiersze dokładnie tak, jak są w pobranym szablonie.
+
+---
+
+## Zasada 3: nagłówki muszą być dokładne
+
+Nazwy kolumn muszą dokładnie odpowiadać tym, których oczekuje platforma:
+
+- **Ta sama wielkość liter:** niektóre importery traktują `Handle`, `handle` i `HANDLE` jako różne kolumny
+- **Bez spacji na początku ani na końcu:** ` Title` (ze spacją przed) nie pasuje do `Title`
+- **Bez znaków nowego wiersza w nagłówkach:** komórka nagłówka musi mieścić się w jednym wierszu
+- **Bez powtarzających się nagłówków:** jeśli dwie kolumny mają tę samą nazwę, większość parserów używa tylko ostatniej
+
+---
+
+## Zasada 4: cudzysłowy przy przecinkach, cudzysłowach i nowych wierszach
+
+Zawsze gdy wartość komórki zawiera przecinek, cudzysłów podwójny lub znak nowego wiersza, ujmij całą wartość w cudzysłów podwójny.
+
+**Dobrze:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Zabezpieczanie cudzysłowów wewnątrz wartości w cudzysłowie:** podwój wewnętrzny cudzysłów:
+
+```
+"She said ""great product"""
+```
+
+To oznacza: She said "great product"
+
+| Sytuacja | Poprawny format |
+|---|---|
+| Wartość z przecinkiem | `"value, with comma"` |
+| Wartość z cudzysłowem podwójnym | `"value ""with"" quotes"` |
+| Wartość z HTML | `"<p>Description here</p>"` |
+| Wartość z nowym wierszem | `"Line one\nLine two"` (wewnątrz cudzysłowu) |
+| Zwykła liczba | `19.99` (cudzysłów niepotrzebny) |
+
+---
+
+## Zasada 5: kodowanie UTF-8
+
+Zapisz plik jako **UTF-8**. Opcja „CSV UTF-8” w Excelu dodaje BOM (Byte Order Mark): Shopify i WooCommerce czytają go bez problemu, ale usuń go, jeśli platforma nie rozpoznaje pierwszej kolumny.
+
+- UTF-8 obsługuje polskie znaki, inne litery z akcentami, symbole i każdy język
+- Stare kodowania (Windows-1250, Windows-1252, ISO 8859-1) psują te znaki przy imporcie
+- Pliki ANSI, Latin-1 i Windows-1252 dają krzaczki zamiast liter z akcentami, typograficznych cudzysłowów i symboli walut
+
+**Sprawdzenie:** otwórz plik w VS Code. Pasek stanu pokazuje kodowanie. Powinno być `UTF-8` (albo `UTF-8 with BOM`), a nie `Windows 1252` czy `ISO 8859-1`.
+
+---
+
+## Zasada 6: spójne końce wierszy
+
+W całym pliku używaj albo CRLF (`\r\n`, Windows), albo LF (`\n`, Unix/macOS). Nigdy ich nie mieszaj.
+
+Przez wymieszane końce wierszy niektóre parsery widzą puste wiersze między wierszami danych albo źle liczą kolumny w wartościach wielowierszowych.
+
+**Sprawdzenie w VS Code:** pasek stanu pokazuje `CRLF` lub `LF`. Kliknij, aby zmienić koniec wiersza, i zapisz.
+
+---
+
+## Zasada 7: jeden wiersz na rekord (poza platformami z produktami w wielu wierszach)
+
+Każdy wiersz to jeden rekord, ale na kilku platformach jeden produkt zajmuje kilka wierszy:
+
+- **Shopify:** wiersze wariantów i dodatkowych zdjęć powtarzają `Handle` produktu
+- **WooCommerce:** każda odmiana ma własny wiersz, powiązany z produktem zmiennym przez `Parent`
+- **eBay:** oferty z wariantami mają dodatkowe wiersze `Relationship` pod wierszem nadrzędnym
+- **Amazon:** produkty nadrzędne i podrzędne to osobne wiersze, powiązane przez SKU produktu nadrzędnego
+
+Trzymaj się struktury opisanej w dokumentacji platformy i nie łącz ani nie dziel wierszy poza nią.
+
+---
+
+## Zasada 8: bez pustych wierszy
+
+Puste wiersze między wierszami danych lub po nich sprawiają, że parsery:
+
+- Wstawiają do importu puste rekordy
+- Źle liczą liczbę produktów
+- Przestają przetwarzać plik na pierwszym pustym wierszu (na niektórych platformach)
+
+Przed zapisem usuń wszystkie puste wiersze. W Excelu naciśnij `Ctrl+End`, aby przejść do ostatniej używanej komórki. Jeśli leży za Twoimi danymi, w pliku są puste wiersze, które trzeba usunąć.
+
+---
+
+## Zasada 9: bez wierszy podsumowań i formuł
+
+Usuń wszystkie wiersze, które nie są danymi produktów:
+
+- Wiersze sum i sum częściowych na dole
+- Wiersze z formułami SUMA()
+- Notatki lub instrukcje wpisane pod danymi
+- Separatory sekcji
+
+Takie wiersze pojawiają się w imporcie jako produkty i powodują błędy typu (tekst tam, gdzie oczekiwana jest liczba, brakujące pola wymagane itd.).
+
+---
+
+## Zasada 10: bez scalonych komórek
+
+Scalone komórki w Excelu eksportują się jako wartość w lewej górnej komórce i puste ciągi we wszystkich pozostałych. Importer widzi brakujące pola wymagane w każdym wierszu po pierwszym.
+
+**Rozwiązanie:** zaznacz wszystko → rozdziel komórki → wypełnij puste komórki właściwymi wartościami przed zapisem jako CSV.
+
+---
+
+## Szybka lista kontrolna
+
+- [ ] Rozdzielany przecinkami (nie średnikami ani pionowymi kreskami; pliki Amazon są rozdzielane tabulatorami)
+- [ ] Wiersz 1 zawiera tylko nagłówki, bez pustych wierszy nad nim
+- [ ] Nagłówki dokładnie odpowiadają nazwom kolumn platformy (wielkość liter i spacje)
+- [ ] Brak powtarzających się nazw kolumn
+- [ ] Wartości z przecinkami lub cudzysłowami są w cudzysłowie podwójnym
+- [ ] Kodowanie pliku to UTF-8
+- [ ] Spójne końce wierszy (wszystkie CRLF albo wszystkie LF)
+- [ ] Nigdzie w pliku nie ma pustych wierszy
+- [ ] Brak wierszy podsumowań, wierszy z formułami i scalonych komórek
+- [ ] Plik ma rozszerzenie `.csv` i jest zwykłym tekstem (a nie `.xlsx` przemianowanym na `.csv`)
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV, a StriveFormats automatycznie sprawdzi każdą z powyższych zasad. Zgłasza naruszenia z dokładnym wierszem i kolumną, automatycznie naprawia bezpieczne problemy i eksportuje czysty plik.
+
+[Otwórz korektor CSV](/app) | [Zobacz szablony CSV](/presets)

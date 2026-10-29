@@ -1,0 +1,196 @@
+---
+title: "Regole di formattazione CSV per le importazioni e-commerce"
+description: "Le regole di formattazione esatte che il tuo CSV deve rispettare per superare le importazioni delle piattaforme e-commerce: delimitatori, virgolette, fine riga, codifica e intestazioni."
+keywords: ["regole formattazione csv", "requisiti formato csv", "formato importazione csv", "formato file csv e-commerce", "regole virgolette csv", "regole delimitatore csv", "come formattare un csv per l'importazione"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Le regole di formattazione obbligatorie per ogni CSV e-commerce"
+  - "Come funzionano le virgolette e quando usarle"
+  - "I requisiti di delimitatore, fine riga e codifica"
+  - "Come i fogli di calcolo rompono il formato CSV senza avvisare"
+  - "Una checklist rapida per convalidare il file prima del caricamento"
+bestFor: "Venditori che preparano il primo file di importazione e sviluppatori che scrivono script di esportazione CSV"
+timeToComplete: "9 minuti"
+---
+
+## Lo standard CSV seguito dalle piattaforme e-commerce
+
+La maggior parte delle piattaforme e-commerce (Shopify, WooCommerce, eBay e le esportazioni di Etsy) si aspetta file conformi a **RFC 4180**, lo standard CSV comune. Lo standard definisce con precisione come vanno strutturati righe, colonne, virgolette e fine riga. L'Inventory Loader di Amazon fa eccezione: accetta testo delimitato da tabulazioni (.txt).
+
+Questa guida copre tutte le regole che incidono sulla riuscita dell'importazione. Violarne anche una sola causa errori di analisi, colonne associate male o dati corrotti senza avvisi.
+
+---
+
+## Regola 1: la virgola è il delimitatore
+
+Separa le colonne con le virgole. Non usare punti e virgola (frequenti con Excel in impostazioni regionali europee), tabulazioni (formato TSV) o barre verticali (`|`).
+
+**Corretto:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Sbagliato (punti e virgola):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Se il tuo Excel usa i punti e virgola per impostazione predefinita (perché le impostazioni regionali usano la virgola come separatore decimale, come in italiano), cambia il separatore di elenco del sistema in virgola oppure esporta da Google Sheets, che produce sempre file delimitati da virgole.
+
+---
+
+## Regola 2: la prima riga contiene solo le intestazioni
+
+La riga 1 deve contenere i nomi delle colonne e nient'altro. Nessuna riga vuota sopra, nessuna riga di titolo, nessuna cella di intestazione unita.
+
+**Corretto:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Sbagliato:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+La piattaforma legge la riga 1 come intestazioni. Qualsiasi altro contenuto nella riga 1 viene preso come nomi di colonna, e nessuna intestazione corrisponde più.
+
+Ci sono due eccezioni: i modelli di categoria di Amazon hanno righe di modello sopra i nomi delle colonne, e i modelli di eBay possono iniziare con righe `Info`. Lascia queste righe esattamente come sono nel modello scaricato.
+
+---
+
+## Regola 3: le intestazioni devono essere esatte
+
+I nomi delle colonne devono corrispondere esattamente a quelli attesi dalla piattaforma:
+
+- **Stesse maiuscole e minuscole:** alcuni importatori trattano `Handle`, `handle` e `HANDLE` come colonne diverse
+- **Nessuno spazio all'inizio o alla fine:** ` Title` (con uno spazio davanti) non corrisponde a `Title`
+- **Nessun a capo nelle intestazioni:** una cella di intestazione deve stare su una sola riga
+- **Nessuna intestazione duplicata:** se due colonne hanno lo stesso nome, la maggior parte dei parser usa solo l'ultima
+
+---
+
+## Regola 4: virgolette obbligatorie per virgole, virgolette e a capo
+
+Ogni volta che il valore di una cella contiene una virgola, una virgoletta doppia o un a capo, racchiudi l'intero valore tra virgolette doppie.
+
+**Corretto:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Escape delle virgolette dentro un valore tra virgolette:** raddoppia la virgoletta interna:
+
+```
+"She said ""great product"""
+```
+
+Rappresenta: She said "great product"
+
+| Situazione | Formato corretto |
+|---|---|
+| Valore con virgola | `"value, with comma"` |
+| Valore con virgoletta doppia | `"value ""with"" quotes"` |
+| Valore con HTML | `"<p>Description here</p>"` |
+| Valore con a capo | `"Line one\nLine two"` (tra le virgolette) |
+| Numero semplice | `19.99` (virgolette non necessarie) |
+
+---
+
+## Regola 5: codifica UTF-8
+
+Salva il file in **UTF-8**. L'opzione «CSV UTF-8» di Excel aggiunge un BOM (Byte Order Mark): Shopify e WooCommerce lo leggono senza problemi, ma rimuovilo se una piattaforma non riconosce la prima colonna.
+
+- UTF-8 gestisce lettere accentate, simboli e qualsiasi lingua
+- Le codifiche vecchie (Windows-1252, ISO 8859-1) rovinano questi caratteri all'importazione
+- I file ANSI, Latin-1 e Windows-1252 producono caratteri illeggibili per lettere accentate, virgolette tipografiche e simboli di valuta
+
+**Controllo:** apri il file in VS Code. La barra di stato mostra la codifica. Deve indicare `UTF-8` (o `UTF-8 with BOM`), non `Windows 1252` o `ISO 8859-1`.
+
+---
+
+## Regola 6: fine riga uniformi
+
+Usa in tutto il file o CRLF (`\r\n`, Windows) o LF (`\n`, Unix/macOS). Non mescolarli mai.
+
+I fine riga misti fanno vedere ad alcuni parser righe vuote tra le righe di dati, o fanno contare male le colonne nei valori su più righe.
+
+**Controllo in VS Code:** la barra di stato mostra `CRLF` o `LF`. Fai clic per cambiare il fine riga, poi salva.
+
+---
+
+## Regola 7: una riga per record (tranne le piattaforme con prodotti su più righe)
+
+Ogni riga è un record, ma su diverse piattaforme un prodotto occupa più righe:
+
+- **Shopify:** le righe delle varianti e delle immagini aggiuntive ripetono l'`Handle` del prodotto
+- **WooCommerce:** ogni variazione ha la sua riga, collegata al prodotto variabile tramite `Parent`
+- **eBay:** le inserzioni con varianti aggiungono righe `Relationship` sotto la riga principale
+- **Amazon:** gli articoli padre e figlio sono righe separate, collegate dallo SKU padre
+
+Segui la struttura descritta nella documentazione della piattaforma e non unire né dividere righe al di fuori di essa.
+
+---
+
+## Regola 8: nessuna riga vuota
+
+Le righe vuote tra le righe di dati o dopo di esse fanno sì che i parser:
+
+- Inseriscano record vuoti nell'importazione
+- Contino male il numero di prodotti
+- Si fermino alla prima riga vuota (su alcune piattaforme)
+
+Elimina tutte le righe vuote prima di salvare. In Excel, premi `Ctrl+Fine` per andare all'ultima cella usata. Se si trova oltre i tuoi dati, ci sono righe vuote da eliminare.
+
+---
+
+## Regola 9: nessuna riga di riepilogo o di formule
+
+Elimina tutte le righe che non sono dati di prodotto:
+
+- Righe di totale o subtotale in fondo
+- Righe con formule SOMMA()
+- Note o istruzioni scritte sotto i dati
+- Separatori di sezione
+
+Queste righe compaiono come prodotti nell'importazione e causano errori di tipo (testo dove servono numeri, campi obbligatori mancanti e così via).
+
+---
+
+## Regola 10: nessuna cella unita
+
+Le celle unite di Excel vengono esportate con un valore nella cella in alto a sinistra e stringhe vuote in tutte le altre. L'importatore vede campi obbligatori mancanti in ogni riga dopo la prima.
+
+**Soluzione:** seleziona tutto → separa le celle → riempi le celle vuote con i valori giusti prima di salvare come CSV.
+
+---
+
+## Checklist rapida di convalida
+
+- [ ] Delimitato da virgole (non punti e virgola né barre verticali; i file Amazon sono delimitati da tabulazioni)
+- [ ] La riga 1 contiene solo le intestazioni, senza righe vuote sopra
+- [ ] Le intestazioni corrispondono esattamente ai nomi attesi dalla piattaforma (maiuscole e spazi)
+- [ ] Nessun nome di colonna duplicato
+- [ ] I valori con virgole o virgolette sono racchiusi tra virgolette doppie
+- [ ] La codifica del file è UTF-8
+- [ ] Fine riga uniformi (tutti CRLF o tutti LF)
+- [ ] Nessuna riga vuota in nessun punto del file
+- [ ] Nessuna riga di riepilogo, riga di formule o cella unita
+- [ ] Il file ha estensione `.csv` ed è testo semplice (non un `.xlsx` rinominato in `.csv`)
+
+---
+
+## Correggilo automaticamente con StriveFormats
+
+Carica il tuo CSV e StriveFormats controlla automaticamente ognuna delle regole qui sopra. Segnala le violazioni con riga e colonna esatte, corregge in automatico i problemi sicuri ed esporta un file pulito.
+
+[Apri il correttore CSV](/app) | [Vedi i modelli CSV](/presets)

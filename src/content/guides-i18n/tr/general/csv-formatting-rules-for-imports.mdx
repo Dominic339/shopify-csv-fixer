@@ -1,0 +1,196 @@
+---
+title: "E-ticaret içe aktarmaları için CSV biçimlendirme kuralları"
+description: "CSV dosyanızın e-ticaret platformlarının içe aktarmalarından geçmesi için uyması gereken kesin biçimlendirme kuralları: ayırıcılar, tırnaklar, satır sonları, kodlama ve başlıklar."
+keywords: ["csv biçimlendirme kuralları", "csv biçim gereksinimleri", "csv içe aktarma biçimi", "e-ticaret csv dosya biçimi", "csv tırnak kuralları", "csv ayırıcı kuralları", "csv içe aktarma için nasıl biçimlendirilir"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Her e-ticaret CSV'sinin uyması gereken zorunlu biçimlendirme kuralları"
+  - "Tırnak kurallarının nasıl çalıştığı ve ne zaman uygulanacağı"
+  - "Ayırıcı, satır sonu ve kodlama gereksinimleri"
+  - "Elektronik tablo araçlarının CSV biçimini nasıl sessizce bozduğu"
+  - "Yüklemeden önce dosyanızı doğrulamak için hızlı bir kontrol listesi"
+bestFor: "İlk içe aktarma dosyasını hazırlayan satıcılar ve CSV dışa aktarma betikleri yazan geliştiriciler"
+timeToComplete: "9 dakika"
+---
+
+## E-ticaret platformlarının izlediği CSV standardı
+
+Çoğu e-ticaret platformu (Shopify, WooCommerce, eBay ve Etsy'nin dışa aktarımları) yaygın CSV standardı olan **RFC 4180**'e uyan dosyalar bekler. Bu standart satırların, sütunların, tırnakların ve satır sonlarının nasıl yapılandırılacağını tam olarak tanımlar. Amazon'un Inventory Loader'ı istisnadır: sekmeyle ayrılmış metin (.txt) alır.
+
+Bu rehber içe aktarmanın başarısını etkileyen her kuralı ele alır. Herhangi birini ihlal etmek ayrıştırma hatalarına, yanlış sütun eşlemesine veya fark edilmeyen veri bozulmasına yol açar.
+
+---
+
+## Kural 1: Ayırıcı virgüldür
+
+Sütunları virgülle ayırın. Noktalı virgül (Avrupa bölge ayarlarındaki Excel'de yaygındır), sekme (TSV biçimi) veya dikey çizgi (`|`) kullanmayın.
+
+**Doğru:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Yanlış (noktalı virgüller):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Excel'iniz varsayılan olarak noktalı virgül kullanıyorsa (bölge ayarınız ondalık ayırıcı olarak virgül kullandığı için, Türkçe'de olduğu gibi), sistemin liste ayırıcısını virgül yapın veya her zaman virgülle ayrılmış dosya üreten Google E-Tablolar üzerinden dışa aktarın.
+
+---
+
+## Kural 2: İlk satırda yalnızca başlıklar bulunur
+
+1. satır sütun adlarını içermeli, başka hiçbir şey içermemelidir. Üstünde boş satır, başlık satırı veya birleştirilmiş başlık hücresi olmamalıdır.
+
+**Doğru:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Yanlış:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+Platform 1. satırı başlık olarak okur. 1. satırdaki başlık dışı her içerik sütun adı olarak ele alınır ve hiçbir başlık eşleşmez.
+
+İki istisna vardır: Amazon kategori şablonlarında sütun adlarının üstünde şablon satırları bulunur, eBay şablonları da `Info` satırlarıyla başlayabilir. Bu satırları indirdiğiniz şablondaki hâliyle aynen bırakın.
+
+---
+
+## Kural 3: Başlıklar tam olmalıdır
+
+Sütun adları platformun beklediği adlarla tam olarak eşleşmelidir:
+
+- **Aynı büyük/küçük harf:** bazı içe aktarıcılar `Handle`, `handle` ve `HANDLE` değerlerini farklı sütunlar olarak görür
+- **Başta veya sonda boşluk yok:** ` Title` (önünde boşluk olan) `Title` ile eşleşmez
+- **Başlıkların içinde satır sonu yok:** bir başlık hücresi tek satır olmalıdır
+- **Yinelenen başlık yok:** iki sütun aynı adı taşıyorsa çoğu ayrıştırıcı yalnızca sonuncusunu kullanır
+
+---
+
+## Kural 4: Virgül, tırnak ve satır sonu için tırnak zorunludur
+
+Bir hücre değeri virgül, çift tırnak veya satır sonu içerdiğinde, değerin tamamını çift tırnak içine alın.
+
+**Doğru:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Tırnak içindeki bir değerde tırnağa kaçış uygulama:** içteki tırnağı iki kez yazın:
+
+```
+"She said ""great product"""
+```
+
+Bu şunu temsil eder: She said "great product"
+
+| Durum | Doğru biçim |
+|---|---|
+| Virgül içeren değer | `"value, with comma"` |
+| Çift tırnak içeren değer | `"value ""with"" quotes"` |
+| HTML içeren değer | `"<p>Description here</p>"` |
+| Satır sonu içeren değer | `"Line one\nLine two"` (tırnak içinde) |
+| Düz sayı | `19.99` (tırnak gerekmez) |
+
+---
+
+## Kural 5: UTF-8 kodlama
+
+Dosyanızı **UTF-8** olarak kaydedin. Excel'in "CSV UTF-8" seçeneği bir BOM (Byte Order Mark) ekler: Shopify ve WooCommerce bunu sorunsuz okur, ancak bir platform ilk sütunu tanımıyorsa BOM'u kaldırın.
+
+- UTF-8 Türkçe karakterleri, aksanlı harfleri, simgeleri ve tüm dilleri destekler
+- Eski kodlamalar (Windows-1254, Windows-1252, ISO 8859-1) bu karakterleri içe aktarmada bozar
+- ANSI, Latin-1 ve Windows-1252 dosyaları aksanlı harflerde, tipografik tırnaklarda ve para birimi simgelerinde bozuk karakterler üretir
+
+**Kontrol:** dosyayı VS Code'da açın. Durum çubuğu kodlamayı gösterir. `Windows 1252` veya `ISO 8859-1` değil, `UTF-8` (veya `UTF-8 with BOM`) yazmalıdır.
+
+---
+
+## Kural 6: Tutarlı satır sonları
+
+Dosyanın tamamında ya CRLF (`\r\n`, Windows) ya da LF (`\n`, Unix/macOS) kullanın. Asla karıştırmayın.
+
+Karışık satır sonları bazı ayrıştırıcıların veri satırları arasında boş satır görmesine veya çok satırlı değerlerde sütunları yanlış saymasına yol açar.
+
+**VS Code'da kontrol:** durum çubuğu `CRLF` veya `LF` gösterir. Satır sonunu değiştirmek için tıklayın ve kaydedin.
+
+---
+
+## Kural 7: Kayıt başına bir satır (çok satırlı ürünleri olan platformlar hariç)
+
+Her satır bir kayıttır, ancak birkaç platformda tek bir ürün birden fazla satıra yayılır:
+
+- **Shopify:** varyant ve ek görsel satırları ürünün `Handle` değerini tekrarlar
+- **WooCommerce:** her varyasyonun kendi satırı vardır ve `Parent` ile değişken ürüne bağlanır
+- **eBay:** varyasyonlu ilanlar ana satırın altına `Relationship` satırları ekler
+- **Amazon:** ana ve alt ürünler ayrı satırlardır ve ana SKU ile birbirine bağlanır
+
+Platformun belgelerinde açıklanan yapıyı izleyin ve bunun dışında satırları birleştirmeyin veya bölmeyin.
+
+---
+
+## Kural 8: Boş satır yok
+
+Veri satırlarının arasındaki veya sonrasındaki boş satırlar ayrıştırıcıların şunları yapmasına yol açar:
+
+- İçe aktarmaya boş kayıtlar eklemek
+- Ürün sayısını yanlış saymak
+- İlk boş satırda işlemeyi durdurmak (bazı platformlarda)
+
+Kaydetmeden önce tüm boş satırları silin. Excel'de son kullanılan hücreye gitmek için `Ctrl+End`'e basın. Hücre verilerinizin ötesindeyse silinmesi gereken boş satırlar vardır.
+
+---
+
+## Kural 9: Özet veya formül satırı yok
+
+Ürün verisi olmayan tüm satırları kaldırın:
+
+- Alttaki toplam ve ara toplam satırları
+- TOPLA() formülü satırları
+- Verilerin altına yazılmış notlar veya talimatlar
+- Bölüm ayırıcıları
+
+Bu satırlar içe aktarmada ürün kaydı olarak görünür ve tür hatalarına (sayı beklenen yerde metin, eksik zorunlu alanlar vb.) neden olur.
+
+---
+
+## Kural 10: Birleştirilmiş hücre yok
+
+Excel'deki birleştirilmiş hücreler, sol üst hücrede bir değer ve diğerlerinde boş metin olarak dışa aktarılır. İçe aktarıcı ilk satırdan sonraki her satırda eksik zorunlu alanlar görür.
+
+**Çözüm:** tümünü seçin → hücre birleştirmesini kaldırın → CSV olarak kaydetmeden önce boş hücreleri uygun değerlerle doldurun.
+
+---
+
+## Hızlı doğrulama kontrol listesi
+
+- [ ] Virgülle ayrılmış (noktalı virgül veya dikey çizgi değil; Amazon dosyaları sekmeyle ayrılmıştır)
+- [ ] 1. satırda yalnızca sütun başlıkları var ve üstünde boş satır yok
+- [ ] Başlıklar platformun beklediği sütun adlarıyla tam olarak eşleşiyor (harf durumu ve boşluklar)
+- [ ] Yinelenen sütun adı yok
+- [ ] Virgül veya tırnak içeren değerler çift tırnak içinde
+- [ ] Dosya kodlaması UTF-8
+- [ ] Satır sonları tutarlı (hepsi CRLF veya hepsi LF)
+- [ ] Dosyanın hiçbir yerinde boş satır yok
+- [ ] Özet satırı, formül satırı veya birleştirilmiş hücre yok
+- [ ] Dosyanın uzantısı `.csv` ve dosya düz metin (`.csv` olarak yeniden adlandırılmış bir `.xlsx` değil)
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+CSV'nizi yükleyin; StriveFormats yukarıdaki her kuralı otomatik olarak kontrol eder. İhlalleri tam satır ve sütun konumlarıyla işaretler, güvenli sorunları otomatik düzeltir ve temiz bir dosya dışa aktarır.
+
+[CSV düzelticisini aç](/app) | [CSV şablonlarını görüntüle](/presets)

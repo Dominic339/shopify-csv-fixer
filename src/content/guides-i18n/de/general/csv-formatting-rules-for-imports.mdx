@@ -1,0 +1,196 @@
+---
+title: "CSV-Formatregeln für E-Commerce-Importe"
+description: "Die genauen Formatregeln, die deine CSV für Importe in E-Commerce-Plattformen erfüllen muss: Trennzeichen, Anführungszeichen, Zeilenenden, Kodierung und Spaltenköpfe."
+keywords: ["csv formatregeln", "csv formatanforderungen", "csv importformat", "csv dateiformat e-commerce", "csv anführungszeichen regeln", "csv trennzeichen regeln", "csv für import formatieren"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Die Pflichtregeln, die jede E-Commerce-CSV erfüllen muss"
+  - "Wie Anführungszeichen funktionieren und wann du sie brauchst"
+  - "Anforderungen an Trennzeichen, Zeilenenden und Kodierung"
+  - "Wie Tabellenprogramme das CSV-Format unbemerkt zerstören"
+  - "Eine kurze Checkliste, um deine Datei vor dem Hochladen zu prüfen"
+bestFor: "Händler, die ihre erste Importdatei vorbereiten, und Entwickler, die CSV-Exportskripte schreiben"
+timeToComplete: "9 Minuten"
+---
+
+## Der CSV-Standard, dem E-Commerce-Plattformen folgen
+
+Die meisten E-Commerce-Plattformen (Shopify, WooCommerce, eBay und die Exporte von Etsy) erwarten Dateien nach **RFC 4180**, dem gängigen CSV-Standard. Er legt genau fest, wie Zeilen, Spalten, Anführungszeichen und Zeilenenden aufgebaut sein müssen. Der Inventory Loader von Amazon ist die Ausnahme: Er nimmt tabulatorgetrennten Text (.txt).
+
+Dieser Leitfaden behandelt jede Regel, die über den Erfolg eines Imports entscheidet. Wer eine davon verletzt, bekommt Parserfehler, falsch zugeordnete Spalten oder unbemerkt beschädigte Daten.
+
+---
+
+## Regel 1: Das Komma ist das Trennzeichen
+
+Trenne Spalten mit Kommas. Nutze keine Semikolons (typisch für Excel mit europäischen Ländereinstellungen), Tabulatoren (TSV-Format) oder senkrechten Striche (`|`).
+
+**Richtig:**
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+```
+
+**Falsch (Semikolons):**
+
+```
+Handle;Title;Vendor;Variant Price
+blue-shirt;Blue T-Shirt;Acme;19.99
+```
+
+Nutzt dein Excel standardmäßig Semikolons (weil deine Ländereinstellung das Komma als Dezimaltrennzeichen verwendet), stelle das Listentrennzeichen des Systems auf Komma um oder exportiere über Google Tabellen, das immer kommagetrennte Dateien erzeugt.
+
+---
+
+## Regel 2: Die erste Zeile enthält nur Spaltenköpfe
+
+Zeile 1 darf nur Spaltennamen enthalten und sonst nichts. Keine Leerzeilen darüber, keine Titelzeilen, keine verbundenen Kopfzellen.
+
+**Richtig:**
+
+```
+Handle,Title,Variant Price
+```
+
+**Falsch:**
+
+```
+Product Export -- June 2026
+Handle,Title,Variant Price
+```
+
+Die Plattform liest Zeile 1 als Kopfzeile. Steht dort etwas anderes, wird es als Spaltennamen gelesen, und kein einziger Spaltenkopf passt mehr.
+
+Es gibt zwei Ausnahmen: Amazon-Kategorievorlagen haben Vorlagenzeilen über den Spaltennamen, und eBay-Vorlagen können mit `Info`-Zeilen beginnen. Lass diese Zeilen genau so, wie sie in der heruntergeladenen Vorlage stehen.
+
+---
+
+## Regel 3: Spaltenköpfe müssen exakt stimmen
+
+Spaltennamen müssen genau den Namen entsprechen, die die Plattform erwartet:
+
+- **Gleiche Groß- und Kleinschreibung:** Manche Importer behandeln `Handle`, `handle` und `HANDLE` als verschiedene Spalten
+- **Keine Leerzeichen am Anfang oder Ende:** ` Title` (mit Leerzeichen davor) passt nicht zu `Title`
+- **Keine Zeilenumbrüche in Spaltenköpfen:** Eine Kopfzelle muss einzeilig sein
+- **Keine doppelten Spaltenköpfe:** Haben zwei Spalten denselben Namen, nutzen die meisten Parser nur die letzte
+
+---
+
+## Regel 4: Anführungszeichen bei Kommas, Anführungszeichen und Zeilenumbrüchen
+
+Enthält ein Zellwert ein Komma, ein doppeltes Anführungszeichen oder einen Zeilenumbruch, setze den ganzen Wert in doppelte Anführungszeichen.
+
+**Richtig:**
+
+```
+"Leather Wallet, Brown",29.99,"Handmade in the USA, ships free"
+```
+
+**Anführungszeichen in einem Wert mit Anführungszeichen maskieren:** Verdopple das innere Anführungszeichen:
+
+```
+"She said ""great product"""
+```
+
+Das steht für: She said "great product"
+
+| Situation | Richtiges Format |
+|---|---|
+| Wert mit Komma | `"value, with comma"` |
+| Wert mit doppeltem Anführungszeichen | `"value ""with"" quotes"` |
+| Wert mit HTML | `"<p>Description here</p>"` |
+| Wert mit Zeilenumbruch | `"Line one\nLine two"` (innerhalb der Anführungszeichen) |
+| Einfache Zahl | `19.99` (keine Anführungszeichen nötig) |
+
+---
+
+## Regel 5: UTF-8-Kodierung
+
+Speichere deine Datei als **UTF-8**. Die Excel-Option „CSV UTF-8“ fügt ein BOM (Byte Order Mark) hinzu: Shopify und WooCommerce lesen es problemlos, aber entferne es, wenn eine Plattform die erste Spalte nicht erkennt.
+
+- UTF-8 kommt mit Umlauten, Akzenten, Symbolen und jeder Sprache zurecht
+- Alte Kodierungen (Windows-1252, ISO 8859-1) machen diese Zeichen beim Import zu Zeichensalat
+- ANSI-, Latin-1- und Windows-1252-Dateien erzeugen Zeichensalat bei Umlauten, typografischen Anführungszeichen und Währungssymbolen
+
+**Prüfen:** Öffne die Datei in VS Code. Die Statusleiste zeigt die Kodierung. Dort sollte `UTF-8` (oder `UTF-8 with BOM`) stehen, nicht `Windows 1252` oder `ISO 8859-1`.
+
+---
+
+## Regel 6: Einheitliche Zeilenenden
+
+Nutze in der ganzen Datei entweder CRLF (`\r\n`, Windows) oder LF (`\n`, Unix/macOS). Mische sie nie.
+
+Gemischte Zeilenenden führen dazu, dass manche Parser Leerzeilen zwischen den Datenzeilen sehen oder Spalten in mehrzeiligen Werten falsch zählen.
+
+**Prüfen in VS Code:** Die Statusleiste zeigt `CRLF` oder `LF`. Klicke darauf, um das Zeilenende zu ändern, und speichere.
+
+---
+
+## Regel 7: Eine Zeile pro Datensatz (außer bei Plattformen mit mehrzeiligen Produkten)
+
+Jede Zeile ist ein Datensatz, aber auf mehreren Plattformen erstreckt sich ein Produkt über mehrere Zeilen:
+
+- **Shopify:** Varianten- und zusätzliche Bildzeilen wiederholen den `Handle` des Produkts
+- **WooCommerce:** Jede Variante hat eine eigene Zeile und ist über `Parent` mit dem variablen Produkt verknüpft
+- **eBay:** Angebote mit Varianten haben unter der Elternzeile zusätzliche `Relationship`-Zeilen
+- **Amazon:** Eltern- und Kindartikel sind getrennte Zeilen, verknüpft über die Eltern-SKU
+
+Halte dich an den Aufbau, den die Dokumentation der Plattform beschreibt, und füge außerhalb davon keine Zeilen zusammen oder teile sie auf.
+
+---
+
+## Regel 8: Keine Leerzeilen
+
+Leerzeilen zwischen oder nach den Datenzeilen führen dazu, dass Parser:
+
+- leere Datensätze in den Import einfügen
+- die Anzahl der Produkte falsch zählen
+- bei der ersten Leerzeile aufhören (auf manchen Plattformen)
+
+Lösche vor dem Speichern alle Leerzeilen. Drücke in Excel `Strg+Ende`, um zur letzten benutzten Zelle zu springen. Liegt sie hinter deinen Daten, gibt es Leerzeilen, die du löschen musst.
+
+---
+
+## Regel 9: Keine Summen- oder Formelzeilen
+
+Entferne alle Zeilen, die keine Produktdaten sind:
+
+- Summen- und Zwischensummenzeilen am Ende
+- Zeilen mit SUMME()-Formeln
+- Notizen oder Hinweise unter den Daten
+- Abschnittstrenner
+
+Diese Zeilen erscheinen im Import als Produktdatensätze und verursachen Typfehler (Text, wo Zahlen erwartet werden, fehlende Pflichtfelder usw.).
+
+---
+
+## Regel 10: Keine verbundenen Zellen
+
+Verbundene Zellen in Excel werden als Wert in der Zelle oben links und leere Zeichenfolgen in allen anderen exportiert. Der Importer sieht in jeder Zeile nach der ersten fehlende Pflichtfelder.
+
+**Lösung:** Alles markieren → Zellverbund aufheben → leere Zellen mit passenden Werten füllen, bevor du als CSV speicherst.
+
+---
+
+## Kurze Prüf-Checkliste
+
+- [ ] Kommagetrennt (keine Semikolons oder senkrechten Striche; Amazon-Dateien sind tabulatorgetrennt)
+- [ ] Zeile 1 enthält nur Spaltenköpfe, ohne Leerzeilen darüber
+- [ ] Spaltenköpfe entsprechen genau den Spaltennamen der Plattform (Schreibweise und Leerzeichen)
+- [ ] Keine doppelten Spaltennamen
+- [ ] Werte mit Kommas oder Anführungszeichen stehen in doppelten Anführungszeichen
+- [ ] Die Kodierung ist UTF-8
+- [ ] Einheitliche Zeilenenden (alle CRLF oder alle LF)
+- [ ] Nirgends in der Datei Leerzeilen
+- [ ] Keine Summenzeilen, Formelzeilen oder verbundenen Zellen
+- [ ] Die Datei hat die Endung `.csv` und ist reiner Text (keine umbenannte `.xlsx`)
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+Lade deine CSV hoch, und StriveFormats prüft jede der oben genannten Regeln automatisch. Es meldet Verstöße mit genauer Zeile und Spalte, behebt sichere Probleme automatisch und exportiert eine saubere Datei.
+
+[CSV-Fixer öffnen](/app) | [CSV-Vorlagen ansehen](/presets)
