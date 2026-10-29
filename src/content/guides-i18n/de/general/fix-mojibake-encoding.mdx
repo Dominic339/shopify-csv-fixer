@@ -1,0 +1,167 @@
+---
+title: "Mojibake und Kodierungsfehler in CSV-Dateien beheben"
+description: "Behebe verstümmelten Text durch falsche Kodierung: Erkenne Konflikte zwischen UTF-8 und Latin-1, entferne die BOM und speichere die Datei für E-Commerce-Importe richtig."
+keywords: ["mojibake csv", "kodierungsfehler csv", "utf-8 csv", "latin-1 csv", "bom csv", "zeichensalat reparieren", "csv kodierung passt nicht", "verstümmelter text csv", "bom entfernen csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Was Mojibake ist und warum es in CSV-Dateien auftaucht"
+  - "Wie du UTF-8 und Latin-1 (ISO-8859-1) unterscheidest"
+  - "Wie du die UTF-8-BOM entfernst, wenn ein Tool sie falsch liest"
+  - "Schritt-für-Schritt-Lösungen in Excel, Google Tabellen und VS Code"
+  - "Wie du verhinderst, dass die Kodierung bei jedem Speichern beschädigt wird"
+bestFor: "Händler und Katalogverantwortliche mit verstümmelten Produkttiteln, Beschreibungen oder Optionsnamen nach dem Export oder Download einer CSV"
+timeToComplete: "10 Minuten"
+---
+
+## Was ist Mojibake?
+
+Mojibake ist der Zeichensalat, der entsteht, wenn eine Datei, die in einer Zeichenkodierung gespeichert wurde, in einer anderen geöffnet oder gelesen wird. Das Wort kommt aus dem Japanischen und bedeutet ungefähr „unverständliche Zeichen“.
+
+Enthält deine CSV Folgen wie diese, hast du ein Kodierungsproblem:
+
+| Was du siehst | Was es sein sollte |
+|---|---|
+| `â€™` | `’` (typografischer Apostroph) |
+| `â€”` | `—` (Geviertstrich) |
+| `â€œ` | `“` (öffnendes Anführungszeichen) |
+| `Ã©` | `é` (e mit Akzent) |
+| `ï»¿` am Anfang eines Felds | BOM (unsichtbare Markierung) |
+
+---
+
+## Warum Kodierungen nicht zusammenpassen
+
+Moderne Plattformen wie Shopify, WooCommerce und Amazon erwarten **UTF-8**-kodierte Dateien. Viele Tools erzeugen aber Dateien in anderen Kodierungen:
+
+- **Microsoft Excel (Windows)** speichert `.csv` in der Kodierung der Systemsprache (oft Windows-1252 oder Latin-1), wenn du nicht ausdrücklich UTF-8 wählst.
+- **Ältere Export-Tools** nutzen oft standardmäßig ISO-8859-1 / Latin-1.
+- **Kopieren und Einfügen aus Websites** bringt typografische Anführungszeichen und Gedankenstriche als mehrbytige UTF-8-Zeichen mit, die kaputtgehen, wenn die Datei als Latin-1 behandelt wird.
+
+Wird eine UTF-8-Datei als Latin-1 oder Windows-1252 gelesen, zerfällt jede mehrbytige Folge in einzelne Ein-Byte-Zeichen, und es entsteht Mojibake. Wird der verstümmelte Text dann gespeichert, ist der Zeichensalat Teil der Daten.
+
+---
+
+## Das Problem bestimmen
+
+### Die Kodierung deiner Datei prüfen
+
+**Unter Mac/Linux:**
+```
+file -I yourfile.csv
+# Beispielausgabe: yourfile.csv: text/plain; charset=utf-8
+```
+
+**Unter Windows (PowerShell):**
+```powershell
+# Windows PowerShell 5.1; in PowerShell 7 -AsByteStream statt -Encoding Byte verwenden
+Get-Content yourfile.csv -Encoding Byte -TotalCount 3
+# Sind die ersten 3 Bytes 239 187 191 (0xEF 0xBB 0xBF), hat die Datei eine UTF-8-BOM.
+```
+
+**Schneller Sichttest:** Öffne die Datei in einem Texteditor (nicht in Excel) und sieh dir das erste Zeichen und Buchstaben mit Akzenten an. Beginnt die erste Zelle mit `ï»¿` oder enthalten Beschreibungen `â€`, stimmt die Kodierung nicht.
+
+### Herausfinden, welche Kodierung du brauchst
+
+- Die meisten verstümmelten Dateien sind **UTF-8, das als Latin-1 oder Windows-1252 gelesen wird** (oder umgekehrt).
+- Ist die Datei selbst in Ordnung und nur die Anzeige falsch, öffne sie mit der Kodierung, in der sie wirklich gespeichert wurde, und speichere sie dann als **UTF-8**. Folgen wie `â€™` bedeuten meist, dass eine UTF-8-Datei als Windows-1252 angezeigt wird: Öffne sie also als UTF-8.
+- Ist der Zeichensalat auch beim Öffnen als UTF-8 noch da, wurde er in die Daten gespeichert. Eine andere Kodierung entfernt ihn nicht; nutze ein Reparaturwerkzeug wie die Python-Bibliothek `ftfy` oder Suchen und Ersetzen.
+
+---
+
+## Was ist die BOM?
+
+Die UTF-8-BOM (Byte Order Mark) ist eine Folge von drei Bytes (`EF BB BF`), die manche Tools UTF-8-Dateien voranstellen. Der Windows-Editor und Excel fügen sie manchmal automatisch hinzu.
+
+**Warum das wichtig ist:** Manche Import-Tools lesen die BOM als echte Zeichen im ersten Spaltennamen, machen aus `Handle` also `ï»¿Handle` und erkennen die Spalte dann nicht. Shopify und WooCommerce kommen mit der BOM zurecht, andere Tools und Skripte aber nicht unbedingt.
+
+---
+
+## Lösung in Excel
+
+Excel ist die häufigste Ursache für Kodierungsprobleme. Halte dich genau an diese Schritte.
+
+### Aus Excel als UTF-8 exportieren
+
+1. Öffne deine Tabelle in Excel.
+2. Klicke auf **Datei → Speichern unter**.
+3. Wähle im Feld „Dateityp“ **CSV UTF-8 (durch Trennzeichen getrennt) (.csv)**.
+   - Diese Option gibt es ab Excel 2016 unter Windows und Mac.
+   - Wähle **nicht** das einfache „CSV (Trennzeichen-getrennt)“. Es speichert in der Kodierung der Systemsprache.
+4. Klicke auf **Speichern**.
+
+### Eine Datei mit Mojibake in Excel neu öffnen
+
+Hast du schon eine verstümmelte Datei:
+
+1. Öffne sie **nicht** per Doppelklick. Dabei wird die Systemsprache genutzt.
+2. Öffne eine leere Excel-Arbeitsmappe.
+3. Gehe zu **Daten → Aus Text/CSV**.
+4. Wähle deine Datei.
+5. Stelle im Import-Assistenten **Dateiursprung** auf die echte Kodierung der Datei: **65001: Unicode (UTF-8)** für UTF-8-Dateien.
+6. Schließe den Import ab und speichere dann als CSV UTF-8.
+
+---
+
+## Lösung in Google Tabellen
+
+Google Tabellen arbeitet intern immer mit UTF-8. Das Risiko liegt beim Herunterladen:
+
+1. **Import:** Gehe zu **Datei → Importieren → Hochladen** und wähle deine CSV. Tabellen erkennt die Kodierung automatisch.
+2. **Export:** Gehe zu **Datei → Herunterladen → Kommagetrennte Werte (.csv)**. Google Tabellen exportiert UTF-8 ohne BOM. Das ist sicher.
+
+Zeigt Tabellen eine erhaltene Datei verstümmelt an:
+
+1. Importiere sie über **Datei → Importieren**, statt sie direkt zu öffnen.
+2. Achte im Import-Dialog darauf, dass **Text in Zahlen, Datumsangaben und Formeln umwandeln** ausgeschaltet ist, wenn du SKUs oder Barcodes hast.
+
+---
+
+## Lösung mit VS Code (zuverlässig für jede Datei)
+
+VS Code gibt dir volle Kontrolle über die Kodierung und ist kostenlos:
+
+1. Öffne VS Code und zieh deine CSV hinein.
+2. Sieh unten rechts in die Statusleiste. Dort steht die erkannte Kodierung (z. B. `UTF-8`, `Windows 1252`).
+3. Klicke auf die Kodierungsanzeige.
+4. Wähle **„Reopen with Encoding“** und die Kodierung, in der die Datei wirklich gespeichert wurde (oft `Western (Windows 1252)` oder `ISO 8859-1`).
+5. Der verstümmelte Text sollte jetzt richtig angezeigt werden. Zeigt er Folgen wie `â€™`, während VS Code `Windows 1252` meldet, ist die Datei in Wirklichkeit UTF-8: Öffne sie dann stattdessen als **UTF-8**.
+6. Klicke erneut auf die Kodierungsanzeige und wähle **„Save with Encoding → UTF-8“**.
+
+Diese zwei Schritte (mit der ursprünglichen Kodierung neu öffnen, dann als UTF-8 speichern) sind die zuverlässigste Methode für jedes Tool.
+
+---
+
+## Lösung mit dem Windows-Editor
+
+Für eine schnelle Lösung unter Windows (Windows 11 / 10 ab Version 1903):
+
+1. Öffne die verstümmelte Datei im Editor.
+2. Gehe zu **Datei → Speichern unter**.
+3. Wähle im Feld **Codierung** **UTF-8** (nicht „UTF-8 mit BOM“).
+4. Speichere.
+
+> **Hinweis:** Ältere Editor-Versionen boten nur „UTF-8“ mit BOM an, was die unsichtbare BOM-Markierung hinzufügt. Hat dein Editor keine Option „UTF-8“ ohne BOM, nutze stattdessen VS Code.
+
+---
+
+## Beschädigung durch erneutes Kodieren verhindern
+
+Ist deine Datei sauber, schütze sie für die Zukunft:
+
+- **Nutze in Excel immer „CSV UTF-8“**, nie das einfache CSV.
+- **Öffne eine UTF-8-CSV unter Windows nie per Doppelklick.** Windows verknüpft `.csv` mit Excel, das sie dann in der Kodierung der Systemsprache öffnen kann. Nutze in Excel **Daten → Aus Text/CSV**, dort kannst du die Kodierung wählen.
+- **Prüfe die Kodierung nach jedem Export**, etwa mit StriveFormats oder einer Prüfung in der Kommandozeile, bevor du hochlädst.
+- Erzeugt das Export-Tool deiner Importplattform immer Latin-1, wandle die Datei direkt nach dem Herunterladen mit VS Code oder einem Skript um, bevor du sie bearbeitest.
+
+---
+
+## Kurzübersicht: Kodierungssymptome und Lösungen
+
+| Symptom | Wahrscheinliche Ursache | Lösung |
+|---|---|---|
+| `â€™` `â€”` im Text | UTF-8-Datei als Windows-1252 angezeigt | Als UTF-8 neu öffnen; ist es noch verstümmelt, mit `ftfy` reparieren |
+| `ï»¿` am Anfang der ersten Spalte | UTF-8-BOM | BOM entfernen; „UTF-8 ohne BOM“ nutzen |
+| `Ã©` `Ã¨` `Ã ` | UTF-8-Datei als Latin-1 oder Windows-1252 angezeigt | Als UTF-8 neu öffnen; ist es noch verstümmelt, mit `ftfy` reparieren |
+| `?` statt aller Sonderzeichen | Kodierung bei der Umwandlung verloren | Die Originaldaten sind vielleicht verloren; erneut aus der Quelle exportieren |
+| In Tabellen richtig, nach dem Herunterladen verstümmelt | Falsche Kodierung beim Download | Datei → Herunterladen → CSV nutzen (Google nutzt UTF-8) |

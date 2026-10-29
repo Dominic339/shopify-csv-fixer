@@ -1,0 +1,167 @@
+---
+title: "Mojibake en coderingsfouten in CSV-bestanden oplossen"
+description: "Los onleesbare tekst op die ontstaat door een verkeerde codering. Leer conflicten tussen UTF-8 en Latin-1 herkennen, de BOM verwijderen en bestanden correct opnieuw opslaan."
+keywords: ["mojibake csv", "coderingsfout csv", "utf-8 csv", "latin-1 csv", "bom csv", "onleesbare tekens herstellen", "csv codering klopt niet", "onleesbare tekst csv", "bom verwijderen csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wat mojibake is en waarom het in CSV-bestanden opduikt"
+  - "Hoe je UTF-8 en Latin-1 (ISO-8859-1) van elkaar onderscheidt"
+  - "Hoe je de UTF-8-BOM verwijdert als een tool die verkeerd leest"
+  - "Stapsgewijze oplossingen in Excel, Google Spreadsheets en VS Code"
+  - "Hoe je voorkomt dat de codering bij elke keer opslaan beschadigd raakt"
+bestFor: "Verkopers en catalogusbeheerders met onleesbare producttitels, beschrijvingen of optienamen na het exporteren of downloaden van een CSV"
+timeToComplete: "10 minuten"
+---
+
+## Wat is mojibake?
+
+Mojibake is de visuele rommel die ontstaat als een bestand dat in de ene tekencodering is opgeslagen, in een andere wordt geopend of gelezen. Het woord komt uit het Japans en betekent ongeveer "onbegrijpelijke tekens".
+
+Bevat je CSV reeksen zoals deze, dan heb je een coderingsprobleem:
+
+| Wat je ziet | Wat het moet zijn |
+|---|---|
+| `â€™` | `’` (gekrulde apostrof) |
+| `â€”` | `—` (kastlijn) |
+| `â€œ` | `“` (openend aanhalingsteken) |
+| `Ã©` | `é` (e met accent) |
+| `ï»¿` aan het begin van een veld | BOM (onzichtbare markering) |
+
+---
+
+## Waarom coderingen niet overeenkomen
+
+Moderne platforms als Shopify, WooCommerce en Amazon verwachten bestanden in **UTF-8**. Maar veel tools maken bestanden in andere coderingen:
+
+- **Microsoft Excel (Windows)** slaat `.csv` op in de codering van de systeemtaal (vaak Windows-1252 of Latin-1), tenzij je uitdrukkelijk UTF-8 kiest.
+- **Oudere exporttools** gebruiken standaard vaak ISO-8859-1 / Latin-1.
+- **Kopiëren en plakken van websites** kan gekrulde aanhalingstekens en gedachtestreepjes meebrengen als UTF-8-tekens van meerdere bytes, die stukgaan als het bestand als Latin-1 wordt behandeld.
+
+Wordt een UTF-8-bestand als Latin-1 of Windows-1252 gelezen, dan valt elke reeks van meerdere bytes uiteen in losse tekens van één byte, en zo ontstaat mojibake. Wordt die onleesbare tekst daarna opgeslagen, dan is de rommel deel van de gegevens.
+
+---
+
+## Het probleem vaststellen
+
+### De codering van je bestand controleren
+
+**Op Mac/Linux:**
+```
+file -I yourfile.csv
+# Voorbeelduitvoer: yourfile.csv: text/plain; charset=utf-8
+```
+
+**Op Windows (PowerShell):**
+```powershell
+# Windows PowerShell 5.1; gebruik in PowerShell 7 -AsByteStream in plaats van -Encoding Byte
+Get-Content yourfile.csv -Encoding Byte -TotalCount 3
+# Zijn de eerste 3 bytes 239 187 191 (0xEF 0xBB 0xBF), dan heeft het bestand een UTF-8-BOM.
+```
+
+**Snelle visuele test:** open het bestand in een teksteditor (niet in Excel) en bekijk het eerste teken en de letters met accenten. Begint de eerste cel met `ï»¿` of bevatten beschrijvingen `â€`, dan klopt de codering niet.
+
+### Bepalen welke codering je nodig hebt
+
+- De meeste onleesbare bestanden zijn **UTF-8 dat als Latin-1 of Windows-1252 wordt gelezen** (of andersom).
+- Is het bestand zelf in orde en klopt alleen de weergave niet, open het dan opnieuw met de codering waarin het echt is opgeslagen en sla het daarna op als **UTF-8**. Reeksen als `â€™` betekenen meestal dat een UTF-8-bestand als Windows-1252 wordt getoond: open het dus als UTF-8.
+- Staat de rommel er nog als je het bestand als UTF-8 opent, dan is die in de gegevens opgeslagen. Een andere codering haalt hem niet weg; gebruik een reparatietool zoals de Python-bibliotheek `ftfy` of Zoeken en vervangen.
+
+---
+
+## Wat is de BOM?
+
+De UTF-8-BOM (Byte Order Mark) is een reeks van drie bytes (`EF BB BF`) die sommige tools aan het begin van UTF-8-bestanden zetten. Kladblok in Windows en Excel voegen die soms automatisch toe.
+
+**Waarom dat belangrijk is:** sommige importtools lezen de BOM als echte tekens in de eerste kolomnaam, maken van `Handle` dus `ï»¿Handle` en herkennen die kolom dan niet. Shopify en WooCommerce kunnen met de BOM overweg, maar andere tools en scripts misschien niet.
+
+---
+
+## Oplossing in Excel
+
+Excel is de meest voorkomende oorzaak van coderingsproblemen. Volg deze stappen precies.
+
+### Vanuit Excel exporteren als UTF-8
+
+1. Open je spreadsheet in Excel.
+2. Klik op **Bestand → Opslaan als**.
+3. Kies in de lijst "Opslaan als type" **CSV UTF-8 (door komma's gescheiden) (.csv)**.
+   - Deze optie bestaat vanaf Excel 2016 op Windows en Mac.
+   - Kies **niet** gewoon "CSV (gescheiden door lijstscheidingsteken)". Dat slaat op in de codering van de systeemtaal.
+4. Klik op **Opslaan**.
+
+### Een bestand met mojibake opnieuw openen in Excel
+
+Heb je al een onleesbaar bestand:
+
+1. Open het **niet** door te dubbelklikken. Dan wordt de systeemtaal gebruikt.
+2. Open een lege Excel-werkmap.
+3. Ga naar **Gegevens → Van tekst/CSV**.
+4. Selecteer je bestand.
+5. Zet in de importwizard **Bestandsoorsprong** op de echte codering van het bestand: **65001: Unicode (UTF-8)** voor UTF-8-bestanden.
+6. Rond de import af en sla daarna op als CSV UTF-8.
+
+---
+
+## Oplossing in Google Spreadsheets
+
+Google Spreadsheets werkt intern altijd in UTF-8. Het risico zit in het downloaden:
+
+1. **Importeren:** ga naar **Bestand → Importeren → Uploaden** en selecteer je CSV. Spreadsheets herkent de codering automatisch.
+2. **Exporteren:** ga naar **Bestand → Downloaden → Kommagescheiden waarden (.csv)**. Google Spreadsheets exporteert UTF-8 zonder BOM. Dat is veilig.
+
+Toont Spreadsheets een ontvangen bestand onleesbaar:
+
+1. Importeer het via **Bestand → Importeren** in plaats van het direct te openen.
+2. Zorg in het importvenster dat **Tekst converteren naar getallen, datums en formules** uit staat als je SKU's of barcodes hebt.
+
+---
+
+## Oplossing met VS Code (betrouwbaar voor elk bestand)
+
+VS Code geeft je volledige controle over de codering en is gratis:
+
+1. Open VS Code en sleep je CSV erin.
+2. Kijk rechtsonder in de statusbalk. Die toont de herkende codering (bijvoorbeeld `UTF-8`, `Windows 1252`).
+3. Klik op de coderingsaanduiding.
+4. Kies **"Reopen with Encoding"** en selecteer de codering waarin het bestand echt is opgeslagen (vaak `Western (Windows 1252)` of `ISO 8859-1`).
+5. De onleesbare tekst zou nu goed moeten worden weergegeven. Toont hij reeksen als `â€™` terwijl VS Code `Windows 1252` meldt, dan is het bestand eigenlijk UTF-8: open het in dat geval opnieuw als **UTF-8**.
+6. Klik opnieuw op de aanduiding en kies **"Save with Encoding → UTF-8"**.
+
+Deze twee stappen (opnieuw openen met de oorspronkelijke codering, dan opslaan als UTF-8) zijn de betrouwbaarste methode voor elke tool.
+
+---
+
+## Oplossing met Kladblok in Windows
+
+Voor een snelle oplossing op Windows (Windows 11 / 10 versie 1903 of nieuwer):
+
+1. Open het onleesbare bestand in Kladblok.
+2. Ga naar **Bestand → Opslaan als**.
+3. Kies in de lijst **Codering** **UTF-8** (niet "UTF-8 met BOM").
+4. Sla op.
+
+> **Let op:** oudere versies van Kladblok boden alleen "UTF-8" met BOM, wat de onzichtbare BOM-markering toevoegt. Heeft jouw Kladblok geen optie "UTF-8" zonder BOM, gebruik dan VS Code.
+
+---
+
+## Voorkomen dat de codering bij opnieuw opslaan beschadigt
+
+Is je bestand eenmaal schoon, bescherm het dan:
+
+- **Gebruik in Excel altijd "CSV UTF-8"**, nooit gewone CSV.
+- **Open een UTF-8-CSV in Windows nooit opnieuw door te dubbelklikken.** Windows koppelt `.csv` aan Excel, dat het bestand dan in de codering van de systeemtaal kan openen. Gebruik in Excel **Gegevens → Van tekst/CSV**, waarmee je de codering kunt kiezen.
+- **Controleer de codering na elke export**, met een tool als StriveFormats of een controle op de opdrachtregel, voordat je uploadt.
+- Maakt de exporttool van je importplatform altijd Latin-1, zet het bestand dan direct na het downloaden om met VS Code of een script, voordat je het bewerkt.
+
+---
+
+## Snel overzicht: coderingssymptomen en oplossingen
+
+| Symptoom | Waarschijnlijke oorzaak | Oplossing |
+|---|---|---|
+| `â€™` `â€”` in de tekst | UTF-8-bestand getoond als Windows-1252 | Opnieuw openen als UTF-8; nog onleesbaar, dan herstellen met `ftfy` |
+| `ï»¿` aan het begin van de eerste kolom | UTF-8-BOM | BOM verwijderen; "UTF-8 zonder BOM" gebruiken |
+| `Ã©` `Ã¨` `Ã ` | UTF-8-bestand getoond als Latin-1 of Windows-1252 | Opnieuw openen als UTF-8; nog onleesbaar, dan herstellen met `ftfy` |
+| `?` in plaats van alle speciale tekens | Codering verloren bij het omzetten | De oorspronkelijke gegevens zijn misschien verloren; opnieuw exporteren uit de bron |
+| Goed in Spreadsheets, onleesbaar na downloaden | Verkeerde codering bij downloaden | Bestand → Downloaden → CSV gebruiken (Google gebruikt UTF-8) |

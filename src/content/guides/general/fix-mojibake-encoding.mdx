@@ -22,9 +22,9 @@ If your CSV contains sequences like these, you have an encoding problem:
 
 | What you see | What it should be |
 |---|---|
-| `â€™` | `'` (right single quotation mark) |
-| `â€"` | `—` (em dash) |
-| `â€œ` | `"` (left double quote) |
+| `â€™` | `’` (right single quotation mark) |
+| `â€”` | `—` (em dash) |
+| `â€œ` | `“` (left double quote) |
 | `Ã©` | `é` (e with accent) |
 | `ï»¿` at the start of a field | BOM (invisible marker) |
 
@@ -38,7 +38,7 @@ Modern platforms such as Shopify, WooCommerce and Amazon expect **UTF-8** encode
 - **Older export tools** may default to ISO-8859-1 / Latin-1.
 - **Copy-paste from websites** can smuggle in curly quotes and em dashes encoded as multi-byte UTF-8 characters that break when the file is treated as Latin-1.
 
-When a UTF-8 file is read as Latin-1, each multi-byte sequence gets split into individual Latin-1 characters, producing mojibake.
+When a UTF-8 file is read as Latin-1 or Windows-1252, each multi-byte sequence gets split into individual single-byte characters, producing mojibake. If that garbled text is then saved, the garbage becomes part of the data.
 
 ---
 
@@ -54,6 +54,7 @@ file -I yourfile.csv
 
 **On Windows (PowerShell):**
 ```powershell
+# Windows PowerShell 5.1; in PowerShell 7 use -AsByteStream instead of -Encoding Byte
 Get-Content yourfile.csv -Encoding Byte -TotalCount 3
 # If first 3 bytes are 239 187 191 (0xEF 0xBB 0xBF), the file has a UTF-8 BOM.
 ```
@@ -62,8 +63,9 @@ Get-Content yourfile.csv -Encoding Byte -TotalCount 3
 
 ### Identify which encoding to use
 
-- Most garbled files are **UTF-8 read as Latin-1** (or vice versa).
-- The fix is almost always: reopen the file with the encoding it was really saved in, then re-save it as **UTF-8**.
+- Most garbled files are **UTF-8 read as Latin-1 or Windows-1252** (or the other way round).
+- If the file itself is fine and only the display is wrong, reopen it with the encoding it was really saved in, then re-save it as **UTF-8**. Sequences like `â€™` usually mean a UTF-8 file is being shown as Windows-1252, so reopen it as UTF-8.
+- If the garbage is still there when the file is opened as UTF-8, it was saved into the data. Changing the encoding won't remove it; use a repair tool such as Python's `ftfy` library or Find and Replace.
 
 ---
 
@@ -96,7 +98,7 @@ If you already have a garbled file:
 2. Open a blank Excel workbook.
 3. Go to **Data → From Text/CSV**.
 4. Select your file.
-5. In the import wizard, set **File Origin** to **65001: Unicode (UTF-8)**.
+5. In the import wizard, set **File Origin** to the file's real encoding: **65001: Unicode (UTF-8)** for UTF-8 files.
 6. Complete the import, then save as CSV UTF-8.
 
 ---
@@ -111,7 +113,7 @@ Google Sheets always works in UTF-8 internally. The risk is in downloading:
 If you received a garbled file that Sheets is displaying incorrectly:
 
 1. Import it via **File → Import** rather than opening it directly.
-2. In the import dialog, check **Convert text to numbers, dates, and formulas** is unchecked if you have SKUs or barcodes.
+2. In the import dialog, make sure **Convert text to numbers, dates, and formulas** is unchecked if you have SKUs or barcodes.
 
 ---
 
@@ -123,7 +125,7 @@ VS Code gives you full control over encoding and is free:
 2. Look at the bottom-right status bar. It shows the detected encoding (e.g., `UTF-8`, `Windows 1252`).
 3. Click the encoding label.
 4. Choose **"Reopen with Encoding"** and select the encoding the file was actually saved in (often `Western (Windows 1252)` or `ISO 8859-1`).
-5. The garbled text should now display correctly.
+5. The garbled text should now display correctly. If it shows `â€™`-style sequences while VS Code says `Windows 1252`, the file is really UTF-8: reopen it as **UTF-8** instead.
 6. Click the encoding label again and choose **"Save with Encoding → UTF-8"**.
 
 This two-step process (reopen with the original encoding, then save as UTF-8) is the most reliable method for any tool.
@@ -148,7 +150,7 @@ For a quick fix on Windows (Windows 11 / 10 version 1903+):
 Once your file is clean, protect it going forward:
 
 - **Always use "CSV UTF-8" in Excel**, never plain CSV.
-- **Never re-open a UTF-8 CSV by double-clicking in Windows.** Windows associates `.csv` with Excel which may open it in the locale encoding. Use **File → Open** from within Excel and specify the encoding, or use **Data → From Text/CSV**.
+- **Never re-open a UTF-8 CSV by double-clicking in Windows.** Windows associates `.csv` with Excel which may open it in the locale encoding. Use **Data → From Text/CSV** in Excel, which lets you choose the encoding.
 - **Validate encoding after every export** using a tool like StriveFormats or a command-line check before uploading.
 - If your import platform's export tool consistently produces Latin-1, convert the file immediately after downloading using VS Code or a script before editing.
 
@@ -158,8 +160,8 @@ Once your file is clean, protect it going forward:
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `â€™` `â€"` in text | UTF-8 file opened/saved as Latin-1 | Reopen as Latin-1, save as UTF-8 |
+| `â€™` `â€”` in text | UTF-8 file shown as Windows-1252 | Reopen as UTF-8; if it's still garbled, repair it with `ftfy` |
 | `ï»¿` at start of first column | UTF-8 BOM | Strip BOM; use "UTF-8 without BOM" |
-| `Ã©` `Ã¨` `Ã ` | UTF-8 multi-byte split | Reopen as Latin-1, save as UTF-8 |
+| `Ã©` `Ã¨` `Ã ` | UTF-8 file shown as Latin-1 or Windows-1252 | Reopen as UTF-8; if it's still garbled, repair it with `ftfy` |
 | `?` replacing all special chars | Encoding lost on conversion | Original data may be lost; re-export from source |
 | Correct in Sheets but garbled when downloaded | Download encoding wrong | Use File → Download → CSV (Google uses UTF-8) |

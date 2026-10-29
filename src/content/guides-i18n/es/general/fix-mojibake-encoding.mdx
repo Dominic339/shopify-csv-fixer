@@ -1,0 +1,167 @@
+---
+title: "Corregir el mojibake y los errores de codificación en archivos CSV"
+description: "Soluciona el texto ilegible causado por codificaciones que no coinciden. Aprende a detectar conflictos entre UTF-8 y Latin-1, quitar el BOM y volver a guardar los archivos correctamente."
+keywords: ["mojibake csv", "error de codificación csv", "utf-8 csv", "latin-1 csv", "bom csv", "arreglar caracteres raros", "codificación csv no coincide", "texto ilegible csv", "quitar bom csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Qué es el mojibake y por qué aparece en los CSV"
+  - "Cómo distinguir UTF-8 de Latin-1 (ISO-8859-1)"
+  - "Cómo quitar el BOM de UTF-8 cuando una herramienta lo lee mal"
+  - "Soluciones paso a paso en Excel, Google Sheets y VS Code"
+  - "Cómo evitar que la codificación se estropee cada vez que guardas"
+bestFor: "Vendedores y responsables de catálogo con títulos, descripciones o nombres de opciones ilegibles tras exportar o descargar un CSV"
+timeToComplete: "10 minutos"
+---
+
+## ¿Qué es el mojibake?
+
+El mojibake es la basura visual que aparece cuando un archivo guardado con una codificación de caracteres se abre o se interpreta con otra. La palabra viene del japonés y significa más o menos «caracteres ininteligibles».
+
+Si tu CSV contiene secuencias como estas, tienes un problema de codificación:
+
+| Lo que ves | Lo que debería ser |
+|---|---|
+| `â€™` | `’` (comilla simple de cierre) |
+| `â€”` | `—` (raya) |
+| `â€œ` | `“` (comilla doble de apertura) |
+| `Ã©` | `é` (e con tilde) |
+| `ï»¿` al principio de un campo | BOM (marca invisible) |
+
+---
+
+## Por qué no coinciden las codificaciones
+
+Las plataformas modernas como Shopify, WooCommerce y Amazon esperan archivos codificados en **UTF-8**. Pero muchas herramientas generan archivos con otras codificaciones:
+
+- **Microsoft Excel (Windows)** guarda los `.csv` con la codificación del idioma del sistema (a menudo Windows-1252 o Latin-1) salvo que elijas UTF-8 expresamente.
+- **Las herramientas de exportación antiguas** pueden usar por defecto ISO-8859-1 / Latin-1.
+- **Copiar y pegar desde webs** puede colar comillas tipográficas y rayas codificadas como caracteres UTF-8 de varios bytes, que se rompen cuando el archivo se trata como Latin-1.
+
+Cuando un archivo UTF-8 se lee como Latin-1 o Windows-1252, cada secuencia de varios bytes se parte en caracteres sueltos de un byte y aparece el mojibake. Si luego se guarda ese texto estropeado, la basura pasa a formar parte de los datos.
+
+---
+
+## Diagnosticar el problema
+
+### Comprobar la codificación del archivo
+
+**En Mac/Linux:**
+```
+file -I yourfile.csv
+# Ejemplo de salida: yourfile.csv: text/plain; charset=utf-8
+```
+
+**En Windows (PowerShell):**
+```powershell
+# Windows PowerShell 5.1; en PowerShell 7 usa -AsByteStream en lugar de -Encoding Byte
+Get-Content yourfile.csv -Encoding Byte -TotalCount 3
+# Si los 3 primeros bytes son 239 187 191 (0xEF 0xBB 0xBF), el archivo tiene un BOM de UTF-8.
+```
+
+**Prueba visual rápida:** abre el archivo en un editor de texto (no en Excel) y mira el primer carácter y las letras acentuadas. Si la primera celda empieza por `ï»¿` o las descripciones contienen `â€`, la codificación está mal.
+
+### Saber qué codificación usar
+
+- La mayoría de los archivos ilegibles son **UTF-8 leído como Latin-1 o Windows-1252** (o al revés).
+- Si el archivo está bien y solo se ve mal, vuelve a abrirlo con la codificación con la que se guardó realmente y luego guárdalo como **UTF-8**. Secuencias como `â€™` suelen indicar que un archivo UTF-8 se está mostrando como Windows-1252, así que ábrelo como UTF-8.
+- Si la basura sigue ahí al abrirlo como UTF-8, se guardó en los datos. Cambiar la codificación no la quita; usa una herramienta de reparación como la biblioteca `ftfy` de Python o Buscar y reemplazar.
+
+---
+
+## ¿Qué es el BOM?
+
+El BOM de UTF-8 (Byte Order Mark) es una secuencia de tres bytes (`EF BB BF`) que algunas herramientas añaden al principio de los archivos UTF-8. El Bloc de notas de Windows y Excel la añaden a veces automáticamente.
+
+**Por qué importa:** algunas herramientas de importación leen el BOM como caracteres reales del primer nombre de columna, convierten `Handle` en `ï»¿Handle` y luego no reconocen esa columna. Shopify y WooCommerce manejan el BOM, pero otras herramientas y scripts puede que no.
+
+---
+
+## Solución en Excel
+
+Excel es la causa más habitual de problemas de codificación. Sigue estos pasos con precisión.
+
+### Exportar desde Excel como UTF-8
+
+1. Abre tu hoja de cálculo en Excel.
+2. Haz clic en **Archivo → Guardar como**.
+3. En la lista «Tipo», elige **CSV UTF-8 (delimitado por comas) (.csv)**.
+   - Esta opción existe desde Excel 2016 en Windows y Mac.
+   - **No** elijas el simple «CSV (delimitado por comas)». Guarda con la codificación del idioma del sistema.
+4. Haz clic en **Guardar**.
+
+### Volver a abrir en Excel un archivo con mojibake
+
+Si ya tienes un archivo ilegible:
+
+1. **No** lo abras con doble clic. Así se usa el idioma del sistema.
+2. Abre un libro de Excel en blanco.
+3. Ve a **Datos → Desde el texto/CSV**.
+4. Selecciona tu archivo.
+5. En el asistente de importación, pon en **Origen del archivo** la codificación real del archivo: **65001: Unicode (UTF-8)** para archivos UTF-8.
+6. Completa la importación y guarda como CSV UTF-8.
+
+---
+
+## Solución en Google Sheets
+
+Google Sheets trabaja siempre en UTF-8 internamente. El riesgo está en la descarga:
+
+1. **Importar:** ve a **Archivo → Importar → Subir** y selecciona tu CSV. Sheets detecta la codificación automáticamente.
+2. **Exportar:** ve a **Archivo → Descargar → Valores separados por comas (.csv)**. Google Sheets exporta UTF-8 sin BOM. Es seguro.
+
+Si recibiste un archivo que Sheets muestra mal:
+
+1. Impórtalo con **Archivo → Importar** en lugar de abrirlo directamente.
+2. En el cuadro de importación, asegúrate de que **Convertir texto en números, fechas y fórmulas** está desmarcado si tienes SKU o códigos de barras.
+
+---
+
+## Solución con VS Code (fiable con cualquier archivo)
+
+VS Code te da control total sobre la codificación y es gratis:
+
+1. Abre VS Code y arrastra tu CSV a la ventana.
+2. Mira la barra de estado abajo a la derecha. Muestra la codificación detectada (por ejemplo, `UTF-8` o `Windows 1252`).
+3. Haz clic en la etiqueta de codificación.
+4. Elige **«Reopen with Encoding»** y selecciona la codificación con la que se guardó realmente el archivo (a menudo `Western (Windows 1252)` o `ISO 8859-1`).
+5. El texto ilegible debería verse bien ahora. Si muestra secuencias como `â€™` mientras VS Code indica `Windows 1252`, el archivo es en realidad UTF-8: vuelve a abrirlo como **UTF-8**.
+6. Haz clic otra vez en la etiqueta y elige **«Save with Encoding → UTF-8»**.
+
+Estos dos pasos (volver a abrir con la codificación original y guardar como UTF-8) son el método más fiable para cualquier herramienta.
+
+---
+
+## Solución con el Bloc de notas de Windows
+
+Para una solución rápida en Windows (Windows 11 / 10 versión 1903 o posterior):
+
+1. Abre el archivo ilegible en el Bloc de notas.
+2. Ve a **Archivo → Guardar como**.
+3. En la lista **Codificación**, selecciona **UTF-8** (no «UTF-8 con BOM»).
+4. Guarda.
+
+> **Nota:** las versiones antiguas del Bloc de notas solo ofrecían «UTF-8» con BOM, que añade la marca invisible. Si tu Bloc de notas no tiene la opción «UTF-8» sin BOM, usa VS Code.
+
+---
+
+## Evitar que se estropee la codificación al volver a guardar
+
+Una vez que el archivo esté limpio, protégelo:
+
+- **Usa siempre «CSV UTF-8» en Excel**, nunca el CSV simple.
+- **Nunca vuelvas a abrir un CSV en UTF-8 con doble clic en Windows.** Windows asocia `.csv` con Excel, que puede abrirlo con la codificación del idioma del sistema. Usa **Datos → Desde el texto/CSV** en Excel, que te deja elegir la codificación.
+- **Comprueba la codificación después de cada exportación**, con una herramienta como StriveFormats o una comprobación en la línea de comandos, antes de subir el archivo.
+- Si la herramienta de exportación de tu plataforma produce siempre Latin-1, convierte el archivo justo después de descargarlo con VS Code o un script, antes de editarlo.
+
+---
+
+## Referencia rápida: síntomas de codificación y soluciones
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| `â€™` `â€”` en el texto | Archivo UTF-8 mostrado como Windows-1252 | Volver a abrirlo como UTF-8; si sigue ilegible, repararlo con `ftfy` |
+| `ï»¿` al principio de la primera columna | BOM de UTF-8 | Quitar el BOM; usar «UTF-8 sin BOM» |
+| `Ã©` `Ã¨` `Ã ` | Archivo UTF-8 mostrado como Latin-1 o Windows-1252 | Volver a abrirlo como UTF-8; si sigue ilegible, repararlo con `ftfy` |
+| `?` en lugar de todos los caracteres especiales | Codificación perdida en la conversión | Puede que los datos originales se hayan perdido; volver a exportar desde el origen |
+| Correcto en Sheets pero ilegible al descargarlo | Codificación de descarga incorrecta | Usar Archivo → Descargar → CSV (Google usa UTF-8) |

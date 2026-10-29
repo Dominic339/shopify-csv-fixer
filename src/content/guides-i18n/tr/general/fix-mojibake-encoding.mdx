@@ -1,0 +1,167 @@
+---
+title: "CSV dosyalarında mojibake ve kodlama hatalarını düzeltme"
+description: "Kodlama uyuşmazlığından kaynaklanan bozuk metinleri düzeltin. UTF-8 ve Latin-1 çakışmalarını tespit etmeyi, BOM'u kaldırmayı ve dosyaları doğru şekilde yeniden kaydetmeyi öğrenin."
+keywords: ["mojibake csv", "csv kodlama hatası", "utf-8 csv", "latin-1 csv", "bom csv", "bozuk karakterleri düzeltme", "csv kodlama uyuşmazlığı", "bozuk metin csv", "csv bom kaldırma"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Mojibake'nin ne olduğu ve CSV dosyalarında neden ortaya çıktığı"
+  - "UTF-8 ile Latin-1'i (ISO-8859-1) nasıl ayırt edeceğiniz"
+  - "Bir araç yanlış okuduğunda UTF-8 BOM'unu nasıl kaldıracağınız"
+  - "Excel, Google E-Tablolar ve VS Code'da adım adım çözümler"
+  - "Her kaydetmede kodlamanın bozulmasını nasıl önleyeceğiniz"
+bestFor: "Bir CSV'yi dışa aktardıktan veya indirdikten sonra bozuk ürün başlıkları, açıklamalar veya seçenek adlarıyla uğraşan satıcılar ve katalog yöneticileri"
+timeToComplete: "10 dakika"
+---
+
+## Mojibake nedir?
+
+Mojibake, bir karakter kodlamasıyla kaydedilmiş bir dosya başka bir kodlamayla açıldığında veya yorumlandığında ortaya çıkan görsel çöptür. Kelime Japoncadan gelir ve kabaca "anlaşılmaz karakterler" anlamına gelir.
+
+CSV'nizde bunun gibi diziler varsa bir kodlama sorununuz vardır:
+
+| Gördüğünüz | Olması gereken |
+|---|---|
+| `â€™` | `’` (tipografik kesme işareti) |
+| `â€”` | `—` (uzun tire) |
+| `â€œ` | `“` (açılış tırnağı) |
+| `Ã©` | `é` (aksanlı e) |
+| Bir alanın başında `ï»¿` | BOM (görünmez işaret) |
+
+---
+
+## Kodlamalar neden uyuşmaz
+
+Shopify, WooCommerce ve Amazon gibi modern platformlar **UTF-8** kodlu dosyalar bekler. Ancak birçok araç başka kodlamalarda dosya üretir:
+
+- **Microsoft Excel (Windows)**, siz özellikle UTF-8 seçmedikçe `.csv` dosyalarını sistem dilinin kodlamasıyla (Türkçe Windows'ta genellikle Windows-1254, Batı dillerinde Windows-1252 veya Latin-1) kaydeder.
+- **Eski dışa aktarma araçları** varsayılan olarak ISO-8859-1 / Latin-1 kullanabilir.
+- **Web sitelerinden kopyalayıp yapıştırmak**, çok baytlı UTF-8 karakterler olarak kodlanmış tipografik tırnakları ve uzun tireleri içeri sokabilir; dosya Latin-1 olarak ele alındığında bunlar bozulur.
+
+Bir UTF-8 dosyası Latin-1 veya Windows-1252 olarak okunduğunda, her çok baytlı dizi tek baytlık ayrı karakterlere bölünür ve mojibake oluşur. Bu bozuk metin sonra kaydedilirse çöp verilerin bir parçası olur.
+
+---
+
+## Sorunu teşhis etme
+
+### Dosyanızın kodlamasını kontrol etme
+
+**Mac/Linux'ta:**
+```
+file -I yourfile.csv
+# Örnek çıktı: yourfile.csv: text/plain; charset=utf-8
+```
+
+**Windows'ta (PowerShell):**
+```powershell
+# Windows PowerShell 5.1; PowerShell 7'de -Encoding Byte yerine -AsByteStream kullanın
+Get-Content yourfile.csv -Encoding Byte -TotalCount 3
+# İlk 3 bayt 239 187 191 (0xEF 0xBB 0xBF) ise dosyada UTF-8 BOM vardır.
+```
+
+**Hızlı göz testi:** dosyayı bir metin düzenleyicide (Excel'de değil) açın ve ilk karaktere ve aksanlı ya da Türkçe harflere bakın. İlk hücre `ï»¿` ile başlıyorsa veya açıklamalarda `â€` varsa kodlama yanlıştır.
+
+### Hangi kodlamanın kullanılacağını belirleme
+
+- Bozuk dosyaların çoğu **Latin-1 veya Windows-1252 olarak okunan UTF-8**'dir (ya da tersi).
+- Dosyanın kendisi sağlamsa ve yalnızca görüntü yanlışsa, dosyayı gerçekte kaydedildiği kodlamayla yeniden açın ve ardından **UTF-8** olarak kaydedin. `â€™` gibi diziler genellikle bir UTF-8 dosyasının Windows-1252 olarak gösterildiği anlamına gelir; bu yüzden dosyayı UTF-8 olarak açın.
+- Dosya UTF-8 olarak açıldığında çöp hâlâ duruyorsa, verilere kaydedilmiş demektir. Kodlamayı değiştirmek onu kaldırmaz; Python'un `ftfy` kütüphanesi gibi bir onarım aracı veya Bul ve Değiştir kullanın.
+
+---
+
+## BOM nedir?
+
+UTF-8 BOM'u (Byte Order Mark), bazı araçların UTF-8 dosyalarının başına eklediği üç baytlık bir dizidir (`EF BB BF`). Windows Not Defteri ve Excel bazen bunu otomatik olarak ekler.
+
+**Neden önemli:** bazı içe aktarma araçları BOM'u ilk sütun adındaki gerçek karakterler olarak okur, `Handle` adını `ï»¿Handle` yapar ve ardından o sütunu tanımaz. Shopify ve WooCommerce BOM ile başa çıkar, ancak diğer araçlar ve betikler çıkamayabilir.
+
+---
+
+## Excel'de düzeltme
+
+Excel, kodlama sorunlarının en yaygın nedenidir. Bu adımları tam olarak uygulayın.
+
+### Excel'den UTF-8 olarak dışa aktarma
+
+1. Elektronik tablonuzu Excel'de açın.
+2. **Dosya → Farklı Kaydet**'e tıklayın.
+3. "Kayıt türü" listesinden **CSV UTF-8 (Virgülle ayrılmış) (.csv)** seçin.
+   - Bu seçenek Windows ve Mac'te Excel 2016 ve sonrasında vardır.
+   - Düz "CSV (Virgülle ayrılmış)" seçeneğini **seçmeyin**. Sistem dilinin kodlamasıyla kaydeder.
+4. **Kaydet**'e tıklayın.
+
+### Mojibake'li bir dosyayı Excel'de yeniden açma
+
+Elinizde zaten bozuk bir dosya varsa:
+
+1. Dosyayı çift tıklayarak **açmayın**. Bu, sistem dilini kullanır.
+2. Boş bir Excel çalışma kitabı açın.
+3. **Veri → Metinden/CSV'den**'e gidin.
+4. Dosyanızı seçin.
+5. İçe aktarma sihirbazında **Dosya Kaynağı**'nı dosyanın gerçek kodlamasına ayarlayın: UTF-8 dosyaları için **65001: Unicode (UTF-8)**.
+6. İçe aktarmayı tamamlayın, ardından CSV UTF-8 olarak kaydedin.
+
+---
+
+## Google E-Tablolar'da düzeltme
+
+Google E-Tablolar içeride her zaman UTF-8 ile çalışır. Risk indirme aşamasındadır:
+
+1. **İçe aktarma:** **Dosya → İçe aktar → Yükle**'ye gidin ve CSV'nizi seçin. E-Tablolar kodlamayı otomatik algılar.
+2. **Dışa aktarma:** **Dosya → İndir → Virgülle ayrılmış değerler (.csv)**'ye gidin. Google E-Tablolar BOM'suz UTF-8 dışa aktarır. Bu güvenlidir.
+
+E-Tablolar aldığınız bir dosyayı yanlış gösteriyorsa:
+
+1. Dosyayı doğrudan açmak yerine **Dosya → İçe aktar** ile içe aktarın.
+2. SKU veya barkodlarınız varsa içe aktarma penceresinde **Metni sayılara, tarihlere ve formüllere dönüştür** seçeneğinin işaretli olmadığından emin olun.
+
+---
+
+## VS Code ile düzeltme (her dosya için güvenilir)
+
+VS Code kodlama üzerinde tam denetim sağlar ve ücretsizdir:
+
+1. VS Code'u açın ve CSV dosyanızı içine sürükleyin.
+2. Sağ alttaki durum çubuğuna bakın. Algılanan kodlamayı gösterir (örneğin `UTF-8`, `Windows 1252`).
+3. Kodlama etiketine tıklayın.
+4. **"Reopen with Encoding"**'i seçin ve dosyanın gerçekte kaydedildiği kodlamayı seçin (çoğu zaman `Turkish (Windows 1254)`, `Western (Windows 1252)` veya `ISO 8859-1`).
+5. Bozuk metin artık doğru görünmelidir. VS Code `Windows 1252` derken metin hâlâ `â€™` gibi diziler gösteriyorsa, dosya aslında UTF-8'dir: onu bunun yerine **UTF-8** olarak yeniden açın.
+6. Etikete yeniden tıklayın ve **"Save with Encoding → UTF-8"**'i seçin.
+
+Bu iki adımlı süreç (özgün kodlamayla yeniden açmak, sonra UTF-8 olarak kaydetmek) her araç için en güvenilir yöntemdir.
+
+---
+
+## Windows Not Defteri ile düzeltme
+
+Windows'ta hızlı bir düzeltme için (Windows 11 / 10 sürüm 1903 ve sonrası):
+
+1. Bozuk dosyayı Not Defteri'nde açın.
+2. **Dosya → Farklı Kaydet**'e gidin.
+3. **Kodlama** listesinden **UTF-8**'i seçin ("BOM ile UTF-8" değil).
+4. Kaydedin.
+
+> **Not:** Not Defteri'nin eski sürümleri yalnızca görünmez BOM işaretini ekleyen BOM'lu "UTF-8" seçeneğini sunuyordu. Not Defteri'nizde BOM'suz "UTF-8" seçeneği yoksa bunun yerine VS Code kullanın.
+
+---
+
+## Yeniden kodlamanın verileri bozmasını önleme
+
+Dosyanız temizlendikten sonra onu koruyun:
+
+- **Excel'de her zaman "CSV UTF-8" kullanın**, asla düz CSV kullanmayın.
+- **Bir UTF-8 CSV'yi Windows'ta asla çift tıklayarak yeniden açmayın.** Windows `.csv` dosyalarını Excel ile ilişkilendirir ve Excel dosyayı sistem dilinin kodlamasıyla açabilir. Excel'de kodlamayı seçmenize izin veren **Veri → Metinden/CSV'den**'i kullanın.
+- **Her dışa aktarmadan sonra kodlamayı doğrulayın**, yüklemeden önce StriveFormats gibi bir araçla veya komut satırından kontrol edin.
+- İçe aktarma platformunuzun dışa aktarma aracı hep Latin-1 üretiyorsa, dosyayı indirdikten hemen sonra ve düzenlemeden önce VS Code veya bir betikle dönüştürün.
+
+---
+
+## Hızlı başvuru: kodlama belirtileri ve çözümleri
+
+| Belirti | Olası neden | Çözüm |
+|---|---|---|
+| Metinde `â€™` `â€”` | UTF-8 dosyası Windows-1252 olarak gösteriliyor | UTF-8 olarak yeniden açın; hâlâ bozuksa `ftfy` ile onarın |
+| İlk sütunun başında `ï»¿` | UTF-8 BOM | BOM'u kaldırın; "BOM'suz UTF-8" kullanın |
+| `Ã©` `Ã¨` `Ã ` | UTF-8 dosyası Latin-1 veya Windows-1252 olarak gösteriliyor | UTF-8 olarak yeniden açın; hâlâ bozuksa `ftfy` ile onarın |
+| Tüm özel karakterlerin yerinde `?` | Dönüştürme sırasında kodlama kayboldu | Özgün veriler kaybolmuş olabilir; kaynaktan yeniden dışa aktarın |
+| E-Tablolar'da doğru ama indirilince bozuk | İndirme kodlaması yanlış | Dosya → İndir → CSV kullanın (Google UTF-8 kullanır) |
