@@ -29,7 +29,8 @@ export function Logo({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <LogoMark className="h-7 w-7 md:h-8 md:w-8" />
-      <span className="text-[17px] font-bold tracking-tight text-[var(--text)] md:text-lg">StriveFormats</span>
+      {/* On the narrowest phones only the mark shows, so the header never overflows. */}
+      <span className="text-[17px] font-bold tracking-tight text-[var(--text)] max-[419px]:sr-only md:text-lg">StriveFormats</span>
     </span>
   );
 }
