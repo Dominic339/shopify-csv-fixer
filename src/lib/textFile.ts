@@ -30,7 +30,7 @@ export function decodeBytes(bytes: Uint8Array): DecodedText {
 
 // Windows-1252 differs from Latin-1 only in 0x80–0x9F (€, curly quotes, dashes, ™ …).
 // Decoded by hand because some runtimes treat the label as plain Latin-1.
-const CP1252_HIGH = "€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008DŽ\u008F\u0090‘’“”•–—˜™š›œ\u009DžŸ";
+export const CP1252_HIGH = "€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008DŽ\u008F\u0090‘’“”•–—˜™š›œ\u009DžŸ";
 
 export function decodeWindows1252(bytes: Uint8Array): string {
   let out = "";

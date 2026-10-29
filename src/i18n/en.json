@@ -39,6 +39,7 @@
     "language": "Language",
     "themeDark": "Switch to dark mode",
     "themeLight": "Switch to light mode",
+    "freeTools": "Free CSV tools",
     "storeMigrations": "Store migrations"
   },
   "guide": {
@@ -955,5 +956,258 @@
     "guidesTitle": "Guides",
     "allGuides": "All {platform} guides →",
     "otherFixers": "Other fixers"
+  },
+  "smallTools": {
+    "indexMetaTitle": "Free CSV tools for online sellers",
+    "indexTitle": "Free CSV tools",
+    "indexDescription": "Free tools for product CSV files: split large files, remove duplicate rows, repair encoding and barcodes, convert Excel to CSV and generate Shopify handles. Everything runs in your browser.",
+    "indexIntro": "Quick fixes for the problems that stop a product file from importing. Free, no sign-up, and your files never leave your browser.",
+    "quickTitle": "Quick fixes",
+    "fullTitle": "Full tools",
+    "badge": "Free · no sign-up · runs in your browser",
+    "open": "Open",
+    "dropTitle": "Drop a CSV file here, or",
+    "dropTitleExcel": "Drop an Excel file (.xlsx) here, or",
+    "choose": "Choose a file",
+    "dropHere": "Drop the file here",
+    "privacy": "Your file is processed in your browser. It is not uploaded.",
+    "fileInfo": "{rows} rows · {cols} columns",
+    "useAnother": "Use a different file",
+    "readError": "This file could not be read. Check that it is a CSV file.",
+    "emptyFile": "This file has no data rows.",
+    "preview": "Preview",
+    "previewNote": "First {shown} of {total} rows.",
+    "downloadCsv": "Download CSV",
+    "checkInFixer": "Check it in the CSV Fixer",
+    "nextStep": "Next step: check the file against your platform's import rules.",
+    "row": "Row",
+    "column": "Column",
+    "before": "Before",
+    "after": "After",
+    "howTitle": "How it works",
+    "faqTitle": "Questions",
+    "relatedTitle": "More free tools",
+    "options": "Options",
+    "result": "Result",
+    "tools": {
+      "split": {
+        "name": "CSV splitter",
+        "metaTitle": "Split a large CSV file into smaller files",
+        "description": "Split a large product CSV into smaller files with the header row in each. Product variants stay together, and you can keep each file under Shopify's 15 MB import limit.",
+        "intro": "Split a large CSV into smaller files, each with the header row. Rows of the same product stay in the same file.",
+        "rowsPerFile": "Rows per file",
+        "maxSize": "Keep each file under 15 MB (Shopify's import limit)",
+        "groupBy": "Keep rows together by",
+        "noGrouping": "Don't group rows",
+        "groupHint": "Rows of one product share this column, so they are never split across two files.",
+        "resultTitle": "{count} files",
+        "part": "Part {n}",
+        "partInfo": "{rows} rows · {size}",
+        "download": "Download",
+        "downloadZip": "Download all as .zip",
+        "steps": [
+          "Drop in your CSV. The file is read in your browser.",
+          "Choose how many rows go in each file. Variant rows of a product are kept together automatically.",
+          "Download the parts one by one or all at once as a .zip, and import them in order."
+        ],
+        "faq": [
+          {
+            "q": "Will a product's variants end up in different files?",
+            "a": "No. Rows that share a Shopify Handle, or WooCommerce variations that follow their parent product, are always kept in the same file. A file can go slightly over the row count to keep a product whole."
+          },
+          {
+            "q": "What is Shopify's file size limit?",
+            "a": "Shopify accepts product CSV files up to 15 MB. Tick the size option and each part is kept under that limit."
+          },
+          {
+            "q": "Does every part have the header row?",
+            "a": "Yes. Every file starts with the same header row, so each one can be imported on its own."
+          }
+        ]
+      },
+      "dedupe": {
+        "name": "Remove duplicate rows",
+        "metaTitle": "Remove duplicate rows from a CSV file",
+        "description": "Remove duplicate rows from a CSV, either rows that are identical or rows that share a SKU or another column. See exactly which rows were removed before you download.",
+        "intro": "Find and remove duplicate rows, either rows that are identical in every column or rows that share a value such as a SKU.",
+        "compare": "Rows are duplicates when",
+        "wholeRow": "every column is the same",
+        "byColumns": "these columns are the same:",
+        "keep": "Keep",
+        "keepFirst": "the first row",
+        "keepLast": "the last row",
+        "loose": "Ignore upper/lower case and extra spaces",
+        "skipBlank": "Never remove rows where these columns are empty",
+        "handleWarning": "All variants of a Shopify product share a Handle. Comparing by Handle alone would delete variants; compare by Variant SKU instead.",
+        "summary": "{removed} duplicate rows removed. {kept} rows kept.",
+        "none": "No duplicate rows found.",
+        "removedTitle": "Removed rows",
+        "downloadKept": "Download cleaned CSV",
+        "downloadRemoved": "Download removed rows",
+        "steps": [
+          "Drop in your CSV.",
+          "Choose what makes two rows the same: every column, or key columns such as SKU.",
+          "Check the list of removed rows, then download the cleaned file."
+        ],
+        "faq": [
+          {
+            "q": "Which row is kept when two rows are duplicates?",
+            "a": "The first one by default. Choose \"the last row\" to keep the newest version when a file was appended to over time."
+          },
+          {
+            "q": "Can I see what was removed?",
+            "a": "Yes. Every removed row is listed with its row number, and you can download the removed rows as their own CSV."
+          },
+          {
+            "q": "Is it safe for Shopify files?",
+            "a": "Yes, if you compare whole rows or Variant SKU. Don't compare by Handle alone: every variant of a product shares the Handle."
+          }
+        ]
+      },
+      "encoding": {
+        "name": "Fix CSV encoding",
+        "metaTitle": "Fix CSV encoding and garbled characters (Ã©, â€™)",
+        "description": "Fix garbled characters such as Ã© and â€™ in a CSV and convert it to UTF-8. Works with files saved by Excel in Windows-1252 or UTF-16.",
+        "intro": "Turn garbled text like \"CafÃ©\" back into \"Café\", and convert the file to UTF-8, the encoding every store platform expects.",
+        "detected": "Detected encoding",
+        "encUtf8": "UTF-8",
+        "encUtf8Bom": "UTF-8 with BOM",
+        "encUtf16": "UTF-16",
+        "encWin1252": "Windows-1252 (converted to UTF-8)",
+        "repaired": "{count} garbled cells repaired.",
+        "clean": "No garbled text found. The download is plain UTF-8.",
+        "bom": "Add a byte order mark (helps Excel on Windows open the file correctly)",
+        "garbled": "Garbled text",
+        "downloadFixed": "Download UTF-8 CSV",
+        "steps": [
+          "Drop in your CSV. The encoding is detected automatically.",
+          "Garbled characters are repaired, and you can check every change.",
+          "Download a clean UTF-8 file."
+        ],
+        "faq": [
+          {
+            "q": "Why do I see Ã© instead of é?",
+            "a": "The file was saved as UTF-8, then opened as Windows-1252 and saved again. Each accented letter turned into two or three odd characters. This tool reverses that."
+          },
+          {
+            "q": "Will it change text that is already correct?",
+            "a": "No. Only character sequences that are clearly garbled UTF-8 are changed; correct accents, symbols and other alphabets are left alone."
+          },
+          {
+            "q": "Should I add a BOM?",
+            "a": "Only if you'll open the file in Excel on Windows. Shopify, WooCommerce and most importers read UTF-8 with or without it."
+          }
+        ]
+      },
+      "barcodes": {
+        "name": "Fix barcodes",
+        "metaTitle": "Fix barcodes Excel broke: leading zeros and 1.23E+11",
+        "description": "Repair UPC, EAN and GTIN barcodes that Excel changed: restore lost leading zeros and expand scientific notation like 1.23457E+11, with check-digit verification.",
+        "intro": "Excel drops leading zeros from barcodes and shows long ones as 1.23457E+11. This tool repairs what can be proven correct and flags what can't.",
+        "columns": "Barcode columns",
+        "noColumns": "No barcode column was found. Pick the columns to check:",
+        "fixed": "Repaired",
+        "lost": "Digits lost",
+        "invalid": "Invalid check digit",
+        "summary": "{fixed} repaired · {lost} lost · {invalid} invalid",
+        "allGood": "Every barcode is valid. Nothing to repair.",
+        "reasonLeadingZero": "Leading zero restored",
+        "reasonScientific": "Scientific notation expanded",
+        "reasonDecimal": "\".0\" removed",
+        "reasonSpaces": "Spaces removed",
+        "lostHelp": "Excel rounded these barcodes, so the original digits are not in the file any more. Copy them again from your supplier or your old platform.",
+        "invalidHelp": "These numbers don't have a valid check digit. They may be mistyped, or may not be barcodes.",
+        "tip": "To stop Excel doing this, open CSV files with Data → From Text/CSV and set barcode columns to Text.",
+        "downloadFixed": "Download repaired CSV",
+        "steps": [
+          "Drop in your CSV. Barcode columns (UPC, EAN, GTIN, Barcode) are found automatically.",
+          "Leading zeros and scientific notation are repaired only when the barcode's check digit proves the result.",
+          "Download the repaired file and check the list of barcodes that need your attention."
+        ],
+        "faq": [
+          {
+            "q": "How can you be sure a leading zero is right?",
+            "a": "Every UPC and EAN ends in a check digit calculated from the others. A zero is only added when the padded code passes that check, so the repair can be proven."
+          },
+          {
+            "q": "Can 1.23457E+11 be restored?",
+            "a": "Not from that text: Excel kept only six digits. If the file still has every digit (for example 1.23456789012E+11), it is expanded. Otherwise the cell is flagged so you can copy the barcode again."
+          },
+          {
+            "q": "Which platforms need valid barcodes?",
+            "a": "Shopify stores them as text, Google Shopping and Amazon check GTINs, and many marketplaces reject invalid ones. A barcode with a missing zero is a different product."
+          }
+        ]
+      },
+      "excel": {
+        "name": "Excel to CSV",
+        "metaTitle": "Convert Excel (.xlsx) to CSV without losing zeros",
+        "description": "Convert an Excel workbook (.xlsx) to a UTF-8 CSV that keeps leading zeros, full-length numbers and readable dates. Runs in your browser.",
+        "intro": "Convert an .xlsx workbook to a UTF-8 CSV. Barcodes keep their digits, dates become YYYY-MM-DD, and accents survive.",
+        "sheet": "Sheet",
+        "rowsCols": "{rows} rows · {cols} columns",
+        "xlsOnly": "Only .xlsx files are supported. In Excel, use File → Save As → Excel Workbook (.xlsx) first.",
+        "notWorkbook": "This file is not an .xlsx workbook.",
+        "emptySheet": "This sheet is empty.",
+        "steps": [
+          "Drop in your .xlsx file. It is read in your browser.",
+          "Pick the sheet to convert and check the preview.",
+          "Download a UTF-8 CSV that is ready to import."
+        ],
+        "faq": [
+          {
+            "q": "Why not just use Save As CSV in Excel?",
+            "a": "Excel's CSV export uses your computer's regional encoding, can switch to semicolons, and writes long numbers the way they're displayed. This tool writes UTF-8 with commas and keeps every digit."
+          },
+          {
+            "q": "How are dates written?",
+            "a": "As YYYY-MM-DD (with the time when there is one), which every platform understands."
+          },
+          {
+            "q": "Can I convert old .xls files?",
+            "a": "Not directly. Open the file in Excel or Google Sheets and save it as .xlsx first."
+          }
+        ]
+      },
+      "handles": {
+        "name": "Shopify handle generator",
+        "metaTitle": "Shopify handle generator: titles to URL handles",
+        "description": "Generate Shopify URL handles from product titles, one by one or for a whole CSV. Accents are removed, symbols cleaned up and duplicates numbered.",
+        "intro": "Turn product titles into clean Shopify URL handles, from a list of titles or for a whole product CSV.",
+        "modePaste": "Paste titles",
+        "modeCsv": "Fill a CSV",
+        "titlesLabel": "Product titles, one per line",
+        "titlesPlaceholder": "Linen Shirt – Navy\nCafé Crème Mug\nRock & Roll Tee",
+        "unique": "Make duplicates unique (-1, -2…)",
+        "handlesLabel": "Handles",
+        "copy": "Copy handles",
+        "copied": "Copied",
+        "titleColumn": "Title column",
+        "handleColumn": "Handle column",
+        "overwrite": "Replace handles that are already filled in",
+        "filled": "{count} handles filled in.",
+        "variantNote": "Rows without a title (Shopify variant rows) get the handle of the product above them.",
+        "downloadFixed": "Download CSV",
+        "steps": [
+          "Paste your titles, or drop in a product CSV and pick the title column.",
+          "Handles are made with Shopify's rules: lowercase, accents removed, symbols replaced by hyphens.",
+          "Copy the handles or download the file with the Handle column filled in."
+        ],
+        "faq": [
+          {
+            "q": "What is a Shopify handle?",
+            "a": "The part of a product URL after /products/. It must be lowercase, with letters, numbers and hyphens only, and unique in your store."
+          },
+          {
+            "q": "What happens to duplicate titles?",
+            "a": "The second one gets -1, the third -2 and so on, the same way Shopify numbers duplicates."
+          },
+          {
+            "q": "Can I change a handle later?",
+            "a": "Yes, but the old URL stops working unless you add a redirect, so it's worth getting handles right before you import."
+          }
+        ]
+      }
+    }
   }
 }

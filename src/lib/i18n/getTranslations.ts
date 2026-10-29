@@ -41,6 +41,8 @@ function withFallback<T>(partial: unknown, english: T): T {
   if (typeof english !== "object" || english === null) {
     return (typeof partial === typeof english ? partial : english) as T;
   }
+  // Lists (steps, FAQs) are translated as a whole.
+  if (Array.isArray(english)) return (Array.isArray(partial) ? partial : english) as T;
   const src = (typeof partial === "object" && partial !== null ? partial : {}) as Record<string, unknown>;
   const out: Record<string, unknown> = { ...src };
   for (const [k, v] of Object.entries(english as Record<string, unknown>)) out[k] = withFallback(src[k], v);

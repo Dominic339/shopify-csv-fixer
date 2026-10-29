@@ -39,6 +39,7 @@
     "language": "Lingua",
     "themeDark": "Passa alla modalità scura",
     "themeLight": "Passa alla modalità chiara",
+    "freeTools": "Strumenti CSV gratuiti",
     "storeMigrations": "Migrazioni di negozio"
   },
   "guide": {
@@ -955,5 +956,258 @@
     "guidesTitle": "Guide",
     "allGuides": "Tutte le guide {platform} →",
     "otherFixers": "Altri correttori"
+  },
+  "smallTools": {
+    "indexMetaTitle": "Strumenti CSV gratuiti per chi vende online",
+    "indexTitle": "Strumenti CSV gratuiti",
+    "indexDescription": "Strumenti gratuiti per i file CSV dei prodotti: dividi file grandi, rimuovi righe duplicate, ripara codifica e codici a barre, converti Excel in CSV e genera handle Shopify. Tutto funziona nel tuo browser.",
+    "indexIntro": "Soluzioni rapide ai problemi che bloccano l'importazione di un file prodotti. Gratis, senza registrazione, e i tuoi file non lasciano mai il browser.",
+    "quickTitle": "Soluzioni rapide",
+    "fullTitle": "Strumenti completi",
+    "badge": "Gratis · senza registrazione · funziona nel browser",
+    "open": "Apri",
+    "dropTitle": "Trascina qui un file CSV, oppure",
+    "dropTitleExcel": "Trascina qui un file Excel (.xlsx), oppure",
+    "choose": "Scegli un file",
+    "dropHere": "Rilascia qui il file",
+    "privacy": "Il file viene elaborato nel browser. Non viene caricato.",
+    "fileInfo": "{rows} righe · {cols} colonne",
+    "useAnother": "Usa un altro file",
+    "readError": "Impossibile leggere questo file. Controlla che sia un CSV.",
+    "emptyFile": "Questo file non contiene righe di dati.",
+    "preview": "Anteprima",
+    "previewNote": "Prime {shown} righe su {total}.",
+    "downloadCsv": "Scarica CSV",
+    "checkInFixer": "Controllalo nel Correttore CSV",
+    "nextStep": "Prossimo passo: controlla il file con le regole di importazione della tua piattaforma.",
+    "row": "Riga",
+    "column": "Colonna",
+    "before": "Prima",
+    "after": "Dopo",
+    "howTitle": "Come funziona",
+    "faqTitle": "Domande",
+    "relatedTitle": "Altri strumenti gratuiti",
+    "options": "Opzioni",
+    "result": "Risultato",
+    "tools": {
+      "split": {
+        "name": "Divisore CSV",
+        "metaTitle": "Dividi un file CSV grande in file più piccoli",
+        "description": "Dividi un CSV di prodotti grande in file più piccoli, ognuno con la riga di intestazione. Le varianti di un prodotto restano insieme e puoi tenere ogni file sotto il limite di importazione di 15 MB di Shopify.",
+        "intro": "Dividi un CSV grande in file più piccoli, ognuno con la riga di intestazione. Le righe dello stesso prodotto restano nello stesso file.",
+        "rowsPerFile": "Righe per file",
+        "maxSize": "Tieni ogni file sotto i 15 MB (il limite di importazione di Shopify)",
+        "groupBy": "Tieni insieme le righe per",
+        "noGrouping": "Non raggruppare le righe",
+        "groupHint": "Le righe di un prodotto condividono questa colonna, quindi non vengono mai divise tra due file.",
+        "resultTitle": "{count} file",
+        "part": "Parte {n}",
+        "partInfo": "{rows} righe · {size}",
+        "download": "Scarica",
+        "downloadZip": "Scarica tutto in .zip",
+        "steps": [
+          "Trascina il CSV. Il file viene letto nel browser.",
+          "Scegli quante righe mettere in ogni file. Le righe delle varianti di un prodotto restano insieme automaticamente.",
+          "Scarica le parti una alla volta o tutte insieme in un .zip e importale in ordine."
+        ],
+        "faq": [
+          {
+            "q": "Le varianti di un prodotto possono finire in file diversi?",
+            "a": "No. Le righe che condividono un Handle Shopify, o le variazioni WooCommerce che seguono il prodotto padre, restano sempre nello stesso file. Un file può superare di poco il numero di righe pur di non dividere un prodotto."
+          },
+          {
+            "q": "Qual è il limite di dimensione di Shopify?",
+            "a": "Shopify accetta file CSV di prodotti fino a 15 MB. Spunta l'opzione sulla dimensione e ogni parte resterà sotto quel limite."
+          },
+          {
+            "q": "Ogni parte ha la riga di intestazione?",
+            "a": "Sì. Ogni file inizia con la stessa riga di intestazione, quindi può essere importato da solo."
+          }
+        ]
+      },
+      "dedupe": {
+        "name": "Rimuovi righe duplicate",
+        "metaTitle": "Rimuovi le righe duplicate da un file CSV",
+        "description": "Rimuovi le righe duplicate da un CSV: righe identiche o righe che condividono uno SKU o un'altra colonna. Vedi esattamente quali righe vengono rimosse prima di scaricare.",
+        "intro": "Trova e rimuovi le righe duplicate: righe identiche in tutte le colonne o righe che condividono un valore come lo SKU.",
+        "compare": "Due righe sono duplicate quando",
+        "wholeRow": "tutte le colonne sono uguali",
+        "byColumns": "queste colonne sono uguali:",
+        "keep": "Conserva",
+        "keepFirst": "la prima riga",
+        "keepLast": "l'ultima riga",
+        "loose": "Ignora maiuscole/minuscole e spazi in più",
+        "skipBlank": "Non rimuovere mai righe in cui queste colonne sono vuote",
+        "handleWarning": "Tutte le varianti di un prodotto Shopify condividono lo stesso Handle. Confrontare solo per Handle eliminerebbe varianti; confronta invece per Variant SKU.",
+        "summary": "{removed} righe duplicate rimosse. {kept} righe conservate.",
+        "none": "Nessuna riga duplicata trovata.",
+        "removedTitle": "Righe rimosse",
+        "downloadKept": "Scarica il CSV pulito",
+        "downloadRemoved": "Scarica le righe rimosse",
+        "steps": [
+          "Trascina il CSV.",
+          "Scegli cosa rende uguali due righe: tutte le colonne o colonne chiave come lo SKU.",
+          "Controlla l'elenco delle righe rimosse, poi scarica il file pulito."
+        ],
+        "faq": [
+          {
+            "q": "Quale riga viene conservata quando due sono duplicate?",
+            "a": "La prima, per impostazione predefinita. Scegli \"l'ultima riga\" per tenere la versione più recente quando il file è stato ampliato nel tempo."
+          },
+          {
+            "q": "Posso vedere cosa è stato rimosso?",
+            "a": "Sì. Ogni riga rimossa è elencata con il suo numero, e puoi scaricare le righe rimosse in un CSV separato."
+          },
+          {
+            "q": "È sicuro per i file Shopify?",
+            "a": "Sì, se confronti righe intere o il Variant SKU. Non confrontare solo per Handle: tutte le varianti di un prodotto lo condividono."
+          }
+        ]
+      },
+      "encoding": {
+        "name": "Ripara la codifica CSV",
+        "metaTitle": "Ripara la codifica di un CSV e i caratteri strani (Ã©, â€™)",
+        "description": "Ripara caratteri strani come Ã© e â€™ in un CSV e convertilo in UTF-8. Funziona con i file salvati da Excel in Windows-1252 o UTF-16.",
+        "intro": "Trasforma testo illeggibile come \"CafÃ©\" di nuovo in \"Café\" e converti il file in UTF-8, la codifica che ogni piattaforma di e-commerce si aspetta.",
+        "detected": "Codifica rilevata",
+        "encUtf8": "UTF-8",
+        "encUtf8Bom": "UTF-8 con BOM",
+        "encUtf16": "UTF-16",
+        "encWin1252": "Windows-1252 (convertito in UTF-8)",
+        "garbled": "Testo illeggibile",
+        "repaired": "{count} celle riparate.",
+        "clean": "Nessun testo illeggibile trovato. Il download è UTF-8 normale.",
+        "bom": "Aggiungi un byte order mark (aiuta Excel su Windows ad aprire bene il file)",
+        "downloadFixed": "Scarica CSV in UTF-8",
+        "steps": [
+          "Trascina il CSV. La codifica viene rilevata automaticamente.",
+          "I caratteri illeggibili vengono riparati e puoi controllare ogni modifica.",
+          "Scarica un file UTF-8 pulito."
+        ],
+        "faq": [
+          {
+            "q": "Perché vedo Ã© invece di é?",
+            "a": "Il file è stato salvato in UTF-8, poi aperto come Windows-1252 e salvato di nuovo. Ogni lettera accentata è diventata due o tre caratteri strani. Questo strumento annulla il danno."
+          },
+          {
+            "q": "Modifica anche il testo già corretto?",
+            "a": "No. Vengono modificate solo le sequenze che sono chiaramente UTF-8 rovinato; accenti corretti, simboli e altri alfabeti restano invariati."
+          },
+          {
+            "q": "Devo aggiungere un BOM?",
+            "a": "Solo se aprirai il file con Excel su Windows. Shopify, WooCommerce e la maggior parte degli importatori leggono l'UTF-8 con o senza."
+          }
+        ]
+      },
+      "barcodes": {
+        "name": "Ripara i codici a barre",
+        "metaTitle": "Ripara i codici a barre rovinati da Excel: zeri iniziali e 1,23E+11",
+        "description": "Ripara codici UPC, EAN e GTIN modificati da Excel: ripristina gli zeri iniziali persi ed espandi la notazione scientifica come 1.23457E+11, con verifica della cifra di controllo.",
+        "intro": "Excel elimina gli zeri iniziali dei codici a barre e mostra quelli lunghi come 1.23457E+11. Questo strumento ripara ciò che si può dimostrare e segnala il resto.",
+        "columns": "Colonne dei codici a barre",
+        "noColumns": "Nessuna colonna di codici a barre trovata. Scegli le colonne da controllare:",
+        "fixed": "Riparati",
+        "lost": "Cifre perse",
+        "invalid": "Cifra di controllo non valida",
+        "summary": "{fixed} riparati · {lost} persi · {invalid} non validi",
+        "allGood": "Tutti i codici a barre sono validi. Niente da riparare.",
+        "reasonLeadingZero": "Zero iniziale ripristinato",
+        "reasonScientific": "Notazione scientifica espansa",
+        "reasonDecimal": "\".0\" rimosso",
+        "reasonSpaces": "Spazi rimossi",
+        "lostHelp": "Excel ha arrotondato questi codici, quindi le cifre originali non sono più nel file. Copiali di nuovo dal fornitore o dalla tua piattaforma precedente.",
+        "invalidHelp": "Questi numeri non hanno una cifra di controllo valida. Forse sono scritti male, o non sono codici a barre.",
+        "tip": "Per evitare che Excel lo rifaccia, apri i CSV con Dati → Da testo/CSV e imposta le colonne dei codici a barre come Testo.",
+        "downloadFixed": "Scarica il CSV riparato",
+        "steps": [
+          "Trascina il CSV. Le colonne dei codici a barre (UPC, EAN, GTIN, Barcode) vengono trovate automaticamente.",
+          "Zeri iniziali e notazione scientifica vengono riparati solo quando la cifra di controllo conferma il risultato.",
+          "Scarica il file riparato e controlla l'elenco dei codici che richiedono la tua attenzione."
+        ],
+        "faq": [
+          {
+            "q": "Come fate a sapere che uno zero iniziale è giusto?",
+            "a": "Ogni UPC ed EAN termina con una cifra di controllo calcolata dalle altre. Uno zero viene aggiunto solo se il codice completo supera questo controllo, quindi la riparazione è dimostrabile."
+          },
+          {
+            "q": "Si può recuperare 1.23457E+11?",
+            "a": "Non da quel testo: Excel ha tenuto solo sei cifre. Se il file contiene ancora tutte le cifre (per esempio 1.23456789012E+11), il numero viene espanso. Altrimenti la cella viene segnalata così puoi ricopiare il codice."
+          },
+          {
+            "q": "Quali piattaforme richiedono codici validi?",
+            "a": "Shopify li salva come testo, Google Shopping e Amazon controllano i GTIN, e molti marketplace rifiutano quelli non validi. Un codice senza uno zero è un altro prodotto."
+          }
+        ]
+      },
+      "excel": {
+        "name": "Da Excel a CSV",
+        "metaTitle": "Converti Excel (.xlsx) in CSV senza perdere gli zeri",
+        "description": "Converti una cartella di lavoro Excel (.xlsx) in un CSV UTF-8 che mantiene gli zeri iniziali, i numeri lunghi completi e date leggibili. Funziona nel browser.",
+        "intro": "Converti una cartella di lavoro .xlsx in un CSV UTF-8. I codici a barre mantengono le cifre, le date diventano AAAA-MM-GG e gli accenti restano.",
+        "sheet": "Foglio",
+        "rowsCols": "{rows} righe · {cols} colonne",
+        "xlsOnly": "Sono supportati solo i file .xlsx. In Excel, usa prima File → Salva con nome → Cartella di lavoro di Excel (.xlsx).",
+        "notWorkbook": "Questo file non è una cartella di lavoro .xlsx.",
+        "emptySheet": "Questo foglio è vuoto.",
+        "steps": [
+          "Trascina il file .xlsx. Viene letto nel browser.",
+          "Scegli il foglio da convertire e controlla l'anteprima.",
+          "Scarica un CSV UTF-8 pronto da importare."
+        ],
+        "faq": [
+          {
+            "q": "Perché non usare Salva come CSV in Excel?",
+            "a": "L'esportazione CSV di Excel usa la codifica regionale del computer, può passare al punto e virgola e scrive i numeri lunghi così come vengono visualizzati. Questo strumento scrive UTF-8 con le virgole e mantiene ogni cifra."
+          },
+          {
+            "q": "Come vengono scritte le date?",
+            "a": "Come AAAA-MM-GG (con l'ora, se presente), un formato che ogni piattaforma capisce."
+          },
+          {
+            "q": "Posso convertire i vecchi file .xls?",
+            "a": "Non direttamente. Apri il file in Excel o Google Fogli e salvalo prima come .xlsx."
+          }
+        ]
+      },
+      "handles": {
+        "name": "Generatore di handle Shopify",
+        "metaTitle": "Generatore di handle Shopify: dai titoli agli URL",
+        "description": "Genera gli handle URL di Shopify dai titoli dei prodotti, uno alla volta o per un intero CSV. Gli accenti vengono rimossi, i simboli ripuliti e i duplicati numerati.",
+        "intro": "Trasforma i titoli dei prodotti in handle URL Shopify puliti, da un elenco di titoli o per un intero CSV di prodotti.",
+        "modePaste": "Incolla i titoli",
+        "modeCsv": "Completa un CSV",
+        "titlesLabel": "Titoli dei prodotti, uno per riga",
+        "titlesPlaceholder": "Camicia di lino – Blu\nTazza Café Crème\nT-shirt Rock & Roll",
+        "unique": "Rendi unici i duplicati (-1, -2…)",
+        "handlesLabel": "Handle",
+        "copy": "Copia gli handle",
+        "copied": "Copiato",
+        "titleColumn": "Colonna del titolo",
+        "handleColumn": "Colonna dell'handle",
+        "overwrite": "Sostituisci gli handle già compilati",
+        "filled": "{count} handle compilati.",
+        "variantNote": "Le righe senza titolo (righe di varianti Shopify) ricevono l'handle del prodotto sopra.",
+        "downloadFixed": "Scarica CSV",
+        "steps": [
+          "Incolla i titoli, oppure trascina un CSV di prodotti e scegli la colonna del titolo.",
+          "Gli handle seguono le regole di Shopify: minuscole, senza accenti, con trattini al posto dei simboli.",
+          "Copia gli handle o scarica il file con la colonna Handle compilata."
+        ],
+        "faq": [
+          {
+            "q": "Che cos'è un handle Shopify?",
+            "a": "La parte dell'URL del prodotto dopo /products/. Deve essere in minuscolo, contenere solo lettere, numeri e trattini, ed essere unico nel tuo negozio."
+          },
+          {
+            "q": "Cosa succede con i titoli duplicati?",
+            "a": "Il secondo riceve -1, il terzo -2 e così via, come fa Shopify con i duplicati."
+          },
+          {
+            "q": "Posso cambiare un handle in seguito?",
+            "a": "Sì, ma il vecchio URL smette di funzionare se non aggiungi un reindirizzamento, quindi conviene sistemare gli handle prima dell'importazione."
+          }
+        ]
+      }
+    }
   }
 }

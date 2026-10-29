@@ -25,6 +25,7 @@ export default function Footer({ navByLocale }: Props) {
         { href: href("/convert"), label: t.formatConverter },
         { href: href("/merge"), label: t.csvMerger },
         { href: href("/csv-inspector"), label: t.csvInspector },
+        { href: href("/tools"), label: t.freeTools },
         { href: "/migrate", label: t.storeMigrations },
       ],
     },

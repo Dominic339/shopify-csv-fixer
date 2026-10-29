@@ -8,9 +8,13 @@ interface FileDropZoneProps {
   className?: string;
   /** Overlay text while a file is dragged over the zone. */
   dropLabel?: string;
+  /** File names to accept; CSV-like text files by default. */
+  accept?: RegExp;
 }
 
-export function FileDropZone({ onFile, children, className = "", dropLabel = "Drop CSV here" }: FileDropZoneProps) {
+const CSV_NAME = /\.(csv|txt|tsv)$/i;
+
+export function FileDropZone({ onFile, children, className = "", dropLabel = "Drop CSV here", accept }: FileDropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
 
@@ -39,7 +43,7 @@ export function FileDropZone({ onFile, children, className = "", dropLabel = "Dr
     setIsDragging(false);
     dragCounter.current = 0;
     const file = e.dataTransfer.files?.[0];
-    if (file && (file.type === "text/csv" || /\.(csv|txt|tsv)$/i.test(file.name))) {
+    if (file && (accept ? accept.test(file.name) : file.type === "text/csv" || CSV_NAME.test(file.name))) {
       onFile(file);
     }
   }

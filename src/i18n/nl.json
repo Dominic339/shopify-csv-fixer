@@ -39,6 +39,7 @@
     "language": "Taal",
     "themeDark": "Overschakelen naar donkere modus",
     "themeLight": "Overschakelen naar lichte modus",
+    "freeTools": "Gratis CSV-tools",
     "storeMigrations": "Winkelverhuizingen"
   },
   "guide": {
@@ -955,5 +956,258 @@
     "guidesTitle": "Handleidingen",
     "allGuides": "Alle handleidingen voor {platform} →",
     "otherFixers": "Andere herstellers"
+  },
+  "smallTools": {
+    "indexMetaTitle": "Gratis CSV-tools voor online verkopers",
+    "indexTitle": "Gratis CSV-tools",
+    "indexDescription": "Gratis tools voor product-CSV's: grote bestanden splitsen, dubbele rijen verwijderen, codering en barcodes repareren, Excel naar CSV omzetten en Shopify-handles maken. Alles draait in je browser.",
+    "indexIntro": "Snelle oplossingen voor de problemen waardoor een productbestand niet importeert. Gratis, zonder account, en je bestanden verlaten nooit je browser.",
+    "quickTitle": "Snelle oplossingen",
+    "fullTitle": "Volledige tools",
+    "badge": "Gratis · zonder account · draait in je browser",
+    "open": "Openen",
+    "dropTitle": "Sleep een CSV-bestand hierheen, of",
+    "dropTitleExcel": "Sleep een Excel-bestand (.xlsx) hierheen, of",
+    "choose": "Kies een bestand",
+    "dropHere": "Zet het bestand hier neer",
+    "privacy": "Je bestand wordt in je browser verwerkt. Het wordt niet geüpload.",
+    "fileInfo": "{rows} rijen · {cols} kolommen",
+    "useAnother": "Ander bestand gebruiken",
+    "readError": "Dit bestand kon niet worden gelezen. Controleer of het een CSV-bestand is.",
+    "emptyFile": "Dit bestand bevat geen gegevensrijen.",
+    "preview": "Voorbeeld",
+    "previewNote": "Eerste {shown} van {total} rijen.",
+    "downloadCsv": "CSV downloaden",
+    "checkInFixer": "Controleren in de CSV-hersteller",
+    "nextStep": "Volgende stap: controleer het bestand op de importregels van je platform.",
+    "row": "Rij",
+    "column": "Kolom",
+    "before": "Voor",
+    "after": "Na",
+    "howTitle": "Hoe het werkt",
+    "faqTitle": "Vragen",
+    "relatedTitle": "Meer gratis tools",
+    "options": "Opties",
+    "result": "Resultaat",
+    "tools": {
+      "split": {
+        "name": "CSV-splitter",
+        "metaTitle": "Een groot CSV-bestand splitsen in kleinere bestanden",
+        "description": "Splits een grote product-CSV in kleinere bestanden, elk met de kopregel. Varianten van een product blijven bij elkaar, en elk bestand kan onder de importlimiet van 15 MB van Shopify blijven.",
+        "intro": "Splits een grote CSV in kleinere bestanden, elk met de kopregel. Rijen van hetzelfde product blijven in hetzelfde bestand.",
+        "rowsPerFile": "Rijen per bestand",
+        "maxSize": "Elk bestand onder 15 MB houden (de importlimiet van Shopify)",
+        "groupBy": "Rijen bij elkaar houden op",
+        "noGrouping": "Rijen niet groeperen",
+        "groupHint": "De rijen van een product delen deze kolom, dus ze worden nooit over twee bestanden verdeeld.",
+        "resultTitle": "{count} bestanden",
+        "part": "Deel {n}",
+        "partInfo": "{rows} rijen · {size}",
+        "download": "Downloaden",
+        "downloadZip": "Alles downloaden als .zip",
+        "steps": [
+          "Sleep je CSV erin. Het bestand wordt in je browser gelezen.",
+          "Kies hoeveel rijen er in elk bestand gaan. Variantrijen van een product blijven automatisch bij elkaar.",
+          "Download de delen los of allemaal tegelijk als .zip, en importeer ze op volgorde."
+        ],
+        "faq": [
+          {
+            "q": "Kunnen varianten van een product in verschillende bestanden belanden?",
+            "a": "Nee. Rijen met dezelfde Shopify-Handle, of WooCommerce-variaties die op hun hoofdproduct volgen, blijven altijd in hetzelfde bestand. Een bestand kan daarvoor iets boven het aantal rijen uitkomen."
+          },
+          {
+            "q": "Wat is de bestandslimiet van Shopify?",
+            "a": "Shopify accepteert product-CSV's tot 15 MB. Vink de groottelimiet aan en elk deel blijft daaronder."
+          },
+          {
+            "q": "Heeft elk deel de kopregel?",
+            "a": "Ja. Elk bestand begint met dezelfde kopregel, dus elk deel kan los worden geïmporteerd."
+          }
+        ]
+      },
+      "dedupe": {
+        "name": "Dubbele rijen verwijderen",
+        "metaTitle": "Dubbele rijen uit een CSV-bestand verwijderen",
+        "description": "Verwijder dubbele rijen uit een CSV: identieke rijen of rijen met dezelfde SKU of een andere kolom. Zie precies welke rijen worden verwijderd voordat je downloadt.",
+        "intro": "Vind en verwijder dubbele rijen: rijen die in elke kolom gelijk zijn, of rijen met een gedeelde waarde zoals een SKU.",
+        "compare": "Rijen zijn dubbel als",
+        "wholeRow": "alle kolommen gelijk zijn",
+        "byColumns": "deze kolommen gelijk zijn:",
+        "keep": "Behouden",
+        "keepFirst": "de eerste rij",
+        "keepLast": "de laatste rij",
+        "loose": "Hoofdletters/kleine letters en extra spaties negeren",
+        "skipBlank": "Rijen waarin deze kolommen leeg zijn nooit verwijderen",
+        "handleWarning": "Alle varianten van een Shopify-product delen een Handle. Alleen op Handle vergelijken zou varianten verwijderen; vergelijk liever op Variant SKU.",
+        "summary": "{removed} dubbele rijen verwijderd. {kept} rijen behouden.",
+        "none": "Geen dubbele rijen gevonden.",
+        "removedTitle": "Verwijderde rijen",
+        "downloadKept": "Opgeschoonde CSV downloaden",
+        "downloadRemoved": "Verwijderde rijen downloaden",
+        "steps": [
+          "Sleep je CSV erin.",
+          "Kies wanneer twee rijen gelijk zijn: in alle kolommen, of in sleutelkolommen zoals de SKU.",
+          "Bekijk de lijst met verwijderde rijen en download dan het opgeschoonde bestand."
+        ],
+        "faq": [
+          {
+            "q": "Welke rij blijft staan als twee rijen dubbel zijn?",
+            "a": "Standaard de eerste. Kies \"de laatste rij\" om de nieuwste versie te houden als een bestand in de loop van de tijd is aangevuld."
+          },
+          {
+            "q": "Kan ik zien wat er is verwijderd?",
+            "a": "Ja. Elke verwijderde rij wordt met het rijnummer getoond, en je kunt de verwijderde rijen als aparte CSV downloaden."
+          },
+          {
+            "q": "Is het veilig voor Shopify-bestanden?",
+            "a": "Ja, als je hele rijen of de Variant SKU vergelijkt. Vergelijk niet alleen op Handle: alle varianten van een product delen die."
+          }
+        ]
+      },
+      "encoding": {
+        "name": "CSV-codering repareren",
+        "metaTitle": "CSV-codering en vreemde tekens repareren (Ã©, â€™)",
+        "description": "Repareer vreemde tekens zoals Ã© en â€™ in een CSV en zet het bestand om naar UTF-8. Werkt met bestanden die Excel in Windows-1252 of UTF-16 heeft opgeslagen.",
+        "intro": "Maak van onleesbare tekst zoals \"CafÃ©\" weer \"Café\", en zet het bestand om naar UTF-8, de codering die elk winkelplatform verwacht.",
+        "detected": "Gevonden codering",
+        "encUtf8": "UTF-8",
+        "encUtf8Bom": "UTF-8 met BOM",
+        "encUtf16": "UTF-16",
+        "encWin1252": "Windows-1252 (omgezet naar UTF-8)",
+        "garbled": "Onleesbare tekst",
+        "repaired": "{count} cellen gerepareerd.",
+        "clean": "Geen onleesbare tekst gevonden. De download is gewoon UTF-8.",
+        "bom": "Een byte order mark toevoegen (helpt Excel op Windows het bestand goed te openen)",
+        "downloadFixed": "UTF-8-CSV downloaden",
+        "steps": [
+          "Sleep je CSV erin. De codering wordt automatisch herkend.",
+          "Onleesbare tekens worden gerepareerd, en je kunt elke wijziging nakijken.",
+          "Download een schoon UTF-8-bestand."
+        ],
+        "faq": [
+          {
+            "q": "Waarom zie ik Ã© in plaats van é?",
+            "a": "Het bestand is als UTF-8 opgeslagen, daarna als Windows-1252 geopend en opnieuw opgeslagen. Elke letter met een accent is zo twee of drie vreemde tekens geworden. Deze tool draait dat terug."
+          },
+          {
+            "q": "Verandert het tekst die al klopt?",
+            "a": "Nee. Alleen reeksen die duidelijk beschadigde UTF-8 zijn worden aangepast; correcte accenten, symbolen en andere schriften blijven ongemoeid."
+          },
+          {
+            "q": "Moet ik een BOM toevoegen?",
+            "a": "Alleen als je het bestand in Excel op Windows opent. Shopify, WooCommerce en de meeste importtools lezen UTF-8 met of zonder."
+          }
+        ]
+      },
+      "barcodes": {
+        "name": "Barcodes repareren",
+        "metaTitle": "Barcodes repareren die Excel kapotmaakte: voorloopnullen en 1,23E+11",
+        "description": "Repareer UPC-, EAN- en GTIN-barcodes die Excel heeft veranderd: herstel verloren voorloopnullen en schrijf wetenschappelijke notatie zoals 1.23457E+11 voluit, met controle van het controlecijfer.",
+        "intro": "Excel haalt voorloopnullen van barcodes af en toont lange als 1.23457E+11. Deze tool repareert wat aantoonbaar klopt en markeert wat niet kan.",
+        "columns": "Barcodekolommen",
+        "noColumns": "Geen barcodekolom gevonden. Kies de kolommen die je wilt controleren:",
+        "fixed": "Gerepareerd",
+        "lost": "Cijfers verloren",
+        "invalid": "Ongeldig controlecijfer",
+        "summary": "{fixed} gerepareerd · {lost} verloren · {invalid} ongeldig",
+        "allGood": "Alle barcodes zijn geldig. Niets te repareren.",
+        "reasonLeadingZero": "Voorloopnul hersteld",
+        "reasonScientific": "Wetenschappelijke notatie voluit geschreven",
+        "reasonDecimal": "\".0\" verwijderd",
+        "reasonSpaces": "Spaties verwijderd",
+        "lostHelp": "Excel heeft deze barcodes afgerond, dus de oorspronkelijke cijfers staan niet meer in het bestand. Kopieer ze opnieuw van je leverancier of je oude platform.",
+        "invalidHelp": "Deze getallen hebben geen geldig controlecijfer. Misschien zijn ze verkeerd getypt, of zijn het geen barcodes.",
+        "tip": "Open CSV-bestanden voortaan via Gegevens → Van tekst/CSV en zet barcodekolommen op Tekst, dan doet Excel dit niet meer.",
+        "downloadFixed": "Gerepareerde CSV downloaden",
+        "steps": [
+          "Sleep je CSV erin. Barcodekolommen (UPC, EAN, GTIN, Barcode) worden automatisch gevonden.",
+          "Voorloopnullen en wetenschappelijke notatie worden alleen gerepareerd als het controlecijfer de uitkomst bevestigt.",
+          "Download het gerepareerde bestand en bekijk de lijst met barcodes die je aandacht nodig hebben."
+        ],
+        "faq": [
+          {
+            "q": "Hoe weten jullie zeker dat een voorloopnul klopt?",
+            "a": "Elke UPC en EAN eindigt op een controlecijfer dat uit de andere cijfers wordt berekend. Er wordt alleen een nul toegevoegd als de aangevulde code die controle doorstaat, dus de reparatie is aantoonbaar juist."
+          },
+          {
+            "q": "Kan 1.23457E+11 worden hersteld?",
+            "a": "Niet uit die tekst: Excel heeft maar zes cijfers bewaard. Als het bestand nog alle cijfers heeft (bijvoorbeeld 1.23456789012E+11), wordt het getal voluit geschreven. Anders wordt de cel gemarkeerd, zodat je de barcode opnieuw kunt kopiëren."
+          },
+          {
+            "q": "Welke platforms hebben geldige barcodes nodig?",
+            "a": "Shopify slaat ze op als tekst, Google Shopping en Amazon controleren GTIN's, en veel marktplaatsen weigeren ongeldige. Een barcode zonder nul is een ander product."
+          }
+        ]
+      },
+      "excel": {
+        "name": "Excel naar CSV",
+        "metaTitle": "Excel (.xlsx) naar CSV omzetten zonder nullen te verliezen",
+        "description": "Zet een Excel-werkmap (.xlsx) om naar een UTF-8-CSV met voorloopnullen, volledige lange getallen en leesbare datums. Draait in je browser.",
+        "intro": "Zet een .xlsx-werkmap om naar een UTF-8-CSV. Barcodes houden hun cijfers, datums worden JJJJ-MM-DD en accenten blijven heel.",
+        "sheet": "Werkblad",
+        "rowsCols": "{rows} rijen · {cols} kolommen",
+        "xlsOnly": "Alleen .xlsx-bestanden worden ondersteund. Kies in Excel eerst Bestand → Opslaan als → Excel-werkmap (.xlsx).",
+        "notWorkbook": "Dit bestand is geen .xlsx-werkmap.",
+        "emptySheet": "Dit werkblad is leeg.",
+        "steps": [
+          "Sleep je .xlsx-bestand erin. Het wordt in je browser gelezen.",
+          "Kies het werkblad dat je wilt omzetten en bekijk het voorbeeld.",
+          "Download een UTF-8-CSV die klaar is om te importeren."
+        ],
+        "faq": [
+          {
+            "q": "Waarom niet gewoon Opslaan als CSV in Excel?",
+            "a": "De CSV-export van Excel gebruikt de regionale codering van je computer, kan overschakelen op puntkomma's en schrijft lange getallen zoals ze worden weergegeven. Deze tool schrijft UTF-8 met komma's en houdt elk cijfer."
+          },
+          {
+            "q": "Hoe worden datums geschreven?",
+            "a": "Als JJJJ-MM-DD (met de tijd als die er is), wat elk platform begrijpt."
+          },
+          {
+            "q": "Kan ik oude .xls-bestanden omzetten?",
+            "a": "Niet direct. Open het bestand in Excel of Google Spreadsheets en sla het eerst op als .xlsx."
+          }
+        ]
+      },
+      "handles": {
+        "name": "Shopify-handlegenerator",
+        "metaTitle": "Shopify-handlegenerator: van titels naar URL-handles",
+        "description": "Maak Shopify-URL-handles van producttitels, één voor één of voor een hele CSV. Accenten worden verwijderd, symbolen opgeschoond en dubbele genummerd.",
+        "intro": "Maak van producttitels nette Shopify-URL-handles, vanuit een lijst met titels of voor een hele product-CSV.",
+        "modePaste": "Titels plakken",
+        "modeCsv": "Een CSV aanvullen",
+        "titlesLabel": "Producttitels, één per regel",
+        "titlesPlaceholder": "Linnen overhemd – Navy\nCafé Crème mok\nRock & Roll T-shirt",
+        "unique": "Dubbele uniek maken (-1, -2…)",
+        "handlesLabel": "Handles",
+        "copy": "Handles kopiëren",
+        "copied": "Gekopieerd",
+        "titleColumn": "Titelkolom",
+        "handleColumn": "Handlekolom",
+        "overwrite": "Al ingevulde handles vervangen",
+        "filled": "{count} handles ingevuld.",
+        "variantNote": "Rijen zonder titel (variantrijen bij Shopify) krijgen de handle van het product erboven.",
+        "downloadFixed": "CSV downloaden",
+        "steps": [
+          "Plak je titels, of sleep een product-CSV erin en kies de titelkolom.",
+          "Handles volgen de regels van Shopify: kleine letters, geen accenten, symbolen worden streepjes.",
+          "Kopieer de handles of download het bestand met de ingevulde Handle-kolom."
+        ],
+        "faq": [
+          {
+            "q": "Wat is een Shopify-handle?",
+            "a": "Het deel van de product-URL na /products/. Het moet in kleine letters zijn, alleen letters, cijfers en streepjes bevatten en uniek zijn in je winkel."
+          },
+          {
+            "q": "Wat gebeurt er met dubbele titels?",
+            "a": "De tweede krijgt -1, de derde -2, enzovoort, net zoals Shopify dubbele nummert."
+          },
+          {
+            "q": "Kan ik een handle later nog wijzigen?",
+            "a": "Ja, maar de oude URL werkt dan niet meer tenzij je een doorverwijzing toevoegt. Het loont dus om handles goed te hebben vóór je importeert."
+          }
+        ]
+      }
+    }
   }
 }

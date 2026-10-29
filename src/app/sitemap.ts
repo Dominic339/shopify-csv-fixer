@@ -1,5 +1,6 @@
 // src/app/sitemap.ts
 import { CONVERT_ROUTES } from "@/lib/convertRoutes";
+import { SMALL_TOOLS } from "@/lib/tools/registry";
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "../lib/presets";
 import { getAllGuides, GUIDE_PLATFORMS } from "../lib/guidesRegistry";
@@ -51,6 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     english("/migrate", "monthly", 0.75),
     ...CONVERT_ROUTES.map((r) => english(`/migrate/${r.slug}`, "monthly", 0.8)),
     ...translated("/how-it-works", "monthly", 0.7),
+    ...translated("/tools", "monthly", 0.8),
+    ...SMALL_TOOLS.flatMap(({ slug }) => translated(`/tools/${slug}`, "monthly", 0.8)),
     ...translated("/about", "monthly", 0.4),
     ...translated("/privacy", "yearly", 0.2),
     ...translated("/terms", "yearly", 0.2),
