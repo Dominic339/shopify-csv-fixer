@@ -2,7 +2,7 @@
 title: "WooCommerce-productattributen in CSV: complete gids"
 description: "Hoe je WooCommerce-productattributen correct opmaakt in een CSV-bestand: attribuutnamen, globale en lokale attributen, variatieattributen en veelgemaakte fouten."
 keywords: ["woocommerce attributen csv", "woocommerce productattributen importeren", "woocommerce attribuutkolommen csv", "woocommerce variatieattributen", "woocommerce csv attribuutformaat", "woocommerce globale attributen csv", "woocommerce attribuut importfout"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Hoe WooCommerce-attribuutkolommen in de CSV heten en genummerd worden"
@@ -35,7 +35,7 @@ Staat WordPress in het Nederlands, dan gebruikt de export Nederlandse kolomnamen
 | Kolom | Formaat | Beschrijving |
 |---|---|---|
 | `Attribute N name` | Tekst | De naam van het attribuut (bijv. `Color`, `Size`) |
-| `Attribute N value(s)` | Tekst, gescheiden door verticale streepjes | De waarde(n) voor deze rij (bijv. `Blue` of `Blue | Red`) |
+| `Attribute N value(s)` | Tekst, gescheiden door komma's | De waarde(n) voor deze rij (bijv. `Blue` of `Blue, Red`) |
 | `Attribute N visible` | `1` of `0` | `1` = zichtbaar op de productpagina; `0` = verborgen |
 | `Attribute N global` | `1` of `0` | `1` = globaal taxonomie-attribuut; `0` = lokaal attribuut |
 
@@ -43,11 +43,11 @@ Staat WordPress in het Nederlands, dan gebruikt de export Nederlandse kolomnamen
 
 ## Eenvoudige producten met meerdere attribuutwaarden
 
-Voor een eenvoudig product dat in meerdere kleuren verkrijgbaar is (maar niet als aparte variaties), zet je alle waarden in de kolom `Attribute 1 value(s)`, gescheiden door een verticaal streepje `|`:
+Voor een eenvoudig product dat in meerdere kleuren bestaat (maar niet als aparte variaties), zet je alle waarden in de kolom `Attribute 1 value(s)`, gescheiden door komma's. De cel bevat dan komma's en staat daarom tussen dubbele aanhalingstekens (spreadsheets doen dat bij het opslaan):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 Zo ontstaat één product met een attribuut Color dat alle drie de kleuren op de productpagina toont.
@@ -62,7 +62,7 @@ Bij variabele producten werken attributen anders. De hoofdrij noemt alle mogelij
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **Variatierijen (Type: variation):**
@@ -87,7 +87,7 @@ Voor een product met twee attribuutdimensies:
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **Variatierijen:**
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-Elke variatierij geeft per attribuut precies één waarde (geen lijst met verticale streepjes).
+Elke variatierij geeft precies één waarde per attribuut, geen lijst. Staan er meerdere, dan gebruikt WooCommerce de eerste.
 
 ---
 
@@ -117,7 +117,7 @@ Bij een import met `global: 1` maakt WooCommerce de attribuutterm aan als die no
 
 Lokale attributen horen bij één product. Gebruik ze voor productspecifieke kenmerken die nergens anders gelden (bijv. `Material: 100% cashmere` bij één bepaald product).
 
-Lokale attributen kun je niet gebruiken voor het filteren van variaties of voor gelaagde navigatie.
+Lokale attributen kun je wel gebruiken voor variaties, maar niet in filters van de gelaagde navigatie.
 
 ---
 
@@ -138,16 +138,16 @@ Goed: `Attribute 1 name`
 
 **Oplossing:** attribuutnamen moeten in hoofd- en variatierijen identiek zijn. De waarden van variaties moeten voorkomen in de waarden die in de hoofdrij staan.
 
-### Verticaal streepje met spaties
+### Waarden gescheiden door verticale strepen
 
-**Oorzaak:** ` | ` (met spaties rond het streepje) en `|` (zonder spaties) worden door elkaar gebruikt. WooCommerce haalt spaties rond waarden weg, maar inconsistenties kunnen toch tot verschillen leiden.
+**Oorzaak:** `|` tussen de waarden, zoals het beheerscherm van WooCommerce ze toont (`Blue | Red`). De CSV-importer splitst waarden bij komma's, dus `Blue | Red` wordt één waarde met de naam "Blue | Red".
 
-**Oplossing:** gebruik `|`, met of zonder spaties eromheen, consequent in het hele bestand. WooCommerce haalt de spaties rond elke waarde weg.
+**Oplossing:** scheid waarden met komma's: `Blue, Red`. Wil je een komma binnen een waarde, schrijf die dan als `\,`. StriveFormats zet door strepen gescheiden waarden voor je om in komma's.
 
 ---
 
 ## Automatisch oplossen met StriveFormats
 
-Upload je WooCommerce-CSV naar StriveFormats. De validator controleert de namen van de attribuutkolommen, de consistentie van attributen tussen hoofd- en variatierijen en de opmaak van de scheidingstekens, en meldt problemen met de exacte rij en kolom.
+Upload je WooCommerce-CSV naar StriveFormats. Het zet door strepen gescheiden attribuutwaarden om in komma's, controleert de attributen van elke variatie en vindt dubbele combinaties, en markeert problemen met de precieze rij en kolom.
 
 [Open de WooCommerce CSV-fixer](/app?preset=woocommerce_products) | [Bekijk de WooCommerce-sjabloon](/presets/woocommerce_products)

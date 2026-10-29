@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "Valore booleano non valido",
-"explanation": "I campi booleani come Published, In stock? e Is featured? si aspettano 1/0 o true/false.",
+"explanation": "I campi sì/no come Is featured?, Sold individually? e Allow customer reviews? richiedono 1 o 0.",
 "whyPlatformCares": "L'importatore di WooCommerce può interpretare male i valori inattesi, nascondendo o configurando male i prodotti.",
 "howToFix": "Usa 1 (sì/vero) o 0 (no/falso). Possiamo normalizzare automaticamente le varianti comuni (yes, no, true, false)."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "Variazione con più valori",
 "explanation": "Una riga di variazione elenca più di un valore per un attributo.",
-"whyPlatformCares": "Ogni variazione WooCommerce è una combinazione specifica, quindi accetta un solo valore per attributo.",
+"whyPlatformCares": "Ogni variazione di WooCommerce è una combinazione precisa. L'importatore di WooCommerce tiene solo il primo valore e ignora gli altri, quindi la variazione potrebbe non essere quella che intendevi.",
 "howToFix": "Tieni tutti i valori nella riga principale e un solo valore in ogni riga di variazione."
 },
 "woocommerce/parent_not_in_file": {

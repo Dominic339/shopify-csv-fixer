@@ -2,7 +2,7 @@
 title: "CSV로 다루는 WooCommerce 가변 상품: 상위 행과 변형 행"
 description: "WooCommerce 상품 가져오기 도구가 가변 상품을 상위 행과 하위(변형) 행으로 어떻게 표현하는지 알아보세요. 속성 열, 행 유형별 필수 필드, 흔한 가져오기 함정을 다룹니다."
 keywords: ["woocommerce 가변 상품 csv", "woocommerce 변형 가져오기", "woocommerce 상위 하위 csv", "woocommerce 속성 csv", "woocommerce csv 변형 가져오기", "가변 상품 woocommerce", "woocommerce 상품 가져오기"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "WooCommerce가 가변 상품을 상위 행과 변형 행으로 표현하는 방식"
@@ -39,9 +39,9 @@ WordPress를 한국어로 쓰고 있다면 내보내기 파일의 열 이름이 
 | Type | `variable` | 정확히 `variable`이어야 합니다 |
 | SKU | `SHIRT-BLUE` | 고유한 상위 SKU |
 | Name | `Blue Cotton T-Shirt` | 상품명 |
-| Published | `1` | 1 = 공개, 0 = 임시 저장 |
+| Published | `1` | 1 = 게시됨, 0 = 비공개, -1 = 임시글 |
 | Attribute 1 name | `Size` | 옵션 축의 이름 |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | 사용할 수 있는 모든 값을 세로 막대로 구분한 목록 |
+| Attribute 1 value(s) | `Small, Medium, Large` | 사용 가능한 모든 값, 쉼표로 구분 |
 | Attribute 1 visible | `1` | 상품 페이지에 표시 |
 | Attribute 1 global | `1` | 전역(공유) 속성 사용 |
 
@@ -62,7 +62,7 @@ WordPress를 한국어로 쓰고 있다면 내보내기 파일의 열 이름이 
 | Type | `variation` | 정확히 `variation`이어야 합니다 |
 | SKU | `SHIRT-BLUE-SM` | 변형마다 고유 |
 | Name | `Blue Cotton T-Shirt` | 상위 상품명과 같아야 합니다 |
-| Parent | `id:123` 또는 `sku:SHIRT-BLUE` | ID나 SKU로 상위 상품과 연결 |
+| Parent | `id:123` 또는 `SHIRT-BLUE` | ID 또는 SKU로 부모 상품에 연결 |
 | Regular price | `19.99` | 변형마다 필수 |
 | Attribute 1 name | `Size` | 상위 상품의 속성 이름과 같아야 합니다 |
 | Attribute 1 value(s) | `Small` | 이 변형에 해당하는 값 하나 |
@@ -73,23 +73,23 @@ WordPress를 한국어로 쓰고 있다면 내보내기 파일의 열 이름이 
 
 `Parent` 열에는 두 가지 형식을 쓸 수 있습니다.
 - **데이터베이스 ID로:** `id:123`. WooCommerce 상품 ID를 알고 있을 때 씁니다.
-- **SKU로:** `sku:SHIRT-BLUE`. 다른 환경으로 옮기기 쉬우며, 아직 ID가 없는 새 상품을 가져올 때 씁니다.
+- **SKU로:** `SHIRT-BLUE`, 즉 부모 상품의 SKU를 그대로 씁니다. 옮기기 쉬워서 아직 ID가 없는 새 상품을 가져올 때 쓰면 좋습니다.
 
-가변 상품을 처음부터 새로 만들 때는 `sku:PARENT_SKU` 형식을 쓰세요. 상위 행을 먼저 가져오거나, 같은 파일에서 변형보다 위에 두세요.
+새 변형 상품을 처음부터 만들 때는 `Parent`에 부모 상품의 SKU를 넣으세요. 부모 행은 같은 파일에서 변형들보다 위에 두거나 먼저 가져오세요.
 
 ---
 
 ## 전체 예시: 가변 티셔츠
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> 참고: 여기서는 간단히 하려고 `Parent` 열을 생략했습니다. 실제로는 변형 행에 `Parent: sku:SHIRT-BLUE`를 넣어야 합니다.
+> 참고: `Parent`에는 부모 상품의 SKU인 `SHIRT-BLUE`가 들어갑니다. 부모의 값 목록에 쉼표가 있으므로 큰따옴표로 감쌉니다.
 
 ---
 
@@ -100,9 +100,9 @@ ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),A
 **상위 행:**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **변형(Small, Blue):**
@@ -129,13 +129,13 @@ Attribute 2 value(s): Blue
 
 **증상:** 변형이 상위 상품에 붙지 않고 독립된 단순 상품으로 만들어집니다.
 
-**해결 방법:** 모든 변형 행의 `Parent` 열에 `sku:PARENT_SKU` 또는 `id:123` 형식의 값이 있는지 확인하세요. 상위 참조가 없거나 형식이 틀리면 상위가 없는 변형이 생깁니다.
+**해결 방법:** 모든 변형 행의 `Parent`에 값이 있는지 확인하세요. 부모 상품의 SKU(예: `SHIRT-BLUE`) 또는 `id:123` 형식의 ID입니다. 참조가 없거나 잘못되면 부모 없는 변형이 생깁니다.
 
-### 실수 3: 상위 행의 속성 값이 세로 막대로 구분되지 않음
+### 실수 3: 속성 값을 세로 막대로 구분
 
-**증상:** 상품 페이지의 드롭다운에 옵션이 하나만 보이거나 "장바구니에 담기" 버튼이 없습니다.
+**증상:** 상품 페이지에 개별 선택지 대신 "Small | Medium | Large" 같은 선택지 하나만 보이거나, 변형이 어떤 선택지와도 맞지 않습니다.
 
-**해결 방법:** 상위 행에는 가능한 모든 속성 값을 ` | `(공백, 세로 막대, 공백)로 구분해 나열하세요: `Small | Medium | Large`. WooCommerce는 이 목록으로 드롭다운을 채웁니다.
+**해결 방법:** 부모 행에서 값을 쉼표로 구분하세요: `Small, Medium, Large`. 세로 막대 `|`는 WooCommerce 관리 화면에서 쓰는 구분자이지만, CSV 가져오기는 쉼표로 값을 나눕니다. StriveFormats가 세로 막대를 쉼표로 바꿔 줍니다.
 
 ### 실수 4: 상위 행과 변형의 속성 이름이 다름
 

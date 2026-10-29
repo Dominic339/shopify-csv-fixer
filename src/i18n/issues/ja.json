@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "真偽値が無効です",
-"explanation": "Published、In stock?、Is featured? などの真偽値の項目には 1/0 または true/false が必要です。",
+"explanation": "Is featured?、Sold individually?、Allow customer reviews? などのはい/いいえ項目には 1 または 0 が必要です。",
 "whyPlatformCares": "WooCommerce のインポーターが想定外の値を誤って解釈し、商品が非表示になったり設定が崩れたりすることがあります。",
 "howToFix": "1（はい／true）または 0（いいえ／false）を使ってください。よくある表記（yes、no、true、false）は自動で正規化できます。"
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "バリエーションに複数の値があります",
 "explanation": "バリエーション行に、1 つの属性に対して複数の値が記載されています。",
-"whyPlatformCares": "WooCommerce のバリエーションは 1 つの決まった組み合わせなので、属性ごとに値は 1 つだけです。",
+"whyPlatformCares": "WooCommerce のバリエーションは 1 つの決まった組み合わせです。WooCommerce のインポーターは最初の値だけを使い、残りは無視するため、意図したバリエーションにならないことがあります。",
 "howToFix": "すべての値は親行に記載し、各バリエーション行には値を 1 つだけ記載してください。"
 },
 "woocommerce/parent_not_in_file": {

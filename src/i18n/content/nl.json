@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Gids voor het Etsy-CSV-sjabloon: velden, formaten en veelgemaakte fouten",
-"description": "Een complete gids voor het CSV-sjabloon voor Etsy-listings: elk veld uitgelegd, toegestane waarden voor keuzelijsten, verplichte en optionele kolommen, en hoe je veelvoorkomende importfouten oplost."
+"description": "Wat er in Etsy's CSV-export van listings staat, wat Etsy er wel en niet mee toestaat, welke limieten elk veld heeft (titels, tags, aantal) en hoe je fouten oplost die spreadsheets erin brengen."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Toevoegen, samenvoegen of koppelen: CSV-bestanden goed combineren",

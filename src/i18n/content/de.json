@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Leitfaden zur Etsy-CSV-Vorlage: Felder, Formate und häufige Fehler",
-"description": "Die Etsy-Angebots-CSV vollständig erklärt: jedes Feld, zulässige Werte für Auswahllisten, Pflicht- und optionale Spalten und wie du häufige Importfehler behebst."
+"description": "Was in Etsys Angebots-CSV-Export steht, was Etsy damit erlaubt und was nicht, welche Grenzen jedes Feld einhalten muss (Titel, Tags, Menge) und wie du Fehler behebst, die Tabellenkalkulationen einbauen."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Anhängen, Zusammenführen oder Verknüpfen: CSV-Dateien richtig kombinieren",

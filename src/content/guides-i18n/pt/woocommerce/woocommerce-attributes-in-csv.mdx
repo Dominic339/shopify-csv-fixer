@@ -2,7 +2,7 @@
 title: "Atributos de produto do WooCommerce no CSV: guia completo"
 description: "Como formatar corretamente os atributos de produto do WooCommerce num arquivo CSV: nomes de atributos, atributos globais e locais, atributos de variação e erros comuns."
 keywords: ["atributos woocommerce csv", "importar atributos de produto woocommerce", "colunas de atributos woocommerce csv", "atributos de variação woocommerce", "formato de atributos csv woocommerce", "atributos globais woocommerce csv", "erro ao importar atributos woocommerce"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Como as colunas de atributos do WooCommerce são nomeadas e numeradas no CSV"
@@ -35,7 +35,7 @@ Se o seu WordPress está em português, a exportação usa nomes de coluna em po
 | Coluna | Formato | Descrição |
 |---|---|---|
 | `Attribute N name` | Texto | O nome do atributo (por exemplo, `Color`, `Size`) |
-| `Attribute N value(s)` | Texto, separado por barras verticais | O valor ou valores desta linha (por exemplo, `Blue` ou `Blue | Red`) |
+| `Attribute N value(s)` | Texto, separado por vírgulas | O valor ou valores desta linha (ex.: `Blue` ou `Blue, Red`) |
 | `Attribute N visible` | `1` ou `0` | `1` = exibido na página do produto; `0` = oculto |
 | `Attribute N global` | `1` ou `0` | `1` = atributo global de taxonomia; `0` = atributo local |
 
@@ -43,11 +43,11 @@ Se o seu WordPress está em português, a exportação usa nomes de coluna em po
 
 ## Produtos simples com vários valores de atributo
 
-Para um produto simples disponível em várias cores (mas não como variações separadas), liste todos os valores na coluna `Attribute 1 value(s)` separados por uma barra vertical `|`:
+Para um produto simples disponível em várias cores (mas não como variações separadas), liste todos os valores na coluna `Attribute 1 value(s)` separados por vírgulas. A célula passa a ter vírgulas, então fica entre aspas duplas (as planilhas fazem isso ao salvar):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 Isso cria um produto com um atributo Color que mostra as três cores na página do produto.
@@ -62,7 +62,7 @@ Nos produtos variáveis, os atributos funcionam de outro jeito. A linha principa
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **Linhas de variação (Type: variation):**
@@ -87,7 +87,7 @@ Para um produto com duas dimensões de atributo:
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **Linhas de variação:**
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-Cada linha de variação informa exatamente um valor por atributo (não uma lista separada por barras verticais).
+Cada linha de variação informa exatamente um valor por atributo, não uma lista. Se uma variação tiver vários, o WooCommerce usa o primeiro.
 
 ---
 
@@ -117,7 +117,7 @@ Ao importar com `global: 1`, o WooCommerce cria o termo do atributo se ele ainda
 
 Os atributos locais pertencem a um único produto. Use-os para especificações próprias de um produto que não se aplicam a outros (por exemplo, `Material: 100% cashmere` num produto específico).
 
-Atributos locais não podem ser usados para filtrar variações nem na navegação em camadas.
+Atributos locais ainda podem ser usados em variações, mas não nos filtros de navegação em camadas.
 
 ---
 
@@ -138,16 +138,16 @@ Certo: `Attribute 1 name`
 
 **Solução:** os nomes dos atributos devem ser idênticos nas linhas principal e de variação. Os valores das variações devem estar entre os valores listados na linha principal.
 
-### Barra vertical com espaços
+### Valores separados por barras verticais
 
-**Causa:** misturar ` | ` (com espaços em volta da barra) e `|` (sem espaços). O WooCommerce remove os espaços dos valores, mas inconsistências podem causar divergências.
+**Causa:** usar `|` entre os valores, como o painel do WooCommerce os mostra (`Blue | Red`). O importador CSV separa os valores nas vírgulas, então `Blue | Red` vira um único valor chamado "Blue | Red".
 
-**Solução:** use `|`, com ou sem espaços em volta, de forma consistente em todo o arquivo. O WooCommerce remove os espaços em volta de cada valor.
+**Solução:** separe os valores com vírgulas: `Blue, Red`. Para usar uma vírgula dentro de um valor, escreva `\,`. O StriveFormats converte para você os valores separados por barras em vírgulas.
 
 ---
 
 ## Corrija automaticamente com o StriveFormats
 
-Envie seu CSV do WooCommerce para o StriveFormats. O validador verifica os nomes das colunas de atributos, a coerência dos atributos entre principal e variações e a formatação das barras verticais, e aponta os problemas com a linha e a coluna exatas.
+Envie seu CSV do WooCommerce ao StriveFormats. Ele converte em vírgulas os valores de atributo separados por barras, verifica os atributos de cada variação e encontra combinações duplicadas, e aponta os problemas com a linha e a coluna exatas.
 
 [Abrir o corretor de CSV do WooCommerce](/app?preset=woocommerce_products) | [Ver o modelo do WooCommerce](/presets/woocommerce_products)

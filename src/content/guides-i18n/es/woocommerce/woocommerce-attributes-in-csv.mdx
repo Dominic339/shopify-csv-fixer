@@ -2,7 +2,7 @@
 title: "Atributos de producto de WooCommerce en CSV: guía completa"
 description: "Cómo dar formato correcto a los atributos de producto de WooCommerce en un CSV: nombres de atributo, atributos globales y locales, atributos de variación y errores comunes."
 keywords: ["atributos woocommerce csv", "importar atributos de producto woocommerce", "columnas de atributos woocommerce csv", "atributos de variación woocommerce", "formato de atributos csv woocommerce", "atributos globales woocommerce csv", "error al importar atributos woocommerce"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Cómo se nombran y numeran las columnas de atributos de WooCommerce en el CSV"
@@ -35,7 +35,7 @@ Si WordPress está en español, la exportación usa nombres de columna en españ
 | Columna | Formato | Descripción |
 |---|---|---|
 | `Attribute N name` | Texto | El nombre del atributo (por ejemplo, `Color`, `Size`) |
-| `Attribute N value(s)` | Texto, separado por barras verticales | El valor o valores de esta fila (por ejemplo, `Blue` o `Blue | Red`) |
+| `Attribute N value(s)` | Texto, separado por comas | El valor o valores de esta fila (p. ej., `Blue` o `Blue, Red`) |
 | `Attribute N visible` | `1` o `0` | `1` = se muestra en la página del producto; `0` = oculto |
 | `Attribute N global` | `1` o `0` | `1` = atributo global de taxonomía; `0` = atributo local |
 
@@ -43,11 +43,11 @@ Si WordPress está en español, la exportación usa nombres de columna en españ
 
 ## Productos simples con varios valores de atributo
 
-Para un producto simple disponible en varios colores (pero no como variaciones separadas), enumera todos los valores en la columna `Attribute 1 value(s)` separados por una barra vertical `|`:
+Para un producto simple que existe en varios colores (pero no como variaciones separadas), escribe todos los valores en la columna `Attribute 1 value(s)` separados por comas. La celda lleva entonces comas, así que va entre comillas dobles (las hojas de cálculo lo hacen al guardar):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 Así se crea un producto con un atributo Color que muestra los tres valores de color en la página del producto.
@@ -62,7 +62,7 @@ En los productos variables, los atributos funcionan de otra manera. La fila prin
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **Filas de variación (Type: variation):**
@@ -87,7 +87,7 @@ Para un producto con dos dimensiones de atributo:
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **Filas de variación:**
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-Cada fila de variación indica exactamente un valor por atributo (no una lista separada por barras verticales).
+Cada fila de variación indica exactamente un valor por atributo, no una lista. Si una variación incluye varios, WooCommerce usa el primero.
 
 ---
 
@@ -117,7 +117,7 @@ Al importar con `global: 1`, WooCommerce crea el término del atributo si todav�
 
 Los atributos locales son propios de un solo producto. Úsalos para especificaciones de un producto concreto que no se aplican a otros (por ejemplo, `Material: 100% cashmere` en un producto determinado).
 
-Los atributos locales no se pueden usar para filtrar variaciones ni en la navegación por capas.
+Los atributos locales se pueden usar igualmente para variaciones, pero no en los filtros de navegación por capas.
 
 ---
 
@@ -138,16 +138,16 @@ Correcto: `Attribute 1 name`
 
 **Solución:** los nombres de los atributos deben ser idénticos en la fila principal y en las de variación. Los valores de las variaciones deben formar parte de los valores enumerados en la fila principal.
 
-### Separador de barra vertical con espacios
+### Valores separados con barras verticales
 
-**Causa:** mezclar ` | ` (con espacios alrededor de la barra) y `|` (sin espacios). WooCommerce recorta los valores, pero las incoherencias pueden provocar discrepancias.
+**Causa:** usar `|` entre los valores, como los muestra el panel de WooCommerce (`Blue | Red`). El importador CSV separa los valores por comas, así que `Blue | Red` se convierte en un único valor llamado "Blue | Red".
 
-**Solución:** usa `|`, con o sin espacios alrededor, de forma coherente en todo el archivo. WooCommerce elimina los espacios alrededor de cada valor.
+**Solución:** separa los valores con comas: `Blue, Red`. Para poner una coma dentro de un valor, escríbela como `\,`. StriveFormats cambia por ti los valores separados por barras a comas.
 
 ---
 
 ## Corrígelo automáticamente con StriveFormats
 
-Sube tu CSV de WooCommerce a StriveFormats. El validador revisa los nombres de las columnas de atributos, la coherencia de atributos entre principal y variaciones y el formato del separador de barra vertical, y señala los problemas con la fila y la columna exactas.
+Sube tu CSV de WooCommerce a StriveFormats. Cambia a comas los valores de atributo separados por barras, revisa los atributos de cada variación y detecta combinaciones duplicadas, y marca los problemas con su fila y columna exactas.
 
 [Abrir el corrector de CSV de WooCommerce](/app?preset=woocommerce_products) | [Ver la plantilla de WooCommerce](/presets/woocommerce_products)

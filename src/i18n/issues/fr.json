@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "Valeur booléenne non valide",
-"explanation": "Les champs booléens comme Published, In stock? et Is featured? attendent 1/0 ou true/false.",
+"explanation": "Les champs oui/non comme Is featured?, Sold individually? et Allow customer reviews? attendent 1 ou 0.",
 "whyPlatformCares": "L'importateur WooCommerce peut mal interpréter les valeurs inattendues, ce qui masque ou configure mal des produits.",
 "howToFix": "Utilisez 1 (oui/vrai) ou 0 (non/faux). Nous pouvons normaliser automatiquement les variantes courantes (yes, no, true, false)."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "Variation avec plusieurs valeurs",
 "explanation": "Une ligne de variation indique plus d'une valeur pour un attribut.",
-"whyPlatformCares": "Chaque variation WooCommerce est une combinaison précise ; elle ne prend donc qu'une valeur par attribut.",
+"whyPlatformCares": "Chaque variation WooCommerce est une combinaison précise. L'importateur de WooCommerce ne garde que la première valeur et ignore les autres : la variation risque de ne pas être celle que vous vouliez.",
 "howToFix": "Gardez toutes les valeurs sur la ligne parente et une seule valeur sur chaque ligne de variation."
 },
 "woocommerce/parent_not_in_file": {

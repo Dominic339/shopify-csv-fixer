@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "A categoria '{0}' deve ser um ID numérico de categoria do eBay.",
 "Category is blank. New listings need an eBay category number.": "Category está vazio. Anúncios novos precisam de um número de categoria do eBay.",
 "Change to \"true\" or \"false\".": "Altere para \"true\" ou \"false\".",
+"Changed the | separators in {0} to commas": "Os separadores | em {0} foram trocados por vírgulas",
+"Changed the | separators in {0} to commas on row {1}": "Os separadores | em {0} foram trocados por vírgulas na linha {1}",
 "Check the ASIN on the product's Amazon page.": "Confira o ASIN na página do produto na Amazon.",
 "Check the barcode number.": "Confira o número do código de barras.",
 "Cleaned Image URLs list": "Lista de Image URLs limpa",

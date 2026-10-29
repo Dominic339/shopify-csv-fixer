@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "布尔值无效",
-"explanation": "Published、In stock?、Is featured? 等布尔字段需要 1/0 或 true/false。",
+"explanation": "Is featured?、Sold individually?、Allow customer reviews? 等是/否字段需要填 1 或 0。",
 "whyPlatformCares": "WooCommerce 导入器可能误解意外的值，导致商品被隐藏或配置错误。",
 "howToFix": "请使用 1（是/真）或 0（否/假）。常见写法（yes、no、true、false）可以自动规范化。"
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "变体有多个值",
 "explanation": "某个变体行为一个属性列出了多个值。",
-"whyPlatformCares": "每个 WooCommerce 变体都是一个具体组合，因此每个属性只能有一个值。",
+"whyPlatformCares": "每个 WooCommerce 变体都是一个具体组合。WooCommerce 导入器只保留第一个值并忽略其余的值，因此变体可能不是你想要的那个。",
 "howToFix": "请将所有值放在父行，每个变体行只写一个值。"
 },
 "woocommerce/parent_not_in_file": {

@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Guide du modèle CSV Etsy : champs, formats et erreurs courantes",
-"description": "Un guide complet du modèle CSV d'annonces Etsy : chaque champ expliqué, les valeurs acceptées pour les listes, les colonnes obligatoires et facultatives, et comment corriger les erreurs d'import courantes."
+"description": "Ce que contient l'export CSV des annonces Etsy, ce qu'Etsy permet ou non d'en faire, les limites de chaque champ (titres, tags, quantité) et comment corriger les erreurs introduites par les tableurs."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Ajouter, fusionner ou joindre : bien combiner des fichiers CSV",

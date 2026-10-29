@@ -2,7 +2,7 @@
 title: "WooCommerce の商品属性を CSV で扱う：完全ガイド"
 description: "WooCommerce の商品属性を CSV ファイルで正しく書く方法です。属性名の付け方、グローバル属性とローカル属性、バリエーション属性、よくあるミスを解説します。"
 keywords: ["woocommerce 属性 csv", "woocommerce 商品属性 インポート", "woocommerce 属性 列 csv", "woocommerce バリエーション 属性", "woocommerce csv 属性 書式", "woocommerce グローバル属性 csv", "woocommerce 属性 インポート エラー"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "CSV での WooCommerce の属性列の名前と番号の付け方"
@@ -35,7 +35,7 @@ WordPress を日本語で使っている場合、エクスポートの列名は�
 | 列 | 形式 | 説明 |
 |---|---|---|
 | `Attribute N name` | テキスト | 属性の名前（例：`Color`、`Size`） |
-| `Attribute N value(s)` | テキスト（縦線区切り） | この行の値（例：`Blue` または `Blue | Red`） |
+| `Attribute N value(s)` | テキスト（カンマ区切り） | この行の値（例: `Blue` または `Blue, Red`） |
 | `Attribute N visible` | `1` または `0` | `1` = 商品ページに表示、`0` = 非表示 |
 | `Attribute N global` | `1` または `0` | `1` = グローバル（タクソノミー）属性、`0` = ローカル属性 |
 
@@ -43,11 +43,11 @@ WordPress を日本語で使っている場合、エクスポートの列名は�
 
 ## 複数の属性値を持つシンプル商品
 
-複数のカラーがある（ただし別々のバリエーションにはしない）シンプル商品では、`Attribute 1 value(s)` 列にすべての値を縦線 `|` で区切って並べます。
+複数の色がある（ただし別々のバリエーションにはしない）シンプル商品では、`Attribute 1 value(s)` 列にすべての値をカンマ区切りで入れます。セルにカンマが含まれるので、二重引用符で囲まれます（表計算ソフトが保存時に自動で行います）:
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 これで、商品ページに3つのカラーをすべて表示する Color 属性を持つ商品が1つ作られます。
@@ -62,7 +62,7 @@ Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **バリエーション行（Type: variation**）：
@@ -87,7 +87,7 @@ Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 vi
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **バリエーション行**：
@@ -98,7 +98,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-各バリエーション行には、属性ごとに値を1つだけ入れます（縦線区切りの一覧にはしません）。
+各バリエーション行は、属性ごとに値をちょうど 1 つ指定します。リストではありません。複数ある場合、WooCommerce は最初の値を使います。
 
 ---
 
@@ -117,7 +117,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 
 ローカル属性は1つの商品だけのものです。ほかの商品には当てはまらない、その商品固有の仕様に使います（例：特定の商品の `Material: 100% cashmere`）。
 
-ローカル属性は、バリエーションの絞り込みや階層ナビゲーションには使えません。
+ローカル属性もバリエーションには使えますが、レイヤーナビゲーションのフィルターには使えません。
 
 ---
 
@@ -138,16 +138,16 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 
 **対処法**：属性名は親行とバリエーション行で完全に同じにします。バリエーションの値は、親行に並べた値の中から選びます。
 
-### 前後にスペースのある縦線区切り
+### 縦棒で区切られた値
 
-**原因**：` | `（縦線の前後にスペース）と `|`（スペースなし）が混在しています。WooCommerce は値の前後のスペースを取り除きますが、書き方がそろっていないと不一致の原因になることがあります。
+**原因**: WooCommerce の管理画面の表示どおりに、値の間に `|` を使っている（`Blue | Red`）。CSV インポーターはカンマで値を分けるため、`Blue | Red` は「Blue | Red」という 1 つの値になります。
 
-**対処法**：前後のスペースの有無はどちらでもかまいませんが、ファイル全体で `|` の書き方をそろえます。WooCommerce は各値の前後のスペースを取り除きます。
+**対処法**: 値はカンマで区切ります: `Blue, Red`。値の中でカンマを使うときは `\,` と書きます。StriveFormats は縦棒区切りの値をカンマに変換します。
 
 ---
 
 ## StriveFormats で自動修正
 
-WooCommerce の CSV を StriveFormats にアップロードしてください。属性の列名、親とバリエーションの属性の一致、縦線区切りの書式をチェックし、問題を正確な行と列の位置とともに示します。
+WooCommerce の CSV を StriveFormats にアップロードしてください。縦棒で区切られた属性値をカンマに変換し、各バリエーションの属性を確認して重複した組み合わせを見つけ、問題を行と列の位置付きで示します。
 
 [WooCommerce の CSV 修正ツールを開く](/app?preset=woocommerce_products) | [WooCommerce のテンプレートを見る](/presets/woocommerce_products)

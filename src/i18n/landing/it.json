@@ -103,7 +103,7 @@
   "gotchas": [
    {
     "title": "13 tag, non di più",
-    "body": "Etsy tiene i primi 13 tag e scarta il resto. Il correttore li conta per ogni inserzione e normalizza i separatori."
+    "body": "Etsy consente 13 tag per inserzione, ciascuno di massimo 20 caratteri. Il correttore li conta per ogni inserzione, segnala i tag troppo lunghi e normalizza i separatori."
    },
    {
     "title": "Prezzi senza simboli",

@@ -2,7 +2,7 @@
 title: "WooCommerce Variable Products in CSV: Parent and Variation Rows"
 description: "Understand how the WooCommerce product importer represents variable products with parent and child (variation) rows. Covers attribute columns, required fields per row type, and the most common import pitfalls."
 keywords: ["woocommerce variable product csv", "woocommerce variations import", "woocommerce parent child csv", "woocommerce attributes csv", "woocommerce csv import variations", "variable product woocommerce", "woocommerce product importer"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "How WooCommerce represents variable products across parent and variation rows"
@@ -37,9 +37,9 @@ The parent row defines product-level fields and declares which attributes the pr
 | Type | `variable` | Must be exactly `variable` |
 | SKU | `SHIRT-BLUE` | Unique parent SKU |
 | Name | `Blue Cotton T-Shirt` | Product name |
-| Published | `1` | 1=published, 0=draft |
+| Published | `1` | 1 = published, 0 = private, -1 = draft |
 | Attribute 1 name | `Size` | The dimension name |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | Pipe-separated list of all available values |
+| Attribute 1 value(s) | `Small, Medium, Large` | All available values, separated by commas |
 | Attribute 1 visible | `1` | Show on product page |
 | Attribute 1 global | `1` | Use global (shared) attribute |
 
@@ -60,7 +60,7 @@ Each variation row represents one purchasable option combination and must link b
 | Type | `variation` | Must be exactly `variation` |
 | SKU | `SHIRT-BLUE-SM` | Unique per variation |
 | Name | `Blue Cotton T-Shirt` | Should match parent name |
-| Parent | `id:123` or `sku:SHIRT-BLUE` | Links to parent by ID or SKU |
+| Parent | `id:123` or `SHIRT-BLUE` | Links to the parent by ID or SKU |
 | Regular price | `19.99` | Required for each variation |
 | Attribute 1 name | `Size` | Must match parent's attribute name |
 | Attribute 1 value(s) | `Small` | Single value for this specific variation |
@@ -71,23 +71,23 @@ Each variation row represents one purchasable option combination and must link b
 
 The `Parent` column accepts two formats:
 - **By database ID:** `id:123`. Use this when you know the WooCommerce product ID.
-- **By SKU:** `sku:SHIRT-BLUE`. This is more portable; use it when importing new products whose IDs are not yet assigned.
+- **By SKU:** `SHIRT-BLUE`, the parent's SKU exactly as it is. This is more portable; use it when importing new products whose IDs are not yet assigned.
 
-When creating new variable products from scratch, use `sku:PARENT_SKU` format. Import the parent row first (or include it in the same file above the variations).
+When creating new variable products from scratch, put the parent's SKU in `Parent`. Include the parent row in the same file above its variations, or import it first.
 
 ---
 
 ## Full Example: Variable T-Shirt
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> Note: The `Parent` column is omitted here for brevity. In practice, the variation rows should include `Parent: sku:SHIRT-BLUE`.
+> Note: `Parent` holds the parent's SKU, `SHIRT-BLUE`. The parent's value list contains commas, so it is wrapped in double quotes.
 
 ---
 
@@ -98,9 +98,9 @@ To add a second attribute (Color), include Attribute 2 columns on the parent row
 **Parent:**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **Variation (Small, Blue):**
@@ -127,13 +127,13 @@ You need 4 variation rows for 2 sizes × 2 colors.
 
 **Symptom:** Variations are created as standalone simple products instead of being attached to the parent.
 
-**Fix:** Ensure every variation row has a `Parent` column value in the format `sku:PARENT_SKU` or `id:123`. Missing or malformed parent references create orphaned variations.
+**Fix:** Make sure every variation row has a `Parent` value: the parent's SKU (for example `SHIRT-BLUE`) or its ID written as `id:123`. Missing or malformed parent references create orphaned variations.
 
-### Mistake 3: Attribute values not pipe-separated on parent row
+### Mistake 3: Attribute values separated with pipes
 
-**Symptom:** The product page shows only one option value in the dropdown, or the "Add to cart" button is missing.
+**Symptom:** The product page shows one option such as "Small | Medium | Large" instead of separate choices, or the variations don't match any option.
 
-**Fix:** On the parent row, list all possible attribute values separated by ` | ` (space-pipe-space): `Small | Medium | Large`. WooCommerce uses this list to populate the dropdown.
+**Fix:** On the parent row, separate the values with commas: `Small, Medium, Large`. The pipe `|` is what WooCommerce's admin screen uses, but the CSV importer splits values at commas. StriveFormats converts pipes to commas for you.
 
 ### Mistake 4: Attribute name mismatch between parent and variation
 

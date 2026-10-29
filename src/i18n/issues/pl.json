@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "Nieprawidłowa wartość logiczna",
-"explanation": "Pola logiczne, takie jak Published, In stock? i Is featured?, oczekują 1/0 lub true/false.",
+"explanation": "Pola tak/nie, takie jak Is featured?, Sold individually? i Allow customer reviews?, wymagają 1 lub 0.",
 "whyPlatformCares": "Importer WooCommerce może źle odczytać nieoczekiwane wartości, przez co produkty zostaną ukryte albo źle skonfigurowane.",
 "howToFix": "Użyj 1 (tak/prawda) lub 0 (nie/fałsz). Typowe warianty (yes, no, true, false) możemy znormalizować automatycznie."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "Wariant z kilkoma wartościami",
 "explanation": "Wiersz wariantu podaje więcej niż jedną wartość atrybutu.",
-"whyPlatformCares": "Każdy wariant WooCommerce to jedna konkretna kombinacja, więc przyjmuje jedną wartość na atrybut.",
+"whyPlatformCares": "Każdy wariant WooCommerce to jedna konkretna kombinacja. Importer WooCommerce bierze tylko pierwszą wartość i pomija resztę, więc wariant może nie być tym, o który chodziło.",
 "howToFix": "Wszystkie wartości umieść w wierszu nadrzędnym, a w każdym wierszu wariantu tylko jedną."
 },
 "woocommerce/parent_not_in_file": {

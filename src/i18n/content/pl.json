@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Przewodnik po szablonie CSV Etsy: pola, formaty i typowe błędy",
-"description": "Kompletny przewodnik po szablonie CSV ofert Etsy: opis każdego pola, dozwolone wartości list, kolumny wymagane i opcjonalne oraz sposoby na najczęstsze błędy importu."
+"description": "Co zawiera eksport ofert Etsy do CSV, na co Etsy pozwala, a na co nie, jakie limity obowiązują poszczególne pola (tytuły, tagi, ilość) i jak naprawić błędy wprowadzane przez arkusze kalkulacyjne."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Dołączanie, scalanie i łączenie: jak dobrze połączyć pliki CSV",

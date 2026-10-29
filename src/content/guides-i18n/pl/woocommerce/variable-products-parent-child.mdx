@@ -2,7 +2,7 @@
 title: "Produkty zmienne WooCommerce w CSV: wiersze nadrzędne i wariantów"
 description: "Poznaj sposób, w jaki importer produktów WooCommerce zapisuje produkty zmienne za pomocą wierszy nadrzędnych i podrzędnych (wariantów): kolumny atrybutów, pola wymagane dla każdego typu wiersza i najczęstsze pułapki importu."
 keywords: ["woocommerce produkt zmienny csv", "import wariantów woocommerce", "woocommerce csv rodzic dziecko", "atrybuty woocommerce csv", "import csv wariantów woocommerce", "produkt zmienny woocommerce", "importer produktów woocommerce"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Jak WooCommerce dzieli produkt zmienny na wiersz nadrzędny i wiersze wariantów"
@@ -39,9 +39,9 @@ Wiersz nadrzędny określa pola na poziomie produktu i deklaruje, jakich atrybut
 | Type | `variable` | Musi mieć dokładnie wartość `variable` |
 | SKU | `SHIRT-BLUE` | Unikalny SKU produktu nadrzędnego |
 | Name | `Blue Cotton T-Shirt` | Nazwa produktu |
-| Published | `1` | 1 = opublikowany, 0 = szkic |
+| Published | `1` | 1 = opublikowany, 0 = prywatny, -1 = szkic |
 | Attribute 1 name | `Size` | Nazwa wymiaru |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | Lista wszystkich dostępnych wartości rozdzielonych pionowymi kreskami |
+| Attribute 1 value(s) | `Small, Medium, Large` | Wszystkie dostępne wartości, rozdzielone przecinkami |
 | Attribute 1 visible | `1` | Pokazuj na stronie produktu |
 | Attribute 1 global | `1` | Użyj atrybutu globalnego (wspólnego) |
 
@@ -62,7 +62,7 @@ Każdy wiersz wariantu reprezentuje jedną kombinację opcji, którą można kup
 | Type | `variation` | Musi mieć dokładnie wartość `variation` |
 | SKU | `SHIRT-BLUE-SM` | Unikalny dla każdego wariantu |
 | Name | `Blue Cotton T-Shirt` | Powinna być taka sama jak nazwa produktu nadrzędnego |
-| Parent | `id:123` lub `sku:SHIRT-BLUE` | Wskazuje produkt nadrzędny przez ID lub SKU |
+| Parent | `id:123` lub `SHIRT-BLUE` | Łączy z produktem nadrzędnym przez ID lub SKU |
 | Regular price | `19.99` | Wymagana dla każdego wariantu |
 | Attribute 1 name | `Size` | Musi być taka sama jak nazwa atrybutu produktu nadrzędnego |
 | Attribute 1 value(s) | `Small` | Jedna wartość dla tego konkretnego wariantu |
@@ -73,23 +73,23 @@ Każdy wiersz wariantu reprezentuje jedną kombinację opcji, którą można kup
 
 Kolumna `Parent` przyjmuje dwa formaty:
 - **Przez ID w bazie danych:** `id:123`, gdy znasz ID produktu w WooCommerce.
-- **Przez SKU:** `sku:SHIRT-BLUE`, łatwiej przenośny; przydaje się przy imporcie nowych produktów, które nie mają jeszcze ID.
+- **Przez SKU:** `SHIRT-BLUE`, czyli SKU produktu nadrzędnego dokładnie w tej postaci. Jest bardziej przenośne; używaj go przy imporcie nowych produktów, które nie mają jeszcze ID.
 
-Tworząc nowe produkty zmienne od zera, używaj formatu `sku:PARENT_SKU`. Najpierw zaimportuj wiersz nadrzędny (albo umieść go w tym samym pliku nad wariantami).
+Tworząc nowe produkty zmienne od zera, wpisz SKU produktu nadrzędnego w `Parent`. Umieść wiersz nadrzędny w tym samym pliku nad jego wariantami albo zaimportuj go najpierw.
 
 ---
 
 ## Pełny przykład: koszulka jako produkt zmienny
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> Uwaga: dla zwięzłości pominięto tu kolumnę `Parent`. W praktyce wiersze wariantów powinny zawierać `Parent: sku:SHIRT-BLUE`.
+> Uwaga: `Parent` zawiera SKU produktu nadrzędnego, `SHIRT-BLUE`. Lista wartości w wierszu nadrzędnym zawiera przecinki, więc jest ujęta w podwójny cudzysłów.
 
 ---
 
@@ -100,9 +100,9 @@ Aby dodać drugi atrybut (kolor), dodaj kolumny Attribute 2 do wiersza nadrzędn
 **Wiersz nadrzędny:**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **Wariant (Small, Blue):**
@@ -129,13 +129,13 @@ Dla 2 rozmiarów × 2 kolorów potrzebujesz 4 wierszy wariantów.
 
 **Objaw:** warianty powstają jako osobne produkty proste zamiast zostać przypisane do produktu nadrzędnego.
 
-**Rozwiązanie:** upewnij się, że każdy wiersz wariantu ma w kolumnie `Parent` wartość w formacie `sku:PARENT_SKU` lub `id:123`. Brakujące lub błędne odwołania tworzą osierocone warianty.
+**Rozwiązanie:** upewnij się, że każdy wiersz wariantu ma wartość w `Parent`: SKU produktu nadrzędnego (na przykład `SHIRT-BLUE`) albo jego ID zapisane jako `id:123`. Brakujące lub błędne odwołania tworzą osierocone warianty.
 
-### Błąd 3: wartości atrybutu w wierszu nadrzędnym nie są rozdzielone pionowymi kreskami
+### Błąd 3: wartości atrybutów rozdzielone pionowymi kreskami
 
-**Objaw:** strona produktu pokazuje w liście rozwijanej tylko jedną opcję albo brakuje przycisku „Dodaj do koszyka”.
+**Objaw:** strona produktu pokazuje jedną opcję w rodzaju „Small | Medium | Large” zamiast osobnych wyborów albo warianty nie pasują do żadnej opcji.
 
-**Rozwiązanie:** w wierszu nadrzędnym wypisz wszystkie możliwe wartości atrybutu rozdzielone ` | ` (spacja, pionowa kreska, spacja): `Small | Medium | Large`. WooCommerce wypełnia tą listą listę rozwijaną.
+**Rozwiązanie:** w wierszu nadrzędnym rozdziel wartości przecinkami: `Small, Medium, Large`. Pionowej kreski `|` używa panel WooCommerce, ale importer CSV dzieli wartości na przecinkach. StriveFormats zamienia kreski na przecinki za ciebie.
 
 ### Błąd 4: różne nazwy atrybutu w wierszu nadrzędnym i w wariancie
 

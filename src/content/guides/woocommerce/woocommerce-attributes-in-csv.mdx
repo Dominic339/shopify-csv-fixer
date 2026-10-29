@@ -2,7 +2,7 @@
 title: "WooCommerce Product Attributes in CSV: Complete Guide"
 description: "How to correctly format WooCommerce product attributes in a CSV file: attribute naming, global vs. local attributes, variation attributes, and common mistakes."
 keywords: ["woocommerce attributes csv", "woocommerce product attributes import", "woocommerce attribute columns csv", "woocommerce variation attributes", "woocommerce csv attribute format", "woocommerce global attributes csv", "woocommerce attribute import error"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "How WooCommerce attribute columns are named and numbered in CSV"
@@ -33,7 +33,7 @@ For a second attribute, repeat with `Attribute 2 name`, `Attribute 2 value(s)`, 
 | Column | Format | Description |
 |---|---|---|
 | `Attribute N name` | Text | The attribute name (e.g., `Color`, `Size`) |
-| `Attribute N value(s)` | Text, pipe-separated | The value(s) for this row (e.g., `Blue` or `Blue | Red`) |
+| `Attribute N value(s)` | Text, comma-separated | The value(s) for this row (e.g., `Blue` or `Blue, Red`) |
 | `Attribute N visible` | `1` or `0` | `1` = shown on product page; `0` = hidden |
 | `Attribute N global` | `1` or `0` | `1` = global taxonomy attribute; `0` = local attribute |
 
@@ -41,11 +41,11 @@ For a second attribute, repeat with `Attribute 2 name`, `Attribute 2 value(s)`, 
 
 ## Simple Products With Multiple Attribute Values
 
-For a simple product that is available in multiple colors (but not as separate variations), list all values in the `Attribute 1 value(s)` column separated by a pipe `|`:
+For a simple product that is available in multiple colors (but not as separate variations), list all values in the `Attribute 1 value(s)` column separated by commas. The cell then contains commas, so it is wrapped in double quotes (spreadsheets do this when they save):
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-Blue Scarf,simple,SCARF-001,14.99,Color,Blue | Navy | Teal,1,1
+Blue Scarf,simple,SCARF-001,14.99,Color,"Blue, Navy, Teal",1,1
 ```
 
 This creates one product with a Color attribute that shows all three color values on the product page.
@@ -60,7 +60,7 @@ For variable products, attributes work differently. The parent row lists all pos
 
 ```
 Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global
-T-Shirt,variable,TSHIRT,20.00,Size,S | M | L | XL,1,1
+T-Shirt,variable,TSHIRT,20.00,Size,"S, M, L, XL",1,1
 ```
 
 **Variation rows (Type: variation):**
@@ -85,7 +85,7 @@ For a product with two attribute dimensions:
 
 ```
 Name,Type,SKU,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 global,Attribute 2 name,Attribute 2 value(s),Attribute 2 visible,Attribute 2 global
-Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
+Running Shoe,variable,SHOE,Size,"7, 8, 9, 10",1,1,Color,"Black, White",1,1
 ```
 
 **Variation rows:**
@@ -96,7 +96,7 @@ Running Shoe,variable,SHOE,Size,7 | 8 | 9 | 10,1,1,Color,Black | White,1,1
 ,variation,SHOE-8-BLK,Size,8,1,1,Color,Black,1,1
 ```
 
-Each variation row specifies exactly one value per attribute (not a pipe-separated list).
+Each variation row specifies exactly one value per attribute, not a list. If a variation lists several, WooCommerce uses the first.
 
 ---
 
@@ -115,7 +115,7 @@ When importing with `global: 1`, WooCommerce creates the attribute term if it do
 
 Local attributes are specific to one product. Use local attributes for product-specific specifications that don't apply elsewhere (e.g., `Material: 100% cashmere` on one particular product).
 
-Local attributes cannot be used for variation filtering or layered navigation.
+Local attributes can still be used for variations, but they can't be used in layered navigation filters.
 
 ---
 
@@ -136,16 +136,16 @@ Correct: `Attribute 1 name`
 
 **Fix:** Attribute names must be identical on parent and variation rows. Variation values must be a subset of the values listed on the parent row.
 
-### Pipe separator with spaces
+### Values separated with pipes
 
-**Cause:** Using ` | ` (with spaces around the pipe) instead of `|` or `|` (without spaces). WooCommerce trims values, but inconsistencies can cause mismatches.
+**Cause:** Using `|` between values, the way WooCommerce's admin screen shows them (`Blue | Red`). The CSV importer splits values at commas, so `Blue | Red` becomes a single value called "Blue | Red".
 
-**Fix:** Use `|` with or without surrounding spaces consistently throughout the file. WooCommerce trims the whitespace around each value.
+**Fix:** Separate values with commas: `Blue, Red`. To use a comma inside a value, write it as `\,`. StriveFormats converts pipe-separated values to commas for you.
 
 ---
 
 ## Fix This Automatically with StriveFormats
 
-Upload your WooCommerce CSV to StriveFormats. The validator checks attribute column naming, parent/variation attribute consistency, and pipe-separator formatting, then flags issues with exact row and column locations.
+Upload your WooCommerce CSV to StriveFormats. It converts pipe-separated attribute values to commas, checks each variation's attributes and catches duplicate combinations, then flags issues with exact row and column locations.
 
 [Open WooCommerce CSV Fixer](/app?preset=woocommerce_products) | [View WooCommerce Template](/presets/woocommerce_products)

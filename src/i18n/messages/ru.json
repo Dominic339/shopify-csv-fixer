@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "Категория '{0}' должна быть числовым ID категории eBay.",
 "Category is blank. New listings need an eBay category number.": "Category пусто. Новым объявлениям нужен номер категории eBay.",
 "Change to \"true\" or \"false\".": "Замените на \"true\" или \"false\".",
+"Changed the | separators in {0} to commas": "Разделители | в {0} заменены запятыми",
+"Changed the | separators in {0} to commas on row {1}": "Разделители | в {0} заменены запятыми в строке {1}",
 "Check the ASIN on the product's Amazon page.": "Проверьте ASIN на странице товара в Amazon.",
 "Check the barcode number.": "Проверьте номер штрихкода.",
 "Cleaned Image URLs list": "Список Image URLs очищен",

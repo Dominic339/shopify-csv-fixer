@@ -2,7 +2,7 @@
 title: "Erros de importação de CSV de produtos do WooCommerce: causas e soluções"
 description: "Corrija os erros mais comuns de importação de CSV de produtos do WooCommerce: SKUs ausentes, tipos inválidos, problemas nas linhas de variação, formato de preço e colunas de atributos."
 keywords: ["erro ao importar csv woocommerce", "erros importação csv woocommerce", "importar produtos woocommerce csv erro", "corrigir csv woocommerce", "problemas importação woocommerce", "validar csv woocommerce", "erro upload produtos woocommerce"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Os erros de importação de CSV do WooCommerce mais comuns e o que cada um significa"
@@ -53,25 +53,25 @@ O WooCommerce usa o SKU como identificador único para ligar as linhas importada
 
 **Solução:**
 - Coloque um SKU único em cada linha de produto (produtos simples e linhas principais de produtos variáveis)
-- As linhas de variação podem herdar o SKU do produto principal ou ter o próprio, mas não podem repetir o SKU de outro produto
+- As linhas de variação podem deixar o SKU em branco ou ter um próprio, mas não podem repetir o SKU de outro produto
 - Encontre SKUs duplicados no Excel com `CONT.SE`: `=CONT.SE($A:$A; A2)`; qualquer valor acima de 1 é duplicado
 
 ---
 
 ## Erro: preço normal inválido
 
-**Causa:** `Regular price` tem símbolo de moeda (`€`, `$`), usa vírgula como separador decimal (`19,99`) ou está vazio em um produto simples ou variável.
+**Causa:** `Regular price` tem um símbolo de moeda (`€`, `$`), usa vírgula como separador decimal (`19,99`) ou está em branco num produto simples ou numa variação.
 
 **Solução:**
 - Remova os símbolos de moeda: apague `$`, `€` e `£` com Localizar e substituir
 - Troque a vírgula decimal por ponto: `19,99` → `19.99`
-- Garanta que todo produto simples e variável tenha preço; as linhas de variação podem herdar do produto principal
+- Dê um preço a cada produto simples e a cada variação. A linha pai de um produto variável não precisa de preço, e as variações não o herdam
 
 ---
 
 ## Erro: campo booleano inválido
 
-**Causa:** As colunas booleanas do WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) aceitam `1` (verdadeiro) ou `0` (falso). Valores como `yes`, `TRUE` ou `Y` causam erros de validação.
+**Causa:** o esquema de importação do WooCommerce documenta `1` (sim) e `0` (não) para as colunas de sim/não (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` também aceita `notify`, e `Published` usa `1` (publicado), `0` (privado) e `-1` (rascunho). Grafias como `yes`, `TRUE` ou `Y` não fazem parte do esquema, então converta-as.
 
 **Solução:** substitua todos os valores booleanos:
 
@@ -88,11 +88,11 @@ Use Localizar e substituir com "Coincidir conteúdo da célula inteira" ativado.
 
 **Causa:** Uma linha com `Type: variation` aponta para um produto principal que não existe no arquivo de importação nem no banco de dados.
 
-As linhas de variação do WooCommerce precisam de um produto principal. A ligação é feita pela coluna `Parent` (que deve ter o ID do produto principal no banco de dados) ou incluindo o produto principal no mesmo arquivo de importação.
+No WooCommerce, as linhas de variação precisam de um pai. A coluna `Parent` contém o SKU do pai ou o ID dele (escrito como `id:123`), e o pai precisa estar no mesmo arquivo de importação ou já existir na sua loja.
 
 **Solução:**
 - Inclua a linha do produto principal no mesmo arquivo CSV
-- Preencha a coluna `Parent` das linhas de variação com o ID de produto do WooCommerce do produto principal (o número que aparece no painel do WordPress)
+- Preencha `Parent` nas linhas de variação com o SKU do pai, ou com o ID de produto do WooCommerce escrito como `id:123`
 - Garanta que a linha principal use `Type: variable`, e não `Type: simple`
 
 ---
@@ -104,7 +104,7 @@ As linhas de variação do WooCommerce precisam de um produto principal. A liga�
 **Formato das colunas de atributo do WooCommerce:**
 
 - `Attribute 1 name`: o nome do primeiro atributo (ex.: `Color`)
-- `Attribute 1 value(s)`: o valor ou valores daquela linha (ex.: `Blue`, ou `Blue | Red` para vários)
+- `Attribute 1 value(s)`: o valor ou valores desta linha (ex.: `Blue`, ou `Blue, Red` para vários)
 - `Attribute 1 visible`: `1` se aparece na página do produto, `0` se fica oculto
 - `Attribute 1 global`: `1` para atributo global, `0` para atributo local
 
@@ -117,13 +117,13 @@ As linhas de variação do WooCommerce precisam de um produto principal. A liga�
 
 ## Erro: URL da imagem inacessível
 
-**Causa:** A URL da imagem na coluna `Images` não é uma URL HTTPS de acesso público, está atrás de login ou usa um protocolo diferente de HTTPS.
+**Causa:** não é possível baixar a URL da imagem na coluna `Images`: ela não é pública, exige login ou não é um endereço web completo.
 
 O WooCommerce baixa as imagens durante a importação e as salva na sua biblioteca de mídia.
 
 **Solução:**
 - Teste cada URL de imagem no navegador: a imagem deve abrir direto, sem login
-- Use URLs HTTPS (não HTTP)
+- Use URLs completas que comecem com `https://`
 - Para imagens no Google Drive ou Dropbox, use links de download direto (não links de compartilhamento)
 - Se as imagens estão em localhost ou em um servidor de testes, mova-as antes para um local de acesso público
 

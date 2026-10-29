@@ -103,7 +103,7 @@
   "gotchas": [
    {
     "title": "13 etiket, daha fazla değil",
-    "body": "Etsy ilk 13 etiketi tutar ve gerisini atar. Düzeltici her ilan için etiketleri sayar ve ayırıcıları normalleştirir."
+    "body": "Etsy her ilan için en fazla 20 karakterlik 13 etikete izin verir. Düzeltici her ilan için etiketleri sayar, uzun etiketleri işaretler ve ayırıcıları normalleştirir."
    },
    {
     "title": "Simgesiz fiyatlar",

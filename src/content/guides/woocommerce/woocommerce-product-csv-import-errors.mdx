@@ -2,7 +2,7 @@
 title: "WooCommerce Product CSV Import Errors: Causes and Fixes"
 description: "Fix the most common WooCommerce product CSV import errors: missing SKUs, invalid types, variation row problems, price formatting, and attribute column issues."
 keywords: ["woocommerce csv import errors", "woocommerce product import failed", "woocommerce csv errors", "fix woocommerce csv", "woocommerce import troubleshooting", "woocommerce csv validation", "woocommerce product upload error"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "The most common WooCommerce CSV import errors and what each means"
@@ -51,25 +51,25 @@ WooCommerce uses SKU as the unique identifier for matching imported rows to exis
 
 **Fix:**
 - Add a unique SKU to every product row (simple products and variable parent rows)
-- Variation rows can inherit the parent SKU or have their own, but must not duplicate another product's SKU
+- Variation rows can leave SKU blank or have their own, but must not repeat another product's SKU
 - Check for duplicate SKUs using Excel's `COUNTIF`: `=COUNTIF($A:$A, A2)`. Any value above 1 is a duplicate
 
 ---
 
 ## Error: Invalid Regular Price
 
-**Cause:** `Regular price` contains a currency symbol (`€`, `$`), uses a comma as the decimal separator (`19,99`), or is blank on a simple or variable product.
+**Cause:** `Regular price` contains a currency symbol (`€`, `$`), uses a comma as the decimal separator (`19,99`), or is blank on a simple product or a variation.
 
 **Fix:**
 - Remove currency symbols: use Find & Replace to remove `$`, `€`, `£`
 - Convert comma decimal separators to periods: `19,99` → `19.99`
-- Ensure every simple and variable product has a price; variation rows may inherit from the parent
+- Give every simple product and every variation a price. A variable product's parent row doesn't need one, and variations don't inherit it
 
 ---
 
 ## Error: Invalid Boolean Field
 
-**Cause:** WooCommerce's boolean columns (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) accept `1` (true) or `0` (false). Values like `yes`, `TRUE`, or `Y` cause validation errors.
+**Cause:** WooCommerce's import schema documents `1` (yes) and `0` (no) for its yes/no columns (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` also takes `notify`, and `Published` uses `1` (published), `0` (private) and `-1` (draft). Spellings like `yes`, `TRUE` or `Y` aren't part of the schema, so convert them.
 
 **Fix:** Replace all boolean values:
 
@@ -86,11 +86,11 @@ Use Find & Replace with "Match entire cell contents" enabled.
 
 **Cause:** A row with `Type: variation` references a parent product that doesn't exist in the import file or in the database.
 
-WooCommerce variation rows need a parent. The parent is linked via the `Parent` column (which should contain the parent product's ID from the database) or by having the parent product in the same import file.
+WooCommerce variation rows need a parent. The `Parent` column holds the parent's SKU or its ID (written as `id:123`), and the parent must be in the same import file or already in your store.
 
 **Fix:**
 - Include the parent product row in the same CSV file
-- Set the `Parent` column on variation rows to the parent product's WooCommerce product ID (the number in the WordPress admin)
+- Set the `Parent` column on variation rows to the parent's SKU, or to its WooCommerce product ID written as `id:123`
 - Ensure the parent row uses `Type: variable`, not `Type: simple`
 
 ---
@@ -102,7 +102,7 @@ WooCommerce variation rows need a parent. The parent is linked via the `Parent` 
 **WooCommerce attribute column format:**
 
 - `Attribute 1 name`: the name of the first attribute (e.g., `Color`)
-- `Attribute 1 value(s)`: the value(s) for this row (e.g., `Blue` or `Blue | Red` for multiple)
+- `Attribute 1 value(s)`: the value(s) for this row (e.g., `Blue`, or `Blue, Red` for several)
 - `Attribute 1 visible`: `1` if shown on product page, `0` if hidden
 - `Attribute 1 global`: `1` if using a global attribute taxonomy, `0` for local
 
@@ -115,13 +115,13 @@ WooCommerce variation rows need a parent. The parent is linked via the `Parent` 
 
 ## Error: Image URL Not Accessible
 
-**Cause:** The image URL in the `Images` column is not a publicly accessible HTTPS URL, is behind authentication, or uses a protocol other than HTTPS.
+**Cause:** The image URL in the `Images` column can't be downloaded: it isn't publicly accessible, it's behind a login, or it isn't a full web address.
 
 WooCommerce sideloads images during import. It downloads them from the URL and stores them in your media library.
 
 **Fix:**
 - Test each image URL in a browser. It should load the image directly without a login
-- Use HTTPS URLs (not HTTP)
+- Use full URLs that start with `https://`
 - For images in Google Drive or Dropbox, use direct download links (not sharing links)
 - If images are on localhost or a staging server, move them to a publicly accessible location first
 

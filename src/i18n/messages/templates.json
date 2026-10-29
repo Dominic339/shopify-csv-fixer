@@ -19,6 +19,8 @@
  "Category '{0}' should be a numeric eBay category ID.",
  "Category is blank. New listings need an eBay category number.",
  "Change to \"true\" or \"false\".",
+ "Changed the | separators in {0} to commas",
+ "Changed the | separators in {0} to commas on row {1}",
  "Check the ASIN on the product's Amazon page.",
  "Check the barcode number.",
  "Cleaned Image URLs list",

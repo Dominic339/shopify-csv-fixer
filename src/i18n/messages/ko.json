@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "카테고리 '{0}'은(는) 숫자로 된 eBay 카테고리 ID여야 합니다.",
 "Category is blank. New listings need an eBay category number.": "Category가 비어 있습니다. 새 상품에는 eBay 카테고리 번호가 필요합니다.",
 "Change to \"true\" or \"false\".": "\"true\" 또는 \"false\"로 변경하세요.",
+"Changed the | separators in {0} to commas": "{0}의 | 구분자를 쉼표로 바꿨습니다",
+"Changed the | separators in {0} to commas on row {1}": "{1}행의 {0}에서 | 구분자를 쉼표로 바꿨습니다",
 "Check the ASIN on the product's Amazon page.": "상품의 Amazon 페이지에서 ASIN을 확인하세요.",
 "Check the barcode number.": "바코드 번호를 확인하세요.",
 "Cleaned Image URLs list": "Image URLs 목록 정리",

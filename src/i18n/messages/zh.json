@@ -19,6 +19,8 @@
 "Category '{0}' should be a numeric eBay category ID.": "类目 '{0}' 应为数字形式的 eBay 类目 ID。",
 "Category is blank. New listings need an eBay category number.": "Category 为空。新刊登需要 eBay 类目编号。",
 "Change to \"true\" or \"false\".": "请改为 \"true\" 或 \"false\"。",
+"Changed the | separators in {0} to commas": "已将 {0} 中的 | 分隔符改为逗号",
+"Changed the | separators in {0} to commas on row {1}": "已将第 {1} 行 {0} 中的 | 分隔符改为逗号",
 "Check the ASIN on the product's Amazon page.": "请在商品的 Amazon 页面上核对 ASIN。",
 "Check the barcode number.": "请核对条形码编号。",
 "Cleaned Image URLs list": "已清理 Image URLs 列表",

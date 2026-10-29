@@ -2,7 +2,7 @@
 title: "WooCommerce-Produkt-CSV-Importfehler: Ursachen und Lösungen"
 description: "Behebe die häufigsten Fehler beim WooCommerce-Produktimport: fehlende SKUs, ungültige Typen, Probleme mit Variationszeilen, Preisformate und Attributspalten."
 keywords: ["woocommerce csv import fehler", "woocommerce produktimport fehlgeschlagen", "woocommerce csv fehler", "woocommerce csv reparieren", "woocommerce import probleme", "woocommerce csv prüfen", "woocommerce produkt upload fehler"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Die häufigsten WooCommerce-CSV-Importfehler und was sie bedeuten"
@@ -53,25 +53,25 @@ WooCommerce nutzt die SKU als eindeutige Kennung, um importierte Zeilen bestehen
 
 **Lösung:**
 - Gib jeder Produktzeile eine eindeutige SKU (einfachen Produkten und übergeordneten Zeilen variabler Produkte)
-- Variationszeilen können die SKU des übergeordneten Produkts übernehmen oder eine eigene haben, dürfen aber nicht die SKU eines anderen Produkts doppeln
+- Variationszeilen können die SKU leer lassen oder eine eigene haben, dürfen aber keine SKU eines anderen Produkts wiederholen
 - Doppelte SKUs findest du in Excel mit `ZÄHLENWENN`: `=ZÄHLENWENN($A:$A; A2)`. Jeder Wert über 1 ist ein Duplikat
 
 ---
 
 ## Fehler: Ungültiger regulärer Preis
 
-**Ursache:** `Regular price` enthält ein Währungssymbol (`€`, `$`), nutzt ein Komma als Dezimaltrennzeichen (`19,99`) oder ist bei einem einfachen oder variablen Produkt leer.
+**Ursache:** `Regular price` enthält ein Währungssymbol (`€`, `$`), verwendet ein Komma als Dezimaltrennzeichen (`19,99`) oder ist bei einem einfachen Produkt oder einer Variation leer.
 
 **Lösung:**
 - Entferne Währungssymbole: lösche `$`, `€`, `£` per Suchen und Ersetzen
 - Ersetze Kommas als Dezimaltrennzeichen durch Punkte: `19,99` → `19.99`
-- Sorge dafür, dass jedes einfache und variable Produkt einen Preis hat; Variationszeilen können ihn vom übergeordneten Produkt übernehmen
+- Gib jedem einfachen Produkt und jeder Variation einen Preis. Die Elternzeile eines variablen Produkts braucht keinen, und Variationen übernehmen ihn auch nicht
 
 ---
 
 ## Fehler: Ungültiges Wahr/Falsch-Feld
 
-**Ursache:** Die Wahr/Falsch-Spalten von WooCommerce (`In stock?`, `Backorders allowed?`, `Sold individually?`, `Is featured?`) akzeptieren `1` (wahr) oder `0` (falsch). Werte wie `yes`, `TRUE` oder `Y` führen zu Prüffehlern.
+**Ursache:** WooCommerces Importschema nennt `1` (ja) und `0` (nein) für seine Ja/Nein-Spalten (`Is featured?`, `Sold individually?`, `Allow customer reviews?`, `In stock?`). `Backorders allowed?` akzeptiert zusätzlich `notify`, und `Published` verwendet `1` (veröffentlicht), `0` (privat) und `-1` (Entwurf). Schreibweisen wie `yes`, `TRUE` oder `Y` gehören nicht zum Schema, wandle sie also um.
 
 **Lösung:** Ersetze alle Wahrheitswerte:
 
@@ -88,11 +88,11 @@ Nutze Suchen und Ersetzen mit aktiviertem „Gesamten Zellinhalt vergleichen“.
 
 **Ursache:** Eine Zeile mit `Type: variation` verweist auf ein übergeordnetes Produkt, das weder in der Importdatei noch in der Datenbank existiert.
 
-Variationszeilen in WooCommerce brauchen ein übergeordnetes Produkt. Die Verknüpfung erfolgt über die Spalte `Parent` (die die ID des übergeordneten Produkts aus der Datenbank enthalten sollte) oder dadurch, dass das übergeordnete Produkt in derselben Importdatei steht.
+Variationszeilen brauchen in WooCommerce ein Elternprodukt. Die Spalte `Parent` enthält dessen SKU oder ID (in der Form `id:123`), und das Elternprodukt muss in derselben Importdatei stehen oder bereits in deinem Shop vorhanden sein.
 
 **Lösung:**
 - Nimm die Zeile des übergeordneten Produkts in dieselbe CSV-Datei auf
-- Setze die Spalte `Parent` in Variationszeilen auf die WooCommerce-Produkt-ID des übergeordneten Produkts (die Nummer im WordPress-Adminbereich)
+- Setze `Parent` in Variationszeilen auf die SKU des Elternprodukts oder auf seine WooCommerce-Produkt-ID in der Form `id:123`
 - Achte darauf, dass die übergeordnete Zeile `Type: variable` nutzt, nicht `Type: simple`
 
 ---
@@ -104,7 +104,7 @@ Variationszeilen in WooCommerce brauchen ein übergeordnetes Produkt. Die Verkn�
 **Format der Attributspalten in WooCommerce:**
 
 - `Attribute 1 name`: der Name des ersten Attributs (z. B. `Color`)
-- `Attribute 1 value(s)`: der Wert bzw. die Werte dieser Zeile (z. B. `Blue` oder `Blue | Red` bei mehreren)
+- `Attribute 1 value(s)`: der Wert bzw. die Werte für diese Zeile (z. B. `Blue` oder `Blue, Red` für mehrere)
 - `Attribute 1 visible`: `1`, wenn auf der Produktseite angezeigt, `0`, wenn ausgeblendet
 - `Attribute 1 global`: `1` bei einem globalen Attribut, `0` bei einem lokalen
 
@@ -117,13 +117,13 @@ Variationszeilen in WooCommerce brauchen ein übergeordnetes Produkt. Die Verkn�
 
 ## Fehler: Bild-URL nicht erreichbar
 
-**Ursache:** Die Bild-URL in der Spalte `Images` ist keine öffentlich erreichbare HTTPS-URL, liegt hinter einer Anmeldung oder nutzt ein anderes Protokoll als HTTPS.
+**Ursache:** Die Bild-URL in der Spalte `Images` lässt sich nicht herunterladen: Sie ist nicht öffentlich erreichbar, liegt hinter einer Anmeldung oder ist keine vollständige Webadresse.
 
 WooCommerce lädt Bilder während des Imports herunter und speichert sie in deiner Mediathek.
 
 **Lösung:**
 - Öffne jede Bild-URL im Browser. Das Bild sollte direkt und ohne Anmeldung laden
-- Nutze HTTPS-URLs (nicht HTTP)
+- Verwende vollständige URLs, die mit `https://` beginnen
 - Für Bilder in Google Drive oder Dropbox nutze direkte Download-Links (keine Freigabelinks)
 - Liegen die Bilder auf localhost oder einem Staging-Server, verschiebe sie zuerst an einen öffentlich erreichbaren Ort
 

@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "Ongeldige booleaanse waarde",
-"explanation": "Booleaanse velden zoals Published, In stock? en Is featured? verwachten 1/0 of true/false.",
+"explanation": "Ja/nee-velden zoals Is featured?, Sold individually? en Allow customer reviews? verwachten 1 of 0.",
 "whyPlatformCares": "De WooCommerce-importer kan onverwachte waarden verkeerd lezen, waardoor producten verborgen of verkeerd ingesteld raken.",
 "howToFix": "Gebruik 1 (ja/waar) of 0 (nee/onwaar). Gangbare varianten (yes, no, true, false) kunnen we automatisch normaliseren."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "Variatie met meerdere waarden",
 "explanation": "Een variatierij bevat meer dan één waarde voor een attribuut.",
-"whyPlatformCares": "Elke WooCommerce-variatie is één specifieke combinatie en heeft dus één waarde per attribuut.",
+"whyPlatformCares": "Elke WooCommerce-variatie is één specifieke combinatie. De importer van WooCommerce houdt alleen de eerste waarde en negeert de rest, dus de variatie is misschien niet wat je bedoelde.",
 "howToFix": "Zet alle waarden op de hoofdrij en één waarde op elke variatierij."
 },
 "woocommerce/parent_not_in_file": {

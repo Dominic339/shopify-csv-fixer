@@ -403,7 +403,7 @@
 },
 "woocommerce/invalid_bool": {
 "title": "잘못된 참/거짓 값",
-"explanation": "Published, In stock?, Is featured? 같은 참/거짓 필드에는 1/0 또는 true/false가 필요합니다.",
+"explanation": "Is featured?, Sold individually?, Allow customer reviews? 같은 예/아니요 필드는 1 또는 0이어야 합니다.",
 "whyPlatformCares": "WooCommerce 가져오기 도구가 예상하지 못한 값을 잘못 해석해 상품이 숨겨지거나 잘못 설정될 수 있습니다.",
 "howToFix": "1(예/참) 또는 0(아니요/거짓)을 사용하세요. 흔한 표기(yes, no, true, false)는 자동으로 정규화할 수 있습니다."
 },
@@ -446,7 +446,7 @@
 "woocommerce/variation_multiple_values": {
 "title": "변형에 값이 여러 개 있습니다",
 "explanation": "변형 행에 한 속성의 값이 두 개 이상 있습니다.",
-"whyPlatformCares": "WooCommerce의 변형은 하나의 정해진 조합이므로 속성마다 값이 하나만 들어갑니다.",
+"whyPlatformCares": "WooCommerce 변형은 하나의 정해진 조합입니다. WooCommerce 가져오기는 첫 번째 값만 쓰고 나머지는 무시하므로, 원하던 변형이 아닐 수 있습니다.",
 "howToFix": "모든 값은 상위 행에 두고, 각 변형 행에는 값을 하나만 적으세요."
 },
 "woocommerce/parent_not_in_file": {

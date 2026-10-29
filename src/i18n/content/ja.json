@@ -18,7 +18,7 @@
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV テンプレートガイド：項目、書式、よくあるエラー",
-"description": "Etsy の出品用 CSV テンプレートの完全ガイドです。各項目の説明、選択肢で使える値、必須列と任意列、よくあるインポートエラーの直し方をまとめています。"
+"description": "Etsy の出品 CSV エクスポートに含まれる内容、Etsy でできることとできないこと、各項目の上限（タイトル、タグ、数量）、スプレッドシートで生じるエラーの直し方をまとめています。"
 },
 "general/append-vs-merge-join-csv": {
 "title": "追加・マージ・結合：CSV ファイルを正しく組み合わせる方法",

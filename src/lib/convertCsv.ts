@@ -638,8 +638,9 @@ function writeWoo(products: Product[]): WriteResult {
     const n = parseLocaleNumber(grams);
     return n == null ? "" : String(Math.round(n) / 1000);
   };
+  // WooCommerce: 1 = published, 0 = private, -1 = draft.
   const published = (p: Product) =>
-    p.status === "draft" || p.status === "archived" || p.published === "false" ? "0" : p.status || p.published ? "1" : "";
+    p.status === "draft" || p.status === "archived" || p.published === "false" ? "-1" : p.status || p.published ? "1" : "";
 
   for (const p of products) {
     const base = {

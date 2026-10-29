@@ -2,7 +2,7 @@
 title: "CSV'de WooCommerce değişken ürünleri: ana ve varyasyon satırları"
 description: "WooCommerce ürün içe aktarıcısının değişken ürünleri ana ve alt (varyasyon) satırlarla nasıl gösterdiğini anlayın: nitelik sütunları, satır türüne göre zorunlu alanlar ve en yaygın içe aktarma tuzakları."
 keywords: ["woocommerce değişken ürün csv", "woocommerce varyasyon içe aktarma", "woocommerce ana alt ürün csv", "woocommerce nitelikler csv", "woocommerce csv varyasyon içe aktarma", "değişken ürün woocommerce", "woocommerce ürün içe aktarıcı"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "WooCommerce'in değişken ürünleri ana satır ve varyasyon satırlarıyla nasıl gösterdiği"
@@ -39,9 +39,9 @@ Ana satır, ürün düzeyindeki alanları tanımlar ve ürünün hangi nitelikle
 | Type | `variable` | Tam olarak `variable` olmalıdır |
 | SKU | `SHIRT-BLUE` | Benzersiz ana ürün SKU'su |
 | Name | `Blue Cotton T-Shirt` | Ürün adı |
-| Published | `1` | 1 = yayında, 0 = taslak |
+| Published | `1` | 1 = yayında, 0 = özel, -1 = taslak |
 | Attribute 1 name | `Size` | Boyutun adı |
-| Attribute 1 value(s) | `Small \| Medium \| Large` | Mevcut tüm değerlerin dikey çizgiyle ayrılmış listesi |
+| Attribute 1 value(s) | `Small, Medium, Large` | Tüm mevcut değerler, virgülle ayrılmış |
 | Attribute 1 visible | `1` | Ürün sayfasında göster |
 | Attribute 1 global | `1` | Genel (paylaşılan) nitelik kullan |
 
@@ -62,7 +62,7 @@ Her varyasyon satırı satın alınabilir bir seçenek kombinasyonunu temsil ede
 | Type | `variation` | Tam olarak `variation` olmalıdır |
 | SKU | `SHIRT-BLUE-SM` | Her varyasyon için benzersiz |
 | Name | `Blue Cotton T-Shirt` | Ana ürünün adıyla aynı olmalıdır |
-| Parent | `id:123` veya `sku:SHIRT-BLUE` | Ana ürüne kimlik veya SKU ile bağlar |
+| Parent | `id:123` veya `SHIRT-BLUE` | Ana ürüne ID veya SKU ile bağlar |
 | Regular price | `19.99` | Her varyasyon için zorunlu |
 | Attribute 1 name | `Size` | Ana ürünün nitelik adıyla aynı olmalıdır |
 | Attribute 1 value(s) | `Small` | Bu varyasyona ait tek bir değer |
@@ -73,23 +73,23 @@ Her varyasyon satırı satın alınabilir bir seçenek kombinasyonunu temsil ede
 
 `Parent` sütunu iki biçimi kabul eder:
 - **Veritabanı kimliğiyle:** `id:123`; WooCommerce ürün kimliğini biliyorsanız kullanın.
-- **SKU ile:** `sku:SHIRT-BLUE`; daha taşınabilirdir, henüz kimlik atanmamış yeni ürünleri içe aktarırken kullanın.
+- **SKU ile:** `SHIRT-BLUE`, yani ana ürünün SKU'su olduğu gibi. Taşınması daha kolaydır; henüz ID'si olmayan yeni ürünleri içe aktarırken bunu kullanın.
 
-Sıfırdan yeni değişken ürünler oluştururken `sku:PARENT_SKU` biçimini kullanın. Önce ana satırı içe aktarın (veya aynı dosyada varyasyonların üstüne koyun).
+Yeni değişken ürünleri sıfırdan oluştururken `Parent` alanına ana ürünün SKU'sunu yazın. Ana ürün satırını aynı dosyada varyasyonlarının üstüne koyun veya önce onu içe aktarın.
 
 ---
 
 ## Tam örnek: değişken tişört
 
 ```
-ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
-,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,Size,Small | Medium | Large,1,
-,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,Size,Small,,30
-,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,Size,Medium,,25
-,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,Size,Large,,15
+ID,Type,SKU,Name,Published,Regular price,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Stock
+,variable,SHIRT-BLUE,Blue Cotton T-Shirt,1,,,Size,"Small, Medium, Large",1,
+,variation,SHIRT-BLUE-SM,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Small,,30
+,variation,SHIRT-BLUE-MD,Blue Cotton T-Shirt,1,19.99,SHIRT-BLUE,Size,Medium,,25
+,variation,SHIRT-BLUE-LG,Blue Cotton T-Shirt,1,21.99,SHIRT-BLUE,Size,Large,,15
 ```
 
-> Not: Kısalık için `Parent` sütunu burada yazılmamıştır. Uygulamada varyasyon satırları `Parent: sku:SHIRT-BLUE` içermelidir.
+> Not: `Parent`, ana ürünün SKU'sunu (`SHIRT-BLUE`) içerir. Ana ürünün değer listesinde virgül olduğu için çift tırnak içine alınır.
 
 ---
 
@@ -100,9 +100,9 @@ ID,Type,SKU,Name,Published,Regular price,Attribute 1 name,Attribute 1 value(s),A
 **Ana satır:**
 ```
 Attribute 1 name: Size
-Attribute 1 value(s): Small | Medium
+Attribute 1 value(s): Small, Medium
 Attribute 2 name: Color
-Attribute 2 value(s): Blue | Red
+Attribute 2 value(s): Blue, Red
 ```
 
 **Varyasyon (Small, Blue):**
@@ -129,13 +129,13 @@ Attribute 2 value(s): Blue
 
 **Belirti:** Varyasyonlar ana ürüne bağlanmak yerine bağımsız basit ürünler olarak oluşturulur.
 
-**Çözüm:** Her varyasyon satırının `Parent` sütununda `sku:PARENT_SKU` veya `id:123` biçiminde bir değer olduğundan emin olun. Eksik veya hatalı ana ürün başvuruları sahipsiz varyasyonlar oluşturur.
+**Çözüm:** Her varyasyon satırında `Parent` değeri olduğundan emin olun: ana ürünün SKU'su (örneğin `SHIRT-BLUE`) veya `id:123` biçiminde yazılmış ID'si. Eksik veya hatalı bağlantılar sahipsiz varyasyonlar oluşturur.
 
-### Hata 3: ana satırda nitelik değerleri dikey çizgiyle ayrılmamış
+### Hata 3: Dikey çizgiyle ayrılmış nitelik değerleri
 
-**Belirti:** Ürün sayfası açılır listede yalnızca bir seçenek gösterir veya "Sepete ekle" düğmesi görünmez.
+**Belirti:** Ürün sayfası ayrı seçenekler yerine "Small | Medium | Large" gibi tek bir seçenek gösterir veya varyasyonlar hiçbir seçenekle eşleşmez.
 
-**Çözüm:** Ana satırda olası tüm nitelik değerlerini ` | ` (boşluk, dikey çizgi, boşluk) ile ayırarak yazın: `Small | Medium | Large`. WooCommerce açılır listeyi bu listeyle doldurur.
+**Çözüm:** Ana ürün satırında değerleri virgülle ayırın: `Small, Medium, Large`. Dikey çizgi `|` WooCommerce yönetim ekranının kullandığı ayırıcıdır, ama CSV içe aktarıcısı değerleri virgülden böler. StriveFormats çizgileri sizin için virgüle çevirir.
 
 ### Hata 4: ana satır ile varyasyon arasında nitelik adı uyuşmuyor
 
