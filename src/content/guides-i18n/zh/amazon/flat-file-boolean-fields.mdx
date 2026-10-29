@@ -1,0 +1,135 @@
+---
+title: "Amazon 平面文件中的是/否字段：true/false、y/n 与常见陷阱"
+description: "Amazon 是/否列接受的值取决于文件：类目模板使用其 Valid Values 选项卡中的值（通常是 true/false），Inventory Loader 使用 y/n 或 1/2。了解如何检查、修正和保护这些列。"
+keywords: ["amazon 平面文件 布尔值", "amazon csv 是否字段", "amazon y n csv", "amazon 平面文件 true false", "amazon 卖家平台 csv", "amazon batteries_required", "amazon valid values 选项卡", "amazon 平面文件 错误"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "为什么 Amazon 的是/否值取决于你上传的文件"
+  - "在哪里找到模板接受的确切值"
+  - "Inventory Loader 的配送列如何工作"
+  - "Excel 和 Google 表格如何在不提示的情况下改变是/否值"
+  - "如何在数百行中找出并修正无效值"
+bestFor: "使用卖家平台平面文件批量上传或更新商品的 Amazon 卖家，尤其是涉及电池、安全和配送字段时"
+timeToComplete: "7 分钟"
+---
+
+## 是/否值取决于文件
+
+Amazon 并不是在所有上传文件中都使用同一种是/否格式。一列接受什么值，取决于你正在填写的文件：
+
+| 文件 | 示例列 | 接受的值 |
+|---|---|---|
+| 类目商品模板（按商品类型从卖家平台下载） | `batteries_required`、`are_batteries_included` | 模板 **Valid Values** 选项卡为该列列出的值。电池字段通常是 `true` / `false` |
+| Inventory Loader（含 `sku`、`product-id`、`add-delete` 的报价文件） | `will-ship-internationally` | 仅限美国用 `n` 或 `1`，国际配送用 `y` 或 `2` |
+| Inventory Loader | `expedited-shipping` | 不是是/否：而是配送选项列表（见下文） |
+
+Amazon 的 Inventory Loader 指南为 `batteries_required` 和 `are_batteries_included` 列出的选项是 `true` 或 `false`，Amazon 的 Listings API 也以 true/false 存储它们。
+
+**最常见的错误**：输入不在模板列表中的词，例如在 Valid Values 选项卡写明 `true` / `false` 的列中填写 `Yes`、`Y` 或 `1`，或者把一个 Amazon 文件的写法照搬到另一个文件。
+
+---
+
+## 先查看 Valid Values 选项卡
+
+从卖家平台下载的每个类目模板都有两个选项卡，可以为你的文件解答这个问题：
+
+1. **Data Definitions**：说明每一列，并标明是否必填。
+2. **Valid Values**：准确列出每个下拉列接受的值。
+
+在 Valid Values 选项卡中找到列名，并按原样复制其中的值。模板会随时间变化，不同类目和站点之间也不同，所以请检查你即将上传的版本，而不是几个月前保存的版本。如果你预期的列不在模板中，说明你的商品类型不使用它。
+
+---
+
+## Inventory Loader 的配送列
+
+如果你用 Inventory Loader 文件（含 `sku`、`product-id` 和 `add-delete` 列的文件）更新报价，有两个配送列看起来像是/否字段，但遵循自己的规则。Amazon 的 Inventory Loader 指南是这样定义的：
+
+| 列名 | 预期值 | 控制内容 |
+|---|---|---|
+| `will-ship-internationally` | 仅限美国用 `n` 或 `1`，国际配送用 `y` 或 `2` | 是否把该报价配送到美国以外 |
+| `expedited-shipping` | `Next`、`Second`、`Domestic`、`International` 和 `Plus`，用逗号分隔；没有则填 `N` | 你提供哪些加急配送选项 |
+
+所以 `expedited-shipping` 不是是/否字段，在这里填 `y` 不会匹配任何选项。要提供次日达和两日达，请写 `Next,Second`；如果都不提供，就让单元格留空。
+
+---
+
+## 电子表格如何改变是/否值
+
+### Excel
+
+1. **复选框和公式**：复选框单元格和 `=IF(A2>0, TRUE, FALSE)` 这样的公式会生成 Excel 自己的 `TRUE` / `FALSE`。只有当模板列表包含 true/false 时才可行，在 Inventory Loader 的 `will-ship-internationally` 列中则永远不行。
+2. **手动输入的词**：手动输入的 `Yes`、`No` 或 `Y` 会原样保留，导致文件中出现多种写法。
+3. **直接打开 CSV**：双击打开 CSV 时，Excel 会猜测列的类型。`true` 这样的文本可能被转换为 Excel 布尔值，并保存为 `TRUE`。
+
+### Google Sheets
+
+Google 表格的行为相同：无论目标列需要什么，复选框列和公式都会生成 `TRUE` / `FALSE`。
+
+---
+
+## 找出无效值
+
+### 逐列筛选
+
+1. 通过 **数据 → 从文本/CSV** 打开文件，以免 Excel 改变格式。
+2. 点击某个是/否列（例如 `batteries_required`）的筛选按钮。
+3. 把列出的值与 Valid Values 选项卡比较。其他任何值都有问题，Data Definitions 选项卡标为必填的列中出现空单元格也一样。
+
+### 辅助列公式
+
+在字段旁边添加一列，并在公式中列出接受的值。对于 true/false 列：
+
+```
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
+```
+
+对于 Inventory Loader 的 `will-ship-internationally`，改为检查 `y`、`n`、`1` 和 `2`。筛选显示 `INVALID` 的行，即可找到所有有问题的值。
+
+---
+
+## 批量修正无效值
+
+### 在 Excel 中查找和替换
+
+1. 按 **Ctrl+H**（查找和替换）。
+2. 在 **查找内容** 中输入错误的值，例如 `Yes`。
+3. 在 **替换为** 中输入 Valid Values 选项卡中的值，例如 `true`。
+4. 点击 **选项**，勾选 **单元格匹配**，这样只会更改整个单元格。
+5. 点击 **全部替换**，然后对 `No` 和你发现的其他写法重复操作。
+
+> **重要**：替换之前先确定每个值的含义。`batteries_required` 中的 `Yes` 与另一列中的 `Yes` 可能需要替换成不同的值。
+
+### 用值替换公式结果
+
+如果你的是/否列是由公式计算的：
+
+1. 选中该列并复制（**Ctrl+C**）。
+2. 右键 → **选择性粘贴 → 值**。
+3. 公式会变成普通文本，之后就可以用查找和替换来修正。
+
+### Google Sheets
+
+1. 选中该列。
+2. **修改 → 查找和替换**（Ctrl+H）。
+3. 勾选 **区分大小写** 和 **匹配整个单元格内容**，搜索错误的值并替换为接受的值。
+
+---
+
+## 下次如何避免问题
+
+### 使用模板自带的下拉列表
+
+Amazon 的类目模板带有根据 Valid Values 选项卡生成的下拉列表。直接在模板中输入数据，而不是把 CSV 粘贴到上面，下拉列表就能让值保持在列表范围内。
+
+### 添加你自己的下拉列表
+
+对于没有下拉列表的文件，选中标题下方该列的单元格，打开 **数据 → 数据验证**，选择 **序列**，然后输入接受的值，例如 `true,false`（`will-ship-internationally` 则为 `y,n,1,2`）。
+
+### 每次上传前检查
+
+1. 用文本编辑器（而不是 Excel）打开最终文件，浏览是/否列。
+2. 确认每个值都在该列的列表中。
+3. 填写 Data Definitions 选项卡标为必填的所有列。
+
+如果你用 Inventory Loader 上传，StriveFormats 修复工具会依据 Amazon 的指南替你检查 `will-ship-internationally` 和 `expedited-shipping`。

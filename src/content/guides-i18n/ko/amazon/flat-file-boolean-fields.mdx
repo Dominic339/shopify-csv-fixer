@@ -1,0 +1,135 @@
+---
+title: "Amazon 플랫 파일 예/아니요 필드: true/false, y/n과 흔한 실수"
+description: "Amazon 예/아니요 열이 허용하는 값은 파일마다 다릅니다. 카테고리 템플릿은 Valid Values 탭의 값(대개 true/false)을, Inventory Loader는 y/n 또는 1/2를 사용합니다. 이 열을 확인하고 고치고 보호하는 방법을 알아보세요."
+keywords: ["amazon 플랫 파일 불리언", "amazon csv 예 아니요", "amazon y n csv", "amazon 플랫 파일 true false", "amazon 셀러 센트럴 csv", "amazon batteries_required", "amazon valid values 탭", "amazon 플랫 파일 오류"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Amazon의 예/아니요 값이 업로드하는 파일에 따라 달라지는 이유"
+  - "템플릿이 허용하는 값을 정확히 확인하는 곳"
+  - "Inventory Loader 배송 열이 작동하는 방식"
+  - "Excel과 Google 스프레드시트가 예/아니요 값을 묻지도 않고 바꾸는 방식"
+  - "수백 행에 걸친 잘못된 값을 찾아 고치는 방법"
+bestFor: "셀러 센트럴 플랫 파일로 상품을 대량 등록하거나 업데이트하는 Amazon 판매자, 특히 배터리, 안전, 배송 필드를 다루는 경우"
+timeToComplete: "7분"
+---
+
+## 예/아니요 값은 파일에 따라 다릅니다
+
+Amazon은 모든 업로드 파일에서 같은 예/아니요 형식을 쓰지 않습니다. 열이 허용하는 값은 작성 중인 파일에 따라 정해집니다.
+
+| 파일 | 열 예시 | 허용되는 값 |
+|---|---|---|
+| 카테고리 등록 템플릿(상품 유형에 맞게 셀러 센트럴에서 다운로드) | `batteries_required`, `are_batteries_included` | 템플릿의 **Valid Values** 탭이 그 열에 나열한 값. 배터리 필드는 대개 `true` / `false` |
+| Inventory Loader(`sku`, `product-id`, `add-delete`가 있는 오퍼 파일) | `will-ship-internationally` | 미국 내 전용은 `n` 또는 `1`, 해외 배송은 `y` 또는 `2` |
+| Inventory Loader | `expedited-shipping` | 예/아니요가 아님: 배송 옵션 목록(아래 참고) |
+
+Amazon의 Inventory Loader 가이드는 `batteries_required`와 `are_batteries_included`의 옵션을 `true` 또는 `false`로 나열하며, Amazon Listings API도 이 값을 true/false로 저장합니다.
+
+**가장 흔한 실수:** 템플릿 목록에 없는 단어를 입력하는 것입니다. 예를 들어 Valid Values 탭이 `true` / `false`라고 하는 열에 `Yes`, `Y`, `1`을 쓰거나, 한 Amazon 파일의 규칙을 다른 파일에 그대로 가져오는 경우입니다.
+
+---
+
+## 먼저 Valid Values 탭을 확인하세요
+
+셀러 센트럴에서 다운로드한 카테고리 템플릿에는 해당 파일의 답을 알려 주는 탭이 두 개 있습니다.
+
+1. **Data Definitions:** 각 열을 설명하고 필수인지 알려 줍니다.
+2. **Valid Values:** 드롭다운이 있는 각 열이 허용하는 값을 정확히 나열합니다.
+
+Valid Values 탭에서 열 이름을 찾고, 표기된 그대로 값을 복사하세요. 템플릿은 시간이 지나면서 바뀌고 카테고리와 마켓플레이스마다 다르므로, 몇 달 전에 저장한 파일이 아니라 지금 업로드할 버전을 확인하세요. 예상한 열이 템플릿에 없다면 해당 상품 유형은 그 열을 쓰지 않습니다.
+
+---
+
+## Inventory Loader 배송 열
+
+Inventory Loader 파일(`sku`, `product-id`, `add-delete` 열이 있는 파일)로 오퍼를 업데이트한다면, 배송 열 두 개는 예/아니요 필드처럼 보이지만 자체 규칙을 따릅니다. Amazon의 Inventory Loader 가이드는 이렇게 정의합니다.
+
+| 열 이름 | 예상 값 | 결정하는 내용 |
+|---|---|---|
+| `will-ship-internationally` | 미국 내 전용은 `n` 또는 `1`, 해외 배송은 `y` 또는 `2` | 오퍼를 미국 밖으로 배송하는지 여부 |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International`, `Plus`를 쉼표로 구분, 없으면 `N` | 어떤 빠른 배송 옵션을 제공하는지 |
+
+따라서 `expedited-shipping`은 예/아니요 필드가 아니며, 여기에 `y`를 넣으면 어떤 옵션과도 맞지 않습니다. 익일 배송과 2일 배송을 제공하려면 `Next,Second`라고 쓰고, 제공하지 않으면 셀을 비워 두세요.
+
+---
+
+## 스프레드시트가 예/아니요 값을 바꾸는 방식
+
+### Excel
+
+1. **확인란과 수식:** 확인란 셀과 `=IF(A2>0, TRUE, FALSE)` 같은 수식은 Excel 고유의 `TRUE` / `FALSE`를 만듭니다. 템플릿 목록에 true/false가 있을 때만 통하며, Inventory Loader의 `will-ship-internationally` 열에서는 절대 통하지 않습니다.
+2. **직접 입력한 단어:** 손으로 입력한 `Yes`, `No`, `Y`는 입력한 그대로 남기 때문에 파일에 여러 표기가 섞입니다.
+3. **CSV를 바로 열기:** CSV를 두 번 클릭해 열면 Excel이 열 형식을 추측합니다. `true` 같은 텍스트가 Excel 불리언으로 바뀌어 `TRUE`로 저장될 수 있습니다.
+
+### Google Sheets
+
+Google 스프레드시트도 똑같이 동작합니다. 확인란 열과 수식은 대상 열이 무엇을 기대하든 `TRUE` / `FALSE`를 만듭니다.
+
+---
+
+## 잘못된 값 찾기
+
+### 열마다 필터 걸기
+
+1. Excel이 서식을 바꾸지 않도록 **데이터 → 텍스트/CSV에서**로 파일을 여세요.
+2. 예/아니요 열(예: `batteries_required`)의 필터 단추를 클릭하세요.
+3. 표시된 값을 Valid Values 탭과 비교하세요. 그 밖의 값은 모두 문제이며, Data Definitions 탭이 필수로 표시한 열의 빈 셀도 마찬가지입니다.
+
+### 보조 열 수식
+
+필드 옆에 열을 추가하고 허용되는 값을 수식에 나열하세요. true/false 열이라면 다음과 같습니다.
+
+```
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
+```
+
+Inventory Loader의 `will-ship-internationally`라면 대신 `y`, `n`, `1`, `2`를 확인하세요. `INVALID`가 표시된 행을 필터로 걸러 내면 문제 값을 모두 찾을 수 있습니다.
+
+---
+
+## 잘못된 값을 한꺼번에 고치기
+
+### Excel 찾기 및 바꾸기
+
+1. **Ctrl+H**(찾기 및 바꾸기)를 누르세요.
+2. **찾을 내용**에 잘못된 값, 예를 들어 `Yes`를 입력하세요.
+3. **바꿀 내용**에 Valid Values 탭의 값, 예를 들어 `true`를 입력하세요.
+4. **옵션**을 클릭하고 셀 전체만 바뀌도록 **전체 셀 내용 일치**를 선택하세요.
+5. **모두 바꾸기**를 클릭한 뒤 `No`와 그 밖에 찾은 표기에도 반복하세요.
+
+> **중요:** 바꾸기 전에 각 값이 무엇을 뜻하는지 정하세요. `batteries_required`의 `Yes`와 다른 열의 `Yes`는 서로 다른 값으로 바꿔야 할 수 있습니다.
+
+### 수식 결과를 값으로 바꾸기
+
+예/아니요 열이 수식으로 계산된다면:
+
+1. 열을 선택하고 복사하세요(**Ctrl+C**).
+2. 마우스 오른쪽 클릭 → **선택하여 붙여넣기 → 값**.
+3. 수식이 일반 텍스트가 되며, 그다음 찾기 및 바꾸기로 고칠 수 있습니다.
+
+### Google Sheets
+
+1. 열을 선택하세요.
+2. **수정 → 찾기 및 바꾸기**(Ctrl+H).
+3. **대소문자 일치**와 **전체 셀 내용 일치**를 선택하고, 잘못된 값을 찾아 허용되는 값으로 바꾸세요.
+
+---
+
+## 다음번 문제 예방하기
+
+### 템플릿의 드롭다운 사용하기
+
+Amazon 카테고리 템플릿에는 Valid Values 탭으로 만든 드롭다운이 들어 있습니다. 템플릿 위에 CSV를 붙여 넣지 말고 템플릿 자체에 데이터를 입력하면, 드롭다운이 값을 목록 안에 유지해 줍니다.
+
+### 직접 드롭다운 추가하기
+
+드롭다운이 없는 파일이라면 머리글 아래의 열 셀을 선택하고 **데이터 → 데이터 유효성 검사**로 가서 **목록**을 고른 뒤 허용되는 값을 입력하세요. 예: `true,false`(`will-ship-internationally`라면 `y,n,1,2`).
+
+### 업로드할 때마다 확인하기
+
+1. 최종 파일을 Excel이 아닌 텍스트 편집기로 열고 예/아니요 열을 훑어보세요.
+2. 모든 값이 그 열의 목록에 있는지 확인하세요.
+3. Data Definitions 탭이 필수로 표시한 열을 모두 채우세요.
+
+Inventory Loader로 업로드한다면 StriveFormats 수정기가 Amazon 가이드에 따라 `will-ship-internationally`와 `expedited-shipping`을 대신 확인합니다.

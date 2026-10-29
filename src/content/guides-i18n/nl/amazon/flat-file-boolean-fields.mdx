@@ -1,0 +1,135 @@
+---
+title: "Ja/nee-velden in Amazon-flatfiles: true/false, y/n en veelgemaakte fouten"
+description: "Welke waarden de ja/nee-kolommen van Amazon accepteren, hangt af van het bestand: categoriesjablonen gebruiken de waarden uit hun tabblad Valid Values (meestal true/false), de Inventory Loader gebruikt y/n of 1/2. Zo controleer, herstel en bescherm je deze kolommen."
+keywords: ["amazon flatfile boolean", "amazon csv booleaanse velden", "amazon y n csv", "amazon flatfile true false", "amazon seller central csv boolean", "amazon batteries_required", "amazon tabblad valid values", "amazon flatfile fouten"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Waarom de ja/nee-waarden van Amazon afhangen van het bestand dat je uploadt"
+  - "Waar je de exacte toegestane waarden voor je sjabloon vindt"
+  - "Hoe de verzendkolommen van de Inventory Loader werken"
+  - "Hoe Excel en Google Spreadsheets ja/nee-waarden ongevraagd veranderen"
+  - "Hoe je ongeldige waarden in honderden rijen vindt en herstelt"
+bestFor: "Amazon-verkopers die met Seller Central-flatfiles aanbiedingen in bulk uploaden of bijwerken, vooral velden over batterijen, veiligheid en verzending"
+timeToComplete: "7 minuten"
+---
+
+## Ja/nee-waarden hangen af van het bestand
+
+Amazon gebruikt niet in al zijn uploadbestanden hetzelfde ja/nee-formaat. Wat een kolom accepteert, hangt af van het bestand dat je invult:
+
+| Bestand | Voorbeeldkolommen | Toegestane waarden |
+|---|---|---|
+| Categoriesjabloon (in Seller Central gedownload voor je producttype) | `batteries_required`, `are_batteries_included` | Wat het tabblad **Valid Values** van het sjabloon voor die kolom vermeldt. Voor batterijvelden is dat meestal `true` / `false` |
+| Inventory Loader (aanbiedingsbestand met `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` of `1` voor alleen de VS, `y` of `2` voor internationaal |
+| Inventory Loader | `expedited-shipping` | Geen ja/nee: een lijst met verzendopties (zie hieronder) |
+
+De Inventory Loader-handleiding van Amazon vermeldt `batteries_required` en `are_batteries_included` met de opties `true` of `false`, en ook de Listings API van Amazon slaat ze op als true/false.
+
+**De meest gemaakte fout:** een woord typen dat niet op de lijst van het sjabloon staat, zoals `Yes`, `Y` of `1` in een kolom waarvan het tabblad Valid Values `true` / `false` aangeeft, of een conventie uit het ene Amazon-bestand naar het andere overnemen.
+
+---
+
+## Bekijk eerst het tabblad Valid Values
+
+Elk categoriesjabloon dat je uit Seller Central downloadt, heeft twee tabbladen die de vraag voor jouw bestand beantwoorden:
+
+1. **Data Definitions:** beschrijft elke kolom en zegt of die verplicht is.
+2. **Valid Values:** geeft de exacte waarden die elke keuzelijstkolom accepteert.
+
+Zoek de kolomnaam op in het tabblad Valid Values en kopieer de waarden daaruit, precies zo gespeld. Sjablonen veranderen in de loop van de tijd en verschillen per categorie en marktplaats, dus controleer de versie die je gaat uploaden en niet een die je maanden geleden hebt opgeslagen. Staat een kolom die je verwachtte niet in je sjabloon, dan gebruikt je producttype die niet.
+
+---
+
+## Verzendkolommen van de Inventory Loader
+
+Als je aanbiedingen bijwerkt met het Inventory Loader-bestand (dat met de kolommen `sku`, `product-id` en `add-delete`), lijken twee verzendkolommen ja/nee-velden, maar ze volgen eigen regels. De Inventory Loader-handleiding van Amazon definieert ze zo:
+
+| Kolomnaam | Verwachte waarden | Wat het regelt |
+|---|---|---|
+| `will-ship-internationally` | `n` of `1` voor alleen de VS, `y` of `2` voor internationaal | Of je de aanbieding buiten de VS verzendt |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` en `Plus`, gescheiden door komma's, of `N` voor geen | Welke snellere verzendopties je aanbiedt |
+
+`expedited-shipping` is dus geen ja/nee-veld, en een `y` daar komt met geen enkele optie overeen. Schrijf `Next,Second` om verzending binnen één en twee dagen aan te bieden, of laat de cel leeg als je er geen aanbiedt.
+
+---
+
+## Hoe spreadsheets ja/nee-waarden veranderen
+
+### Excel
+
+1. **Selectievakjes en formules:** cellen met selectievakjes en formules zoals `=IF(A2>0, TRUE, FALSE)` leveren de eigen `TRUE` / `FALSE` van Excel op (in Nederlandstalige Excel weergegeven als WAAR / ONWAAR). Dat werkt alleen als de lijst van je sjabloon true/false bevat, en nooit in de Inventory Loader-kolom `will-ship-internationally`.
+2. **Getypte woorden:** een met de hand getypte `Yes`, `No` of `Y` blijft zoals getypt, dus het bestand krijgt een mengsel van spellingen.
+3. **Een CSV direct openen:** als je op een CSV dubbelklikt, raadt Excel de kolomtypen. Tekst zoals `true` kan een Excel-booleaanse waarde worden en als `TRUE` worden opgeslagen.
+
+### Google Sheets
+
+Google Spreadsheets werkt hetzelfde: kolommen met selectievakjes en formules leveren `TRUE` / `FALSE` op, wat de doelkolom ook verwacht.
+
+---
+
+## Ongeldige waarden vinden
+
+### Filter elke kolom
+
+1. Open je bestand via **Gegevens → Van tekst/CSV**, zodat Excel het niet opnieuw opmaakt.
+2. Klik op de filterknop van een ja/nee-kolom (bijvoorbeeld `batteries_required`).
+3. Vergelijk de vermelde waarden met het tabblad Valid Values. Al het andere is een probleem, net als een lege cel in een kolom die het tabblad Data Definitions als verplicht aanmerkt.
+
+### Formule in een hulpkolom
+
+Voeg naast het veld een kolom toe en zet de toegestane waarden in de formule. Voor een true/false-kolom:
+
+```
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
+```
+
+In Nederlandstalige Excel heten de functies ALS, OF en KLEINE.LETTERS. Controleer voor `will-ship-internationally` van de Inventory Loader in plaats daarvan op `y`, `n`, `1` en `2`. Filter op rijen met `INVALID` om elke probleemwaarde te vinden.
+
+---
+
+## Ongeldige waarden in bulk herstellen
+
+### Zoeken en vervangen in Excel
+
+1. Druk op **Ctrl+H** (Zoeken en vervangen).
+2. Vul bij **Zoeken naar** de verkeerde waarde in, bijvoorbeeld `Yes`.
+3. Vul bij **Vervangen door** de waarde uit het tabblad Valid Values in, bijvoorbeeld `true`.
+4. Klik op **Opties** en vink **Identieke celinhoud** aan, zodat alleen hele cellen veranderen.
+5. Klik op **Alles vervangen** en herhaal dit voor `No` en elke andere spelling die je vond.
+
+> **Belangrijk:** bepaal wat elke waarde betekent voordat je vervangt. Een `Yes` in `batteries_required` en een `Yes` in een andere kolom kunnen een andere vervanging nodig hebben.
+
+### Formuleresultaten vervangen door waarden
+
+Als je ja/nee-kolommen met formules worden berekend:
+
+1. Selecteer de kolom en kopieer die (**Ctrl+C**).
+2. Klik met de rechtermuisknop → **Plakken speciaal → Waarden**.
+3. De formules worden gewone tekst, die je daarna met Zoeken en vervangen kunt herstellen.
+
+### Google Sheets
+
+1. Selecteer de kolom.
+2. **Bewerken → Zoeken en vervangen** (Ctrl+H).
+3. Vink **Hoofdlettergevoelig** en **Volledige celinhoud matchen** aan, zoek de verkeerde waarde en vervang die door de toegestane.
+
+---
+
+## Problemen de volgende keer voorkomen
+
+### Gebruik de keuzelijsten van het sjabloon
+
+De categoriesjablonen van Amazon bevatten keuzelijsten die op het tabblad Valid Values zijn gebaseerd. Vul de gegevens in het sjabloon zelf in in plaats van er een CSV overheen te plakken, dan houden de keuzelijsten de waarden op de lijst.
+
+### Voeg je eigen keuzelijst toe
+
+Selecteer bij een bestand zonder keuzelijsten de cellen van de kolom onder de kop, ga naar **Gegevens → Gegevensvalidatie**, kies **Lijst** en vul de toegestane waarden in, bijvoorbeeld `true,false` (of `y,n,1,2` voor `will-ship-internationally`).
+
+### Controleer voor elke upload
+
+1. Open het definitieve bestand in een teksteditor (niet in Excel) en loop de ja/nee-kolommen na.
+2. Controleer of elke waarde op de lijst voor die kolom staat.
+3. Vul elke kolom in die het tabblad Data Definitions als verplicht aanmerkt.
+
+Upload je met de Inventory Loader, dan controleert de StriveFormats-fixer `will-ship-internationally` en `expedited-shipping` voor je aan de hand van de handleiding van Amazon.

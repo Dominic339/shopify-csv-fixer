@@ -1,0 +1,135 @@
+---
+title: "Amazon düz dosyalarında evet/hayır alanları: true/false, y/n ve sık yapılan hatalar"
+description: "Amazon'un evet/hayır sütunlarının kabul ettiği değerler dosyaya göre değişir: kategori şablonları Valid Values sekmesindeki değerleri (genellikle true/false), Inventory Loader ise y/n veya 1/2 kullanır. Bu sütunları nasıl kontrol edeceğinizi, düzelteceğinizi ve koruyacağınızı öğrenin."
+keywords: ["amazon düz dosya boolean", "amazon csv mantıksal alanlar", "amazon y n csv", "amazon düz dosya true false", "amazon seller central csv evet hayır", "amazon batteries_required", "amazon valid values sekmesi", "amazon düz dosya hataları"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Amazon'un evet/hayır değerlerinin neden yüklediğiniz dosyaya bağlı olduğu"
+  - "Şablonunuzun kabul ettiği değerleri tam olarak nerede bulacağınız"
+  - "Inventory Loader'ın kargo sütunlarının nasıl çalıştığı"
+  - "Excel ve Google E-Tablolar'ın evet/hayır değerlerini sormadan nasıl değiştirdiği"
+  - "Yüzlerce satırdaki geçersiz değerleri nasıl bulup düzelteceğiniz"
+bestFor: "Seller Central düz dosyalarıyla ilanları toplu yükleyen veya güncelleyen Amazon satıcıları, özellikle pil, güvenlik ve kargo alanları için"
+timeToComplete: "7 dakika"
+---
+
+## Evet/hayır değerleri dosyaya bağlıdır
+
+Amazon tüm yükleme dosyalarında tek bir evet/hayır biçimi kullanmaz. Bir sütunun neyi kabul ettiği, doldurduğunuz dosyaya bağlıdır:
+
+| Dosya | Örnek sütunlar | Kabul edilen değerler |
+|---|---|---|
+| Kategori ilan şablonu (ürün türünüz için Seller Central'dan indirilir) | `batteries_required`, `are_batteries_included` | Şablonun **Valid Values** sekmesinin o sütun için listelediği değerler. Pil alanlarında bu genellikle `true` / `false` olur |
+| Inventory Loader (`sku`, `product-id`, `add-delete` içeren teklif dosyası) | `will-ship-internationally` | Yalnızca ABD için `n` veya `1`, uluslararası için `y` veya `2` |
+| Inventory Loader | `expedited-shipping` | Evet/hayır değil: bir kargo seçenekleri listesi (aşağıya bakın) |
+
+Amazon'un Inventory Loader rehberi `batteries_required` ve `are_batteries_included` için `true` veya `false` seçeneklerini listeler; Amazon'un Listings API'si de bunları true/false olarak saklar.
+
+**En sık yapılan hata:** şablonun listesinde olmayan bir kelime yazmak; örneğin Valid Values sekmesi `true` / `false` diyen bir sütuna `Yes`, `Y` veya `1` yazmak ya da bir Amazon dosyasındaki kuralı başka birine taşımak.
+
+---
+
+## Önce Valid Values sekmesine bakın
+
+Seller Central'dan indirdiğiniz her kategori şablonunda, dosyanız için bu soruyu çözen iki sekme bulunur:
+
+1. **Data Definitions:** her sütunu açıklar ve zorunlu olup olmadığını belirtir.
+2. **Valid Values:** açılır listeli her sütunun kabul ettiği değerleri tam olarak listeler.
+
+Sütun adını Valid Values sekmesinde bulun ve değerleri oradan, tam olarak yazıldığı gibi kopyalayın. Şablonlar zamanla değişir ve kategoriye ve pazar yerine göre farklılık gösterir; bu yüzden aylar önce kaydettiğiniz sürümü değil, yüklemek üzere olduğunuz sürümü kontrol edin. Beklediğiniz bir sütun şablonunuzda yoksa ürün türünüz onu kullanmıyordur.
+
+---
+
+## Inventory Loader kargo sütunları
+
+Teklifleri Inventory Loader dosyasıyla (`sku`, `product-id` ve `add-delete` sütunları olan dosya) güncelliyorsanız, iki kargo sütunu evet/hayır alanı gibi görünür ama kendi kurallarına uyar. Amazon'un Inventory Loader rehberi bunları şöyle tanımlar:
+
+| Sütun adı | Beklenen değerler | Neyi belirler |
+|---|---|---|
+| `will-ship-internationally` | Yalnızca ABD için `n` veya `1`, uluslararası için `y` veya `2` | Teklifi ABD dışına gönderip göndermediğiniz |
+| `expedited-shipping` | Virgülle ayrılmış `Next`, `Second`, `Domestic`, `International` ve `Plus`, hiçbiri için `N` | Hangi hızlı kargo seçeneklerini sunduğunuz |
+
+Yani `expedited-shipping` bir evet/hayır alanı değildir ve oradaki bir `y` hiçbir seçenekle eşleşmez. Bir ve iki günlük kargo sunmak için `Next,Second` yazın ya da hiçbirini sunmuyorsanız hücreyi boş bırakın.
+
+---
+
+## Elektronik tablolar evet/hayır değerlerini nasıl değiştirir
+
+### Excel
+
+1. **Onay kutuları ve formüller:** onay kutulu hücreler ve `=IF(A2>0, TRUE, FALSE)` gibi formüller Excel'in kendi `TRUE` / `FALSE` değerlerini üretir (Türkçe Excel'de DOĞRU / YANLIŞ olarak görünür). Bu yalnızca şablonunuzun listesi true/false içeriyorsa işe yarar ve Inventory Loader'ın `will-ship-internationally` sütununda asla işe yaramaz.
+2. **Yazılan kelimeler:** elle yazılan `Yes`, `No` veya `Y` yazıldığı gibi kalır, bu yüzden dosyada karışık yazımlar oluşur.
+3. **CSV'yi doğrudan açmak:** bir CSV'ye çift tıkladığınızda Excel sütun türlerini tahmin eder. `true` gibi bir metin Excel mantıksal değerine dönüşüp `TRUE` olarak kaydedilebilir.
+
+### Google Sheets
+
+Google E-Tablolar da aynı şekilde davranır: onay kutulu sütunlar ve formüller, hedef sütun ne beklerse beklesin `TRUE` / `FALSE` üretir.
+
+---
+
+## Geçersiz değerleri bulma
+
+### Her sütunu filtreleyin
+
+1. Excel dosyanızı yeniden biçimlendirmesin diye dosyayı **Veri → Metinden/CSV'den** ile açın.
+2. Bir evet/hayır sütununun (örneğin `batteries_required`) filtre düğmesine tıklayın.
+3. Listelenen değerleri Valid Values sekmesiyle karşılaştırın. Başka her değer bir sorundur; Data Definitions sekmesinin zorunlu olarak işaretlediği bir sütundaki boş hücre de öyle.
+
+### Yardımcı sütun formülü
+
+Alanın yanına bir sütun ekleyin ve kabul edilen değerleri formülde listeleyin. Bir true/false sütunu için:
+
+```
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
+```
+
+Türkçe Excel'de bu işlevlerin adı EĞER, YADA ve KÜÇÜKHARF'tir. Inventory Loader'ın `will-ship-internationally` sütunu için bunun yerine `y`, `n`, `1` ve `2` değerlerini kontrol edin. Tüm sorunlu değerleri bulmak için `INVALID` gösteren satırları filtreleyin.
+
+---
+
+## Geçersiz değerleri toplu düzeltme
+
+### Excel'de Bul ve Değiştir
+
+1. **Ctrl+H** tuşlarına basın (Bul ve Değiştir).
+2. **Aranan** alanına yanlış değeri girin, örneğin `Yes`.
+3. **Yeni değer** alanına Valid Values sekmesindeki değeri girin, örneğin `true`.
+4. **Seçenekler**'e tıklayın ve yalnızca hücrenin tamamı değişsin diye **Tüm hücre içeriğini eşleştir**'i işaretleyin.
+5. **Tümünü Değiştir**'e tıklayın, ardından `No` ve bulduğunuz diğer yazımlar için tekrarlayın.
+
+> **Önemli:** değiştirmeden önce her değerin ne anlama geldiğine karar verin. `batteries_required` içindeki bir `Yes` ile başka bir sütundaki `Yes` farklı değişiklikler gerektirebilir.
+
+### Formül sonuçlarını değerlerle değiştirin
+
+Evet/hayır sütunlarınız formüllerle hesaplanıyorsa:
+
+1. Sütunu seçin ve kopyalayın (**Ctrl+C**).
+2. Sağ tıklayın → **Özel Yapıştır → Değerler**.
+3. Formüller düz metne dönüşür; bunu sonra Bul ve Değiştir ile düzeltebilirsiniz.
+
+### Google Sheets
+
+1. Sütunu seçin.
+2. **Düzenle → Bul ve değiştir** (Ctrl+H).
+3. **Büyük/küçük harf eşleştir** ve **Tüm hücre içeriğini eşleştir** seçeneklerini işaretleyin, yanlış değeri arayın ve kabul edilen değerle değiştirin.
+
+---
+
+## Bir dahaki sefere sorunları önleme
+
+### Şablonun kendi açılır listelerini kullanın
+
+Amazon'un kategori şablonları, Valid Values sekmesinden oluşturulmuş açılır listelerle gelir. Şablonun üzerine bir CSV yapıştırmak yerine verileri şablonun kendisine girin; açılır listeler değerleri listede tutar.
+
+### Kendi açılır listenizi ekleyin
+
+Açılır listesi olmayan bir dosyada başlığın altındaki sütun hücrelerini seçin, **Veri → Veri Doğrulama**'ya gidin, **Liste**'yi seçin ve kabul edilen değerleri girin, örneğin `true,false` (veya `will-ship-internationally` için `y,n,1,2`).
+
+### Her yüklemeden önce kontrol edin
+
+1. Son dosyayı bir metin düzenleyicide (Excel'de değil) açın ve evet/hayır sütunlarını gözden geçirin.
+2. Her değerin o sütunun listesinde olduğunu doğrulayın.
+3. Data Definitions sekmesinin zorunlu olarak işaretlediği tüm sütunları doldurun.
+
+Inventory Loader ile yüklüyorsanız, StriveFormats düzelticisi `will-ship-internationally` ve `expedited-shipping` sütunlarını Amazon'un rehberine göre sizin yerinize kontrol eder.

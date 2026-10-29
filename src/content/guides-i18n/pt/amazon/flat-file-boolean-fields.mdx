@@ -1,0 +1,135 @@
+---
+title: "Campos de sim/não nos arquivos flat da Amazon: true/false, y/n e armadilhas comuns"
+description: "Os valores aceitos pelas colunas de sim/não da Amazon dependem do arquivo: os modelos de categoria usam os valores da aba Valid Values (geralmente true/false), e o Inventory Loader usa y/n ou 1/2. Saiba como verificar, corrigir e proteger essas colunas."
+keywords: ["amazon arquivo flat booleano", "amazon csv campos booleanos", "amazon y n csv", "amazon arquivo flat true false", "amazon seller central csv booleano", "amazon batteries_required", "amazon aba valid values", "erros arquivo flat amazon"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Por que os valores de sim/não da Amazon dependem do arquivo enviado"
+  - "Onde encontrar os valores exatos aceitos pelo seu modelo"
+  - "Como funcionam as colunas de envio do Inventory Loader"
+  - "Como o Excel e o Planilhas Google mudam valores de sim/não sem avisar"
+  - "Como encontrar e corrigir valores inválidos em centenas de linhas"
+bestFor: "Vendedores da Amazon que usam arquivos flat do Seller Central para enviar ou atualizar anúncios em massa, principalmente campos de bateria, segurança e envio"
+timeToComplete: "7 minutos"
+---
+
+## Os valores de sim/não dependem do arquivo
+
+A Amazon não usa um único formato de sim/não em todos os seus arquivos de envio. O que uma coluna aceita depende do arquivo que você está preenchendo:
+
+| Arquivo | Colunas de exemplo | Valores aceitos |
+|---|---|---|
+| Modelo de anúncio por categoria (baixado do Seller Central para o seu tipo de produto) | `batteries_required`, `are_batteries_included` | O que a aba **Valid Values** do modelo lista para essa coluna. Para campos de bateria, geralmente é `true` / `false` |
+| Inventory Loader (arquivo de ofertas com `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` ou `1` só para os EUA, `y` ou `2` para envio internacional |
+| Inventory Loader | `expedited-shipping` | Não é sim/não: uma lista de opções de envio (veja abaixo) |
+
+O guia do Inventory Loader da Amazon lista `batteries_required` e `are_batteries_included` com as opções `true` ou `false`, e a Listings API da Amazon também os armazena como true/false.
+
+**O erro mais comum:** digitar uma palavra que não está na lista do modelo, como `Yes`, `Y` ou `1` numa coluna cuja aba Valid Values diz `true` / `false`, ou copiar uma convenção de um arquivo da Amazon para outro.
+
+---
+
+## Confira primeiro a aba Valid Values
+
+Todo modelo de categoria baixado do Seller Central tem duas abas que resolvem a questão para o seu arquivo:
+
+1. **Data Definitions:** descreve cada coluna e diz se ela é obrigatória.
+2. **Valid Values:** lista os valores exatos que cada coluna com lista suspensa aceita.
+
+Procure o nome da coluna na aba Valid Values e copie os valores de lá, escritos exatamente como aparecem. Os modelos mudam com o tempo e variam entre categorias e marketplaces, então confira a versão que você vai enviar, e não uma salva meses atrás. Se uma coluna que você esperava não está no modelo, o seu tipo de produto não a usa.
+
+---
+
+## Colunas de envio do Inventory Loader
+
+Se você atualiza ofertas com o arquivo Inventory Loader (aquele com as colunas `sku`, `product-id` e `add-delete`), duas colunas de envio parecem campos de sim/não, mas seguem regras próprias. O guia do Inventory Loader da Amazon as define assim:
+
+| Nome da coluna | Valores esperados | O que controla |
+|---|---|---|
+| `will-ship-internationally` | `n` ou `1` só para os EUA, `y` ou `2` para envio internacional | Se você envia a oferta para fora dos EUA |
+| `expedited-shipping` | `Next`, `Second`, `Domestic`, `International` e `Plus`, separados por vírgulas, ou `N` para nenhuma | Quais opções de envio mais rápido você oferece |
+
+Portanto, `expedited-shipping` não é um campo de sim/não, e um `y` ali não corresponde a nenhuma opção. Escreva `Next,Second` para oferecer envio em um e dois dias, ou deixe a célula vazia se não oferecer nenhuma.
+
+---
+
+## Como as planilhas mudam valores de sim/não
+
+### Excel
+
+1. **Caixas de seleção e fórmulas:** células com caixa de seleção e fórmulas como `=IF(A2>0, TRUE, FALSE)` produzem o `TRUE` / `FALSE` do próprio Excel (no Excel em português aparecem como VERDADEIRO / FALSO). Isso só funciona se a lista do modelo contém true/false, e nunca funciona na coluna `will-ship-internationally` do Inventory Loader.
+2. **Palavras digitadas:** um `Yes`, `No` ou `Y` digitado à mão fica como foi escrito, então o arquivo termina com grafias misturadas.
+3. **Abrir um CSV diretamente:** ao clicar duas vezes num CSV, o Excel adivinha os tipos de coluna. Um texto como `true` pode virar um booleano do Excel e ser salvo como `TRUE`.
+
+### Google Sheets
+
+O Planilhas Google se comporta da mesma forma: colunas com caixas de seleção e fórmulas produzem `TRUE` / `FALSE`, seja lá o que a coluna de destino espere.
+
+---
+
+## Encontrar valores inválidos
+
+### Filtre cada coluna
+
+1. Abra o arquivo por **Dados → De Texto/CSV** para que o Excel não o reformate.
+2. Clique no menu de filtro de uma coluna de sim/não (por exemplo, `batteries_required`).
+3. Compare os valores listados com a aba Valid Values. Qualquer outro valor é um problema, assim como uma célula vazia numa coluna que a aba Data Definitions marca como obrigatória.
+
+### Fórmula numa coluna auxiliar
+
+Adicione uma coluna ao lado do campo e liste os valores aceitos na fórmula. Para uma coluna true/false:
+
+```
+=IF(OR(LOWER(A2)="true", LOWER(A2)="false", A2=""), "OK", "INVALID: "&A2)
+```
+
+No Excel em português, as funções se chamam SE, OU e MINÚSCULA. Para o `will-ship-internationally` do Inventory Loader, verifique `y`, `n`, `1` e `2`. Filtre as linhas que mostram `INVALID` para encontrar todos os valores com problema.
+
+---
+
+## Corrigir valores inválidos em massa
+
+### Localizar e substituir no Excel
+
+1. Pressione **Ctrl+U** (Localizar e Substituir; Ctrl+H em algumas versões).
+2. Em **Localizar**, digite o valor errado, por exemplo `Yes`.
+3. Em **Substituir por**, digite o valor da aba Valid Values, por exemplo `true`.
+4. Clique em **Opções** e marque **Coincidir conteúdo da célula inteira**, para que só células inteiras mudem.
+5. Clique em **Substituir Tudo** e repita para `No` e qualquer outra grafia encontrada.
+
+> **Importante:** decida o que cada valor significa antes de substituir. Um `Yes` em `batteries_required` e um `Yes` em outra coluna podem precisar de substituições diferentes.
+
+### Substitua os resultados das fórmulas por valores
+
+Se as suas colunas de sim/não são calculadas por fórmulas:
+
+1. Selecione a coluna e copie (**Ctrl+C**).
+2. Clique com o botão direito → **Colar Especial → Valores**.
+3. As fórmulas viram texto simples, que você pode corrigir com Localizar e Substituir.
+
+### Google Sheets
+
+1. Selecione a coluna.
+2. **Editar → Localizar e substituir** (Ctrl+H).
+3. Marque **Diferenciar maiúsculas e minúsculas** e **Corresponder a todo o conteúdo da célula**, procure o valor errado e substitua pelo aceito.
+
+---
+
+## Evitar problemas da próxima vez
+
+### Use as listas suspensas do próprio modelo
+
+Os modelos de categoria da Amazon vêm com listas suspensas criadas a partir da aba Valid Values. Digite os dados no próprio modelo em vez de colar um CSV por cima, e as listas suspensas mantêm os valores dentro da lista.
+
+### Adicione a sua própria lista suspensa
+
+Para um arquivo sem listas suspensas, selecione as células da coluna abaixo do cabeçalho, vá em **Dados → Validação de Dados**, escolha **Lista** e digite os valores aceitos, por exemplo `true,false` (ou `y,n,1,2` para `will-ship-internationally`).
+
+### Confira antes de cada envio
+
+1. Abra o arquivo final num editor de texto (não no Excel) e percorra as colunas de sim/não.
+2. Confirme que cada valor está na lista daquela coluna.
+3. Preencha todas as colunas que a aba Data Definitions marca como obrigatórias.
+
+Se você envia com o Inventory Loader, o corretor do StriveFormats verifica `will-ship-internationally` e `expedited-shipping` para você com base no guia da Amazon.
