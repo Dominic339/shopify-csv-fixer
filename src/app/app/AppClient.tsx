@@ -10,7 +10,7 @@ import { localeHref } from "@/lib/i18n/locales";
 import { useFixer, type AppStrings } from "./fixer/useFixer";
 import { FormatPicker } from "./fixer/FormatPicker";
 import { UploadPanel } from "./fixer/UploadPanel";
-import { ResultsPanel } from "./fixer/ResultsPanel";
+import { ResultsPanel, formatPassTime } from "./fixer/ResultsPanel";
 import { IssuesPanel } from "./fixer/IssuesPanel";
 import { WorkspaceBar } from "./fixer/WorkspaceBar";
 import { muted } from "./fixer/ui";
@@ -21,6 +21,8 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
   const issuesRef = useRef<HTMLElement>(null);
   const jumpToIssues = () => issuesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const hasFile = f.rows.length > 0 || f.issuesForTable.length > 0;
+  const plan = f.subStatus?.plan ?? "free";
+  const onPassOnly = !!f.passExpiresAt && plan === "free";
 
   return (
     <>
@@ -31,10 +33,19 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
             <p className={`mt-2 text-base ${muted}`}>{t.subtitle}</p>
           </div>
           <div className="shrink-0 self-start rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm">
-            <span className="font-semibold text-[var(--text)]">
-              {f.isUnlimited ? t.unlimitedExports : fmt(t.exportsLeft, { left: f.left ?? 0, limit: f.limit ?? 0 })}
-            </span>
-            <span className={`ml-2 ${muted}`}>· {fmt(t.planLabel, { plan: t[`plan_${f.subStatus?.plan ?? "free"}`] })}</span>
+            {onPassOnly ? (
+              // A 24-hour pass on the free plan: say when it ends rather than "Plan: Free".
+              <span className="font-semibold text-[var(--secondary-text)]">
+                {fmt(t.passActive, { time: formatPassTime(f.passExpiresAt!, f.currentLocale) }).replace(/[.。]$/, "")}
+              </span>
+            ) : (
+              <>
+                <span className="font-semibold text-[var(--text)]">
+                  {f.isUnlimited ? t.unlimitedExports : fmt(t.exportsLeft, { left: f.left ?? 0, limit: f.limit ?? 0 })}
+                </span>
+                <span className={`ml-2 ${muted}`}>· {fmt(t.planLabel, { plan: t[`plan_${plan}`] })}</span>
+              </>
+            )}
           </div>
         </header>
 
