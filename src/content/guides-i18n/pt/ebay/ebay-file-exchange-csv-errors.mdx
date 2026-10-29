@@ -1,0 +1,204 @@
+---
+title: "Erros de CSV no eBay File Exchange: causas e soluções"
+description: "Corrija os erros de CSV mais comuns nos envios em massa do eBay pelo Seller Hub Reports e em arquivos do File Exchange: a linha INFO, valores de Action inválidos, IDs de categoria, tamanho do título, IDs de condição, durações, preços e URLs de imagem."
+keywords: ["erros csv ebay file exchange", "erros importacao csv ebay", "erros file exchange ebay", "corrigir csv ebay", "erro envio csv ebay", "erros csv anuncios ebay", "erros envio em massa ebay", "seller hub reports envio"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Como o envio em massa do eBay confere um CSV e por que algumas linhas falham"
+  - "Por que a linha INFO no topo dos modelos do eBay precisa ficar"
+  - "Os valores permitidos para Action, ConditionID e Duration"
+  - "Como corrigir erros de tamanho do título, categoria, preço, URL de imagem e número do item"
+  - "Como testar um lote pequeno antes de enviar todo o estoque"
+bestFor: "Vendedores do eBay que enviam anúncios em massa pelo Seller Hub Reports ou em arquivos CSV no formato do File Exchange"
+timeToComplete: "12 minutos"
+---
+
+## Como o eBay confere um envio em massa
+
+Os envios em massa de anúncios no eBay passam hoje por **Seller Hub → Relatórios → Envios**, onde você também baixa os modelos CSV no formato do File Exchange. Quando você envia um arquivo, o eBay confere:
+
+1. **A estrutura do arquivo**: a linha INFO no topo e a linha de cabeçalhos logo abaixo
+2. **A coluna Action**: o que fazer com cada linha de anúncio
+3. **Tipos de dados**: preços como números, quantidades como números inteiros, URLs como endereços web completos
+4. **Regras de negócio**: IDs de categoria válidos, IDs de condição permitidos na categoria, durações válidas
+5. **Regras de conteúdo**: tamanho do título e políticas de anúncios
+
+Depois do processamento, a página Envios disponibiliza um arquivo de resultados. Ele mostra quais linhas deram certo, quais falharam e por quê. Confira sempre, porque o eBay costuma importar algumas linhas e rejeitar outras.
+
+---
+
+## Erro: modelo não reconhecido (a linha INFO)
+
+Os modelos atuais do eBay começam com uma linha como esta, acima dos cabeçalhos das colunas:
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+O eBay precisa dessa primeira linha INFO no envio. As outras linhas que começam com `#INFO` ou `INFO` (instruções do modelo) podem ficar ou sair.
+
+**Solução:**
+- Não apague a primeira linha do modelo, mesmo que ela pareça uma anotação.
+- Se você usa o Excel no Mac, confira se não há nada antes de `#INFO` na primeira linha. O Excel pode colocar caracteres invisíveis ali, e aí o eBay rejeita o arquivo. Abra o CSV num editor de texto para vê-los.
+
+O StriveFormats lê a linha de cabeçalhos abaixo das linhas INFO e as devolve ao topo no download, sem os caracteres estranhos.
+
+---
+
+## Erro: Action ausente ou inválida
+
+Toda linha de anúncio precisa de uma Action. A exceção são as linhas de variação (`Relationship` = `Variation`), que ficam abaixo do anúncio principal e deixam Action em branco.
+
+Valores aceitos:
+
+| Valor | Significado |
+|---|---|
+| `Add` | Criar um anúncio novo |
+| `VerifyAdd` | Conferir um anúncio novo e ver as tarifas sem publicá-lo |
+| `Revise` | Alterar campos de um anúncio ativo |
+| `Relist` | Republicar um anúncio encerrado |
+| `End` | Encerrar um anúncio ativo (com um `EndCode`) |
+| `Status` | Mudar o status de um item vendido, por exemplo marcá-lo como enviado |
+| `AddToItemDescription` | Acrescentar texto ao fim da descrição de um anúncio ativo |
+| `Draft` | Salvar um anúncio nos rascunhos (só no modelo de rascunhos) |
+
+**Solução:** toda linha de anúncio deve usar um dos valores acima, escrito exatamente assim. O eBay compara de forma exata, então `verifyadd` não é o mesmo que `VerifyAdd`.
+
+---
+
+## Erro: categoria inválida
+
+**Causa:** o valor de `Category` (ou `Category ID`) não é um ID de categoria numérico válido do eBay, ou a categoria foi descontinuada.
+
+Os IDs de categoria do eBay são números (por exemplo, `15687` para camisetas masculinas no eBay dos EUA). Eles mudam de vez em quando, à medida que o eBay reorganiza as categorias.
+
+**Solução:**
+- Procure o ID de categoria certo na árvore de categorias do eBay
+- Não copie IDs de categoria de modelos antigos sem conferir se ainda estão ativos
+- Algumas categorias exigem especificações extras, então veja o que a categoria precisa
+
+Em [eBay CategoryID: o que é e como configurar](/guides/ebay/categoryid-and-file-exchange) há formas de encontrar os IDs.
+
+---
+
+## Erro: título longo demais
+
+**Causa:** o valor de `Title` passa de 80 caracteres, o limite do eBay para títulos de anúncio.
+
+**Solução:**
+
+No Excel, adicione uma coluna auxiliar: `=LEN(B2)` (troque B2 pela célula da sua coluna de título; no Excel em português a função se chama `NÚM.CARACT`). Filtre as linhas com mais de 80 caracteres e encurte esses títulos.
+
+Em Python:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## Erro: ID de condição inválido
+
+**Causa:** o valor de `ConditionID` não é um ID de condição válido do eBay, ou não é permitido na categoria do item.
+
+IDs de condição comuns, da tabela de condições do eBay:
+
+| ID | Condição | Observações |
+|---|---|---|
+| `1000` | New | Também aparece como Brand New, New with tags ou New with box |
+| `1500` | New other | Novo sem etiqueta ou caixa, caixa aberta |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | Só para vendedores aprovados em algumas categorias |
+| `2500` | Seller refurbished | Substituído pelos níveis de recondicionado abaixo em algumas categorias |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | Só para vendedores aprovados em algumas categorias |
+| `2750` | Like New | |
+| `3000` | Used | Também aparece como Pre-owned |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | Só em categorias onde faz sentido |
+
+Os IDs que você pode usar dependem da categoria, e os nomes mostrados aos compradores também variam por categoria.
+
+**Solução:** troque os nomes de condição pelo ID numérico. O StriveFormats converte para você os nomes de condição do eBay (como "Used" ou "Open box") nos IDs.
+
+---
+
+## Erro: StartPrice inválido
+
+**Causa:** o campo `StartPrice` tem um símbolo de moeda (`$9.99`), usa vírgula decimal (`9,99`), é negativo ou está em branco.
+
+**Solução:**
+- Remova os símbolos de moeda com Localizar e substituir
+- Troque as vírgulas decimais por pontos
+- Garanta que todo preço seja um número decimal positivo
+- Formate a coluna como Número no Excel antes de salvar
+
+---
+
+## Erro: Duration inválida
+
+**Causa:** o campo `Duration` tem um valor que o eBay não aceita para o formato do anúncio.
+
+**Valores aceitos:**
+
+| Formato | Duration |
+|---|---|
+| `FixedPrice` | `GTC` (Good 'Til Cancelled). Anúncios de preço fixo não aceitam mais um número de dias |
+| `Auction` | `Days_1`, `Days_3`, `Days_5`, `Days_7` ou `Days_10` |
+
+**Solução:** use `GTC` para anúncios de preço fixo e um dos valores `Days_` para leilões.
+
+---
+
+## Erro: URL da imagem inacessível
+
+**Causa:** o campo `PicURL` tem uma URL que o eBay não consegue baixar: a imagem está atrás de um login, no seu próprio computador ou atrás de um redirecionamento.
+
+O Seller Hub Reports do eBay aceita até **24 imagens** por anúncio em `PicURL`, separadas por uma barra vertical `|`. Cada URL pode ter até 2048 caracteres, e os espaços numa URL devem ser escritos como `%20`.
+
+**Solução:**
+- Abra cada URL numa janela anônima do navegador. Ela deve mostrar a imagem direto, sem login
+- Use URLs completas com `https://`
+- Troque os espaços por `%20` (o StriveFormats faz isso para você)
+- Evite encurtadores de URL e serviços de redirecionamento
+
+---
+
+## Erro: o número do item ou o UPC aparece como 1.23457E+11
+
+**Causa:** o Excel transformou um número longo (um `ItemID` ou um código de barras em `P:UPC`) em notação científica. Os dígitos depois dos primeiros se perderam, então o eBay não encontra o anúncio nem consegue identificar o produto.
+
+**Solução:** digite de novo os números completos a partir dos seus registros. A ajuda do eBay recomenda formatar as colunas de número do item como Número com 0 casas decimais antes de salvar. O formato Texto também funciona. O StriveFormats aponta cada célula onde isso aconteceu.
+
+---
+
+## Erro: quantidade inválida
+
+**Causa:** `Quantity` está em branco, tem casas decimais (por exemplo `1.5`) ou é negativa.
+
+**Solução:** use números inteiros. Anúncios novos devem ter quantidade de pelo menos 1. Em anúncios com variações, coloque a quantidade de cada variação na própria linha, não na linha principal.
+
+---
+
+## Teste antes de enviar tudo
+
+1. Copie 2 ou 3 linhas para um arquivo novo, mantendo a linha INFO e a linha de cabeçalhos.
+2. Mude a Action delas para `VerifyAdd` e envie. O eBay confere as linhas e mostra as tarifas sem publicar nada.
+3. Corrija o que o arquivo de resultados apontar e volte a Action para `Add` no arquivo completo.
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu CSV do eBay ao StriveFormats. O validador confere a coluna Action, os IDs de categoria, os preços, o tamanho dos títulos, os IDs de condição, as durações, as URLs de imagem e as linhas de variação, e aponta as linhas e células exatas com problemas.
+
+[Abrir o corretor de CSV do eBay](/app?preset=ebay_listings) | [Ver o modelo do eBay](/presets/ebay_listings)

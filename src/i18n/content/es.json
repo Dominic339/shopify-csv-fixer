@@ -10,11 +10,11 @@
 },
 "ebay/categoryid-and-file-exchange": {
 "title": "CategoryID de eBay y File Exchange: qué es y cómo configurarlo",
-"description": "Entiende qué es el campo CategoryID de eBay, por qué es obligatorio en las cargas de File Exchange, cómo encontrar el ID de categoría correcto para tus productos y cómo rellenarlo en bloque en todo tu catálogo."
+"description": "Qué es el campo CategoryID de eBay, por qué es obligatorio en las cargas de File Exchange, cómo encontrar el ID de categoría correcto para tus productos y cómo rellenarlo en bloque en todo tu catálogo."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Errores CSV de eBay File Exchange: causas y soluciones",
-"description": "Corrige los errores CSV habituales de eBay File Exchange: valores de Action no válidos, problemas con el ID de categoría, títulos demasiado largos, códigos de estado, formato de precios y URL de imágenes."
+"description": "Corrige los errores CSV más comunes en las cargas masivas de eBay con Seller Hub Reports y archivos de File Exchange: la línea INFO, valores de Action no válidos, ID de categoría, longitud del título, ID de estado, duraciones, precios y URL de imágenes."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Guía de la plantilla CSV de Etsy: campos, formatos y errores comunes",

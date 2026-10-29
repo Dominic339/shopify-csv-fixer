@@ -1,0 +1,136 @@
+---
+title: "Guide du modèle CSV Etsy : champs, formats et erreurs courantes"
+description: "Ce que contient l'export CSV des annonces Etsy, ce qu'Etsy permet ou non d'en faire, les limites de chaque champ (titres, tags, quantité) et comment corriger les erreurs introduites par les tableurs."
+keywords: ["guide modèle csv etsy", "csv annonces etsy", "champs csv etsy", "import csv etsy", "envoi groupé csv etsy", "format csv etsy", "modèle etsy expliqué", "télécharger annonces etsy csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Comment télécharger vos annonces Etsy en CSV et ce que contient le fichier"
+  - "Pourquoi Etsy n'a pas d'import CSV et à quoi les vendeurs utilisent le fichier"
+  - "Les limites des titres, tags, matériaux et quantités"
+  - "Comment bien formater les prix, les tags et les URL d'images"
+  - "Comment corriger les erreurs introduites par les modifications dans un tableur"
+bestFor: "Vendeurs Etsy qui modifient, vérifient ou migrent leurs annonces dans un tableur, ou qui préparent un fichier pour une application de mise en ligne groupée"
+timeToComplete: "9 minutes"
+---
+
+## Ce qu'est le CSV d'annonces Etsy (et ce qu'il n'est pas)
+
+Etsy vous permet de télécharger vos annonces actives en CSV : ouvrez **Gestionnaire de boutique → Paramètres → Options → Télécharger les données** et choisissez le téléchargement CSV de vos annonces. D'après l'aide d'Etsy, le fichier contient pour chaque annonce :
+
+- Le titre
+- La description
+- Le prix et le code de devise
+- La quantité
+- Les tags
+- Les matériaux
+- Les URL des images
+- Le SKU (si vous en avez ajouté à vos annonces)
+
+**Etsy n'a pas d'import CSV pour les annonces.** Modifier le fichier ne change rien dans votre boutique, et Etsy ne propose aucun moyen de le réimporter. Les vendeurs utilisent l'export pour :
+
+- Vérifier et nettoyer les données des annonces dans un tableur
+- Garder une sauvegarde de leur catalogue
+- Transférer leurs annonces vers une autre plateforme, comme Shopify ou WooCommerce
+- Alimenter une application tierce de mise en ligne groupée qui passe par l'API d'Etsy
+
+Pour des modifications groupées dans Etsy même, utilisez les options de modification groupée de la page Annonces du Gestionnaire de boutique.
+
+---
+
+## Les colonnes de l'export
+
+Dans le fichier, chaque champ a sa colonne, avec des en-têtes comme `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` et `SKU`. Chaque photo a sa propre colonne (`IMAGE1`, `IMAGE2`, etc.) contenant l'URL de l'image.
+
+| Colonne | Contenu | Format |
+|---|---|---|
+| `TITLE` | Titre de l'annonce | Jusqu'à 140 caractères |
+| `DESCRIPTION` | Description de l'annonce | Texte brut |
+| `PRICE` | Prix dans la devise de votre boutique | Nombre simple, comme `14.99` |
+| `CURRENCY_CODE` | Devise de la boutique | Code à trois lettres, comme `USD` |
+| `QUANTITY` | Quantité disponible | Nombre entier, jusqu'à 999 |
+| `TAGS` | Tags de recherche | Séparés par des virgules, jusqu'à 13 |
+| `MATERIALS` | Matériaux | Séparés par des virgules, jusqu'à 13 |
+| `IMAGE1`, `IMAGE2`, ... | URL des photos | URL complètes en `https://` |
+| `SKU` | Votre SKU | Texte |
+
+Gardez les noms de colonnes tels quels si un outil doit relire le fichier.
+
+---
+
+## Les limites de chaque champ
+
+Ce sont les limites appliquées par l'éditeur d'annonces d'Etsy. Un fichier qui les dépasse ne peut pas redevenir des annonces valides, quel que soit l'outil utilisé :
+
+- **Titre :** 140 caractères au maximum. La recherche Etsy n'en affiche que le début, alors placez les mots les plus importants en premier.
+- **Tags :** jusqu'à 13 par annonce, de 20 caractères au maximum chacun, espaces compris. Tenez-vous-en aux lettres, chiffres et espaces ; Etsy refuse la plupart des symboles dans les tags.
+- **Matériaux :** jusqu'à 13 par annonce.
+- **Quantité :** un nombre entier jusqu'à 999 par annonce.
+- **Prix :** un nombre simple dans la devise de votre boutique, sans symbole monétaire.
+
+---
+
+## Formater les prix
+
+- Utilisez un nombre décimal simple : `14.99`
+- Pas de symbole monétaire (`$`, `€`, `£`)
+- Utilisez un point (et non une virgule) comme séparateur décimal, même si votre tableur utilise des virgules
+- La devise est fixée par votre boutique ; `CURRENCY_CODE` ne fait que l'indiquer
+
+---
+
+## Tags
+
+Les tags tiennent dans une seule cellule, séparés par des virgules :
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Comme la cellule contient des virgules, elle doit être entourée de guillemets doubles dans le CSV. Les tableurs le font pour vous à l'enregistrement. Points à surveiller :
+
+- Plus de 13 tags dans la cellule
+- Un tag de plus de 20 caractères
+- Des virgules doublées ou des espaces autour des virgules laissés après modification
+
+---
+
+## Les champs qu'une application de mise en ligne groupée peut demander
+
+L'export d'Etsy ne contient pas tous les réglages d'une annonce. Les applications tierces qui créent des annonces via l'API d'Etsy demandent souvent des colonnes supplémentaires : qui a fabriqué l'objet (`who_made`), quand il a été fabriqué (`when_made`), s'il s'agit de fournitures créatives (`is_supply`), le profil d'expédition et la section de la boutique. Leurs valeurs acceptées viennent de l'API d'Etsy et évoluent avec le temps (par exemple les tranches d'années de `when_made`) : utilisez donc exactement les valeurs indiquées dans le modèle de cette application.
+
+---
+
+## Problèmes courants après modification dans un tableur
+
+### Prix avec symboles ou virgules
+
+Un prix comme `$14.99` ou `14,99` n'est pas un nombre simple.
+
+**Solution :** utilisez Rechercher et remplacer pour supprimer `$`, `€` et `£`, et remplacez les virgules décimales par des points.
+
+### Titre trop long
+
+Le titre dépasse 140 caractères.
+
+**Solution :** dans Excel, ajoutez une colonne d'aide avec `=LEN(A2)` (dans Excel en français, `=NBCAR(A2)`) pour repérer les titres de plus de 140 caractères, puis raccourcissez-les.
+
+### Trop de tags, ou tags trop longs
+
+Une annonce a plus de 13 tags, ou un tag dépasse 20 caractères.
+
+**Solution :** comptez les tags (virgules + 1) et limitez chaque tag à 20 caractères.
+
+### Liens d'images cassés
+
+Une cellule d'image contient par exemple `mug.jpg` ou un lien sans `https://`.
+
+**Solution :** utilisez l'URL complète de l'image, qui commence par `https://`.
+
+---
+
+## Corrigez-le automatiquement avec StriveFormats
+
+Importez votre CSV d'annonces Etsy dans StriveFormats. Il normalise les prix, les codes de devise et les listes de tags, et signale les titres trop longs, l'excès de tags, les tags de plus de 20 caractères, les quantités supérieures à 999, les URL d'images cassées et les SKU en double, avec la ligne exacte de chacun.
+
+[Ouvrir le correcteur CSV Etsy](/app?preset=etsy_listings) | [Voir le modèle Etsy](/presets/etsy_listings)

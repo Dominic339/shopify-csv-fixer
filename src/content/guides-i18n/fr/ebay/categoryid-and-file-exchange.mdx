@@ -1,0 +1,156 @@
+---
+title: "CategoryID eBay et File Exchange : ce que c'est et comment le définir"
+description: "Ce qu'est le champ CategoryID d'eBay, pourquoi il est obligatoire dans les envois File Exchange, comment trouver le bon ID de catégorie pour vos produits et comment le renseigner en masse dans tout votre catalogue."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "id catégorie ebay", "import csv ebay", "catégorie fichier plat ebay", "envoi groupé annonces ebay", "trouver categoryid ebay"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Ce que représente la colonne CategoryID dans les fichiers CSV File Exchange"
+  - "Pourquoi un CategoryID absent ou faux fait échouer les annonces"
+  - "Comment trouver le bon CategoryID pour votre type de produit"
+  - "Comment renseigner CategoryID sur des centaines de lignes efficacement"
+  - "Des conseils pour vérifier la catégorie avant l'envoi"
+bestFor: "Vendeurs eBay qui utilisent File Exchange ou d'autres outils d'envoi groupé et doivent attribuer des ID de catégorie à des annonces nouvelles ou existantes"
+timeToComplete: "10 minutes"
+---
+
+## Qu'est-ce que le CategoryID ?
+
+La colonne `Category` (ou `CategoryID` selon la version du modèle File Exchange) du CSV d'envoi groupé d'eBay est un **identifiant numérique** de la catégorie eBay à laquelle appartient votre objet. Toute annonce active sur eBay doit avoir une catégorie, et eBay utilise cet ID pour déterminer :
+
+- Où votre annonce apparaît quand on parcourt les catégories.
+- Quelles caractéristiques de l'objet (champs obligatoires) s'appliquent à votre annonce.
+- Dans quelles recherches d'acheteurs votre objet ressort.
+
+Un CategoryID absent ou faux est l'une des raisons les plus fréquentes pour lesquelles les envois File Exchange échouent complètement ou produisent des annonces aux caractéristiques incomplètes.
+
+---
+
+## CategoryID ou chemin de catégorie
+
+Le CSV attend un **nombre** (le CategoryID), pas le chemin lisible de la catégorie. Par exemple :
+
+| Chemin de catégorie | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+Vous ne pouvez pas mettre le texte du chemin dans le CSV. Il faut l'ID numérique.
+
+---
+
+## Pourquoi le CategoryID compte pour les caractéristiques
+
+Le système de caractéristiques d'eBay (marque, taille, couleur, matière, etc.) dépend de la catégorie. Choisir la mauvaise catégorie signifie que :
+- Les caractéristiques obligatoires de la bonne catégorie ne sont ni demandées ni vérifiées.
+- Votre annonce peut être reléguée dans les résultats de recherche si des caractéristiques obligatoires manquent.
+- Les acheteurs qui filtrent par caractéristiques dans votre catégorie ne trouveront pas votre annonce.
+
+Attribuez toujours la catégorie la plus précise possible (la catégorie finale qui décrit exactement votre produit), pas une grande catégorie parente.
+
+---
+
+## Comment trouver le bon CategoryID
+
+### Méthode 1 : les suggestions de catégorie d'eBay (Seller Hub)
+
+1. Dans Seller Hub, créez à la main un brouillon d'annonce pour l'un de vos produits.
+2. À l'étape « Catégorie », utilisez la zone de recherche pour trouver votre type de produit.
+3. eBay propose des catégories à partir de vos mots-clés.
+4. Choisissez la catégorie la plus précise qui convient.
+5. Notez le nom de la catégorie et servez-vous-en pour trouver l'ID avec l'une des méthodes ci-dessous.
+
+### Méthode 2 : la référence des ID de catégorie d'eBay
+
+L'aide de Seller Hub Reports renvoie vers une référence des noms et ID de catégorie pour les envois groupés :
+
+1. Allez dans **Seller Hub → Rapports → Envois** et ouvrez l'aide sur les modèles d'envoi.
+2. Trouvez la référence des noms et ID de catégorie et cherchez votre type de produit.
+3. Les développeurs peuvent aussi récupérer l'arborescence complète des catégories via les API d'eBay (par exemple la Taxonomy API).
+
+### Méthode 3 : regardez l'URL d'une annonce existante
+
+Si vous avez une annonce, la vôtre ou celle d'un concurrent, dans la même catégorie :
+
+1. Ouvrez la page de la catégorie sur eBay (cliquez sur le nom de la catégorie dans le fil d'Ariane au-dessus d'une annonce).
+2. Les pages de catégorie ont des URL comme `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`.
+3. Le nombre qui suit le nom de la catégorie (`11483`, jeans homme) est l'ID de catégorie.
+
+### Méthode 4 : téléchargez un modèle de catégorie
+
+Dans **Seller Hub → Rapports → Envois**, eBay vous permet de télécharger un modèle d'annonce pour une catégorie précise. L'ID de catégorie choisi à cet endroit est celui à utiliser dans votre fichier.
+
+---
+
+## Le CategoryID dans le CSV File Exchange
+
+La colonne s'appelle `*Category` dans les modèles d'annonces d'eBay (l'astérisque signale une colonne obligatoire) et `Category ID` dans le modèle de brouillons.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Règles :**
+- La valeur doit être un entier positif correspondant à une catégorie finale eBay valide.
+- Les catégories parentes ou intermédiaires ne sont généralement pas acceptées. Utilisez la catégorie la plus précise.
+- La catégorie doit être valable pour votre site eBay (les catégories américaines diffèrent de celles du Royaume-Uni, de l'Allemagne, de l'Australie, etc.).
+
+---
+
+## Renseigner le CategoryID en masse
+
+Pour les grands catalogues où la plupart des produits relèvent de quelques catégories :
+
+### Dans Excel : attribuez les catégories avec SI ou RECHERCHEV
+
+Si vous avez une colonne d'aide avec un code de type de produit :
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+Ou créez une table de référence (type de produit → CategoryID) et utilisez RECHERCHEV :
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+Dans Excel en français, les fonctions s'appellent `SI` et `RECHERCHEV`, et les arguments sont séparés par des points-virgules.
+
+### Dans Excel : recopiez vers le bas pour les groupes d'une même catégorie
+
+1. Triez votre liste de produits par type de produit.
+2. Saisissez le CategoryID du premier produit de chaque groupe.
+3. Sélectionnez de cette cellule jusqu'au dernier produit du groupe.
+4. Appuyez sur **Ctrl+B** (ou **Ctrl+D** dans Excel en anglais) pour recopier vers le bas.
+
+### Avec un filtre
+
+1. Filtrez votre catalogue sur la colonne du type de produit.
+2. Sélectionnez toutes les cellules visibles de la colonne CategoryID.
+3. Tapez le CategoryID et appuyez sur **Ctrl+Entrée** pour remplir toutes les cellules sélectionnées d'un coup.
+
+---
+
+## Vérifier le CategoryID avant l'envoi
+
+Un CategoryID faux crée des annonces dans la mauvaise catégorie. C'est une erreur fréquente et difficile à repérer :
+
+1. **Contrôle ponctuel :** prenez 5 valeurs de CategoryID dans votre CSV et cherchez-les sur eBay pour vérifier qu'elles correspondent au chemin de catégorie attendu.
+2. **Comparez avec votre référence des types de produits :** tenez une table simple type de produit → CategoryID et relisez-la quand vous ajoutez de nouveaux types.
+3. **Envoi de test :** envoyez d'abord un fichier de test de 1 à 3 lignes. Regardez les annonces créées et vérifiez qu'elles apparaissent dans la bonne catégorie.
+4. **Consultez le fichier de résultats d'eBay :** après chaque envoi, la page Envois de Seller Hub Reports propose un fichier de résultats. Cherchez-y les erreurs de lignes liées à des ID de catégorie non valides.
+
+---
+
+## Erreurs fréquentes
+
+| Message d'erreur | Cause probable |
+|---|---|
+| "Category is required" | La colonne CategoryID est vide |
+| "Invalid category" | L'ID n'est pas une catégorie finale eBay valide |
+| "Category not allowed for this listing type" | Restriction de la catégorie pour le prix fixe ou les enchères |
+| Erreurs de caractéristiques après l'envoi | Mauvaise catégorie, donc les caractéristiques ne correspondent pas à vos objets |

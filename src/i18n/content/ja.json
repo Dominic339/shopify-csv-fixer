@@ -9,12 +9,12 @@
 "description": "Amazon のはい/いいえ列で使える値はファイルによって異なります。カテゴリテンプレートは Valid Values タブの値（多くは true/false）、Inventory Loader は y/n または 1/2 を使います。これらの列を確認・修正・保護する方法を解説します。"
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "eBay の CategoryID と File Exchange：概要と設定方法",
-"description": "eBay の CategoryID 項目とは何か、File Exchange のアップロードでなぜ必須なのか、商品に合ったカテゴリ ID の見つけ方、カタログ全体に一括で入力する方法を解説します。"
+"title": "eBay の CategoryID と File Exchange：意味と設定方法",
+"description": "eBay の CategoryID 項目とは何か、File Exchange のアップロードで必須な理由、商品に合ったカテゴリ ID の探し方、カタログ全体にまとめて入力する方法を解説します。"
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay File Exchange の CSV エラー：原因と対処法",
-"description": "eBay File Exchange の CSV でよくあるエラーを解決します。無効な Action の値、カテゴリ ID の問題、タイトルの文字数超過、状態コード、価格の書式、画像 URL の問題などを扱います。"
+"description": "Seller Hub Reports と File Exchange 形式のファイルによる eBay 一括アップロードで起きる CSV エラーを解決します。INFO 行、無効な Action の値、カテゴリ ID、タイトルの長さ、商品の状態 ID、出品期間、価格、画像 URL を扱います。"
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Etsy CSV テンプレートガイド：項目、書式、よくあるエラー",

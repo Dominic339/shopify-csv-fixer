@@ -9,12 +9,12 @@
 "description": "Какие значения принимают колонки да/нет в Amazon, зависит от файла: шаблоны категорий используют значения со вкладки Valid Values (обычно true/false), а Inventory Loader использует y/n или 1/2. Узнайте, как проверять, исправлять и защищать эти колонки."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "CategoryID в eBay и File Exchange: что это и как задать",
-"description": "Разберитесь, что такое поле CategoryID в eBay, почему оно обязательно при загрузке через File Exchange, как найти нужный ID категории для своих товаров и как массово заполнить его по всему каталогу."
+"title": "CategoryID в eBay и File Exchange: что это и как его задать",
+"description": "Что такое поле CategoryID в eBay, почему оно обязательно при загрузке через File Exchange, как найти правильный ID категории для товаров и как заполнить его сразу для всего каталога."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "Ошибки CSV в eBay File Exchange: причины и решения",
-"description": "Исправьте частые ошибки CSV в eBay File Exchange: недопустимые значения Action, проблемы с ID категорий, слишком длинные названия, коды состояния, формат цен и URL изображений."
+"description": "Исправьте частые ошибки CSV при массовой загрузке на eBay через Seller Hub Reports и файлы File Exchange: строка INFO, недопустимые значения Action, ID категорий, длина заголовка, ID состояния, сроки, цены и URL изображений."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Руководство по шаблону CSV Etsy: поля, форматы и частые ошибки",

@@ -1,0 +1,156 @@
+---
+title: "eBay CategoryID und File Exchange: was sie ist und wie du sie setzt"
+description: "Was das Feld CategoryID von eBay bedeutet, warum es bei File-Exchange-Uploads Pflicht ist, wie du die richtige Kategorie-ID für deine Produkte findest und wie du sie für den ganzen Katalog in einem Rutsch einträgst."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "ebay kategorie id", "ebay csv import", "ebay flatfile kategorie", "ebay massenupload angebote", "ebay categoryid suchen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wofür die Spalte CategoryID in File-Exchange-CSV-Dateien steht"
+  - "Warum eine fehlende oder falsche CategoryID Angebote scheitern lässt"
+  - "Wie du die richtige CategoryID für deinen Produkttyp findest"
+  - "Wie du CategoryID effizient in Hunderten von Zeilen einträgst"
+  - "Tipps, um die Kategoriewahl vor dem Upload zu prüfen"
+bestFor: "eBay-Verkäufer, die File Exchange oder andere Massenupload-Tools nutzen und neuen oder bestehenden Angeboten Kategorie-IDs zuweisen müssen"
+timeToComplete: "10 Minuten"
+---
+
+## Was ist die CategoryID?
+
+Die Spalte `Category` (je nach Version der File-Exchange-Vorlage auch `CategoryID`) in eBays CSV für Massenuploads ist eine **numerische Kennung** der eBay-Kategorie, zu der dein Artikel gehört. Jedes aktive Angebot auf eBay muss einer Kategorie zugeordnet sein, und eBay bestimmt anhand dieser ID:
+
+- Wo dein Angebot beim Stöbern in Kategorien erscheint.
+- Welche Artikelmerkmale (Pflichtfelder) für dein Angebot gelten.
+- Bei welchen Suchen von Käufern dein Artikel auftaucht.
+
+Eine fehlende oder falsche CategoryID gehört zu den häufigsten Gründen, warum File-Exchange-Uploads ganz scheitern oder Angebote mit unvollständigen Artikelmerkmalen entstehen.
+
+---
+
+## CategoryID oder Kategoriepfad
+
+Die CSV braucht eine **Zahl** (die CategoryID), nicht den lesbaren Kategoriepfad. Zum Beispiel:
+
+| Kategoriepfad | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+Den Pfadtext kannst du in der CSV nicht verwenden. Es muss die numerische ID sein.
+
+---
+
+## Warum die CategoryID für Artikelmerkmale wichtig ist
+
+eBays System der Artikelmerkmale (Marke, Größe, Farbe, Material usw.) hängt von der Kategorie ab. Eine falsche Kategorie bedeutet:
+- Die Pflichtmerkmale der richtigen Kategorie werden weder abgefragt noch geprüft.
+- Dein Angebot wird in den Suchergebnissen womöglich zurückgestuft, wenn Pflichtmerkmale fehlen.
+- Käufer, die in deiner Kategorie nach Merkmalen filtern, finden dein Angebot nicht.
+
+Weise immer die spezifischste mögliche Kategorie zu (die unterste Kategorie, die dein Produkt genau beschreibt), keine breite übergeordnete Kategorie.
+
+---
+
+## So findest du die richtige CategoryID
+
+### Methode 1: eBays Kategorievorschläge (Seller Hub)
+
+1. Lege im eBay Seller Hub für eines deiner Produkte von Hand einen Angebotsentwurf an.
+2. Suche im Schritt „Kategorie“ über das Suchfeld nach deinem Produkttyp.
+3. eBay schlägt anhand deiner Suchbegriffe Kategorien vor.
+4. Wähle die spezifischste passende Kategorie.
+5. Notiere den Kategorienamen und suche damit die ID mit einer der Methoden unten.
+
+### Methode 2: eBays Referenz der Kategorie-IDs
+
+Die Hilfe zu Seller Hub Reports verlinkt eine Referenz mit Kategorienamen und IDs für Massenuploads:
+
+1. Gehe zu **Seller Hub → Berichte → Uploads** und öffne die Hilfe zu den Upload-Vorlagen.
+2. Suche die Referenz mit Kategorienamen und IDs und schlage deinen Produkttyp nach.
+3. Entwickler können den vollständigen Kategoriebaum auch über eBays APIs abrufen (zum Beispiel die Taxonomy API).
+
+### Methode 3: Sieh dir die URL eines erfolgreichen Angebots an
+
+Wenn du ein bestehendes Angebot oder das eines Mitbewerbers in derselben Kategorie hast:
+
+1. Öffne die Kategorieseite auf eBay (klicke auf den Kategorienamen in der Navigationsleiste über einem Angebot).
+2. Kategorieseiten haben URLs wie `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`.
+3. Die Zahl nach dem Kategorienamen (`11483`, Herrenjeans) ist die Kategorie-ID.
+
+### Methode 4: Eine Kategorievorlage herunterladen
+
+Unter **Seller Hub → Berichte → Uploads** kannst du eine Angebotsvorlage für eine bestimmte Kategorie herunterladen. Die Kategorie-ID, die du dort auswählst, ist die richtige für deine Datei.
+
+---
+
+## Die CategoryID in der File-Exchange-CSV
+
+In eBays Angebotsvorlagen heißt die Spalte `*Category` (das Sternchen kennzeichnet eine Pflichtspalte), in der Entwurfsvorlage `Category ID`.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Regeln:**
+- Der Wert muss eine positive ganze Zahl sein, die zu einer gültigen untersten eBay-Kategorie gehört.
+- Übergeordnete Kategorien und Zwischenkategorien werden in der Regel nicht akzeptiert. Verwende die spezifischste (unterste) Kategorie.
+- Die Kategorie muss für deine eBay-Website gelten (US-Kategorien unterscheiden sich von UK, DE, AU usw.).
+
+---
+
+## CategoryID in großen Mengen eintragen
+
+Für große Kataloge, in denen die meisten Produkte in wenige Kategorien fallen:
+
+### In Excel: Kategorien mit WENN oder SVERWEIS zuweisen
+
+Wenn du eine Hilfsspalte mit einem Produkttyp-Code hast:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+Oder lege eine Referenztabelle an (Produkttyp → CategoryID) und nutze SVERWEIS:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+In deutschem Excel heißen die Funktionen `WENN` und `SVERWEIS`, und Argumente werden durch Semikolons getrennt.
+
+### In Excel: Gruppen mit gleicher Kategorie nach unten ausfüllen
+
+1. Sortiere deine Produktliste nach Produkttyp.
+2. Trage die CategoryID beim ersten Produkt jeder Gruppe ein.
+3. Markiere von dieser Zelle bis zum letzten Produkt der Gruppe.
+4. Fülle mit **Strg+U** nach unten aus (in englischem Excel **Ctrl+D**).
+
+### Mit einem Filter
+
+1. Filtere deinen Katalog nach der Spalte Produkttyp.
+2. Markiere alle sichtbaren Zellen in der Spalte CategoryID.
+3. Gib die CategoryID ein und drücke **Strg+Eingabe**, um alle markierten Zellen auf einmal zu füllen.
+
+---
+
+## Die CategoryID vor dem Upload prüfen
+
+Eine falsche CategoryID erzeugt Angebote in der falschen Kategorie. Das passiert oft und fällt schwer auf:
+
+1. **Stichprobe:** Nimm 5 CategoryID-Werte aus deiner CSV und schlage sie auf eBay nach, um zu prüfen, ob sie zum erwarteten Kategoriepfad passen.
+2. **Mit deiner Produkttyp-Referenz abgleichen:** Führe eine einfache Tabelle Produkttyp → CategoryID und prüfe sie, wenn neue Produkttypen dazukommen.
+3. **Testupload:** Lade zuerst eine Testdatei mit 1 bis 3 Zeilen hoch. Sieh dir die entstandenen Angebote an und prüfe, ob sie in der richtigen Kategorie erscheinen.
+4. **eBays Ergebnisdatei prüfen:** Nach jedem Upload gibt es auf der Seite Uploads in Seller Hub Reports eine Ergebnisdatei. Prüfe sie auf Fehler in einzelnen Zeilen, die mit ungültigen Kategorie-IDs zusammenhängen.
+
+---
+
+## Häufige Fehler
+
+| Fehlermeldung | Wahrscheinliche Ursache |
+|---|---|
+| "Category is required" | Die Spalte CategoryID ist leer |
+| "Invalid category" | Die ID ist keine gültige unterste eBay-Kategorie |
+| "Category not allowed for this listing type" | Einschränkung der Kategorie für Festpreis oder Auktion |
+| Fehler bei Artikelmerkmalen nach dem Upload | Falsche Kategorie, deshalb passen die Merkmale nicht zu deinen Artikeln |

@@ -1,0 +1,136 @@
+---
+title: "Przewodnik po szablonie CSV Etsy: pola, formaty i częste błędy"
+description: "Co zawiera eksport ofert Etsy do CSV, na co Etsy pozwala, a na co nie, jakie limity obowiązują poszczególne pola (tytuły, tagi, ilość) i jak naprawić błędy wprowadzane przez arkusze kalkulacyjne."
+keywords: ["przewodnik szablon csv etsy", "csv ofert etsy", "pola csv etsy", "import csv etsy", "masowe przesyłanie csv etsy", "format csv etsy", "szablon etsy wyjaśniony", "pobieranie ofert etsy csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Jak pobrać oferty Etsy do pliku CSV i co się w nim znajduje"
+  - "Dlaczego Etsy nie ma przesyłania CSV i do czego sprzedawcy używają tego pliku"
+  - "Limity dla tytułów, tagów, materiałów i ilości"
+  - "Jak poprawnie formatować ceny, tagi i adresy zdjęć"
+  - "Jak naprawić błędy powstałe przy edycji w arkuszu kalkulacyjnym"
+bestFor: "Sprzedawcy Etsy, którzy edytują, sprawdzają lub przenoszą oferty w arkuszu kalkulacyjnym albo przygotowują plik dla aplikacji do masowego wystawiania"
+timeToComplete: "9 minut"
+---
+
+## Czym jest plik CSV ofert Etsy (a czym nie jest)
+
+Etsy pozwala pobrać aktywne oferty w pliku CSV: otwórz **Menedżer sklepu → Ustawienia → Opcje → Pobierz dane** i wybierz pobieranie ofert w CSV. Według pomocy Etsy plik zawiera dla każdej oferty:
+
+- Tytuł
+- Opis
+- Cenę i kod waluty
+- Ilość
+- Tagi
+- Materiały
+- Adresy URL zdjęć
+- SKU (jeśli dodałeś SKU do ofert)
+
+**Etsy nie ma przesyłania ofert z pliku CSV.** Edycja pliku niczego nie zmienia w sklepie, a Etsy nie daje możliwości zaimportowania go z powrotem. Sprzedawcy używają eksportu, żeby:
+
+- Sprawdzać i porządkować dane ofert w arkuszu kalkulacyjnym
+- Mieć kopię zapasową katalogu
+- Przenieść oferty na inną platformę, np. Shopify lub WooCommerce
+- Zasilić zewnętrzną aplikację do masowego wystawiania, która korzysta z API Etsy
+
+Do masowych zmian w samym Etsy używaj opcji edycji zbiorczej na stronie Oferty w Menedżerze sklepu.
+
+---
+
+## Kolumny w eksporcie
+
+W pliku każde pole ma własną kolumnę, z nagłówkami takimi jak `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` i `SKU`. Każde zdjęcie ma osobną kolumnę (`IMAGE1`, `IMAGE2` itd.) z adresem URL obrazu.
+
+| Kolumna | Zawartość | Format |
+|---|---|---|
+| `TITLE` | Tytuł oferty | Do 140 znaków |
+| `DESCRIPTION` | Opis oferty | Zwykły tekst |
+| `PRICE` | Cena w walucie sklepu | Zwykła liczba, np. `14.99` |
+| `CURRENCY_CODE` | Waluta sklepu | Trzyliterowy kod, np. `USD` |
+| `QUANTITY` | Dostępna ilość | Liczba całkowita, do 999 |
+| `TAGS` | Tagi wyszukiwania | Rozdzielone przecinkami, do 13 |
+| `MATERIALS` | Materiały | Rozdzielone przecinkami, do 13 |
+| `IMAGE1`, `IMAGE2`, ... | Adresy zdjęć | Pełne adresy `https://` |
+| `SKU` | Twoje SKU | Tekst |
+
+Zachowaj nazwy kolumn bez zmian, jeśli jakieś narzędzie ma ponownie odczytać plik.
+
+---
+
+## Limity, których musi przestrzegać każde pole
+
+To limity, które stosuje edytor ofert Etsy. Pliku, który je przekracza, nie da się z powrotem zamienić w prawidłowe oferty, niezależnie od narzędzia:
+
+- **Tytuł:** najwyżej 140 znaków. Wyszukiwarka Etsy pokazuje tylko początek, więc najważniejsze słowa umieść na początku.
+- **Tagi:** do 13 na ofertę, każdy najwyżej 20 znaków, łącznie ze spacjami. Używaj liter, cyfr i spacji; Etsy odrzuca większość symboli w tagach.
+- **Materiały:** do 13 na ofertę.
+- **Ilość:** liczba całkowita do 999 na ofertę.
+- **Cena:** zwykła liczba w walucie sklepu, bez symbolu waluty.
+
+---
+
+## Formatowanie cen
+
+- Używaj zwykłej liczby dziesiętnej: `14.99`
+- Bez symboli walut (`$`, `€`, `£`)
+- Jako separatora dziesiętnego używaj kropki (nie przecinka), nawet jeśli arkusz używa przecinków
+- Walutę ustala sklep, a `CURRENCY_CODE` tylko ją zapisuje
+
+---
+
+## Tagi
+
+Tagi są w jednej komórce, rozdzielone przecinkami:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Ponieważ komórka zawiera przecinki, w pliku CSV musi być ujęta w podwójny cudzysłów. Arkusze kalkulacyjne robią to za ciebie przy zapisie. Na co uważać:
+
+- Więcej niż 13 tagów w komórce
+- Tag dłuższy niż 20 znaków
+- Podwójne przecinki lub spacje wokół przecinków, które zostały po edycji
+
+---
+
+## Pola, których może wymagać aplikacja do masowego wystawiania
+
+Eksport Etsy nie zawiera wszystkich ustawień oferty. Zewnętrzne aplikacje, które tworzą oferty przez API Etsy, często wymagają dodatkowych kolumn, np. kto wykonał przedmiot (`who_made`), kiedy go wykonano (`when_made`), czy to materiał rękodzielniczy (`is_supply`), profil wysyłki i sekcja sklepu. Dozwolone wartości pochodzą z API Etsy i z czasem się zmieniają (np. przedziały lat dla `when_made`), więc używaj dokładnie tych wartości, które podaje szablon danej aplikacji.
+
+---
+
+## Częste problemy po edycji w arkuszu kalkulacyjnym
+
+### Ceny z symbolami lub przecinkami
+
+Cena taka jak `$14.99` czy `14,99` nie jest zwykłą liczbą.
+
+**Rozwiązanie:** za pomocą Znajdź i zamień usuń `$`, `€` i `£`, a przecinki dziesiętne zamień na kropki.
+
+### Za długi tytuł
+
+Tytuł ma ponad 140 znaków.
+
+**Rozwiązanie:** w Excelu dodaj kolumnę pomocniczą z `=LEN(A2)` (w polskim Excelu `=DŁ(A2)`), żeby znaleźć tytuły dłuższe niż 140 znaków, i je skróć.
+
+### Za dużo tagów lub za długie tagi
+
+Oferta ma ponad 13 tagów albo któryś tag ma ponad 20 znaków.
+
+**Rozwiązanie:** policz tagi (przecinki + 1) i pilnuj, żeby każdy miał najwyżej 20 znaków.
+
+### Uszkodzone linki do zdjęć
+
+W komórce zdjęcia jest np. `mug.jpg` albo link bez `https://`.
+
+**Rozwiązanie:** użyj pełnego adresu URL zdjęcia, zaczynającego się od `https://`.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV z ofertami Etsy do StriveFormats. Ujednolica ceny, kody walut i listy tagów oraz oznacza za długie tytuły, za dużo tagów, tagi dłuższe niż 20 znaków, ilości powyżej 999, uszkodzone adresy zdjęć i zduplikowane SKU, każdy z dokładnym wierszem.
+
+[Otwórz korektor CSV dla Etsy](/app?preset=etsy_listings) | [Zobacz szablon Etsy](/presets/etsy_listings)

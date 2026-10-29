@@ -1,0 +1,156 @@
+---
+title: "CategoryID di eBay e File Exchange: cos'è e come impostarlo"
+description: "Cos'è il campo CategoryID di eBay, perché è obbligatorio nei caricamenti File Exchange, come trovare l'ID di categoria giusto per i tuoi prodotti e come compilarlo in blocco in tutto il catalogo."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "id categoria ebay", "importazione csv ebay", "categoria file flat ebay", "caricamento in blocco inserzioni ebay", "trovare categoryid ebay"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cosa rappresenta la colonna CategoryID nei file CSV di File Exchange"
+  - "Perché un CategoryID mancante o sbagliato fa fallire le inserzioni"
+  - "Come trovare il CategoryID giusto per il tuo tipo di prodotto"
+  - "Come compilare CategoryID su centinaia di righe in modo efficiente"
+  - "Consigli per verificare la categoria prima del caricamento"
+bestFor: "Venditori eBay che usano File Exchange o altri strumenti di caricamento in blocco e devono assegnare ID di categoria a inserzioni nuove o esistenti"
+timeToComplete: "10 minuti"
+---
+
+## Cos'è il CategoryID?
+
+La colonna `Category` (o `CategoryID`, a seconda della versione del modello File Exchange) nel CSV di caricamento in blocco di eBay è un **identificativo numerico** della categoria eBay a cui appartiene il tuo oggetto. Ogni inserzione attiva su eBay deve avere una categoria, ed eBay usa questo ID per stabilire:
+
+- Dove compare la tua inserzione quando si sfogliano le categorie.
+- Quali specifiche dell'oggetto (campi obbligatori) valgono per la tua inserzione.
+- In quali ricerche degli acquirenti compare il tuo oggetto.
+
+Un CategoryID mancante o sbagliato è uno dei motivi più comuni per cui i caricamenti File Exchange falliscono del tutto o creano inserzioni con specifiche incomplete.
+
+---
+
+## CategoryID o percorso della categoria
+
+Il CSV richiede un **numero** (il CategoryID), non il percorso leggibile della categoria. Per esempio:
+
+| Percorso della categoria | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+Nel CSV non puoi usare il testo del percorso. Serve l'ID numerico.
+
+---
+
+## Perché il CategoryID conta per le specifiche
+
+Il sistema di specifiche di eBay (marca, taglia, colore, materiale ecc.) dipende dalla categoria. Scegliere la categoria sbagliata significa che:
+- Le specifiche obbligatorie della categoria corretta non vengono richieste né controllate.
+- La tua inserzione può essere penalizzata nei risultati di ricerca se mancano specifiche obbligatorie.
+- Gli acquirenti che filtrano per specifiche nella tua categoria non troveranno la tua inserzione.
+
+Assegna sempre la categoria più specifica possibile (la categoria finale che descrive esattamente il prodotto), non una categoria principale generica.
+
+---
+
+## Come trovare il CategoryID giusto
+
+### Metodo 1: i suggerimenti di categoria di eBay (Seller Hub)
+
+1. In Seller Hub, crea a mano una bozza di inserzione per uno dei tuoi prodotti.
+2. Al passaggio "Categoria", usa la casella di ricerca per trovare il tuo tipo di prodotto.
+3. eBay suggerisce categorie in base alle parole chiave.
+4. Scegli la categoria più specifica adatta.
+5. Annota il nome della categoria e usalo per trovare l'ID con uno dei metodi qui sotto.
+
+### Metodo 2: il riferimento degli ID di categoria di eBay
+
+La guida di Seller Hub Reports rimanda a un riferimento di nomi e ID di categoria per i caricamenti in blocco:
+
+1. Vai su **Seller Hub → Report → Caricamenti** e apri la guida dei modelli di caricamento.
+2. Trova il riferimento di nomi e ID di categoria e cerca il tuo tipo di prodotto.
+3. Gli sviluppatori possono anche ottenere l'albero completo delle categorie tramite le API di eBay (per esempio la Taxonomy API).
+
+### Metodo 3: guarda l'URL di un'inserzione esistente
+
+Se hai un'inserzione tua o di un concorrente nella stessa categoria:
+
+1. Apri la pagina della categoria su eBay (fai clic sul nome della categoria nel percorso sopra un'inserzione).
+2. Le pagine di categoria hanno URL come `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`.
+3. Il numero dopo il nome della categoria (`11483`, jeans da uomo) è l'ID di categoria.
+
+### Metodo 4: scarica un modello di categoria
+
+In **Seller Hub → Report → Caricamenti**, eBay ti permette di scaricare un modello di inserzione per una categoria specifica. L'ID di categoria scelto lì è quello da usare nel tuo file.
+
+---
+
+## Il CategoryID nel CSV di File Exchange
+
+La colonna si chiama `*Category` nei modelli di inserzione di eBay (l'asterisco indica una colonna obbligatoria) e `Category ID` nel modello delle bozze.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Regole:**
+- Il valore deve essere un intero positivo che corrisponde a una categoria finale eBay valida.
+- Le categorie principali o intermedie di solito non sono accettate. Usa la categoria più specifica.
+- La categoria deve essere valida per il tuo sito eBay (le categorie degli Stati Uniti sono diverse da quelle di Regno Unito, Germania, Australia ecc.).
+
+---
+
+## Compilare CategoryID in blocco
+
+Per i cataloghi grandi in cui la maggior parte dei prodotti rientra in poche categorie:
+
+### In Excel: assegna le categorie con SE o CERCA.VERT
+
+Se hai una colonna di appoggio con un codice del tipo di prodotto:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+Oppure crea una tabella di riferimento (tipo di prodotto → CategoryID) e usa CERCA.VERT:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+In Excel in italiano le funzioni si chiamano `SE` e `CERCA.VERT`, e gli argomenti si separano con il punto e virgola.
+
+### In Excel: riempi verso il basso i gruppi della stessa categoria
+
+1. Ordina l'elenco dei prodotti per tipo di prodotto.
+2. Inserisci il CategoryID nel primo prodotto di ogni gruppo.
+3. Seleziona da quella cella fino all'ultimo prodotto del gruppo.
+4. Usa **Riempi → In basso** per riempire verso il basso (nell'Excel in inglese la scorciatoia è **Ctrl+D**).
+
+### Con un filtro
+
+1. Filtra il catalogo in base alla colonna del tipo di prodotto.
+2. Seleziona tutte le celle visibili della colonna CategoryID.
+3. Digita il CategoryID e premi **Ctrl+Invio** per riempire tutte le celle selezionate in una volta.
+
+---
+
+## Verificare il CategoryID prima del caricamento
+
+Un CategoryID sbagliato crea inserzioni nella categoria sbagliata. È un errore comune e difficile da notare:
+
+1. **Controllo a campione:** prendi 5 valori di CategoryID dal CSV e cercali su eBay per confermare che corrispondono al percorso di categoria previsto.
+2. **Confronta con il tuo riferimento dei tipi di prodotto:** tieni una semplice tabella tipo di prodotto → CategoryID e rivedila quando aggiungi nuovi tipi.
+3. **Caricamento di prova:** carica prima un file di prova di 1-3 righe. Guarda le inserzioni create e conferma che compaiono nella categoria giusta.
+4. **Controlla il file dei risultati di eBay:** dopo ogni caricamento, la pagina Caricamenti di Seller Hub Reports ha un file dei risultati. Controlla se ci sono errori di riga legati a ID di categoria non validi.
+
+---
+
+## Errori comuni
+
+| Messaggio di errore | Causa probabile |
+|---|---|
+| "Category is required" | La colonna CategoryID è vuota |
+| "Invalid category" | L'ID non è una categoria finale eBay valida |
+| "Category not allowed for this listing type" | Restrizione della categoria per prezzo fisso o asta |
+| Errori nelle specifiche dopo il caricamento | Categoria sbagliata, quindi le specifiche non corrispondono ai tuoi oggetti |

@@ -1,0 +1,136 @@
+---
+title: "Guida al modello CSV di Etsy: campi, formati ed errori comuni"
+description: "Cosa contiene l'esportazione CSV delle inserzioni Etsy, cosa Etsy permette di farci e cosa no, i limiti di ogni campo (titoli, tag, quantità) e come correggere gli errori introdotti dai fogli di calcolo."
+keywords: ["guida modello csv etsy", "csv inserzioni etsy", "campi csv etsy", "importazione csv etsy", "caricamento in blocco csv etsy", "formato csv etsy", "modello etsy spiegato", "scaricare inserzioni etsy csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Come scaricare le inserzioni Etsy in CSV e cosa contiene il file"
+  - "Perché Etsy non ha un caricamento CSV e per cosa i venditori usano il file"
+  - "I limiti di titoli, tag, materiali e quantità"
+  - "Come formattare correttamente prezzi, tag e URL delle immagini"
+  - "Come correggere gli errori introdotti dalle modifiche in un foglio di calcolo"
+bestFor: "Venditori Etsy che modificano, controllano o trasferiscono le inserzioni in un foglio di calcolo, o che preparano un file per un'app di pubblicazione in blocco"
+timeToComplete: "9 minuti"
+---
+
+## Cos'è il CSV delle inserzioni Etsy (e cosa non è)
+
+Etsy ti permette di scaricare le inserzioni attive in CSV: apri **Gestione negozio → Impostazioni → Opzioni → Scarica dati** e scegli il download CSV delle inserzioni. Secondo la guida di Etsy, il file contiene per ogni inserzione:
+
+- Titolo
+- Descrizione
+- Prezzo e codice valuta
+- Quantità
+- Tag
+- Materiali
+- URL delle immagini
+- SKU (se hai aggiunto degli SKU alle inserzioni)
+
+**Etsy non ha un caricamento CSV per le inserzioni.** Modificare il file non cambia nulla nel negozio, ed Etsy non offre un modo per reimportarlo. I venditori usano l'esportazione per:
+
+- Controllare e ripulire i dati delle inserzioni in un foglio di calcolo
+- Conservare una copia di sicurezza del catalogo
+- Trasferire le inserzioni su un'altra piattaforma, come Shopify o WooCommerce
+- Alimentare un'app di terze parti per la pubblicazione in blocco che lavora con l'API di Etsy
+
+Per le modifiche in blocco direttamente su Etsy, usa le opzioni di modifica multipla della pagina Inserzioni in Gestione negozio.
+
+---
+
+## Le colonne dell'esportazione
+
+Nel file ogni campo ha la sua colonna, con intestazioni come `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` e `SKU`. Ogni foto ha una colonna propria (`IMAGE1`, `IMAGE2` e così via) con l'URL dell'immagine.
+
+| Colonna | Contenuto | Formato |
+|---|---|---|
+| `TITLE` | Titolo dell'inserzione | Fino a 140 caratteri |
+| `DESCRIPTION` | Descrizione dell'inserzione | Testo semplice |
+| `PRICE` | Prezzo nella valuta del negozio | Numero semplice, come `14.99` |
+| `CURRENCY_CODE` | Valuta del negozio | Codice di tre lettere, come `USD` |
+| `QUANTITY` | Quantità disponibile | Numero intero, fino a 999 |
+| `TAGS` | Tag di ricerca | Separati da virgole, fino a 13 |
+| `MATERIALS` | Materiali | Separati da virgole, fino a 13 |
+| `IMAGE1`, `IMAGE2`, ... | URL delle foto | URL completi con `https://` |
+| `SKU` | Il tuo SKU | Testo |
+
+Mantieni i nomi delle colonne così come sono se uno strumento deve rileggere il file.
+
+---
+
+## I limiti di ogni campo
+
+Questi sono i limiti applicati dall'editor delle inserzioni di Etsy. Un file che li supera non può tornare a essere un insieme di inserzioni valide, qualunque strumento tu usi:
+
+- **Titolo:** al massimo 140 caratteri. La ricerca di Etsy ne mostra solo l'inizio, quindi metti per prime le parole più importanti.
+- **Tag:** fino a 13 per inserzione, ciascuno di massimo 20 caratteri, spazi inclusi. Usa lettere, numeri e spazi; Etsy rifiuta la maggior parte dei simboli nei tag.
+- **Materiali:** fino a 13 per inserzione.
+- **Quantità:** un numero intero fino a 999 per inserzione.
+- **Prezzo:** un numero semplice nella valuta del negozio, senza simbolo di valuta.
+
+---
+
+## Formattare i prezzi
+
+- Usa un numero decimale semplice: `14.99`
+- Nessun simbolo di valuta (`$`, `€`, `£`)
+- Usa il punto (non la virgola) come separatore decimale, anche se il foglio di calcolo usa le virgole
+- La valuta è fissata dal negozio; `CURRENCY_CODE` la registra soltanto
+
+---
+
+## Tag
+
+I tag stanno in una sola cella, separati da virgole:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Poiché la cella contiene virgole, nel CSV deve essere racchiusa tra virgolette doppie. I fogli di calcolo lo fanno per te al salvataggio. Problemi da tenere d'occhio:
+
+- Più di 13 tag nella cella
+- Un tag di più di 20 caratteri
+- Virgole doppie o spazi intorno alle virgole rimasti dopo le modifiche
+
+---
+
+## Campi che un'app di pubblicazione in blocco può richiedere
+
+L'esportazione di Etsy non contiene tutte le impostazioni di un'inserzione. Le app di terze parti che creano inserzioni tramite l'API di Etsy chiedono spesso colonne aggiuntive, come chi ha realizzato l'oggetto (`who_made`), quando è stato realizzato (`when_made`), se è materiale per creazioni (`is_supply`), il profilo di spedizione e la sezione del negozio. I valori ammessi vengono dall'API di Etsy e cambiano nel tempo (per esempio gli intervalli di anni di `when_made`), quindi usa esattamente i valori indicati nel modello di quell'app.
+
+---
+
+## Problemi comuni dopo le modifiche in un foglio di calcolo
+
+### Prezzi con simboli o virgole
+
+Un prezzo come `$14.99` o `14,99` non è un numero semplice.
+
+**Soluzione:** usa Trova e sostituisci per togliere `$`, `€` e `£`, e cambia le virgole decimali in punti.
+
+### Titolo troppo lungo
+
+Il titolo supera i 140 caratteri.
+
+**Soluzione:** in Excel aggiungi una colonna di appoggio con `=LEN(A2)` (in Excel in italiano `=LUNGHEZZA(A2)`) per trovare i titoli oltre i 140 caratteri, poi accorciali.
+
+### Troppi tag, o tag troppo lunghi
+
+Un'inserzione ha più di 13 tag, oppure un tag supera i 20 caratteri.
+
+**Soluzione:** conta i tag (virgole + 1) e tieni ogni tag entro i 20 caratteri.
+
+### Link alle immagini non validi
+
+Una cella delle immagini contiene qualcosa come `mug.jpg` o un link senza `https://`.
+
+**Soluzione:** usa l'URL completo dell'immagine, che inizia con `https://`.
+
+---
+
+## Correggilo automaticamente con StriveFormats
+
+Carica il CSV delle inserzioni Etsy su StriveFormats. Normalizza prezzi, codici valuta ed elenchi di tag, e segnala titoli troppo lunghi, troppi tag, tag oltre i 20 caratteri, quantità superiori a 999, URL delle immagini non validi e SKU duplicati, indicando la riga esatta di ciascuno.
+
+[Apri il correttore CSV per Etsy](/app?preset=etsy_listings) | [Vedi il modello Etsy](/presets/etsy_listings)

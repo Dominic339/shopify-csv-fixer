@@ -9,16 +9,16 @@
 "description": "Welche Werte Amazons Ja/Nein-Spalten akzeptieren, hängt von der Datei ab: Kategorievorlagen nutzen die Werte aus ihrem Tabellenblatt Valid Values (meist true/false), der Inventory Loader nutzt y/n oder 1/2. So prüfst, korrigierst und schützt du diese Spalten."
 },
 "ebay/categoryid-and-file-exchange": {
-"title": "eBay CategoryID und File Exchange: was es ist und wie du es setzt",
-"description": "Was das eBay-Feld CategoryID ist, warum es bei File-Exchange-Uploads Pflicht ist, wie du die richtige Kategorie-ID für deine Produkte findest und wie du sie für den ganzen Katalog einträgst."
+"title": "eBay CategoryID und File Exchange: was sie ist und wie du sie setzt",
+"description": "Was das Feld CategoryID von eBay bedeutet, warum es bei File-Exchange-Uploads Pflicht ist, wie du die richtige Kategorie-ID für deine Produkte findest und wie du sie für den ganzen Katalog in einem Rutsch einträgst."
 },
 "ebay/ebay-file-exchange-csv-errors": {
 "title": "eBay-File-Exchange-CSV-Fehler: Ursachen und Lösungen",
-"description": "Behebe häufige Fehler in eBay-File-Exchange-CSVs: ungültige Action-Werte, Probleme mit Kategorie-IDs, zu lange Titel, Zustandscodes, Preisformate und Bild-URLs."
+"description": "Behebe häufige CSV-Fehler bei eBay-Massenuploads über Seller Hub Reports und File-Exchange-Dateien: die INFO-Zeile, ungültige Action-Werte, Kategorie-IDs, Titellänge, Zustands-IDs, Laufzeiten, Preise und Bild-URLs."
 },
 "etsy/etsy-csv-template-guide": {
 "title": "Leitfaden zur Etsy-CSV-Vorlage: Felder, Formate und häufige Fehler",
-"description": "Was in Etsys Angebots-CSV-Export steht, was Etsy damit erlaubt und was nicht, welche Grenzen jedes Feld einhalten muss (Titel, Tags, Menge) und wie du Fehler behebst, die Tabellenkalkulationen einbauen."
+"description": "Was in Etsys CSV-Export der Angebote steht, was Etsy damit erlaubt und was nicht, welche Grenzen jedes Feld einhalten muss (Titel, Tags, Menge) und wie du Fehler behebst, die Tabellenkalkulationen einbauen."
 },
 "general/append-vs-merge-join-csv": {
 "title": "Anhängen, Zusammenführen oder Verknüpfen: CSV-Dateien richtig kombinieren",

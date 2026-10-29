@@ -1,0 +1,156 @@
+---
+title: "CategoryID w eBay i File Exchange: czym jest i jak go ustawić"
+description: "Czym jest pole CategoryID w eBay, dlaczego jest wymagane przy przesyłaniu przez File Exchange, jak znaleźć właściwe ID kategorii dla produktów i jak wypełnić je masowo w całym katalogu."
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "id kategorii ebay", "import csv ebay", "kategoria plik płaski ebay", "masowe wystawianie ofert ebay", "wyszukiwanie categoryid ebay"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Co oznacza kolumna CategoryID w plikach CSV File Exchange"
+  - "Dlaczego brakujący lub błędny CategoryID powoduje odrzucenie ofert"
+  - "Jak znaleźć właściwy CategoryID dla swojego typu produktu"
+  - "Jak sprawnie wypełnić CategoryID w setkach wierszy"
+  - "Wskazówki, jak sprawdzić kategorię przed przesłaniem"
+bestFor: "Sprzedawcy eBay korzystający z File Exchange lub innych narzędzi do masowego przesyłania, którzy muszą przypisać ID kategorii nowym lub istniejącym ofertom"
+timeToComplete: "10 minut"
+---
+
+## Czym jest CategoryID?
+
+Kolumna `Category` (lub `CategoryID`, zależnie od wersji szablonu File Exchange) w pliku CSV do masowego przesyłania w eBay to **liczbowy identyfikator** kategorii eBay, do której należy przedmiot. Każda aktywna oferta w eBay musi mieć kategorię, a eBay na podstawie tego ID ustala:
+
+- Gdzie oferta pojawia się podczas przeglądania kategorii.
+- Które parametry przedmiotu (pola wymagane) dotyczą oferty.
+- W jakich wyszukiwaniach kupujących pojawia się przedmiot.
+
+Brakujący lub błędny CategoryID to jeden z najczęstszych powodów, dla których przesyłanie przez File Exchange całkowicie się nie udaje albo powstają oferty z niepełnymi parametrami.
+
+---
+
+## CategoryID a ścieżka kategorii
+
+Plik CSV wymaga **liczby** (CategoryID), a nie czytelnej ścieżki kategorii. Na przykład:
+
+| Ścieżka kategorii | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+W pliku CSV nie można użyć tekstu ścieżki. Musi to być liczbowe ID.
+
+---
+
+## Dlaczego CategoryID ma znaczenie dla parametrów
+
+System parametrów przedmiotu w eBay (marka, rozmiar, kolor, materiał itd.) zależy od kategorii. Wybór złej kategorii oznacza, że:
+- Wymagane parametry właściwej kategorii nie są ani wymagane, ani sprawdzane.
+- Oferta może spaść w wynikach wyszukiwania, jeśli brakuje obowiązkowych parametrów.
+- Kupujący filtrujący po parametrach w twojej kategorii nie znajdą oferty.
+
+Zawsze przypisuj najbardziej szczegółową kategorię (najniższą kategorię, która dokładnie opisuje produkt), a nie szeroką kategorię nadrzędną.
+
+---
+
+## Jak znaleźć właściwy CategoryID
+
+### Metoda 1: podpowiedzi kategorii w eBay (Seller Hub)
+
+1. W Seller Hub utwórz ręcznie wersję roboczą oferty dla jednego z produktów.
+2. W kroku „Kategoria” wpisz w polu wyszukiwania typ produktu.
+3. eBay podpowie kategorie na podstawie słów kluczowych.
+4. Wybierz najbardziej szczegółową pasującą kategorię.
+5. Zapisz nazwę kategorii i znajdź jej ID jedną z metod poniżej.
+
+### Metoda 2: zestawienie ID kategorii od eBay
+
+Pomoc do Seller Hub Reports zawiera odnośnik do zestawienia nazw i ID kategorii dla masowego przesyłania:
+
+1. Przejdź do **Seller Hub → Raporty → Przesłane pliki** i otwórz pomoc do szablonów.
+2. Znajdź zestawienie nazw i ID kategorii i wyszukaj swój typ produktu.
+3. Programiści mogą też pobrać pełne drzewo kategorii przez API eBay (np. Taxonomy API).
+
+### Metoda 3: sprawdź adres URL działającej oferty
+
+Jeśli masz własną ofertę lub ofertę konkurencji w tej samej kategorii:
+
+1. Otwórz stronę kategorii w eBay (kliknij nazwę kategorii w ścieżce nad ofertą).
+2. Strony kategorii mają adresy typu `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`.
+3. Liczba po nazwie kategorii (`11483`, męskie dżinsy) to ID kategorii.
+
+### Metoda 4: pobierz szablon kategorii
+
+W **Seller Hub → Raporty → Przesłane pliki** eBay pozwala pobrać szablon ofert dla konkretnej kategorii. ID kategorii wybrane w tym miejscu to to, którego należy użyć w pliku.
+
+---
+
+## CategoryID w pliku CSV File Exchange
+
+W szablonach ofert eBay kolumna nazywa się `*Category` (gwiazdka oznacza kolumnę wymaganą), a w szablonie wersji roboczych `Category ID`.
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**Zasady:**
+- Wartość musi być dodatnią liczbą całkowitą odpowiadającą prawidłowej najniższej kategorii eBay.
+- Kategorie nadrzędne i pośrednie zwykle nie są akceptowane. Używaj najbardziej szczegółowej kategorii.
+- Kategoria musi być prawidłowa dla twojej witryny eBay (kategorie w USA różnią się od kategorii w Wielkiej Brytanii, Niemczech, Australii itd.).
+
+---
+
+## Masowe wypełnianie CategoryID
+
+Dla dużych katalogów, w których większość produktów należy do kilku kategorii:
+
+### W Excelu: przypisz kategorie funkcją JEŻELI lub WYSZUKAJ.PIONOWO
+
+Jeśli masz kolumnę pomocniczą z kodem typu produktu:
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+Albo utwórz tabelę odniesień (typ produktu → CategoryID) i użyj WYSZUKAJ.PIONOWO:
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+W polskim Excelu funkcje nazywają się `JEŻELI` i `WYSZUKAJ.PIONOWO`, a argumenty rozdziela się średnikami.
+
+### W Excelu: wypełnij w dół grupy z tą samą kategorią
+
+1. Posortuj listę produktów według typu produktu.
+2. Wpisz CategoryID przy pierwszym produkcie każdej grupy.
+3. Zaznacz od tej komórki do ostatniego produktu w grupie.
+4. Użyj polecenia **Wypełnij → W dół** (w angielskim Excelu skrót to **Ctrl+D**).
+
+### Za pomocą filtra
+
+1. Odfiltruj katalog według kolumny typu produktu.
+2. Zaznacz wszystkie widoczne komórki w kolumnie CategoryID.
+3. Wpisz CategoryID i naciśnij **Ctrl+Enter**, aby wypełnić wszystkie zaznaczone komórki naraz.
+
+---
+
+## Sprawdzanie CategoryID przed przesłaniem
+
+Błędny CategoryID tworzy oferty w złej kategorii. To częsty błąd, który trudno zauważyć:
+
+1. **Kontrola wyrywkowa:** weź 5 wartości CategoryID z pliku CSV i wyszukaj je w eBay, żeby potwierdzić, że odpowiadają oczekiwanej ścieżce kategorii.
+2. **Porównaj z zestawieniem typów produktów:** prowadź prostą tabelę typ produktu → CategoryID i przeglądaj ją przy dodawaniu nowych typów.
+3. **Przesyłanie testowe:** najpierw prześlij plik testowy z 1–3 wierszami. Obejrzyj utworzone oferty i sprawdź, czy są we właściwej kategorii.
+4. **Przejrzyj plik wyników eBay:** po każdym przesłaniu na stronie przesłanych plików w Seller Hub Reports jest plik wyników. Poszukaj w nim błędów wierszy związanych z nieprawidłowymi ID kategorii.
+
+---
+
+## Częste błędy
+
+| Komunikat o błędzie | Prawdopodobna przyczyna |
+|---|---|
+| "Category is required" | Kolumna CategoryID jest pusta |
+| "Invalid category" | ID nie jest prawidłową najniższą kategorią eBay |
+| "Category not allowed for this listing type" | Ograniczenie kategorii dla ceny stałej lub aukcji |
+| Błędy parametrów po przesłaniu | Zła kategoria, więc parametry nie pasują do przedmiotów |

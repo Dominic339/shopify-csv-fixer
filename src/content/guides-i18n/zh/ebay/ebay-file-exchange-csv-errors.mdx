@@ -1,0 +1,204 @@
+---
+title: "eBay File Exchange CSV 错误：原因与解决方法"
+description: "修复通过 Seller Hub Reports 和 File Exchange 文件批量上传到 eBay 时常见的 CSV 错误：INFO 行、无效的 Action 值、类目 ID、标题长度、物品状况 ID、刊登时长、价格和图片 URL。"
+keywords: ["ebay file exchange csv 错误", "ebay csv 导入错误", "ebay file exchange 错误", "修复 ebay csv", "ebay csv 上传错误", "ebay 刊登 csv 错误", "ebay 批量上传错误", "seller hub reports 上传"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "eBay 批量上传如何检查 CSV，以及行为什么会失败"
+  - "为什么 eBay 模板顶部的 INFO 行必须保留"
+  - "Action、ConditionID 和 Duration 允许的值"
+  - "如何修复标题长度、类目、价格、图片 URL 和物品编号错误"
+  - "如何在上传全部库存前先用一小批测试"
+bestFor: "通过 Seller Hub Reports 或 File Exchange 格式的 CSV 文件批量上传刊登的 eBay 卖家"
+timeToComplete: "12 分钟"
+---
+
+## eBay 如何检查批量上传
+
+eBay 的刊登批量上传现在通过 **Seller Hub → 报告 → 上传** 完成，File Exchange 格式的 CSV 模板也在这里下载。上传文件时，eBay 会检查：
+
+1. **文件结构**：最上面的 INFO 行和下面的表头行
+2. **Action 列**：每一行刊登要做什么
+3. **数据类型**：价格是数字，数量是整数，URL 是完整的网址
+4. **业务规则**：有效的类目 ID、该类目允许的状况 ID、有效的刊登时长
+5. **内容规则**：标题长度和刊登政策
+
+处理完成后，上传页面会提供一个结果文件，列出哪些行成功、哪些行失败以及原因。请务必查看，因为 eBay 经常只导入部分行，拒绝其余的行。
+
+---
+
+## 错误：无法识别模板（INFO 行）
+
+eBay 当前的模板在列标题上方以这样一行开头：
+
+```
+#INFO,Version=1.0.0,Template=fx_category_template_EBAY_US
+```
+
+上传时 eBay 需要这第一行 INFO。其他以 `#INFO` 或 `INFO` 开头的行（模板中的说明）可以保留，也可以删除。
+
+**解决方法**：
+- 不要删除模板的第一行，即使它看起来像一条备注。
+- 如果你在 Mac 上用 Excel，请检查第一行的 `#INFO` 前面没有任何内容。Excel 可能在那里加入看不见的字符，eBay 就会拒绝该文件。用文本编辑器打开 CSV 就能看到。
+
+StriveFormats 会读取 INFO 行下面的表头行，下载时再把去掉多余字符的 INFO 行放回最上面。
+
+---
+
+## 错误：Action 缺失或无效
+
+每一行刊登都需要 Action。例外是变体行（`Relationship` = `Variation`），它们放在父刊登下面，Action 留空。
+
+可用的值：
+
+| 值 | 含义 |
+|---|---|
+| `Add` | 创建新刊登 |
+| `VerifyAdd` | 检查新刊登并查看费用，但不发布 |
+| `Revise` | 修改在线刊登的字段 |
+| `Relist` | 重新刊登已结束的刊登 |
+| `End` | 结束在线刊登（附带 `EndCode`） |
+| `Status` | 更改已售物品的状态，例如标记为已发货 |
+| `AddToItemDescription` | 在在线刊登的描述末尾追加文字 |
+| `Draft` | 将刊登保存到草稿（仅限草稿模板） |
+
+**解决方法**：每一行刊登都必须使用上面的某个值，并且写法完全一致。eBay 按完全一致比较，所以 `verifyadd` 和 `VerifyAdd` 不一样。
+
+---
+
+## 错误：类目无效
+
+**原因**：`Category`（或 `Category ID`）的值不是有效的 eBay 数字类目 ID，或者该类目已停用。
+
+eBay 类目 ID 是数字（例如 eBay 美国站的男士 T 恤是 `15687`）。eBay 调整类目结构时，这些 ID 会不时变化。
+
+**解决方法**：
+- 在 eBay 类目树中查找正确的类目 ID
+- 不要不加核实就沿用旧模板中的类目 ID，先确认它们仍然有效
+- 有些类目需要额外的物品属性，请确认该类目的要求
+
+查找 ID 的方法见 [eBay CategoryID：是什么以及如何设置](/guides/ebay/categoryid-and-file-exchange)。
+
+---
+
+## 错误：标题过长
+
+**原因**：`Title` 的值超过 80 个字符，这是 eBay 刊登标题的上限。
+
+**解决方法**：
+
+在 Excel 中添加辅助列：`=LEN(B2)`（把 B2 换成标题列的单元格）。筛选长度超过 80 的行，缩短这些标题。
+
+用 Python：
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for i, row in enumerate(reader, 2):
+        title_len = len(row.get("Title", ""))
+        if title_len > 80:
+            print(f"Row {i}: Title is {title_len} chars (max 80): {row['Title'][:60]}...")
+```
+
+---
+
+## 错误：状况 ID 无效
+
+**原因**：`ConditionID` 的值不是有效的 eBay 状况 ID，或者在该物品的类目中不允许使用。
+
+eBay 状况表中常见的状况 ID：
+
+| ID | 状况 | 说明 |
+|---|---|---|
+| `1000` | New | 也会显示为 Brand New、New with tags 或 New with box |
+| `1500` | New other | 无吊牌或无包装的全新品、开箱品 |
+| `1750` | New with defects | |
+| `2000` | Certified Refurbished | 部分类目中仅限获批卖家 |
+| `2500` | Seller refurbished | 在部分类目中已被下面的翻新等级取代 |
+| `2010` / `2020` / `2030` | Excellent / Very Good / Good - Refurbished | 部分类目中仅限获批卖家 |
+| `2750` | Like New | |
+| `3000` | Used | 也会显示为 Pre-owned |
+| `4000` | Very Good | |
+| `5000` | Good | |
+| `6000` | Acceptable | |
+| `7000` | For parts or not working | 仅在合适的类目中使用 |
+
+能用哪些 ID 取决于类目，买家看到的名称也因类目而异。
+
+**解决方法**：把状况名称换成数字 ID。StriveFormats 会自动把 eBay 的状况名称（如“Used”或“Open box”）转换为对应的 ID。
+
+---
+
+## 错误：StartPrice 无效
+
+**原因**：`StartPrice` 字段含有货币符号（`$9.99`）、用逗号作小数点（`9,99`）、为负数或为空。
+
+**解决方法**：
+- 用查找和替换删除货币符号
+- 把小数点逗号换成句点
+- 确保每个价格都是正的小数
+- 保存前在 Excel 中把该列设为数值格式
+
+---
+
+## 错误：Duration 无效
+
+**原因**：`Duration` 字段中的值不是 eBay 对该刊登形式接受的值。
+
+**可用的值**：
+
+| 形式 | Duration |
+|---|---|
+| `FixedPrice` | `GTC`（Good 'Til Cancelled）。一口价刊登不再设置天数 |
+| `Auction` | `Days_1`、`Days_3`、`Days_5`、`Days_7` 或 `Days_10` |
+
+**解决方法**：一口价刊登用 `GTC`，拍卖用某个 `Days_` 值。
+
+---
+
+## 错误：无法访问图片 URL
+
+**原因**：`PicURL` 字段中的 URL eBay 无法下载：图片需要登录、存放在你自己的电脑上，或者位于重定向之后。
+
+eBay 的 Seller Hub Reports 允许每个刊登在 `PicURL` 中最多放 **24 张图片**，用竖线 `|` 分隔。每个 URL 最长 2048 个字符，URL 中的空格必须写成 `%20`。
+
+**解决方法**：
+- 在浏览器的无痕窗口中打开每个 URL，应无需登录就能直接显示图片
+- 使用完整的 `https://` URL
+- 把空格换成 `%20`（StriveFormats 会自动处理）
+- 避免使用短网址和重定向服务
+
+---
+
+## 错误：物品编号或 UPC 显示为 1.23457E+11
+
+**原因**：Excel 把一个长数字（`ItemID` 或 `P:UPC` 中的条形码）转换成了科学计数法。前几位之后的数字已经丢失，eBay 因此找不到刊登，也无法匹配商品。
+
+**解决方法**：根据你的记录重新输入完整编号。eBay 的帮助建议在保存前把物品编号列设为小数位数为 0 的数值格式，设为文本格式也可以。StriveFormats 会标出所有出现这种情况的单元格。
+
+---
+
+## 错误：数量无效
+
+**原因**：`Quantity` 为空、含小数（例如 `1.5`）或为负数。
+
+**解决方法**：使用整数。新刊登的数量应至少为 1。对于有变体的刊登，把每个变体的数量写在它自己的行中，而不是父行中。
+
+---
+
+## 全部上传前先测试
+
+1. 把 2 到 3 行复制到一个新文件中，并保留 INFO 行和表头行。
+2. 把这些行的 Action 改为 `VerifyAdd` 后上传。eBay 会检查这些行并显示费用，但不发布任何内容。
+3. 修复结果文件中指出的问题，再把整个文件的 Action 改回 `Add`。
+
+---
+
+## 用 StriveFormats 自动修复
+
+把你的 eBay CSV 上传到 StriveFormats。验证工具会检查 Action 列、类目 ID、价格、标题长度、状况 ID、刊登时长、图片 URL 和变体行，并标出有问题的具体行和单元格。
+
+[打开 eBay CSV 修复工具](/app?preset=ebay_listings) | [查看 eBay 模板](/presets/ebay_listings)

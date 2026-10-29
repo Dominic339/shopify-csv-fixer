@@ -1,0 +1,136 @@
+---
+title: "Etsy CSV Şablonu Rehberi: Alanlar, Biçimler ve Sık Yapılan Hatalar"
+description: "Etsy'nin ilan CSV dışa aktarımında neler olduğu, Etsy'nin bu dosyayla neye izin verip vermediği, her alanın sınırları (başlık, etiket, miktar) ve elektronik tabloların yol açtığı hataların nasıl düzeltileceği."
+keywords: ["etsy csv şablonu rehberi", "etsy ilan csv", "etsy csv alanları", "etsy csv içe aktarma", "etsy toplu yükleme csv", "etsy csv biçimi", "etsy şablonu açıklaması", "etsy ilanlarını csv indirme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Etsy ilanlarınızı CSV olarak nasıl indireceğiniz ve dosyada neler olduğu"
+  - "Etsy'nin neden CSV yüklemesi olmadığı ve satıcıların dosyayı ne için kullandığı"
+  - "Başlık, etiket, malzeme ve miktar sınırları"
+  - "Fiyatları, etiketleri ve görsel URL'lerini doğru biçimlendirme"
+  - "Elektronik tabloda düzenlemenin yol açtığı hataları düzeltme"
+bestFor: "İlanlarını bir elektronik tabloda düzenleyen, denetleyen veya taşıyan ya da toplu yayınlama uygulaması için dosya hazırlayan Etsy satıcıları"
+timeToComplete: "9 dakika"
+---
+
+## Etsy'nin ilan CSV'si nedir (ve ne değildir)
+
+Etsy, etkin ilanlarınızı CSV olarak indirmenize izin verir: **Mağaza Yöneticisi → Ayarlar → Seçenekler → Verileri İndir** bölümünü açın ve ilanlarınız için CSV indirmeyi seçin. Etsy'nin yardımına göre dosya her ilan için şunları içerir:
+
+- Başlık
+- Açıklama
+- Fiyat ve para birimi kodu
+- Miktar
+- Etiketler
+- Malzemeler
+- Görsel URL'leri
+- SKU (ilanlarınıza SKU eklediyseniz)
+
+**Etsy'nin ilanlar için CSV yüklemesi yoktur.** Dosyayı düzenlemek mağazanızda hiçbir şeyi değiştirmez ve Etsy dosyayı geri içe aktarmanın bir yolunu sunmaz. Satıcılar dışa aktarımı şunlar için kullanır:
+
+- İlan verilerini bir elektronik tabloda denetlemek ve temizlemek
+- Kataloglarının yedeğini tutmak
+- İlanlarını Shopify veya WooCommerce gibi başka bir platforma taşımak
+- Etsy'nin API'si üzerinden çalışan üçüncü taraf bir toplu yayınlama uygulamasına veri vermek
+
+Etsy içinde toplu değişiklikler için Mağaza Yöneticisi'ndeki İlanlar sayfasının toplu düzenleme seçeneklerini kullanın.
+
+---
+
+## Dışa aktarımdaki sütunlar
+
+Dosyada her alanın kendi sütunu vardır; başlıklar `TITLE`, `DESCRIPTION`, `PRICE`, `CURRENCY_CODE`, `QUANTITY`, `TAGS`, `MATERIALS` ve `SKU` gibidir. Her fotoğrafın görselin URL'sini içeren ayrı bir sütunu vardır (`IMAGE1`, `IMAGE2` vb.).
+
+| Sütun | İçerdiği | Biçim |
+|---|---|---|
+| `TITLE` | İlan başlığı | En fazla 140 karakter |
+| `DESCRIPTION` | İlan açıklaması | Düz metin |
+| `PRICE` | Mağaza para biriminde fiyat | Düz sayı, örneğin `14.99` |
+| `CURRENCY_CODE` | Mağaza para birimi | Üç harfli kod, örneğin `USD` |
+| `QUANTITY` | Mevcut miktar | Tam sayı, en fazla 999 |
+| `TAGS` | Arama etiketleri | Virgülle ayrılmış, en fazla 13 |
+| `MATERIALS` | Malzemeler | Virgülle ayrılmış, en fazla 13 |
+| `IMAGE1`, `IMAGE2`, ... | Fotoğraf URL'leri | Tam `https://` URL'leri |
+| `SKU` | SKU'nuz | Metin |
+
+Bir araç dosyayı yeniden okuyacaksa sütun adlarını olduğu gibi bırakın.
+
+---
+
+## Her alanın uyması gereken sınırlar
+
+Bunlar Etsy'nin ilan düzenleyicisinin uyguladığı sınırlardır. Bu sınırları aşan bir dosya, hangi aracı kullanırsanız kullanın yeniden geçerli ilanlara dönüştürülemez:
+
+- **Başlık:** en fazla 140 karakter. Etsy araması yalnızca başını gösterir, bu yüzden en önemli kelimeleri başa koyun.
+- **Etiketler:** ilan başına en fazla 13, her biri boşluklar dahil en fazla 20 karakter. Harf, rakam ve boşluk kullanın; Etsy etiketlerdeki çoğu simgeyi kabul etmez.
+- **Malzemeler:** ilan başına en fazla 13.
+- **Miktar:** ilan başına en fazla 999 olan bir tam sayı.
+- **Fiyat:** mağaza para biriminde, para birimi simgesi olmayan düz bir sayı.
+
+---
+
+## Fiyat biçimlendirme
+
+- Düz bir ondalık sayı kullanın: `14.99`
+- Para birimi simgesi yok (`$`, `€`, `£`)
+- Elektronik tablonuz virgül kullansa bile ondalık ayırıcı olarak virgül değil nokta kullanın
+- Para birimini mağazanız belirler; `CURRENCY_CODE` yalnızca bunu kaydeder
+
+---
+
+## Etiketler
+
+Etiketler tek bir hücrede, virgülle ayrılmış olarak durur:
+
+```
+handmade,gift for her,leather wallet,birthday gift
+```
+
+Hücrede virgül olduğu için CSV'de çift tırnak içinde olmalıdır. Elektronik tablolar kaydederken bunu sizin için yapar. Dikkat edilecekler:
+
+- Hücrede 13'ten fazla etiket
+- 20 karakterden uzun bir etiket
+- Düzenlemeden sonra kalan çift virgüller veya virgüllerin etrafındaki boşluklar
+
+---
+
+## Bir toplu yayınlama uygulamasının isteyebileceği alanlar
+
+Etsy'nin dışa aktarımı bir ilanın tüm ayarlarını içermez. Etsy'nin API'si üzerinden ilan oluşturan üçüncü taraf uygulamalar çoğu zaman ek sütunlar ister: ürünü kimin yaptığı (`who_made`), ne zaman yapıldığı (`when_made`), el işi malzemesi olup olmadığı (`is_supply`), kargo profili ve mağaza bölümü gibi. Kabul edilen değerler Etsy'nin API'sinden gelir ve zamanla değişir (örneğin `when_made` için yıl aralıkları), bu yüzden o uygulamanın şablonundaki değerleri aynen kullanın.
+
+---
+
+## Elektronik tabloda düzenledikten sonra sık görülen sorunlar
+
+### Simgeli veya virgüllü fiyatlar
+
+`$14.99` veya `14,99` gibi bir fiyat düz bir sayı değildir.
+
+**Çözüm:** Bul ve Değiştir ile `$`, `€` ve `£` simgelerini kaldırın ve ondalık virgülleri noktaya çevirin.
+
+### Başlık çok uzun
+
+Başlık 140 karakterden uzun.
+
+**Çözüm:** 140 karakteri aşan başlıkları bulmak için Excel'de `=LEN(A2)` (Türkçe Excel'de `=UZUNLUK(A2)`) içeren bir yardımcı sütun ekleyin ve bu başlıkları kısaltın.
+
+### Çok fazla veya çok uzun etiketler
+
+Bir ilanda 13'ten fazla etiket var ya da bir etiket 20 karakteri aşıyor.
+
+**Çözüm:** Etiketleri sayın (virgüller + 1) ve her etiketi en fazla 20 karakterde tutun.
+
+### Bozuk görsel bağlantıları
+
+Bir görsel hücresinde `mug.jpg` gibi bir şey ya da `https://` olmayan bir bağlantı var.
+
+**Çözüm:** `https://` ile başlayan tam görsel URL'sini kullanın.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+Etsy ilan CSV'nizi StriveFormats'a yükleyin. Fiyatları, para birimi kodlarını ve etiket listelerini düzenler; çok uzun başlıkları, fazla etiketleri, 20 karakterden uzun etiketleri, 999'u aşan miktarları, bozuk görsel URL'lerini ve yinelenen SKU'ları tam satırıyla işaretler.
+
+[Etsy CSV düzelticisini aç](/app?preset=etsy_listings) | [Etsy şablonunu görüntüle](/presets/etsy_listings)

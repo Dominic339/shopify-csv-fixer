@@ -1,0 +1,154 @@
+---
+title: "eBay CategoryID 与 File Exchange：是什么以及如何设置"
+description: "了解 eBay 的 CategoryID 字段是什么、为什么 File Exchange 上传必须填写、如何为商品找到正确的类目 ID，以及如何为整个目录批量填写。"
+keywords: ["ebay categoryid csv", "ebay file exchange categoryid", "ebay 类目 id", "ebay csv 导入", "ebay 平面文件 类目", "ebay 批量刊登上传", "ebay categoryid 查询"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "File Exchange CSV 文件中的 CategoryID 列代表什么"
+  - "CategoryID 缺失或错误为什么会导致刊登失败"
+  - "如何为你的商品类型找到正确的 CategoryID"
+  - "如何高效地为数百行填写 CategoryID"
+  - "上传前检查类目选择的技巧"
+bestFor: "使用 File Exchange 或其他批量刊登工具、需要为新刊登或现有刊登指定类目 ID 的 eBay 卖家"
+timeToComplete: "10 分钟"
+---
+
+## 什么是 CategoryID？
+
+eBay 批量刊登 CSV 中的 `Category` 列（根据 File Exchange 模板版本，也可能叫 `CategoryID`）是物品所属 eBay 类目的**数字标识**。eBay 上每个在线刊登都必须有类目，eBay 用这个 ID 来决定：
+
+- 买家浏览类目时，你的刊登出现在哪里。
+- 哪些物品属性（必填字段）适用于你的刊登。
+- 你的物品会出现在哪些买家搜索中。
+
+CategoryID 缺失或错误，是 File Exchange 上传整体失败、或生成物品属性不完整的刊登的最常见原因之一。
+
+---
+
+## CategoryID 与类目路径
+
+CSV 需要的是**数字**（CategoryID），而不是供人阅读的类目路径。例如：
+
+| 类目路径 | CategoryID |
+|---|---|
+| Clothing, Shoes & Accessories > Men > Men's Clothing > Shirts > T-Shirts | 15687 |
+| Cameras & Photo > Digital Cameras | 31388 |
+| Health & Beauty > Vitamins & Dietary Supplements | 180959 |
+
+CSV 中不能使用路径文字，必须是数字 ID。
+
+---
+
+## 为什么 CategoryID 对物品属性很重要
+
+eBay 的物品属性体系（品牌、尺码、颜色、材质等）取决于类目。选错类目意味着：
+- 正确类目的必填物品属性不会被要求填写，也不会被检查。
+- 缺少必填属性时，刊登在搜索结果中的排名可能下降。
+- 在你的类目中按物品属性筛选的买家找不到你的刊登。
+
+始终选择最具体的类目（准确描述商品的最底层类目），而不是宽泛的上级类目。
+
+---
+
+## 如何找到正确的 CategoryID
+
+### 方法 1：eBay 的类目建议（Seller Hub）
+
+1. 在 eBay Seller Hub 中，为你的某个商品手动创建一个刊登草稿。
+2. 在“类目”这一步，用搜索框查找你的商品类型。
+3. eBay 会根据关键词推荐类目。
+4. 选择最具体的匹配类目。
+5. 记下类目名称，再用下面的某种方法查出 ID。
+
+### 方法 2：eBay 的类目 ID 对照表
+
+Seller Hub Reports 的帮助中有一个用于批量上传的类目名称和 ID 对照表链接：
+
+1. 进入 **Seller Hub → 报告 → 上传**，打开上传模板的帮助。
+2. 找到类目名称和 ID 对照表，查找你的商品类型。
+3. 开发者也可以通过 eBay 的 API（例如 Taxonomy API）获取完整的类目树。
+
+### 方法 3：查看已有刊登的 URL
+
+如果在同一类目中有你自己或竞争对手的刊登：
+
+1. 在 eBay 上打开类目页面（点击刊登上方导航路径中的类目名称）。
+2. 类目页面的 URL 形如 `https://www.ebay.com/b/Levis-Mens-Jeans/11483/bn_700176`。
+3. 类目名称后面的数字（`11483`，男士牛仔裤）就是类目 ID。
+
+### 方法 4：下载类目模板
+
+在 **Seller Hub → 报告 → 上传** 中，eBay 允许你下载某个类目专用的刊登模板。你在那里选择的类目 ID，就是文件中要用的 ID。
+
+---
+
+## File Exchange CSV 中的 CategoryID
+
+在 eBay 的刊登模板中，这一列叫 `*Category`（星号表示必填列）；在草稿模板中叫 `Category ID`。
+
+```
+*Action(SiteID=US|Country=US|Currency=USD|Version=1193),*Title,*Category,*StartPrice,...
+Add,Men's Blue Cotton T-Shirt,15687,19.99,...
+Add,Men's Slim Fit Jeans,11483,45.00,...
+```
+
+**规则**：
+- 值必须是正整数，对应一个有效的 eBay 最底层类目。
+- 上级类目和中间类目通常不被接受，请使用最具体的类目。
+- 类目必须适用于你所在的 eBay 站点（美国站的类目与英国、德国、澳大利亚等站点不同）。
+
+---
+
+## 批量填写 CategoryID
+
+对于大多数商品只落在少数几个类目中的大型目录：
+
+### 在 Excel 中：用 IF 或 VLOOKUP 分配类目
+
+如果你有一个包含商品类型代码的辅助列：
+
+```
+=IF(B2="T-Shirts", 15687, IF(B2="Jeans", 11483, ""))
+```
+
+或者建立一个对照表（商品类型 → CategoryID），再用 VLOOKUP：
+
+```
+=VLOOKUP(B2, CategoryTable!$A:$B, 2, FALSE)
+```
+
+### 在 Excel 中：向下填充同一类目的分组
+
+1. 按商品类型对商品列表排序。
+2. 在每组的第一个商品中输入 CategoryID。
+3. 从该单元格选到该组的最后一个商品。
+4. 按 **Ctrl+D** 向下填充。
+
+### 使用筛选
+
+1. 按商品类型列筛选目录。
+2. 选中 CategoryID 列中所有可见的单元格。
+3. 输入 CategoryID，按 **Ctrl+Enter** 一次填满所有选中的单元格。
+
+---
+
+## 上传前检查 CategoryID
+
+CategoryID 错误会让刊登出现在错误的类目中。这种错误很常见，也很难发现：
+
+1. **抽查**：从 CSV 中取 5 个 CategoryID 值，在 eBay 上查询，确认它们对应预期的类目路径。
+2. **与商品类型对照表核对**：维护一张简单的“商品类型 → CategoryID”表，新增商品类型时复核一遍。
+3. **测试上传**：先上传一个 1 到 3 行的测试文件。查看生成的刊登，确认它们出现在正确的类目中。
+4. **查看 eBay 的结果文件**：每次上传后，Seller Hub Reports 的上传页面都会提供结果文件。检查其中是否有与无效类目 ID 相关的行错误。
+
+---
+
+## 常见错误
+
+| 错误消息 | 可能的原因 |
+|---|---|
+| "Category is required" | CategoryID 列为空 |
+| "Invalid category" | 该 ID 不是有效的 eBay 最底层类目 |
+| "Category not allowed for this listing type" | 类目对一口价或拍卖的限制 |
+| 上传后出现物品属性错误 | 类目错误，因此属性与你的物品不匹配 |
