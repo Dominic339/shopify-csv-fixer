@@ -2,7 +2,7 @@
 title: "How to Merge Two CSV Files"
 description: "Step-by-step guide to combining two CSV files into one using Excel Power Query, Google Sheets, or a simple command-line approach. No programming experience required."
 keywords: ["merge csv files", "combine csv", "join two csv", "excel power query csv", "google sheets merge csv", "append csv", "stack csv files"]
-lastUpdated: "2026-03-03"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Four methods to merge CSV files (Excel, Sheets, CLI, Python)"
@@ -55,7 +55,7 @@ Excel's Power Query appends multiple CSVs without formulas or macros. It handles
 4. In the Power Query Editor, go to **Home** > **Append Queries** > **Append Queries as New**.
 5. In the dialog, choose **Two tables**, then select your second query from the dropdown list.
 6. A new combined query appears in the left panel. Click **Close and Load** to write it to a new sheet.
-7. Select all data on the sheet, then go to **File** > **Save As** and choose **CSV UTF-8 (Comma delimited)** or **CSV (Comma delimited)** as the file format.
+7. Select all data on the sheet, then go to **File** > **Save As** and choose **CSV UTF-8 (Comma delimited)** as the file format. Plain "CSV (Comma delimited)" uses a legacy encoding and can garble accented characters.
 
 ### Why Power Query
 
@@ -82,7 +82,7 @@ Google Sheets is a quick option if you do not have Excel. It works well for file
 
 ### Watch Out For
 
-- Google Sheets sometimes adds a BOM on export. If your platform rejects the merged file, open it in VS Code and re-save as UTF-8 without BOM.
+- Google Sheets exports UTF-8 without a BOM, so the merged file can be uploaded as it is.
 - Very large files (100,000+ rows) can cause Sheets to slow down or freeze. Use the CLI or Python method instead.
 - Double-check that the pasted rows line up with the columns. A single off-by-one column shift corrupts the entire merge.
 
@@ -289,7 +289,7 @@ If both files use the same encoding but different delimiters (commas vs semicolo
 | Duplicate header row in the middle | Forgot to skip the header of the second file | Use `tail -n +2` (CLI) or Power Query Append (which skips it automatically) |
 | Data shifted to wrong columns | Column order is different between files | Reorder columns in one file first, or use the Python DictWriter approach |
 | Garbled characters in the merged file | Files have different encodings | Convert both files to UTF-8 first using iconv on Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv -o file2_utf8.csv` |
-| File rejected with "invalid format" | Merged file has a BOM | Open in VS Code and re-save as UTF-8 without BOM |
+| First column not recognised after upload | Merged file has a BOM the platform misreads | Open in VS Code and re-save as UTF-8 without BOM |
 
 ---
 
@@ -310,7 +310,7 @@ Before importing the merged file, verify these items:
 - [ ] No extra blank row between the two files' data sections
 - [ ] No duplicate SKUs or handles that should not be duplicated (run through the CSV Fixer)
 - [ ] All columns present from both source files (if using DictWriter with mismatched schemas)
-- [ ] File saved as UTF-8 without BOM
+- [ ] File saved as UTF-8
 - [ ] File extension is .csv and content is comma-delimited plain text
 
 ---

@@ -396,8 +396,8 @@ function boolSpellings(platform: string, tr: Tr) {
 
 /** Amazon's upload page takes tab-delimited text, so its save steps name that format instead of CSV. */
 const AMAZON_SAVE_STEPS: Record<string, string> = {
-  "Save as CSV (Comma delimited).": "Save as Text (Tab delimited) (*.txt).",
-  "When done, select the helper column, right-click, and choose Delete. Save as CSV (Comma delimited).":
+  "Save as CSV UTF-8 (Comma delimited).": "Save as Text (Tab delimited) (*.txt).",
+  "When done, select the helper column, right-click, and choose Delete. Save as CSV UTF-8 (Comma delimited).":
     "When done, select the helper column, right-click, and choose Delete. Save as Text (Tab delimited) (*.txt).",
   "Go to File > Download > Comma Separated Values (.csv).":
     "Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.",
@@ -433,7 +433,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Repeat: no -> {f},  1 -> {t},  0 -> {f}.", { t, f }),
         ...(t === "true" ? [] : [tr("Also replace: True -> {t},  False -> {f}.", { t, f })]),
         tr("Scan the column to confirm only {pair} remain (and blanks if allowed).", { pair }),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     }
     case "money":
@@ -443,7 +443,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Find the comma used as a thousand separator (as in 1,000) and replace it with nothing. This turns 1,000.00 into 1000.00."),
         tr("Right-click the selected column, choose 'Format Cells', select 'Number', set Decimal places to 2, click OK."),
         tr("Scroll through the column and verify values look like 9.99 or 1000.00 with no symbols."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     case "inventory":
       return [
@@ -451,7 +451,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Right-click and choose 'Format Cells'. Select 'Number', set Decimal places to 0, click OK."),
         tr("Use Data > Filter on this column. Filter where value is less than 0 and change those cells to 0."),
         tr("Also filter for non-numeric values (text cells) and enter the correct whole number."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     case "required_field":
       return [
@@ -459,7 +459,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Press Ctrl+G (Go To), then choose Special → Blanks → OK. Excel selects all empty cells in that column."),
         tr("Type the required value and press Ctrl+Enter to fill all selected blank cells at once."),
         tr("If different rows need different values: use Data > Filter on the column, filter for '(Blanks)', and fill each row manually."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     case "url":
     case "image":
@@ -469,7 +469,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Scan the column for cells that start with // or just a filename like 'shirt.jpg'. Add https:// in front of each."),
         tr("Find ' ' (a single space), replace it with a hyphen, then click Replace All. This removes spaces from URLs."),
         tr("Click a sample URL and press F5, or paste it into a browser, to confirm the image or page loads correctly."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     case "length_limit": {
       const limit = charLimit(input) ?? tr("the limit");
@@ -479,7 +479,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Copy this formula down to all rows by double-clicking the fill handle (the small square in the cell's bottom-right corner)."),
         tr("Go to Data > Filter. On the helper column, use a number filter for 'Greater Than {limit}'.", { limit }),
         tr("For each flagged row, click into the original column's cell and shorten the text until the helper column shows a number at or below the limit."),
-        tr("When done, select the helper column, right-click, and choose Delete. Save as CSV (Comma delimited)."),
+        tr("When done, select the helper column, right-click, and choose Delete. Save as CSV UTF-8 (Comma delimited)."),
       ];
     }
     case "enum": {
@@ -490,7 +490,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Press Ctrl+H. Type the invalid value in 'Find what' and the correct value in 'Replace with', then click Replace All."),
         tr("The accepted values are: {values}.", { values }),
         tr("To prevent future errors, add a dropdown: select the column, go to Data > Data Validation, choose 'List', and enter the valid options separated by commas."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     }
     case "duplicate":
@@ -499,7 +499,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Go to Home > Conditional Formatting > Highlight Cell Rules > Duplicate Values. Duplicate cells will be highlighted in red."),
         tr("For each highlighted pair, decide which row to keep. Either delete the duplicate row, or change its identifier to something unique."),
         tr("After resolving all duplicates, clear the conditional formatting: Home > Conditional Formatting > Clear Rules > Clear Rules from Selected Cells."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     case "variant_structure":
       return [
@@ -507,13 +507,13 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
         tr("Verify the parent row appears before all its variant rows in the sorted result."),
         tr("For WooCommerce: parent rows should have Type = 'variable'. Variation rows should have Type = 'variation' and the Parent column set to the parent's SKU."),
         tr("For Shopify: all rows in a product group must share the same Handle. Check that Option1 Name is filled before Option2 Name."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
     default:
       return [
         tr("Review the {column} column for incorrect values.", col),
         tr("Fix any cells that do not match the expected format."),
-        tr("Save as CSV (Comma delimited)."),
+        tr("Save as CSV UTF-8 (Comma delimited)."),
       ];
   }
 }

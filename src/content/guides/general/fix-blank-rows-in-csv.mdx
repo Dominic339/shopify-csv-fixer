@@ -2,7 +2,7 @@
 title: "Fix Blank Rows in a CSV File"
 description: "How to find and delete blank rows in a CSV file before importing to Shopify, WooCommerce, Etsy, eBay, or Amazon, in Excel, Google Sheets, and Python."
 keywords: ["fix blank rows csv", "remove blank rows csv", "csv blank row error", "delete empty rows csv", "csv import blank row", "blank lines csv", "excel csv blank rows"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Why blank rows appear in CSV files and how they break imports"
@@ -16,7 +16,7 @@ timeToComplete: "6 minutes"
 
 ## Why Blank Rows Cause Import Problems
 
-A blank row in a CSV file is a row where all fields are empty (or just commas with no values). When an ecommerce platform parses your file and encounters a blank row, it either:
+A blank row in a CSV file is a row where all fields are empty (or just commas with no values). Many importers simply skip a fully blank row, but depending on the platform, a blank row can instead:
 
 - **Creates an empty product record** (Title blank, Price blank), which fails required field validation
 - **Stops importing** at the blank row, silently ignoring everything after it

@@ -2,12 +2,12 @@
 title: "Fix Mojibake and Encoding Errors in CSV Files"
 description: "Resolve garbled text caused by encoding mismatches in your CSV files. Learn to detect UTF-8 vs Latin-1 conflicts, strip the BOM, and re-save files correctly for ecommerce imports."
 keywords: ["mojibake csv", "encoding error csv", "utf-8 csv", "latin-1 csv", "bom csv", "fix garbled characters", "csv encoding mismatch", "garbled text csv fix", "bom strip csv"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "What mojibake is and why it appears in CSV files"
   - "How to identify UTF-8 vs Latin-1 (ISO-8859-1) encoding"
-  - "How to strip the UTF-8 BOM that breaks imports"
+  - "How to strip the UTF-8 BOM when a tool misreads it"
   - "Step-by-step fixes in Excel, Google Sheets, and VS Code"
   - "How to prevent re-encoding corruption on every save"
 bestFor: "Sellers and catalog managers dealing with garbled product titles, descriptions, or option names after exporting or downloading a CSV"
@@ -63,7 +63,7 @@ Get-Content yourfile.csv -Encoding Byte -TotalCount 3
 ### Identify which encoding to use
 
 - Most garbled files are **UTF-8 read as Latin-1** (or vice versa).
-- The fix is almost always: re-save as **UTF-8 without BOM**.
+- The fix is almost always: reopen the file with the encoding it was really saved in, then re-save it as **UTF-8**.
 
 ---
 
@@ -71,7 +71,7 @@ Get-Content yourfile.csv -Encoding Byte -TotalCount 3
 
 The UTF-8 BOM (Byte Order Mark) is a three-byte sequence (`EF BB BF`) that some tools prepend to UTF-8 files. Windows Notepad and Excel sometimes add it automatically.
 
-**Why it matters:** Import tools, including Shopify's product CSV importer, may read the BOM as literal characters in the first column name, turning `Handle` into `ï»¿Handle`. That column is then not recognized and the entire import fails silently.
+**Why it matters:** Some import tools read the BOM as literal characters in the first column name, turning `Handle` into `ï»¿Handle`, and then don't recognise that column. Shopify and WooCommerce handle the BOM, but other tools and scripts may not.
 
 ---
 

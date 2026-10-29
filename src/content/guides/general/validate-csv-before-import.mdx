@@ -2,7 +2,7 @@
 title: "Validate Your CSV Before Uploading to Any Ecommerce Platform"
 description: "A practical checklist to catch encoding errors, missing headers, row-length mismatches, quoting issues, and other problems before your CSV import fails. Covers Shopify, WooCommerce, eBay, Amazon, and Etsy."
 keywords: ["validate csv before import", "csv checklist", "csv import errors", "csv headers check", "csv encoding check", "csv quoting", "csv row length", "shopify csv validate", "woocommerce csv validate"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "What to check before uploading any CSV to an ecommerce platform"
@@ -24,12 +24,12 @@ A five-minute validation check before uploading can save hours of cleanup.
 
 ## The Pre-Import Checklist
 
-### 1. Encoding: UTF-8 without BOM
+### 1. Encoding: UTF-8
 
-**What to check:** The file must be encoded in UTF-8. A BOM (Byte Order Mark) at the start of the file can corrupt the first column name.
+**What to check:** The file must be encoded in UTF-8. A BOM (Byte Order Mark) at the start is fine for Shopify and WooCommerce, but some tools read it as part of the first column name.
 
 **How to check:**
-- Open the file in VS Code. The bottom-right status bar should say `UTF-8`, not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
+- Open the file in VS Code. The bottom-right status bar should say `UTF-8` (or `UTF-8 with BOM`), not `Windows 1252` or `ISO 8859-1`.
 - If it shows anything other than `UTF-8`, click the encoding label, choose **Save with Encoding → UTF-8**.
 
 **Common fix:** In Excel, always save as **CSV UTF-8 (Comma delimited)**, not plain CSV.
