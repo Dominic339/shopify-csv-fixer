@@ -904,7 +904,7 @@ export function convertCsv(
   const unmappedSourceFields = sourceHeaders.filter((h) => !source.consumed.has(h));
   if (unmappedSourceFields.length) {
     warnings.unshift(
-      `${unmappedSourceFields.length} source column(s) have no equivalent in the target format and were left out: ${unmappedSourceFields.slice(0, 5).join(", ")}${unmappedSourceFields.length > 5 ? "…" : ""}.`
+      `${unmappedSourceFields.length} source column(s) have no equivalent in the target format and were left out: ${unmappedSourceFields.slice(0, 5).join(", ")}${unmappedSourceFields.length > 5 ? ` (+${unmappedSourceFields.length - 5})` : ""}.`
     );
   }
   if (truncated) {

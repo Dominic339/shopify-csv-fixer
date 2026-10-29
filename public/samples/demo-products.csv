@@ -1,0 +1,8 @@
+Title,URL handle,Option1 name,Option1 value,SKU,Price,Compare-at price,Inventory quantity,Published on online store,Status,Vendor,Type,Product image URL
+Linen Shirt,Linen Shirt!,Size,S,LS-S,$ 45,,12,yes,active,Northwind,Shirts,https://cdn.example.com/linen-shirt.jpg
+,linen-shirt,,M,LS-M,"45,00",,8,,,,,
+,linen-shirt,,M,LS-M2,45.00,,0,,,,,
+Canvas Tote,canvas-tote,Title,Default Title,TOTE-1,,,40,TRUE,active,Northwind,Bags,https://cdn.example.com/tote.jpg
+Wool Beanie,wool-beanie,Color,Grey,BEANIE-GRY,32.00,38.00,20,TRUE,active,Northwind,Hats,https://cdn.example.com/beanie.jpg
+,wool-beanie,,Navy,BEANIE-GRY,32,,11,,,,,
+Ceramic Mug ,ceramic-mug,Title,Default Title,MUG-01,18.5,,ten,TRUE,Active,Northwind,Kitchen,https://cdn.example.com/mug.jpg

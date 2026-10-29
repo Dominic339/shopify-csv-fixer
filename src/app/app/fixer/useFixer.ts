@@ -657,6 +657,19 @@ export function useFixer(t: AppStrings) {
     return map;
   }, [issuesForDisplay]);
 
+  // Column order for the on-screen tables (export keeps the file's order): the columns
+  // that name the product, then the ones with issues, then everything else. Otherwise
+  // the problem cells are often far off to the right.
+  const displayHeaders = useMemo(() => {
+    const isName = (h: string) => /^\*?(title|name|url handle|handle|item[-_ ]name)$/i.test(h.trim());
+    const withIssues = new Set<string>();
+    for (const key of issueCellMap.keys()) withIssues.add(key.slice(key.indexOf("|||") + 3));
+    const names = tableHeaders.filter(isName);
+    const flagged = tableHeaders.filter((h) => !isName(h) && withIssues.has(h));
+    const rest = tableHeaders.filter((h) => !isName(h) && !withIssues.has(h));
+    return [...names, ...flagged, ...rest];
+  }, [tableHeaders, issueCellMap]);
+
   // Rows that should be auto-pinned for the *current filter scope*.
 // Important behavior:
 // - Auto-pins are "sticky" within the current filter: once a row is auto-pinned, it stays pinned
@@ -1160,6 +1173,7 @@ useEffect(() => {
     fileName,
     rows,
     tableHeaders,
+    displayHeaders,
     busy,
     handleFile,
     lastUploadedText,

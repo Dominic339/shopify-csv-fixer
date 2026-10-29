@@ -65,7 +65,7 @@ export function IssuesPanel({ f, t, sectionRef }: { f: Fixer; t: AppStrings; sec
                 <tr>
                   <th className="px-3 py-2">{t.pinCol}</th>
                   <th className="px-3 py-2">{t.rowCol}</th>
-                  {f.tableHeaders.map((h) => (
+                  {f.displayHeaders.map((h) => (
                     <th key={h} className="whitespace-nowrap px-3 py-2">
                       {h}
                     </th>
@@ -97,7 +97,7 @@ export function IssuesPanel({ f, t, sectionRef }: { f: Fixer; t: AppStrings; sec
                         </button>
                       </td>
                       <td className={`whitespace-nowrap px-3 py-2 ${muted}`}>{rowIndex + 1}</td>
-                      {f.tableHeaders.map((h) => {
+                      {f.displayHeaders.map((h) => {
                         const sev = f.issueCellMap.get(`${rowIndex}|||${h}`);
                         return (
                           <td key={h} className="min-w-[180px] px-3 py-2">
@@ -127,7 +127,7 @@ export function IssuesPanel({ f, t, sectionRef }: { f: Fixer; t: AppStrings; sec
 
       <div className="mt-6">
         <EditableIssuesTable
-          headers={f.tableHeaders}
+          headers={f.displayHeaders}
           issues={f.issuesForDisplay}
           rows={f.rows}
           onUpdateRow={f.onUpdateRow}
