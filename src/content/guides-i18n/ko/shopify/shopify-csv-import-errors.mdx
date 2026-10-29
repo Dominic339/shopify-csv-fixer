@@ -2,7 +2,7 @@
 title: "Shopify CSV 가져오기 오류: 흔한 원인과 해결 방법"
 description: "Shopify CSV에서 가장 흔한 가져오기 오류에 대한 완전한 가이드입니다. 빠진 열, 잘못된 참/거짓 값, 변형 구조 문제, 가격 오류, handle 충돌을 다룹니다."
 keywords: ["shopify csv 가져오기 오류", "shopify 제품 csv 가져오기 실패", "shopify csv 오류", "shopify 제품 가져오기 오류", "shopify csv 수정", "shopify csv 검사", "shopify csv 업로드 오류"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "가장 흔한 Shopify CSV 가져오기 오류와 각각의 원인"
@@ -33,13 +33,13 @@ timeToComplete: "12분"
 
 **원인:** 머리글 행에 필수 열이 하나 이상 없거나, 철자가 틀렸거나, 대소문자가 다릅니다.
 
-**Shopify 필수 열:**
+**주요 Shopify 열:**
 
 | 열 | 참고 |
 |---|---|
-| `Handle` | URL에 쓸 수 있는 짧은 이름, 변형을 묶음 |
-| `Title` | 제품 이름 |
-| `Variant Price` | 모든 변형 행의 가격 |
+| `Handle` | 변형 행을 묶습니다. 상품에 변형이 있거나 기존 상품을 업데이트할 때 필요하며, 그렇지 않으면 Shopify가 제목으로 만듭니다 |
+| `Title` | 상품 이름. 새 상품에 Shopify가 요구하는 유일한 열입니다 |
+| `Variant Price` | 각 변형의 가격. 비어 있는 가격은 0.00으로 가져옵니다 |
 
 **해결 방법:**
 - 머리글 행을 [공식 Shopify 제품 CSV 템플릿](https://help.shopify.com/ko/manual/products/import-export/using-csv)과 비교하세요
@@ -70,12 +70,12 @@ Excel에서는 `Ctrl+H`(찾기 및 바꾸기)를 누르고, 긴 값 안의 글�
 
 ## 오류: 변형 가격이 비어 있거나 잘못됨
 
-**메시지:** "Variant Price can't be blank" 또는 가격이 0.00으로 가져와짐
+**증상:** 상품이 0.00으로 가져와지거나 가격이 잘못 나옵니다
 
 **원인:** `Variant Price`가 비어 있거나, 통화 기호가 있거나(`$19.99`), 소수점으로 쉼표를 썼거나(`19,99`), 텍스트입니다.
 
 **해결 방법:**
-- 모든 행(상위 행과 변형 행 모두)에 `Variant Price`를 입력하세요
+- 모든 변형 행에 `Variant Price`를 넣으세요. Shopify는 빈 가격을 거부하지 않고 해당 변형을 0.00으로 가져옵니다
 - 통화 기호를 없애세요: 찾기 및 바꾸기로 `$`를 지우세요
 - 소수점 쉼표를 마침표로 바꾸세요: `19,99` → `19.99`
 - 저장하기 전에 Excel에서 열 서식을 숫자로 지정하세요(기호가 다시 붙지 않도록)
@@ -94,7 +94,7 @@ Excel에서는 `Ctrl+H`(찾기 및 바꾸기)를 누르고, 긴 값 안의 글�
 
 **변형 행 규칙:**
 - 같은 제품의 모든 행은 정확히 같은 `Handle`을 써야 합니다
-- 모든 행에 `Option1 Name`과 `Option1 Value`가 있어야 합니다
+- 각 상품의 첫 행에서 옵션 이름(`Option1 Name`)을 정하고, 각 변형 행에는 자체 `Option1 Value`가 있어야 합니다
 - 옵션이 3개라면 모든 행에 `Option1`, `Option2`, `Option3` 열이 있어야 합니다
 - `Option1 Name`(예: `Size`)은 그룹의 모든 행에서 같아야 하고, 바뀌는 것은 `Option1 Value`뿐입니다
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **원인:** 서로 관계없는 두 제품이 같은 Handle을 씁니다. Shopify는 Handle이 같은 행을 모두 하나의 제품으로 묶기 때문에, Handle이 중복되면 서로 다른 제품이 합쳐집니다.
 
-**해결 방법:** 제품마다 고유한 Handle을 쓰세요. Handle은 URL에 쓸 수 있어야 하므로 영문 소문자, 숫자, 하이픈만 사용하고 공백이나 특수 문자는 쓰지 마세요.
+**해결 방법:** 상품마다 고유한 Handle을 쓰세요. Handle에는 문자, 숫자, 하이픈만 쓸 수 있고 공백이나 다른 문자는 안 되며, Shopify는 소문자로 저장합니다.
 
 기존 제품을 업데이트하는 중이고 그 Handle이 이미 Shopify에 있다면 의도된 동작이며, 가져오기로 그 제품이 업데이트됩니다. 하지만 새 제품이 실수로 기존 제품과 같은 Handle을 쓰면 기존 제품의 데이터가 덮어써집니다.
 

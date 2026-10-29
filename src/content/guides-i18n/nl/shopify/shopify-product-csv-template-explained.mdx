@@ -2,7 +2,7 @@
 title: "Het Shopify-product-CSV-sjabloon uitgelegd"
 description: "Een uitleg per kolom van elk veld in het officiële product-CSV-sjabloon van Shopify: wat elke kolom doet, welke waarden hij accepteert en welke verplicht zijn."
 keywords: ["shopify product csv sjabloon", "shopify csv kolommen uitgelegd", "shopify csv sjabloon handleiding", "shopify importsjabloon", "shopify csv velden", "shopify productimport kolommen", "shopify csv referentie"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Wat elke kolom in het product-CSV-sjabloon van Shopify doet"
@@ -18,13 +18,13 @@ timeToComplete: "15 minuten"
 
 Het officiële product-CSV-sjabloon van Shopify heeft twee soorten kolommen: **productniveau** (één keer per product ingevuld, in de eerste rij of hoofdrij) en **variantniveau** (in elke rij van dat product ingevuld). Heeft een product meerdere varianten, dan beslaat het meerdere rijen in het bestand, allemaal met dezelfde Handle.
 
-Download het actuele sjabloon in de Shopify-beheeromgeving: Producten → Importeren → Voorbeeld-CSV downloaden.
+Download de huidige sjabloon in je Shopify-beheer: Producten → Importeren → Voorbeeld-CSV downloaden. De huidige sjabloon gebruikt nieuwere kolomnamen (`URL handle`, `Description`, `Price`, `Product image URL`, `Published on online store` enzovoort). Shopify accepteert nog steeds de oudere namen uit deze handleiding.
 
 ---
 
 ## Kolommen voor identificatie
 
-### Handle (verplicht)
+### Handle (`URL handle` in de huidige sjabloon)
 
 De Handle is de unieke, URL-geschikte ID van het product. Hij moet:
 - uniek zijn binnen alle producten in je winkel
@@ -70,9 +70,9 @@ Of het product in je webwinkel wordt gepubliceerd. Accepteert `true` of `false`;
 - `true`: het product wordt in je webwinkel gepubliceerd
 - `false`: het product verschijnt niet in je webwinkel (het blijft in je beheeromgeving; de conceptstatus stel je apart in met de kolom Status)
 
-### Published Scope
+### Status
 
-Waar het product wordt gepubliceerd. Gangbare waarden: `web` (webwinkel), `global` (alle kanalen).
+Of het product verkocht kan worden: `active` (standaard), `draft` of `archived`.
 
 ---
 
@@ -107,9 +107,9 @@ Deze kolommen gelden voor elke rij (hoofdrijen en variantrijen).
 
 Een unieke ID voor deze specifieke variant. Optioneel, maar als je voorraad bijhoudt, moeten SKU's uniek zijn. Laat leeg als je geen voorraadbeheer op SKU gebruikt.
 
-### Variant Price (verplicht)
+### Variant Price (`Price` in de huidige sjabloon)
 
-De verkoopprijs van deze variant. Een gewoon decimaal getal, zonder valutasymbolen en zonder scheidingstekens voor duizendtallen.
+De verkoopprijs van deze variant. Een gewoon decimaal getal, zonder valutateken of scheidingsteken voor duizendtallen. Een lege prijs wordt geïmporteerd als 0.00.
 
 **Voorbeeld:** `19.99`
 
@@ -119,7 +119,7 @@ De "van"-prijs die doorgestreept wordt getoond. Laat leeg als er geen kortingspr
 
 ### Variant Inventory Qty
 
-Het aantal stuks op voorraad. Geheel getal. Gebruik `0` als het product uitverkocht is. Laat leeg als voorraadbeheer voor deze variant uit staat.
+Het aantal eenheden op voorraad, als geheel getal. Dit geldt alleen voor winkels met één locatie; winkels met meerdere locaties werken de voorraad bij met de voorraad-CSV van Shopify.
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ Hoe de variant wordt afgehandeld. `manual` voor standaardafhandeling, of de API-
 
 ### Variant Barcode
 
-UPC-, EAN- of ISBN-barcode. Gewone tekst. Shopify controleert hem niet, maar slaat hem alleen op.
+UPC-, EAN- of ISBN-barcode. Stel de kolom in als tekst, zodat een spreadsheet geen voorloopnullen weghaalt en het getal niet verandert in 1.23E+11.
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-Het gewicht van de variant en de eenheid. Het gewicht is een decimaal getal. Als eenheid zijn `kg`, `g`, `lb` of `oz` toegestaan.
+`Variant Grams` (`Weight value (grams)` in de huidige sjabloon) is het gewicht in grammen, als geheel getal zonder eenheid: 5,125 kg wordt `5125`. `Variant Weight Unit` (`Weight unit for display`) bepaalt alleen de eenheid die klanten zien: `g`, `kg`, `lb` of `oz`.
 
 ---
 
@@ -151,7 +151,7 @@ Het gewicht van de variant en de eenheid. Het gewicht is een decimaal getal. Als
 
 ### Image Src
 
-De URL van de productafbeelding. Die moet een openbaar bereikbare HTTPS-URL zijn. Ondersteunde formaten: JPG, JPEG, PNG, GIF, WEBP.
+De URL van de productafbeelding. Dit moet een openbaar bereikbare `https://`-URL zonder wachtwoord zijn.
 
 - In de hoofdrij: de hoofdafbeelding van het product
 - In variantrijen: de afbeelding bij de optiecombinatie van die variant (bijv. het blauwe kleurstaal)
@@ -174,7 +174,7 @@ De paginatitel (zichtbaar in browsertabbladen en zoekresultaten). Is hij leeg, d
 
 ### SEO Description
 
-De metabeschrijving van de productpagina. Aanbevolen: minder dan 160 tekens.
+De metabeschrijving van de productpagina. Shopify staat tot 320 tekens toe; een lege cel gebruikt de productbeschrijving.
 
 ---
 
@@ -182,7 +182,7 @@ De metabeschrijving van de productpagina. Aanbevolen: minder dan 160 tekens.
 
 ### Gift Card (booleaans)
 
-Alleen `true` als dit product een cadeaubon is. Bij de meeste producten hoort hier `false` te staan of blijft het veld leeg.
+Alleen `true` als dit product een cadeaubon is. De meeste producten horen `false` of leeg te zijn. Shopify kan geen cadeaubonnen aanmaken via een CSV-import, dus maak nieuwe cadeaubonnen aan in het beheer.
 
 ---
 

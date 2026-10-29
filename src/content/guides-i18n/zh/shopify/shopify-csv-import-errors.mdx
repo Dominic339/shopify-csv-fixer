@@ -2,7 +2,7 @@
 title: "Shopify CSV 导入错误：常见原因与解决方法"
 description: "最常见的 Shopify CSV 导入错误完整指南：缺少列、布尔值无效、变体结构问题、价格错误和 handle 冲突。"
 keywords: ["shopify csv 导入错误", "shopify 产品 csv 导入失败", "shopify csv 报错", "shopify 商品导入错误", "修复 shopify csv", "检查 shopify csv", "shopify csv 上传错误"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "最常见的 Shopify CSV 导入错误及其原因"
@@ -33,13 +33,13 @@ timeToComplete: "12 分钟"
 
 **原因**：标题行中缺少一个或多个必填列，或者列名拼写错误、大小写不对。
 
-**Shopify 必填列**：
+**Shopify 的主要列：**
 
 | 列 | 说明 |
 |---|---|
-| `Handle` | 可用于 URL 的短名称；用于对变体分组 |
-| `Title` | 商品名称 |
-| `Variant Price` | 每个变体行的价格 |
+| `Handle` | 把变体行归为一组。商品有变体或更新现有商品时需要填写；否则 Shopify 会根据标题自动生成 |
+| `Title` | 商品名称。新建商品时 Shopify 唯一要求的列 |
+| `Variant Price` | 每个变体的价格。价格留空会按 0.00 导入 |
 
 **解决方法**：
 - 将标题行与 [Shopify 官方商品 CSV 模板](https://help.shopify.com/zh-CN/manual/products/import-export/using-csv) 进行对比
@@ -70,12 +70,12 @@ timeToComplete: "12 分钟"
 
 ## 错误：变体价格为空或无效
 
-**提示信息**："Variant Price can't be blank"，或价格被导入为 0.00
+**症状：** 商品以 0.00 导入，或价格不对
 
 **原因**：`Variant Price` 为空、带有货币符号（`$19.99`）、用逗号作小数点（`19,99`），或者是文本。
 
 **解决方法**：
-- 在每一行（父行和变体行）都填写 `Variant Price`
+- 在每个变体行填写 `Variant Price`。Shopify 不会拒绝空价格，而是把该变体按 0.00 导入
 - 去掉货币符号：用查找和替换删除 `$`
 - 把小数点逗号换成句点：`19,99` → `19.99`
 - 保存前在 Excel 中把该列设为数值格式（防止再次加上符号）
@@ -94,7 +94,7 @@ timeToComplete: "12 分钟"
 
 **变体行规则**：
 - 同一商品的所有行必须使用完全相同的 `Handle`
-- 每一行都必须有 `Option1 Name` 和 `Option1 Value`
+- 每个商品的第一行给出选项名称（`Option1 Name`）；每个变体行都需要自己的 `Option1 Value`
 - 如果有 3 个选项，所有行都必须有 `Option1`、`Option2` 和 `Option3` 列
 - `Option1 Name`（例如 `Size`）在组内所有行中应保持一致，只有 `Option1 Value` 会变化
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **原因**：两个毫无关系的商品使用了相同的 Handle。Shopify 会把 Handle 相同的所有行合并为一个商品，因此重复的 Handle 会把不同的商品合并在一起。
 
-**解决方法**：为每个商品设置唯一的 Handle。Handle 必须可用于 URL：只能使用小写英文字母、数字和连字符，不能有空格或特殊字符。
+**解决方法：** 让每个商品的 Handle 都唯一。Handle 可以包含字母、数字和连字符，不能有空格或其他字符，Shopify 会以小写保存。
 
 如果您是在更新现有商品，而该 Handle 已存在于 Shopify 中，这是正常的：导入会更新该商品。但如果新商品意外地与现有商品使用了相同的 Handle，现有商品的数据就会被覆盖。
 

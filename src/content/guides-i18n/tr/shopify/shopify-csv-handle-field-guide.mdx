@@ -2,7 +2,7 @@
 title: "Shopify CSV Handle alanı rehberi"
 description: "Shopify ürün CSV'sindeki Handle alanı hakkında bilmeniz gereken her şey: ne işe yaradığı, geçerli bir handle'ın kuralları, varyantları nasıl grupladığı ve handle hatalarını nasıl düzelteceğiniz."
 keywords: ["shopify csv handle alanı", "shopify handle", "shopify handle csv", "shopify ürün handle", "shopify handle varyant", "shopify handle kuralları", "shopify csv handle hataları"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify Handle alanının ne işe yaradığı ve neden en önemli sütun olduğu"
@@ -33,7 +33,7 @@ Geçerli bir Shopify handle'ı:
 - Yalnızca **küçük harf, rakam ve tire** içermelidir
 - **Boşluk içermemelidir** (yerine tire kullanın)
 - **Özel karakter içermemelidir**: `&`, `%`, `?`, `/`, `@` veya Unicode karakterler olmamalıdır
-- Her satırda **dolu** olmalıdır: boş handle'lara izin verilmez
+- Varyantları olan bir ürünün **her satırında dolu** olmalıdır. Tek satırlık bir ürün bunu boş bırakabilir; Shopify handle'ı başlıktan üretir
 
 | Geçerli | Geçersiz | Neden |
 |---|---|---|
@@ -41,7 +41,7 @@ Geçerli bir Shopify handle'ı:
 | `product-123` | `product/123` | Eğik çizgi içeriyor |
 | `mens-running-shoes` | `men's-running-shoes` | Kesme işareti içeriyor |
 | `widget-v2` | `widget_v2` | Alt çizgi içeriyor (teknik olarak izinli ama önerilmez) |
-| `shirt-sm` | `` | Boş (izin verilmez) |
+| `shirt-sm` | Varyant satırında `` | Boş: varyant satırlarının gruplu kalması için handle gerekir |
 
 ---
 

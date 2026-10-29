@@ -2,7 +2,7 @@
 title: "Shopify-productafbeeldingen in CSV: Image Src, alt-tekst en posities"
 description: "Leer hoe je afbeeldings-URL's in de Shopify-product-CSV opbouwt: de kolommen Image Src, Image Position en Image Alt Text, meerdere afbeeldingen per product toevoegen en de meest voorkomende importfouten bij afbeeldingen voorkomen."
 keywords: ["shopify afbeeldingen csv", "shopify image src", "shopify alt-tekst afbeelding", "shopify image position csv", "shopify productafbeeldingen importeren", "shopify csv meerdere afbeeldingen", "shopify afbeelding url"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Welke afbeeldingskolommen de Shopify-product-CSV heeft"
@@ -50,8 +50,8 @@ Wil je meer dan één afbeelding bij een product, voeg dan **extra rijen met dez
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 De belangrijkste regels:
@@ -88,7 +88,7 @@ Shopify downloadt de afbeeldingen tijdens de import van de URL die je opgeeft. D
 - **Hij moet HTTPS gebruiken.** Gewone HTTP-URL's worden geweigerd of kunnen waarschuwingen over gemengde inhoud geven.
 - **Hij moet openbaar bereikbaar zijn.** URL's achter een login, Cloudflare-controles of IP-beperkingen werken niet.
 - **Geen spaties in de URL.** Spaties moeten als `%20` worden gecodeerd of de URL moet worden aangepast.
-- **Hij moet naar een afbeeldingsbestand wijzen.** Shopify accepteert JPEG, PNG, GIF, WEBP en SVG. De URL hoeft niet op een extensie te eindigen als de server het juiste content-type teruggeeft, maar de meeste importprocessen werken betrouwbaarder met URL's met een extensie.
+- **Moet naar een afbeeldingsbestand wijzen.** Gebruik een gangbaar formaat zoals JPEG, PNG, GIF of WEBP. De URL hoeft niet op een extensie te eindigen als de server de juiste content-type-header teruggeeft, maar de meeste imports werken betrouwbaarder met URL's met een extensie.
 - **Geen parameters die verlopen.** Gebruik je vooraf ondertekende URL's (van S3, Cloudinary enz.) die na een tijd verlopen, zorg dan dat ze tijdens de hele import geldig blijven.
 
 ---
@@ -116,13 +116,13 @@ Shopify downloadt de afbeeldingen tijdens de import van de URL die je opgeeft. D
 
 **Oplossing:** Zorg dat de Handles precies gelijk zijn. Eén extra spatie of een andere hoofdletter maakt al een nieuw product aan.
 
-### Oude afbeeldingen worden niet verwijderd
+### Afbeeldingen opnieuw importeren
 
-**Gedrag:** Bij een nieuwe import **voegt** de CSV-import van Shopify afbeeldingen aan een product toe. Bestaande afbeeldingen worden niet verwijderd. Wil je afbeeldingen verwijderen, doe dat dan in de Shopify-beheeromgeving of via de API.
+**Gedrag:** de documentatie van Shopify zegt niet of een product opnieuw importeren de afbeeldingen nog eens toevoegt of de bestaande vervangt. Test eerst met één product en verwijder ongewenste afbeeldingen in het Shopify-beheer.
 
 ### Te veel afbeeldingen
 
-**Gedrag:** Geef je meer dan 250 afbeeldings-URL's op voor één Handle, dan importeert Shopify alleen de eerste 250 en negeert de rest zonder melding.
+**Gedrag:** Shopify ondersteunt tot 250 afbeeldingen per product. Blijf per handle binnen die grens.
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**Variantafbeelding (afbeelding die bij een bepaalde variantrij hoort):**
-Zet Image Src in dezelfde rij als de variant. Shopify koppelt die afbeelding dan aan die variant:
+**Variantafbeelding (afbeelding gekoppeld aan een bepaalde variant):**
+Zet de afbeeldings-URL in de kolom `Variant Image` (`Variant image URL` in de huidige sjabloon) op de rij van die variant:
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

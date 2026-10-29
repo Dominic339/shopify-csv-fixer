@@ -2,7 +2,7 @@
 title: "Shopify Product Images in CSV: Image Src, Alt Text, and Positions"
 description: "Learn how to structure image URLs in the Shopify product CSV. Understand Image Src, Image Position, Image Alt Text columns, how to add multiple images per product, and how to avoid the most common image import failures."
 keywords: ["shopify image csv", "shopify image src", "shopify image alt text", "shopify image position csv", "shopify product images import", "shopify csv multiple images", "shopify image url"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Which image columns exist in the Shopify product CSV"
@@ -50,8 +50,8 @@ To add more than one image to a product, add **additional rows with the same Han
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 Key rules:
@@ -88,7 +88,7 @@ Shopify downloads images from the URL you provide at import time. The URL must m
 - **Must be HTTPS.** Plain HTTP URLs are rejected or may result in mixed-content warnings.
 - **Must be publicly accessible.** URLs behind authentication, Cloudflare challenges, or IP restrictions will not work.
 - **No spaces in the URL.** Spaces must be encoded as `%20` or the URL must be restructured.
-- **Must point to an image file.** Shopify accepts JPEG, PNG, GIF, WEBP, and SVG. The URL does not need to end in an extension if the server returns the correct content-type header, but most import pipelines work more reliably with extension-based URLs.
+- **Must point to an image file.** Use a common image format such as JPEG, PNG, GIF or WEBP. The URL does not need to end in an extension if the server returns the correct content-type header, but most import pipelines work more reliably with extension-based URLs.
 - **No query strings that expire.** If you use pre-signed URLs (from S3, Cloudinary, etc.) that expire after a time, ensure they are valid for the duration of the import process.
 
 ---
@@ -116,13 +116,13 @@ Shopify downloads images from the URL you provide at import time. The URL must m
 
 **Fix:** Ensure exact Handle consistency. A single extra space or capitalization difference creates a new product.
 
-### Old images are not removed
+### Re-importing images
 
-**Behavior:** Shopify's CSV import **adds** images to a product on re-import. It does not remove existing images. If you need to remove images, you must do so through the Shopify admin or API.
+**Behavior:** Shopify's documentation doesn't say whether re-importing a product adds its images again or replaces the existing ones. Test with one product first, and remove unwanted images in the Shopify admin.
 
 ### Too many images
 
-**Behavior:** If you specify more than 250 image URLs for a single Handle, Shopify imports only the first 250 and silently ignores the rest.
+**Behavior:** Shopify supports up to 250 images per product. Keep each handle within that limit.
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**Variant image (image associated with a specific variant row):**
-Place the Image Src on the same row as the variant. Shopify associates that image with that variant:
+**Variant image (image linked to a specific variant):**
+Put the image URL in the `Variant Image` column (`Variant image URL` in the current template) on that variant's row:
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

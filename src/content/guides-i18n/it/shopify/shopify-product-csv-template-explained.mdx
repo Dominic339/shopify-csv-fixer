@@ -2,7 +2,7 @@
 title: "Il modello CSV prodotti di Shopify spiegato"
 description: "Una spiegazione colonna per colonna di ogni campo del modello CSV prodotti ufficiale di Shopify: a cosa serve ogni colonna, quali valori accetta e quali sono obbligatorie."
 keywords: ["modello csv prodotti shopify", "colonne csv shopify spiegate", "guida modello csv shopify", "modello di importazione shopify", "campi csv shopify", "colonne importazione prodotti shopify", "riferimento csv shopify"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "A cosa serve ogni colonna del modello CSV prodotti di Shopify"
@@ -18,13 +18,13 @@ timeToComplete: "15 minuti"
 
 Il modello CSV prodotti ufficiale di Shopify ha due tipi di colonne: **a livello di prodotto** (compilate una volta per prodotto, nella prima riga o riga principale) e **a livello di variante** (compilate in ogni riga di quel prodotto). Un prodotto con più varianti occupa più righe del file, tutte con lo stesso Handle.
 
-Scarica il modello aggiornato dal pannello di Shopify: Prodotti → Importa → Scarica il CSV di esempio.
+Scarica il modello attuale dal pannello di Shopify: Prodotti → Importa → Scarica CSV di esempio. Il modello attuale usa nomi di colonna più recenti (`URL handle`, `Description`, `Price`, `Product image URL`, `Published on online store` e così via). Shopify accetta ancora i nomi precedenti usati in questa guida.
 
 ---
 
 ## Colonne di identificazione
 
-### Handle (obbligatoria)
+### Handle (`URL handle` nel modello attuale)
 
 L'Handle è l'identificativo univoco del prodotto, adatto agli URL. Deve:
 - Essere univoco tra tutti i prodotti del negozio
@@ -70,9 +70,9 @@ Indica se il prodotto è pubblicato nel tuo negozio online. Accetta `true` o `fa
 - `true`: il prodotto è pubblicato nel tuo negozio online
 - `false`: il prodotto non compare nel tuo negozio online (resta nel pannello di amministrazione; lo stato di bozza si imposta a parte, nella colonna Status)
 
-### Published Scope
+### Status
 
-Dove viene pubblicato il prodotto. Valori comuni: `web` (negozio online), `global` (tutti i canali).
+Se il prodotto si può vendere: `active` (predefinito), `draft` o `archived`.
 
 ---
 
@@ -107,9 +107,9 @@ Queste colonne valgono per ogni riga (principali e di variante).
 
 Un identificativo univoco per questa variante. È facoltativo, ma se gestisci l'inventario gli SKU devono essere univoci. Lascialo vuoto se non gestisci l'inventario per SKU.
 
-### Variant Price (obbligatoria)
+### Variant Price (`Price` nel modello attuale)
 
-Il prezzo di vendita di questa variante. Un semplice numero decimale, senza simboli di valuta né separatori delle migliaia.
+Il prezzo di vendita di questa variante. Un semplice numero decimale, senza simboli di valuta né separatori delle migliaia. Un prezzo vuoto viene importato come 0.00.
 
 **Esempio:** `19.99`
 
@@ -119,7 +119,7 @@ Il prezzo "prima" mostrato barrato. Lascialo vuoto se non c'è un prezzo scontat
 
 ### Variant Inventory Qty
 
-Le unità disponibili in magazzino. Numero intero. Usa `0` se esaurito. Lascialo vuoto se la gestione dell'inventario è disattivata per questa variante.
+Il numero di unità disponibili, come numero intero. Vale solo per i negozi con un'unica sede; i negozi con più sedi aggiornano le scorte con il CSV dell'inventario di Shopify.
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ Come viene evasa la variante. `manual` per l'evasione standard, oppure il nome A
 
 ### Variant Barcode
 
-Codice a barre UPC, EAN o ISBN. Testo semplice. Shopify non lo convalida, lo memorizza soltanto.
+Codice a barre UPC, EAN o ISBN. Formatta la colonna come testo, così il foglio di calcolo non elimina gli zeri iniziali né trasforma il numero in 1.23E+11.
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-Il peso della variante e la relativa unità. Il peso è un numero decimale. L'unità accetta `kg`, `g`, `lb` o `oz`.
+`Variant Grams` (`Weight value (grams)` nel modello attuale) è il peso in grammi, come numero intero senza unità: 5,125 kg diventano `5125`. `Variant Weight Unit` (`Weight unit for display`) imposta solo l'unità mostrata ai clienti: `g`, `kg`, `lb` o `oz`.
 
 ---
 
@@ -151,7 +151,7 @@ Il peso della variante e la relativa unità. Il peso è un numero decimale. L'un
 
 ### Image Src
 
-L'URL dell'immagine del prodotto. Deve essere un URL HTTPS accessibile pubblicamente. Formati supportati: JPG, JPEG, PNG, GIF, WEBP.
+L'URL dell'immagine del prodotto. Deve essere un URL `https://` accessibile pubblicamente e senza password.
 
 - Nella riga principale: l'immagine principale del prodotto
 - Nelle righe di variante: l'immagine specifica della combinazione di opzioni di quella variante (ad es. il campione del colore blu)
@@ -174,7 +174,7 @@ Il tag del titolo della pagina (visibile nelle schede del browser e nei risultat
 
 ### SEO Description
 
-La meta description della pagina prodotto. Consigliati meno di 160 caratteri.
+La meta descrizione della pagina del prodotto. Shopify consente fino a 320 caratteri; una cella vuota usa la descrizione del prodotto.
 
 ---
 
@@ -182,7 +182,7 @@ La meta description della pagina prodotto. Consigliati meno di 160 caratteri.
 
 ### Gift Card (booleano)
 
-`true` solo se il prodotto è una carta regalo. Per la maggior parte dei prodotti deve essere `false` o vuota.
+`true` solo se il prodotto è una carta regalo. La maggior parte dei prodotti dovrebbe avere `false` o la cella vuota. Shopify non può creare carte regalo con un'importazione CSV, quindi creale nel pannello.
 
 ---
 

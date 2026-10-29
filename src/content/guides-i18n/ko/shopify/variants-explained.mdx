@@ -2,7 +2,7 @@
 title: "Shopify 상품 변형 해설: CSV 구조와 흔한 실수"
 description: "Shopify CSV 형식이 Handle 묶음, Option 열, 상위/하위 행으로 변형을 어떻게 표현하는지 알아보세요. 상품이 나뉘거나, 변형이 사라지거나, 가져오기가 실패하는 흔한 실수를 피할 수 있습니다."
 keywords: ["shopify 변형 csv", "shopify 제품 변형 가져오기", "shopify handle 변형", "shopify option1 option2", "shopify csv 상위 하위 행", "shopify 변형 가격 csv", "shopify csv 구조"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify가 Handle로 상위 상품과 그 변형을 묶는 방식"
@@ -39,7 +39,7 @@ Handle의 첫 번째 행이 상위 행입니다. 상품 수준의 필드를 설�
 
 | 열 | 상위 행 필수 여부 | 참고 |
 |---|---|---|
-| Handle | 필수 | 이 상품의 고유한 짧은 이름, 영문 소문자와 하이픈만 |
+| Handle | 예 | 이 상품의 고유 식별자. 문자, 숫자, 하이픈 |
 | Title | 필수 | 상품명 |
 | Body HTML | 선택 | 상품 설명, 상위 행에만 필요 |
 | Vendor | 선택 | 브랜드명 |
@@ -66,8 +66,8 @@ Handle의 첫 번째 행이 상위 행입니다. 상품 수준의 필드를 설�
 
 | 열 | 참고 |
 |---|---|
-| Variant Price | 변형마다 필수, 소수(통화 기호 없이) |
-| Variant SKU | 선택이지만 강력히 권장, 스토어 전체에서 고유해야 함 |
+| Variant Price | 소수(통화 기호 없음). 비어 있는 가격은 0.00으로 가져옵니다 |
+| Variant SKU | 선택 사항이지만 강력히 권장. Shopify가 중복을 막지 않으므로 고유하게 유지하세요 |
 | Variant Grams | 그램 단위 무게 |
 | Variant Inventory Qty | 초기 재고 수량 |
 | Variant Inventory Policy | `deny` 또는 `continue`(continue = 재고 없이도 판매 허용) |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **해결 방법:** 한 상품에 속한 모든 행은 정확히 같은 Handle 값을 써야 합니다. 오타 하나(`blue-shirt`와 `blue-shirt-`)만으로도 Shopify가 새 상품을 만듭니다.
 
-### 실수 2: 모든 행에 Title 입력
+### 실수 2: 변형 행에 상품 정보 입력
 
-**증상:** 가져오기는 성공하지만 Shopify가 중복 상품을 만들거나 변형 행을 별도 상품으로 처리합니다.
+**증상:** 변형 행에 입력한 제목, 설명, 태그가 가져온 뒤에 보이지 않습니다.
 
-**해결 방법:** Title은 각 Handle의 첫 행에만 입력하세요. 모든 변형 행에서는 Title을 비워 두세요.
+**해결 방법:** Shopify는 상품 단위 필드(Title, Body HTML, Vendor, Tags 등)를 각 Handle의 첫 행에서 읽습니다. 그 행에 입력하고 이후 행은 비워 두세요.
 
 ### 실수 3: Option1 Name 열 없음
 
-**증상:** "Option1 Name is required" 가져오기 오류가 나거나, 모든 변형이 "Default Title"이라는 옵션 하나로 표시됩니다.
+**증상:** 변형이 보이지 않거나, 상품에 "Default Title"이라는 변형 하나만 남습니다.
 
-**해결 방법:** 머리글에 항상 `Option1 Name`을 넣고, 최소한 상위 행에는 값을 입력하세요. 실제 옵션이 없는 상품이라면 Option1 Name을 `Title`, Option1 Value를 `Default Title`로 설정하세요.
+**해결 방법:** 헤더에는 항상 `Option1 Name`을 넣고 최소한 부모 행에 값을 입력하세요. 실제 옵션이 없는 상품이라면 Option1 Name을 `Title`, Option1 Value를 `Default Title`로 설정하세요. 옵션 열을 아예 빼면 Shopify는 새 기본 변형을 만들고 기존 변형을 삭제합니다.
 
 ### 실수 4: 행마다 옵션 값이 다름
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### 실수 5: Variant Price가 비어 있음
 
-**증상:** "Variant Price is required"로 가져오기가 실패하거나, 가격이 0.00인 변형이 만들어집니다.
+**증상:** 변형이 0.00달러 가격으로 만들어집니다.
 
-**해결 방법:** Variant Price는 모든 행에 필수입니다. 값이 상속되지 않으므로, 모든 변형의 가격이 같더라도 각 행에 입력해야 합니다.
+**해결 방법:** Shopify는 빈 가격을 거부하지 않고 해당 변형을 0.00으로 가져옵니다. 가격은 물려받지 않으므로 모든 변형의 가격이 같아도 각 행에 가격을 써야 합니다.
 
 ### 실수 6: 새 변형을 추가했더니 기존 변형이 덮어써짐
 
 **증상:** 새 변형 하나만 추가하는 부분 가져오기를 했더니 다른 변형이 모두 사라졌습니다.
 
-**해결 방법:** CSV 가져오기로 상품을 업데이트할 때는 새 변형만이 아니라 기존 **모든** 변형을 파일에 넣어야 합니다. Shopify 가져오기는 Handle의 변형 전체를 교체합니다. 빠뜨린 기존 변형은 삭제됩니다.
+**해결 방법:** CSV 가져오기로 상품을 업데이트할 때는 새 변형만이 아니라 기존 변형을 **모두** 파일에 넣으세요. Shopify는 옵션 값으로 변형을 맞추므로, 파일에 없는 변형은 상품을 덮어쓸 때 삭제될 수 있습니다.
 
 ---
 

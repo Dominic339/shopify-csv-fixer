@@ -2,7 +2,7 @@
 title: "Shopify ürün CSV şablonu açıklandı"
 description: "Resmi Shopify ürün CSV şablonundaki her alanın sütun sütun açıklaması: her sütunun ne yaptığı, hangi değerleri kabul ettiği ve hangilerinin zorunlu olduğu."
 keywords: ["shopify ürün csv şablonu", "shopify csv sütunları açıklaması", "shopify csv şablon rehberi", "shopify içe aktarma şablonu", "shopify csv alanları", "shopify ürün içe aktarma sütunları", "shopify csv başvuru"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify ürün CSV şablonundaki her sütunun ne yaptığı"
@@ -18,13 +18,13 @@ timeToComplete: "15 dakika"
 
 Resmi Shopify ürün CSV şablonunda iki tür sütun vardır: **ürün düzeyi** (ürün başına bir kez, ilk/ana satırda doldurulur) ve **varyant düzeyi** (o ürünün her satırında doldurulur). Birden fazla varyantı olan bir ürün dosyada birden fazla satır kaplar ve bu satırların hepsi aynı Handle'ı paylaşır.
 
-Güncel şablonu Shopify yönetim panelinden indirin: Ürünler → İçe aktar → Örnek CSV indir.
+Güncel şablonu Shopify yönetim panelinizden indirin: Ürünler → İçe aktar → Örnek CSV'yi indir. Güncel şablon daha yeni sütun adları kullanır (`URL handle`, `Description`, `Price`, `Product image URL`, `Published on online store` vb.). Shopify bu kılavuzda kullanılan eski adları hâlâ kabul eder.
 
 ---
 
 ## Kimlik sütunları
 
-### Handle (zorunlu)
+### Handle (güncel şablonda `URL handle`)
 
 Handle, ürünün URL'ye uygun benzersiz tanımlayıcısıdır. Şunları sağlamalıdır:
 - Mağazanızdaki tüm ürünler arasında benzersiz olmalı
@@ -70,9 +70,9 @@ Virgülle ayrılmış etiket listesi. Bir etiket virgül içeriyorsa Tags hücre
 - `true`: ürün çevrimiçi mağazanızda yayınlanır
 - `false`: ürün çevrimiçi mağazanızda görünmez (yönetim panelinizde kalır; taslak durumu ayrıca Status sütununda belirlenir)
 
-### Published Scope
+### Status
 
-Ürünün nerede yayınlandığı. Yaygın değerler: `web` (online mağaza), `global` (tüm kanallar).
+Ürünün satılıp satılamayacağı: `active` (varsayılan), `draft` veya `archived`.
 
 ---
 
@@ -107,9 +107,9 @@ Bu sütunlar her satır için geçerlidir (hem ana hem varyant satırları).
 
 Bu varyantın benzersiz tanımlayıcısı. İsteğe bağlıdır, ancak stok takibi yapıyorsanız SKU'lar benzersiz olmalıdır. SKU tabanlı takip yapmıyorsanız boş bırakın.
 
-### Variant Price (zorunlu)
+### Variant Price (güncel şablonda `Price`)
 
-Bu varyantın satış fiyatı. Para birimi simgesi ve binlik ayırıcı olmadan düz bir ondalık sayı.
+Bu varyantın satış fiyatı. Para birimi simgesi ve binlik ayırıcı olmadan düz bir ondalık sayı. Boş bir fiyat 0.00 olarak içe aktarılır.
 
 **Örnek:** `19.99`
 
@@ -119,7 +119,7 @@ Bu varyantın satış fiyatı. Para birimi simgesi ve binlik ayırıcı olmadan 
 
 ### Variant Inventory Qty
 
-Stoktaki adet. Tam sayı. Stok yoksa `0` kullanın. Bu varyant için stok takibi kapalıysa boş bırakın.
+Stoktaki birim sayısı, tam sayı olarak. Yalnızca tek konumu olan mağazalar için geçerlidir; birden çok konumu olan mağazalar stoku Shopify'ın envanter CSV'siyle günceller.
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ Varyant vergiye tabiyse `true`; vergiden muafsa `false`.
 
 ### Variant Barcode
 
-UPC, EAN veya ISBN barkodu. Düz metin. Shopify bunu doğrulamaz, yalnızca saklar.
+UPC, EAN veya ISBN barkodu. Elektronik tablonun baştaki sıfırları silmemesi ve sayıyı 1.23E+11'e çevirmemesi için sütunu metin olarak biçimlendirin.
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-Varyantın ağırlığı ve birimi. Ağırlık ondalık bir sayıdır. Birim olarak `kg`, `g`, `lb` veya `oz` kabul edilir.
+`Variant Grams` (güncel şablonda `Weight value (grams)`), birimsiz tam sayı olarak gram cinsinden ağırlıktır: 5,125 kg `5125` olarak yazılır. `Variant Weight Unit` (`Weight unit for display`) yalnızca müşterilere gösterilen birimi belirler: `g`, `kg`, `lb` veya `oz`.
 
 ---
 
@@ -151,7 +151,7 @@ Varyantın ağırlığı ve birimi. Ağırlık ondalık bir sayıdır. Birim ola
 
 ### Image Src
 
-Ürün görselinin URL'si. Herkese açık bir HTTPS URL'si olmalıdır. Desteklenen biçimler: JPG, JPEG, PNG, GIF, WEBP.
+Ürün görselinin URL'si. Herkese açık, parolasız bir `https://` URL'si olmalıdır.
 
 - Ana satırda: ürünün ana görseli
 - Varyant satırlarında: o varyantın seçenek kombinasyonuna özgü görsel (ör. mavi renk örneği)
@@ -174,7 +174,7 @@ Sayfa başlığı etiketi (tarayıcı sekmelerinde ve arama sonuçlarında gör�
 
 ### SEO Description
 
-Ürün sayfasının meta açıklaması. 160 karakterin altı önerilir.
+Ürün sayfasının meta açıklaması. Shopify 320 karaktere kadar izin verir; boş bir hücre ürün açıklamasını kullanır.
 
 ---
 
@@ -182,7 +182,7 @@ Sayfa başlığı etiketi (tarayıcı sekmelerinde ve arama sonuçlarında gör�
 
 ### Gift Card (mantıksal)
 
-Yalnızca ürün bir hediye kartıysa `true`. Çoğu ürün için `false` olmalı veya boş bırakılmalıdır.
+Yalnızca ürün bir hediye kartıysa `true`. Ürünlerin çoğu `false` olmalı ya da boş kalmalıdır. Shopify hediye kartlarını CSV içe aktarımıyla oluşturamaz, bu yüzden yeni hediye kartlarını yönetim panelinde oluşturun.
 
 ---
 

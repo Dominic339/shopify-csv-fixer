@@ -2,7 +2,7 @@
 title: "Shopify CSV içe aktarma hataları: yaygın nedenler ve çözümler"
 description: "En yaygın Shopify CSV içe aktarma hataları için eksiksiz rehber: eksik sütunlar, geçersiz mantıksal değerler, varyant yapısı sorunları, fiyat hataları ve handle çakışmaları."
 keywords: ["shopify csv içe aktarma hatası", "shopify csv yükleme hatası", "shopify csv hataları", "shopify ürün içe aktarma hatası", "shopify csv düzeltme", "shopify csv kontrol", "shopify csv yüklenmiyor"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "En yaygın Shopify CSV içe aktarma hataları ve her birinin nedeni"
@@ -33,13 +33,13 @@ Herhangi bir adımdaki hata satırların başarısız olmasına neden olur. Shop
 
 **Neden:** Bir veya daha fazla zorunlu sütun başlık satırında yok, yanlış yazılmış ya da büyük/küçük harfi hatalı.
 
-**Shopify'ın zorunlu sütunları:**
+**Önemli Shopify sütunları:**
 
 | Sütun | Not |
 |---|---|
-| `Handle` | URL'ye uygun kısa ad; varyantları gruplar |
-| `Title` | Ürün adı |
-| `Variant Price` | Her varyant satırının fiyatı |
+| `Handle` | Varyant satırlarını gruplar. Ürünün varyantları varsa veya mevcut ürünleri güncelliyorsanız gerekir; aksi halde Shopify onu başlıktan üretir |
+| `Title` | Ürün adı. Shopify'ın yeni bir ürün için zorunlu tuttuğu tek sütun |
+| `Variant Price` | Her varyantın fiyatı. Boş bir fiyat 0.00 olarak içe aktarılır |
 
 **Çözüm:**
 - Başlık satırınızı [resmî Shopify ürün CSV şablonu](https://help.shopify.com/tr/manual/products/import-export/using-csv) ile karşılaştırın
@@ -70,12 +70,12 @@ Excel'de: `Ctrl+H` (Bul ve Değiştir), daha uzun değerlerin içindeki metni de
 
 ## Hata: boş veya geçersiz varyant fiyatı
 
-**Mesaj:** "Variant Price can't be blank" ya da fiyat 0.00 olarak içe aktarılıyor
+**Belirti:** Ürünler 0.00 fiyatla içe aktarılıyor veya fiyatlar yanlış çıkıyor
 
 **Neden:** `Variant Price` boş, para birimi simgesi içeriyor (`$19.99`), ondalık ayırıcı olarak virgül kullanıyor (`19,99`) veya metin.
 
 **Çözüm:**
-- `Variant Price` alanını her satırda doldurun (hem ana hem varyant satırlarında)
+- Her varyant satırına `Variant Price` girin. Shopify boş fiyatı reddetmez, varyantı 0.00 fiyatla içe aktarır
 - Para birimi simgelerini kaldırın: `$` işaretini Bul ve Değiştir ile silin
 - Ondalık virgülü noktayla değiştirin: `19,99` → `19.99`
 - Kaydetmeden önce sütunu Excel'de Sayı olarak biçimlendirin (simgelerin geri gelmemesi için)
@@ -94,7 +94,7 @@ Excel'de: `Ctrl+H` (Bul ve Değiştir), daha uzun değerlerin içindeki metni de
 
 **Varyant satırları için kurallar:**
 - Aynı ürünün tüm satırları tam olarak aynı `Handle`'a sahip olmalı
-- Her satırda `Option1 Name` ve `Option1 Value` bulunmalı
+- Her ürünün ilk satırı seçenekleri adlandırır (`Option1 Name`); her varyant satırının kendi `Option1 Value` değeri olmalıdır
 - 3 seçeneğiniz varsa tüm satırlarda `Option1`, `Option2` ve `Option3` sütunları olmalı
 - `Option1 Name` (ör. `Size`) gruptaki tüm satırlarda aynı olmalı; yalnızca `Option1 Value` değişir
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Neden:** Birbiriyle ilgisi olmayan iki ürün aynı Handle'ı paylaşıyor. Shopify aynı Handle'a sahip tüm satırları tek bir üründe birleştirdiği için yinelenen Handle farklı ürünleri birleştirir.
 
-**Çözüm:** Her ürünün Handle'ını benzersiz yapın. Handle'lar URL'ye uygun olmalı: yalnızca küçük harf, rakam ve tire; boşluk veya özel karakter yok.
+**Çözüm:** Her ürünün Handle değerini benzersiz yapın. Handle harf, rakam ve kısa çizgi içerebilir, boşluk veya başka karakter içeremez; Shopify bunu küçük harfle kaydeder.
 
 Mevcut bir ürünü güncelliyorsanız ve Handle Shopify'da zaten varsa bu bilinçli bir durumdur: içe aktarma o ürünü günceller. Ancak yeni bir ürün yanlışlıkla mevcut bir ürünün Handle'ını paylaşırsa mevcut ürünün verileri üzerine yazılır.
 

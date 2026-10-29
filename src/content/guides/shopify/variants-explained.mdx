@@ -2,7 +2,7 @@
 title: "Shopify Product Variants Explained: CSV Structure and Common Mistakes"
 description: "Learn how Shopify's CSV format represents product variants using Handle grouping, Option columns, and parent/child rows. Avoid the most common mistakes that cause split products, missing variants, and import errors."
 keywords: ["shopify variants csv", "shopify product variants import", "shopify handle variants", "shopify option1 option2", "shopify csv parent child", "shopify variant price csv", "shopify csv structure"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "How Shopify uses Handle to group a parent product and its variants"
@@ -39,7 +39,7 @@ The first row for a given Handle is the parent row. It sets product-level fields
 
 | Column | Required in parent | Notes |
 |---|---|---|
-| Handle | Yes | Unique slug for this product; lowercase, hyphens only |
+| Handle | Yes | Unique slug for this product; letters, numbers and hyphens |
 | Title | Yes | The product name |
 | Body HTML | No | Product description; only needed in parent row |
 | Vendor | No | Brand name |
@@ -66,8 +66,8 @@ Each row after the first with the same Handle is a variant row. Variant rows:
 
 | Column | Notes |
 |---|---|
-| Variant Price | Required per variant; decimal number (no currency symbol) |
-| Variant SKU | Optional but strongly recommended; must be unique across your store |
+| Variant Price | Decimal number (no currency symbol); a blank price imports as 0.00 |
+| Variant SKU | Optional but strongly recommended; keep it unique, because Shopify doesn't stop duplicates |
 | Variant Grams | Weight in grams |
 | Variant Inventory Qty | Initial stock count |
 | Variant Inventory Policy | `deny` or `continue` (continue = allow oversell) |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Fix:** All rows belonging to one product must share exactly the same Handle value. A typo (`blue-shirt` vs `blue-shirt-`) causes Shopify to create a new product.
 
-### Mistake 2: Title on every row
+### Mistake 2: Product details on variant rows
 
-**Symptom:** Import succeeds but Shopify creates duplicate products, or variant rows are treated as standalone products.
+**Symptom:** A title, description or tag you typed on a variant row doesn't show up after import.
 
-**Fix:** Only the first row per Handle should have a Title. Leave Title blank in all variant rows.
+**Fix:** Shopify reads product-level fields (Title, Body HTML, Vendor, Tags and so on) from the first row of each Handle. Put them there, and leave them blank on later rows.
 
 ### Mistake 3: Missing Option1 Name column
 
-**Symptom:** Import error "Option1 Name is required" or all variants appear as a single option called "Default Title."
+**Symptom:** Variants don't appear, or the product ends up with a single variant called "Default Title".
 
-**Fix:** Always include `Option1 Name` in the header and a value on at least the parent row. If your product has no real options, set Option1 Name to `Title` and Option1 Value to `Default Title`.
+**Fix:** Always include `Option1 Name` in the header and a value on at least the parent row. If your product has no real options, set Option1 Name to `Title` and Option1 Value to `Default Title`. Leaving the option columns out entirely makes Shopify create a new default variant and delete the existing ones.
 
 ### Mistake 4: Option values don't match across rows
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### Mistake 5: Variant Price is blank
 
-**Symptom:** Import fails with "Variant Price is required" or variants are created with $0.00 price.
+**Symptom:** Variants are created with a $0.00 price.
 
-**Fix:** Variant Price is required for every row. There is no inheritance. Even if all variants share the same price, each row must specify it.
+**Fix:** Shopify doesn't reject a blank price; it imports the variant at 0.00. Prices aren't inherited, so even if all variants share the same price, each row must specify it.
 
 ### Mistake 6: Adding a new variant overwrites existing variants
 
 **Symptom:** After a partial import (adding one new variant), all other variants disappear.
 
-**Fix:** When updating a product via CSV import, you must include **all** existing variants in the file, not just the new one. Shopify's importer replaces the entire variant set for a Handle. If you omit existing variants, they are deleted.
+**Fix:** When updating a product via CSV import, include **all** of its existing variants in the file, not just the new one. Shopify matches variants by their option values, and variants missing from the file can be removed when you overwrite the product.
 
 ---
 

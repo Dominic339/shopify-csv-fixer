@@ -2,7 +2,7 @@
 title: "Warianty produktów w Shopify: struktura CSV i typowe błędy"
 description: "Dowiedz się, jak format CSV Shopify zapisuje warianty za pomocą grupowania po Handle, kolumn Option oraz wierszy nadrzędnych i podrzędnych. Unikaj błędów, które dzielą produkty, gubią warianty i psują import."
 keywords: ["warianty shopify csv", "import wariantów produktu shopify", "shopify handle warianty", "shopify option1 option2", "shopify csv produkt nadrzędny wariant", "cena wariantu shopify csv", "struktura csv shopify"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Jak Shopify używa Handle do grupowania produktu nadrzędnego i jego wariantów"
@@ -39,7 +39,7 @@ Pierwszy wiersz danego Handle to wiersz nadrzędny. Ustala pola produktu:
 
 | Kolumna | Wymagana w nadrzędnym | Uwagi |
 |---|---|---|
-| Handle | Tak | Unikalny identyfikator produktu; małe litery, tylko myślniki |
+| Handle | Tak | Unikalny identyfikator produktu; litery, cyfry i łączniki |
 | Title | Tak | Nazwa produktu |
 | Body HTML | Nie | Opis produktu; potrzebny tylko w wierszu nadrzędnym |
 | Vendor | Nie | Nazwa marki |
@@ -66,8 +66,8 @@ Każdy wiersz po pierwszym z tym samym Handle to wiersz wariantu. Wiersze warian
 
 | Kolumna | Uwagi |
 |---|---|
-| Variant Price | Wymagana dla każdego wariantu; liczba dziesiętna (bez symbolu waluty) |
-| Variant SKU | Opcjonalna, ale mocno zalecana; musi być unikalna w całym sklepie |
+| Variant Price | Liczba dziesiętna (bez symbolu waluty); pusta cena zostanie zaimportowana jako 0.00 |
+| Variant SKU | Opcjonalne, ale bardzo zalecane; dbaj o unikalność, bo Shopify nie blokuje duplikatów |
 | Variant Grams | Waga w gramach |
 | Variant Inventory Qty | Początkowy stan magazynowy |
 | Variant Inventory Policy | `deny` lub `continue` (continue = sprzedaż bez stanu) |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Rozwiązanie:** Wszystkie wiersze jednego produktu muszą mieć dokładnie ten sam Handle. Literówka (`blue-shirt` zamiast `blue-shirt-`) sprawia, że Shopify tworzy nowy produkt.
 
-### Błąd 2: Title w każdym wierszu
+### Błąd 2: dane produktu w wierszach wariantów
 
-**Objaw:** Import się udaje, ale Shopify tworzy zduplikowane produkty albo traktuje wiersze wariantów jako osobne produkty.
+**Objaw:** tytuł, opis lub tag wpisany w wierszu wariantu nie pojawia się po imporcie.
 
-**Rozwiązanie:** Tylko pierwszy wiersz danego Handle powinien mieć Title. W wierszach wariantów zostaw Title puste.
+**Rozwiązanie:** Shopify odczytuje pola produktu (Title, Body HTML, Vendor, Tags itd.) z pierwszego wiersza każdego Handle. Wpisz je tam, a w kolejnych wierszach zostaw puste.
 
 ### Błąd 3: brak kolumny Option1 Name
 
-**Objaw:** Błąd importu „Option1 Name is required” albo wszystkie warianty pojawiają się jako jedna opcja „Default Title”.
+**Objaw:** warianty się nie pojawiają albo produkt ma w końcu jeden wariant o nazwie „Default Title”.
 
-**Rozwiązanie:** Zawsze dodawaj `Option1 Name` do nagłówka i wpisz wartość przynajmniej w wierszu nadrzędnym. Jeśli produkt nie ma prawdziwych opcji, ustaw Option1 Name na `Title`, a Option1 Value na `Default Title`.
+**Rozwiązanie:** zawsze umieszczaj `Option1 Name` w nagłówku i wpisuj wartość przynajmniej w wierszu głównym. Jeśli produkt nie ma prawdziwych opcji, ustaw Option1 Name na `Title`, a Option1 Value na `Default Title`. Gdy całkiem pominiesz kolumny opcji, Shopify utworzy nowy domyślny wariant i usunie istniejące.
 
 ### Błąd 4: wartości opcji różnią się między wierszami
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### Błąd 5: puste Variant Price
 
-**Objaw:** Import kończy się błędem „Variant Price is required” albo warianty dostają cenę 0.00.
+**Objaw:** warianty powstają z ceną 0.00 $.
 
-**Rozwiązanie:** Variant Price jest wymagane w każdym wierszu. Nie ma dziedziczenia. Nawet jeśli wszystkie warianty mają tę samą cenę, każdy wiersz musi ją podać.
+**Rozwiązanie:** Shopify nie odrzuca pustej ceny, tylko importuje wariant z ceną 0.00. Ceny nie są dziedziczone, więc nawet gdy wszystkie warianty kosztują tyle samo, każdy wiersz musi ją podać.
 
 ### Błąd 6: dodanie nowego wariantu nadpisuje istniejące
 
 **Objaw:** Po częściowym imporcie (dodaniu jednego nowego wariantu) wszystkie pozostałe warianty znikają.
 
-**Rozwiązanie:** Aktualizując produkt importem CSV, musisz umieścić w pliku **wszystkie** istniejące warianty, a nie tylko nowy. Import Shopify zastępuje cały zestaw wariantów danego Handle. Pominięte warianty zostaną usunięte.
+**Rozwiązanie:** aktualizując produkt przez import CSV, umieść w pliku **wszystkie** jego istniejące warianty, a nie tylko nowy. Shopify dopasowuje warianty po wartościach opcji, a warianty, których brakuje w pliku, mogą zostać usunięte przy nadpisywaniu produktu.
 
 ---
 

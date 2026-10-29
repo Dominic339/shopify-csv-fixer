@@ -2,7 +2,7 @@
 title: "Produktbilder in der Shopify-CSV: Image Src, Alt-Text und Positionen"
 description: "So legst du Bild-URLs in der Shopify-Produkt-CSV an: die Spalten Image Src, Image Position und Image Alt Text, mehrere Bilder pro Produkt und die häufigsten Fehler beim Bildimport."
 keywords: ["shopify bilder csv", "shopify image src", "shopify alt text bilder", "shopify image position csv", "shopify produktbilder importieren", "shopify csv mehrere bilder", "shopify bild url"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Welche Bildspalten es in der Shopify-Produkt-CSV gibt"
@@ -50,8 +50,8 @@ Für mehr als ein Bild fügst du **weitere Zeilen mit demselben Handle** hinzu, 
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 Die wichtigsten Regeln:
@@ -88,7 +88,7 @@ Shopify lädt die Bilder beim Import von der angegebenen URL herunter. Die URL m
 - **Sie muss HTTPS verwenden.** Reine HTTP-URLs werden abgelehnt oder können Warnungen wegen gemischter Inhalte auslösen.
 - **Sie muss öffentlich erreichbar sein.** URLs hinter einer Anmeldung, Cloudflare-Prüfungen oder IP-Sperren funktionieren nicht.
 - **Keine Leerzeichen in der URL.** Leerzeichen müssen als `%20` kodiert oder die URL muss umgebaut werden.
-- **Sie muss auf eine Bilddatei zeigen.** Shopify akzeptiert JPEG, PNG, GIF, WEBP und SVG. Die URL muss nicht auf eine Dateiendung enden, wenn der Server den richtigen Content-Type liefert, aber die meisten Importabläufe funktionieren mit URLs mit Endung zuverlässiger.
+- **Muss auf eine Bilddatei zeigen.** Verwende ein gängiges Bildformat wie JPEG, PNG, GIF oder WEBP. Die URL muss nicht auf eine Dateiendung enden, wenn der Server den richtigen Content-Type-Header liefert, aber die meisten Importe funktionieren mit URLs mit Dateiendung zuverlässiger.
 - **Keine ablaufenden Parameter.** Nutzt du vorsignierte URLs (von S3, Cloudinary usw.), die nach einer Zeit ablaufen, müssen sie während des gesamten Imports gültig sein.
 
 ---
@@ -116,13 +116,13 @@ Shopify lädt die Bilder beim Import von der angegebenen URL herunter. Die URL m
 
 **Lösung:** Achte auf exakt gleiche Handles. Schon ein zusätzliches Leerzeichen oder eine andere Großschreibung erzeugt ein neues Produkt.
 
-### Alte Bilder werden nicht entfernt
+### Bilder erneut importieren
 
-**Verhalten:** Beim erneuten Import **fügt** Shopifys CSV-Import einem Produkt Bilder hinzu. Bestehende Bilder entfernt er nicht. Willst du Bilder entfernen, musst du das im Shopify-Adminbereich oder über die API tun.
+**Verhalten:** Shopifys Dokumentation sagt nicht, ob ein erneuter Import die Bilder eines Produkts noch einmal hinzufügt oder die vorhandenen ersetzt. Teste zuerst mit einem Produkt und entferne unerwünschte Bilder im Shopify-Adminbereich.
 
 ### Zu viele Bilder
 
-**Verhalten:** Gibst du für einen Handle mehr als 250 Bild-URLs an, importiert Shopify nur die ersten 250 und ignoriert den Rest ohne Meldung.
+**Verhalten:** Shopify unterstützt bis zu 250 Bilder pro Produkt. Bleib bei jedem Handle innerhalb dieser Grenze.
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**Variantenbild (ein Bild, das zu einer bestimmten Variantenzeile gehört):**
-Setze Image Src in dieselbe Zeile wie die Variante. Shopify ordnet das Bild dann dieser Variante zu:
+**Variantenbild (Bild, das mit einer bestimmten Variante verknüpft ist):**
+Trage die Bild-URL in der Zeile der Variante in die Spalte `Variant Image` ein (`Variant image URL` in der aktuellen Vorlage):
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

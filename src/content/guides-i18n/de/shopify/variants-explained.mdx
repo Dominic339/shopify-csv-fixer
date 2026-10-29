@@ -2,7 +2,7 @@
 title: "Shopify-Produktvarianten erklärt: CSV-Struktur und häufige Fehler"
 description: "Wie Shopifys CSV-Format Varianten über Handle-Gruppierung, Optionsspalten und Eltern- und Kindzeilen abbildet, und wie du Fehler vermeidest, die Produkte aufteilen, Varianten verlieren oder den Import scheitern lassen."
 keywords: ["shopify varianten csv", "shopify produktvarianten importieren", "shopify handle varianten", "shopify option1 option2", "shopify csv eltern kind", "shopify variantenpreis csv", "shopify csv struktur"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Wie Shopify über den Handle ein übergeordnetes Produkt und seine Varianten gruppiert"
@@ -39,7 +39,7 @@ Die erste Zeile eines Handles ist die übergeordnete Zeile. Sie legt die Felder 
 
 | Spalte | Pflicht in der übergeordneten Zeile | Hinweis |
 |---|---|---|
-| Handle | Ja | Eindeutiger Kurzname für dieses Produkt; Kleinbuchstaben, nur Bindestriche |
+| Handle | Ja | Eindeutiger Slug für dieses Produkt; Buchstaben, Ziffern und Bindestriche |
 | Title | Ja | Der Produktname |
 | Body HTML | Nein | Produktbeschreibung; nur in der übergeordneten Zeile nötig |
 | Vendor | Nein | Markenname |
@@ -66,8 +66,8 @@ Jede Zeile nach der ersten mit demselben Handle ist eine Variantenzeile. Variant
 
 | Spalte | Hinweis |
 |---|---|
-| Variant Price | Pflicht je Variante; Dezimalzahl (ohne Währungssymbol) |
-| Variant SKU | Optional, aber dringend empfohlen; muss im ganzen Shop eindeutig sein |
+| Variant Price | Dezimalzahl (ohne Währungssymbol); ein leerer Preis wird als 0.00 importiert |
+| Variant SKU | Optional, aber sehr empfehlenswert; halte sie eindeutig, denn Shopify verhindert keine Duplikate |
 | Variant Grams | Gewicht in Gramm |
 | Variant Inventory Qty | Anfangsbestand |
 | Variant Inventory Policy | `deny` oder `continue` (continue = Überverkauf erlauben) |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Lösung:** Alle Zeilen eines Produkts müssen genau denselben Handle haben. Ein Tippfehler (`blue-shirt` statt `blue-shirt-`) lässt Shopify ein neues Produkt anlegen.
 
-### Fehler 2: Title in jeder Zeile
+### Fehler 2: Produktdaten in Variantenzeilen
 
-**Symptom:** Der Import klappt, aber Shopify legt doppelte Produkte an oder behandelt Variantenzeilen als eigenständige Produkte.
+**Symptom:** Ein Titel, eine Beschreibung oder ein Tag, den du in einer Variantenzeile eingetragen hast, erscheint nach dem Import nicht.
 
-**Lösung:** Nur die erste Zeile je Handle sollte einen Title haben. Lass den Title in allen Variantenzeilen leer.
+**Lösung:** Shopify liest Felder auf Produktebene (Title, Body HTML, Vendor, Tags usw.) aus der ersten Zeile jedes Handles. Trage sie dort ein und lass sie in den folgenden Zeilen leer.
 
 ### Fehler 3: Spalte Option1 Name fehlt
 
-**Symptom:** Importfehler „Option1 Name is required“ oder alle Varianten erscheinen als eine einzige Option namens „Default Title“.
+**Symptom:** Varianten erscheinen nicht, oder das Produkt hat am Ende nur eine Variante namens „Default Title“.
 
-**Lösung:** Nimm `Option1 Name` immer in die Kopfzeile auf und trage zumindest in der übergeordneten Zeile einen Wert ein. Hat dein Produkt keine echten Optionen, setze Option1 Name auf `Title` und Option1 Value auf `Default Title`.
+**Lösung:** Nimm `Option1 Name` immer in die Kopfzeile auf und trage mindestens in der Elternzeile einen Wert ein. Hat dein Produkt keine echten Optionen, setze Option1 Name auf `Title` und Option1 Value auf `Default Title`. Fehlen die Optionsspalten ganz, legt Shopify eine neue Standardvariante an und löscht die vorhandenen.
 
 ### Fehler 4: Optionswerte passen zeilenübergreifend nicht zusammen
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### Fehler 5: Variant Price ist leer
 
-**Symptom:** Der Import scheitert mit „Variant Price is required“ oder Varianten werden mit einem Preis von 0.00 angelegt.
+**Symptom:** Varianten werden mit einem Preis von 0.00 $ angelegt.
 
-**Lösung:** Variant Price ist in jeder Zeile Pflicht. Es gibt keine Vererbung. Selbst wenn alle Varianten denselben Preis haben, muss jede Zeile ihn angeben.
+**Lösung:** Shopify lehnt einen leeren Preis nicht ab, sondern importiert die Variante mit 0.00. Preise werden nicht übernommen; auch wenn alle Varianten gleich viel kosten, braucht jede Zeile ihren Preis.
 
 ### Fehler 6: Eine neue Variante überschreibt bestehende Varianten
 
 **Symptom:** Nach einem Teilimport (eine neue Variante hinzugefügt) sind alle anderen Varianten verschwunden.
 
-**Lösung:** Wenn du ein Produkt per CSV-Import aktualisierst, musst du **alle** bestehenden Varianten in die Datei aufnehmen, nicht nur die neue. Shopifys Import ersetzt alle Varianten eines Handles. Lässt du bestehende Varianten weg, werden sie gelöscht.
+**Lösung:** Wenn du ein Produkt per CSV-Import aktualisierst, nimm **alle** vorhandenen Varianten in die Datei auf, nicht nur die neue. Shopify ordnet Varianten über ihre Optionswerte zu, und Varianten, die in der Datei fehlen, können beim Überschreiben des Produkts entfernt werden.
 
 ---
 

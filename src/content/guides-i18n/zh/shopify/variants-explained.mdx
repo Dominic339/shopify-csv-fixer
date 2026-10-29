@@ -2,7 +2,7 @@
 title: "Shopify 商品变体详解：CSV 结构与常见错误"
 description: "了解 Shopify 的 CSV 格式如何通过 Handle 分组、Option 列和父/子行来表示商品变体，避免导致商品被拆分、变体丢失和导入失败的常见错误。"
 keywords: ["shopify 变体 csv", "shopify 商品变体导入", "shopify handle 变体", "shopify option1 option2", "shopify csv 父行 子行", "shopify 变体价格 csv", "shopify csv 结构"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify 如何用 Handle 将父商品与其变体归为一组"
@@ -39,7 +39,7 @@ blue-shirt,,Size,Medium,21.99,BLUE-MD,
 
 | 列 | 父行是否必填 | 说明 |
 |---|---|---|
-| Handle | 是 | 该商品唯一的短名称；只能用小写字母和连字符 |
+| Handle | 是 | 该商品的唯一标识；字母、数字和连字符 |
 | Title | 是 | 商品名称 |
 | Body HTML | 否 | 商品描述；只需在父行填写 |
 | Vendor | 否 | 品牌名称 |
@@ -66,8 +66,8 @@ blue-shirt,,Size,Medium,21.99,BLUE-MD,
 
 | 列 | 说明 |
 |---|---|
-| Variant Price | 每个变体必填；小数（不带货币符号） |
-| Variant SKU | 可选，但强烈建议填写；在整个店铺中必须唯一 |
+| Variant Price | 小数（不带货币符号）；价格留空会按 0.00 导入 |
+| Variant SKU | 可选，但强烈建议填写；请保持唯一，因为 Shopify 不会阻止重复 |
 | Variant Grams | 以克为单位的重量 |
 | Variant Inventory Qty | 初始库存数量 |
 | Variant Inventory Policy | `deny` 或 `continue`（continue = 允许超卖） |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **解决方法**：同一商品的所有行必须使用完全相同的 Handle。一个小小的拼写差异（`blue-shirt` 与 `blue-shirt-`）就会让 Shopify 新建一个商品。
 
-### 错误 2：每一行都填写了 Title
+### 错误 2：在变体行填写商品信息
 
-**症状**：导入成功，但 Shopify 创建了重复商品，或把变体行当作独立商品处理。
+**症状：** 在变体行填写的标题、描述或标签，导入后没有出现。
 
-**解决方法**：只有每个 Handle 的第一行才应填写 Title。所有变体行的 Title 都留空。
+**解决方法：** Shopify 从每个 Handle 的第一行读取商品级字段（Title、Body HTML、Vendor、Tags 等）。请填在那一行，后面的行留空。
 
 ### 错误 3：缺少 Option1 Name 列
 
-**症状**：出现导入错误“Option1 Name is required”，或所有变体都显示为一个名为“Default Title”的选项。
+**症状：** 变体没有出现，或者商品最后只有一个名为“Default Title”的变体。
 
-**解决方法**：标题行中始终要包含 `Option1 Name`，并至少在父行中填写值。如果商品没有真正的选项，请将 Option1 Name 设为 `Title`，将 Option1 Value 设为 `Default Title`。
+**解决方法：** 表头中始终包含 `Option1 Name`，并至少在父行中填写值。如果商品没有真正的选项，将 Option1 Name 设为 `Title`，Option1 Value 设为 `Default Title`。如果完全去掉选项列，Shopify 会新建一个默认变体并删除现有变体。
 
 ### 错误 4：各行的选项值不一致
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### 错误 5：Variant Price 为空
 
-**症状**：导入失败并提示“Variant Price is required”，或变体以 0.00 的价格创建。
+**症状：** 变体以 0.00 美元的价格创建。
 
-**解决方法**：每一行都必须填写 Variant Price。价格不会继承：即使所有变体价格相同，每一行也都要填写。
+**解决方法：** Shopify 不会拒绝空价格，而是把该变体按 0.00 导入。价格不会继承，所以即使所有变体价格相同，每一行也都要填写。
 
 ### 错误 6：添加新变体后覆盖了现有变体
 
 **症状**：进行部分导入（只添加一个新变体）后，其他变体全部消失了。
 
-**解决方法**：通过 CSV 导入更新商品时，文件中必须包含**所有**现有变体，而不只是新变体。Shopify 的导入会替换某个 Handle 的整组变体，遗漏的现有变体会被删除。
+**解决方法：** 通过 CSV 导入更新商品时，要把它**所有**现有变体都放进文件，而不只是新变体。Shopify 按选项值匹配变体，文件中缺少的变体在覆盖商品时可能会被删除。
 
 ---
 

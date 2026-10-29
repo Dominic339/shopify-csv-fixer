@@ -2,7 +2,7 @@
 title: "Images produit Shopify dans le CSV : Image Src, texte alternatif et positions"
 description: "Apprenez à structurer les URL d'images dans le CSV produit Shopify : les colonnes Image Src, Image Position et Image Alt Text, l'ajout de plusieurs images par produit et les échecs d'import d'images les plus courants."
 keywords: ["images shopify csv", "shopify image src", "texte alternatif image shopify", "shopify image position csv", "importer images produits shopify", "shopify csv plusieurs images", "url image shopify"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Quelles colonnes d'images existent dans le CSV produit Shopify"
@@ -50,8 +50,8 @@ Pour ajouter plus d'une image à un produit, ajoutez **des lignes supplémentair
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 Règles essentielles :
@@ -88,7 +88,7 @@ Shopify télécharge les images à partir de l'URL fournie au moment de l'import
 - **Elle doit être en HTTPS.** Les URL en HTTP simple sont refusées ou peuvent provoquer des avertissements de contenu mixte.
 - **Elle doit être accessible publiquement.** Les URL protégées par une connexion, une vérification Cloudflare ou une restriction d'IP ne fonctionnent pas.
 - **Pas d'espace dans l'URL.** Les espaces doivent être encodés en `%20`, ou l'URL doit être restructurée.
-- **Elle doit pointer vers un fichier image.** Shopify accepte JPEG, PNG, GIF, WEBP et SVG. L'URL n'a pas besoin de se terminer par une extension si le serveur renvoie le bon type de contenu, mais la plupart des chaînes d'import fonctionnent mieux avec des URL qui en ont une.
+- **Doit pointer vers un fichier image.** Utilisez un format courant comme JPEG, PNG, GIF ou WEBP. L'URL n'a pas besoin de se terminer par une extension si le serveur renvoie le bon en-tête content-type, mais la plupart des imports fonctionnent mieux avec des URL qui en ont une.
 - **Pas de paramètres qui expirent.** Si vous utilisez des URL pré-signées (S3, Cloudinary, etc.) qui expirent, vérifiez qu'elles restent valides pendant tout l'import.
 
 ---
@@ -116,13 +116,13 @@ Shopify télécharge les images à partir de l'URL fournie au moment de l'import
 
 **Solution :** Assurez-vous que les Handles sont strictement identiques. Un seul espace en trop ou une majuscule différente crée un nouveau produit.
 
-### Les anciennes images ne sont pas supprimées
+### Réimporter des images
 
-**Comportement :** Lors d'un nouvel import, l'import CSV de Shopify **ajoute** des images au produit. Il ne supprime pas les images existantes. Pour en supprimer, passez par l'administration Shopify ou par l'API.
+**Comportement :** la documentation de Shopify ne précise pas si réimporter un produit ajoute de nouveau ses images ou remplace celles qui existent. Testez d'abord avec un produit et supprimez les images en trop dans l'interface Shopify.
 
 ### Trop d'images
 
-**Comportement :** Si vous indiquez plus de 250 URL d'images pour un même Handle, Shopify n'importe que les 250 premières et ignore les autres sans prévenir.
+**Comportement :** Shopify prend en charge jusqu'à 250 images par produit. Restez dans cette limite pour chaque handle.
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**Image de variante (image liée à une ligne de variante précise) :**
-Placez Image Src sur la même ligne que la variante. Shopify associe alors cette image à cette variante :
+**Image de variante (image liée à une variante précise) :**
+Indiquez l'URL de l'image dans la colonne `Variant Image` (`Variant image URL` dans le modèle actuel), sur la ligne de cette variante :
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

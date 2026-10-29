@@ -2,7 +2,7 @@
 title: "Erreurs d'import CSV Shopify : causes courantes et solutions"
 description: "Un guide complet des erreurs d'import CSV Shopify les plus courantes : colonnes manquantes, booléens non valides, structure des variantes, erreurs de prix et conflits de handle."
 keywords: ["erreur importation csv shopify", "erreur import csv shopify", "shopify import produits csv erreur", "csv shopify ne s'importe pas", "corriger csv shopify", "vérifier csv shopify", "erreur téléversement csv shopify"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Les erreurs d'import CSV Shopify les plus courantes et leurs causes"
@@ -33,13 +33,13 @@ Une erreur à n'importe quelle étape fait échouer des lignes. Shopify importe 
 
 **Cause :** Une ou plusieurs colonnes obligatoires sont absentes de la ligne d'en-tête, mal orthographiées ou avec une mauvaise casse.
 
-**Colonnes obligatoires de Shopify :**
+**Colonnes Shopify importantes :**
 
 | Colonne | Remarques |
 |---|---|
-| `Handle` | Identifiant compatible URL ; regroupe les variantes |
-| `Title` | Nom du produit |
-| `Variant Price` | Prix de chaque ligne de variante |
+| `Handle` | Regroupe les lignes de variantes. Nécessaire quand un produit a des variantes ou quand vous mettez à jour des produits existants ; sinon Shopify le génère à partir du titre |
+| `Title` | Nom du produit. La seule colonne exigée par Shopify pour un nouveau produit |
+| `Variant Price` | Prix de chaque variante. Un prix vide est importé à 0.00 |
 
 **Solution :**
 - Comparez votre ligne d'en-tête au [modèle officiel de CSV de produits Shopify](https://help.shopify.com/fr/manual/products/import-export/using-csv)
@@ -70,12 +70,12 @@ Dans Excel : `Ctrl+H` (Rechercher et remplacer), cochez « Totalité du contenu 
 
 ## Erreur : prix de variante vide ou non valide
 
-**Message :** « Variant Price can't be blank » ou prix importé à 0.00
+**Symptôme :** les produits sont importés à 0.00, ou les prix sont faux
 
 **Cause :** `Variant Price` est vide, contient un symbole monétaire (`$19.99`), utilise la virgule décimale (`19,99`) ou contient du texte.
 
 **Solution :**
-- Renseignez `Variant Price` sur chaque ligne (lignes parent comme lignes de variante)
+- Renseignez `Variant Price` sur chaque ligne de variante. Shopify ne refuse pas un prix vide : il importe la variante à 0.00
 - Supprimez les symboles monétaires : effacez `$` avec Rechercher et remplacer
 - Remplacez la virgule décimale par un point : `19,99` → `19.99`
 - Formatez la colonne en Nombre dans Excel avant d'enregistrer (pour que les symboles ne reviennent pas)
@@ -94,7 +94,7 @@ Dans Excel : `Ctrl+H` (Rechercher et remplacer), cochez « Totalité du contenu 
 
 **Règles pour les lignes de variante :**
 - Toutes les lignes d'un même produit doivent avoir exactement le même `Handle`
-- Chaque ligne doit avoir `Option1 Name` et `Option1 Value`
+- La première ligne de chaque produit nomme les options (`Option1 Name`) ; chaque ligne de variante a besoin de son propre `Option1 Value`
 - Avec 3 options, toutes les lignes doivent avoir les colonnes `Option1`, `Option2` et `Option3`
 - `Option1 Name` (par ex. `Size`) doit être identique sur toutes les lignes du groupe ; seul `Option1 Value` change
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Cause :** Deux produits sans rapport partagent le même Handle. Shopify regroupe toutes les lignes de même Handle en un seul produit : un Handle en double fusionne donc des produits différents.
 
-**Solution :** Donnez à chaque produit un Handle unique. Les handles doivent être compatibles URL : uniquement des minuscules, des chiffres et des tirets, sans espace ni caractère spécial.
+**Solution :** donnez à chaque produit un Handle unique. Les handles peuvent contenir des lettres, des chiffres et des tirets, sans espaces ni autres caractères, et Shopify les enregistre en minuscules.
 
 Si vous mettez à jour un produit existant dont le Handle existe déjà dans Shopify, c'est voulu : l'import mettra ce produit à jour. Mais si un nouveau produit partage par erreur le Handle d'un produit existant, les données de ce dernier seront écrasées.
 

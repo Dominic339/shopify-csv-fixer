@@ -2,7 +2,7 @@
 title: "Изображения товаров Shopify в CSV: Image Src, альтернативный текст и позиции"
 description: "Узнайте, как оформлять URL изображений в CSV товаров Shopify: столбцы Image Src, Image Position и Image Alt Text, добавление нескольких изображений к товару и как избежать самых частых ошибок импорта изображений."
 keywords: ["изображения shopify csv", "shopify image src", "альтернативный текст изображения shopify", "shopify image position csv", "импорт изображений товаров shopify", "shopify csv несколько изображений", "url изображения shopify"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Какие столбцы для изображений есть в CSV товаров Shopify"
@@ -50,8 +50,8 @@ blue-shirt,,Size,Medium,21.99,,
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 Главные правила:
@@ -88,7 +88,7 @@ Shopify скачивает изображения по указанному URL 
 - **Должен использовать HTTPS.** Обычные HTTP-адреса отклоняются или могут вызывать предупреждения о смешанном содержимом.
 - **Должен быть общедоступным.** URL за авторизацией, проверками Cloudflare или ограничениями по IP работать не будут.
 - **Без пробелов.** Пробелы нужно закодировать как `%20` или изменить адрес.
-- **Должен вести на файл изображения.** Shopify принимает JPEG, PNG, GIF, WEBP и SVG. URL не обязан заканчиваться расширением, если сервер возвращает правильный content-type, но большинство процессов импорта надёжнее работают с адресами с расширением.
+- **Должен вести на файл изображения.** Используйте распространённый формат: JPEG, PNG, GIF или WEBP. URL не обязан заканчиваться расширением, если сервер возвращает правильный заголовок content-type, но большинство импортов надёжнее работает с адресами с расширением.
 - **Без истекающих параметров.** Если вы используете подписанные ссылки (из S3, Cloudinary и т. п.) с ограниченным сроком действия, убедитесь, что они остаются действительными на всё время импорта.
 
 ---
@@ -116,13 +116,13 @@ Shopify скачивает изображения по указанному URL 
 
 **Решение:** Следите, чтобы Handle совпадали в точности. Даже один лишний пробел или другой регистр буквы создаёт новый товар.
 
-### Старые изображения не удаляются
+### Повторный импорт изображений
 
-**Поведение:** При повторном импорте импорт CSV в Shopify **добавляет** изображения к товару. Существующие изображения он не удаляет. Чтобы удалить изображения, воспользуйтесь админкой Shopify или API.
+**Поведение:** в документации Shopify не сказано, добавляет ли повторный импорт товара его изображения ещё раз или заменяет существующие. Сначала проверьте на одном товаре, а лишние изображения удалите в админке Shopify.
 
 ### Слишком много изображений
 
-**Поведение:** Если для одного Handle указать больше 250 URL изображений, Shopify импортирует только первые 250, а остальные без предупреждения пропустит.
+**Поведение:** Shopify поддерживает до 250 изображений на товар. Не превышайте этот предел для каждого handle.
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**Изображение варианта (изображение, привязанное к конкретной строке варианта):**
-Укажите Image Src в той же строке, что и вариант. Shopify привяжет это изображение к этому варианту:
+**Изображение варианта (привязанное к конкретному варианту):**
+Укажите URL изображения в колонке `Variant Image` (`Variant image URL` в текущем шаблоне) в строке этого варианта:
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```

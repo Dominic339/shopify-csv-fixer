@@ -2,7 +2,7 @@
 title: "Das Feld Handle in der Shopify-CSV"
 description: "Alles über das Feld Handle in Shopifys Produkt-CSV: wozu es dient, die Regeln für gültige Handles, wie es Varianten gruppiert und wie du Handle-Fehler behebst."
 keywords: ["shopify csv handle", "shopify handle", "shopify handle csv", "shopify produkt handle", "shopify handle varianten", "shopify handle regeln", "shopify csv handle fehler"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Wozu das Shopify-Feld Handle dient und warum es die wichtigste Spalte ist"
@@ -33,7 +33,7 @@ Ein gültiger Shopify-Handle muss:
 - nur **Kleinbuchstaben, Ziffern und Bindestriche** enthalten
 - **keine Leerzeichen** enthalten (nutze stattdessen Bindestriche)
 - **keine Sonderzeichen** enthalten: kein `&`, `%`, `?`, `/`, `@` und keine Unicode-Zeichen
-- in jeder Zeile **ausgefüllt** sein (leere Handles sind nicht erlaubt)
+- In **jeder Zeile ausgefüllt** sein, wenn ein Produkt Varianten hat. Ein Produkt mit nur einer Zeile darf ihn leer lassen; dann erzeugt Shopify den Handle aus dem Titel
 
 | Gültig | Ungültig | Grund |
 |---|---|---|
@@ -41,7 +41,7 @@ Ein gültiger Shopify-Handle muss:
 | `product-123` | `product/123` | Enthält einen Schrägstrich |
 | `mens-running-shoes` | `men's-running-shoes` | Enthält einen Apostroph |
 | `widget-v2` | `widget_v2` | Enthält einen Unterstrich (technisch erlaubt, aber nicht empfohlen) |
-| `shirt-sm` | `` | Leer (nicht erlaubt) |
+| `shirt-sm` | `` in einer Variantenzeile | Leer: Variantenzeilen brauchen den Handle, um gruppiert zu bleiben |
 
 ---
 

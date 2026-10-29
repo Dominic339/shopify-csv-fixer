@@ -2,7 +2,7 @@
 title: "Shopify CSV Handle 字段指南"
 description: "关于 Shopify 商品 CSV 中 Handle 字段的一切：它的作用、有效 handle 的规则、如何对变体分组，以及如何修复 handle 错误。"
 keywords: ["shopify csv handle 字段", "shopify handle", "shopify handle csv", "shopify 商品 handle", "shopify handle 变体", "shopify handle 规则", "shopify csv handle 错误"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify Handle 字段的作用，以及它为何是最重要的列"
@@ -33,7 +33,7 @@ Handle 是 Shopify CSV 中最重要的列。Handle 错误导致的导入失败�
 - 只包含**小写英文字母、数字和连字符**
 - **不含空格**（用连字符代替）
 - **不含特殊字符**：不能有 `&`、`%`、`?`、`/`、`@` 或 Unicode 字符
-- 每一行都**不能为空**：不允许空的 handle
+- 有变体的商品，**每一行都要填写**。只有一行的商品可以留空，Shopify 会根据标题生成 handle
 
 | 有效 | 无效 | 原因 |
 |---|---|---|
@@ -41,7 +41,7 @@ Handle 是 Shopify CSV 中最重要的列。Handle 错误导致的导入失败�
 | `product-123` | `product/123` | 含有斜杠 |
 | `mens-running-shoes` | `men's-running-shoes` | 含有撇号 |
 | `widget-v2` | `widget_v2` | 含有下划线（技术上允许，但不推荐） |
-| `shirt-sm` | `` | 为空（不允许） |
+| `shirt-sm` | 变体行中为 `` | 留空：变体行需要 handle 才能保持在同一组 |
 
 ---
 

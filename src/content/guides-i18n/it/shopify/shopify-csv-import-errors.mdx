@@ -2,7 +2,7 @@
 title: "Errori di importazione CSV di Shopify: cause comuni e soluzioni"
 description: "Una guida completa agli errori di importazione CSV più comuni di Shopify: colonne mancanti, booleani non validi, problemi di struttura delle varianti, errori di prezzo e conflitti di handle."
 keywords: ["errore importazione csv shopify", "errori importazione csv shopify", "shopify importare prodotti csv errore", "csv shopify non si importa", "correggere csv shopify", "controllare csv shopify", "errore caricamento csv shopify"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Gli errori di importazione CSV più comuni di Shopify e le loro cause"
@@ -33,13 +33,13 @@ Un errore in una qualsiasi fase fa fallire delle righe. Shopify spesso importa l
 
 **Causa:** Una o più colonne obbligatorie mancano nella riga di intestazione, sono scritte male o hanno maiuscole e minuscole sbagliate.
 
-**Colonne obbligatorie di Shopify:**
+**Colonne Shopify principali:**
 
 | Colonna | Note |
 |---|---|
-| `Handle` | Identificativo adatto agli URL; raggruppa le varianti |
-| `Title` | Nome del prodotto |
-| `Variant Price` | Prezzo di ogni riga di variante |
+| `Handle` | Raggruppa le righe delle varianti. Serve quando un prodotto ha varianti o quando aggiorni prodotti esistenti; altrimenti Shopify lo genera dal titolo |
+| `Title` | Nome del prodotto. L'unica colonna che Shopify richiede per un nuovo prodotto |
+| `Variant Price` | Prezzo di ogni variante. Un prezzo vuoto viene importato come 0.00 |
 
 **Soluzione:**
 - Confronta la tua riga di intestazione con il [modello ufficiale CSV dei prodotti Shopify](https://help.shopify.com/it/manual/products/import-export/using-csv)
@@ -70,12 +70,12 @@ In Excel: `Ctrl+H` (Trova e sostituisci) e seleziona "Confronta intero contenuto
 
 ## Errore: prezzo della variante vuoto o non valido
 
-**Messaggio:** "Variant Price can't be blank" oppure il prezzo viene importato come 0.00
+**Sintomo:** i prodotti vengono importati a 0.00 o i prezzi risultano sbagliati
 
 **Causa:** `Variant Price` è vuoto, contiene un simbolo di valuta (`$19.99`), usa la virgola decimale (`19,99`) o è un testo.
 
 **Soluzione:**
-- Compila `Variant Price` in ogni riga (sia principali sia di variante)
+- Compila `Variant Price` in ogni riga di variante. Shopify non rifiuta un prezzo vuoto: importa la variante a 0.00
 - Rimuovi i simboli di valuta: elimina `$` con Trova e sostituisci
 - Sostituisci la virgola decimale con il punto: `19,99` → `19.99`
 - Formatta la colonna come Numero in Excel prima di salvare (così i simboli non ricompaiono)
@@ -94,7 +94,7 @@ In Excel: `Ctrl+H` (Trova e sostituisci) e seleziona "Confronta intero contenuto
 
 **Regole per le righe di variante:**
 - Tutte le righe dello stesso prodotto devono avere esattamente lo stesso `Handle`
-- Ogni riga deve avere `Option1 Name` e `Option1 Value`
+- La prima riga di ogni prodotto dà il nome alle opzioni (`Option1 Name`); ogni riga di variante ha bisogno del proprio `Option1 Value`
 - Con 3 opzioni, tutte le righe devono avere le colonne `Option1`, `Option2` e `Option3`
 - `Option1 Name` (ad es. `Size`) deve essere uguale in tutte le righe del gruppo; cambia solo `Option1 Value`
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Causa:** Due prodotti senza relazione condividono lo stesso Handle. Shopify raggruppa tutte le righe con lo stesso Handle in un unico prodotto, quindi un Handle duplicato fonde prodotti diversi.
 
-**Soluzione:** Rendi unico l'Handle di ogni prodotto. Gli handle devono essere adatti agli URL: solo lettere minuscole, numeri e trattini, senza spazi né caratteri speciali.
+**Soluzione:** rendi unico l'Handle di ogni prodotto. Gli handle possono contenere lettere, numeri e trattini, senza spazi o altri caratteri, e Shopify li salva in minuscolo.
 
 Se stai aggiornando un prodotto esistente e l'Handle esiste già in Shopify, è voluto: l'importazione aggiornerà quel prodotto. Ma se un nuovo prodotto condivide per errore l'Handle di uno esistente, i dati di quest'ultimo verranno sovrascritti.
 

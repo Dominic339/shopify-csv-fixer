@@ -2,7 +2,7 @@
 title: "Shopify CSV Handle Field Guide"
 description: "Everything you need to know about the Handle field in Shopify's product CSV: what it does, the rules for valid handles, how it groups variants, and how to fix handle errors."
 keywords: ["shopify csv handle field", "shopify handle", "shopify handle csv", "shopify product handle", "shopify handle variants", "shopify handle rules", "shopify csv handle errors"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "What the Shopify Handle field does and why it's the most important column"
@@ -33,7 +33,7 @@ A valid Shopify handle must:
 - Contain only **lowercase letters, numbers, and hyphens**
 - Have **no spaces** (use hyphens instead)
 - Have **no special characters**: no `&`, `%`, `?`, `/`, `@`, or Unicode characters
-- Be **non-empty** on every row (blank handles are not allowed)
+- Be **filled in on every row** of a product that has variants. A single-row product can leave it blank, and Shopify generates the handle from the Title
 
 | Valid | Invalid | Reason |
 |---|---|---|
@@ -41,7 +41,7 @@ A valid Shopify handle must:
 | `product-123` | `product/123` | Contains slash |
 | `mens-running-shoes` | `men's-running-shoes` | Contains apostrophe |
 | `widget-v2` | `widget_v2` | Contains underscore (technically allowed but not recommended) |
-| `shirt-sm` | `` | Blank (not allowed) |
+| `shirt-sm` | `` on a variant row | Blank: variant rows need the handle to stay grouped |
 
 ---
 

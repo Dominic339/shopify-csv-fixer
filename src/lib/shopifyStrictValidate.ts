@@ -394,7 +394,7 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
     }
   }
 
-  // 10) Price can't be blank when a row is clearly a variant row (Shopify common import failure)
+  // 10) Blank price on a clear variant row: Shopify imports it at 0.00, which is rarely intended.
   if (has(COL.price)) {
     for (let i = 0; i < fixedRows.length; i++) {
       const row = i + 1;

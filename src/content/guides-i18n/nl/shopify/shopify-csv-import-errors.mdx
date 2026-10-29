@@ -2,7 +2,7 @@
 title: "Shopify-CSV-importfouten: veelvoorkomende oorzaken en oplossingen"
 description: "Een complete gids voor de meest voorkomende CSV-importfouten bij Shopify: ontbrekende kolommen, ongeldige booleaanse waarden, problemen met de variantstructuur, prijsfouten en handleconflicten."
 keywords: ["shopify csv importfout", "shopify csv import mislukt", "shopify csv fouten", "shopify producten importeren csv fout", "shopify csv repareren", "shopify csv controleren", "shopify uploadfout"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "De meest voorkomende CSV-importfouten bij Shopify en wat ze veroorzaakt"
@@ -33,13 +33,13 @@ Een fout in een van deze stappen laat rijen mislukken. Shopify importeert vaak d
 
 **Oorzaak:** Een of meer verplichte kolommen ontbreken in de koprij, zijn verkeerd gespeld of hebben de verkeerde hoofdletters.
 
-**Verplichte Shopify-kolommen:**
+**Belangrijke Shopify-kolommen:**
 
 | Kolom | Opmerking |
 |---|---|
-| `Handle` | URL-geschikte korte naam; groepeert varianten |
-| `Title` | Productnaam |
-| `Variant Price` | Prijs voor elke variantrij |
+| `Handle` | Groepeert variantrijen. Nodig als een product varianten heeft of als je bestaande producten bijwerkt; anders maakt Shopify hem aan op basis van de titel |
+| `Title` | Productnaam. De enige kolom die Shopify verplicht stelt voor een nieuw product |
+| `Variant Price` | Prijs van elke variant. Een lege prijs wordt geïmporteerd als 0.00 |
 
 **Oplossing:**
 - Vergelijk je koprij met de [officiële Shopify-sjabloon voor product-CSV's](https://help.shopify.com/nl/manual/products/import-export/using-csv)
@@ -70,12 +70,12 @@ In Excel: `Ctrl+H` (Zoeken en vervangen) en vink "Volledige celinhoud vergelijke
 
 ## Fout: lege of ongeldige variantprijs
 
-**Melding:** "Variant Price can't be blank" of de prijs wordt als 0.00 geïmporteerd
+**Symptoom:** producten worden geïmporteerd voor 0.00, of de prijzen kloppen niet
 
 **Oorzaak:** `Variant Price` is leeg, bevat een valutasymbool (`$19.99`), gebruikt een komma als decimaalteken (`19,99`) of is tekst.
 
 **Oplossing:**
-- Vul `Variant Price` in elke rij in (zowel hoofdrijen als variantrijen)
+- Vul `Variant Price` in op elke variantrij. Shopify weigert een lege prijs niet, maar importeert de variant voor 0.00
 - Verwijder valutasymbolen: wis `$` met Zoeken en vervangen
 - Vervang komma's als decimaalteken door punten: `19,99` → `19.99`
 - Geef de kolom in Excel vóór het opslaan de opmaak Getal (zodat de symbolen niet terugkomen)
@@ -94,7 +94,7 @@ In Excel: `Ctrl+H` (Zoeken en vervangen) en vink "Volledige celinhoud vergelijke
 
 **Regels voor variantrijen:**
 - Alle rijen van hetzelfde product moeten precies dezelfde `Handle` hebben
-- Elke rij moet `Option1 Name` en `Option1 Value` hebben
+- De eerste rij van elk product benoemt de opties (`Option1 Name`); elke variantrij heeft een eigen `Option1 Value` nodig
 - Bij 3 opties moeten alle rijen de kolommen `Option1`, `Option2` en `Option3` hebben
 - `Option1 Name` (bijv. `Size`) moet in alle rijen van de groep gelijk zijn; alleen `Option1 Value` verandert
 
@@ -115,7 +115,7 @@ blue-shirt,,Size,Large,21.99
 
 **Oorzaak:** Twee producten die niets met elkaar te maken hebben, delen dezelfde Handle. Shopify voegt alle rijen met dezelfde Handle samen tot één product, dus een dubbele Handle smelt verschillende producten samen.
 
-**Oplossing:** Geef elk product een unieke Handle. Handles moeten URL-geschikt zijn: alleen kleine letters, cijfers en streepjes, geen spaties of speciale tekens.
+**Oplossing:** geef elk product een unieke Handle. Handles mogen letters, cijfers en koppeltekens bevatten, zonder spaties of andere tekens, en Shopify slaat ze op in kleine letters.
 
 Werk je een bestaand product bij en bestaat de Handle al in Shopify, dan is dat de bedoeling: de import werkt dat product bij. Maar deelt een nieuw product per ongeluk de Handle van een bestaand product, dan worden de gegevens van dat bestaande product overschreven.
 

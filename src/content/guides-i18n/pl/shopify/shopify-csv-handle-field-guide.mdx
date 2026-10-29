@@ -2,7 +2,7 @@
 title: "Przewodnik po polu Handle w CSV Shopify"
 description: "Wszystko o polu Handle w CSV produktów Shopify: do czego służy, jakie są zasady poprawnego handle, jak grupuje warianty i jak naprawiać błędy handle."
 keywords: ["pole handle csv shopify", "shopify handle", "handle shopify csv", "handle produktu shopify", "shopify handle warianty", "zasady handle shopify", "błędy handle csv shopify"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Do czego służy pole Handle w Shopify i dlaczego to najważniejsza kolumna"
@@ -33,7 +33,7 @@ Poprawny handle w Shopify musi:
 - Zawierać tylko **małe litery, cyfry i myślniki**
 - **Nie zawierać spacji** (zamiast nich używaj myślników)
 - **Nie zawierać znaków specjalnych**: żadnych `&`, `%`, `?`, `/`, `@` ani znaków Unicode
-- **Być wypełniony** w każdym wierszu (puste handle są niedozwolone)
+- Być **wypełniony w każdym wierszu** produktu z wariantami. Produkt zajmujący jeden wiersz może go zostawić pusty, a Shopify utworzy handle z tytułu
 
 | Poprawny | Niepoprawny | Powód |
 |---|---|---|
@@ -41,7 +41,7 @@ Poprawny handle w Shopify musi:
 | `product-123` | `product/123` | Zawiera ukośnik |
 | `mens-running-shoes` | `men's-running-shoes` | Zawiera apostrof |
 | `widget-v2` | `widget_v2` | Zawiera podkreślnik (technicznie dozwolony, ale niezalecany) |
-| `shirt-sm` | `` | Pusty (niedozwolony) |
+| `shirt-sm` | `` w wierszu wariantu | Pusty: wiersze wariantów potrzebują handle, żeby pozostać zgrupowane |
 
 ---
 

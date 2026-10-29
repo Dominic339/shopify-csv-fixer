@@ -2,7 +2,7 @@
 title: "Shopify ürün varyantları açıklandı: CSV yapısı ve yaygın hatalar"
 description: "Shopify'ın CSV biçiminin varyantları Handle gruplaması, Option sütunları ve ana/alt satırlarla nasıl gösterdiğini öğrenin. Ürünleri bölen, varyantları kaybettiren ve içe aktarmayı bozan en yaygın hatalardan kaçının."
 keywords: ["shopify varyant csv", "shopify ürün varyantı içe aktarma", "shopify handle varyant", "shopify option1 option2", "shopify csv ana ürün varyant", "shopify varyant fiyatı csv", "shopify csv yapısı"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify'ın bir ana ürünü ve varyantlarını Handle ile nasıl grupladığı"
@@ -39,7 +39,7 @@ Bir Handle'ın ilk satırı ana satırdır. Ürün düzeyindeki alanları belirl
 
 | Sütun | Ana satırda zorunlu | Not |
 |---|---|---|
-| Handle | Evet | Bu ürünün benzersiz kısa adı; küçük harf, yalnızca tire |
+| Handle | Evet | Bu ürünün benzersiz kısa adı; harf, rakam ve kısa çizgi |
 | Title | Evet | Ürün adı |
 | Body HTML | Hayır | Ürün açıklaması; yalnızca ana satırda gerekir |
 | Vendor | Hayır | Marka adı |
@@ -66,8 +66,8 @@ Aynı Handle'a sahip ilk satırdan sonraki her satır bir varyant satırıdır. 
 
 | Sütun | Not |
 |---|---|
-| Variant Price | Her varyant için zorunlu; ondalık sayı (para birimi simgesi yok) |
-| Variant SKU | İsteğe bağlı ama kesinlikle önerilir; tüm mağazada benzersiz olmalı |
+| Variant Price | Ondalık sayı (para birimi simgesi olmadan); boş bir fiyat 0.00 olarak içe aktarılır |
+| Variant SKU | İsteğe bağlı ama şiddetle önerilir; benzersiz tutun, çünkü Shopify yinelenen SKU'ları engellemez |
 | Variant Grams | Gram cinsinden ağırlık |
 | Variant Inventory Qty | Başlangıç stok miktarı |
 | Variant Inventory Policy | `deny` veya `continue` (continue = stok olmadan satışa izin ver) |
@@ -106,17 +106,17 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Çözüm:** Bir ürüne ait tüm satırlar tam olarak aynı Handle değerine sahip olmalıdır. Bir yazım hatası (`blue-shirt` yerine `blue-shirt-`) Shopify'ın yeni bir ürün oluşturmasına yol açar.
 
-### Hata 2: her satırda Title
+### Hata 2: Varyant satırlarındaki ürün bilgileri
 
-**Belirti:** İçe aktarma başarılı olur ama Shopify yinelenen ürünler oluşturur veya varyant satırlarını ayrı ürün gibi işler.
+**Belirti:** Bir varyant satırına yazdığınız başlık, açıklama veya etiket içe aktarmadan sonra görünmüyor.
 
-**Çözüm:** Yalnızca her Handle'ın ilk satırında Title olmalıdır. Tüm varyant satırlarında Title'ı boş bırakın.
+**Çözüm:** Shopify ürün düzeyindeki alanları (Title, Body HTML, Vendor, Tags vb.) her Handle'ın ilk satırından okur. Bunları oraya yazın ve sonraki satırlarda boş bırakın.
 
 ### Hata 3: Option1 Name sütunu eksik
 
-**Belirti:** "Option1 Name is required" içe aktarma hatası alınır veya tüm varyantlar "Default Title" adlı tek bir seçenek olarak görünür.
+**Belirti:** Varyantlar görünmüyor veya ürün "Default Title" adlı tek bir varyantla kalıyor.
 
-**Çözüm:** Başlık satırına her zaman `Option1 Name` ekleyin ve en azından ana satırda bir değer girin. Ürününüzün gerçek seçenekleri yoksa Option1 Name'i `Title`, Option1 Value'yu `Default Title` yapın.
+**Çözüm:** `Option1 Name` sütununu her zaman başlık satırına ekleyin ve en azından ana satırda bir değer girin. Ürününüzün gerçek seçenekleri yoksa Option1 Name'i `Title`, Option1 Value'yu `Default Title` yapın. Seçenek sütunlarını tamamen çıkarırsanız Shopify yeni bir varsayılan varyant oluşturur ve mevcut olanları siler.
 
 ### Hata 4: satırlar arasında seçenek değerleri uyuşmuyor
 
@@ -126,15 +126,15 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 ### Hata 5: Variant Price boş
 
-**Belirti:** İçe aktarma "Variant Price is required" hatasıyla başarısız olur veya varyantlar 0.00 fiyatla oluşturulur.
+**Belirti:** Varyantlar 0.00 $ fiyatla oluşturuluyor.
 
-**Çözüm:** Variant Price her satırda zorunludur. Değer devralınmaz: tüm varyantların fiyatı aynı olsa bile her satırda belirtilmelidir.
+**Çözüm:** Shopify boş fiyatı reddetmez, varyantı 0.00 fiyatla içe aktarır. Fiyatlar devralınmaz; tüm varyantlar aynı fiyatta olsa bile her satırda fiyat yazmalıdır.
 
 ### Hata 6: yeni bir varyant eklemek mevcut varyantların üzerine yazıyor
 
 **Belirti:** Kısmi bir içe aktarmadan (yeni bir varyant eklemekten) sonra diğer tüm varyantlar kaybolur.
 
-**Çözüm:** Bir ürünü CSV içe aktarmasıyla güncellerken dosyaya yalnızca yenisini değil, mevcut **tüm** varyantları eklemeniz gerekir. Shopify içe aktarıcısı bir Handle'ın tüm varyant kümesini değiştirir. Dahil etmediğiniz mevcut varyantlar silinir.
+**Çözüm:** Bir ürünü CSV içe aktarımıyla güncellerken yalnızca yenisini değil, mevcut **tüm** varyantlarını dosyaya ekleyin. Shopify varyantları seçenek değerlerine göre eşleştirir ve dosyada olmayan varyantlar ürünün üzerine yazdığınızda kaldırılabilir.
 
 ---
 

@@ -2,7 +2,7 @@
 title: "Shopify 상품 CSV 템플릿 해설"
 description: "Shopify 공식 상품 CSV 템플릿의 모든 필드를 열별로 설명합니다. 각 열의 역할, 허용되는 값, 필수 열을 알 수 있습니다."
 keywords: ["shopify 제품 csv 템플릿", "shopify csv 열 설명", "shopify csv 템플릿 가이드", "shopify 가져오기 템플릿", "shopify csv 필드", "shopify 제품 가져오기 열", "shopify csv 참고"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify 상품 CSV 템플릿의 각 열이 하는 일"
@@ -18,13 +18,13 @@ timeToComplete: "15분"
 
 Shopify 공식 상품 CSV 템플릿의 열은 **상품 수준**(상품마다 한 번, 첫 행인 상위 행에 입력)과 **변형 수준**(해당 상품의 모든 행에 입력) 두 종류입니다. 변형이 여러 개인 상품은 같은 Handle을 공유하는 여러 행을 차지합니다.
 
-최신 템플릿은 Shopify 관리자에서 내려받으세요: 제품 → 가져오기 → 샘플 CSV 다운로드.
+최신 템플릿은 Shopify 관리자에서 내려받으세요: 제품 → 가져오기 → 샘플 CSV 다운로드. 최신 템플릿은 새 열 이름(`URL handle`, `Description`, `Price`, `Product image URL`, `Published on online store` 등)을 씁니다. 이 가이드에서 쓰는 예전 이름도 Shopify가 계속 받아들입니다.
 
 ---
 
 ## 식별 열
 
-### Handle(필수)
+### Handle(최신 템플릿에서는 `URL handle`)
 
 Handle은 URL에 쓸 수 있는 상품의 고유 식별자입니다. 다음 조건을 지켜야 합니다.
 - 스토어의 모든 상품 중에서 고유해야 합니다
@@ -70,9 +70,9 @@ Handle은 URL에 쓸 수 있는 상품의 고유 식별자입니다. 다음 조�
 - `true`: 상품이 온라인 스토어에 게시됩니다
 - `false`: 상품이 온라인 스토어에 표시되지 않습니다(관리자 화면에는 남아 있으며, 초안 상태는 Status 열에서 따로 설정합니다)
 
-### Published Scope
+### Status
 
-상품이 게시되는 곳입니다. 흔히 쓰는 값: `web`(온라인 스토어), `global`(모든 채널).
+상품을 판매할 수 있는지 여부: `active`(기본값), `draft`, `archived`.
 
 ---
 
@@ -107,9 +107,9 @@ Handle은 URL에 쓸 수 있는 상품의 고유 식별자입니다. 다음 조�
 
 해당 변형의 고유 식별자입니다. 선택 사항이지만 재고를 관리한다면 SKU는 고유해야 합니다. SKU 기반 재고 관리를 하지 않으면 비워 두세요.
 
-### Variant Price(필수)
+### Variant Price(최신 템플릿에서는 `Price`)
 
-해당 변형의 판매 가격입니다. 통화 기호와 천 단위 구분 기호 없이 단순한 소수로 씁니다.
+이 변형의 판매 가격입니다. 통화 기호나 천 단위 구분 기호 없는 일반 소수로 씁니다. 비어 있는 가격은 0.00으로 가져옵니다.
 
 **예:** `19.99`
 
@@ -119,7 +119,7 @@ Handle은 URL에 쓸 수 있는 상품의 고유 식별자입니다. 다음 조�
 
 ### Variant Inventory Qty
 
-재고 수량입니다. 정수로 씁니다. 재고가 없으면 `0`을 쓰세요. 이 변형의 재고 관리를 끈 경우 비워 두세요.
+재고 수량을 정수로 씁니다. 위치가 하나인 스토어에만 적용되며, 위치가 여러 곳인 스토어는 Shopify 재고 CSV로 재고를 업데이트합니다.
 
 ### Variant Inventory Policy
 
@@ -139,11 +139,11 @@ Handle은 URL에 쓸 수 있는 상품의 고유 식별자입니다. 다음 조�
 
 ### Variant Barcode
 
-UPC, EAN, ISBN 바코드입니다. 일반 텍스트입니다. Shopify는 검증하지 않고 저장만 합니다.
+UPC, EAN, ISBN 바코드입니다. 스프레드시트가 앞자리 0을 지우거나 숫자를 1.23E+11로 바꾸지 않도록 열 서식을 텍스트로 지정하세요.
 
-### Variant Weight / Variant Weight Unit
+### Variant Grams / Variant Weight Unit
 
-변형의 무게와 단위입니다. 무게는 소수이고, 단위는 `kg`, `g`, `lb`, `oz` 중 하나입니다.
+`Variant Grams`(최신 템플릿에서는 `Weight value (grams)`)는 그램 단위 무게로, 단위 없이 정수로 씁니다. 5.125kg은 `5125`입니다. `Variant Weight Unit`(`Weight unit for display`)은 고객에게 보이는 단위만 정합니다: `g`, `kg`, `lb`, `oz`.
 
 ---
 
@@ -151,7 +151,7 @@ UPC, EAN, ISBN 바코드입니다. 일반 텍스트입니다. Shopify는 검증�
 
 ### Image Src
 
-상품 이미지 URL입니다. 공개된 HTTPS URL이어야 합니다. 지원 형식: JPG, JPEG, PNG, GIF, WEBP.
+상품 이미지의 URL입니다. 비밀번호 보호가 없는 공개 `https://` URL이어야 합니다.
 
 - 상위 행: 상품의 대표 이미지
 - 변형 행: 해당 변형의 옵션 조합에 맞는 이미지(예: 파란색 견본)
@@ -174,7 +174,7 @@ UPC, EAN, ISBN 바코드입니다. 일반 텍스트입니다. Shopify는 검증�
 
 ### SEO Description
 
-상품 페이지의 메타 설명입니다. 160자 미만을 권장합니다.
+상품 페이지의 메타 설명입니다. Shopify는 320자까지 허용하며, 비어 있으면 상품 설명을 씁니다.
 
 ---
 
@@ -182,7 +182,7 @@ UPC, EAN, ISBN 바코드입니다. 일반 텍스트입니다. Shopify는 검증�
 
 ### Gift Card(참/거짓)
 
-상품이 기프트 카드일 때만 `true`입니다. 대부분의 상품은 `false`이거나 비워 둡니다.
+이 상품이 기프트 카드일 때만 `true`입니다. 대부분의 상품은 `false`이거나 비어 있어야 합니다. Shopify는 CSV 가져오기로 기프트 카드를 만들 수 없으므로 새 기프트 카드는 관리자에서 만드세요.
 
 ---
 

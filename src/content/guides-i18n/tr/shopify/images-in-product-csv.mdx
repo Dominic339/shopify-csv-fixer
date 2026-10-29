@@ -2,7 +2,7 @@
 title: "CSV'de Shopify ürün görselleri: Image Src, alternatif metin ve sıralar"
 description: "Shopify ürün CSV'sinde görsel URL'lerini nasıl yapılandıracağınızı öğrenin: Image Src, Image Position ve Image Alt Text sütunları, ürün başına birden çok görsel ekleme ve en yaygın görsel içe aktarma hatalarından kaçınma."
 keywords: ["shopify görsel csv", "shopify image src", "shopify görsel alternatif metin", "shopify image position csv", "shopify ürün görselleri içe aktarma", "shopify csv birden fazla görsel", "shopify görsel url"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Shopify ürün CSV'sinde hangi görsel sütunlarının bulunduğu"
@@ -50,8 +50,8 @@ Bir ürüne birden fazla görsel eklemek için yalnızca görsel verisi içeren,
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
 blue-shirt,Blue T-Shirt,Size,Small,19.99,https://cdn.example.com/blue-shirt-front.jpg,1,Blue t-shirt front view
 blue-shirt,,Size,Medium,21.99,,,
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
-blue-shirt,,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-back.jpg,2,Blue t-shirt back view
+blue-shirt,,,,,https://cdn.example.com/blue-shirt-detail.jpg,3,Blue t-shirt fabric detail
 ```
 
 Temel kurallar:
@@ -88,7 +88,7 @@ Shopify, içe aktarma sırasında görselleri verdiğiniz URL'den indirir. URL �
 - **HTTPS olmalıdır.** Düz HTTP URL'leri reddedilir veya karışık içerik uyarılarına yol açabilir.
 - **Herkese açık olmalıdır.** Giriş, Cloudflare doğrulaması veya IP kısıtlaması arkasındaki URL'ler çalışmaz.
 - **URL'de boşluk olmamalıdır.** Boşluklar `%20` olarak kodlanmalı veya URL yeniden düzenlenmelidir.
-- **Bir görsel dosyasını göstermelidir.** Shopify JPEG, PNG, GIF, WEBP ve SVG kabul eder. Sunucu doğru içerik türünü döndürüyorsa URL'nin bir uzantıyla bitmesi gerekmez, ancak çoğu içe aktarma süreci uzantılı URL'lerle daha güvenilir çalışır.
+- **Bir görsel dosyasını göstermelidir.** JPEG, PNG, GIF veya WEBP gibi yaygın bir biçim kullanın. Sunucu doğru content-type başlığını döndürüyorsa URL'nin bir uzantıyla bitmesi gerekmez, ama çoğu içe aktarma uzantılı URL'lerle daha güvenilir çalışır.
 - **Süresi dolan parametreler olmamalıdır.** Bir süre sonra geçersiz olan önceden imzalanmış URL'ler (S3, Cloudinary vb.) kullanıyorsanız, içe aktarma boyunca geçerli kaldıklarından emin olun.
 
 ---
@@ -116,13 +116,13 @@ Shopify, içe aktarma sırasında görselleri verdiğiniz URL'den indirir. URL �
 
 **Çözüm:** Handle'ların tamamen aynı olduğundan emin olun. Tek bir fazladan boşluk veya farklı bir büyük harf bile yeni bir ürün oluşturur.
 
-### Eski görseller kaldırılmıyor
+### Görselleri yeniden içe aktarma
 
-**Davranış:** Yeniden içe aktarmada Shopify'ın CSV içe aktarıcısı ürüne görsel **ekler**. Mevcut görselleri kaldırmaz. Görselleri kaldırmanız gerekiyorsa bunu Shopify yönetim panelinden veya API üzerinden yapmalısınız.
+**Davranış:** Shopify'ın belgeleri, bir ürünü yeniden içe aktarmanın görselleri tekrar ekleyip eklemediğini ya da mevcutların yerine koyup koymadığını söylemez. Önce tek bir ürünle deneyin ve istenmeyen görselleri Shopify yönetim panelinden kaldırın.
 
 ### Çok fazla görsel
 
-**Davranış:** Tek bir Handle için 250'den fazla görsel URL'si verirseniz Shopify yalnızca ilk 250'sini içe aktarır ve geri kalanını uyarı vermeden yok sayar.
+**Davranış:** Shopify ürün başına 250 görsele kadar destekler. Her handle için bu sınırın içinde kalın.
 
 ---
 
@@ -160,10 +160,10 @@ my-product,,,...,https://example.com/img2.jpg,2,Side view
 my-product,,,...,https://example.com/img3.jpg,3,Detail view
 ```
 
-**Varyant görseli (belirli bir varyant satırıyla ilişkili görsel):**
-Image Src'yi varyantla aynı satıra yazın. Shopify o görseli o varyantla ilişkilendirir:
+**Varyant görseli (belirli bir varyanta bağlı görsel):**
+Görsel URL'sini o varyantın satırında `Variant Image` sütununa (güncel şablonda `Variant image URL`) yazın:
 ```
-Handle,Option1 Value,Variant Price,Image Src
+Handle,Option1 Value,Variant Price,Variant Image
 my-product,Blue,19.99,https://example.com/blue.jpg
 my-product,Red,19.99,https://example.com/red.jpg
 ```
