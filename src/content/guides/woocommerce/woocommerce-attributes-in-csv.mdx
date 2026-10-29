@@ -1,6 +1,6 @@
 ---
 title: "WooCommerce Product Attributes in CSV: Complete Guide"
-description: "How to correctly format WooCommerce product attributes in a CSV file — attribute naming, global vs. local attributes, variation attributes, and common mistakes."
+description: "How to correctly format WooCommerce product attributes in a CSV file: attribute naming, global vs. local attributes, variation attributes, and common mistakes."
 keywords: ["woocommerce attributes csv", "woocommerce product attributes import", "woocommerce attribute columns csv", "woocommerce variation attributes", "woocommerce csv attribute format", "woocommerce global attributes csv", "woocommerce attribute import error"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -16,7 +16,7 @@ timeToComplete: "10 minutes"
 
 ## How WooCommerce Attributes Work in CSV
 
-WooCommerce product attributes define the dimensions by which a product varies — typically Size, Color, or Material. In a CSV import, attributes are represented as numbered column groups. Each group of four columns covers one attribute.
+WooCommerce product attributes define the ways a product varies, typically Size, Color, or Material. In a CSV import, attributes are represented as numbered column groups. Each group of four columns covers one attribute.
 
 The column naming pattern is:
 - `Attribute 1 name`
@@ -73,7 +73,7 @@ Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 vi
 ,variation,TSHIRT-XL,20.00,Size,XL,1,1
 ```
 
-The `Name` column is blank on variation rows — WooCommerce generates the variation name from the attribute values.
+The `Name` column is blank on variation rows. WooCommerce generates the variation name from the attribute values.
 
 ---
 
@@ -123,7 +123,7 @@ Local attributes cannot be used for variation filtering or layered navigation.
 
 ### Attribute columns not recognized
 
-**Cause:** Column names don't follow the exact pattern — wrong spacing, wrong numbering, or abbreviated names.
+**Cause:** Column names don't follow the exact pattern: wrong spacing, wrong numbering, or abbreviated names.
 
 Wrong: `Attribute1 name`, `attribute 1 name`, `Attr 1 name`
 Correct: `Attribute 1 name`
@@ -146,6 +146,6 @@ Correct: `Attribute 1 name`
 
 ## Fix This Automatically with StriveFormats
 
-Upload your WooCommerce CSV to StriveFormats. The validator checks attribute column naming, parent/variation attribute consistency, and pipe-separator formatting — then flags issues with exact row and column locations.
+Upload your WooCommerce CSV to StriveFormats. The validator checks attribute column naming, parent/variation attribute consistency, and pipe-separator formatting, then flags issues with exact row and column locations.
 
 [Open WooCommerce CSV Fixer](/app?preset=woocommerce_products) | [View WooCommerce Template](/presets/woocommerce_products)

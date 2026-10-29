@@ -18,8 +18,8 @@ timeToComplete: "10 minut"
 
 Handle to unikalny identyfikator produktu w CSV produktów Shopify. Pełni dwie funkcje:
 
-1. **Grupuje wiersze wariantów** – wszystkie wiersze tego samego produktu muszą mieć ten sam Handle. Shopify czyta kolumnę Handle, żeby wiedzieć, które wiersze należą do siebie.
-2. **Ustala adres URL produktu** – Handle staje się ścieżką w adresie: `yourstore.com/products/<handle>`
+1. **Grupuje wiersze wariantów**: wszystkie wiersze tego samego produktu muszą mieć ten sam Handle. Shopify czyta kolumnę Handle, żeby wiedzieć, które wiersze należą do siebie.
+2. **Ustala adres URL produktu**: Handle staje się ścieżką w adresie: `yourstore.com/products/<handle>`
 
 Handle to najważniejsza kolumna CSV Shopify. Błędy w Handle powodują więcej nieudanych importów niż jakiekolwiek inne pole.
 
@@ -33,7 +33,7 @@ Poprawny handle w Shopify musi:
 - Zawierać tylko **małe litery, cyfry i myślniki**
 - **Nie zawierać spacji** (zamiast nich używaj myślników)
 - **Nie zawierać znaków specjalnych**: żadnych `&`, `%`, `?`, `/`, `@` ani znaków Unicode
-- **Być wypełniony** w każdym wierszu – puste handle są niedozwolone
+- **Być wypełniony** w każdym wierszu (puste handle są niedozwolone)
 
 | Poprawny | Niepoprawny | Powód |
 |---|---|---|
@@ -94,7 +94,7 @@ Gdy Shopify czyta ten plik:
 
 **Rozwiązanie:** W niektórych sytuacjach Shopify sam zmienia handle na małe litery i zastępuje spacje myślnikami, ale przy imporcie CSV lepiej samodzielnie sformatować handle wcześniej, żeby uniknąć nieprzewidywalnych zmian.
 
-**Python – ujednolicanie handle:**
+**Python: ujednolicanie handle**
 
 ```python
 import re
@@ -113,7 +113,7 @@ print(to_shopify_handle("Blue Leather Wallet!"))
 
 **Objaw:** Shopify importuje każdy wiersz wariantu jako osobny produkt (każdy z 0 lub 1 wariantem).
 
-**Przyczyna:** Wartość Handle różni się w wierszach, które powinny należeć do tego samego produktu – często przez literówkę lub dodatkową spację.
+**Przyczyna:** Wartość Handle różni się w wierszach, które powinny należeć do tego samego produktu, często przez literówkę lub dodatkową spację.
 
 **Rozwiązanie:** Posortuj plik CSV według Handle i poszukaj wierszy, które powinny mieć ten sam Handle, a go nie mają. Spacja na końcu (`blue-wallet ` zamiast `blue-wallet`) to najczęstszy winowajca.
 

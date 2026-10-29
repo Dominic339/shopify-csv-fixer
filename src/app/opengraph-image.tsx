@@ -38,7 +38,7 @@ export default function OpenGraphImage() {
           <span style={{ color: "#0f766e", marginLeft: 12 }}>before the import fails.</span>
         </div>
         <div style={{ marginTop: 22, fontSize: 28, color: "#5c6377" }}>
-          Shopify · WooCommerce · Etsy · eBay · Amazon — your file never leaves your computer.
+          Shopify · WooCommerce · Etsy · eBay · Amazon. Your file never leaves your computer.
         </div>
         <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 14, display: "flex" }}>
           <div style={{ flex: 3, background: "#0f766e" }} />

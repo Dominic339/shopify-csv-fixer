@@ -44,7 +44,7 @@ These columns appear in many category templates and require careful attention:
 | `hazmat_applicable` | `y` / `n` | Hazmat / dangerous goods flag |
 | `fragile` | `y` / `n` | Whether item is fragile for shipping |
 | `is_discontinued_by_manufacturer` | `y` / `n` | Discontinued product flag |
-| `generic_keywords` | text | (Not boolean — listed here to avoid confusion) |
+| `generic_keywords` | text | (Not boolean; listed here to avoid confusion) |
 
 > **Note:** The exact column names and accepted values vary by category template. Always refer to the data definitions tab in the template you downloaded from Seller Central for your specific category.
 
@@ -57,7 +57,7 @@ These columns appear in many category templates and require careful attention:
 When you type `y` in a cell, Excel leaves it as text. But problems arise when:
 
 1. **Opening a CSV that already has y/n values:** If Excel interprets the column as boolean and auto-formats it, `y` may be displayed correctly but saved as a platform-specific value on export.
-2. **Using TRUE/FALSE:** If someone enters `TRUE` or `FALSE` (Excel's built-in boolean literals), Excel stores them as booleans. When exported to CSV, Excel writes `TRUE` or `FALSE` (uppercase) — which Amazon rejects for `y`/`n` columns.
+2. **Using TRUE/FALSE:** If someone enters `TRUE` or `FALSE` (Excel's built-in boolean literals), Excel stores them as booleans. When exported to CSV, Excel writes `TRUE` or `FALSE` (uppercase), which Amazon rejects for `y`/`n` columns.
 3. **Formulas producing TRUE/FALSE:** If a formula like `=IF(A2>0, TRUE, FALSE)` is used to fill boolean columns, the result is `TRUE`/`FALSE`, not `y`/`n`.
 
 ### Google Sheets
@@ -99,7 +99,7 @@ Filter for rows showing `INVALID` to find all problem values.
 5. Click **Replace All**.
 6. Repeat for `FALSE` → `n` (or `y`, depending on the field's meaning).
 
-> **Important:** Decide the mapping for each field — `TRUE` might mean `y` for `batteries_included` but may not make sense for `is_adult_product`. Review the field meaning before mass-replacing.
+> **Important:** Decide the mapping for each field. `TRUE` might mean `y` for `batteries_included` but may not make sense for `is_adult_product`. Review the field meaning before mass-replacing.
 
 ### Replace formula results with values
 
@@ -154,5 +154,5 @@ Before uploading your Flat File to Seller Central:
 |---|---|
 | "Invalid value for batteries_required" | `TRUE` or `Yes` instead of `y` |
 | "batteries_required is required" | Field left blank for a physical product |
-| Row silently ignored | `FALSE` used — Amazon skips the field update |
+| Row silently ignored | `FALSE` used, so Amazon skips the field update |
 | "Value not in valid range" | Using `1`/`0` in a `y`/`n` column |

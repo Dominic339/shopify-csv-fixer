@@ -18,10 +18,10 @@ timeToComplete: "12 minut"
 
 Gdy importujesz plik CSV z produktami, Shopify przepuszcza każdy wiersz przez kilka etapów walidacji:
 
-1. **Kontrola nagłówków** – sprawdza, czy są wymagane kolumny
-2. **Grupowanie po handle** – łączy wiersze z tym samym Handle w jeden produkt
-3. **Walidacja pól** – sprawdza typy danych, wartości wymagane i dozwolone
-4. **Wykrywanie konfliktów** – szuka konfliktów handle i SKU z istniejącymi produktami
+1. **Kontrola nagłówków**: sprawdza, czy są wymagane kolumny
+2. **Grupowanie po handle**: łączy wiersze z tym samym Handle w jeden produkt
+3. **Walidacja pól**: sprawdza typy danych, wartości wymagane i dozwolone
+4. **Wykrywanie konfliktów**: szuka konfliktów handle i SKU z istniejącymi produktami
 
 Błąd na dowolnym etapie powoduje odrzucenie wierszy. Shopify często importuje poprawne wiersze i pomija błędne, więc jeśli nie poprawisz wcześniej wszystkich błędów, import może być niepełny.
 
@@ -117,7 +117,7 @@ blue-shirt,,Size,Large,21.99
 
 **Rozwiązanie:** Nadaj każdemu produktowi unikalny Handle. Handle musi być przyjazny dla URL: tylko małe litery, cyfry i myślniki, bez spacji i znaków specjalnych.
 
-Jeśli aktualizujesz istniejący produkt, a Handle już jest w Shopify, to jest zamierzone – import zaktualizuje ten produkt. Ale jeśli nowy produkt przypadkiem ma Handle istniejącego, dane istniejącego zostaną nadpisane.
+Jeśli aktualizujesz istniejący produkt, a Handle już jest w Shopify, to jest zamierzone i import zaktualizuje ten produkt. Ale jeśli nowy produkt przypadkiem ma Handle istniejącego, dane istniejącego zostaną nadpisane.
 
 ---
 
@@ -140,7 +140,7 @@ Jeśli aktualizujesz istniejący produkt, a Handle już jest w Shopify, to jest 
 - Adres zawiera spacje lub znaki specjalne, które trzeba zakodować
 - Format obrazu nie jest obsługiwany (Shopify akceptuje JPG, JPEG, PNG, GIF i WEBP)
 
-**Rozwiązanie:** Sprawdź każdy adres obrazu w przeglądarce – obraz powinien od razu się wyświetlić. Obrazy z Google Drive, Dropboxa lub localhosta trzeba przed importem przenieść na publiczny hosting.
+**Rozwiązanie:** Sprawdź każdy adres obrazu w przeglądarce. Obraz powinien od razu się wyświetlić. Obrazy z Google Drive, Dropboxa lub localhosta trzeba przed importem przenieść na publiczny hosting.
 
 ---
 

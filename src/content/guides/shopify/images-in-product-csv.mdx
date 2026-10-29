@@ -44,7 +44,7 @@ The variant rows (second and subsequent rows with the same Handle) have empty Im
 
 ## Adding Multiple Images per Product
 
-To add more than one image to a product, add **additional rows with the same Handle** that contain only the image data. These rows have blank Title and blank variant fields — they exist only to carry additional image URLs.
+To add more than one image to a product, add **additional rows with the same Handle** that contain only the image data. These rows have a blank Title and blank variant fields. They exist only to carry additional image URLs.
 
 ```
 Handle,Title,Option1 Name,Option1 Value,Variant Price,Image Src,Image Position,Image Alt Text
@@ -58,7 +58,7 @@ Key rules:
 - Up to **250 images** are supported per product.
 - Each image URL goes on its own row with the same Handle.
 - The image-only rows have blank Variant Price, blank Option values, and blank Title.
-- Do not use the same row for both a variant and a non-primary image — one row, one purpose.
+- Do not use the same row for both a variant and a non-primary image. One row, one purpose.
 
 ---
 
@@ -112,7 +112,7 @@ Shopify downloads images from the URL you provide at import time. The URL must m
 
 ### Images appear on the wrong product
 
-**Cause:** Handle typo — the image row used a slightly different Handle than the product row.
+**Cause:** A Handle typo. The image row used a slightly different Handle than the product row.
 
 **Fix:** Ensure exact Handle consistency. A single extra space or capitalization difference creates a new product.
 

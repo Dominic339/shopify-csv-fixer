@@ -1,6 +1,6 @@
 ---
 title: "CSV Basics for Ecommerce Imports"
-description: "Understand headers, UTF-8 encoding, quoting, line endings, and the most common mistakes that break ecommerce CSV imports -- before your first upload."
+description: "Understand headers, UTF-8 encoding, quoting, line endings, and the most common mistakes that break ecommerce CSV imports, before your first upload."
 keywords: ["csv basics", "csv encoding utf-8", "csv headers", "csv quoting commas", "csv line endings", "csv import errors", "fix csv file"]
 lastUpdated: "2026-03-03"
 kind: "curated"
@@ -55,7 +55,7 @@ If the first line starts with three strange characters before the header names, 
 
 ## UTF-8 Encoding
 
-Encoding is how text characters are stored as bytes on disk. The wrong encoding causes garbled text -- for example, a right-curly apostrophe stored as UTF-8 but read as Latin-1 produces the three-character sequence that looks like garbage.
+Encoding is how text characters are stored as bytes on disk. The wrong encoding causes garbled text. For example, a curly apostrophe stored as UTF-8 but read as Latin-1 turns into a three-character sequence that looks like garbage.
 
 ### Why UTF-8
 
@@ -73,7 +73,7 @@ How to tell if your file has a BOM: open it in VS Code and check the bottom-righ
 
 **Fix in VS Code:** Click the encoding indicator in the status bar, choose "Save with Encoding", then select "UTF-8" (without BOM).
 
-**Fix in Excel:** Choose "CSV (Comma delimited)" when saving -- not "CSV UTF-8 (Comma delimited)". The plain "CSV (Comma delimited)" option saves without a BOM on most Windows Excel versions.
+**Fix in Excel:** Choose "CSV (Comma delimited)" when saving, not "CSV UTF-8 (Comma delimited)". The plain "CSV (Comma delimited)" option saves without a BOM on most Windows Excel versions.
 
 **Fix with Python:**
 
@@ -87,7 +87,7 @@ with open("output.csv", "w", encoding="utf-8") as f:
 
 ### Encoding in Other Tools
 
-**Google Sheets:** File > Download > Comma Separated Values exports as UTF-8. Some versions add a BOM -- if you see garbled characters at the start of your file, re-save in VS Code without BOM.
+**Google Sheets:** File > Download > Comma Separated Values exports as UTF-8. Some versions add a BOM. If you see garbled characters at the start of your file, re-save it in VS Code without a BOM.
 
 **LibreOffice Calc:** When saving as CSV, choose "Unicode (UTF-8)" in the dialog box.
 
@@ -149,7 +149,7 @@ Line endings tell the parser where one row ends and the next begins. There are t
 | CRLF | carriage return + line feed | Windows, Excel |
 | LF | line feed only | macOS, Linux, most web tools |
 
-Most platforms accept either format. Problems arise when line endings are mixed -- some rows CRLF and others LF. Mixed endings can cause parsers to see extra blank rows or misread multi-line values.
+Most platforms accept either format. Problems arise when line endings are mixed, with some rows using CRLF and others LF. Mixed endings can cause parsers to see extra blank rows or misread multi-line values.
 
 ### How to Check and Fix
 
@@ -172,7 +172,7 @@ with open("output.csv", "w", newline="\n", encoding="utf-8") as f:
 
 **1. Extra blank rows**
 
-Many spreadsheet tools add a blank row at the end. Platforms skip or error on blank rows. Delete them before exporting. In Excel, press Ctrl+End to jump to the last used cell -- if it is blank, delete the empty rows below your data.
+Many spreadsheet tools add a blank row at the end. Platforms skip or error on blank rows. Delete them before exporting. In Excel, press Ctrl+End to jump to the last used cell. If it is blank, delete the empty rows below your data.
 
 **2. Summary or total rows**
 
@@ -192,7 +192,7 @@ A cell showing `$29.99` from a formula might export as `29.99` or as the raw for
 
 **6. Wrong file format with a .csv extension**
 
-Saving as `.xlsx` but naming it `.csv` produces a file that is not actually CSV. Open it in a text editor -- if you see binary characters, it is not a real CSV. Re-export using the correct save format.
+Saving as `.xlsx` but naming it `.csv` produces a file that is not actually CSV. Open it in a text editor. If you see binary characters, it is not a real CSV. Re-export using the correct save format.
 
 **7. ANSI or Latin-1 encoding**
 
@@ -208,9 +208,9 @@ The name "CSV" implies commas, but some files use tabs (TSV) or semicolons inste
 
 Open the file in a plain text editor. Look at the first row:
 
-- If column names are separated by `,` -- comma-delimited (standard CSV)
-- If they are separated by `;` -- semicolon-delimited (common in European Excel locales)
-- If there are no separators and each row is one long string -- the file may be tab-delimited and you opened it in a tool that replaced tabs with nothing
+- If column names are separated by `,`, the file is comma-delimited (standard CSV)
+- If they are separated by `;`, it is semicolon-delimited (common in European Excel locales)
+- If there are no separators and each row is one long string, the file may be tab-delimited and you opened it in a tool that replaced tabs with nothing
 
 ### Converting a Semicolon File to Comma-Delimited
 
@@ -308,7 +308,7 @@ Each platform adds specific requirements on top of the basic CSV standard:
 
 ## Quick Pre-Import Checklist
 
-- [ ] Row 1 is headers -- no blank row above it
+- [ ] Row 1 is headers, with no blank row above it
 - [ ] Headers match the platform's expected column names exactly (case-sensitive)
 - [ ] No duplicate column names
 - [ ] No leading or trailing spaces in header names

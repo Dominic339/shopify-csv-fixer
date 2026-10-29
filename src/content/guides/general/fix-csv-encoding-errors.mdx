@@ -1,6 +1,6 @@
 ---
 title: "Fix CSV Encoding Errors"
-description: "Diagnose and fix UTF-8 encoding problems in CSV files — garbled characters, BOM markers, mojibake, and ANSI files that break ecommerce imports."
+description: "Diagnose and fix UTF-8 encoding problems in CSV files: garbled characters, BOM markers, mojibake, and ANSI files that break ecommerce imports."
 keywords: ["fix csv encoding errors", "csv utf-8 encoding", "csv garbled characters", "csv bom fix", "mojibake csv", "csv encoding import error", "utf-8 csv fix"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -16,9 +16,9 @@ timeToComplete: "8 minutes"
 
 ## What Are CSV Encoding Errors?
 
-Encoding errors occur when the bytes in your CSV file are interpreted using the wrong character set. The most common symptom is **garbled text** — product names, descriptions, or other fields that contain strange sequences like `â€™`, `Ã©`, or `Â£` instead of apostrophes, accented letters, or currency symbols.
+Encoding errors occur when the bytes in your CSV file are interpreted using the wrong character set. The most common symptom is **garbled text**: product names, descriptions, or other fields that contain strange sequences like `â€™`, `Ã©`, or `Â£` instead of apostrophes, accented letters, or currency symbols.
 
-Ecommerce platforms (Shopify, WooCommerce, Etsy, eBay, Amazon) all require **UTF-8** encoding. When your file is saved in a different encoding — ANSI, Latin-1, Windows-1252 — importers either reject the file outright or silently corrupt character data.
+Ecommerce platforms (Shopify, WooCommerce, Etsy, eBay, Amazon) all require **UTF-8** encoding. When your file is saved in a different encoding (ANSI, Latin-1, Windows-1252), importers either reject the file outright or silently corrupt character data.
 
 ### Common symptoms
 
@@ -57,7 +57,7 @@ file -i products.csv
 
 ## Remove a UTF-8 BOM
 
-A **BOM** (Byte Order Mark) is a hidden 3-byte sequence (`EF BB BF`) at the start of the file. Excel on Windows adds it by default when you use "Save As > CSV UTF-8 (Comma delimited)". Most platforms misread the first column header because of these extra bytes — the column name becomes `﻿Handle` instead of `Handle`, and the platform can't match it.
+A **BOM** (Byte Order Mark) is a hidden 3-byte sequence (`EF BB BF`) at the start of the file. Excel on Windows adds it by default when you use "Save As > CSV UTF-8 (Comma delimited)". Most platforms misread the first column header because of these extra bytes. The column name becomes `﻿Handle` instead of `Handle`, and the platform can't match it.
 
 **Fix in VS Code:**
 1. Open the file
@@ -66,7 +66,7 @@ A **BOM** (Byte Order Mark) is a hidden 3-byte sequence (`EF BB BF`) at the star
 4. Select **UTF-8** (without BOM)
 
 **Fix in Excel:**
-Use **"CSV (Comma delimited)"** when saving — not "CSV UTF-8 (Comma delimited)". The plain CSV option saves without a BOM on most Windows versions.
+Use **"CSV (Comma delimited)"** when saving, not "CSV UTF-8 (Comma delimited)". The plain CSV option saves without a BOM on most Windows versions.
 
 **Fix in Python:**
 
@@ -137,9 +137,9 @@ Use Find and Replace in VS Code or a text editor with regex support. Replace the
 
 ## Prevent Encoding Issues
 
-- **Always export from Google Sheets** using File > Download > CSV — it produces clean UTF-8
+- **Always export from Google Sheets** using File > Download > CSV. It produces clean UTF-8
 - **In Excel on Windows**, use "CSV (Comma delimited)" not "CSV UTF-8" to avoid the BOM
-- **Check your file** in VS Code after saving — the status bar confirms the encoding
+- **Check your file** in VS Code after saving. The status bar confirms the encoding
 - **Never open and re-save** a UTF-8 CSV in older Excel versions without explicitly setting UTF-8 on save
 - **Use the Python `csv` module** or pandas with `encoding="utf-8"` for programmatic exports
 

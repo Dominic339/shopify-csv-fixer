@@ -16,7 +16,7 @@ timeToComplete: "12 Minuten"
 
 ## Wie WooCommerce variable Produkte abbildet
 
-In WooCommerce ist ein **variables Produkt** ein Produkt mit kaufbaren Variationen – zum Beispiel ein T-Shirt in den Größen S, M und L. In der CSV gibt es dafür zwei Arten von Zeilen:
+In WooCommerce ist ein **variables Produkt** ein Produkt mit kaufbaren Variationen, zum Beispiel ein T-Shirt in den Größen S, M und L. In der CSV gibt es dafür zwei Arten von Zeilen:
 
 1. **Elternzeile**: steht für den Produktcontainer. Der Type ist `variable`.
 2. **Variationszeilen**: Jede steht für eine kaufbare Kombination von Optionen. Der Type ist `variation`.
@@ -72,8 +72,8 @@ Jede Variationszeile steht für eine kaufbare Kombination von Optionen und muss 
 ### Variationen mit dem Elternprodukt verknüpfen
 
 Die Spalte `Parent` akzeptiert zwei Formate:
-- **Per Datenbank-ID:** `id:123` – wenn du die WooCommerce-Produkt-ID kennst.
-- **Per SKU:** `sku:SHIRT-BLUE` – besser übertragbar; für neue Produkte, die noch keine ID haben.
+- **Per Datenbank-ID:** `id:123`, wenn du die WooCommerce-Produkt-ID kennst.
+- **Per SKU:** `sku:SHIRT-BLUE`, besser übertragbar und geeignet für neue Produkte, die noch keine ID haben.
 
 Wenn du neue variable Produkte von Grund auf anlegst, verwende das Format `sku:PARENT_SKU`. Importiere zuerst die Elternzeile (oder setze sie in derselben Datei über die Variationen).
 
@@ -163,6 +163,6 @@ Wenn du ein bereits vorhandenes variables Produkt erneut importierst:
 
 - **Abgleich per ID:** die sicherste Methode. WooCommerce aktualisiert das vorhandene Produkt, wenn die ID übereinstimmt.
 - **Abgleich per SKU:** WooCommerce kann auch über die SKU abgleichen. Lass die ID leer und gib die SKU an.
-- **Neue Variationen hinzufügen:** Nimm die vorhandenen Variationen zusammen mit den neuen in die Importdatei auf. Variationen, die im Backend vorhanden sind, aber in der Importdatei fehlen, werden **nicht** gelöscht – das kann jedoch je nach WooCommerce-Version und Einstellungen des Import-Plugins abweichen.
+- **Neue Variationen hinzufügen:** Nimm die vorhandenen Variationen zusammen mit den neuen in die Importdatei auf. Variationen, die im Backend vorhanden sind, aber in der Importdatei fehlen, werden **nicht** gelöscht. Das kann jedoch je nach WooCommerce-Version und Einstellungen des Import-Plugins abweichen.
 
 Teste Aktualisierungen immer in einem Staging-Shop oder mit einem Backup, bevor du in den Live-Shop importierst.

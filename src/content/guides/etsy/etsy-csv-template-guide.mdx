@@ -1,6 +1,6 @@
 ---
 title: "Etsy CSV Template Guide: Fields, Formats, and Common Errors"
-description: "A complete guide to the Etsy listing CSV template — every field explained, accepted values for dropdowns, required vs optional columns, and how to fix common import errors."
+description: "A complete guide to the Etsy listing CSV template: every field explained, accepted values for dropdowns, required vs optional columns, and how to fix common import errors."
 keywords: ["etsy csv template guide", "etsy listing csv", "etsy csv fields", "etsy csv import", "etsy bulk upload csv", "etsy csv format", "etsy listing template explained"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -16,7 +16,7 @@ timeToComplete: "12 minutes"
 
 ## How Etsy CSV Imports Work
 
-Etsy allows sellers to export their listings as a CSV, edit the file, and re-import it to update multiple listings at once. The CSV import is for **updating existing listings** — you cannot create brand-new listings from scratch via CSV import. The listing ID must match an existing draft or active listing.
+Etsy allows sellers to export their listings as a CSV, edit the file, and re-import it to update multiple listings at once. The CSV import is for **updating existing listings**. You cannot create brand-new listings from scratch via CSV import. The listing ID must match an existing draft or active listing.
 
 For new listings at scale, Etsy's bulk listing tool in the Seller Dashboard is the supported workflow.
 
@@ -98,7 +98,7 @@ Etsy uses strict enum values for several fields. Using any value not in the allo
 - No special characters in tags (letters, numbers, spaces only)
 - Example: `handmade,gift for her,leather wallet,birthday gift`
 
-Tags are stored as an array — if your tags value contains commas, make sure the entire field is wrapped in double quotes in the CSV:
+Tags are stored as a list. If your tags value contains commas, make sure the entire field is wrapped in double quotes in the CSV:
 
 ```
 "handmade,gift for her,leather wallet"
@@ -115,7 +115,7 @@ Tags are stored as an array — if your tags value contains commas, make sure th
 
 Image URLs must be publicly accessible HTTPS URLs. Etsy downloads the images at import time.
 
-Note: Etsy has specific image requirements — minimum 2000px on the longest side recommended, JPEG or PNG format. Images that don't meet requirements may be rejected at upload.
+Note: Etsy has specific image requirements. At least 2000px on the longest side is recommended, in JPEG or PNG format. Images that don't meet requirements may be rejected at upload.
 
 ---
 
@@ -127,7 +127,7 @@ The `shipping_profile_id` column links a listing to a pre-configured shipping pr
 
 ## Sections
 
-The `section_id` column links a listing to a shop section. Find section IDs in your Etsy Shop Manager → Sections. Optional — listings without a section are not grouped.
+The `section_id` column links a listing to a shop section. Find section IDs in your Etsy Shop Manager → Sections. It's optional; listings without a section are not grouped.
 
 ---
 
@@ -163,6 +163,6 @@ The price field contains a currency symbol or non-numeric characters.
 
 ## Fix This Automatically with StriveFormats
 
-Upload your Etsy CSV to StriveFormats. The validator checks all enum fields, price formats, title lengths, tag counts, and required fields — then flags issues with exact row locations.
+Upload your Etsy CSV to StriveFormats. The validator checks all enum fields, price formats, title lengths, tag counts, and required fields, then flags issues with exact row locations.
 
 [Open Etsy CSV Fixer](/app?preset=etsy_listings) | [View Etsy Template](/presets/etsy_listings)

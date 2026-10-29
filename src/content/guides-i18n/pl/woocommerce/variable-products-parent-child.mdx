@@ -16,10 +16,10 @@ timeToComplete: "12 minut"
 
 ## Jak WooCommerce modeluje produkty zmienne
 
-W WooCommerce **produkt zmienny** to produkt z wariantami, które można kupić — na przykład koszulka sprzedawana w rozmiarach S, M i L. W pliku CSV zapisuje się go za pomocą dwóch rodzajów wierszy:
+W WooCommerce **produkt zmienny** to produkt z wariantami, które można kupić, na przykład koszulka sprzedawana w rozmiarach S, M i L. W pliku CSV zapisuje się go za pomocą dwóch rodzajów wierszy:
 
-1. **Wiersz nadrzędny** — reprezentuje kontener produktu. Type ma wartość `variable`.
-2. **Wiersze wariantów** — każdy reprezentuje jedną kombinację opcji, którą można kupić. Type ma wartość `variation`.
+1. **Wiersz nadrzędny**: reprezentuje kontener produktu. Type ma wartość `variable`.
+2. **Wiersze wariantów**: każdy reprezentuje jedną kombinację opcji, którą można kupić. Type ma wartość `variation`.
 
 Warianty są powiązane z produktem nadrzędnym przez jego SKU lub ID.
 
@@ -72,8 +72,8 @@ Każdy wiersz wariantu reprezentuje jedną kombinację opcji, którą można kup
 ### Łączenie wariantów z produktem nadrzędnym
 
 Kolumna `Parent` przyjmuje dwa formaty:
-- **Przez ID w bazie danych:** `id:123` — gdy znasz ID produktu w WooCommerce.
-- **Przez SKU:** `sku:SHIRT-BLUE` — łatwiej przenośny; przy imporcie nowych produktów, które nie mają jeszcze ID.
+- **Przez ID w bazie danych:** `id:123`, gdy znasz ID produktu w WooCommerce.
+- **Przez SKU:** `sku:SHIRT-BLUE`, łatwiej przenośny; przydaje się przy imporcie nowych produktów, które nie mają jeszcze ID.
 
 Tworząc nowe produkty zmienne od zera, używaj formatu `sku:PARENT_SKU`. Najpierw zaimportuj wiersz nadrzędny (albo umieść go w tym samym pliku nad wariantami).
 

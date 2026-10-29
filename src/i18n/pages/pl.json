@@ -7,7 +7,7 @@
     "whyTitle": "Po co powstał",
     "why": [
       "Importery sklepów są surowe, a ich komunikaty o błędach rzadko mówią, który wiersz jest zły. Plik, który w arkuszu wygląda dobrze, może się nie zaimportować przez cenę zapisaną jako „45,00”, wiersz wariantu, który zgubił handle, albo pustą komórkę, która po cichu skasowałaby dane już zapisane w sklepie.",
-      "StriveFormats zna zasady każdej platformy, stosuje poprawki, które nie mogą zmienić znaczenia twoich danych, a każdą decyzję, która mogłaby to zrobić, zostawia tobie – z wyjaśnieniem i linkiem do poradnika."
+      "StriveFormats zna zasady każdej platformy, stosuje poprawki, które nie mogą zmienić znaczenia twoich danych, a każdą decyzję, która mogłaby to zrobić, zostawia tobie, z wyjaśnieniem i linkiem do poradnika."
     ],
     "runTitle": "Jak działa",
     "run": [

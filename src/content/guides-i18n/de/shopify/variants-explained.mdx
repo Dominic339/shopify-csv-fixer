@@ -16,7 +16,7 @@ timeToComplete: "12 Minuten"
 
 ## Wie Shopify Varianten in der CSV abbildet
 
-In Shopifys Produkt-CSV besteht ein Produkt mit mehreren Varianten aus **mehreren Zeilen mit demselben Handle**. Die erste Zeile ist die „übergeordnete“ Zeile – sie enthält die Daten auf Produktebene. Jede weitere Zeile mit demselben Handle ist eine Variantenzeile.
+In Shopifys Produkt-CSV besteht ein Produkt mit mehreren Varianten aus **mehreren Zeilen mit demselben Handle**. Die erste Zeile ist die „übergeordnete“ Zeile und enthält die Daten auf Produktebene. Jede weitere Zeile mit demselben Handle ist eine Variantenzeile.
 
 ### Minimalbeispiel: T-Shirt in zwei Größen
 
@@ -58,7 +58,7 @@ Die erste Zeile eines Handles ist die übergeordnete Zeile. Sie legt die Felder 
 
 Jede Zeile nach der ersten mit demselben Handle ist eine Variantenzeile. Variantenzeilen:
 - haben denselben Handle wie die übergeordnete Zeile.
-- haben einen leeren Title (oder denselben – Shopify ignoriert ihn außerhalb der übergeordneten Zeile).
+- haben einen leeren Title (oder denselben, denn Shopify ignoriert ihn außerhalb der übergeordneten Zeile).
 - haben einen eigenen Option1 Value (und Option2 Value, Option3 Value, falls vorhanden).
 - haben eigene Werte für Variant Price, Variant SKU, Variant Inventory Qty usw.
 
@@ -128,7 +128,7 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Symptom:** Der Import scheitert mit „Variant Price is required“ oder Varianten werden mit einem Preis von 0.00 angelegt.
 
-**Lösung:** Variant Price ist in jeder Zeile Pflicht. Es gibt keine Vererbung – selbst wenn alle Varianten denselben Preis haben, muss jede Zeile ihn angeben.
+**Lösung:** Variant Price ist in jeder Zeile Pflicht. Es gibt keine Vererbung. Selbst wenn alle Varianten denselben Preis haben, muss jede Zeile ihn angeben.
 
 ### Fehler 6: Eine neue Variante überschreibt bestehende Varianten
 

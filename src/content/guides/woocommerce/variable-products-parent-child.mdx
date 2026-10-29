@@ -16,10 +16,10 @@ timeToComplete: "12 minutes"
 
 ## How WooCommerce Models Variable Products
 
-In WooCommerce, a **variable product** is a product that has purchasable variations — for example, a T-shirt sold in Small, Medium, and Large. The CSV representation uses two types of rows:
+In WooCommerce, a **variable product** is a product that has purchasable variations, for example a T-shirt sold in Small, Medium, and Large. The CSV representation uses two types of rows:
 
-1. **Parent row** — represents the product container. Type is `variable`.
-2. **Variation rows** — each represents one purchasable option combination. Type is `variation`.
+1. **Parent row**: represents the product container. Type is `variable`.
+2. **Variation rows**: each represents one purchasable option combination. Type is `variation`.
 
 Variations are linked to their parent via the parent's SKU or ID.
 
@@ -70,8 +70,8 @@ Each variation row represents one purchasable option combination and must link b
 ### Linking variations to parents
 
 The `Parent` column accepts two formats:
-- **By database ID:** `id:123` — use when you know the WooCommerce product ID.
-- **By SKU:** `sku:SHIRT-BLUE` — more portable; use when importing new products where IDs are not yet assigned.
+- **By database ID:** `id:123`. Use this when you know the WooCommerce product ID.
+- **By SKU:** `sku:SHIRT-BLUE`. This is more portable; use it when importing new products whose IDs are not yet assigned.
 
 When creating new variable products from scratch, use `sku:PARENT_SKU` format. Import the parent row first (or include it in the same file above the variations).
 

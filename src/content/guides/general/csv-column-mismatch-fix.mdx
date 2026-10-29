@@ -1,6 +1,6 @@
 ---
 title: "Fix CSV Column Mismatch Errors"
-description: "How to diagnose and fix column mismatch errors in CSV imports — wrong column names, case differences, extra spaces, and column order problems across ecommerce platforms."
+description: "How to diagnose and fix column mismatch errors in CSV imports: wrong column names, case differences, extra spaces, and column order problems across ecommerce platforms."
 keywords: ["csv column mismatch", "csv wrong column name", "csv header mismatch", "csv import column error", "fix csv columns", "csv column mapping error", "csv header not recognized"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -16,7 +16,7 @@ timeToComplete: "7 minutes"
 
 ## What Is a Column Mismatch?
 
-A column mismatch happens when the column names in your CSV header row don't match what the import platform expects. The platform uses column names to map your data to the correct product fields. If a column name is wrong — even by a single space or letter — the platform either ignores the column (your data is silently dropped) or rejects the import entirely.
+A column mismatch happens when the column names in your CSV header row don't match what the import platform expects. The platform uses column names to map your data to the correct product fields. If a column name is wrong, even by a single space or letter, the platform either ignores the column (your data is silently dropped) or rejects the import entirely.
 
 Column mismatches are one of the most common causes of "nothing imported" or "all fields blank" problems.
 
@@ -126,7 +126,7 @@ print("Extra in your file:", extra)
 
 If your file has extra columns the platform doesn't recognize:
 
-- **Most platforms** (Shopify, WooCommerce): extra columns are silently ignored — not a problem
+- **Most platforms** (Shopify, WooCommerce): extra columns are silently ignored, so they're not a problem
 - **Amazon flat files**: extra columns can cause row-level validation failures
 - **eBay File Exchange**: extra columns may trigger parse errors on the entire file
 
@@ -140,7 +140,7 @@ If your file is missing optional columns:
 
 - The platform uses its default value for those fields
 - This is almost always acceptable for optional fields
-- For required fields, missing columns cause import failures — every row will fail
+- For required fields, missing columns cause import failures, and every row will fail
 
 ---
 

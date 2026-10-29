@@ -1,6 +1,6 @@
 ---
 title: "WooCommerce Product CSV Import Errors: Causes and Fixes"
-description: "Fix the most common WooCommerce product CSV import errors — missing SKUs, invalid types, variation row problems, price formatting, and attribute column issues."
+description: "Fix the most common WooCommerce product CSV import errors: missing SKUs, invalid types, variation row problems, price formatting, and attribute column issues."
 keywords: ["woocommerce csv import errors", "woocommerce product import failed", "woocommerce csv errors", "fix woocommerce csv", "woocommerce import troubleshooting", "woocommerce csv validation", "woocommerce product upload error"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -39,7 +39,7 @@ Understanding the validation rules prevents most import failures before they hap
 **Fix:**
 - Add a `Type` column if it's missing
 - Replace any custom or misspelled values with one of the above
-- `Variable` (capital V) is not the same as `variable` — use lowercase
+- `Variable` (capital V) is not the same as `variable`. Use lowercase
 
 ---
 
@@ -51,8 +51,8 @@ WooCommerce uses SKU as the unique identifier for matching imported rows to exis
 
 **Fix:**
 - Add a unique SKU to every product row (simple products and variable parent rows)
-- Variation rows can inherit the parent SKU or have their own — but must not duplicate another product's SKU
-- Check for duplicate SKUs using Excel's `COUNTIF`: `=COUNTIF($A:$A, A2)` — any value above 1 is a duplicate
+- Variation rows can inherit the parent SKU or have their own, but must not duplicate another product's SKU
+- Check for duplicate SKUs using Excel's `COUNTIF`: `=COUNTIF($A:$A, A2)`. Any value above 1 is a duplicate
 
 ---
 
@@ -101,10 +101,10 @@ WooCommerce variation rows need a parent. The parent is linked via the `Parent` 
 
 **WooCommerce attribute column format:**
 
-- `Attribute 1 name` — the name of the first attribute (e.g., `Color`)
-- `Attribute 1 value(s)` — the value(s) for this row (e.g., `Blue` or `Blue | Red` for multiple)
-- `Attribute 1 visible` — `1` if shown on product page, `0` if hidden
-- `Attribute 1 global` — `1` if using a global attribute taxonomy, `0` for local
+- `Attribute 1 name`: the name of the first attribute (e.g., `Color`)
+- `Attribute 1 value(s)`: the value(s) for this row (e.g., `Blue` or `Blue | Red` for multiple)
+- `Attribute 1 visible`: `1` if shown on product page, `0` if hidden
+- `Attribute 1 global`: `1` if using a global attribute taxonomy, `0` for local
 
 **Fix:**
 - Use the exact format with spaces: `Attribute 1 name`, not `attribute_1_name` or `Attribute1Name`
@@ -117,10 +117,10 @@ WooCommerce variation rows need a parent. The parent is linked via the `Parent` 
 
 **Cause:** The image URL in the `Images` column is not a publicly accessible HTTPS URL, is behind authentication, or uses a protocol other than HTTPS.
 
-WooCommerce sideloads images during import — it downloads them from the URL and stores them in your media library.
+WooCommerce sideloads images during import. It downloads them from the URL and stores them in your media library.
 
 **Fix:**
-- Test each image URL in a browser — it should load the image directly without login
+- Test each image URL in a browser. It should load the image directly without a login
 - Use HTTPS URLs (not HTTP)
 - For images in Google Drive or Dropbox, use direct download links (not sharing links)
 - If images are on localhost or a staging server, move them to a publicly accessible location first
@@ -130,8 +130,8 @@ WooCommerce sideloads images during import — it downloads them from the URL an
 ## Reading WooCommerce's Import Error Report
 
 After an import, WooCommerce shows a summary page with:
-- "X products imported" — successfully created or updated
-- "X products failed" — click "View import log" to see which rows failed and why
+- "X products imported": successfully created or updated
+- "X products failed": click "View import log" to see which rows failed and why
 
 The import log shows the row number and the specific error. Use the row number to find the row in your CSV (remember: header is row 1, so data starts at row 2).
 
@@ -139,6 +139,6 @@ The import log shows the row number and the specific error. Use the row number t
 
 ## Fix This Automatically with StriveFormats
 
-Upload your WooCommerce CSV to StriveFormats. The validator checks product types, SKUs, prices, booleans, attribute columns, and variation parent/child relationships — then auto-fixes safe issues.
+Upload your WooCommerce CSV to StriveFormats. The validator checks product types, SKUs, prices, booleans, attribute columns, and variation parent/child relationships, then auto-fixes safe issues.
 
 [Open WooCommerce CSV Fixer](/app?preset=woocommerce_products) | [View WooCommerce Template](/presets/woocommerce_products)

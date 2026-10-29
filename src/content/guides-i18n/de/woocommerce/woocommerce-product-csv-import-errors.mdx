@@ -41,7 +41,7 @@ Wer die Prüfregeln kennt, verhindert die meisten Importfehler, bevor sie entste
 **Lösung:**
 - Füge eine Spalte `Type` hinzu, falls sie fehlt
 - Ersetze eigene oder falsch geschriebene Werte durch einen der obigen
-- `Variable` (mit großem V) ist nicht dasselbe wie `variable` – nutze Kleinbuchstaben
+- `Variable` (mit großem V) ist nicht dasselbe wie `variable`. Nutze Kleinbuchstaben
 
 ---
 
@@ -53,8 +53,8 @@ WooCommerce nutzt die SKU als eindeutige Kennung, um importierte Zeilen bestehen
 
 **Lösung:**
 - Gib jeder Produktzeile eine eindeutige SKU (einfachen Produkten und übergeordneten Zeilen variabler Produkte)
-- Variationszeilen können die SKU des übergeordneten Produkts übernehmen oder eine eigene haben – dürfen aber nicht die SKU eines anderen Produkts doppeln
-- Doppelte SKUs findest du in Excel mit `ZÄHLENWENN`: `=ZÄHLENWENN($A:$A; A2)` – jeder Wert über 1 ist ein Duplikat
+- Variationszeilen können die SKU des übergeordneten Produkts übernehmen oder eine eigene haben, dürfen aber nicht die SKU eines anderen Produkts doppeln
+- Doppelte SKUs findest du in Excel mit `ZÄHLENWENN`: `=ZÄHLENWENN($A:$A; A2)`. Jeder Wert über 1 ist ein Duplikat
 
 ---
 
@@ -103,10 +103,10 @@ Variationszeilen in WooCommerce brauchen ein übergeordnetes Produkt. Die Verkn�
 
 **Format der Attributspalten in WooCommerce:**
 
-- `Attribute 1 name` – der Name des ersten Attributs (z. B. `Color`)
-- `Attribute 1 value(s)` – der Wert bzw. die Werte dieser Zeile (z. B. `Blue` oder `Blue | Red` bei mehreren)
-- `Attribute 1 visible` – `1`, wenn auf der Produktseite angezeigt, `0`, wenn ausgeblendet
-- `Attribute 1 global` – `1` bei einem globalen Attribut, `0` bei einem lokalen
+- `Attribute 1 name`: der Name des ersten Attributs (z. B. `Color`)
+- `Attribute 1 value(s)`: der Wert bzw. die Werte dieser Zeile (z. B. `Blue` oder `Blue | Red` bei mehreren)
+- `Attribute 1 visible`: `1`, wenn auf der Produktseite angezeigt, `0`, wenn ausgeblendet
+- `Attribute 1 global`: `1` bei einem globalen Attribut, `0` bei einem lokalen
 
 **Lösung:**
 - Nutze genau dieses Format mit Leerzeichen: `Attribute 1 name`, nicht `attribute_1_name` oder `Attribute1Name`
@@ -122,7 +122,7 @@ Variationszeilen in WooCommerce brauchen ein übergeordnetes Produkt. Die Verkn�
 WooCommerce lädt Bilder während des Imports herunter und speichert sie in deiner Mediathek.
 
 **Lösung:**
-- Öffne jede Bild-URL im Browser – das Bild sollte direkt und ohne Anmeldung laden
+- Öffne jede Bild-URL im Browser. Das Bild sollte direkt und ohne Anmeldung laden
 - Nutze HTTPS-URLs (nicht HTTP)
 - Für Bilder in Google Drive oder Dropbox nutze direkte Download-Links (keine Freigabelinks)
 - Liegen die Bilder auf localhost oder einem Staging-Server, verschiebe sie zuerst an einen öffentlich erreichbaren Ort
@@ -132,8 +132,8 @@ WooCommerce lädt Bilder während des Imports herunter und speichert sie in dein
 ## Den Fehlerbericht des WooCommerce-Imports lesen
 
 Nach einem Import zeigt WooCommerce eine Übersicht mit:
-- „X Produkte importiert“ – erfolgreich angelegt oder aktualisiert
-- „X Produkte fehlgeschlagen“ – klicke auf „Importprotokoll anzeigen“, um zu sehen, welche Zeilen warum gescheitert sind
+- „X Produkte importiert“: erfolgreich angelegt oder aktualisiert
+- „X Produkte fehlgeschlagen“: Klicke auf „Importprotokoll anzeigen“, um zu sehen, welche Zeilen warum gescheitert sind
 
 Das Importprotokoll nennt die Zeilennummer und den genauen Fehler. Mit der Zeilennummer findest du die Zeile in deiner CSV (Achtung: Die Kopfzeile ist Zeile 1, die Daten beginnen in Zeile 2).
 
@@ -141,6 +141,6 @@ Das Importprotokoll nennt die Zeilennummer und den genauen Fehler. Mit der Zeile
 
 ## Automatisch beheben mit StriveFormats
 
-Lade deine WooCommerce-CSV in StriveFormats hoch. Der Validator prüft Produkttypen, SKUs, Preise, Wahrheitswerte, Attributspalten und die Beziehungen zwischen übergeordneten Produkten und Variationen – und behebt sichere Probleme automatisch.
+Lade deine WooCommerce-CSV in StriveFormats hoch. Der Validator prüft Produkttypen, SKUs, Preise, Wahrheitswerte, Attributspalten und die Beziehungen zwischen übergeordneten Produkten und Variationen und behebt sichere Probleme automatisch.
 
 [WooCommerce-CSV-Reparateur öffnen](/app?preset=woocommerce_products) | [WooCommerce-Vorlage ansehen](/presets/woocommerce_products)

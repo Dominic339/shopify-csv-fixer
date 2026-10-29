@@ -16,7 +16,7 @@ timeToComplete: "12 minut"
 
 ## Jak Shopify zapisuje warianty w pliku CSV
 
-W pliku CSV produktów Shopify produkt z wieloma wariantami to **kilka wierszy z tym samym Handle**. Pierwszy wiersz jest „nadrzędny” – zawiera dane produktu. Każdy kolejny wiersz z tym samym Handle to wiersz wariantu.
+W pliku CSV produktów Shopify produkt z wieloma wariantami to **kilka wierszy z tym samym Handle**. Pierwszy wiersz jest „nadrzędny” i zawiera dane produktu. Każdy kolejny wiersz z tym samym Handle to wiersz wariantu.
 
 ### Minimalny przykład: koszulka w dwóch rozmiarach
 
@@ -58,7 +58,7 @@ Pierwszy wiersz danego Handle to wiersz nadrzędny. Ustala pola produktu:
 
 Każdy wiersz po pierwszym z tym samym Handle to wiersz wariantu. Wiersze wariantów:
 - Mają ten sam Handle co wiersz nadrzędny.
-- Mają puste Title (albo to samo – Shopify ignoruje je poza wierszem nadrzędnym).
+- Mają puste Title (albo to samo, bo Shopify ignoruje je poza wierszem nadrzędnym).
 - Mają własną wartość Option1 Value (oraz Option2 Value, Option3 Value, jeśli są).
 - Mają własne Variant Price, Variant SKU, Variant Inventory Qty itd.
 
@@ -128,7 +128,7 @@ blue-shirt,,Size,Medium,Color,Red,21.99,BLUE-MD-RED
 
 **Objaw:** Import kończy się błędem „Variant Price is required” albo warianty dostają cenę 0.00.
 
-**Rozwiązanie:** Variant Price jest wymagane w każdym wierszu. Nie ma dziedziczenia – nawet jeśli wszystkie warianty mają tę samą cenę, każdy wiersz musi ją podać.
+**Rozwiązanie:** Variant Price jest wymagane w każdym wierszu. Nie ma dziedziczenia. Nawet jeśli wszystkie warianty mają tę samą cenę, każdy wiersz musi ją podać.
 
 ### Błąd 6: dodanie nowego wariantu nadpisuje istniejące
 

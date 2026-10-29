@@ -323,7 +323,7 @@
 "Use a full https:// URL pointing to the product image.": "Verwende eine vollständige https://-URL zum Produktbild.",
 "Use a full https:// URL to a publicly accessible image.": "Verwende eine vollständige https://-URL zu einem öffentlich erreichbaren Bild.",
 "Use a full https:// image URL.": "Verwende eine vollständige https://-Bild-URL.",
-"Use a numeric condition code: 11=New, 1=Used Like New, 2=Used Very Good, 3=Used Good, 4=Used Acceptable, 10=Refurbished.": "Verwende einen numerischen Zustandscode: 11=Neu, 1=Gebraucht – wie neu, 2=Gebraucht – sehr gut, 3=Gebraucht – gut, 4=Gebraucht – akzeptabel, 10=Generalüberholt.",
+"Use a numeric condition code: 11=New, 1=Used Like New, 2=Used Very Good, 3=Used Good, 4=Used Acceptable, 10=Refurbished.": "Verwende einen numerischen Zustandscode: 11=Neu, 1=Gebraucht (wie neu), 2=Gebraucht (sehr gut), 3=Gebraucht (gut), 4=Gebraucht (akzeptabel), 10=Generalüberholt.",
 "Use a plain decimal like 19.99 (no currency symbols).": "Verwende eine einfache Dezimalzahl wie 19.99 (ohne Währungssymbol).",
 "Use a plain decimal like 19.99.": "Verwende eine einfache Dezimalzahl wie 19.99.",
 "Use a publicly accessible image URL starting with https://": "Verwende eine öffentlich erreichbare Bild-URL, die mit https:// beginnt.",

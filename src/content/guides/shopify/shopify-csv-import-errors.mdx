@@ -1,6 +1,6 @@
 ---
 title: "Shopify CSV Import Errors: Common Causes and Fixes"
-description: "A complete guide to the most common Shopify CSV import errors — missing columns, invalid booleans, variant structure problems, price errors, and handle conflicts."
+description: "A complete guide to the most common Shopify CSV import errors: missing columns, invalid booleans, variant structure problems, price errors, and handle conflicts."
 keywords: ["shopify csv import errors", "shopify import failed", "shopify csv errors", "shopify product import error", "fix shopify csv import", "shopify csv validation", "shopify upload error"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -18,10 +18,10 @@ timeToComplete: "12 minutes"
 
 When you import a product CSV, Shopify runs every row through a multi-step validation pipeline:
 
-1. **Header check** — verifies required columns are present
-2. **Handle grouping** — groups rows with the same Handle into one product
-3. **Field validation** — checks data types, required values, and allowed values
-4. **Conflict detection** — checks for handle/SKU conflicts with existing products
+1. **Header check**: verifies required columns are present
+2. **Handle grouping**: groups rows with the same Handle into one product
+3. **Field validation**: checks data types, required values, and allowed values
+4. **Conflict detection**: checks for handle/SKU conflicts with existing products
 
 Errors at any stage cause rows to fail. Shopify often imports the valid rows and skips the failed ones, so you may end up with partial imports if you don't fix all errors first.
 
@@ -117,7 +117,7 @@ blue-shirt,,Size,Large,21.99
 
 **Fix:** Make every product's Handle unique. Handles must be URL-safe: lowercase letters, numbers, and hyphens only. No spaces or special characters.
 
-If you're updating an existing product and the Handle already exists in Shopify, that's intentional — the import will update that product. But if a new product accidentally shares a Handle with an existing one, the existing product's data will be overwritten.
+If you're updating an existing product and the Handle already exists in Shopify, that's intentional, and the import will update that product. But if a new product accidentally shares a Handle with an existing one, the existing product's data will be overwritten.
 
 ---
 
@@ -125,7 +125,7 @@ If you're updating an existing product and the Handle already exists in Shopify,
 
 **Message:** Products import but inventory is wrong, or SKUs are reported as duplicates
 
-**Cause:** The same SKU appears on two different rows (or two different products). Shopify uses SKUs for inventory tracking — duplicate SKUs cause inventory to merge incorrectly.
+**Cause:** The same SKU appears on two different rows (or two different products). Shopify uses SKUs for inventory tracking, so duplicate SKUs cause inventory to merge incorrectly.
 
 **Fix:** Ensure every variant row has a unique SKU. You can leave SKU blank if you don't use SKU-based inventory tracking, but it must not be duplicated across rows.
 
@@ -140,12 +140,12 @@ If you're updating an existing product and the Handle already exists in Shopify,
 - URL contains spaces or special characters that need URL encoding
 - Image file is not in a supported format (Shopify accepts JPG, JPEG, PNG, GIF, WEBP)
 
-**Fix:** Test each image URL in a browser — it should load the image directly. For images in Google Drive, Dropbox, or localhost, they must be moved to a public hosting URL before import.
+**Fix:** Test each image URL in a browser. It should load the image directly. Images in Google Drive, Dropbox, or on localhost must be moved to a public hosting URL before import.
 
 ---
 
 ## Fix This Automatically with StriveFormats
 
-Upload your Shopify CSV to StriveFormats. The validator checks all required columns, boolean formats, variant structure, price fields, and handle uniqueness — then auto-fixes safe issues with one click.
+Upload your Shopify CSV to StriveFormats. The validator checks all required columns, boolean formats, variant structure, price fields, and handle uniqueness, then auto-fixes safe issues with one click.
 
 [Open Shopify CSV Fixer](/app?preset=shopify_products) | [View Shopify Template](/presets/shopify_products)

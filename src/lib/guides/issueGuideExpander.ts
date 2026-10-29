@@ -1,6 +1,6 @@
 // src/lib/guides/issueGuideExpander.ts
 // Deterministic content expansion for issue-based guide pages.
-// No AI calls, no external dependencies -- pure derived data.
+// No AI calls and no external dependencies: pure derived data.
 //
 // Every sentence goes through `tr(template, values)`. English fills the {placeholders} in;
 // other languages look the template up in src/i18n/guideText/<locale>.json first
@@ -183,7 +183,7 @@ export function classifyIssue(input: IssueInput): IssueType {
 function booleanValues(platform: string, tr: Tr): string[] {
   switch (platform) {
     case "shopify":
-      return ["TRUE", "FALSE", tr("(blank -- treated as FALSE for most boolean fields)")];
+      return ["TRUE", "FALSE", tr("(blank: treated as FALSE for most boolean fields)")];
     case "woocommerce":
       return [tr("1 (true)"), tr("0 (false)"), tr("(the fixer normalizes common variants like yes/no)")];
     case "amazon":
@@ -233,17 +233,17 @@ function getValidValues(type: IssueType, input: IssueInput, tr: Tr): string[] | 
       return booleanValues(input.platform, tr);
     case "money":
       return [
-        tr("Positive decimal number -- e.g. 9.99, 100.00, 1999.95"),
+        tr("Positive decimal number, e.g. 9.99, 100.00, 1999.95"),
         tr("Use a period (.) as the decimal separator, not a comma"),
         tr("No currency symbols ($, USD, GBP, EUR)"),
-        tr("No thousand separators -- write 1000.00 not 1,000.00"),
+        tr("No thousand separators: write 1000.00, not 1,000.00"),
         tr("Maximum 2 decimal places for most platforms"),
       ];
     case "inventory":
       return [
         tr("Whole number (integer), 0 or greater"),
-        tr("No decimal places -- write 10 not 10.5"),
-        tr("No negative values -- use 0 for out-of-stock items"),
+        tr("No decimal places: write 10, not 10.5"),
+        tr("No negative values: use 0 for out-of-stock items"),
       ];
     case "url":
       return [
@@ -404,10 +404,10 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
       return [
         tr("Download the official {platform} template from the Templates section of StriveFormats.", { platform }),
         tr("Open both your CSV and the downloaded template in Excel."),
-        tr("Look at row 1 in both files -- this is the header row."),
+        tr("Look at row 1 in both files. This is the header row."),
         tr("Identify column names that appear in the template but are missing from your file."),
         tr("In your CSV, click the header of an empty column and type the missing column name exactly as it appears in the template (case-sensitive)."),
-        tr("Leave the new column's cells blank if you have no data -- the column just needs to exist."),
+        tr("Leave the new column's cells blank if you have no data. The column just needs to exist."),
         tr("Repeat for each missing column, then save as CSV (Comma delimited)."),
       ];
     case "boolean": {
@@ -415,7 +415,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
       return [
         tr("In Excel, click the column letter for the {column} column to select the entire column.", col),
         tr("Press Ctrl+H to open Find & Replace."),
-        tr("In 'Find what', type: yes  --  in 'Replace with', type: {t}  --  check 'Match entire cell contents'  --  click Replace All.", { t }),
+        tr("In 'Find what', type yes, in 'Replace with', type {t}, tick 'Match entire cell contents', then click Replace All.", { t }),
         tr("Repeat: no -> {f},  1 -> {t},  0 -> {f}.", { t, f }),
         tr("Also replace: True -> {t},  False -> {f}.", { t, f }),
         tr("Scan the column to confirm only {pair} remain (and blanks if allowed).", { pair }),
@@ -425,8 +425,8 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
     case "money":
       return [
         tr("In Excel, click the column letter for the {column} column to select it.", col),
-        tr("Press Ctrl+H (Find & Replace). In 'Find what', type: $  -- leave 'Replace with' blank  -- click Replace All. Repeat for the pound sign, euro sign, and any other currency prefix."),
-        tr("Find: ,  (comma, for thousand separators like 1,000)  -- Replace with: (nothing). This converts 1,000.00 to 1000.00."),
+        tr("Press Ctrl+H (Find & Replace). In 'Find what', type $, leave 'Replace with' blank, then click Replace All. Repeat for the pound sign, euro sign, and any other currency prefix."),
+        tr("Find the comma used as a thousand separator (as in 1,000) and replace it with nothing. This turns 1,000.00 into 1000.00."),
         tr("Right-click the selected column, choose 'Format Cells', select 'Number', set Decimal places to 2, click OK."),
         tr("Scroll through the column and verify values look like 9.99 or 1000.00 with no symbols."),
         tr("Save as CSV (Comma delimited)."),
@@ -442,7 +442,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
     case "required_field":
       return [
         tr("In Excel, click the header letter of the {column} column to select it.", col),
-        tr("Press Ctrl+G (Go To) -- click 'Special' -- select 'Blanks' -- click OK. Excel selects all empty cells in that column."),
+        tr("Press Ctrl+G (Go To), then choose Special → Blanks → OK. Excel selects all empty cells in that column."),
         tr("Type the required value and press Ctrl+Enter to fill all selected blank cells at once."),
         tr("If different rows need different values: use Data > Filter on the column, filter for '(Blanks)', and fill each row manually."),
         tr("Save as CSV (Comma delimited)."),
@@ -451,9 +451,9 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
     case "image":
       return [
         tr("In Excel, click the column letter for the {column} column.", col),
-        tr("Press Ctrl+H. Find: http://  -- Replace with: https://  -- Replace All. This upgrades insecure URLs."),
+        tr("Press Ctrl+H, find http:// and replace it with https://, then click Replace All. This upgrades insecure URLs."),
         tr("Scan the column for cells that start with // or just a filename like 'shirt.jpg'. Add https:// in front of each."),
-        tr("Find: ' ' (a space character)  -- Replace with: -  -- Replace All. This removes spaces from URLs."),
+        tr("Find ' ' (a single space), replace it with a hyphen, then click Replace All. This removes spaces from URLs."),
         tr("Click a sample URL and press F5, or paste it into a browser, to confirm the image or page loads correctly."),
         tr("Save as CSV (Comma delimited)."),
       ];
@@ -461,7 +461,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
       const limit = charLimit(input) ?? tr("the limit");
       return [
         tr("In Excel, right-click the column header next to {column} and choose 'Insert' to add a blank helper column.", col),
-        tr("In the first data row of the helper column, type: =LEN(X2)  -- replace X2 with the actual cell reference of your {column} column.", col),
+        tr("In the first data row of the helper column, type =LEN(X2), replacing X2 with the cell in your {column} column.", col),
         tr("Copy this formula down to all rows by double-clicking the fill handle (the small square in the cell's bottom-right corner)."),
         tr("Go to Data > Filter. On the helper column, use a number filter for 'Greater Than {limit}'.", { limit }),
         tr("For each flagged row, click into the original column's cell and shorten the text until the helper column shows a number at or below the limit."),
@@ -473,7 +473,7 @@ function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: T
       const values = vals ? vals.slice(0, 4).join(", ") : tr("the allowed values listed above");
       return [
         tr("In Excel, click the column letter for the {column} column.", col),
-        tr("Press Ctrl+H. In 'Find what', type the invalid value -- in 'Replace with', type the correct accepted value -- Replace All."),
+        tr("Press Ctrl+H. Type the invalid value in 'Find what' and the correct value in 'Replace with', then click Replace All."),
         tr("The accepted values are: {values}.", { values }),
         tr("To prevent future errors, add a dropdown: select the column, go to Data > Data Validation, choose 'List', and enter the valid options separated by commas."),
         tr("Save as CSV (Comma delimited)."),
@@ -519,7 +519,7 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
         tr("Open both files in Google Sheets (drag and drop onto drive.google.com, or File > Import in an existing sheet)."),
         tr("Compare row 1 in both files. Note any column names present in the template but absent in your file."),
         tr("Add the missing column names to row 1 of your file, exactly as they appear in the template (case-sensitive)."),
-        tr("Leave the new column's cells blank if you have no data -- the header must exist."),
+        tr("Leave the new column's cells blank if you have no data. Only the header has to exist."),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
       ];
     case "boolean": {
@@ -527,7 +527,7 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
       return [
         tr("In Google Sheets, click the column letter for the {column} column to select the whole column.", col),
         tr("Press Ctrl+H to open Find & Replace."),
-        tr("Set Find: yes  --  Replace with: {t}  --  check 'Match entire cell contents'  --  Replace All.", { t }),
+        tr("Find yes, replace it with {t}, tick 'Match entire cell contents', then click Replace All.", { t }),
         tr("Repeat: no -> {f},  1 -> {t},  0 -> {f},  True -> {t},  False -> {f}.", { t, f }),
         tr("Verify only {pair} remain in the column.", { pair }),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
@@ -536,8 +536,8 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
     case "money":
       return [
         tr("In Google Sheets, click the column letter for the {column} column.", col),
-        tr("Press Ctrl+H. Find: $  -- Replace with: (empty)  -- Replace All. Repeat for the pound sign and euro sign."),
-        tr("Find: ,  (the comma used in thousand separators like 1,000)  -- Replace with: (empty)  -- Replace All."),
+        tr("Press Ctrl+H, find $ and replace it with nothing, then click Replace All. Repeat for the pound sign and euro sign."),
+        tr("Find the comma used as a thousand separator (as in 1,000), replace it with nothing, then click Replace All."),
         tr("Select the column again. Go to Format > Number > Number to ensure cells are treated as numbers."),
         tr("Verify all prices look like 9.99 or 1000.00 with no symbols."),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
@@ -546,7 +546,7 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
       return [
         tr("In Google Sheets, click the column letter for the {column} column.", col),
         tr("Go to Format > Number > Number and set decimal places to 0 (integers only)."),
-        tr("In a blank helper column, enter =MOD(A2,1) (replace A2 with your column) and copy it down. Rows showing non-zero have decimal values -- round them manually."),
+        tr("In a blank helper column, enter =MOD(A2,1) (replace A2 with your column) and copy it down. Rows that don't show 0 have decimals, so round those by hand."),
         tr("Delete the helper column when done."),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
       ];
@@ -563,9 +563,9 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
     case "image":
       return [
         tr("In Google Sheets, select the {column} column.", col),
-        tr("Press Ctrl+H. Find: http://  -- Replace with: https://  -- Replace All."),
+        tr("Press Ctrl+H, find http:// and replace it with https://, then click Replace All."),
         tr("Scan the column for cells starting with // or just a filename. Add https:// in front manually."),
-        tr("Find: ' ' (a space)  -- Replace with: -  -- Replace All to clean up any spaces in URLs."),
+        tr("Find ' ' (a single space) and replace it with a hyphen, then click Replace All to clean up spaces in URLs."),
         tr("Paste a sample URL into a new browser tab to confirm it loads correctly."),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
       ];
@@ -573,7 +573,7 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
       const limit = charLimit(input) ?? tr("the limit");
       return [
         tr("In Google Sheets, click the column letter next to {column} and insert a blank column (right-click > Insert 1 column left/right).", col),
-        tr("In the first data row of the helper column, enter: =LEN(X2)  -- replace X2 with the cell reference for your {column} column.", col),
+        tr("In the first data row of the helper column, enter =LEN(X2), replacing X2 with the cell in your {column} column.", col),
         tr("Copy the formula down to cover all data rows."),
         tr("Go to Data > Create a filter on the helper column. Use the filter to show only rows where the value is greater than {limit}.", { limit }),
         tr("For each flagged row, shorten the original column's text until the helper column shows a number at or below the limit."),
@@ -585,7 +585,7 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
       const values = vals ? vals.slice(0, 4).join(", ") : tr("the allowed values listed above");
       return [
         tr("In Google Sheets, select the {column} column.", col),
-        tr("Press Ctrl+H. Find the invalid value -- Replace with the correct accepted value -- Replace All."),
+        tr("Press Ctrl+H, find the invalid value and replace it with the correct one, then click Replace All."),
         tr("Accepted values: {values}.", { values }),
         tr("To add a validation dropdown: select the column, go to Data > Data Validation, choose 'Dropdown (from a list)', and enter the valid options."),
         tr("Go to File > Download > Comma Separated Values (.csv)."),
@@ -594,7 +594,7 @@ function getSheetsSteps(type: IssueType, input: IssueInput, column: string, tr: 
     case "duplicate":
       return [
         tr("In Google Sheets, click the column letter for the {column} column.", col),
-        tr("Go to Format > Conditional formatting. Set 'Format rules' to 'Custom formula is' and enter: =COUNTIF($A:$A,A1)>1  -- replace A with your column letter."),
+        tr("Go to Format > Conditional formatting. Set 'Format rules' to 'Custom formula is' and enter =COUNTIF($A:$A,A1)>1, replacing A with your column letter."),
         tr("Set a highlight color (e.g., red fill) and click Done. Duplicate values will be highlighted."),
         tr("For each highlighted cell, either delete the duplicate row or assign it a unique identifier."),
         tr("Remove the conditional formatting rule when done."),
@@ -627,7 +627,7 @@ function getStriveNote(type: IssueType, input: IssueInput, tr: Tr): string {
       case "boolean":
         return tr("Auto-fix normalizes common boolean variants (yes/no, 1/0, True/False) to the platform's exact required format. Upload your CSV and click Fix Issues.");
       case "required_header":
-        return tr("Auto-fix adds all missing required column headers in one click. The added columns will be blank -- add your data into them.");
+        return tr("Auto-fix adds all missing required column headers in one click. The new columns start out blank, so fill in your data.");
       case "money":
         return tr("Auto-fix removes common currency symbols and normalizes price format. Upload and click Fix Issues.");
       default:
@@ -658,18 +658,18 @@ function getPreventTips(type: IssueType, input: IssueInput, tr: Tr): string[] {
     case "boolean":
       return [
         isAmazon
-          ? tr("Always type y or n (lowercase) -- do not use spreadsheet checkboxes; export them as text instead.")
-          : tr("Always type TRUE or FALSE (all caps) -- do not use spreadsheet checkboxes; export them as text instead."),
-        tr("If you export data from the platform's own admin panel, do not modify boolean columns in Excel -- autocorrect can silently change the values."),
+          ? tr("Always type y or n (lowercase). Don't use spreadsheet checkboxes; export them as text instead.")
+          : tr("Always type TRUE or FALSE (all caps). Don't use spreadsheet checkboxes; export them as text instead."),
+        tr("If you export data from the platform's own admin panel, don't edit boolean columns in Excel, because autocorrect can quietly change the values."),
         tr("Set the cell format to Text in Excel before pasting boolean values to prevent automatic conversion."),
         tr("Use StriveFormats auto-fix as a final pass before every import."),
       ];
     case "money":
       return [
         tr("Always format price cells as Number (2 decimal places), not Currency, in Excel."),
-        tr("Never copy prices from a webpage or PDF -- they often include currency symbols or use commas as decimal separators."),
+        tr("Never copy prices from a webpage or PDF. They often include currency symbols or use commas as decimal separators."),
         tr("Use a period (.) as the decimal separator regardless of your computer's regional settings."),
-        tr("Avoid using SUM() or other formula results in price cells -- use Paste Special > Values to paste plain numbers."),
+        tr("Avoid SUM() or other formula results in price cells. Use Paste Special > Values to paste plain numbers instead."),
         tr("Run every file through StriveFormats before importing to catch formatting issues early."),
       ];
     case "required_field":
@@ -677,7 +677,7 @@ function getPreventTips(type: IssueType, input: IssueInput, tr: Tr): string[] {
         tr("Start from the official platform template so you know which fields are required from the start."),
         tr("Before exporting, run a quick filter on each required column and check for blanks."),
         tr("Test with a small 5-row sample CSV before uploading your full catalog."),
-        tr("If a required field is conditional (required only for certain product types), still include the column -- just leave non-applicable rows blank."),
+        tr("If a field is only required for certain product types, still include the column and leave the other rows blank."),
       ];
     case "required_header":
       return [
@@ -700,13 +700,13 @@ function getPreventTips(type: IssueType, input: IssueInput, tr: Tr): string[] {
         tr("Know the platform's character limits before writing titles and descriptions."),
         tr("Use =LEN() in Excel or Google Sheets to count characters as you type."),
         tr("Focus on high-impact keywords rather than full sentences in title fields."),
-        tr("Review titles for length before exporting -- it is much faster to fix them in the source sheet."),
+        tr("Check title lengths before exporting. It's much faster to fix them in the source sheet."),
       ];
     case "enum":
       return [
         tr("Copy-paste allowed values directly from the official template to avoid typos."),
         tr("Use Excel Data Validation or Google Sheets Data Validation to restrict the column to a dropdown of allowed values."),
-        tr("Check the platform's official documentation for the current list of allowed values -- they can change."),
+        tr("Check the platform's official documentation for the current list of allowed values, as they can change."),
       ];
     case "duplicate":
       return [
@@ -726,7 +726,7 @@ function getPreventTips(type: IssueType, input: IssueInput, tr: Tr): string[] {
     case "inventory":
       return [
         tr("Export quantity data from your inventory system as whole numbers."),
-        tr("Use 0 for out-of-stock items -- do not leave the quantity blank."),
+        tr("Use 0 for out-of-stock items instead of leaving the quantity blank."),
         tr("Never copy-paste quantity data from a financial system that uses decimal places."),
       ];
     default:
@@ -758,7 +758,7 @@ function getPlatformNote(type: IssueType, input: IssueInput, tr: Tr): string | n
 
   if (type === "boolean") {
     if (platform === "shopify")
-      return tr("Shopify requires TRUE or FALSE in all caps. A blank cell is treated as FALSE for most boolean fields. Do not use Yes, No, 1, or 0 -- Shopify's importer will reject them.");
+      return tr("Shopify requires TRUE or FALSE in all caps. A blank cell is treated as FALSE for most boolean fields. Don't use Yes, No, 1, or 0, because Shopify's importer rejects them.");
     if (platform === "amazon")
       return tr("Amazon flat files use lowercase y for true and lowercase n for false. This is different from most other platforms that use TRUE/FALSE.");
     if (platform === "woocommerce")
@@ -791,7 +791,7 @@ function getDetectionNote(type: IssueType, input: IssueInput, column: string, tr
   const v = { platform: platformDisplayName(input.platform, tr), column };
   switch (type) {
     case "boolean":
-      return tr(`StriveFormats reads every cell in the {column} column and checks it against {platform}'s accepted boolean values. Any value that does not match exactly -- including mixed-case variants like "True" or "Yes" -- is flagged as an error.`, v);
+      return tr(`StriveFormats reads every cell in the {column} column and checks it against {platform}'s accepted boolean values. Any value that doesn't match exactly, including mixed-case variants like "True" or "Yes", is flagged as an error.`, v);
     case "required_header":
       return tr("StriveFormats compares your file's header row (row 1) against the full set of required columns for the {platform} format. Any column name from the required list that is absent triggers this issue.", v);
     case "required_field":
@@ -806,7 +806,7 @@ function getDetectionNote(type: IssueType, input: IssueInput, column: string, tr
     case "length_limit":
       return tr("StriveFormats measures the character length of every cell in the {column} column and compares it against {platform}'s documented limit. Rows exceeding the limit are individually flagged with the actual character count.", v);
     case "enum":
-      return tr("StriveFormats checks the {column} column against the exact list of accepted values for {platform}. The comparison is case-sensitive -- any casing variation or typo is flagged as an invalid value.", v);
+      return tr("StriveFormats checks the {column} column against the exact list of accepted values for {platform}. The comparison is case-sensitive, so any difference in capitalization or spelling is flagged as an invalid value.", v);
     case "duplicate":
       return tr("StriveFormats builds a frequency map of all values in the {column} column as it parses the file. Any value that appears more than once is flagged on every row where it occurs.", v);
     case "variant_structure":
@@ -825,33 +825,33 @@ function getTechnicalDetail(type: IssueType, input: IssueInput, column: string, 
       if (input.platform === "amazon")
         return tr(`Amazon flat files require the literal lowercase strings "y" and "n" for boolean fields. This differs from most other platforms. Spreadsheet applications often export boolean cells as "TRUE"/"FALSE", "Yes"/"No", or "1"/"0", none of which Amazon's importer accepts. Even a correctly-spelled "Y" (uppercase) will be rejected because Amazon's parser is case-sensitive for these values.`);
       if (input.platform === "woocommerce")
-        return tr(`WooCommerce's CSV importer accepts "1" for true and "0" for false. Some export tools produce "yes", "no", "TRUE", or "FALSE" instead. Although WooCommerce's built-in importer handles some of these variants, third-party migration tools and staging environments often do not -- so using the canonical "1"/"0" form avoids surprises across all toolchains.`);
+        return tr(`WooCommerce's CSV importer accepts "1" for true and "0" for false. Some export tools produce "yes", "no", "TRUE", or "FALSE" instead. WooCommerce's built-in importer handles some of these, but third-party migration tools and staging sites often don't, so sticking to "1" and "0" avoids surprises.`);
       return tr(`{platform}'s importer performs an exact, case-sensitive match on boolean fields. Only the uppercase strings TRUE and FALSE are accepted. Spreadsheet applications commonly produce alternative representations: Excel exports checkbox cells as TRUE/FALSE (which works), but "true" (lowercase), "Yes", "1", or "checked" will all fail. The blank value is treated as FALSE for most boolean fields, so leaving optional boolean fields empty is safe.`, v);
     case "required_header":
-      return tr(`{platform}'s importer parses the first row of the CSV as the header row before processing any data. If a required column name is absent from that row, the importer has no column to write data into -- it cannot infer missing columns from content. Column names are matched exactly (case-sensitive on most platforms), so "variant price" will not satisfy a requirement for "Variant Price".`, v);
+      return tr(`{platform}'s importer reads the first row of the CSV as the header row before processing any data. If a required column name is missing from that row, the importer has nowhere to put that data, and it can't guess missing columns from the content. Column names are matched exactly (case-sensitive on most platforms), so "variant price" won't count as "Variant Price".`, v);
     case "money":
       return tr(`{platform}'s importer expects prices as plain decimal numbers. Currency symbols ($, £, €), thousand separators (1,000.00), and comma decimal separators (19,99) all cause the importer to treat the value as text rather than a number, resulting in a zero price, an import error, or a rejected row depending on the platform. Spreadsheet applications frequently auto-format price cells with currency symbols when the cell is formatted as "Currency" or "Accounting" rather than "Number".`, v);
     case "inventory":
-      return tr("{platform}'s importer expects inventory quantities as whole numbers (integers). Decimal values like 10.5 are rejected or silently truncated depending on the platform version. Negative values are also rejected -- use 0 for out-of-stock items. A common source of this issue is copying quantity data from accounting software that stores stock levels as decimals for partial unit tracking.", v);
+      return tr("{platform}'s importer expects inventory quantities as whole numbers. Decimal values like 10.5 are rejected or quietly cut off, depending on the platform version. Negative values are also rejected, so use 0 for out-of-stock items. This often happens when quantities are copied from accounting software that stores stock levels as decimals.", v);
     case "url":
     case "image":
-      return tr(`{platform}'s importer fetches image URLs at import time (or at product display time). The URL must be a fully-qualified address starting with http:// or https:// so the importer can locate the resource. Relative paths (like "images/shirt.jpg") are interpreted as relative to nothing, since the platform has no base path context from your local machine. Spaces in URLs must be encoded as %20 or replaced with hyphens -- most CDNs reject URLs with literal space characters.`, v);
+      return tr(`{platform}'s importer downloads each image from its URL during the import. The URL must be a full address starting with http:// or https:// so the importer can find the image. A relative path like "images/shirt.jpg" points nowhere, because the platform can't see files on your computer. Spaces in URLs must be written as %20 or replaced with hyphens, since most image hosts reject URLs with spaces in them.`, v);
     case "length_limit": {
       const limit = charLimit(input) ?? tr("the documented limit");
-      return tr("{platform} enforces a {limit}-character limit on the {column} field. This limit exists because the platform stores and indexes the value in a fixed-width database column or a search index with a maximum token size. Values exceeding the limit are either silently truncated (causing your data to appear differently on the storefront) or the entire row is rejected. The character count includes all spaces, punctuation, and special characters -- it is not a word count.", { ...v, limit });
+      return tr("{platform} limits the {column} field to {limit} characters. Longer values are either cut off without warning, so they look different on your storefront, or the whole row is rejected. The count includes every space, punctuation mark and special character. It's a character count, not a word count.", { ...v, limit });
     }
     case "enum":
-      return tr(`{platform}'s importer validates this field against a fixed list of accepted values defined in its import specification. These values are often short codes that map to internal states -- for example, "active"/"draft" map to product visibility states. The match is case-sensitive and exact: an extra space, a different casing, or a synonym (like "enabled" instead of "active") will cause the value to be rejected. The allowed values can change between platform versions, so always refer to the most recent template.`, v);
+      return tr(`{platform}'s importer checks this field against a fixed list of accepted values. These are often short codes for internal settings; for example, "active" and "draft" set whether a product is visible. The match is exact and case-sensitive: an extra space, different capitalization, or a synonym (like "enabled" instead of "active") gets the value rejected. The allowed values can change between platform versions, so always check the latest template.`, v);
     case "duplicate":
       return tr("{platform} uses certain column values (like Handle, SKU, or Listing ID) as unique identifiers to decide whether to create a new record or update an existing one. When the same identifier appears more than once in the file, the importer's behavior depends on the platform: Shopify merges rows with the same Handle into one product (intentional for variants), while duplicate SKUs on separate products or duplicate Listing IDs on Etsy cause unexpected overwrites. Understanding whether a duplicate is intentional (variant grouping) or accidental is key to resolving this issue correctly.", v);
     case "variant_structure":
       if (input.platform === "shopify")
-        return tr("Shopify groups product rows by the Handle column value. All rows sharing a Handle are treated as variants of the same product. The first row of a group must contain the product-level fields (Title, Body, Vendor). Subsequent rows for the same Handle only need variant-level fields (Option values, Price, SKU). If Option columns are inconsistent between rows in a group -- for example, Option1 Name changes between variant rows -- Shopify will create duplicate or broken variants, or reject the import.");
+        return tr("Shopify groups product rows by their Handle. All rows that share a Handle are variants of the same product. The first row of a group must contain the product-level fields (Title, Body, Vendor), and the rows after it only need variant fields (option values, Price, SKU). If the option columns don't match across a group (for example, Option1 Name changes between variant rows), Shopify creates duplicate or broken variants, or rejects the import.");
       if (input.platform === "woocommerce")
-        return tr(`WooCommerce's variable product model requires a strict two-tier structure. Parent rows must have Type = "variable" and define the product-level data. Variation rows must have Type = "variation" and a Parent value matching the SKU of the parent row exactly (case-sensitive). A variation row with no matching parent is an orphan -- WooCommerce will either skip it or create a broken variation with no parent product. The parent SKU must exist in the same file or already be present in the store.`);
+        return tr(`WooCommerce variable products use a strict two-level structure. Parent rows must have Type = "variable" and hold the product-level data. Variation rows must have Type = "variation" and a Parent value that matches the parent's SKU exactly (case-sensitive). A variation with no matching parent is an orphan, and WooCommerce either skips it or creates a broken variation with no product. The parent SKU must be in the same file or already exist in the store.`);
       return tr("{platform} requires parent product rows to appear before their child/variation rows, with a specific column value linking child rows to their parent. Rows that reference a parent that does not exist in the file will be treated as orphans and either skipped or imported incorrectly.", v);
     default:
-      return tr("{platform}'s importer validates the {column} field against its official import specification. Values that do not meet the expected format are flagged to prevent silent data corruption -- an invalid value that slips through import might appear as a blank field, a zero, or incorrect text in your storefront without any error message after the fact.", v);
+      return tr("{platform}'s importer checks the {column} field against its official import specification. Values in the wrong format are flagged because an invalid value that slips through can show up in your store as a blank field, a zero or wrong text, with no error message.", v);
   }
 }
 

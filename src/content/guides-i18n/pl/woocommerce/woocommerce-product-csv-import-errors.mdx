@@ -41,7 +41,7 @@ Znajomość zasad walidacji pozwala uniknąć większości błędów importu, za
 **Rozwiązanie:**
 - Dodaj kolumnę `Type`, jeśli jej brakuje
 - Zamień własne lub błędnie zapisane wartości na jedną z powyższych
-- `Variable` (z wielkim V) to nie to samo co `variable` – używaj małych liter
+- `Variable` (z wielkim V) to nie to samo co `variable`. Używaj małych liter
 
 ---
 
@@ -54,7 +54,7 @@ WooCommerce używa SKU jako unikalnego identyfikatora, żeby dopasować importow
 **Rozwiązanie:**
 - Nadaj unikalne SKU każdemu wierszowi produktu (produktom prostym i wierszom nadrzędnym produktów zmiennych)
 - Wiersze wariantów mogą dziedziczyć SKU produktu nadrzędnego albo mieć własne, ale nie mogą powielać SKU innego produktu
-- Duplikaty SKU znajdziesz w Excelu funkcją `LICZ.JEŻELI`: `=LICZ.JEŻELI($A:$A; A2)` – każda wartość większa od 1 to duplikat
+- Duplikaty SKU znajdziesz w Excelu funkcją `LICZ.JEŻELI`: `=LICZ.JEŻELI($A:$A; A2)`. Każda wartość większa od 1 to duplikat
 
 ---
 
@@ -103,10 +103,10 @@ Wiersze wariantów w WooCommerce potrzebują produktu nadrzędnego. Powiązanie 
 
 **Format kolumn atrybutów w WooCommerce:**
 
-- `Attribute 1 name` – nazwa pierwszego atrybutu (np. `Color`)
-- `Attribute 1 value(s)` – wartość lub wartości w danym wierszu (np. `Blue` albo `Blue | Red` przy kilku)
-- `Attribute 1 visible` – `1`, jeśli jest widoczny na stronie produktu, `0`, jeśli ukryty
-- `Attribute 1 global` – `1` dla atrybutu globalnego, `0` dla lokalnego
+- `Attribute 1 name`: nazwa pierwszego atrybutu (np. `Color`)
+- `Attribute 1 value(s)`: wartość lub wartości w danym wierszu (np. `Blue` albo `Blue | Red` przy kilku)
+- `Attribute 1 visible`: `1`, jeśli jest widoczny na stronie produktu, `0`, jeśli ukryty
+- `Attribute 1 global`: `1` dla atrybutu globalnego, `0` dla lokalnego
 
 **Rozwiązanie:**
 - Używaj dokładnie tego formatu ze spacjami: `Attribute 1 name`, a nie `attribute_1_name` czy `Attribute1Name`
@@ -122,7 +122,7 @@ Wiersze wariantów w WooCommerce potrzebują produktu nadrzędnego. Powiązanie 
 WooCommerce pobiera zdjęcia w trakcie importu i zapisuje je w bibliotece mediów.
 
 **Rozwiązanie:**
-- Sprawdź każdy adres zdjęcia w przeglądarce – zdjęcie powinno się wczytać od razu, bez logowania
+- Sprawdź każdy adres zdjęcia w przeglądarce. Zdjęcie powinno się wczytać od razu, bez logowania
 - Używaj adresów HTTPS (nie HTTP)
 - Dla zdjęć z Google Drive lub Dropboxa używaj bezpośrednich linków do pobrania (nie linków do udostępniania)
 - Jeśli zdjęcia są na localhoście lub serwerze testowym, najpierw przenieś je w publicznie dostępne miejsce
@@ -132,8 +132,8 @@ WooCommerce pobiera zdjęcia w trakcie importu i zapisuje je w bibliotece medió
 ## Jak czytać raport błędów importu WooCommerce
 
 Po imporcie WooCommerce pokazuje podsumowanie:
-- „Zaimportowano X produktów” – utworzone lub zaktualizowane poprawnie
-- „X produktów nie udało się zaimportować” – kliknij „Zobacz dziennik importu”, żeby sprawdzić, które wiersze i dlaczego się nie udały
+- „Zaimportowano X produktów”: utworzone lub zaktualizowane poprawnie
+- „X produktów nie udało się zaimportować”: kliknij „Zobacz dziennik importu”, żeby sprawdzić, które wiersze i dlaczego się nie udały
 
 Dziennik importu podaje numer wiersza i konkretny błąd. Po numerze znajdziesz wiersz w pliku CSV (pamiętaj: nagłówek to wiersz 1, więc dane zaczynają się od wiersza 2).
 

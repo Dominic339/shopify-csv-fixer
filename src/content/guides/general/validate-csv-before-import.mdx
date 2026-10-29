@@ -29,7 +29,7 @@ A five-minute validation check before uploading can save hours of cleanup.
 **What to check:** The file must be encoded in UTF-8. A BOM (Byte Order Mark) at the start of the file can corrupt the first column name.
 
 **How to check:**
-- Open the file in VS Code. Look at the bottom-right status bar — it should say `UTF-8`, not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
+- Open the file in VS Code. The bottom-right status bar should say `UTF-8`, not `UTF-8 with BOM`, `Windows 1252`, or `ISO 8859-1`.
 - If it shows anything other than `UTF-8`, click the encoding label, choose **Save with Encoding → UTF-8**.
 
 **Common fix:** In Excel, always save as **CSV UTF-8 (Comma delimited)**, not plain CSV.
@@ -123,7 +123,7 @@ blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
 **What to check:**
 - Handles/slugs contain only lowercase letters, numbers, and hyphens.
 - Price fields contain only numbers and a decimal point (no currency symbols, commas as thousands separators).
-- Boolean fields (e.g., Published, Featured) use the expected values (TRUE/FALSE, yes/no, 1/0 — check your platform).
+- Boolean fields (e.g., Published, Featured) use the expected values (TRUE/FALSE, yes/no, or 1/0, depending on your platform).
 
 **Common problems:**
 - `$19.99` in a price column (should be `19.99`).
@@ -164,7 +164,7 @@ Never upload your full 10,000-row catalog as a first test. Instead:
 5. Fix any errors in the full file.
 6. Upload the full file.
 
-For Shopify: the importer shows an error summary after upload — check it even if the import completes. "X rows failed" may not always display prominently.
+For Shopify: the importer shows an error summary after upload. Check it even if the import completes, because "X rows failed" may not always display prominently.
 
 ---
 
@@ -178,4 +178,4 @@ For Shopify: the importer shows an error summary after upload — check it even 
 | **Google Sheets import preview** | Column detection, encoding issues |
 | **Excel Data → From Text/CSV** | Encoding and delimiter preview before loading |
 
-A validator cannot catch semantic errors (wrong SKU, wrong category ID, invalid image URL) — those require a sample upload. But validators catch the structural errors that prevent any import from completing.
+A validator cannot catch semantic errors (wrong SKU, wrong category ID, invalid image URL). Those require a sample upload. But validators do catch the structural errors that stop an import from completing.

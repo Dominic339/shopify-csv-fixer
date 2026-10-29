@@ -16,7 +16,7 @@ timeToComplete: "10 minut"
 
 ## Jak działają atrybuty WooCommerce w CSV
 
-Atrybuty produktów WooCommerce określają wymiary, w których produkt się różni — zwykle rozmiar, kolor lub materiał. Przy imporcie CSV atrybuty zapisuje się jako numerowane grupy kolumn. Każda grupa czterech kolumn odpowiada jednemu atrybutowi.
+Atrybuty produktów WooCommerce określają wymiary, w których produkt się różni, zwykle rozmiar, kolor lub materiał. Przy imporcie CSV atrybuty zapisuje się jako numerowane grupy kolumn. Każda grupa czterech kolumn odpowiada jednemu atrybutowi.
 
 Wzór nazw kolumn wygląda tak:
 - `Attribute 1 name`
@@ -75,7 +75,7 @@ Name,Type,SKU,Regular price,Attribute 1 name,Attribute 1 value(s),Attribute 1 vi
 ,variation,TSHIRT-XL,20.00,Size,XL,1,1
 ```
 
-Kolumna `Name` pozostaje pusta w wierszach wariantów — WooCommerce tworzy nazwę wariantu z wartości atrybutów.
+Kolumna `Name` pozostaje pusta w wierszach wariantów. WooCommerce tworzy nazwę wariantu z wartości atrybutów.
 
 ---
 
@@ -125,7 +125,7 @@ Atrybutów lokalnych nie można używać do filtrowania wariantów ani w nawigac
 
 ### Kolumny atrybutów nie są rozpoznawane
 
-**Przyczyna:** nazwy kolumn nie odpowiadają dokładnie wzorowi — złe spacje, zła numeracja lub skrócone nazwy.
+**Przyczyna:** nazwy kolumn nie odpowiadają dokładnie wzorowi: złe spacje, zła numeracja lub skrócone nazwy.
 
 Źle: `Attribute1 name`, `attribute 1 name`, `Attr 1 name`
 Dobrze: `Attribute 1 name`

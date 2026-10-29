@@ -1,6 +1,6 @@
 ---
 title: "Amazon Flat File Import Errors: Causes and Fixes"
-description: "Fix the most common Amazon flat file CSV import errors — SKU problems, invalid condition codes, price formatting, fulfillment channel values, and template mismatch issues."
+description: "Fix the most common Amazon flat file CSV import errors: SKU problems, invalid condition codes, price formatting, fulfillment channel values, and template mismatch issues."
 keywords: ["amazon flat file import errors", "amazon csv import errors", "amazon flat file errors", "fix amazon csv", "amazon inventory loader errors", "amazon flat file validation", "amazon bulk upload errors"]
 lastUpdated: "2026-03-06"
 kind: "curated"
@@ -18,13 +18,13 @@ timeToComplete: "12 minutes"
 
 Amazon flat files are tab-delimited or comma-delimited CSV files that follow strict column schemas defined per product category. When you upload a flat file, Amazon runs it through a validation pipeline:
 
-1. **Template match** — checks that your column headers match the expected template for the file type
-2. **Required field validation** — verifies all required columns have values
-3. **Data type validation** — checks numbers, booleans, and enum values
-4. **Business rules** — verifies ASINs, validates SKUs, checks condition codes and price ranges
-5. **Catalog check** — matches product IDs to Amazon's catalog
+1. **Template match**: checks that your column headers match the expected template for the file type
+2. **Required field validation**: verifies all required columns have values
+3. **Data type validation**: checks numbers, booleans, and enum values
+4. **Business rules**: verifies ASINs, validates SKUs, checks condition codes and price ranges
+5. **Catalog check**: matches product IDs to Amazon's catalog
 
-After processing, Amazon generates a **Processing Report** (accessible in Seller Central under Inventory → Add Products via Upload). Always review the Processing Report — it lists every row that failed and the specific error.
+After processing, Amazon generates a **Processing Report** (accessible in Seller Central under Inventory → Add Products via Upload). Always review it. It lists every row that failed and the specific error.
 
 ---
 
@@ -62,14 +62,14 @@ After processing, Amazon generates a **Processing Report** (accessible in Seller
 | Value | Description |
 |---|---|
 | `New` | Brand new, factory sealed |
-| `UsedLikeNew` | Used — Like New |
-| `UsedVeryGood` | Used — Very Good |
-| `UsedGood` | Used — Good |
-| `UsedAcceptable` | Used — Acceptable |
-| `CollectibleLikeNew` | Collectible — Like New |
-| `CollectibleVeryGood` | Collectible — Very Good |
-| `CollectibleGood` | Collectible — Good |
-| `CollectibleAcceptable` | Collectible — Acceptable |
+| `UsedLikeNew` | Used, Like New |
+| `UsedVeryGood` | Used, Very Good |
+| `UsedGood` | Used, Good |
+| `UsedAcceptable` | Used, Acceptable |
+| `CollectibleLikeNew` | Collectible, Like New |
+| `CollectibleVeryGood` | Collectible, Very Good |
+| `CollectibleGood` | Collectible, Good |
+| `CollectibleAcceptable` | Collectible, Acceptable |
 | `Refurbished` | Seller refurbished |
 | `Club` | Club (media category) |
 
@@ -148,9 +148,9 @@ Common categories with their own templates: Clothing, Shoes, Jewelry, Electronic
 After uploading, download the Processing Report from Seller Central (Inventory → Add Products via Upload → Monitor Upload Status → View Processing Report).
 
 The report has three tabs:
-- **Summary** — total rows, successes, and failures
-- **Results** — one row per record in your file, with status and error message
-- **Original** — your original uploaded data
+- **Summary**: total rows, successes, and failures
+- **Results**: one row per record in your file, with status and error message
+- **Original**: your original uploaded data
 
 To find failed rows: filter the Results tab by the `status` column. `FAILURE` rows include an `error-code` and `error-message` that explain exactly what went wrong.
 
@@ -158,6 +158,6 @@ To find failed rows: filter the Results tab by the `status` column. `FAILURE` ro
 
 ## Fix This Automatically with StriveFormats
 
-Upload your Amazon flat file to StriveFormats. The validator checks SKUs, condition codes, prices, fulfillment channel values, and required fields — then flags exact rows and cells with issues.
+Upload your Amazon flat file to StriveFormats. The validator checks SKUs, condition codes, prices, fulfillment channel values, and required fields, then flags the exact rows and cells with issues.
 
 [Open Amazon CSV Fixer](/app?preset=amazon_inventory_loader) | [View Amazon Template](/presets/amazon_inventory_loader)
