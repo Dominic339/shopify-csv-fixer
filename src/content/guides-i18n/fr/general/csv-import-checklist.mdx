@@ -1,0 +1,158 @@
+---
+title: "Liste de contrôle d'import CSV pour les plateformes e-commerce"
+description: "Une liste de contrôle complète avant import pour les fichiers CSV Shopify, WooCommerce, Etsy, eBay et Amazon : encodage, en-têtes, types de données et règles propres à chaque plateforme."
+keywords: ["liste de contrôle import csv", "checklist envoi csv", "checklist csv e-commerce", "vérifier csv avant import", "checklist csv shopify", "checklist csv woocommerce", "préparer un import csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Une liste de contrôle générale valable pour toutes les plateformes"
+  - "Les vérifications propres à Shopify, WooCommerce, Etsy, eBay et Amazon"
+  - "Comment valider les types de données, les champs obligatoires et l'encodage avant l'envoi"
+  - "Comment tester avec un petit lot avant d'importer tout le catalogue"
+  - "Que faire si l'import échoue encore après la liste de contrôle"
+bestFor: "Tout vendeur qui prépare un import CSV et veut éviter les échecs les plus courants avant l'envoi"
+timeToComplete: "12 minutes"
+---
+
+## Liste de contrôle générale avant l'import
+
+Passez ces points en revue pour chaque CSV, quelle que soit la plateforme.
+
+### Structure du fichier
+
+- [ ] Le fichier a l'extension `.csv` et contient du texte brut séparé par des virgules (pas un `.xlsx` renommé en `.csv` ; ouvrez-le dans un éditeur de texte pour vérifier)
+- [ ] La ligne 1 contient les en-têtes de colonnes, sans ligne vide ni ligne de titre au-dessus
+- [ ] Aucune ligne vide nulle part dans le fichier (pour les repérer dans Excel, ajoutez une colonne auxiliaire avec `=NBVAL(A2:Z2)` et filtrez sur 0 ; n'utilisez pas Atteindre > Cellules vides, qui sélectionne toutes les cellules vides et pas seulement les lignes vides)
+- [ ] Aucune ligne de synthèse, de total ou de formule en bas
+- [ ] Aucune cellule fusionnée (elles s'exportent vides partout sauf dans la première cellule)
+- [ ] Chaque ligne a autant de champs que l'en-tête (comptez les champs, pas les virgules : les virgules dans des valeurs entre guillemets ne séparent pas de colonnes)
+
+### Encodage
+
+- [ ] Le fichier est enregistré en **UTF-8** (vérifiez dans la barre d'état de VS Code)
+- [ ] Aucun caractère illisible (â€™, Ã©, Â£) dans les valeurs
+- [ ] Si la plateforme ne reconnaît pas la première colonne, vérifiez dans un éditeur de texte si son en-tête commence par un BOM invisible
+
+### En-têtes
+
+- [ ] Les noms de colonnes reprennent exactement l'orthographe de la plateforme, majuscules comprises
+- [ ] Aucun nom de colonne ne commence ou ne finit par une espace
+- [ ] Aucun nom de colonne en double
+- [ ] Toutes les colonnes obligatoires sont présentes (voir les listes par plateforme ci-dessous)
+
+### Types de données
+
+- [ ] Les colonnes de prix ne contiennent que des nombres (pas de `$`, `EUR` ni d'autres symboles)
+- [ ] Les champs oui/non utilisent le format de la plateforme (TRUE/FALSE, 1/0, y/n)
+- [ ] Les champs texte obligatoires ne sont vides sur aucune ligne
+- [ ] Les champs SKU et identifiants sont uniques dans tout le fichier
+- [ ] Les URL d'images sont absolues (commencent par `https://`) et accessibles publiquement
+
+---
+
+## Liste de contrôle Shopify
+
+- [ ] `Handle` est présent et non vide sur chaque ligne
+- [ ] Les lignes de variantes ont le même `Handle` que la ligne du produit
+- [ ] `Title` figure sur la première ligne de chaque produit ; il peut être vide sur les lignes de variantes
+- [ ] `Variant Price` est un nombre simple sans symbole monétaire (un prix vide est importé comme 0.00)
+- [ ] Les champs oui/non (`Published`, `Requires Shipping`, `Gift Card`) utilisent `true` ou `false`
+- [ ] Les produits à variantes ont `Option1 Name` sur la première ligne et une `Option1 Value` sur chaque ligne de variante
+- [ ] Aucune colonne d'option en trop sans valeur (par exemple `Option3 Name` sans `Option3 Value`)
+- [ ] Les URL d'images sont des liens `https://` publics vers des fichiers image (JPEG, PNG, GIF ou WebP)
+- [ ] Le champ `Tags` sépare les tags par des virgules (entre guillemets s'il y en a)
+
+[Ouvrir le correcteur CSV Shopify](/app?preset=shopify_products) | [Voir le modèle Shopify](/presets/shopify_products)
+
+---
+
+## Liste de contrôle WooCommerce
+
+- [ ] La colonne `Type` contient une valeur valide : `simple`, `variable`, `variation`, `grouped` ou `external`
+- [ ] Les valeurs de `SKU` sont uniques (le SKU est facultatif, mais les doublons échouent)
+- [ ] `Regular price` est un nombre décimal simple (sans symbole monétaire)
+- [ ] `In stock?` utilise `1` ou `0`, et `Backorders allowed?` utilise `1`, `0` ou `notify`
+- [ ] Les lignes de variation ont une valeur `Parent` : le SKU du produit variable, ou `id:` suivi de son ID produit
+- [ ] Les colonnes d'attributs suivent le modèle `Attribute 1 name` / `Attribute 1 value(s)`
+- [ ] `Tax status` vaut `taxable`, `shipping` ou `none`
+- [ ] Les URL d'images sont des URL HTTPS absolues
+
+[Ouvrir le correcteur CSV WooCommerce](/app?preset=woocommerce_products) | [Voir le modèle WooCommerce](/presets/woocommerce_products)
+
+---
+
+## Liste de contrôle Etsy
+
+Etsy n'a pas d'envoi de CSV. Ces vérifications concernent un export d'annonces que vous allez modifier, migrer ou confier à une application de mise en ligne en masse.
+
+- [ ] `TITLE` n'est pas vide et fait 140 caractères ou moins
+- [ ] `PRICE` est un nombre positif simple sans symbole monétaire
+- [ ] `QUANTITY` est un nombre entier jusqu'à 999
+- [ ] `TAGS` contient 13 tags ou moins séparés par des virgules, de 20 caractères maximum chacun
+- [ ] `MATERIALS` contient 13 entrées ou moins
+- [ ] Les colonnes d'images (`IMAGE1`, `IMAGE2`, ...) contiennent des URL `https://` complètes
+- [ ] Les valeurs de `SKU` sont uniques, si vous utilisez des SKU
+- [ ] Les colonnes ajoutées par une application de mise en ligne en masse (comme `who_made`, `when_made` et `is_supply`) utilisent les valeurs du modèle de cette application
+
+[Ouvrir le correcteur CSV Etsy](/app?preset=etsy_listings) | [Voir le modèle Etsy](/presets/etsy_listings)
+
+---
+
+## Liste de contrôle eBay
+
+- [ ] La colonne `Action` a une valeur sur chaque ligne, comme `Add`, `Revise`, `Relist` ou `End`
+- [ ] `Category` est un ID de catégorie eBay numérique valide
+- [ ] `Title` fait 80 caractères ou moins
+- [ ] `StartPrice` est un nombre décimal positif (sans symbole monétaire)
+- [ ] `ConditionID` utilise les ID d'état numériques d'eBay (par exemple `1000` pour Neuf, `3000` pour Occasion)
+- [ ] `Duration` utilise une valeur autorisée (`GTC` pour les annonces à prix fixe ; `Days_3`, `Days_5`, `Days_7` ou `Days_10` pour les enchères)
+- [ ] `PicURL` contient des URL d'images HTTPS séparées par une barre verticale `|` (jusqu'à 24)
+- [ ] `Quantity` est un nombre entier positif
+
+[Ouvrir le correcteur CSV eBay](/app?preset=ebay_listings) | [Voir le modèle eBay](/presets/ebay_listings)
+
+---
+
+## Liste de contrôle Amazon
+
+Ces vérifications concernent le fichier d'offres de l'Inventory Loader. Les modèles de catégorie ont leurs propres colonnes, décrites dans l'onglet Data Definitions du modèle.
+
+- [ ] Le fichier est enregistré en texte séparé par des tabulations (`.txt`), pas en CSV
+- [ ] `sku` n'est pas vide, est unique et fait 40 caractères ou moins
+- [ ] `product-id` et `product-id-type` concordent (`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
+- [ ] `price` est un nombre décimal positif (sans symbole monétaire)
+- [ ] `quantity` est un nombre entier (0 ou plus), laissé vide pour les offres FBA
+- [ ] `item-condition` utilise les codes numériques d'Amazon (`11` = Neuf, `10` = Reconditionné, `1` à `8` pour l'occasion et les objets de collection)
+- [ ] `add-delete` vaut `a` (ajouter ou mettre à jour), `d` (supprimer l'offre) ou `x` (supprimer l'offre et ses données produit)
+- [ ] `fulfillment-center-id` vaut `DEFAULT` pour les offres que vous expédiez vous-même, ou la valeur FBA de votre région (comme `AMAZON_EU`)
+
+[Ouvrir le correcteur CSV Amazon](/app?preset=amazon_inventory_loader) | [Voir le modèle Amazon](/presets/amazon_inventory_loader)
+
+---
+
+## Testez d'abord avec un petit lot
+
+Avant d'envoyer tout votre catalogue, testez avec 3 à 5 lignes :
+
+1. Copiez 3 lignes de données dans un nouveau fichier (avec la même ligne d'en-tête)
+2. Envoyez ce petit fichier de test
+3. Vérifiez le résultat de l'import : tous les champs sont-ils bien associés, les produits ont-ils le bon aspect ?
+4. Si tout passe, importez le fichier complet
+
+Tester avec un petit lot permet de repérer bien plus facilement les problèmes avant qu'ils touchent des centaines de lignes.
+
+---
+
+## Que faire si l'import échoue encore
+
+1. Lisez attentivement le message d'erreur. Les rapports d'erreur des plateformes indiquent généralement la colonne ou la ligne en cause
+2. Recherchez le message d'erreur exact avec le nom de la plateforme pour trouver la documentation correspondante
+3. Envoyez le fichier dans StriveFormats pour une validation automatique. Il repère les problèmes que les messages d'erreur de la plateforme n'expliquent pas clairement
+
+---
+
+## Vérifiez tout automatiquement avec StriveFormats
+
+Faites passer toute cette liste automatiquement. StriveFormats vérifie toutes les règles générales et propres à chaque plateforme, signale les cellules exactes qui posent problème et corrige automatiquement les problèmes sans risque.
+
+[Ouvrir le correcteur CSV](/app) | [Voir les modèles CSV](/presets)

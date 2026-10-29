@@ -1,0 +1,158 @@
+---
+title: "쇼핑몰 플랫폼용 CSV 가져오기 체크리스트"
+description: "Shopify, WooCommerce, Etsy, eBay, Amazon CSV 파일을 가져오기 전에 확인할 완전한 체크리스트입니다. 인코딩, 헤더, 데이터 유형, 플랫폼별 규칙을 점검하세요."
+keywords: ["csv 가져오기 체크리스트", "csv 업로드 체크리스트", "쇼핑몰 csv 체크리스트", "가져오기 전 csv 확인", "shopify csv 체크리스트", "woocommerce csv 체크리스트", "csv 가져오기 준비"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "모든 플랫폼에 적용되는 공통 가져오기 전 체크리스트"
+  - "Shopify, WooCommerce, Etsy, eBay, Amazon별 확인 사항"
+  - "업로드 전에 데이터 유형, 필수 필드, 인코딩을 검증하는 방법"
+  - "전체 카탈로그를 가져오기 전에 소량으로 테스트하는 방법"
+  - "체크리스트를 마쳐도 가져오기가 실패할 때 할 일"
+bestFor: "CSV 가져오기를 준비하면서 업로드 전에 가장 흔한 실패를 피하고 싶은 모든 판매자"
+timeToComplete: "12분"
+---
+
+## 공통 가져오기 전 체크리스트
+
+플랫폼에 상관없이 모든 CSV에서 다음을 확인하세요.
+
+### 파일 구조
+
+- [ ] 확장자가 `.csv`이고 쉼표로 구분된 일반 텍스트임(`.xlsx`를 `.csv`로 이름만 바꾼 것이 아님. 텍스트 편집기로 열어 확인)
+- [ ] 1행에 열 머리글이 있고 그 위에 빈 행이나 제목 행이 없음
+- [ ] 파일 어디에도 빈 행이 없음(Excel에서 찾으려면 `=COUNTA(A2:Z2)` 보조 열을 추가하고 0으로 필터링하세요. 이동 옵션 > 빈 셀은 빈 행만이 아니라 모든 빈 셀을 선택하므로 쓰지 마세요)
+- [ ] 아래쪽에 요약, 합계, 수식 행이 없음
+- [ ] 병합된 셀이 없음(병합된 셀은 첫 셀을 뺀 나머지가 모두 빈 칸으로 내보내집니다)
+- [ ] 모든 행의 필드 수가 머리글과 같음(쉼표가 아니라 필드를 세세요. 따옴표로 감싼 값 안의 쉼표는 열을 나누지 않습니다)
+
+### 인코딩
+
+- [ ] 파일을 **UTF-8**로 저장함(VS Code 상태 표시줄에서 확인)
+- [ ] 어떤 필드에도 깨진 글자(â€™, Ã©, Â£)가 보이지 않음
+- [ ] 플랫폼이 첫 열을 인식하지 못하면 텍스트 편집기로 머리글 앞에 보이지 않는 BOM이 있는지 확인
+
+### 머리글
+
+- [ ] 열 이름이 플랫폼의 표기와 대소문자까지 정확히 일치함
+- [ ] 어떤 열 이름에도 앞뒤 공백이 없음
+- [ ] 열 이름이 중복되지 않음
+- [ ] 필수 열이 모두 있음(아래 플랫폼별 체크리스트 참고)
+
+### 데이터 유형
+
+- [ ] 가격 열에는 숫자만 있음(`$`, `EUR` 같은 기호 없음)
+- [ ] 예/아니요 필드가 플랫폼에 맞는 형식을 씀(TRUE/FALSE, 1/0, y/n)
+- [ ] 필수 텍스트 필드가 어떤 행에서도 비어 있지 않음
+- [ ] SKU와 식별자 필드가 파일 전체에서 고유함
+- [ ] 이미지 URL이 절대 경로(`https://`로 시작)이고 공개되어 있음
+
+---
+
+## Shopify 체크리스트
+
+- [ ] 모든 행에 `Handle`이 있고 비어 있지 않음
+- [ ] 옵션 행이 상품 행과 같은 `Handle`을 씀
+- [ ] 각 상품의 첫 행에 `Title`이 있음(옵션 행에서는 비어 있어도 됨)
+- [ ] `Variant Price`가 통화 기호 없는 단순한 숫자임(빈 가격은 0.00으로 가져옴)
+- [ ] 예/아니요 필드(`Published`, `Requires Shipping`, `Gift Card`)가 `true` 또는 `false`를 씀
+- [ ] 옵션이 있는 상품은 첫 행에 `Option1 Name`, 모든 옵션 행에 `Option1 Value`가 있음
+- [ ] 값이 없는 여분의 옵션 열이 없음(예: `Option3 Value` 없는 `Option3 Name`)
+- [ ] 이미지 URL이 이미지 파일(JPEG, PNG, GIF, WebP)로 가는 공개 `https://` 링크임
+- [ ] `Tags` 필드가 태그를 쉼표로 구분함(있다면 따옴표로 감쌈)
+
+[Shopify CSV 수정기 열기](/app?preset=shopify_products) | [Shopify 템플릿 보기](/presets/shopify_products)
+
+---
+
+## WooCommerce 체크리스트
+
+- [ ] `Type` 열에 올바른 값이 있음: `simple`, `variable`, `variation`, `grouped`, `external`
+- [ ] `SKU` 값이 고유함(SKU는 선택 사항이지만 중복되면 실패함)
+- [ ] `Regular price`가 단순한 소수임(통화 기호 없음)
+- [ ] `In stock?`은 `1` 또는 `0`, `Backorders allowed?`는 `1`, `0`, `notify` 중 하나를 씀
+- [ ] 변형 행에 `Parent` 값이 있음: 가변 상품의 SKU 또는 `id:` 뒤에 상품 ID
+- [ ] 속성 열이 `Attribute 1 name` / `Attribute 1 value(s)` 이름 규칙을 따름
+- [ ] `Tax status`가 `taxable`, `shipping`, `none` 중 하나임
+- [ ] 이미지 URL이 HTTPS 절대 URL임
+
+[WooCommerce CSV 수정기 열기](/app?preset=woocommerce_products) | [WooCommerce 템플릿 보기](/presets/woocommerce_products)
+
+---
+
+## Etsy 체크리스트
+
+Etsy에는 CSV 업로드가 없습니다. 이 항목은 편집하거나, 이전하거나, 대량 등록 앱에 넘길 상품 내보내기 파일을 위한 것입니다.
+
+- [ ] `TITLE`이 비어 있지 않고 140자 이하임
+- [ ] `PRICE`가 통화 기호 없는 양수임
+- [ ] `QUANTITY`가 999 이하의 정수임
+- [ ] `TAGS`에 쉼표로 구분한 태그가 13개 이하이고 각 태그가 20자 이하임
+- [ ] `MATERIALS` 항목이 13개 이하임
+- [ ] 이미지 열(`IMAGE1`, `IMAGE2` 등)에 완전한 `https://` URL이 있음
+- [ ] SKU를 쓴다면 `SKU` 값이 고유함
+- [ ] 대량 등록 앱이 추가하는 열(`who_made`, `when_made`, `is_supply` 등)이 그 앱 템플릿의 값을 씀
+
+[Etsy CSV 수정기 열기](/app?preset=etsy_listings) | [Etsy 템플릿 보기](/presets/etsy_listings)
+
+---
+
+## eBay 체크리스트
+
+- [ ] `Action` 열의 모든 행에 `Add`, `Revise`, `Relist`, `End` 같은 값이 있음
+- [ ] `Category`가 올바른 숫자 eBay 카테고리 ID임
+- [ ] `Title`이 80자 이하임
+- [ ] `StartPrice`가 양의 소수임(통화 기호 없음)
+- [ ] `ConditionID`가 eBay의 숫자 상태 ID를 씀(예: 새 상품 `1000`, 중고 `3000`)
+- [ ] `Duration`이 허용된 값을 씀(고정가 상품은 `GTC`, 경매는 `Days_3`, `Days_5`, `Days_7`, `Days_10`)
+- [ ] `PicURL`에 세로 막대 `|`로 구분한 HTTPS 이미지 URL이 있음(최대 24개)
+- [ ] `Quantity`가 양의 정수임
+
+[eBay CSV 수정기 열기](/app?preset=ebay_listings) | [eBay 템플릿 보기](/presets/ebay_listings)
+
+---
+
+## Amazon 체크리스트
+
+이 항목은 Inventory Loader 오퍼 파일을 위한 것입니다. 카테고리 템플릿에는 자체 열이 있으며 템플릿의 Data Definitions 탭에 나와 있습니다.
+
+- [ ] 파일을 CSV가 아니라 탭으로 구분된 텍스트(`.txt`)로 저장함
+- [ ] `sku`가 비어 있지 않고, 고유하며, 40자 이하임
+- [ ] `product-id`와 `product-id-type`이 맞음(`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
+- [ ] `price`가 양의 소수임(통화 기호 없음)
+- [ ] `quantity`가 정수(0 이상)이고 FBA 오퍼에서는 비워 둠
+- [ ] `item-condition`이 Amazon의 숫자 코드를 씀(`11` = 새 상품, `10` = 리퍼비시, `1`~`8` = 중고 및 수집품)
+- [ ] `add-delete`가 `a`(추가 또는 업데이트), `d`(오퍼 삭제), `x`(오퍼와 상품 데이터 삭제) 중 하나임
+- [ ] `fulfillment-center-id`가 직접 배송하는 오퍼는 `DEFAULT`, FBA는 지역별 값(예: `AMAZON_NA`)임
+
+[Amazon CSV 수정기 열기](/app?preset=amazon_inventory_loader) | [Amazon 템플릿 보기](/presets/amazon_inventory_loader)
+
+---
+
+## 먼저 소량으로 테스트하기
+
+전체 카탈로그를 업로드하기 전에 3~5개 행으로 테스트하세요.
+
+1. 데이터 행 3개를 새 파일에 복사합니다(머리글 행은 그대로 유지)
+2. 작은 테스트 파일을 업로드합니다
+3. 가져오기 결과를 확인합니다. 모든 필드가 올바르게 연결되었고 상품이 제대로 보이는지 살펴보세요
+4. 문제가 없으면 전체 파일을 가져옵니다
+
+소량으로 먼저 테스트하면 수백 개 행에 영향을 주기 전에 문제를 훨씬 쉽게 찾을 수 있습니다.
+
+---
+
+## 그래도 가져오기가 실패한다면
+
+1. 오류 메시지를 꼼꼼히 읽으세요. 플랫폼의 오류 보고서에는 대개 실패한 열이나 행이 적혀 있습니다
+2. 정확한 오류 메시지를 플랫폼 이름과 함께 검색해 해당 플랫폼의 문서를 찾으세요
+3. 파일을 StriveFormats에 업로드해 자동으로 검증하세요. 플랫폼의 오류 메시지가 분명히 설명하지 않는 문제도 찾아냅니다
+
+---
+
+## StriveFormats로 모두 자동 확인하기
+
+이 체크리스트 전체를 자동으로 실행하세요. StriveFormats는 모든 공통 규칙과 플랫폼별 규칙을 검증하고, 문제가 있는 셀을 정확히 표시하며, 안전한 문제는 자동으로 고칩니다.
+
+[CSV 수정기 열기](/app) | [CSV 템플릿 보기](/presets)

@@ -1,0 +1,158 @@
+---
+title: "CSV-Import-Checkliste für E-Commerce-Plattformen"
+description: "Eine vollständige Checkliste vor dem Import für CSV-Dateien von Shopify, WooCommerce, Etsy, eBay und Amazon: Kodierung, Spaltenköpfe, Datentypen und plattformspezifische Regeln."
+keywords: ["csv import checkliste", "csv upload checkliste", "e-commerce csv checkliste", "csv vor dem import prüfen", "shopify csv checkliste", "woocommerce csv checkliste", "csv import vorbereiten"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Eine allgemeine Checkliste vor dem Import, die für alle Plattformen gilt"
+  - "Plattformspezifische Prüfungen für Shopify, WooCommerce, Etsy, eBay und Amazon"
+  - "Wie du Datentypen, Pflichtfelder und Kodierung vor dem Hochladen prüfst"
+  - "Wie du mit einer kleinen Testmenge testest, bevor du den ganzen Katalog importierst"
+  - "Was du tust, wenn der Import trotz Checkliste scheitert"
+bestFor: "Alle Händler, die einen CSV-Import vorbereiten und die häufigsten Fehler schon vor dem Hochladen vermeiden wollen"
+timeToComplete: "12 Minuten"
+---
+
+## Allgemeine Checkliste vor dem Import
+
+Geh diese Punkte bei jeder CSV durch, egal für welche Plattform.
+
+### Dateiaufbau
+
+- [ ] Die Datei hat die Endung `.csv` und ist reiner, kommagetrennter Text (keine umbenannte `.xlsx`; zum Prüfen in einem Texteditor öffnen)
+- [ ] Zeile 1 enthält die Spaltenköpfe, ohne Leer- oder Titelzeile darüber
+- [ ] Nirgends in der Datei Leerzeilen (in Excel findest du sie mit einer Hilfsspalte `=ANZAHL2(A2:Z2)` und dem Filter auf 0; nutze nicht Inhalte auswählen > Leerzellen, das markiert jede leere Zelle, nicht nur leere Zeilen)
+- [ ] Keine Summen-, Ergebnis- oder Formelzeilen am Ende
+- [ ] Keine verbundenen Zellen (sie werden in allen Zellen außer der ersten leer exportiert)
+- [ ] Jede Zeile hat so viele Felder wie die Kopfzeile (zähle Felder, keine Kommas: Kommas in Werten mit Anführungszeichen trennen keine Spalten)
+
+### Kodierung
+
+- [ ] Die Datei ist als **UTF-8** gespeichert (prüfe es in der Statusleiste von VS Code)
+- [ ] In keinem Feld ist Zeichensalat zu sehen (â€™, Ã©, Â£)
+- [ ] Erkennt die Plattform die erste Spalte nicht, prüfe deren Spaltenkopf in einem Texteditor auf ein unsichtbares BOM
+
+### Spaltenköpfe
+
+- [ ] Die Spaltennamen entsprechen genau der Schreibweise der Plattform, auch bei Groß- und Kleinschreibung
+- [ ] Keine Leerzeichen am Anfang oder Ende eines Spaltennamens
+- [ ] Keine doppelten Spaltennamen
+- [ ] Alle Pflichtspalten sind vorhanden (siehe die Plattform-Checklisten unten)
+
+### Datentypen
+
+- [ ] Preisspalten enthalten nur Zahlen (kein `$`, `EUR` oder andere Symbole)
+- [ ] Ja/Nein-Felder nutzen das richtige Format der Plattform (TRUE/FALSE, 1/0, y/n)
+- [ ] Pflicht-Textfelder sind in keiner Zeile leer
+- [ ] SKU- und ID-Felder sind in der ganzen Datei eindeutig
+- [ ] Bild-URLs sind absolut (beginnen mit `https://`) und öffentlich erreichbar
+
+---
+
+## Checkliste für Shopify
+
+- [ ] `Handle` ist in jeder Zeile vorhanden und nicht leer
+- [ ] Variantenzeilen haben denselben `Handle` wie die Zeile des Produkts
+- [ ] `Title` steht in der ersten Zeile jedes Produkts; in Variantenzeilen darf er leer sein
+- [ ] `Variant Price` ist eine einfache Zahl ohne Währungssymbol (ein leerer Preis wird als 0.00 importiert)
+- [ ] Ja/Nein-Felder (`Published`, `Requires Shipping`, `Gift Card`) nutzen `true` oder `false`
+- [ ] Produkte mit Varianten haben `Option1 Name` in der ersten Zeile und einen `Option1 Value` in jeder Variantenzeile
+- [ ] Keine zusätzlichen Optionsspalten ohne Werte (z. B. `Option3 Name` ohne `Option3 Value`)
+- [ ] Bild-URLs sind öffentliche `https://`-Links auf Bilddateien (JPEG, PNG, GIF oder WebP)
+- [ ] Das Feld `Tags` trennt Tags mit Kommas (in Anführungszeichen, wenn vorhanden)
+
+[Shopify-CSV-Fixer öffnen](/app?preset=shopify_products) | [Shopify-Vorlage ansehen](/presets/shopify_products)
+
+---
+
+## Checkliste für WooCommerce
+
+- [ ] Die Spalte `Type` enthält einen gültigen Wert: `simple`, `variable`, `variation`, `grouped` oder `external`
+- [ ] `SKU`-Werte sind eindeutig (die SKU ist optional, aber Duplikate scheitern)
+- [ ] `Regular price` ist eine einfache Dezimalzahl (ohne Währungssymbol)
+- [ ] `In stock?` nutzt `1` oder `0`, und `Backorders allowed?` nutzt `1`, `0` oder `notify`
+- [ ] Variantenzeilen haben einen `Parent`-Wert: die SKU des variablen Produkts oder `id:` gefolgt von seiner Produkt-ID
+- [ ] Attributspalten folgen dem Muster `Attribute 1 name` / `Attribute 1 value(s)`
+- [ ] `Tax status` ist `taxable`, `shipping` oder `none`
+- [ ] Bild-URLs sind absolute HTTPS-URLs
+
+[WooCommerce-CSV-Fixer öffnen](/app?preset=woocommerce_products) | [WooCommerce-Vorlage ansehen](/presets/woocommerce_products)
+
+---
+
+## Checkliste für Etsy
+
+Etsy hat keinen CSV-Upload. Diese Punkte gelten für einen Export deiner Angebote, den du bearbeiten, umziehen oder einer App für Massen-Einstellungen geben willst.
+
+- [ ] `TITLE` ist nicht leer und hat höchstens 140 Zeichen
+- [ ] `PRICE` ist eine einfache positive Zahl ohne Währungssymbol
+- [ ] `QUANTITY` ist eine ganze Zahl bis 999
+- [ ] `TAGS` enthält höchstens 13 kommagetrennte Tags mit je höchstens 20 Zeichen
+- [ ] `MATERIALS` enthält höchstens 13 Einträge
+- [ ] Bildspalten (`IMAGE1`, `IMAGE2`, ...) enthalten vollständige `https://`-URLs
+- [ ] `SKU`-Werte sind eindeutig, falls du SKUs nutzt
+- [ ] Spalten, die eine App für Massen-Einstellungen ergänzt (etwa `who_made`, `when_made` und `is_supply`), nutzen die Werte aus der Vorlage dieser App
+
+[Etsy-CSV-Fixer öffnen](/app?preset=etsy_listings) | [Etsy-Vorlage ansehen](/presets/etsy_listings)
+
+---
+
+## Checkliste für eBay
+
+- [ ] Die Spalte `Action` hat in jeder Zeile einen Wert, etwa `Add`, `Revise`, `Relist` oder `End`
+- [ ] `Category` ist eine gültige numerische eBay-Kategorie-ID
+- [ ] `Title` hat höchstens 80 Zeichen
+- [ ] `StartPrice` ist eine positive Dezimalzahl (ohne Währungssymbol)
+- [ ] `ConditionID` nutzt die numerischen Zustands-IDs von eBay (z. B. `1000` für Neu, `3000` für Gebraucht)
+- [ ] `Duration` nutzt einen erlaubten Wert (`GTC` für Festpreisangebote; `Days_3`, `Days_5`, `Days_7` oder `Days_10` für Auktionen)
+- [ ] `PicURL` enthält HTTPS-Bild-URLs, getrennt durch einen senkrechten Strich `|` (bis zu 24)
+- [ ] `Quantity` ist eine positive ganze Zahl
+
+[eBay-CSV-Fixer öffnen](/app?preset=ebay_listings) | [eBay-Vorlage ansehen](/presets/ebay_listings)
+
+---
+
+## Checkliste für Amazon
+
+Diese Punkte gelten für die Angebotsdatei des Inventory Loader. Kategorievorlagen haben eigene Spalten, die im Tabellenblatt Data Definitions der Vorlage stehen.
+
+- [ ] Die Datei ist als tabulatorgetrennter Text (`.txt`) gespeichert, nicht als CSV
+- [ ] `sku` ist nicht leer, eindeutig und hat höchstens 40 Zeichen
+- [ ] `product-id` und `product-id-type` passen zusammen (`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
+- [ ] `price` ist eine positive Dezimalzahl (ohne Währungssymbol)
+- [ ] `quantity` ist eine ganze Zahl (0 oder mehr) und bleibt bei FBA-Angeboten leer
+- [ ] `item-condition` nutzt Amazons Zahlencodes (`11` = Neu, `10` = Generalüberholt, `1` bis `8` für gebraucht und Sammlerstücke)
+- [ ] `add-delete` ist `a` (hinzufügen oder aktualisieren), `d` (Angebot löschen) oder `x` (Angebot und Produktdaten löschen)
+- [ ] `fulfillment-center-id` ist `DEFAULT` für Angebote, die du selbst versendest, oder der FBA-Wert für deine Region (etwa `AMAZON_EU`)
+
+[Amazon-CSV-Fixer öffnen](/app?preset=amazon_inventory_loader) | [Amazon-Vorlage ansehen](/presets/amazon_inventory_loader)
+
+---
+
+## Zuerst mit einer kleinen Testmenge testen
+
+Bevor du deinen ganzen Katalog hochlädst, teste mit 3 bis 5 Zeilen:
+
+1. Kopiere 3 Datenzeilen in eine neue Datei (mit derselben Kopfzeile)
+2. Lade die kleine Testdatei hoch
+3. Prüfe das Ergebnis des Imports: Wurden alle Felder richtig zugeordnet, und sehen die Produkte richtig aus?
+4. Klappt alles, importiere die ganze Datei
+
+Mit einer kleinen Testmenge findest du Probleme viel leichter, bevor sie Hunderte Zeilen betreffen.
+
+---
+
+## Was tun, wenn der Import trotzdem scheitert?
+
+1. Lies die Fehlermeldung genau. Fehlerberichte der Plattformen nennen meist die Spalte oder Zeile, die gescheitert ist
+2. Suche nach der genauen Fehlermeldung und dem Namen der Plattform, um passende Dokumentation zu finden
+3. Lade die Datei zur automatischen Prüfung in StriveFormats hoch. Es findet Probleme, die die Fehlermeldungen der Plattform nicht klar erklären
+
+---
+
+## Automatisch prüfen mit StriveFormats
+
+Lass diese ganze Checkliste automatisch durchlaufen. StriveFormats prüft alle allgemeinen und plattformspezifischen Regeln, markiert genau die Zellen mit Problemen und behebt sichere Probleme automatisch.
+
+[CSV-Fixer öffnen](/app) | [CSV-Vorlagen ansehen](/presets)

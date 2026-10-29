@@ -1,0 +1,158 @@
+---
+title: "电商平台 CSV 导入检查清单"
+description: "适用于 Shopify、WooCommerce、Etsy、eBay 和 Amazon CSV 文件的完整导入前检查清单：编码、表头、数据类型和各平台的特定规则。"
+keywords: ["csv 导入检查清单", "csv 上传检查清单", "电商 csv 检查清单", "导入前检查 csv", "shopify csv 检查清单", "woocommerce csv 检查清单", "csv 导入准备"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "适用于所有平台的通用导入前检查清单"
+  - "Shopify、WooCommerce、Etsy、eBay 和 Amazon 的专项检查"
+  - "如何在上传前校验数据类型、必填字段和编码"
+  - "如何在导入整个目录前先用少量数据测试"
+  - "完成检查清单后导入仍失败时该怎么办"
+bestFor: "所有正在准备 CSV 导入、希望在上传前避开最常见失败原因的卖家"
+timeToComplete: "12 分钟"
+---
+
+## 通用导入前检查清单
+
+无论使用哪个平台，每个 CSV 都要检查以下各项。
+
+### 文件结构
+
+- [ ] 文件扩展名为 `.csv`，内容是逗号分隔的纯文本（不是改名为 `.csv` 的 `.xlsx`；用文本编辑器打开即可确认）
+- [ ] 第 1 行是列标题，上方没有空行或标题行
+- [ ] 文件中任何地方都没有空行（在 Excel 中可以添加一个 `=COUNTA(A2:Z2)` 辅助列并筛选 0 来查找；不要使用"定位条件 > 空值"，它会选中所有空单元格，而不只是空行）
+- [ ] 底部没有汇总行、合计行或公式行
+- [ ] 没有合并单元格（合并单元格导出时，除第一个单元格外全是空白）
+- [ ] 每一行的字段数都与表头相同（数字段而不是逗号：带引号的值中的逗号不会分隔列）
+
+### 编码
+
+- [ ] 文件已保存为 **UTF-8**（在 VS Code 状态栏中查看）
+- [ ] 所有字段中都看不到乱码（â€™、Ã©、Â£）
+- [ ] 如果平台无法识别第一列，用文本编辑器检查其表头前是否有看不见的 BOM
+
+### 表头
+
+- [ ] 列名与平台的写法完全一致，包括大小写
+- [ ] 所有列名开头和结尾都没有空格
+- [ ] 没有重复的列名
+- [ ] 必填列齐全（见下方各平台的检查清单）
+
+### 数据类型
+
+- [ ] 价格列只包含数字（没有 `$`、`EUR` 或其他符号）
+- [ ] 是/否字段使用平台要求的格式（TRUE/FALSE、1/0、y/n）
+- [ ] 必填的文本字段在任何一行都不为空
+- [ ] SKU 和标识字段在整个文件中唯一
+- [ ] 图片 URL 是绝对地址（以 `https://` 开头）并且可以公开访问
+
+---
+
+## Shopify 检查清单
+
+- [ ] 每一行都有 `Handle` 且不为空
+- [ ] 多属性行与商品行使用相同的 `Handle`
+- [ ] 每个商品的第一行有 `Title`；多属性行留空也可以
+- [ ] `Variant Price` 是不带货币符号的普通数字（空价格会导入为 0.00）
+- [ ] 是/否字段（`Published`、`Requires Shipping`、`Gift Card`）使用 `true` 或 `false`
+- [ ] 有多属性的商品在第一行有 `Option1 Name`，每个多属性行都有 `Option1 Value`
+- [ ] 没有无值的多余选项列（例如有 `Option3 Name` 却没有 `Option3 Value`）
+- [ ] 图片 URL 是指向图片文件（JPEG、PNG、GIF 或 WebP）的公开 `https://` 链接
+- [ ] `Tags` 字段用逗号分隔标签（如有标签，用引号括起来）
+
+[打开 Shopify CSV 修复工具](/app?preset=shopify_products) | [查看 Shopify 模板](/presets/shopify_products)
+
+---
+
+## WooCommerce 检查清单
+
+- [ ] `Type` 列包含有效值：`simple`、`variable`、`variation`、`grouped` 或 `external`
+- [ ] `SKU` 值唯一（SKU 可以不填，但重复会导致失败）
+- [ ] `Regular price` 是普通小数（不带货币符号）
+- [ ] `In stock?` 使用 `1` 或 `0`，`Backorders allowed?` 使用 `1`、`0` 或 `notify`
+- [ ] 变体行的 `Parent` 有值：可变商品的 SKU，或 `id:` 加上其商品 ID
+- [ ] 属性列遵循 `Attribute 1 name` / `Attribute 1 value(s)` 的命名方式
+- [ ] `Tax status` 为 `taxable`、`shipping` 或 `none`
+- [ ] 图片 URL 是 HTTPS 绝对地址
+
+[打开 WooCommerce CSV 修复工具](/app?preset=woocommerce_products) | [查看 WooCommerce 模板](/presets/woocommerce_products)
+
+---
+
+## Etsy 检查清单
+
+Etsy 没有 CSV 上传功能。这些检查适用于你要编辑、迁移或交给批量刊登应用的商品导出文件。
+
+- [ ] `TITLE` 不为空，且不超过 140 个字符
+- [ ] `PRICE` 是不带货币符号的普通正数
+- [ ] `QUANTITY` 是不超过 999 的整数
+- [ ] `TAGS` 中用逗号分隔的标签不超过 13 个，每个不超过 20 个字符
+- [ ] `MATERIALS` 不超过 13 项
+- [ ] 图片列（`IMAGE1`、`IMAGE2` 等）中是完整的 `https://` URL
+- [ ] 如果使用 SKU，`SKU` 值唯一
+- [ ] 批量刊登应用添加的列（例如 `who_made`、`when_made` 和 `is_supply`）使用该应用模板中的值
+
+[打开 Etsy CSV 修复工具](/app?preset=etsy_listings) | [查看 Etsy 模板](/presets/etsy_listings)
+
+---
+
+## eBay 检查清单
+
+- [ ] `Action` 列的每一行都有值，例如 `Add`、`Revise`、`Relist` 或 `End`
+- [ ] `Category` 是有效的 eBay 数字类目 ID
+- [ ] `Title` 不超过 80 个字符
+- [ ] `StartPrice` 是正的小数（不带货币符号）
+- [ ] `ConditionID` 使用 eBay 的数字品相 ID（例如全新为 `1000`，二手为 `3000`）
+- [ ] `Duration` 使用允许的值（一口价刊登用 `GTC`；拍卖用 `Days_3`、`Days_5`、`Days_7` 或 `Days_10`）
+- [ ] `PicURL` 中是用竖线 `|` 分隔的 HTTPS 图片 URL（最多 24 个）
+- [ ] `Quantity` 是正整数
+
+[打开 eBay CSV 修复工具](/app?preset=ebay_listings) | [查看 eBay 模板](/presets/ebay_listings)
+
+---
+
+## Amazon 检查清单
+
+这些检查适用于 Inventory Loader 报价文件。类目模板有自己的列，列在模板的 Data Definitions 选项卡中。
+
+- [ ] 文件保存为制表符分隔的文本（`.txt`），而不是 CSV
+- [ ] `sku` 不为空、唯一，且不超过 40 个字符
+- [ ] `product-id` 与 `product-id-type` 一致（`1` = ASIN，`2` = ISBN，`3` = UPC，`4` = EAN）
+- [ ] `price` 是正的小数（不带货币符号）
+- [ ] `quantity` 是整数（0 或以上），FBA 报价留空
+- [ ] `item-condition` 使用 Amazon 的数字代码（`11` = 全新，`10` = 翻新，`1` 至 `8` = 二手和收藏品）
+- [ ] `add-delete` 为 `a`（添加或更新）、`d`（删除报价）或 `x`（删除报价及其商品数据）
+- [ ] `fulfillment-center-id` 对自行发货的报价为 `DEFAULT`，对 FBA 为所在地区的值（例如 `AMAZON_NA`）
+
+[打开 Amazon CSV 修复工具](/app?preset=amazon_inventory_loader) | [查看 Amazon 模板](/presets/amazon_inventory_loader)
+
+---
+
+## 先用少量数据测试
+
+在上传整个目录之前，先用 3 到 5 行测试：
+
+1. 把 3 行数据复制到一个新文件中（保留相同的表头行）
+2. 上传这个小测试文件
+3. 检查导入结果：确认所有字段都映射正确，商品显示无误
+4. 如果通过，再导入完整文件
+
+先用少量数据测试，可以在问题影响数百行之前更容易地发现它们。
+
+---
+
+## 导入仍然失败时怎么办
+
+1. 仔细阅读错误信息。平台的错误报告通常会指出出错的列或行
+2. 用准确的错误信息加上平台名称进行搜索，找到该平台的相关文档
+3. 把文件上传到 StriveFormats 进行自动校验。它能发现平台错误信息没有讲清楚的问题
+
+---
+
+## 用 StriveFormats 自动检查全部内容
+
+自动完成整份检查清单。StriveFormats 会校验所有通用规则和各平台规则，准确标出有问题的单元格，并自动修复可以安全修复的问题。
+
+[打开 CSV 修复工具](/app) | [查看 CSV 模板](/presets)

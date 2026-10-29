@@ -1,0 +1,158 @@
+---
+title: "Lista kontrolna importu CSV dla platform e-commerce"
+description: "Kompletna lista kontrolna przed importem plików CSV do Shopify, WooCommerce, Etsy, eBay i Amazon: kodowanie, nagłówki, typy danych i zasady poszczególnych platform."
+keywords: ["lista kontrolna importu csv", "checklista przesyłania csv", "checklista csv e-commerce", "sprawdzenie csv przed importem", "checklista csv shopify", "checklista csv woocommerce", "przygotowanie importu csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Ogólną listę kontrolną przed importem, która dotyczy wszystkich platform"
+  - "Kontrole dla Shopify, WooCommerce, Etsy, eBay i Amazon"
+  - "Jak sprawdzić typy danych, pola wymagane i kodowanie przed przesłaniem"
+  - "Jak przetestować małą partię przed importem całego katalogu"
+  - "Co zrobić, jeśli import nadal się nie udaje po przejściu listy"
+bestFor: "Każdy sprzedawca, który przygotowuje import CSV i chce uniknąć najczęstszych błędów przed przesłaniem"
+timeToComplete: "12 minut"
+---
+
+## Ogólna lista kontrolna przed importem
+
+Przejdź te punkty przy każdym pliku CSV, niezależnie od platformy.
+
+### Struktura pliku
+
+- [ ] Plik ma rozszerzenie `.csv` i jest zwykłym tekstem rozdzielanym przecinkami (a nie `.xlsx` przemianowanym na `.csv`; sprawdź w edytorze tekstu)
+- [ ] Wiersz 1 zawiera nagłówki kolumn, bez pustych wierszy ani wiersza tytułowego nad nim
+- [ ] Nigdzie w pliku nie ma pustych wierszy (w Excelu znajdziesz je dzięki kolumnie pomocniczej z `=ILE.NIEPUSTYCH(A2:Z2)` i filtrowi na 0; nie używaj Przejdź do — specjalnie > Puste, bo zaznacza każdą pustą komórkę, a nie tylko puste wiersze)
+- [ ] Brak wierszy podsumowań, sum lub formuł na dole
+- [ ] Brak scalonych komórek (scalone komórki eksportują się jako puste we wszystkich komórkach poza pierwszą)
+- [ ] Każdy wiersz ma tyle pól co nagłówek (licz pola, nie przecinki: przecinki w wartościach w cudzysłowie nie rozdzielają kolumn)
+
+### Kodowanie
+
+- [ ] Plik jest zapisany jako **UTF-8** (sprawdź na pasku stanu VS Code)
+- [ ] W żadnym polu nie widać krzaczków (â€™, Ã©, Â£)
+- [ ] Jeśli platforma nie rozpoznaje pierwszej kolumny, sprawdź w edytorze tekstu, czy jej nagłówek nie zaczyna się od niewidocznego BOM
+
+### Nagłówki
+
+- [ ] Nazwy kolumn dokładnie odpowiadają zapisowi platformy, łącznie z wielkością liter
+- [ ] Żadna nazwa kolumny nie ma spacji na początku ani na końcu
+- [ ] Brak powtarzających się nazw kolumn
+- [ ] Są wszystkie wymagane kolumny (zobacz listy dla poszczególnych platform poniżej)
+
+### Typy danych
+
+- [ ] Kolumny cen zawierają tylko liczby (bez `$`, `EUR` ani innych symboli)
+- [ ] Pola tak/nie używają właściwego formatu platformy (TRUE/FALSE, 1/0, y/n)
+- [ ] Wymagane pola tekstowe nie są puste w żadnym wierszu
+- [ ] Pola SKU i identyfikatorów są unikatowe w całym pliku
+- [ ] Adresy URL zdjęć są bezwzględne (zaczynają się od `https://`) i publicznie dostępne
+
+---
+
+## Lista kontrolna dla Shopify
+
+- [ ] `Handle` jest w każdym wierszu i nie jest pusty
+- [ ] Wiersze wariantów mają ten sam `Handle` co wiersz produktu
+- [ ] `Title` jest w pierwszym wierszu każdego produktu; w wierszach wariantów może być pusty
+- [ ] `Variant Price` to zwykła liczba bez symbolu waluty (pusta cena importuje się jako 0.00)
+- [ ] Pola tak/nie (`Published`, `Requires Shipping`, `Gift Card`) używają `true` lub `false`
+- [ ] Produkty z wariantami mają `Option1 Name` w pierwszym wierszu i `Option1 Value` w każdym wierszu wariantu
+- [ ] Brak dodatkowych kolumn opcji bez wartości (np. `Option3 Name` bez `Option3 Value`)
+- [ ] Adresy URL zdjęć to publiczne linki `https://` do plików graficznych (JPEG, PNG, GIF lub WebP)
+- [ ] Pole `Tags` rozdziela tagi przecinkami (w cudzysłowie, jeśli są)
+
+[Otwórz korektor CSV dla Shopify](/app?preset=shopify_products) | [Zobacz szablon Shopify](/presets/shopify_products)
+
+---
+
+## Lista kontrolna dla WooCommerce
+
+- [ ] Kolumna `Type` zawiera poprawną wartość: `simple`, `variable`, `variation`, `grouped` lub `external`
+- [ ] Wartości `SKU` są unikatowe (SKU jest opcjonalne, ale duplikaty kończą się błędem)
+- [ ] `Regular price` to zwykła liczba dziesiętna (bez symboli walut)
+- [ ] `In stock?` używa `1` lub `0`, a `Backorders allowed?` używa `1`, `0` lub `notify`
+- [ ] Wiersze odmian mają wartość w `Parent`: SKU produktu zmiennego albo `id:` i jego ID produktu
+- [ ] Kolumny atrybutów mają nazwy według wzoru `Attribute 1 name` / `Attribute 1 value(s)`
+- [ ] `Tax status` to `taxable`, `shipping` lub `none`
+- [ ] Adresy URL zdjęć to bezwzględne adresy HTTPS
+
+[Otwórz korektor CSV dla WooCommerce](/app?preset=woocommerce_products) | [Zobacz szablon WooCommerce](/presets/woocommerce_products)
+
+---
+
+## Lista kontrolna dla Etsy
+
+Etsy nie ma przesyłania CSV. Te punkty dotyczą eksportu ofert, który będziesz edytować, przenosić lub przekazać aplikacji do masowego wystawiania.
+
+- [ ] `TITLE` nie jest pusty i ma najwyżej 140 znaków
+- [ ] `PRICE` to zwykła liczba dodatnia bez symbolu waluty
+- [ ] `QUANTITY` to liczba całkowita do 999
+- [ ] `TAGS` zawiera najwyżej 13 tagów rozdzielonych przecinkami, każdy do 20 znaków
+- [ ] `MATERIALS` zawiera najwyżej 13 pozycji
+- [ ] Kolumny zdjęć (`IMAGE1`, `IMAGE2`, ...) zawierają pełne adresy `https://`
+- [ ] Wartości `SKU` są unikatowe, jeśli używasz SKU
+- [ ] Kolumny dodawane przez aplikację do masowego wystawiania (np. `who_made`, `when_made` i `is_supply`) używają wartości z szablonu tej aplikacji
+
+[Otwórz korektor CSV dla Etsy](/app?preset=etsy_listings) | [Zobacz szablon Etsy](/presets/etsy_listings)
+
+---
+
+## Lista kontrolna dla eBay
+
+- [ ] Kolumna `Action` ma wartość w każdym wierszu, np. `Add`, `Revise`, `Relist` lub `End`
+- [ ] `Category` to poprawny numeryczny identyfikator kategorii eBay
+- [ ] `Title` ma najwyżej 80 znaków
+- [ ] `StartPrice` to dodatnia liczba dziesiętna (bez symboli walut)
+- [ ] `ConditionID` używa numerycznych identyfikatorów stanu eBay (np. `1000` dla Nowy, `3000` dla Używany)
+- [ ] `Duration` ma dozwoloną wartość (`GTC` dla ofert Kup teraz; `Days_3`, `Days_5`, `Days_7` lub `Days_10` dla licytacji)
+- [ ] `PicURL` zawiera adresy HTTPS zdjęć rozdzielone pionową kreską `|` (do 24)
+- [ ] `Quantity` to dodatnia liczba całkowita
+
+[Otwórz korektor CSV dla eBay](/app?preset=ebay_listings) | [Zobacz szablon eBay](/presets/ebay_listings)
+
+---
+
+## Lista kontrolna dla Amazon
+
+Te punkty dotyczą pliku ofert Inventory Loader. Szablony kategorii mają własne kolumny, opisane na karcie Data Definitions szablonu.
+
+- [ ] Plik jest zapisany jako tekst rozdzielany tabulatorami (`.txt`), a nie jako CSV
+- [ ] `sku` nie jest puste, jest unikatowe i ma najwyżej 40 znaków
+- [ ] `product-id` i `product-id-type` są zgodne (`1` = ASIN, `2` = ISBN, `3` = UPC, `4` = EAN)
+- [ ] `price` to dodatnia liczba dziesiętna (bez symboli walut)
+- [ ] `quantity` to liczba całkowita (0 lub więcej), a przy ofertach FBA zostaje puste
+- [ ] `item-condition` używa kodów liczbowych Amazon (`11` = Nowy, `10` = Odnowiony, od `1` do `8` dla używanych i kolekcjonerskich)
+- [ ] `add-delete` to `a` (dodaj lub zaktualizuj), `d` (usuń ofertę) albo `x` (usuń ofertę i dane produktu)
+- [ ] `fulfillment-center-id` to `DEFAULT` dla ofert wysyłanych samodzielnie albo wartość FBA dla Twojego regionu (np. `AMAZON_EU`)
+
+[Otwórz korektor CSV dla Amazon](/app?preset=amazon_inventory_loader) | [Zobacz szablon Amazon](/presets/amazon_inventory_loader)
+
+---
+
+## Najpierw przetestuj małą partię
+
+Zanim prześlesz cały katalog, przetestuj 3–5 wierszy:
+
+1. Skopiuj 3 wiersze danych do nowego pliku (z tym samym wierszem nagłówka)
+2. Prześlij mały plik testowy
+3. Sprawdź wynik importu: czy wszystkie pola trafiły na swoje miejsce i czy produkty wyglądają dobrze
+4. Jeśli wszystko gra, zaimportuj cały plik
+
+Test na małej partii znacznie ułatwia wychwycenie problemów, zanim dotkną setek wierszy.
+
+---
+
+## Co zrobić, jeśli import nadal się nie udaje
+
+1. Uważnie przeczytaj komunikat o błędzie. Raporty błędów platform zwykle podają kolumnę lub wiersz, który się nie udał
+2. Wyszukaj dokładny komunikat błędu razem z nazwą platformy, aby znaleźć właściwą dokumentację
+3. Prześlij plik do StriveFormats do automatycznego sprawdzenia. Wychwytuje problemy, których komunikaty platformy jasno nie wyjaśniają
+
+---
+
+## Sprawdź wszystko automatycznie w StriveFormats
+
+Przejdź całą tę listę automatycznie. StriveFormats sprawdza wszystkie zasady ogólne i zasady platform, wskazuje dokładnie komórki z problemami i automatycznie naprawia bezpieczne problemy.
+
+[Otwórz korektor CSV](/app) | [Zobacz szablony CSV](/presets)
