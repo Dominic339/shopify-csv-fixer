@@ -113,5 +113,79 @@
       }
     ]
   },
-  "translationNote": "Esta traducción se ofrece por comodidad. Si difiere de la versión en inglés, prevalece la versión en inglés:"
+  "translationNote": "Esta traducción se ofrece por comodidad. Si difiere de la versión en inglés, prevalece la versión en inglés:",
+  "howItWorks": {
+    "metaTitle": "Cómo funciona el Reparador CSV, paso a paso",
+    "metaDescription": "Recorrido visual para corregir un CSV de productos para Shopify, WooCommerce, Etsy, eBay o Amazon: elige el formato, lee el resumen, corrige lo que falte y descarga un archivo que se importa.",
+    "eyebrow": "Cómo funciona",
+    "title": "De una exportación desordenada a una importación limpia",
+    "intro": "Este recorrido sigue un pequeño archivo de productos de Shopify desde que se sube hasta que se descarga. Todos los demás formatos funcionan igual.",
+    "ctaFixer": "Abrir el Reparador CSV",
+    "ctaDemo": "Descargar el archivo de ejemplo",
+    "stepLabel": "Paso {n}",
+    "steps": [
+      {
+        "title": "Elige el formato y añade tu archivo",
+        "desc": "Empieza por la plataforma a la que vas a importar, porque cada una tiene sus propias reglas.",
+        "alt": "El selector de formato con Shopify elegido y un archivo subido con su número de filas y columnas",
+        "notes": [
+          "Elige la plataforma a la que vas a importar. Puedes cambiarla después y el archivo se vuelve a revisar.",
+          "Arrastra tu CSV, selecciónalo o pega el texto. Si no tienes un archivo a mano, carga el de ejemplo. Tu archivo se lee en tu navegador y nunca se sube."
+        ]
+      },
+      {
+        "title": "Lee el resumen",
+        "desc": "Las comprobaciones se ejecutan en cuanto se abre el archivo, y el resumen te dice si se importaría.",
+        "alt": "El panel de resumen con un problema bloqueante, el número de errores y avisos, la puntuación de validación y el botón de exportar",
+        "notes": [
+          "Todo lo que aparece en este recuadro haría fallar la importación. Cuando se pone en verde, el archivo está listo.",
+          "La puntuación es un chequeo rápido. Los errores cuentan más que los avisos.",
+          "Puedes exportar en cualquier momento. Si quedan problemas bloqueantes, se te pide confirmación primero."
+        ]
+      },
+      {
+        "title": "Corrige lo que falte en la tabla",
+        "desc": "Los problemas que la herramienta no puede corregir sola con seguridad se muestran en su sitio, para que los arregles en unos clics.",
+        "alt": "La tabla de problemas con valores de opción duplicados en rojo, un SKU duplicado en amarillo y la lista de correcciones manuales debajo",
+        "notes": [
+          "Filtra la tabla por errores, avisos o consejos.",
+          "Las celdas rojas son errores y las amarillas, avisos. Haz clic en una celda para editarla y las comprobaciones se ejecutan de nuevo al instante.",
+          "Las filas con problemas quedan fijadas en Correcciones manuales, cada una con una explicación de qué está mal y cómo corregirlo."
+        ]
+      },
+      {
+        "title": "Revisa las correcciones automáticas y descarga",
+        "desc": "Abre la lista de correcciones automáticas para ver cada cambio hecho por ti, descarga el archivo corregido e impórtalo en tu plataforma.",
+        "alt": "La lista de correcciones automáticas abierta, con precios, valores true/false, un handle de URL y un estado normalizados",
+        "notes": [
+          "Precios, valores true/false, handles y estados se corrigen sin cambiar su significado.",
+          "Descarga el registro de correcciones si quieres tener constancia de cada cambio.",
+          "Los archivos de hasta {rows} filas siempre se descargan gratis."
+        ]
+      }
+    ],
+    "convertLabel": "¿Cambias de plataforma?",
+    "convertTitle": "Primero convierte, luego revisa",
+    "convertDesc": "El conversor de formatos transforma una exportación de WooCommerce, Etsy, eBay o Amazon en una importación para Shopify, o al revés. Previsualiza el resultado y envíalo al corrector de CSV con un clic.",
+    "convertAlt": "El conversor mostrando un archivo de WooCommerce convertido a Shopify, con avisos y una vista previa del resultado",
+    "ctaConverter": "Abrir el conversor",
+    "ctaMigrations": "Guías de migración paso a paso",
+    "tipsTitle": "Conviene saber",
+    "tips": [
+      {
+        "title": "No se sube nada",
+        "desc": "Tu archivo se lee, revisa y guarda en tu propio ordenador. Los costes de proveedor y los productos aún no lanzados siguen siendo privados."
+      },
+      {
+        "title": "Nada cambia sin avisar",
+        "desc": "Cada cambio automático aparece en la lista, y todo lo que pueda cambiar el significado espera a que decidas tú."
+      },
+      {
+        "title": "Gratis para probar",
+        "desc": "Todas las comprobaciones y correcciones funcionan sin cuenta, y los archivos de hasta {rows} filas siempre son gratis."
+      }
+    ],
+    "finalTitle": "Pruébalo con tu propio archivo",
+    "finalDesc": "Lleva un minuto, y ves todos los problemas antes de decidir nada."
+  }
 }

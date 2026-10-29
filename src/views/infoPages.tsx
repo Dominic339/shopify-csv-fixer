@@ -29,7 +29,7 @@ const PAGES_LOADERS: Record<Exclude<Locale, "en">, () => Promise<{ default: Page
   zh: () => import("@/i18n/pages/zh.json"),
 };
 
-async function loadPages(locale: Locale): Promise<PagesDict> {
+export async function loadPages(locale: Locale): Promise<PagesDict> {
   return locale === "en" ? en : (await PAGES_LOADERS[locale]()).default;
 }
 

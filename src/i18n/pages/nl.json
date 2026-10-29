@@ -113,5 +113,79 @@
       }
     ]
   },
-  "translationNote": "Deze vertaling is bedoeld voor het gemak. Bij verschillen geldt de Engelse versie:"
+  "translationNote": "Deze vertaling is bedoeld voor het gemak. Bij verschillen geldt de Engelse versie:",
+  "howItWorks": {
+    "metaTitle": "Hoe de CSV-hersteller werkt, stap voor stap",
+    "metaDescription": "Een visuele uitleg van het corrigeren van een product-CSV voor Shopify, WooCommerce, Etsy, eBay of Amazon: kies het formaat, lees de samenvatting, corrigeer wat overblijft en download een bestand dat importeert.",
+    "eyebrow": "Hoe het werkt",
+    "title": "Van een rommelige export naar een schone import",
+    "intro": "Deze uitleg volgt een klein Shopify-productbestand van uploaden tot downloaden. Alle andere formaten werken op dezelfde manier.",
+    "ctaFixer": "Open de CSV-hersteller",
+    "ctaDemo": "Download het voorbeeldbestand",
+    "stepLabel": "Stap {n}",
+    "steps": [
+      {
+        "title": "Kies het formaat en voeg je bestand toe",
+        "desc": "Begin met het platform waarin je importeert, want elk platform heeft zijn eigen regels.",
+        "alt": "De formaatkiezer met Shopify geselecteerd en een geüpload bestand met het aantal rijen en kolommen",
+        "notes": [
+          "Kies het platform waarin je importeert. Je kunt later wisselen; het bestand wordt dan opnieuw gecontroleerd.",
+          "Sleep je CSV erin, kies hem of plak de tekst. Heb je geen bestand bij de hand, laad dan het voorbeeld. Je bestand wordt in je browser gelezen en nooit geüpload."
+        ]
+      },
+      {
+        "title": "Lees de samenvatting",
+        "desc": "De controles starten zodra het bestand open is, en de samenvatting vertelt of het zou importeren.",
+        "alt": "Het samenvattingspaneel met één blokkerend probleem, het aantal fouten en waarschuwingen, de validatiescore en de exportknop",
+        "notes": [
+          "Alles in dit vak zou de import laten mislukken. Wordt het groen, dan is het bestand klaar.",
+          "De score is een snelle check. Fouten tellen zwaarder dan waarschuwingen.",
+          "Je kunt altijd exporteren. Zijn er nog blokkerende problemen, dan vragen we eerst om bevestiging."
+        ]
+      },
+      {
+        "title": "Corrigeer wat overblijft in de tabel",
+        "desc": "Problemen die de tool niet veilig zelf kan oplossen, worden ter plekke getoond, zodat je ze in een paar klikken oplost.",
+        "alt": "De probleemtabel met dubbele optiewaarden in rood, een dubbele SKU in geel en de lijst met handmatige correcties eronder",
+        "notes": [
+          "Filter de tabel op fouten, waarschuwingen of tips.",
+          "Rode cellen zijn fouten en gele cellen waarschuwingen. Klik op een cel om hem te bewerken; de controles lopen meteen opnieuw.",
+          "Rijen met problemen staan vastgezet onder Handmatige correcties, elk met uitleg over wat er mis is en hoe je het oplost."
+        ]
+      },
+      {
+        "title": "Controleer de automatische correcties en download",
+        "desc": "Open de lijst met automatische correcties om elke wijziging te zien die voor je is gedaan. Download daarna het gecorrigeerde bestand en importeer het in je platform.",
+        "alt": "De geopende lijst met automatische correcties, met genormaliseerde prijzen, true/false-waarden, een URL-handle en een status",
+        "notes": [
+          "Prijzen, true/false-waarden, handles en statussen worden gecorrigeerd zonder dat hun betekenis verandert.",
+          "Download het correctielog als je elke wijziging wilt vastleggen.",
+          "Bestanden tot {rows} rijen download je altijd gratis."
+        ]
+      }
+    ],
+    "convertLabel": "Van platform wisselen?",
+    "convertTitle": "Eerst converteren, dan controleren",
+    "convertDesc": "De formaatconverter zet een export uit WooCommerce, Etsy, eBay of Amazon om naar een Shopify-import, of andersom. Bekijk een voorbeeld van het resultaat en stuur het met één klik naar de CSV-hersteller.",
+    "convertAlt": "De converter met een WooCommerce-bestand omgezet naar Shopify, met waarschuwingen en een voorbeeld van het resultaat",
+    "ctaConverter": "Open de converter",
+    "ctaMigrations": "Stapsgewijze migratiegidsen",
+    "tipsTitle": "Goed om te weten",
+    "tips": [
+      {
+        "title": "Er wordt niets geüpload",
+        "desc": "Je bestand wordt op je eigen computer gelezen, gecontroleerd en opgeslagen. Inkoopprijzen en nog niet gelanceerde producten blijven privé."
+      },
+      {
+        "title": "Niets verandert stilletjes",
+        "desc": "Elke automatische wijziging wordt vermeld, en alles wat de betekenis kan veranderen, wacht op jou."
+      },
+      {
+        "title": "Gratis uitproberen",
+        "desc": "Alle controles en correcties werken zonder account, en bestanden tot {rows} rijen zijn altijd gratis."
+      }
+    ],
+    "finalTitle": "Probeer het met je eigen bestand",
+    "finalDesc": "Het duurt ongeveer een minuut, en je ziet elk probleem voordat je iets beslist."
+  }
 }

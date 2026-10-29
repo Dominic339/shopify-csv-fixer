@@ -113,5 +113,79 @@
       }
     ]
   },
-  "translationNote": ""
+  "translationNote": "",
+  "howItWorks": {
+    "metaTitle": "How the CSV Fixer works, step by step",
+    "metaDescription": "A visual walkthrough of fixing a product CSV for Shopify, WooCommerce, Etsy, eBay or Amazon: choose the format, read the summary, fix what's left and download a file that imports.",
+    "eyebrow": "How it works",
+    "title": "From a messy export to a clean import",
+    "intro": "This walkthrough follows a small Shopify product file from upload to download. Every other format works the same way.",
+    "ctaFixer": "Open the CSV Fixer",
+    "ctaDemo": "Download the demo file",
+    "stepLabel": "Step {n}",
+    "steps": [
+      {
+        "title": "Choose the format and add your file",
+        "desc": "Start with the platform you're importing into, because each one has its own rules.",
+        "alt": "The format picker with Shopify selected, and an uploaded file showing its row and column count",
+        "notes": [
+          "Pick the platform you're importing into. You can switch later and the file is checked again.",
+          "Drop in your CSV, choose it, or paste the text. If you don't have a file to hand, load the sample. Your file is read in your browser and never uploaded."
+        ]
+      },
+      {
+        "title": "Read the summary",
+        "desc": "The checks run as soon as the file opens, and the summary tells you whether it would import.",
+        "alt": "The summary panel with one blocking issue, the error and warning counts, the validation score and the export button",
+        "notes": [
+          "Anything in this box would make the import fail. When it turns green, the file is ready.",
+          "The score is a quick health check. Errors count for more than warnings.",
+          "You can export at any time. If blocking issues are left, you're asked to confirm first."
+        ]
+      },
+      {
+        "title": "Fix what's left in the table",
+        "desc": "Problems the tool can't safely fix on its own are shown in place, so you can fix them in a few clicks.",
+        "alt": "The issues table with duplicate option values highlighted in red, a duplicate SKU in yellow, and the manual fixes list below",
+        "notes": [
+          "Filter the table to errors, warnings or tips.",
+          "Red cells are errors and yellow cells are warnings. Click a cell to edit it, and the checks run again straight away.",
+          "Rows with issues are pinned under Manual fixes, each with an explanation of what's wrong and how to fix it."
+        ]
+      },
+      {
+        "title": "Check the automatic fixes and download",
+        "desc": "Open the list of automatic fixes to see every change that was made for you, then download the fixed file and import it into your platform.",
+        "alt": "The list of automatic fixes opened, showing normalized prices, true/false values, a URL handle and a status",
+        "notes": [
+          "Prices, true/false values, handles and statuses are corrected without changing their meaning.",
+          "Download the fix log if you want a record of every change.",
+          "Files up to {rows} rows are always free to download."
+        ]
+      }
+    ],
+    "convertLabel": "Changing platforms?",
+    "convertTitle": "Convert first, then check",
+    "convertDesc": "The format converter turns a WooCommerce, Etsy, eBay or Amazon export into a Shopify import, or the other way round. Preview the result, then send it to the CSV Fixer with one click.",
+    "convertAlt": "The converter showing a WooCommerce file converted to Shopify, with warnings and a preview of the output",
+    "ctaConverter": "Open the converter",
+    "ctaMigrations": "Step-by-step migration guides",
+    "tipsTitle": "Good to know",
+    "tips": [
+      {
+        "title": "Nothing is uploaded",
+        "desc": "Your file is read, checked and saved on your own computer. Supplier costs and unreleased products stay private."
+      },
+      {
+        "title": "Nothing changes silently",
+        "desc": "Every automatic change is listed, and anything that could change meaning waits for you."
+      },
+      {
+        "title": "Free to try",
+        "desc": "Every check and fix works without an account, and files up to {rows} rows are always free."
+      }
+    ],
+    "finalTitle": "Try it on your own file",
+    "finalDesc": "It takes about a minute, and you can see every issue before you decide anything."
+  }
 }

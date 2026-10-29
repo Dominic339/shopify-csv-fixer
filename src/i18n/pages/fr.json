@@ -113,5 +113,79 @@
       }
     ]
   },
-  "translationNote": "Cette traduction est fournie à titre indicatif. En cas de différence, la version anglaise fait foi :"
+  "translationNote": "Cette traduction est fournie à titre indicatif. En cas de différence, la version anglaise fait foi :",
+  "howItWorks": {
+    "metaTitle": "Comment fonctionne le Correcteur CSV, étape par étape",
+    "metaDescription": "Un tutoriel illustré pour corriger un CSV de produits pour Shopify, WooCommerce, Etsy, eBay ou Amazon : choisissez le format, lisez le résumé, corrigez le reste et téléchargez un fichier qui s'importe.",
+    "eyebrow": "Comment ça marche",
+    "title": "D'un export en désordre à un import propre",
+    "intro": "Ce tutoriel suit un petit fichier de produits Shopify, de l'envoi au téléchargement. Tous les autres formats fonctionnent de la même façon.",
+    "ctaFixer": "Ouvrir le Correcteur CSV",
+    "ctaDemo": "Télécharger le fichier d'exemple",
+    "stepLabel": "Étape {n}",
+    "steps": [
+      {
+        "title": "Choisissez le format et ajoutez votre fichier",
+        "desc": "Commencez par la plateforme vers laquelle vous importez, car chacune a ses propres règles.",
+        "alt": "Le sélecteur de format avec Shopify choisi, et un fichier ajouté avec son nombre de lignes et de colonnes",
+        "notes": [
+          "Choisissez la plateforme vers laquelle vous importez. Vous pouvez en changer plus tard : le fichier est alors vérifié à nouveau.",
+          "Déposez votre CSV, sélectionnez-le ou collez le texte. Si vous n'avez pas de fichier sous la main, chargez l'exemple. Votre fichier est lu dans votre navigateur et n'est jamais envoyé."
+        ]
+      },
+      {
+        "title": "Lisez le résumé",
+        "desc": "Les vérifications démarrent dès l'ouverture du fichier, et le résumé vous dit s'il s'importerait.",
+        "alt": "Le panneau de résumé avec un problème bloquant, le nombre d'erreurs et d'avertissements, le score de validation et le bouton d'export",
+        "notes": [
+          "Tout ce qui figure dans cet encadré ferait échouer l'import. Quand il passe au vert, le fichier est prêt.",
+          "Le score donne un aperçu rapide de l'état du fichier. Les erreurs pèsent plus que les avertissements.",
+          "Vous pouvez exporter à tout moment. S'il reste des problèmes bloquants, une confirmation vous est d'abord demandée."
+        ]
+      },
+      {
+        "title": "Corrigez le reste dans le tableau",
+        "desc": "Les problèmes que l'outil ne peut pas corriger seul sans risque sont affichés à leur place, pour que vous les régliez en quelques clics.",
+        "alt": "Le tableau des problèmes avec des valeurs d'option en double en rouge, un SKU en double en jaune et la liste des corrections manuelles en dessous",
+        "notes": [
+          "Filtrez le tableau par erreurs, avertissements ou conseils.",
+          "Les cellules rouges sont des erreurs, les jaunes des avertissements. Cliquez sur une cellule pour la modifier : les vérifications sont relancées aussitôt.",
+          "Les lignes à problème sont épinglées sous « Corrections manuelles », chacune avec une explication de ce qui ne va pas et de la façon de le corriger."
+        ]
+      },
+      {
+        "title": "Vérifiez les corrections automatiques et téléchargez",
+        "desc": "Ouvrez la liste des corrections automatiques pour voir chaque modification faite pour vous, puis téléchargez le fichier corrigé et importez-le dans votre plateforme.",
+        "alt": "La liste des corrections automatiques ouverte, avec des prix, des valeurs true/false, un handle d'URL et un statut normalisés",
+        "notes": [
+          "Les prix, valeurs true/false, handles et statuts sont corrigés sans que leur sens change.",
+          "Téléchargez le journal des corrections si vous voulez garder une trace de chaque modification.",
+          "Les fichiers jusqu'à {rows} lignes se téléchargent toujours gratuitement."
+        ]
+      }
+    ],
+    "convertLabel": "Vous changez de plateforme ?",
+    "convertTitle": "Convertissez d'abord, vérifiez ensuite",
+    "convertDesc": "Le convertisseur de formats transforme un export WooCommerce, Etsy, eBay ou Amazon en import Shopify, ou l'inverse. Prévisualisez le résultat, puis envoyez-le au correcteur CSV en un clic.",
+    "convertAlt": "Le convertisseur affichant un fichier WooCommerce converti pour Shopify, avec des avertissements et un aperçu du résultat",
+    "ctaConverter": "Ouvrir le convertisseur",
+    "ctaMigrations": "Guides de migration étape par étape",
+    "tipsTitle": "Bon à savoir",
+    "tips": [
+      {
+        "title": "Rien n'est envoyé",
+        "desc": "Votre fichier est lu, vérifié et enregistré sur votre propre ordinateur. Vos prix d'achat et vos produits pas encore lancés restent privés."
+      },
+      {
+        "title": "Rien ne change en silence",
+        "desc": "Chaque modification automatique est listée, et tout ce qui pourrait changer le sens attend votre décision."
+      },
+      {
+        "title": "Gratuit pour essayer",
+        "desc": "Toutes les vérifications et corrections fonctionnent sans compte, et les fichiers jusqu'à {rows} lignes sont toujours gratuits."
+      }
+    ],
+    "finalTitle": "Essayez avec votre propre fichier",
+    "finalDesc": "Cela prend environ une minute, et vous voyez chaque problème avant de décider quoi que ce soit."
+  }
 }

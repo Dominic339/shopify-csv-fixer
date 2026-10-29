@@ -15,6 +15,12 @@ import { getTranslations, presetText, type Translations } from "@/lib/i18n/getTr
 import { getAllFormats } from "@/lib/formats";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
+
+/** Distinct import checks across the built-in formats. */
+function countChecks(): number {
+  return Object.values(ISSUE_META_REGISTRY).reduce((n, checks) => n + Object.keys(checks).length, 0);
+}
 
 /** Built-in format names in the page's language, for the fixer's format picker. */
 function presetNames(t: Translations): Record<string, string> {
@@ -67,7 +73,7 @@ export async function ToolView({ locale, tool }: { locale: Locale; tool: ToolId 
   const t = await getTranslations(locale);
   switch (tool) {
     case "home":
-      return <HomeClient tHome={t.home} tPricing={t.pricing} />;
+      return <HomeClient tHome={t.home} tPricing={t.pricing} checksCount={countChecks()} />;
     case "app":
       return (
         <Suspense fallback={<div className="mx-auto max-w-6xl px-6 py-10" />}>
