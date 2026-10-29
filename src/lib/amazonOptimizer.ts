@@ -54,13 +54,14 @@ const VALID_PRODUCT_ID_TYPES = new Set(["asin", "upc", "ean", "isbn", "jan", "gc
 // 1=Used;Like New, 2=Used;Very Good, 3=Used;Good, 4=Used;Acceptable
 // 5=Collectible;Like New, 6=Collectible;Very Good, 7=Collectible;Good, 8=Collectible;Acceptable
 // 10=Refurbished, 11=New
-// 9=Club (legacy). Category templates use names (New, UsedLikeNew, Refurbished, ...).
+// Amazon's Inventory Loader guide marks 9 as "Not used". Category templates use names
+// (New, UsedLikeNew, Refurbished, Club, ...).
 // will-ship-internationally: 1/n = US only, 2/y = international (Inventory Loader guide).
 const VALID_SHIP_INTERNATIONALLY = new Set(["1", "2", "y", "n"]);
 // expedited-shipping options: Next (one day), Second (two day), Domestic, International, Plus.
 const EXPEDITED_OPTIONS = new Set(["next", "second", "domestic", "international", "plus"]);
 
-const VALID_ITEM_CONDITIONS = new Set(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]);
+const VALID_ITEM_CONDITIONS = new Set(["1", "2", "3", "4", "5", "6", "7", "8", "10", "11"]);
 const VALID_CONDITION_NAMES = new Set([
   "new", "refurbished", "usedlikenew", "usedverygood", "usedgood", "usedacceptable",
   "collectiblelikenew", "collectibleverygood", "collectiblegood", "collectibleacceptable", "club",
@@ -71,7 +72,7 @@ const PRODUCT_ID_TYPE_CODES: Record<string, string> = { asin: "1", isbn: "2", up
 const CONDITION_CODES: Record<string, string> = {
   usedlikenew: "1", usedverygood: "2", usedgood: "3", usedacceptable: "4",
   collectiblelikenew: "5", collectibleverygood: "6", collectiblegood: "7", collectibleacceptable: "8",
-  club: "9", refurbished: "10", new: "11",
+  refurbished: "10", new: "11",
 };
 
 // Amazon add-delete values
@@ -263,9 +264,19 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
     for (const col of ["minimum-seller-allowed-price", "maximum-seller-allowed-price"]) {
       if (!(col in out)) continue;
       const raw = out[col] ?? "";
-      if (!isEmpty(raw)) {
+      // "delete" removes the limit (Amazon's Inventory Loader guide).
+      if (!isEmpty(raw) && raw.trim().toLowerCase() !== "delete") {
         const parsed = parseShopifyMoney(raw);
-        if (parsed == null) {
+        if (parsed === 0) {
+          issues.push({
+            rowIndex,
+            column: col,
+            severity: "warning",
+            code: "amazon/invalid_price",
+            message: `${col} can't be 0.`,
+            suggestion: "Enter a price above 0, or enter delete to remove the limit.",
+          });
+        } else if (parsed == null) {
           issues.push({
             rowIndex,
             column: col,
@@ -443,6 +454,24 @@ export function validateAndFixAmazonInventory(headers: string[], rows: CsvRow[])
           code: "amazon/invalid_fulfillment_channel",
           message: `fulfillment-center-id '${fc}' is not a recognized value.`,
           suggestion: "Use DEFAULT (merchant fulfilled), or AMAZON_NA / AMAZON_EU / AMAZON_FE / AMAZON_IN for FBA.",
+        });
+      }
+    }
+
+    // Amazon's Inventory Loader guide: a quantity on an Amazon-fulfilled SKU converts it to
+    // seller-fulfilled. FBA stock comes from what the fulfillment center receives.
+    {
+      const fc = (out["fulfillment-center-id"] ?? "").trim();
+      const qty = (out["quantity"] ?? "").trim();
+      if (fc.toLowerCase().startsWith("amazon_") && qty) {
+        issues.push({
+          rowIndex,
+          column: "quantity",
+          severity: "warning",
+          code: "amazon/quantity_on_fba_offer",
+          message: `quantity is set on an Amazon-fulfilled offer (fulfillment-center-id ${fc}).`,
+          suggestion: "Leave quantity blank for FBA offers. Amazon switches an offer with a quantity to seller-fulfilled.",
+          details: { column: "quantity", value: qty },
         });
       }
     }

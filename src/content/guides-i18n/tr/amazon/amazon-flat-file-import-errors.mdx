@@ -2,7 +2,7 @@
 title: "Amazon düz dosya içe aktarma hataları: nedenleri ve çözümleri"
 description: "En yaygın Amazon düz dosya CSV içe aktarma hatalarını düzeltin: SKU sorunları, geçersiz durum kodları, fiyat biçimi, gönderim kanalı değerleri ve uyumsuz şablonlar."
 keywords: ["amazon düz dosya içe aktarma hatası", "amazon csv içe aktarma hataları", "amazon flat file hataları", "amazon csv düzeltme", "amazon inventory loader hataları", "amazon düz dosya doğrulama", "amazon toplu yükleme hataları"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Amazon'un düz dosya CSV yüklemelerini nasıl doğruladığı ve hatalara neyin yol açtığı"
@@ -16,7 +16,7 @@ timeToComplete: "12 dakika"
 
 ## Amazon düz dosyaları nasıl doğrular
 
-Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun şemalarına uyan, sekmeyle veya virgülle ayrılmış CSV dosyalarıdır. Bir düz dosya yüklediğinizde Amazon onu bir dizi doğrulama adımından geçirir:
+Amazon düz dosyaları her ürün kategorisi için tanımlanmış katı sütun şemalarına uyar ve Amazon'un Inventory Loader kılavuzu, dosyayı yüklemeden önce sekmeyle ayrılmış metin (.txt) olarak kaydetmenizi söyler. Bir düz dosya yüklediğinizde Amazon onu birkaç doğrulama adımından geçirir:
 
 1. **Şablon eşleşmesi**: sütun başlıklarınızın dosya türü için beklenen şablonla eşleştiğini kontrol eder
 2. **Zorunlu alan doğrulaması**: tüm zorunlu sütunlarda değer olduğunu doğrular
@@ -24,7 +24,7 @@ Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun 
 4. **İş kuralları**: ASIN'leri, SKU'ları, durum kodlarını ve fiyat aralıklarını doğrular
 5. **Katalog kontrolü**: ürün kimliklerini Amazon kataloğuyla eşleştirir
 
-İşlemden sonra Amazon bir **işleme raporu** oluşturur (Seller Central'da Envanter → Yükleme yoluyla ürün ekle altında). İşleme raporunu her zaman inceleyin: başarısız olan her satırı ve hatanın kendisini listeler.
+İşlemden sonra Amazon bir **işleme raporu** oluşturur (Seller Central'da Katalog → Yükleme ile ürün ekle altında). Her zaman inceleyin. Başarısız olan her satırı ve hatanın ne olduğunu listeler.
 
 ---
 
@@ -34,8 +34,8 @@ Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun 
 
 **seller_sku kuralları:**
 - En fazla 40 karakter
-- Boşluk yok (kısa çizgi veya alt çizgi kullanın)
-- Harf ve rakamlarla birlikte `-`, `_`, `.`
+- Amazon'un kılavuzu bunu alfanümerik bir dize olarak tanımlar; ancak Amazon'un kendi örnek SKU'su `dt-black` bir kısa çizgi de içerir
+- Bazı araçların düzgün işleyemediği boşluklardan ve diğer simgelerden kaçının
 - Amazon satıcı hesabınızın tamamında benzersiz olmalı
 
 **Çözüm:** Her satırın benzersiz bir SKU'su olduğundan emin olun. Yinelemeleri bulmak için `=EĞERSAY($A:$A; A2)` gibi bir formül kullanın. 40 karakteri aşan SKU'ları kısaltın.
@@ -73,7 +73,7 @@ Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun 
 | `Refurbished` | Satıcı tarafından yenilenmiş |
 | `Club` | Club (medya kategorisi) |
 
-**Çözüm:** Standart dışı durum değerlerini yukarıdaki listeden biriyle değiştirin. `New` büyük harfle başlamalıdır; `new` (küçük harf) reddedilir.
+**Çözüm:** standart dışı durum değerlerini yukarıdaki listeden biriyle değiştirin. Inventory Loader'da `item-condition` bunun yerine sayı alır: Yeni için `11`, Kullanılmış (yeni gibi, çok iyi, iyi, kabul edilebilir) için `1` ile `4` arası ve Koleksiyonluk için aynı sırayla `5` ile `8` arası. Amazon'un kılavuzu `9` değerini kullanılmıyor olarak işaretler.
 
 ---
 
@@ -86,6 +86,7 @@ Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun 
 - Para birimi simgesi yok
 - Pozitif olmalı (0'dan büyük)
 - Ondalık ayırıcı olarak nokta
+- Binlik ayırıcı yok: `1,250.00` değil, `1250.00`
 
 **Çözüm:** Para birimi simgelerini kaldırın ve ondalık virgülleri noktayla değiştirin. Türkçe Excel'de ondalık ayırıcı virgüldür; kaydettikten sonra fiyatların nokta kullandığını bir metin düzenleyicide kontrol edin.
 
@@ -100,11 +101,11 @@ Amazon düz dosyaları, her ürün kategorisi için tanımlanmış katı sütun 
 | Değer | Açıklama |
 |---|---|
 | `DEFAULT` | Satıcı tarafından gönderim (FBM) |
-| `AMAZON_NA` (veya `AMAZON`) | Amazon tarafından gönderim (FBA) |
+| `AMAZON_NA` | Amazon tarafından gönderim (FBA), ABD |
 
 Tam sütun adı ve kabul edilen değerler düz dosya şablonuna göre biraz değişir. Kendi şablonunuzu kontrol edin.
 
-**Çözüm:** FBM için `DEFAULT`, FBA için `AMAZON_NA` veya `AMAZON` kullanın. `FBA`, `FBM` ya da başka kısaltmalar kullanmayın.
+**Çözüm:** FBM için `DEFAULT`, ABD'de FBA için `AMAZON_NA` kullanın. `FBA`, `FBM` veya başka kısaltmalar kullanmayın. FBA satırlarında `quantity` alanını boş bırakın: Amazon'un kılavuzuna göre bir miktar, SKU'yu satıcı gönderimine çevirir.
 
 ---
 
@@ -130,7 +131,7 @@ Tam sütun adı ve kabul edilen değerler düz dosya şablonuna göre biraz değ
 
 ## Hata: ürün kategorisi için yanlış şablon
 
-**Neden:** Kendine özgü bir düz dosya gerektiren bir kategori (ör. giyim, ayakkabı, takı) için genel Inventory Loader şablonunu kullandınız.
+**Neden:** Inventory Loader'ı henüz Amazon kataloğunda olmayan bir ürün için kullandınız. Inventory Loader yalnızca var olan ürünlerin tekliflerini oluşturur veya günceller; yeni ürünler kategoriye özel envanter dosyası ister (örneğin Giyim, Ayakkabı, Mücevher).
 
 Amazon'un ek zorunlu alanlar içeren kategoriye özel şablonları vardır. Yanlış şablon kullanıldığında kategoriye özel tüm zorunlu alanlar eksik kalır.
 
@@ -145,14 +146,11 @@ Kendi şablonu olan yaygın kategoriler: giyim, ayakkabı, takı, elektronik, ki
 
 ## İşleme raporunu okuma
 
-Yüklemeden sonra işleme raporunu Seller Central'dan indirin (Envanter → Yükleme yoluyla ürün ekle → Yükleme durumunu izle → İşleme raporunu görüntüle).
+Yüklemeden sonra Seller Central'da işleme raporunu açın (Katalog → Yükleme ile ürün ekle → Yükleme durumunu izle). Seller Central menülerinin yeri değişebilir; bu yolu göremiyorsanız Seller Central'da "Yükleme ile ürün ekle" araması yapın.
 
-Raporun üç sekmesi vardır:
-- **Summary**: toplam satır, başarılı ve başarısız sayıları
-- **Results**: dosyanızdaki her kayıt için bir satır, durum ve hata mesajıyla
-- **Original**: ilk yüklediğiniz veriler
+Rapor bir özetle başlar: kaç kaydın işlendiği ve kaçının başarılı olduğu.
 
-Başarısız satırları bulmak için Results sekmesini `status` sütununa göre filtreleyin. `FAILURE` satırları, neyin yanlış gittiğini tam olarak açıklayan bir `error-code` ve `error-message` içerir.
+Altında her sorun, dosyanızdaki satır numarası (`original-record-number`), `sku`, bir `error-code`, `error-type` (Error veya Warning) ve bir `error-message` ile ayrı bir satırda yer alır. Hatalar o satırı durdurur; uyarılar satırı geçirir ama kontrol edilmesi gereken bir şeye işaret eder.
 
 ---
 

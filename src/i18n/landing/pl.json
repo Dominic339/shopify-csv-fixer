@@ -217,7 +217,7 @@
    },
    {
     "q": "Mój plik to .txt rozdzielany tabulatorami. Czy mogę go użyć?",
-    "a": "Tak, prześlij go bez zmian. Poprawiony plik jest eksportowany jako CSV; otwórz go w arkuszu i zapisz jako tekst rozdzielany tabulatorami, jeśli Seller Central wymaga pliku .txt."
+    "a": "Tak, prześlij go bez zmian albo prześlij plik CSV. Poprawiony plik pobiera się jako tekst rozdzielany tabulatorami (.txt), czyli w formacie, którego wymaga przewodnik Amazona po Inventory Loaderze, więc możesz od razu przesłać go do Seller Central."
    }
   ],
   "metaTitle": "Błędy w pliku Inventory Loader Amazon – sprawdź za darmo | StriveFormats",

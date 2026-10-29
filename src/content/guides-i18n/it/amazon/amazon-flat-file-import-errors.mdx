@@ -2,7 +2,7 @@
 title: "Errori di importazione dei file flat Amazon: cause e soluzioni"
 description: "Correggi gli errori più comuni di importazione dei file flat CSV di Amazon: problemi di SKU, codici di condizione non validi, formato dei prezzi, valori del canale di evasione e modelli non corrispondenti."
 keywords: ["errori file flat amazon", "errore importazione csv amazon", "errore file di inventario amazon", "correggere csv amazon", "errori inventory loader amazon", "validazione file flat amazon", "errore caricamento massivo amazon"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Come Amazon convalida i caricamenti di file flat CSV e cosa causa gli errori"
@@ -16,7 +16,7 @@ timeToComplete: "12 minuti"
 
 ## Come Amazon convalida i file flat
 
-I file flat di Amazon sono file CSV delimitati da tabulazioni o virgole che seguono schemi di colonne rigidi, definiti per ciascuna categoria di prodotto. Quando carichi un file flat, Amazon lo sottopone a una serie di controlli:
+I file flat di Amazon seguono schemi di colonne rigidi definiti per categoria di prodotto, e la guida dell'Inventory Loader di Amazon dice di salvare il file come testo delimitato da tabulazioni (.txt) prima di caricarlo. Quando carichi un file flat, Amazon lo sottopone a diversi controlli:
 
 1. **Corrispondenza del modello**: verifica che le intestazioni delle colonne corrispondano al modello previsto per quel tipo di file
 2. **Convalida dei campi obbligatori**: verifica che tutte le colonne obbligatorie abbiano un valore
@@ -24,7 +24,7 @@ I file flat di Amazon sono file CSV delimitati da tabulazioni o virgole che segu
 4. **Regole commerciali**: verifica gli ASIN, convalida gli SKU e controlla i codici di condizione e le fasce di prezzo
 5. **Controllo del catalogo**: confronta gli identificativi dei prodotti con il catalogo Amazon
 
-Al termine dell'elaborazione, Amazon genera un **report di elaborazione** (disponibile in Seller Central in Inventario → Aggiungi prodotti tramite caricamento). Controlla sempre il report di elaborazione: elenca ogni riga non riuscita con l'errore specifico.
+Dopo l'elaborazione, Amazon genera un **report di elaborazione** (in Seller Central, in Catalogo → Aggiungi prodotti tramite caricamento). Controllalo sempre. Elenca ogni riga non riuscita con l'errore specifico.
 
 ---
 
@@ -34,8 +34,8 @@ Al termine dell'elaborazione, Amazon genera un **report di elaborazione** (dispo
 
 **Regole per seller_sku:**
 - Massimo 40 caratteri
-- Niente spazi (usa trattini o trattini bassi)
-- Lettere e numeri, più `-`, `_`, `.`
+- La guida di Amazon lo descrive come una stringa alfanumerica; lo SKU di esempio della stessa Amazon, `dt-black`, contiene però un trattino
+- Evita spazi e altri simboli, che alcuni strumenti gestiscono male
 - Deve essere univoco in tutto il tuo account venditore Amazon
 
 **Soluzione:** assicurati che ogni riga abbia uno SKU univoco. Usa una formula come `=CONTA.SE($A:$A; A2)` per trovare i duplicati. Accorcia gli SKU che superano i 40 caratteri.
@@ -73,7 +73,7 @@ Al termine dell'elaborazione, Amazon genera un **report di elaborazione** (dispo
 | `Refurbished` | Ricondizionato dal venditore |
 | `Club` | Club (categoria media) |
 
-**Soluzione:** sostituisci qualsiasi valore di condizione non standard con uno dell'elenco qui sopra. `New` deve avere l'iniziale maiuscola; `new` (minuscolo) viene rifiutato.
+**Soluzione:** sostituisci ogni valore di condizione non standard con uno dell'elenco sopra. Nell'Inventory Loader, `item-condition` usa invece numeri: `11` per Nuovo, da `1` a `4` per Usato (come nuovo, ottime condizioni, buone condizioni, condizioni accettabili) e da `5` a `8` per Da collezione nello stesso ordine. La guida di Amazon indica `9` come non utilizzato.
 
 ---
 
@@ -86,6 +86,7 @@ Al termine dell'elaborazione, Amazon genera un **report di elaborazione** (dispo
 - Nessun simbolo di valuta
 - Deve essere positivo (maggiore di 0)
 - Punto come separatore decimale
+- Nessun separatore delle migliaia: `1250.00`, non `1,250.00`
 
 **Soluzione:** elimina i simboli di valuta e sostituisci le virgole decimali con i punti. Prima di salvare, formatta la colonna del prezzo come Numero in Excel.
 
@@ -100,11 +101,11 @@ Al termine dell'elaborazione, Amazon genera un **report di elaborazione** (dispo
 | Valore | Descrizione |
 |---|---|
 | `DEFAULT` | Spedito dal venditore (FBM) |
-| `AMAZON_NA` (o `AMAZON`) | Logistica di Amazon (FBA) |
+| `AMAZON_NA` | Logistica di Amazon (FBA) negli Stati Uniti |
 
 Il nome esatto della colonna e i valori accettati variano leggermente a seconda del modello di file flat. Controlla il tuo modello.
 
-**Soluzione:** usa `DEFAULT` per FBM e `AMAZON_NA` o `AMAZON` per FBA. Non usare `FBA`, `FBM` o altre abbreviazioni.
+**Soluzione:** usa `DEFAULT` per FBM e `AMAZON_NA` per FBA negli Stati Uniti. Non usare `FBA`, `FBM` o altre abbreviazioni. Nelle righe FBA lascia vuoto `quantity`: secondo la guida di Amazon, una quantità trasforma lo SKU in gestito dal venditore.
 
 ---
 
@@ -130,7 +131,7 @@ Il nome esatto della colonna e i valori accettati variano leggermente a seconda 
 
 ## Errore: modello sbagliato per la categoria del prodotto
 
-**Causa:** hai usato un modello Inventory Loader generico per una categoria che richiede un file flat specifico (ad esempio abbigliamento, scarpe, gioielli).
+**Causa:** hai usato l'Inventory Loader per un prodotto che non è ancora nel catalogo Amazon. L'Inventory Loader crea o aggiorna solo offerte su prodotti già esistenti; i nuovi prodotti richiedono il file di inventario specifico della categoria (ad es. Abbigliamento, Scarpe, Gioielli).
 
 Amazon ha modelli specifici per categoria con campi obbligatori aggiuntivi. Con il modello sbagliato mancano tutti i campi obbligatori propri della categoria.
 
@@ -145,14 +146,11 @@ Categorie comuni con un modello proprio: abbigliamento, scarpe, gioielli, elettr
 
 ## Leggere il report di elaborazione
 
-Dopo il caricamento, scarica il report di elaborazione da Seller Central (Inventario → Aggiungi prodotti tramite caricamento → Monitora lo stato del caricamento → Visualizza il report di elaborazione).
+Dopo il caricamento, apri il report di elaborazione in Seller Central (Catalogo → Aggiungi prodotti tramite caricamento → Monitora lo stato del caricamento). I menu di Seller Central cambiano posizione, quindi se non trovi questo percorso cerca "Aggiungi prodotti tramite caricamento" in Seller Central.
 
-Il report ha tre schede:
-- **Summary**: totale delle righe, riuscite e non riuscite
-- **Results**: una riga per ogni record del file, con stato e messaggio di errore
-- **Original**: i dati che hai caricato
+Il report inizia con un riepilogo: quanti record sono stati elaborati e quanti sono andati a buon fine.
 
-Per trovare le righe non riuscite, filtra la scheda Results in base alla colonna `status`. Le righe `FAILURE` contengono un `error-code` e un `error-message` che spiegano esattamente cosa è andato storto.
+Sotto, ogni problema occupa una riga con il numero di riga del tuo file (`original-record-number`), lo `sku`, un `error-code`, l'`error-type` (Error o Warning) e un `error-message`. Gli errori bloccano quella riga; gli avvisi la lasciano passare ma segnalano qualcosa da controllare.
 
 ---
 

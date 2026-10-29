@@ -91,6 +91,23 @@ export function parseCsv(text: string): ParseResult {
   return { headers, rows: data, parseErrors, parseIssues };
 }
 
+/**
+ * Tab-delimited text, the format Amazon's upload page takes for Inventory Loader and
+ * category files. Cells aren't quoted, so tabs and line breaks inside a cell become spaces.
+ */
+export function toTsv(headers: string[], rows: CsvRow[]): string {
+  const clean = (v: string) => v.replace(/[\t\r\n]+/g, " ");
+  return [headers, ...rows.map((r) => headers.map((h) => r[h] ?? ""))].map((cells) => cells.map(clean).join("\t")).join("\r\n");
+}
+
+/** Amazon formats download as tab-delimited .txt; everything else as quoted CSV. */
+export function exportFileFor(formatId: string | null | undefined, headers: string[], rows: CsvRow[]) {
+  if (formatId?.startsWith("amazon_")) {
+    return { text: toTsv(headers, rows), extension: "txt", type: "text/tab-separated-values;charset=utf-8" };
+  }
+  return { text: toCsv(headers, rows), extension: "csv", type: "text/csv;charset=utf-8" };
+}
+
 export function toCsv(headers: string[], rows: CsvRow[]): string {
   return Papa.unparse(
     rows.map((r) => {

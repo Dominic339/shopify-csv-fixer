@@ -2,7 +2,7 @@
 title: "Errores de importación de archivos planos de Amazon: causas y soluciones"
 description: "Corrige los errores más comunes al importar archivos planos CSV de Amazon: problemas de SKU, códigos de estado no válidos, formato de precios, valores del canal logístico y plantillas que no coinciden."
 keywords: ["errores archivo plano amazon", "errores importación csv amazon", "error archivo de inventario amazon", "corregir csv amazon", "errores inventory loader amazon", "validar archivo plano amazon", "errores carga masiva amazon"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Cómo valida Amazon las cargas de archivos planos CSV y qué provoca los fallos"
@@ -16,7 +16,7 @@ timeToComplete: "12 minutos"
 
 ## Cómo valida Amazon los archivos planos
 
-Los archivos planos de Amazon son archivos CSV delimitados por tabulaciones o comas que siguen esquemas de columnas estrictos definidos para cada categoría de producto. Cuando cargas un archivo plano, Amazon lo pasa por un proceso de validación:
+Los archivos planos de Amazon siguen esquemas de columnas estrictos definidos por categoría de producto, y la guía del Inventory Loader de Amazon indica guardar el archivo como texto delimitado por tabulaciones (.txt) antes de subirlo. Cuando subes un archivo plano, Amazon lo pasa por varias validaciones:
 
 1. **Coincidencia de plantilla**: comprueba que los encabezados de columna coincidan con la plantilla esperada para ese tipo de archivo
 2. **Validación de campos obligatorios**: verifica que todas las columnas obligatorias tengan valor
@@ -24,7 +24,7 @@ Los archivos planos de Amazon son archivos CSV delimitados por tabulaciones o co
 4. **Reglas de negocio**: verifica los ASIN, valida los SKU y comprueba los códigos de estado y los rangos de precio
 5. **Comprobación del catálogo**: busca los identificadores de producto en el catálogo de Amazon
 
-Tras el procesamiento, Amazon genera un **informe de procesamiento** (disponible en Seller Central, en Inventario → Añadir productos mediante carga). Revisa siempre el informe de procesamiento: enumera cada fila que falló y el error concreto.
+Tras el procesamiento, Amazon genera un **informe de procesamiento** (en Seller Central, en Catálogo → Añadir productos mediante carga). Revísalo siempre. Muestra cada fila que falló y el error concreto.
 
 ---
 
@@ -34,8 +34,8 @@ Tras el procesamiento, Amazon genera un **informe de procesamiento** (disponible
 
 **Reglas de seller_sku:**
 - Máximo 40 caracteres
-- Sin espacios (usa guiones o guiones bajos)
-- Letras y números, más `-`, `_`, `.`
+- La guía de Amazon lo describe como una cadena alfanumérica; aun así, el SKU de ejemplo de la propia Amazon, `dt-black`, lleva un guion
+- Evita espacios y otros símbolos, que algunas herramientas gestionan mal
 - Debe ser único en toda tu cuenta de vendedor de Amazon
 
 **Solución:** asegúrate de que cada fila tenga un SKU único. Usa una fórmula como `=CONTAR.SI($A:$A; A2)` para encontrar duplicados. Acorta los SKU de más de 40 caracteres.
@@ -73,7 +73,7 @@ Tras el procesamiento, Amazon genera un **informe de procesamiento** (disponible
 | `Refurbished` | Reacondicionado por el vendedor |
 | `Club` | Club (categoría de medios) |
 
-**Solución:** sustituye cualquier valor de estado no estándar por uno de la lista anterior. `New` debe ir con mayúscula inicial; `new` (en minúsculas) se rechaza.
+**Solución:** sustituye cualquier valor de condición no estándar por uno de la lista anterior. En el Inventory Loader, `item-condition` usa números: `11` para Nuevo, `1` a `4` para Usado (como nuevo, muy bueno, bueno, aceptable) y `5` a `8` para Coleccionable en el mismo orden. La guía de Amazon indica que el `9` no se usa.
 
 ---
 
@@ -86,6 +86,7 @@ Tras el procesamiento, Amazon genera un **informe de procesamiento** (disponible
 - Sin símbolos de moneda
 - Debe ser positivo (mayor que 0)
 - Punto como separador decimal
+- Sin separadores de miles: `1250.00`, no `1,250.00`
 
 **Solución:** elimina los símbolos de moneda y cambia las comas decimales por puntos. Da formato de número a la columna de precio en Excel antes de guardar.
 
@@ -100,11 +101,11 @@ Tras el procesamiento, Amazon genera un **informe de procesamiento** (disponible
 | Valor | Descripción |
 |---|---|
 | `DEFAULT` | Gestionado por el vendedor (FBM) |
-| `AMAZON_NA` (o `AMAZON`) | Logística de Amazon (FBA) |
+| `AMAZON_NA` | Logística de Amazon (FBA) en EE. UU. |
 
 El nombre exacto de la columna y los valores aceptados varían ligeramente según la plantilla de archivo plano. Consulta tu plantilla concreta.
 
-**Solución:** usa `DEFAULT` para FBM y `AMAZON_NA` o `AMAZON` para FBA. No uses `FBA`, `FBM` ni otras abreviaturas.
+**Solución:** usa `DEFAULT` para FBM y `AMAZON_NA` para FBA en EE. UU. No uses `FBA`, `FBM` ni otras abreviaturas. En las filas FBA, deja `quantity` vacío: según la guía de Amazon, una cantidad cambia el SKU a gestionado por el vendedor.
 
 ---
 
@@ -130,7 +131,7 @@ El nombre exacto de la columna y los valores aceptados varían ligeramente segú
 
 ## Error: plantilla incorrecta para la categoría del producto
 
-**Causa:** usaste una plantilla general de Inventory Loader para una categoría que exige un archivo plano específico (por ejemplo, ropa, zapatos o joyería).
+**Causa:** usaste el Inventory Loader para un producto que todavía no está en el catálogo de Amazon. El Inventory Loader solo crea o actualiza ofertas de productos que ya existen; los productos nuevos necesitan el archivo de inventario específico de la categoría (p. ej., Ropa, Calzado, Joyería).
 
 Amazon tiene plantillas por categoría con campos obligatorios adicionales. Si usas la plantilla equivocada, faltarán todos los campos obligatorios propios de la categoría.
 
@@ -145,14 +146,11 @@ Categorías habituales con plantilla propia: ropa, zapatos, joyería, electróni
 
 ## Cómo leer el informe de procesamiento
 
-Después de la carga, descarga el informe de procesamiento desde Seller Central (Inventario → Añadir productos mediante carga → Supervisar el estado de la carga → Ver informe de procesamiento).
+Después de subir el archivo, abre su informe de procesamiento en Seller Central (Catálogo → Añadir productos mediante carga → Supervisar el estado de la carga). Los menús de Seller Central cambian de sitio, así que si no ves esta ruta, busca "Añadir productos mediante carga" en Seller Central.
 
-El informe tiene tres pestañas:
-- **Summary**: total de filas, correctas y fallidas
-- **Results**: una fila por registro de tu archivo, con su estado y el mensaje de error
-- **Original**: los datos originales que cargaste
+El informe empieza con un resumen: cuántos registros se procesaron y cuántos se completaron correctamente.
 
-Para encontrar las filas fallidas, filtra la pestaña Results por la columna `status`. Las filas `FAILURE` incluyen un `error-code` y un `error-message` que explican exactamente qué salió mal.
+Debajo, cada problema ocupa una línea con el número de fila de tu archivo (`original-record-number`), el `sku`, un `error-code`, el `error-type` (Error o Warning) y un `error-message`. Los errores detienen esa fila; las advertencias la dejan pasar, pero señalan algo que conviene revisar.
 
 ---
 

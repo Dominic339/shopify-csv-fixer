@@ -24,7 +24,7 @@ Amazon verwendet nicht in allen Upload-Dateien dasselbe Ja/Nein-Format. Was eine
 | Inventory Loader (Angebotsdatei mit `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` oder `1` für nur USA, `y` oder `2` für international |
 | Inventory Loader | `expedited-shipping` | Kein Ja/Nein-Feld, sondern eine Liste von Versandoptionen (siehe unten) |
 
-Auch Amazons Listings API speichert `batteries_required` als true/false-Wert, was zu dem passt, was Verkäufer in ihren Kategorievorlagen sehen.
+Amazons Inventory-Loader-Anleitung führt `batteries_required` und `are_batteries_included` mit den Optionen `true` oder `false`, und auch Amazons Listings API speichert sie als true/false.
 
 **Der häufigste Fehler:** ein Wort einzutragen, das nicht auf der Liste der Vorlage steht, etwa `Yes`, `Y` oder `1` in einer Spalte, für die das Tabellenblatt Valid Values `true` / `false` angibt, oder eine Konvention aus einer Amazon-Datei in eine andere zu übernehmen.
 

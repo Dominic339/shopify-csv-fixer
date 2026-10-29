@@ -851,6 +851,12 @@
 "whyPlatformCares": "Amazon Inventory Loader는 제공하는 빠른 배송 옵션을 쉼표로 구분한 목록을 기대합니다: Next(1일), Second(2일), Domestic, International, Plus. N 또는 빈 셀은 없음을 뜻합니다. yes나 true 같은 단어나 다른 값은 어떤 옵션과도 일치하지 않습니다.",
 "howToFix": "제공하는 옵션을 쉼표로 구분해 입력하세요(예: Next,Second). 빠른 배송을 제공하지 않으면 N을 입력하거나 셀을 비워 두세요."
 },
+"amazon/quantity_on_fba_offer": {
+"title": "FBA 오퍼의 수량",
+"explanation": "Amazon fulfillment-center-id(예: AMAZON_NA)가 있는 행에 quantity 수량도 들어 있습니다.",
+"whyPlatformCares": "Amazon Inventory Loader 가이드는 Amazon이 배송하는 상품에 수량을 입력하지 말라고 안내합니다. 재고는 풀필먼트 센터가 받은 수량으로 정해지며, 파일에 수량을 넣으면 해당 SKU가 판매자 배송으로 바뀝니다.",
+"howToFix": "FBA 행의 quantity 셀을 비우세요. 판매자 배송 행(fulfillment-center-id가 DEFAULT이거나 비어 있음)에만 수량을 넣어야 합니다."
+},
 "amazon/product_id_scientific_notation": {
 "title": "스프레드시트가 바코드를 망가뜨렸습니다",
 "explanation": "product-id가 1.23457E+11처럼 보입니다. 스프레드시트가 바코드를 지수 표기로 바꿨습니다.",

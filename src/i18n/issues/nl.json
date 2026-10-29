@@ -851,6 +851,12 @@
 "whyPlatformCares": "De Inventory Loader van Amazon verwacht een door komma's gescheiden lijst van de snellere verzendopties die je aanbiedt: Next (één dag), Second (twee dagen), Domestic, International en Plus. N of een lege cel betekent geen. Woorden als yes of true, of iets anders, passen bij geen enkele optie.",
 "howToFix": "Vermeld de opties die je aanbiedt, gescheiden door komma's, bijvoorbeeld Next,Second. Gebruik N of laat de cel leeg als je geen snelle verzending aanbiedt."
 },
+"amazon/quantity_on_fba_offer": {
+"title": "Aantal bij een FBA-aanbieding",
+"explanation": "Een rij met een Amazon-fulfillment-center-id (zoals AMAZON_NA) heeft ook een aantal in quantity.",
+"whyPlatformCares": "De Inventory Loader-handleiding van Amazon zegt dat je geen aantal invult voor producten die Amazon verzendt. Hun voorraad komt uit de eenheden die het fulfilmentcentrum ontvangt, en een aantal in het bestand zet de SKU om naar verzending door de verkoper.",
+"howToFix": "Maak de cel quantity leeg in FBA-rijen. Alleen rijen die de verkoper verzendt (fulfillment-center-id DEFAULT of leeg) horen een aantal te hebben."
+},
 "amazon/product_id_scientific_notation": {
 "title": "Barcode verminkt door een spreadsheet",
 "explanation": "Een product-id ziet eruit als 1.23457E+11: een spreadsheet heeft de barcode omgezet naar wetenschappelijke notatie.",

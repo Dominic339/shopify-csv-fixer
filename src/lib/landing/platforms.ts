@@ -317,7 +317,7 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
       },
       {
         q: "My file is tab-delimited .txt. Can I use it?",
-        a: "Yes, upload it as is. The fixed file is exported as CSV; open it in a spreadsheet and save as tab-delimited text if Seller Central asks for .txt.",
+        a: "Yes, upload it as is, or upload a CSV. The fixed file downloads as tab-delimited text (.txt), the format Amazon's Inventory Loader guide asks for, so you can upload it to Seller Central directly.",
       },
     ],
     related: ["ebay", "shopify", "woocommerce"],

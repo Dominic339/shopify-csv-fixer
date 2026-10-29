@@ -2,7 +2,7 @@
 title: "Amazon-Flatfile-Importfehler: Ursachen und Lösungen"
 description: "Behebe die häufigsten Importfehler in Amazon-Flatfile-CSVs: SKU-Probleme, ungültige Zustandscodes, Preisformate, Werte für den Versandkanal und nicht passende Vorlagen."
 keywords: ["amazon flatfile fehler", "amazon csv import fehler", "amazon lagerdatei fehler", "amazon csv korrigieren", "amazon inventory loader fehler", "amazon flatfile validierung", "amazon massenupload fehler"]
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Wie Amazon Flatfile-Uploads prüft und was zu Fehlern führt"
@@ -16,7 +16,7 @@ timeToComplete: "12 Minuten"
 
 ## Wie Amazon Flatfiles prüft
 
-Amazon-Flatfiles sind tabulator- oder kommagetrennte CSV-Dateien, die strengen, je Produktkategorie festgelegten Spaltenschemata folgen. Wenn du ein Flatfile hochlädst, durchläuft es bei Amazon mehrere Prüfschritte:
+Amazon-Flatfiles folgen strengen, je Produktkategorie festgelegten Spaltenschemata, und laut Amazons Inventory-Loader-Anleitung speicherst du die Datei vor dem Upload als tabulatorgetrennten Text (.txt). Wenn du ein Flatfile hochlädst, durchläuft es bei Amazon mehrere Prüfschritte:
 
 1. **Vorlagenabgleich**: prüft, ob deine Spaltenüberschriften zur erwarteten Vorlage für den Dateityp passen
 2. **Pflichtfeldprüfung**: stellt sicher, dass alle Pflichtspalten Werte enthalten
@@ -24,7 +24,7 @@ Amazon-Flatfiles sind tabulator- oder kommagetrennte CSV-Dateien, die strengen, 
 4. **Geschäftsregeln**: prüft ASINs, validiert SKUs und kontrolliert Zustandscodes und Preisspannen
 5. **Katalogabgleich**: gleicht Produkt-IDs mit dem Amazon-Katalog ab
 
-Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller Central unter Lagerbestand → Produkte über Upload hinzufügen). Sieh dir den Verarbeitungsbericht immer an. Er listet jede fehlgeschlagene Zeile mit dem konkreten Fehler auf.
+Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller Central unter Katalog → Produkte über Upload hinzufügen). Sieh dir den Verarbeitungsbericht immer an. Er listet jede fehlgeschlagene Zeile mit dem konkreten Fehler auf.
 
 ---
 
@@ -34,8 +34,8 @@ Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller 
 
 **Regeln für seller_sku:**
 - Höchstens 40 Zeichen
-- Keine Leerzeichen (verwende Bindestriche oder Unterstriche)
-- Buchstaben und Ziffern sowie `-`, `_`, `.`
+- Amazons Anleitung beschreibt sie als alphanumerische Zeichenfolge; Amazons eigene Beispiel-SKU `dt-black` enthält aber auch einen Bindestrich
+- Vermeide Leerzeichen und andere Sonderzeichen, mit denen manche Tools nicht zurechtkommen
 - Muss in deinem gesamten Amazon-Verkäuferkonto eindeutig sein
 
 **Lösung:** Sorge dafür, dass jede Zeile eine eindeutige SKU hat. Mit einer Formel wie `=ZÄHLENWENN($A:$A; A2)` findest du Duplikate. Kürze SKUs, die länger als 40 Zeichen sind.
@@ -73,7 +73,7 @@ Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller 
 | `Refurbished` | Vom Verkäufer generalüberholt |
 | `Club` | Club (Medienkategorie) |
 
-**Lösung:** Ersetze alle nicht standardmäßigen Zustandswerte durch einen Wert aus der Liste oben. `New` muss großgeschrieben werden; `new` (klein) wird abgelehnt.
+**Lösung:** Ersetze alle nicht standardmäßigen Zustandswerte durch einen Wert aus der Liste oben. Im Inventory Loader nimmt `item-condition` stattdessen Zahlen: `11` für Neu, `1` bis `4` für Gebraucht (wie neu, sehr gut, gut, akzeptabel) und `5` bis `8` für Sammlerstück in derselben Reihenfolge. Amazons Anleitung kennzeichnet `9` als nicht verwendet.
 
 ---
 
@@ -86,6 +86,7 @@ Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller 
 - Keine Währungssymbole
 - Muss positiv sein (größer als 0)
 - Punkt als Dezimaltrennzeichen
+- Keine Tausendertrennzeichen: `1250.00`, nicht `1,250.00`
 
 **Lösung:** Entferne Währungssymbole und ersetze Dezimalkommas durch Punkte. Formatiere die Preisspalte in Excel vor dem Speichern als Zahl.
 
@@ -100,11 +101,11 @@ Nach der Verarbeitung erstellt Amazon einen **Verarbeitungsbericht** (in Seller 
 | Wert | Beschreibung |
 |---|---|
 | `DEFAULT` | Versand durch Verkäufer (FBM) |
-| `AMAZON_NA` (oder `AMAZON`) | Versand durch Amazon (FBA) |
+| `AMAZON_NA` | Versand durch Amazon (FBA) in den USA |
 
 Der genaue Spaltenname und die zulässigen Werte unterscheiden sich je nach Flatfile-Vorlage leicht. Prüfe deine konkrete Vorlage.
 
-**Lösung:** Verwende `DEFAULT` für FBM und `AMAZON_NA` oder `AMAZON` für FBA. Verwende nicht `FBA`, `FBM` oder andere Kurzformen.
+**Lösung:** Verwende `DEFAULT` für FBM und `AMAZON_NA` für FBA in den USA. Verwende nicht `FBA`, `FBM` oder andere Kurzformen. Lass `quantity` in FBA-Zeilen leer: Laut Amazons Anleitung stellt eine Menge die SKU auf Versand durch den Verkäufer um.
 
 ---
 
@@ -130,7 +131,7 @@ Der genaue Spaltenname und die zulässigen Werte unterscheiden sich je nach Flat
 
 ## Fehler: falsche Vorlage für die Produktkategorie
 
-**Ursache:** Du hast eine allgemeine Inventory-Loader-Vorlage für eine Kategorie verwendet, die ein kategoriespezifisches Flatfile verlangt (z. B. Bekleidung, Schuhe, Schmuck).
+**Ursache:** Du hast den Inventory Loader für ein Produkt verwendet, das noch nicht im Amazon-Katalog ist. Der Inventory Loader legt nur Angebote für bereits vorhandene Produkte an oder aktualisiert sie; neue Produkte brauchen die kategoriespezifische Lagerbestandsdatei (z. B. Bekleidung, Schuhe, Schmuck).
 
 Amazon hat kategoriespezifische Vorlagen mit zusätzlichen Pflichtfeldern. Mit der falschen Vorlage fehlen alle kategoriespezifischen Pflichtfelder.
 
@@ -145,14 +146,11 @@ Gängige Kategorien mit eigener Vorlage: Bekleidung, Schuhe, Schmuck, Elektronik
 
 ## Den Verarbeitungsbericht lesen
 
-Lade nach dem Upload den Verarbeitungsbericht aus Seller Central herunter (Lagerbestand → Produkte über Upload hinzufügen → Upload-Status überwachen → Verarbeitungsbericht anzeigen).
+Öffne nach dem Upload den Verarbeitungsbericht in Seller Central (Katalog → Produkte über Upload hinzufügen → Upload-Status überwachen). Die Menüs in Seller Central ändern sich gelegentlich. Wenn du diesen Pfad nicht findest, suche in Seller Central nach „Produkte über Upload hinzufügen“.
 
-Der Bericht hat drei Registerkarten:
-- **Summary**: Gesamtzahl der Zeilen, Erfolge und Fehler
-- **Results**: eine Zeile pro Datensatz deiner Datei, mit Status und Fehlermeldung
-- **Original**: deine ursprünglich hochgeladenen Daten
+Der Bericht beginnt mit einer Zusammenfassung: wie viele Datensätze verarbeitet wurden und wie viele erfolgreich waren.
 
-So findest du fehlgeschlagene Zeilen: Filtere die Registerkarte Results nach der Spalte `status`. Zeilen mit `FAILURE` enthalten einen `error-code` und eine `error-message`, die genau erklären, was schiefgelaufen ist.
+Darunter steht jedes Problem in einer eigenen Zeile mit der Zeilennummer aus deiner Datei (`original-record-number`), der `sku`, einem `error-code`, dem `error-type` (Error oder Warning) und einer `error-message`. Fehler stoppen die Zeile; Warnungen lassen sie durch, weisen aber auf etwas hin, das du prüfen solltest.
 
 ---
 

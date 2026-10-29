@@ -24,7 +24,7 @@ Amazon n'utilise pas un seul format oui/non pour tous ses fichiers d'import. Ce 
 | Inventory Loader (fichier d'offres avec `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` ou `1` pour les États-Unis uniquement, `y` ou `2` pour l'international |
 | Inventory Loader | `expedited-shipping` | Pas un champ oui/non : une liste d'options d'expédition (voir plus bas) |
 
-La Listings API d'Amazon enregistre elle aussi `batteries_required` comme une valeur true/false, ce qui correspond à ce que les vendeurs voient dans leurs modèles de catégorie.
+Le guide de l'Inventory Loader d'Amazon présente `batteries_required` et `are_batteries_included` avec les options `true` ou `false`, et la Listings API d'Amazon les enregistre aussi en true/false.
 
 **L'erreur la plus courante :** saisir un mot qui ne figure pas dans la liste du modèle, comme `Yes`, `Y` ou `1` dans une colonne dont l'onglet Valid Values indique `true` / `false`, ou reprendre la convention d'un fichier Amazon dans un autre.
 

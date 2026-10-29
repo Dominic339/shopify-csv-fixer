@@ -24,7 +24,7 @@ Amazon no usa un único formato de sí/no en todos sus archivos de carga. Lo que
 | Inventory Loader (archivo de ofertas con `sku`, `product-id`, `add-delete`) | `will-ship-internationally` | `n` o `1` para solo EE. UU., `y` o `2` para internacional |
 | Inventory Loader | `expedited-shipping` | No es de sí/no: es una lista de opciones de envío (ver más abajo) |
 
-La propia Listings API de Amazon también guarda `batteries_required` como un valor true/false, lo que coincide con lo que los vendedores ven en sus plantillas de categoría.
+La guía del Inventory Loader de Amazon recoge `batteries_required` y `are_batteries_included` con las opciones `true` o `false`, y la Listings API de Amazon también los guarda como true/false.
 
 **El error más común:** escribir una palabra que no está en la lista de la plantilla, como `Yes`, `Y` o `1` en una columna cuya pestaña Valid Values dice `true` / `false`, o copiar la convención de un archivo de Amazon a otro.
 

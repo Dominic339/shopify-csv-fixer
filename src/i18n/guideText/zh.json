@@ -256,5 +256,10 @@
   "Use 1 or 0": "使用 1 或 0",
   "the header row": "标题行",
   "expedited-shipping isn't a yes/no field. It lists the faster shipping options you offer, separated by commas: Next (one day), Second (two day), Domestic, International and Plus. For example, Next,Second offers one-day and two-day shipping. Use N, or leave the cell blank, if you offer none.": "expedited-shipping 不是是/否字段。它用逗号分隔列出你提供的加急配送选项：Next（一天）、Second（两天）、Domestic、International 和 Plus。例如，Next,Second 表示提供一天达和两天达配送。如果都不提供，请填 N 或将单元格留空。",
-  "StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.": "StriveFormats 按逗号拆分每个 expedited-shipping 单元格，并将每一部分与 Amazon 的选项名称比对（不区分大小写）。空单元格或 N 可以通过；其他任何值，例如 y、yes 或 Standard，都会被标记。"
+  "StriveFormats splits each expedited-shipping cell at the commas and checks every part against Amazon's option names, in any capitalization. A blank cell or N passes; anything else, such as y, yes or Standard, is flagged.": "StriveFormats 按逗号拆分每个 expedited-shipping 单元格，并将每一部分与 Amazon 的选项名称比对（不区分大小写）。空单元格或 N 可以通过；其他任何值，例如 y、yes 或 Standard，都会被标记。",
+  "Save as Text (Tab delimited) (*.txt).": "另存为“文本文件（制表符分隔）（*.txt）”。",
+  "When done, select the helper column, right-click, and choose Delete. Save as Text (Tab delimited) (*.txt).": "完成后选中辅助列，右键点击并选择“删除”。另存为“文本文件（制表符分隔）（*.txt）”。",
+  "Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.": "选择“文件 > 下载 > 制表符分隔值文件（.tsv）”，然后将文件重命名为以 .txt 结尾。",
+  "Delete the helper column. Go to File > Download > Tab Separated Values (.tsv), then rename the file to end in .txt.": "删除辅助列。选择“文件 > 下载 > 制表符分隔值文件（.tsv）”，然后将文件重命名为以 .txt 结尾。",
+  "Amazon's Inventory Loader guide says to leave quantity blank for products fulfilled by Amazon. Their stock is the number of units the fulfillment center receives, and a quantity in the file converts the SKU to seller-fulfilled.": "Amazon 的 Inventory Loader 指南规定，由 Amazon 配送的商品应将 quantity 留空。其库存是运营中心收到的件数，在文件中填写数量会把该 SKU 转为卖家自配送。"
 }
