@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} は 1 または 0 にしてください。検出された値：'{1}'。",
 "{0} needs the ItemID of the existing listing.": "{0} には既存の出品の ItemID が必要です。",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "product-id（UPC/EAN/ASIN）のない出品が {0} 件あります。これらは SKU がアカウントに既に存在する場合にのみ Amazon で更新できます。",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} 件の商品に4つ以上のオプションがあります。Shopify は3つまでなので、最初の3つだけを残しました。",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "バリエーションのある商品 {0} 件を単一の出品に変換しました（最安価格、数量は合計）。Etsy のバリエーションは Shop Manager で追加してください。",
 "{0} should be a decimal number. Found '{1}'.": "{0} は小数で入力してください。検出された値：'{1}'。",
 "{0} should be a whole number. Found '{1}'.": "{0} は整数で入力してください。検出された値：'{1}'。",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "変換先の形式に対応する列がない元の列 {0} 件を除外しました：{1}{2}。",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "{0} 件のタグを除外しました。Etsy では1つの出品につき、20文字以内のタグを13個まで付けられます。",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} 件のタイトルが Etsy の上限140文字を超えています。",
 "{0} title(s) are longer than eBay's 80-character limit.": "eBay の 80 文字の上限を超えるタイトルが {0} 件あります。",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "SKU のないバリエーション {0} 件をスキップしました。Amazon ではすべての出品に SKU が必要です。",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} が親行の RelationshipDetails に記載されていません（{2} 行目）。"

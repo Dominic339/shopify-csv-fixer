@@ -158,6 +158,8 @@ export default function TopBar({ navByLocale }: Props) {
     { path: "/convert", label: navT.formatConverter },
     { path: "/merge", label: navT.csvMerger },
     { path: "/csv-inspector", label: navT.csvInspector },
+    // English-only pages, so not prefixed with the reader's locale.
+    { path: "/migrate", label: navT.storeMigrations, englishOnly: true },
   ];
   const openCustomFormats = () => {
     setMenuOpen(false);
@@ -287,7 +289,7 @@ export default function TopBar({ navByLocale }: Props) {
                   {tools.map((tool) => (
                     <Link
                       key={tool.path}
-                      href={href(tool.path)}
+                      href={tool.englishOnly ? tool.path : href(tool.path)}
                       className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
                       onClick={() => setToolsOpen(false)}
                     >
@@ -370,7 +372,7 @@ export default function TopBar({ navByLocale }: Props) {
             {tools.map((tool) => (
               <Link
                 key={tool.path}
-                href={href(tool.path)}
+                href={tool.englishOnly ? tool.path : href(tool.path)}
                 className="flex items-center justify-between rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]"
               >
                 {tool.label}

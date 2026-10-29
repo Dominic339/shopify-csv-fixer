@@ -84,10 +84,10 @@ The code falls back to slower, non-atomic behaviour if migration 3 hasn't been r
 
 ## Plans and quota
 
-Defined in `src/lib/plans.ts`. Checking and fixing are always free; only exports count.
+Defined in `src/lib/plans.ts`. Checking, fixing and converting are always free; only downloads of fixed or converted files count (the fixer and the converter share the same allowance).
 
 - **Free:** 3 exports a month, counted per device in `localStorage` (no account needed) or per account when signed in. Files of up to 100 rows never count.
-- **24-hour pass:** a one-time payment for unlimited exports (and unlimited converter rows) for 24 hours. A second pass bought while one is running adds another 24 hours. Recorded by the webhook in `export_passes`.
+- **24-hour pass:** a one-time payment for unlimited exports for 24 hours. A second pass bought while one is running adds another 24 hours. Recorded by the webhook in `export_passes`.
 - **Basic:** 100 exports a month.
 - **Advanced:** unlimited, plus Custom Formats.
 

@@ -32,6 +32,7 @@ import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 // Phase 1: strict mode preference (Shopify)
 import { getStrictMode, setStrictMode } from "@/lib/validation/strictMode";
+import { readTextFile } from "@/lib/textFile";
 
 
 type SubStatus = {
@@ -953,7 +954,7 @@ useEffect(() => {
     trackToolEvent("file_uploaded", { format: activeFormat?.id ?? null }, subStatus?.plan);
 
     try {
-      const text = await file.text();
+      const { text } = await readTextFile(file);
       setLastUploadedText(text);
 
       setIssues([]);
@@ -983,7 +984,7 @@ useEffect(() => {
       return handleFile(file);
     }
     const id = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const text = await file.text();
+    const { text } = await readTextFile(file);
     const doc: WorkspaceDoc = { id, name: file.name, text };
 
     setWorkspaceDocs((prev) => {

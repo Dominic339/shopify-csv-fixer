@@ -36,7 +36,8 @@
     "tagline": "Correggi i CSV dei prodotti prima che l’importazione fallisca. I file vengono elaborati nel tuo browser.",
     "language": "Lingua",
     "themeDark": "Passa alla modalità scura",
-    "themeLight": "Passa alla modalità chiara"
+    "themeLight": "Passa alla modalità chiara",
+    "storeMigrations": "Migrazioni di negozio"
   },
   "guide": {
     "whatYouLearn": "Cosa imparerai",
@@ -262,11 +263,11 @@
   "convert": {
     "title": "Convertitore di formato CSV",
     "description": "Converti tra i formati CSV di Shopify, WooCommerce, Etsy, eBay e Amazon. I campi che non possono essere mappati perfettamente vengono segnalati come avvisi.",
-    "uploadStep": "1. Carica CSV",
+    "uploadStep": "Carica CSV",
     "uploadDesc": "Carica il file che desideri convertire.",
     "chooseFile": "Scegli file",
     "noFileChosen": "Nessun file scelto",
-    "selectFormats": "2. Seleziona formati",
+    "selectFormats": "Seleziona formati",
     "sourceFormat": "Formato sorgente",
     "targetFormat": "Formato di destinazione",
     "convert": "Converti",
@@ -303,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify (nuovo modello)",
     "fmt_shopify_products_legacy": "Shopify (vecchio modello)",
-    "noEquivalent": "(nessun equivalente nel formato di destinazione):"
+    "noEquivalent": "(nessun equivalente nel formato di destinazione):",
+    "swap": "Inverti formati",
+    "uploadDescFrom": "Carica il file che hai esportato da {platform}.",
+    "chooseAnother": "Scegli un altro file",
+    "dropHint": "oppure trascina qui un file CSV",
+    "resultStep": "Controlla e scarica",
+    "rowsInFile": "Righe nel tuo file",
+    "rowsOut": "Righe scritte",
+    "previewTitle": "Anteprima delle prime {rows} righe",
+    "moreColumns": "+ altre {count} colonne nel file scaricato",
+    "checkInFixer": "Controllalo nel correttore CSV ({platform})",
+    "freeNote": "La conversione è gratuita. I file fino a {rows} righe si scaricano sempre gratis; quelli più grandi usano una delle tue esportazioni gratuite.",
+    "limitReached": "Hai usato le esportazioni gratuite di questo mese.",
+    "popularMigrations": "Migrazioni di negozio più comuni",
+    "routeLabel": "Da {from} a {to}",
+    "migrationGuide": "Guida passo passo: da {from} a {to}",
+    "passCta": "Esportazioni illimitate per 24 ore: {price}",
+    "passSignIn": "Accedi per acquistare un pass di 24 ore ({price})",
+    "passStarting": "Apertura del pagamento…",
+    "passError": "Impossibile aprire il pagamento. Riprova.",
+    "viewPlans": "Vedi i piani",
+    "fileRestored": "Il tuo file è stato ricaricato: ora puoi scaricarlo."
   },
   "merge": {
     "title": "Unificatore e deduplicatore CSV",

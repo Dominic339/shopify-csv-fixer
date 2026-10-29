@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} deve ser 1 ou 0. Encontrado: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} precisa do ItemID do anúncio existente.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "{0} oferta(s) sem product-id (UPC/EAN/ASIN), então a Amazon só consegue atualizá-las se o SKU já existir na sua conta.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} produto(s) têm mais de 3 opções; a Shopify permite 3, então só as 3 primeiras foram mantidas.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "{0} produto(s) com variantes viraram anúncios simples (menor preço, quantidade somada). Adicione as variações do Etsy no Shop Manager.",
 "{0} should be a decimal number. Found '{1}'.": "{0} deve ser um número decimal. Encontrado: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} deve ser um número inteiro. Encontrado: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "{0} coluna(s) de origem não têm equivalente no formato de destino e foram deixadas de fora: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "{0} tag(s) foram deixadas de fora: a Etsy permite 13 tags por anúncio, com até 20 caracteres cada.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} título(s) passam do limite de 140 caracteres da Etsy.",
 "{0} title(s) are longer than eBay's 80-character limit.": "{0} título(s) passam do limite de 80 caracteres do eBay.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "{0} variante(s) sem SKU foram ignoradas; a Amazon exige um SKU para cada oferta.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} não está listado no RelationshipDetails da linha principal (linha {2})."

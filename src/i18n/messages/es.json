@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} debe ser 1 o 0. Valor encontrado: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} necesita el ItemID del anuncio existente.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "{0} oferta(s) no tienen product-id (UPC/EAN/ASIN), así que Amazon solo puede actualizarlas si el SKU ya existe en tu cuenta.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} producto(s) tienen más de 3 opciones; Shopify admite 3, así que solo se conservaron las 3 primeras.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "{0} producto(s) con variantes pasaron a ser anuncios simples (precio más bajo, cantidad sumada). Añade las variaciones de Etsy en Shop Manager.",
 "{0} should be a decimal number. Found '{1}'.": "{0} debe ser un número decimal. Valor encontrado: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} debe ser un número entero. Valor encontrado: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "{0} columna(s) de origen no tienen equivalente en el formato de destino y se omitieron: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "Se omitieron {0} etiqueta(s): Etsy admite 13 etiquetas por anuncio, de hasta 20 caracteres cada una.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} título(s) superan el límite de 140 caracteres de Etsy.",
 "{0} title(s) are longer than eBay's 80-character limit.": "{0} título(s) superan el límite de 80 caracteres de eBay.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "Se omitieron {0} variante(s) sin SKU; Amazon exige un SKU para cada oferta.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} no figura en el RelationshipDetails de la fila principal (fila {2})."

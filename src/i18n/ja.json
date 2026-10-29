@@ -36,7 +36,8 @@
     "tagline": "商品 CSV のインポートが失敗する前に修正。ファイルはブラウザー内で処理されます。",
     "language": "言語",
     "themeDark": "ダークモードに切り替え",
-    "themeLight": "ライトモードに切り替え"
+    "themeLight": "ライトモードに切り替え",
+    "storeMigrations": "ストア移行"
   },
   "guide": {
     "whatYouLearn": "学べること",
@@ -262,11 +263,11 @@
   "convert": {
     "title": "CSV形式コンバーター",
     "description": "Shopify、WooCommerce、Etsy、eBay、Amazon CSV形式間で変換します。完全にマッピングできないフィールドは警告としてフラグが立てられます。",
-    "uploadStep": "1. CSVをアップロード",
+    "uploadStep": "CSVをアップロード",
     "uploadDesc": "変換するファイルをアップロードしてください。",
     "chooseFile": "ファイルを選択",
     "noFileChosen": "ファイルが選択されていません",
-    "selectFormats": "2. 形式を選択",
+    "selectFormats": "形式を選択",
     "sourceFormat": "ソース形式",
     "targetFormat": "ターゲット形式",
     "convert": "変換",
@@ -303,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify（新テンプレート）",
     "fmt_shopify_products_legacy": "Shopify（旧テンプレート）",
-    "noEquivalent": "（変換先フォーマットに対応する列なし）："
+    "noEquivalent": "（変換先フォーマットに対応する列なし）：",
+    "swap": "形式を入れ替える",
+    "uploadDescFrom": "{platform} からエクスポートしたファイルをアップロードしてください。",
+    "chooseAnother": "別のファイルを選ぶ",
+    "dropHint": "または CSV ファイルをここにドロップ",
+    "resultStep": "確認してダウンロード",
+    "rowsInFile": "ファイルの行数",
+    "rowsOut": "書き出した行数",
+    "previewTitle": "最初の {rows} 行のプレビュー",
+    "moreColumns": "ダウンロードにはさらに {count} 列あります",
+    "checkInFixer": "CSV 修正ツールでチェック（{platform}）",
+    "freeNote": "変換は無料です。{rows}行までのファイルはいつでも無料でダウンロードでき、それより大きいファイルは無料エクスポートを1回分使います。",
+    "limitReached": "今月の無料エクスポートを使い切りました。",
+    "popularMigrations": "よくあるストア移行",
+    "routeLabel": "{from} から {to} へ",
+    "migrationGuide": "手順ガイド：{from} から {to} へ",
+    "passCta": "24時間エクスポート無制限：{price}",
+    "passSignIn": "ログインして24時間パスを購入（{price}）",
+    "passStarting": "決済画面を開いています…",
+    "passError": "決済画面を開けませんでした。もう一度お試しください。",
+    "viewPlans": "プランを見る",
+    "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。"
   },
   "merge": {
     "title": "CSVマージャー＆重複排除ツール",

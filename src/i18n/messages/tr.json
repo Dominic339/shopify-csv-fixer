@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} 1 veya 0 olmalıdır. Bulunan: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} mevcut ilanın ItemID değerine ihtiyaç duyar.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "{0} teklifin product-id değeri (UPC/EAN/ASIN) yok; Amazon bunları yalnızca SKU hesabınızda zaten varsa güncelleyebilir.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} üründe 3'ten fazla seçenek var; Shopify 3 seçeneğe izin verir, bu yüzden yalnızca ilk 3'ü tutuldu.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "Varyantlı {0} ürün tekli ilana dönüştü (en düşük fiyat, toplam miktar). Etsy varyasyonlarını Shop Manager'da ekleyin.",
 "{0} should be a decimal number. Found '{1}'.": "{0} ondalık bir sayı olmalıdır. Bulunan: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} tam sayı olmalıdır. Bulunan: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "Hedef biçimde karşılığı olmayan {0} kaynak sütun dışarıda bırakıldı: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "{0} etiket dışarıda bırakıldı: Etsy, ilan başına her biri en fazla 20 karakterlik 13 etikete izin verir.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} başlık Etsy'nin 140 karakter sınırından uzun.",
 "{0} title(s) are longer than eBay's 80-character limit.": "{0} başlık eBay'in 80 karakter sınırını aşıyor.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "SKU'su olmayan {0} varyant atlandı; Amazon her teklif için bir SKU ister.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1}, ana satırın RelationshipDetails alanında listelenmemiş ({2}. satır)."

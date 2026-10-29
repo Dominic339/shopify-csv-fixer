@@ -36,7 +36,8 @@
     "tagline": "Popraw pliki CSV produktów, zanim import się nie powiedzie. Pliki są przetwarzane w Twojej przeglądarce.",
     "language": "Język",
     "themeDark": "Przełącz na tryb ciemny",
-    "themeLight": "Przełącz na tryb jasny"
+    "themeLight": "Przełącz na tryb jasny",
+    "storeMigrations": "Przenosiny sklepu"
   },
   "guide": {
     "whatYouLearn": "Czego się nauczysz",
@@ -262,11 +263,11 @@
   "convert": {
     "title": "Konwerter formatu CSV",
     "description": "Konwertuj między formatami CSV Shopify, WooCommerce, Etsy, eBay i Amazon. Pola, których nie można idealnie zmapować, są oznaczane jako ostrzeżenia.",
-    "uploadStep": "1. Prześlij CSV",
+    "uploadStep": "Prześlij CSV",
     "uploadDesc": "Prześlij plik, który chcesz przekonwertować.",
     "chooseFile": "Wybierz plik",
     "noFileChosen": "Nie wybrano pliku",
-    "selectFormats": "2. Wybierz formaty",
+    "selectFormats": "Wybierz formaty",
     "sourceFormat": "Format źródłowy",
     "targetFormat": "Format docelowy",
     "convert": "Konwertuj",
@@ -303,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify (nowy szablon)",
     "fmt_shopify_products_legacy": "Shopify (stary szablon)",
-    "noEquivalent": "(brak odpowiednika w formacie docelowym):"
+    "noEquivalent": "(brak odpowiednika w formacie docelowym):",
+    "swap": "Zamień formaty",
+    "uploadDescFrom": "Prześlij plik wyeksportowany z {platform}.",
+    "chooseAnother": "Wybierz inny plik",
+    "dropHint": "lub upuść tutaj plik CSV",
+    "resultStep": "Sprawdź i pobierz",
+    "rowsInFile": "Wiersze w pliku",
+    "rowsOut": "Zapisane wiersze",
+    "previewTitle": "Podgląd pierwszych {rows} wierszy",
+    "moreColumns": "+ {count} kolumn więcej w pobranym pliku",
+    "checkInFixer": "Sprawdź w narzędziu do naprawy CSV ({platform})",
+    "freeNote": "Konwersja jest bezpłatna. Pliki do {rows} wierszy zawsze pobierzesz za darmo; większe zużywają jeden z darmowych eksportów.",
+    "limitReached": "Wykorzystano darmowe eksporty w tym miesiącu.",
+    "popularMigrations": "Popularne przenosiny sklepów",
+    "routeLabel": "Z {from} do {to}",
+    "migrationGuide": "Przewodnik krok po kroku: z {from} do {to}",
+    "passCta": "Nielimitowany eksport przez 24 godziny: {price}",
+    "passSignIn": "Zaloguj się, aby kupić karnet 24-godzinny ({price})",
+    "passStarting": "Otwieranie płatności…",
+    "passError": "Nie udało się otworzyć płatności. Spróbuj ponownie.",
+    "viewPlans": "Zobacz plany",
+    "fileRestored": "Twój plik został ponownie wczytany, możesz go teraz pobrać."
   },
   "merge": {
     "title": "Scalacz i deduplikator CSV",

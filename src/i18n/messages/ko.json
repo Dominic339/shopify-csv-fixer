@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0}은(는) 1 또는 0이어야 합니다. 확인된 값: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0}에는 기존 상품의 ItemID가 필요합니다.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "product-id(UPC/EAN/ASIN)가 없는 판매 정보가 {0}개 있습니다. SKU가 계정에 이미 있는 경우에만 Amazon이 업데이트할 수 있습니다.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "옵션이 3개를 넘는 상품이 {0}개 있습니다. Shopify는 3개까지 허용하므로 처음 3개만 남겼습니다.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "변형이 있는 상품 {0}개를 단일 상품으로 바꿨습니다(최저가, 수량 합계). Etsy 변형은 Shop Manager에서 추가하세요.",
 "{0} should be a decimal number. Found '{1}'.": "{0}은(는) 소수여야 합니다. 확인된 값: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0}은(는) 정수여야 합니다. 확인된 값: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "대상 형식에 해당하는 열이 없는 원본 열 {0}개를 제외했습니다: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "태그 {0}개를 제외했습니다. Etsy는 리스팅당 태그를 13개까지, 각 20자 이내로 허용합니다.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "제목 {0}개가 Etsy의 140자 제한을 넘습니다.",
 "{0} title(s) are longer than eBay's 80-character limit.": "eBay의 80자 제한을 넘는 제목이 {0}개 있습니다.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "SKU가 없는 변형 {0}개를 건너뛰었습니다. Amazon은 모든 판매 정보에 SKU가 필요합니다.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1}이(가) 상위 행의 RelationshipDetails에 없습니다({2}행)."

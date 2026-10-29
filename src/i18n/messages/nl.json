@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} moet 1 of 0 zijn. Gevonden: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "{0} heeft de ItemID van de bestaande listing nodig.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "{0} aanbieding(en) zonder product-id (UPC/EAN/ASIN); Amazon kan die alleen bijwerken als de SKU al in je account bestaat.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} product(en) hebben meer dan 3 opties; Shopify staat er 3 toe, dus alleen de eerste 3 zijn behouden.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "{0} product(en) met varianten zijn enkelvoudige listings geworden (laagste prijs, opgetelde voorraad). Voeg de Etsy-variaties toe in Shop Manager.",
 "{0} should be a decimal number. Found '{1}'.": "{0} moet een decimaal getal zijn. Gevonden: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} moet een geheel getal zijn. Gevonden: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "{0} bronkolom(men) hebben geen equivalent in het doelformaat en zijn weggelaten: {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "{0} tag(s) zijn weggelaten: Etsy staat 13 tags per advertentie toe, elk van maximaal 20 tekens.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} titel(s) zijn langer dan de limiet van 140 tekens van Etsy.",
 "{0} title(s) are longer than eBay's 80-character limit.": "{0} titel(s) zijn langer dan de limiet van 80 tekens van eBay.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "{0} variant(en) zonder SKU zijn overgeslagen; Amazon vereist voor elke aanbieding een SKU.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} staat niet in de RelationshipDetails van de hoofdrij (rij {2})."

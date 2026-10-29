@@ -36,7 +36,8 @@
     "tagline": "Ürün CSV dosyalarınızı içe aktarma başarısız olmadan düzeltin. Dosyalarınız tarayıcınızda işlenir.",
     "language": "Dil",
     "themeDark": "Koyu moda geç",
-    "themeLight": "Açık moda geç"
+    "themeLight": "Açık moda geç",
+    "storeMigrations": "Mağaza taşıma"
   },
   "guide": {
     "whatYouLearn": "Neler öğreneceksiniz",
@@ -262,11 +263,11 @@
   "convert": {
     "title": "CSV format dönüştürücü",
     "description": "Shopify, WooCommerce, Etsy, eBay ve Amazon CSV formatları arasında dönüştürme yapın. Mükemmel eşleştirilemeyen alanlar uyarı olarak işaretlenir.",
-    "uploadStep": "1. CSV yükle",
+    "uploadStep": "CSV yükle",
     "uploadDesc": "Dönüştürmek istediğiniz dosyayı yükleyin.",
     "chooseFile": "Dosya seç",
     "noFileChosen": "Dosya seçilmedi",
-    "selectFormats": "2. Format seç",
+    "selectFormats": "Format seç",
     "sourceFormat": "Kaynak format",
     "targetFormat": "Hedef format",
     "convert": "Dönüştür",
@@ -303,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify (yeni şablon)",
     "fmt_shopify_products_legacy": "Shopify (eski şablon)",
-    "noEquivalent": "(hedef biçimde karşılığı yok):"
+    "noEquivalent": "(hedef biçimde karşılığı yok):",
+    "swap": "Biçimleri değiştir",
+    "uploadDescFrom": "{platform} üzerinden dışa aktardığınız dosyayı yükleyin.",
+    "chooseAnother": "Başka dosya seç",
+    "dropHint": "veya bir CSV dosyasını buraya bırakın",
+    "resultStep": "Gözden geçirin ve indirin",
+    "rowsInFile": "Dosyanızdaki satırlar",
+    "rowsOut": "Yazılan satırlar",
+    "previewTitle": "İlk {rows} satırın önizlemesi",
+    "moreColumns": "İndirilen dosyada {count} sütun daha var",
+    "checkInFixer": "CSV Düzelticide kontrol et ({platform})",
+    "freeNote": "Dönüştürme ücretsizdir. {rows} satıra kadar dosyalar her zaman ücretsiz indirilir; daha büyükleri ücretsiz dışa aktarma hakkınızdan birini kullanır.",
+    "limitReached": "Bu ayın ücretsiz dışa aktarma haklarını kullandınız.",
+    "popularMigrations": "Popüler mağaza taşımaları",
+    "routeLabel": "{from} → {to}",
+    "migrationGuide": "Adım adım rehber: {from} → {to}",
+    "passCta": "24 saat sınırsız dışa aktarma: {price}",
+    "passSignIn": "24 saatlik geçiş satın almak için giriş yapın ({price})",
+    "passStarting": "Ödeme sayfası açılıyor…",
+    "passError": "Ödeme sayfası açılamadı. Lütfen tekrar deneyin.",
+    "viewPlans": "Planları görüntüle",
+    "fileRestored": "Dosyanız yeniden yüklendi; şimdi indirebilirsiniz."
   },
   "merge": {
     "title": "CSV birleştirici ve tekilleştirici",

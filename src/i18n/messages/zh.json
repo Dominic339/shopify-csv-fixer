@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} 必须为 1 或 0。实际值：'{1}'。",
 "{0} needs the ItemID of the existing listing.": "{0} 需要现有刊登的 ItemID。",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "有 {0} 个报价没有 product-id（UPC/EAN/ASIN），只有当 SKU 已存在于您的账户中时，Amazon 才能更新它们。",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "{0} 个商品的选项超过 3 个；Shopify 最多允许 3 个，因此只保留了前 3 个。",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "{0} 个带变体的商品已变为单一刊登（取最低价，数量合计）。请在 Shop Manager 中添加 Etsy 变体。",
 "{0} should be a decimal number. Found '{1}'.": "{0} 应为小数。实际值：'{1}'。",
 "{0} should be a whole number. Found '{1}'.": "{0} 应为整数。实际值：'{1}'。",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "有 {0} 个源列在目标格式中没有对应列，已被省略：{1}{2}。",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "已省略 {0} 个标签：Etsy 每个商品最多 13 个标签，每个不超过 20 个字符。",
+"{0} title(s) are longer than Etsy's 140-character limit.": "{0} 个标题超过了 Etsy 的 140 个字符限制。",
 "{0} title(s) are longer than eBay's 80-character limit.": "有 {0} 个标题超过 eBay 80 个字符的上限。",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "已跳过 {0} 个没有 SKU 的变体；Amazon 要求每个报价都有 SKU。",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} 未列在父行的 RelationshipDetails 中（第 {2} 行）。"

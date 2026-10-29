@@ -36,7 +36,8 @@
     "tagline": "Исправляйте CSV с товарами до того, как импорт завершится ошибкой. Файлы обрабатываются в вашем браузере.",
     "language": "Язык",
     "themeDark": "Включить тёмную тему",
-    "themeLight": "Включить светлую тему"
+    "themeLight": "Включить светлую тему",
+    "storeMigrations": "Переезд магазина"
   },
   "guide": {
     "whatYouLearn": "Что вы узнаете",
@@ -262,11 +263,11 @@
   "convert": {
     "title": "Конвертер форматов CSV",
     "description": "Конвертируйте между форматами CSV Shopify, WooCommerce, Etsy, eBay и Amazon. Поля, которые не могут быть сопоставлены идеально, помечаются как предупреждения.",
-    "uploadStep": "1. Загрузить CSV",
+    "uploadStep": "Загрузить CSV",
     "uploadDesc": "Загрузите файл, который хотите конвертировать.",
     "chooseFile": "Выбрать файл",
     "noFileChosen": "Файл не выбран",
-    "selectFormats": "2. Выбрать форматы",
+    "selectFormats": "Выбрать форматы",
     "sourceFormat": "Исходный формат",
     "targetFormat": "Целевой формат",
     "convert": "Конвертировать",
@@ -303,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_shopify_products": "Shopify (новый шаблон)",
     "fmt_shopify_products_legacy": "Shopify (старый шаблон)",
-    "noEquivalent": "(нет соответствия в целевом формате):"
+    "noEquivalent": "(нет соответствия в целевом формате):",
+    "swap": "Поменять местами",
+    "uploadDescFrom": "Загрузите файл, выгруженный из {platform}.",
+    "chooseAnother": "Выбрать другой файл",
+    "dropHint": "или перетащите CSV-файл сюда",
+    "resultStep": "Проверьте и скачайте",
+    "rowsInFile": "Строк в файле",
+    "rowsOut": "Записано строк",
+    "previewTitle": "Первые {rows} строк",
+    "moreColumns": "+ ещё {count} столбцов в скачанном файле",
+    "checkInFixer": "Проверить в исправителе CSV ({platform})",
+    "freeNote": "Преобразование бесплатно. Файлы до {rows} строк всегда скачиваются бесплатно; файлы больше расходуют один из бесплатных экспортов.",
+    "limitReached": "Бесплатные экспорты в этом месяце закончились.",
+    "popularMigrations": "Популярные переезды магазина",
+    "routeLabel": "Из {from} в {to}",
+    "migrationGuide": "Пошаговая инструкция: из {from} в {to}",
+    "passCta": "Безлимитный экспорт на 24 часа: {price}",
+    "passSignIn": "Войдите, чтобы купить пропуск на 24 часа ({price})",
+    "passStarting": "Открываем оплату…",
+    "passError": "Не удалось открыть оплату. Попробуйте ещё раз.",
+    "viewPlans": "Посмотреть тарифы",
+    "fileRestored": "Ваш файл снова загружен — теперь его можно скачать."
   },
   "merge": {
     "title": "Объединитель и дедупликатор CSV",

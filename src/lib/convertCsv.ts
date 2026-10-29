@@ -7,7 +7,6 @@
 // rows, and Etsy / Amazon files are one row per listing / offer.
 
 import type { CsvRow } from "@/lib/csv";
-import type { Plan } from "@/lib/quota";
 import {
   canonicalizeShopifyProductCsv,
   formatShopifyMoney,
@@ -17,16 +16,6 @@ import {
   weightToGrams,
 } from "@/lib/shopifySchema";
 import { canonicalEbayColumn, parseRelationshipDetails } from "@/lib/ebayOptimizer";
-
-// ---------------------------------------------------------------------------
-// Row limits by plan
-// ---------------------------------------------------------------------------
-
-export function getConvertRowLimit(plan: Plan): number | null {
-  if (plan === "advanced") return null; // unlimited
-  if (plan === "basic") return 1000;
-  return 100; // free
-}
 
 // ---------------------------------------------------------------------------
 // Product model
@@ -105,8 +94,58 @@ function bool(v: string): string {
 function splitList(v: string, sep: RegExp = /(?<!\\),/): string[] {
   return t(v)
     .split(sep)
-    .map((s) => s.trim())
+    .map((s) => s.replace(/\\,/g, ",").trim())
     .filter(Boolean);
+}
+
+// ---------------------------------------------------------------------------
+// Descriptions: Shopify, WooCommerce and eBay take HTML; Etsy and Amazon take plain text.
+// ---------------------------------------------------------------------------
+
+const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0", hellip: "…", mdash: "—", ndash: "–", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“" };
+
+/** Decode HTML entities (Etsy's download is full of &#39; and &amp;). */
+export function decodeEntities(v: string): string {
+  return v.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => {
+    if (e[0] === "#") {
+      const code = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      return Number.isFinite(code) && code > 0 && code < 0x110000 ? String.fromCodePoint(code) : m;
+    }
+    return ENTITIES[e.toLowerCase()] ?? m;
+  });
+}
+
+const looksLikeHtml = (v: string) => /<\/?(p|br|div|ul|ol|li|h[1-6]|strong|em|b|i|span|table|a)\b[^>]*>/i.test(v);
+
+/** HTML → readable plain text, keeping paragraphs and list items on their own lines. */
+export function htmlToText(v: string): string {
+  if (!looksLikeHtml(v)) return v;
+  const text = v
+    .replace(/\r\n?/g, "\n")
+    .replace(/<\s*br\s*\/?>/gi, "\n")
+    .replace(/<\s*li[^>]*>/gi, "\n• ")
+    .replace(/<\/\s*(p|div|h[1-6]|ul|ol|table|tr)\s*>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "");
+  return decodeEntities(text)
+    .split("\n")
+    .map((l) => l.replace(/[ \t]+/g, " ").trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+const escapeHtml = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** Plain text → simple HTML, so line breaks survive on HTML platforms. */
+export function textToHtml(v: string): string {
+  if (!v || looksLikeHtml(v) || !/\n/.test(v)) return v;
+  return v
+    .replace(/\r\n?/g, "\n")
+    .split(/\n{2,}/)
+    .map((para) => para.trim())
+    .filter(Boolean)
+    .map((para) => `<p>${escapeHtml(para).replace(/\n/g, "<br>")}</p>`)
+    .join("");
 }
 
 function addImage(p: Product, url: string) {
@@ -232,7 +271,8 @@ function readWoo(headers: string[], rows: CsvRow[]): ReadResult {
     const name = get(r, "Name");
     const p = emptyProduct(uniqueKey(slugifyShopifyHandle(name) || get(r, "SKU").toLowerCase(), used));
     p.title = name;
-    p.description = get(r, "Description") || get(r, "Short description");
+    // WooCommerce's exporter writes line breaks as a literal "\n"; its importer turns them back.
+    p.description = (get(r, "Description") || get(r, "Short description")).replace(/\\n/g, "\n");
     p.tags = splitList(get(r, "Tags")).join(", ");
     p.category = splitList(get(r, "Categories"))[0] ?? "";
     const pub = get(r, "Published");
@@ -330,11 +370,11 @@ function readEtsy(headers: string[], rows: CsvRow[]): ReadResult {
   }
 
   const products = rows.map((r) => {
-    const title = get(r, "Title");
+    const title = decodeEntities(get(r, "Title"));
     const p = emptyProduct(uniqueKey(slugifyShopifyHandle(title) || get(r, "SKU").toLowerCase(), used));
     p.title = title;
-    p.description = get(r, "Description");
-    p.tags = splitList(get(r, "Tags")).join(", ");
+    p.description = decodeEntities(get(r, "Description"));
+    p.tags = splitList(decodeEntities(get(r, "Tags"))).join(", ");
     for (const c of imageCols) addImage(p, r[c]);
     for (const img of splitList(get(r, "Image URLs"))) addImage(p, img);
     p.variants.push({ ...emptyVariant(), sku: get(r, "SKU"), price: money(get(r, "Price")), qty: int(get(r, "Quantity")) });
@@ -344,10 +384,18 @@ function readEtsy(headers: string[], rows: CsvRow[]): ReadResult {
   return { products, consumed, warnings };
 }
 
+// Seller Hub's "Active listings" download names a few columns differently from File Exchange.
+const EBAY_REPORT_ALIASES: Record<string, string> = {
+  "available quantity": "Quantity",
+  "current price": "StartPrice",
+  "item number": "ItemID",
+  "ebay category 1 number": "Category",
+};
+
 function readEbay(headers: string[], rows: CsvRow[]): ReadResult {
   const col = new Map<string, string>();
   for (const x of headers) {
-    const c = canonicalEbayColumn(x);
+    const c = canonicalEbayColumn(x) ?? EBAY_REPORT_ALIASES[x.trim().toLowerCase()] ?? null;
     if (c && !col.has(c)) col.set(c, x);
   }
   const consumed = new Set<string>();
@@ -413,8 +461,8 @@ function readAmazon(headers: string[], rows: CsvRow[]): ReadResult {
     const id = get(r, "product-id", "external_product_id");
     const isBarcode = ["2", "3", "4", "upc", "ean", "isbn", "gtin", "jan"].includes(idType);
     const p = emptyProduct(uniqueKey(slugifyShopifyHandle(title) || sku.toLowerCase(), used));
-    p.title = title || sku;
-    p.description = get(r, "item-description", "product_description");
+    p.title = decodeEntities(title) || sku;
+    p.description = decodeEntities(get(r, "item-description", "product_description"));
     p.vendor = get(r, "brand-name", "brand_name");
     addImage(p, get(r, "image-url", "main_image_url"));
     p.variants.push({
@@ -492,7 +540,7 @@ function writeShopify(products: Product[], legacy: boolean): WriteResult {
         if (!p.type && p.category) typedFromCategory = true;
         Object.assign(row, {
           Title: p.title,
-          Description: p.description,
+          Description: textToHtml(p.description),
           Vendor: p.vendor,
           Type: p.type || (p.category.split(">").pop() ?? "").trim(),
           Tags: p.tags,
@@ -536,6 +584,11 @@ function writeShopify(products: Product[], legacy: boolean): WriteResult {
       }
       rows.push(row);
     }
+  }
+
+  const tooManyOptions = products.filter((p) => p.variants.some((v) => v.options.length > 3)).length;
+  if (tooManyOptions) {
+    warnings.push(`${tooManyOptions} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.`);
   }
 
   if (typedFromCategory) {
@@ -592,7 +645,7 @@ function writeWoo(products: Product[]): WriteResult {
     const base = {
       Name: p.title,
       Published: published(p),
-      Description: p.description,
+      Description: textToHtml(p.description),
       Categories: p.category || p.type,
       Tags: p.tags,
       Images: p.images.join(", "),
@@ -647,20 +700,31 @@ function writeWoo(products: Product[]): WriteResult {
   return { headers, rows: rows.map((r) => Object.fromEntries(headers.map((h) => [h, r[h] ?? ""]))), warnings };
 }
 
+// Etsy's listing limits: 140-character titles, 13 tags of at most 20 characters.
+const ETSY_TITLE_MAX = 140;
+const ETSY_TAGS_MAX = 13;
+const ETSY_TAG_LEN = 20;
+
 function writeEtsy(products: Product[]): WriteResult {
   const warnings: string[] = [];
   let collapsed = 0;
+  let longTitles = 0;
+  let droppedTags = 0;
   const rows = products.map((p) => {
     if (p.variants.length > 1) collapsed++;
+    if (p.title.length > ETSY_TITLE_MAX) longTitles++;
+    const allTags = [...new Set(splitList(p.tags).map((x) => x.replace(/[^\p{L}\p{N} '&-]/gu, "").trim()).filter(Boolean))];
+    const tags = allTags.filter((x) => x.length <= ETSY_TAG_LEN).slice(0, ETSY_TAGS_MAX);
+    droppedTags += allTags.length - tags.length;
     const prices = p.variants.map((v) => parseLocaleNumber(v.price)).filter((n): n is number => n != null);
     const qtys = p.variants.map((v) => parseLocaleNumber(v.qty)).filter((n): n is number => n != null);
     const row: CsvRow = {
       TITLE: p.title,
-      DESCRIPTION: p.description,
+      DESCRIPTION: htmlToText(p.description),
       PRICE: prices.length ? formatShopifyMoney(Math.min(...prices)) : "",
       CURRENCY_CODE: "",
       QUANTITY: qtys.length ? String(Math.min(999, qtys.reduce((a, b) => a + b, 0))) : "",
-      TAGS: p.tags,
+      TAGS: tags.join(","),
       SKU: p.variants[0]?.sku ?? "",
     };
     p.images.slice(0, 10).forEach((u, i) => (row[`IMAGE${i + 1}`] = u));
@@ -669,6 +733,8 @@ function writeEtsy(products: Product[]): WriteResult {
   if (collapsed) {
     warnings.push(`${collapsed} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.`);
   }
+  if (longTitles) warnings.push(`${longTitles} title(s) are longer than Etsy's 140-character limit.`);
+  if (droppedTags) warnings.push(`${droppedTags} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.`);
   warnings.push("CURRENCY_CODE is left blank: Etsy listings use your shop's currency.");
   const imageCols = Array.from({ length: 10 }, (_, i) => `IMAGE${i + 1}`);
   const headers = compact(["TITLE", "DESCRIPTION", "PRICE", "CURRENCY_CODE", "QUANTITY", "TAGS", ...imageCols, "SKU"], rows, ["TITLE", "PRICE", "CURRENCY_CODE", "QUANTITY"]);
@@ -687,7 +753,7 @@ function writeEbay(products: Product[]): WriteResult {
       "*Category": "",
       "*Title": p.title,
       "*ConditionID": "",
-      "*Description": p.description,
+      "*Description": textToHtml(p.description),
       PicURL: p.images.slice(0, 24).join("|"),
       "*Format": "FixedPrice",
       "*Duration": "GTC",
@@ -808,7 +874,8 @@ export function convertCsv(
   sourceRows: CsvRow[],
   sourceFormatId: string,
   targetFormatId: string,
-  plan: Plan = "free"
+  /** Rows to convert at most; null converts everything. */
+  limit: number | null = null
 ): ConvertResult {
   const normalizedSourceId = sourceFormatId === "shopify_products_legacy" ? "shopify_products" : sourceFormatId;
   const read = READERS[normalizedSourceId];
@@ -826,7 +893,6 @@ export function convertCsv(
   if (!read) return unsupported(`Unsupported source format: ${sourceFormatId}`);
   if (!write) return unsupported(`Unsupported target format: ${targetFormatId}`);
 
-  const limit = getConvertRowLimit(plan);
   const totalRows = sourceRows.length;
   const truncated = limit !== null && totalRows > limit;
   const rowsToProcess = truncated ? sourceRows.slice(0, limit) : sourceRows;

@@ -10,6 +10,7 @@ import { fmt } from "@/lib/i18n/fmt";
 import { localeHref } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { FileDropZone } from "@/components/FileDropZone";
+import { readTextFile } from "@/lib/textFile";
 
 type T = Translations["inspector"];
 
@@ -50,7 +51,7 @@ export default function InspectorClient({ t }: Props) {
     setFileName(file.name);
     setError(null);
     try {
-      setResult(inspectCsv(await file.text()));
+      setResult(inspectCsv((await readTextFile(file)).text));
     } catch {
       setError(t.readFailed);
       setResult(null);

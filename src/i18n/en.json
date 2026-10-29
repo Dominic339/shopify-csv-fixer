@@ -36,7 +36,8 @@
     "tagline": "Fix product CSV imports before they fail. Your files are processed in your browser.",
     "language": "Language",
     "themeDark": "Switch to dark mode",
-    "themeLight": "Switch to light mode"
+    "themeLight": "Switch to light mode",
+    "storeMigrations": "Store migrations"
   },
   "guide": {
     "whatYouLearn": "What you'll learn",
@@ -265,11 +266,11 @@
   "convert": {
     "title": "CSV Format Converter",
     "description": "Convert between Shopify, WooCommerce, Etsy, eBay, and Amazon CSV formats. Fields that cannot map perfectly are flagged as warnings.",
-    "uploadStep": "1. Upload CSV",
+    "uploadStep": "Upload CSV",
     "uploadDesc": "Upload the file you want to convert.",
     "chooseFile": "Choose file",
     "noFileChosen": "No file chosen",
-    "selectFormats": "2. Select formats",
+    "selectFormats": "Select formats",
     "sourceFormat": "Source format",
     "targetFormat": "Target format",
     "convert": "Convert",
@@ -306,7 +307,28 @@
     "linkFixer": "CSV Fixer",
     "linkMerger": "CSV Merger",
     "linkInspector": "CSV Inspector",
-    "linkTemplates": "Templates"
+    "linkTemplates": "Templates",
+    "swap": "Swap formats",
+    "uploadDescFrom": "Upload the file you exported from {platform}.",
+    "chooseAnother": "Choose another file",
+    "dropHint": "or drop a CSV file here",
+    "resultStep": "Review and download",
+    "rowsInFile": "Rows in your file",
+    "rowsOut": "Rows written",
+    "previewTitle": "Preview of the first {rows} rows",
+    "moreColumns": "+ {count} more columns in the download",
+    "checkInFixer": "Check it in the CSV Fixer ({platform})",
+    "freeNote": "Converting is free. Files with up to {rows} rows are always free to download; larger files use one of your free exports.",
+    "limitReached": "You've used this month's free exports.",
+    "popularMigrations": "Popular store migrations",
+    "routeLabel": "{from} to {to}",
+    "migrationGuide": "Step-by-step guide: {from} to {to}",
+    "passCta": "Unlimited exports for 24 hours: {price}",
+    "passSignIn": "Sign in to buy a 24-hour pass ({price})",
+    "passStarting": "Opening checkout…",
+    "passError": "Couldn't open checkout. Please try again.",
+    "viewPlans": "View plans",
+    "fileRestored": "Your file is loaded again, so you can download it now."
   },
   "merge": {
     "title": "CSV Merger & Deduplicator",

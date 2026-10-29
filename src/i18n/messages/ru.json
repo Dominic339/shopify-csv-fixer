@@ -385,10 +385,13 @@
 "{0} must be 1 or 0. Found '{1}'.": "{0} должно быть 1 или 0. Найдено: '{1}'.",
 "{0} needs the ItemID of the existing listing.": "Для {0} нужен ItemID существующего объявления.",
 "{0} offer(s) have no product-id (UPC/EAN/ASIN), so Amazon can only update them if the SKU already exists in your account.": "Предложений без product-id (UPC/EAN/ASIN): {0}. Amazon сможет обновить их, только если SKU уже есть в вашем аккаунте.",
+"{0} product(s) have more than 3 options; Shopify allows 3, so only the first 3 were kept.": "Товаров с более чем 3 опциями: {0}. Shopify допускает 3, поэтому сохранены только первые 3.",
 "{0} product(s) with variants became single listings (lowest price, combined quantity). Add Etsy variations in Shop Manager.": "Товаров с вариантами, превращённых в одиночные объявления (минимальная цена, суммарное количество): {0}. Добавьте вариации Etsy в Shop Manager.",
 "{0} should be a decimal number. Found '{1}'.": "{0} должно быть десятичным числом. Найдено: '{1}'.",
 "{0} should be a whole number. Found '{1}'.": "{0} должно быть целым числом. Найдено: '{1}'.",
 "{0} source column(s) have no equivalent in the target format and were left out: {1}{2}.": "Исходные столбцы без соответствия в целевом формате пропущены ({0}): {1}{2}.",
+"{0} tag(s) were left out: Etsy allows 13 tags per listing, each up to 20 characters.": "Пропущено тегов: {0}. Etsy допускает 13 тегов на объявление, каждый не длиннее 20 символов.",
+"{0} title(s) are longer than Etsy's 140-character limit.": "Названий длиннее лимита Etsy в 140 символов: {0}.",
 "{0} title(s) are longer than eBay's 80-character limit.": "Названий длиннее лимита eBay в 80 символов: {0}.",
 "{0} variant(s) without a SKU were skipped; Amazon requires a SKU for every offer.": "Пропущено вариантов без SKU: {0}; Amazon требует SKU для каждого предложения.",
 "{0}={1} is not listed in the parent row's RelationshipDetails (row {2}).": "{0}={1} не указано в RelationshipDetails родительской строки (строка {2})."

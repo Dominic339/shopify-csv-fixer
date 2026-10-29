@@ -36,7 +36,8 @@
     "tagline": "Corrigez vos CSV produits avant l’échec de l’import. Vos fichiers sont traités dans votre navigateur.",
     "language": "Langue",
     "themeDark": "Passer en mode sombre",
-    "themeLight": "Passer en mode clair"
+    "themeLight": "Passer en mode clair",
+    "storeMigrations": "Migrations de boutique"
   },
   "guide": {
     "whatYouLearn": "Ce que vous allez apprendre",
@@ -262,11 +263,11 @@
   "convert": {
     "title": "Convertisseur de format CSV",
     "description": "Convertissez entre les formats CSV Shopify, WooCommerce, Etsy, eBay et Amazon. Les champs qui ne peuvent pas être mappés parfaitement sont signalés comme avertissements.",
-    "uploadStep": "1. Téléverser le CSV",
+    "uploadStep": "Téléverser le CSV",
     "uploadDesc": "Téléversez le fichier que vous souhaitez convertir.",
     "chooseFile": "Choisir un fichier",
     "noFileChosen": "Aucun fichier choisi",
-    "selectFormats": "2. Sélectionner les formats",
+    "selectFormats": "Sélectionner les formats",
     "sourceFormat": "Format source",
     "targetFormat": "Format cible",
     "convert": "Convertir",
@@ -303,7 +304,28 @@
     "fmt_amazon_inventory_loader": "Chargeur d'inventaire Amazon",
     "fmt_shopify_products": "Shopify (nouveau modèle)",
     "fmt_shopify_products_legacy": "Shopify (ancien modèle)",
-    "noEquivalent": "(aucun équivalent dans le format cible) :"
+    "noEquivalent": "(aucun équivalent dans le format cible) :",
+    "swap": "Inverser les formats",
+    "uploadDescFrom": "Importez le fichier exporté depuis {platform}.",
+    "chooseAnother": "Choisir un autre fichier",
+    "dropHint": "ou déposez un fichier CSV ici",
+    "resultStep": "Vérifier et télécharger",
+    "rowsInFile": "Lignes dans votre fichier",
+    "rowsOut": "Lignes écrites",
+    "previewTitle": "Aperçu des {rows} premières lignes",
+    "moreColumns": "+ {count} colonnes de plus dans le fichier téléchargé",
+    "checkInFixer": "Le vérifier dans le correcteur CSV ({platform})",
+    "freeNote": "La conversion est gratuite. Les fichiers de {rows} lignes maximum se téléchargent toujours gratuitement ; les plus gros utilisent l'un de vos exports gratuits.",
+    "limitReached": "Vous avez utilisé les exports gratuits de ce mois.",
+    "popularMigrations": "Migrations de boutique fréquentes",
+    "routeLabel": "De {from} vers {to}",
+    "migrationGuide": "Guide pas à pas : de {from} vers {to}",
+    "passCta": "Exports illimités pendant 24 heures : {price}",
+    "passSignIn": "Connectez-vous pour acheter un pass 24 heures ({price})",
+    "passStarting": "Ouverture du paiement…",
+    "passError": "Impossible d'ouvrir le paiement. Veuillez réessayer.",
+    "viewPlans": "Voir les forfaits",
+    "fileRestored": "Votre fichier est de nouveau chargé : vous pouvez le télécharger."
   },
   "merge": {
     "title": "Fusionneur et déduplicateur CSV",

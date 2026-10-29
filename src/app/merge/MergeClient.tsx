@@ -21,6 +21,7 @@ import { fmt } from "@/lib/i18n/fmt";
 import { localeHref } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { useValidationText } from "@/lib/i18n/useValidationText";
+import { readTextFile } from "@/lib/textFile";
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -98,7 +99,7 @@ export default function MergeClient({ t }: Props) {
   }
 
   async function loadFileData(file: File, setter: (d: FileData) => void) {
-    const text = await file.text();
+    const { text } = await readTextFile(file);
     const { headers, rows } = parseCsv(text);
     setter({ name: file.name, headers, rows });
     setResult(null);
