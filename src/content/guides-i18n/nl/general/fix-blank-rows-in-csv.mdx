@@ -1,0 +1,145 @@
+---
+title: "Lege rijen uit een CSV-bestand verwijderen"
+description: "Hoe je lege rijen in een CSV-bestand vindt en verwijdert voordat je importeert in Shopify, WooCommerce, Etsy, eBay of Amazon, met Excel, Google Sheets of Python."
+keywords: ["lege rijen csv verwijderen", "lege regels csv weghalen", "csv lege rij fout", "lege rijen csv wissen", "csv import lege rij", "lege regels in csv", "excel csv lege rijen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Waarom er lege rijen in CSV-bestanden komen en hoe ze imports breken"
+  - "Hoe je lege rijen vindt en verwijdert in Excel, Google Spreadsheets en Python"
+  - "Hoe je omgaat met de lege rij die vaak aan het eind van een bestand staat"
+  - "Hoe je rijen herkent die alleen leeg lijken (rijen met alleen spaties)"
+  - "Hoe je voorkomt dat lege rijen terugkomen in je exports"
+bestFor: "Verkopers die door lege rijen in hun CSV importfouten of onverwachte lege producten zien"
+timeToComplete: "6 minuten"
+---
+
+## Waarom lege rijen importproblemen geven
+
+Een lege rij in een CSV is een rij waarin alle velden leeg zijn (of die alleen komma's zonder waarden bevat). Veel importprogramma's slaan een volledig lege rij gewoon over, maar afhankelijk van het platform kan een lege rij ook:
+
+- **Een leeg productrecord maken** (Title leeg, Price leeg), dat niet door de controle op verplichte velden komt
+- **De import stoppen** bij de lege rij, waarbij alles daarna zonder melding wordt genegeerd
+- **Een validatiefout melden** voor elk verplicht veld dat in de lege rij ontbreekt
+
+Hier ontstaan lege rijen het vaakst:
+
+- Aan het **eind van het bestand** (spreadsheetprogramma's voegen er vaak automatisch een toe)
+- **Tussen producten** (je hebt een rij verwijderd, maar een lege regel laten staan)
+- **Tussen secties**, als je je spreadsheet met visuele tussenruimtes hebt ingedeeld
+- **Na het wissen van celinhoud**: de Delete-toets maakt de cellen van een rij leeg, maar laat de lege rij staan
+
+---
+
+## Lege rijen vinden
+
+### In een teksteditor
+
+Open het bestand in VS Code of Kladblok. Lege rijen zie je meteen: het zijn regels met alleen komma's of helemaal lege regels:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← lege rij (alleen komma's of niets)
+red-shirt,Red T-Shirt,21.99
+```
+
+### In Excel
+
+Druk op `Ctrl+End` om naar de laatste cel van het gebruikte bereik te springen. Ligt de laatste rij voorbij je gegevens (een lege rij), dan heeft Excel lege rijen in het gebruikte bereik opgenomen.
+
+Om alle lege rijen te vinden, voeg je na je laatste kolom een hulpkolom toe, typ je `=AANTALARG(A2:Z2)` in rij 2 (maak het bereik groot genoeg voor al je kolommen) en vul je de formule omlaag door. Rijen met `0` zijn helemaal leeg.
+
+Zoek niet naar lege cellen in één kolom zoals `Title`: in een Shopify-bestand laten variantrijen `Title` bewust leeg, en dat zijn geen lege rijen.
+
+---
+
+## Lege rijen verwijderen in Excel
+
+**Methode 1: lege rijen aan het eind verwijderen**
+
+1. Druk op `Ctrl+End` om te zien waar Excel denkt dat de gegevens eindigen
+2. Ligt dat voorbij je laatste rij met gegevens, selecteer dan de extra rijen onder je gegevens
+3. Rechtermuisknop → Verwijderen
+4. Druk nogmaals op `Ctrl+End` om te controleren of het gebruikte bereik nu klopt
+
+**Methode 2: alle lege rijen verwijderen met een hulpkolom**
+
+1. Voeg de hierboven beschreven hulpkolom met `=AANTALARG(A2:Z2)` toe
+2. Zet een filter aan (Gegevens → Filter) en toon alleen rijen waarin de hulpkolom `0` is
+3. Selecteer die rijen, rechtermuisknop → Rij verwijderen
+4. Wis het filter en verwijder de hulpkolom
+
+Vermijd Selecteren speciaal → Lege waarden op één kolom: dan verwijder je elke rij waarin die kolom toevallig leeg is, ook geldige variantrijen.
+
+---
+
+## Lege rijen verwijderen in Google Spreadsheets
+
+Gebruik dezelfde hulpkolom en een filter:
+
+1. Voeg een hulpkolom met `=AANTALARG(A2:Z2)` toe en vul die omlaag door
+2. Voeg een filter toe (Gegevens → Een filter maken)
+3. Toon in het filter van de hulpkolom alleen `0`
+4. Selecteer de zichtbare rijen en verwijder ze (rechtermuisknop → Geselecteerde rijen verwijderen)
+5. Zet het filter uit en verwijder de hulpkolom
+
+Sorteren zet lege rijen ook onderaan, maar sorteer alleen een bestand waarin de volgorde van de rijen er niet toe doet. Shopify-producten, WooCommerce-variaties en eBay-aanbiedingen met variaties hebben rijen die in volgorde moeten blijven.
+
+---
+
+## Lege rijen verwijderen met Python
+
+Voor grote bestanden is Python de snelste aanpak:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Rij houden als een veld een waarde heeft die niet alleen uit witruimte bestaat
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Dit pakt ook rijen met alleen spaties aan (rijen die leeg lijken, maar spaties of tabs bevatten).
+
+---
+
+## Rijen met alleen spaties
+
+Sommige rijen lijken leeg in de spreadsheet, maar bevatten in een of meer cellen spaties of tabs. Een eenvoudige controle "is de rij leeg?" vindt ze niet.
+
+**Zo vind je ze met Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+De oplossing uit het vorige deel (met `cell.strip()`) verwijdert ze automatisch.
+
+---
+
+## Lege rijen in toekomstige exports voorkomen
+
+- **In Excel:** druk vóór het opslaan als CSV op `Ctrl+End` en controleer of de laatste rij met gegevens echt de laatst gebruikte rij is. Verwijder alle rijen daaronder.
+- **In Google Spreadsheets:** de CSV-download bevat elke rij tot de laatste niet-lege cel, dus houd je gegevens compact.
+- **Bij het verwijderen van rijen:** klik in Excel met de rechtermuisknop op de rijnummers → Verwijderen (druk niet alleen op Delete op de celinhoud, want dan blijft er een lege rij staan).
+- **Na het filteren:** de CSV-export van Excel bevat ook rijen die door een filter verborgen zijn. Wis dus de filters en controleer wat er echt in het blad staat voordat je exporteert.
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+Upload je CSV naar StriveFormats. De controle vindt lege rijen, rijen met alleen spaties en rijen waarin alle verplichte velden leeg zijn, en toont precies waar ze staan, zodat je ze vóór de import kunt weghalen.
+
+[CSV-fixer openen](/app) | [CSV-sjablonen bekijken](/presets)

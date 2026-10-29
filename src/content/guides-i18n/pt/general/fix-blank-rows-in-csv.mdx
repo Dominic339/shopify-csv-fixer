@@ -1,0 +1,145 @@
+---
+title: "Remover linhas em branco de um arquivo CSV"
+description: "Como encontrar e excluir linhas em branco de um arquivo CSV antes de importar no Shopify, WooCommerce, Etsy, eBay ou Amazon, no Excel, Google Sheets ou Python."
+keywords: ["remover linhas em branco csv", "excluir linhas vazias csv", "erro linha em branco csv", "apagar linhas vazias csv", "importação csv linha em branco", "linhas vazias csv", "excel csv linhas em branco"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Por que aparecem linhas em branco nos CSV e como elas quebram importações"
+  - "Como encontrar e excluir linhas em branco no Excel, Google Sheets e Python"
+  - "Como lidar com a linha em branco que costuma sobrar no fim do arquivo"
+  - "Como identificar linhas que parecem vazias mas não estão (só espaços)"
+  - "Como evitar que linhas em branco voltem nas suas exportações"
+bestFor: "Vendedores que veem erros de importação ou produtos vazios inesperados por causa de linhas em branco no CSV"
+timeToComplete: "6 minutos"
+---
+
+## Por que linhas em branco causam problemas na importação
+
+Uma linha em branco num CSV é uma linha em que todos os campos estão vazios (ou que só tem vírgulas, sem valores). Muitos importadores simplesmente pulam uma linha totalmente vazia, mas, dependendo da plataforma, uma linha em branco pode:
+
+- **Criar um registro de produto vazio** (Title vazio, Price vazio), que falha na validação dos campos obrigatórios
+- **Interromper a importação** na linha em branco, ignorando sem aviso tudo o que vem depois
+- **Gerar um erro de validação** para cada campo obrigatório que falta na linha em branco
+
+Os lugares onde mais aparecem linhas em branco:
+
+- No **fim do arquivo** (as planilhas costumam acrescentar uma automaticamente)
+- **Entre produtos** (você excluiu uma linha, mas deixou uma linha vazia)
+- **Entre seções**, se você organizou a planilha com espaços visuais
+- **Depois de apagar o conteúdo das células**: a tecla Delete limpa as células de uma linha, mas deixa a linha vazia no lugar
+
+---
+
+## Encontrar linhas em branco
+
+### Num editor de texto
+
+Abra o arquivo no VS Code ou no Bloco de Notas. As linhas em branco são fáceis de ver: são linhas só com vírgulas ou totalmente vazias:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← linha em branco (só vírgulas ou nada)
+red-shirt,Red T-Shirt,21.99
+```
+
+### No Excel
+
+Pressione `Ctrl+End` para ir à última célula do intervalo usado. Se a última linha estiver além dos seus dados (uma linha vazia), o Excel incluiu linhas em branco no intervalo usado.
+
+Para encontrar todas as linhas em branco, crie uma coluna auxiliar depois da última coluna, digite `=CONT.VALORES(A2:Z2)` na linha 2 (amplie o intervalo para cobrir todas as colunas) e arraste para baixo. As linhas que mostram `0` estão totalmente vazias.
+
+Não procure células vazias numa só coluna como `Title`: num arquivo da Shopify, as linhas de variante deixam `Title` vazio de propósito, e elas não são linhas em branco.
+
+---
+
+## Excluir linhas em branco no Excel
+
+**Método 1: excluir as linhas em branco do fim**
+
+1. Pressione `Ctrl+End` para ver onde o Excel acha que os dados terminam
+2. Se for além da sua última linha de dados, selecione as linhas sobrando abaixo dos dados
+3. Clique com o botão direito → Excluir
+4. Pressione `Ctrl+End` de novo para confirmar que o intervalo usado agora está certo
+
+**Método 2: excluir todas as linhas em branco com uma coluna auxiliar**
+
+1. Crie a coluna auxiliar `=CONT.VALORES(A2:Z2)` descrita acima
+2. Ative um filtro (Dados → Filtro) e mostre só as linhas em que a coluna auxiliar é `0`
+3. Selecione essas linhas, clique com o botão direito → Excluir Linha
+4. Limpe o filtro e exclua a coluna auxiliar
+
+Evite Ir para Especial → Em branco numa só coluna: isso exclui toda linha em que aquela coluna estiver vazia, inclusive linhas de variante válidas.
+
+---
+
+## Excluir linhas em branco no Google Sheets
+
+Use a mesma coluna auxiliar e um filtro:
+
+1. Crie uma coluna auxiliar com `=CONT.VALORES(A2:Z2)` e arraste para baixo
+2. Adicione um filtro (Dados → Criar um filtro)
+3. No filtro da coluna auxiliar, mostre só `0`
+4. Selecione as linhas visíveis e exclua-as (botão direito → Excluir linhas selecionadas)
+5. Desative o filtro e exclua a coluna auxiliar
+
+Ordenar também leva as linhas em branco para o fim, mas só ordene um arquivo em que a ordem das linhas não importe. Produtos da Shopify, variações do WooCommerce e anúncios com variações do eBay dependem de as linhas continuarem na ordem.
+
+---
+
+## Excluir linhas em branco com Python
+
+Para arquivos grandes, o Python é o caminho mais rápido:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Manter a linha se algum campo tiver um valor que não seja só espaço
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Isso também trata as linhas só com espaços (linhas que parecem vazias, mas têm espaços ou tabulações).
+
+---
+
+## Linhas só com espaços
+
+Algumas linhas parecem vazias na planilha, mas na verdade têm espaços ou tabulações em uma ou mais células. Uma verificação simples de "a linha está vazia?" não as encontra.
+
+**Como detectá-las com Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+A correção da seção anterior (com `cell.strip()`) as remove automaticamente.
+
+---
+
+## Evitar linhas em branco nas próximas exportações
+
+- **No Excel:** antes de salvar como CSV, pressione `Ctrl+End` e confira se a última linha com dados é mesmo a última linha usada. Exclua as linhas abaixo dela.
+- **No Google Sheets:** o download em CSV inclui todas as linhas até a última célula não vazia, então mantenha os dados compactos.
+- **Ao excluir linhas:** no Excel, clique com o botão direito nos números das linhas → Excluir (não apenas pressione Delete no conteúdo, que deixa uma linha vazia).
+- **Depois de filtrar:** a exportação em CSV do Excel inclui as linhas ocultas por um filtro, então limpe os filtros e confira o que realmente está na planilha antes de exportar.
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+Envie seu CSV ao StriveFormats. O validador detecta linhas em branco, linhas só com espaços e linhas em que todos os campos obrigatórios estão vazios. Ele mostra a posição exata de cada uma para você removê-las antes de importar.
+
+[Abrir o corretor de CSV](/app) | [Ver modelos de CSV](/presets)

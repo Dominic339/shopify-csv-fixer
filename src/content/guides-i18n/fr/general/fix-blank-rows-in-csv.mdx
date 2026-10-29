@@ -1,0 +1,145 @@
+---
+title: "Supprimer les lignes vides d'un fichier CSV"
+description: "Comment trouver et supprimer les lignes vides d'un fichier CSV avant de l'importer dans Shopify, WooCommerce, Etsy, eBay ou Amazon, avec Excel, Google Sheets ou Python."
+keywords: ["supprimer lignes vides csv", "enlever lignes vides csv", "erreur ligne vide csv", "effacer lignes vides csv", "import csv ligne vide", "lignes blanches csv", "excel csv lignes vides"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Pourquoi des lignes vides apparaissent dans les CSV et comment elles cassent les imports"
+  - "Comment trouver et supprimer les lignes vides dans Excel, Google Sheets et Python"
+  - "Comment gérer la ligne vide qui traîne souvent en fin de fichier"
+  - "Comment repérer les lignes qui ne sont vides qu'en apparence (espaces uniquement)"
+  - "Comment éviter que les lignes vides reviennent dans vos exports"
+bestFor: "Vendeurs qui voient des erreurs d'import ou des produits vides inattendus à cause de lignes vides dans leur CSV"
+timeToComplete: "6 minutes"
+---
+
+## Pourquoi les lignes vides posent problème à l'import
+
+Une ligne vide dans un CSV est une ligne dont tous les champs sont vides (ou qui ne contient que des virgules sans valeurs). Beaucoup d'outils d'import ignorent simplement une ligne entièrement vide, mais selon la plateforme, une ligne vide peut au contraire :
+
+- **Créer un produit vide** (Title vide, Price vide), qui échoue à la validation des champs obligatoires
+- **Arrêter l'import** à la ligne vide, en ignorant sans prévenir tout ce qui suit
+- **Signaler une erreur de validation** pour chaque champ obligatoire absent de la ligne vide
+
+Les endroits où les lignes vides apparaissent le plus souvent :
+
+- À la **fin du fichier** (les tableurs en ajoutent souvent une automatiquement)
+- **Entre deux produits** (vous avez supprimé une ligne mais laissé une ligne vide)
+- **Entre des sections**, si vous avez organisé votre tableur avec des espaces visuels
+- **Après avoir effacé le contenu des cellules** : la touche Suppr vide les cellules d'une ligne mais laisse la ligne vide en place
+
+---
+
+## Trouver les lignes vides
+
+### Dans un éditeur de texte
+
+Ouvrez le fichier dans VS Code ou le Bloc-notes. Les lignes vides se repèrent facilement : ce sont des lignes qui ne contiennent que des virgules, ou rien du tout :
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← ligne vide (que des virgules ou rien)
+red-shirt,Red T-Shirt,21.99
+```
+
+### Dans Excel
+
+Appuyez sur `Ctrl+Fin` pour aller à la dernière cellule de la plage utilisée. Si la dernière ligne se trouve après vos données (une ligne vide), Excel a inclus des lignes vides dans la plage utilisée.
+
+Pour trouver toutes les lignes vides, ajoutez une colonne auxiliaire après votre dernière colonne, saisissez `=NBVAL(A2:Z2)` en ligne 2 (élargissez la plage pour couvrir toutes vos colonnes) et recopiez la formule vers le bas. Les lignes qui affichent `0` sont entièrement vides.
+
+Ne cherchez pas les cases vides dans une seule colonne comme `Title` : dans un fichier Shopify, les lignes de variantes laissent volontairement `Title` vide, et ce ne sont pas des lignes vides.
+
+---
+
+## Supprimer les lignes vides dans Excel
+
+**Méthode 1 : supprimer les lignes vides à la fin**
+
+1. Appuyez sur `Ctrl+Fin` pour voir où Excel pense que les données s'arrêtent
+2. Si c'est après votre dernière ligne de données, sélectionnez les lignes en trop sous vos données
+3. Clic droit → Supprimer
+4. Appuyez de nouveau sur `Ctrl+Fin` pour vérifier que la plage utilisée est maintenant correcte
+
+**Méthode 2 : supprimer toutes les lignes vides avec une colonne auxiliaire**
+
+1. Ajoutez la colonne auxiliaire `=NBVAL(A2:Z2)` décrite plus haut
+2. Activez un filtre (Données → Filtrer) et n'affichez que les lignes où la colonne auxiliaire vaut `0`
+3. Sélectionnez ces lignes, clic droit → Supprimer la ligne
+4. Effacez le filtre et supprimez la colonne auxiliaire
+
+Évitez Atteindre → Cellules vides sur une seule colonne : cela supprime toutes les lignes où cette colonne est vide, y compris des lignes de variantes valides.
+
+---
+
+## Supprimer les lignes vides dans Google Sheets
+
+Utilisez la même colonne auxiliaire et un filtre :
+
+1. Ajoutez une colonne auxiliaire avec `=NBVAL(A2:Z2)` et recopiez-la vers le bas
+2. Ajoutez un filtre (Données → Créer un filtre)
+3. Dans le filtre de la colonne auxiliaire, n'affichez que `0`
+4. Sélectionnez les lignes visibles et supprimez-les (clic droit → Supprimer les lignes sélectionnées)
+5. Désactivez le filtre et supprimez la colonne auxiliaire
+
+Le tri envoie aussi les lignes vides en bas, mais ne triez qu'un fichier dont l'ordre des lignes n'a pas d'importance. Les produits Shopify, les variations WooCommerce et les annonces eBay avec variantes dépendent de l'ordre de leurs lignes.
+
+---
+
+## Supprimer les lignes vides avec Python
+
+Pour les gros fichiers, Python est la méthode la plus rapide :
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Garder la ligne si un champ contient autre chose que des espaces
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Cela traite aussi les lignes qui ne contiennent que des espaces (elles semblent vides mais contiennent des espaces ou des tabulations).
+
+---
+
+## Lignes qui ne contiennent que des espaces
+
+Certaines lignes semblent vides dans le tableur mais contiennent en réalité des espaces ou des tabulations dans une ou plusieurs cellules. Un simple test « la ligne est-elle vide ? » ne les détecte pas.
+
+**Les repérer avec Python :**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+La correction de la section précédente (avec `cell.strip()`) les supprime automatiquement.
+
+---
+
+## Éviter les lignes vides dans vos prochains exports
+
+- **Dans Excel :** avant d'enregistrer en CSV, appuyez sur `Ctrl+Fin` et vérifiez que la dernière ligne de données est bien la dernière ligne utilisée. Supprimez les lignes en dessous.
+- **Dans Google Sheets :** le téléchargement en CSV inclut toutes les lignes jusqu'à la dernière cellule non vide, alors gardez vos données compactes.
+- **Pour supprimer des lignes :** dans Excel, faites un clic droit sur les numéros de ligne → Supprimer (n'appuyez pas seulement sur Suppr sur le contenu des cellules, qui laisse une ligne vide).
+- **Après un filtrage :** l'export CSV d'Excel inclut les lignes masquées par un filtre, alors effacez les filtres et vérifiez ce que contient vraiment la feuille avant d'exporter.
+
+---
+
+## Corrigez-le automatiquement avec StriveFormats
+
+Envoyez votre CSV dans StriveFormats. Le validateur détecte les lignes vides, les lignes ne contenant que des espaces et les lignes dont tous les champs obligatoires sont vides. Il indique leur emplacement exact pour que vous puissiez les retirer avant l'import.
+
+[Ouvrir le correcteur CSV](/app) | [Voir les modèles CSV](/presets)

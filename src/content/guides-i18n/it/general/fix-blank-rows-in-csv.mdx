@@ -1,0 +1,145 @@
+---
+title: "Eliminare le righe vuote da un file CSV"
+description: "Come trovare ed eliminare le righe vuote di un file CSV prima di importarlo in Shopify, WooCommerce, Etsy, eBay o Amazon, con Excel, Google Sheets o Python."
+keywords: ["eliminare righe vuote csv", "rimuovere righe vuote csv", "errore riga vuota csv", "cancellare righe vuote csv", "importazione csv riga vuota", "righe bianche csv", "excel csv righe vuote"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Perché compaiono righe vuote nei CSV e come rompono le importazioni"
+  - "Come trovare ed eliminare le righe vuote in Excel, Google Sheets e Python"
+  - "Come gestire la riga vuota che spesso resta alla fine del file"
+  - "Come riconoscere le righe che sembrano vuote ma non lo sono (solo spazi)"
+  - "Come evitare che le righe vuote ricompaiano nelle esportazioni"
+bestFor: "Venditori che vedono errori di importazione o prodotti vuoti inattesi causati da righe vuote nel CSV"
+timeToComplete: "6 minuti"
+---
+
+## Perché le righe vuote causano problemi di importazione
+
+Una riga vuota in un CSV è una riga in cui tutti i campi sono vuoti (o che contiene solo virgole senza valori). Molti importatori saltano semplicemente una riga del tutto vuota, ma a seconda della piattaforma una riga vuota può invece:
+
+- **Creare un prodotto vuoto** (Title vuoto, Price vuoto), che non supera il controllo dei campi obbligatori
+- **Interrompere l'importazione** alla riga vuota, ignorando senza avvisi tutto ciò che segue
+- **Segnalare un errore di convalida** per ogni campo obbligatorio mancante nella riga vuota
+
+I punti in cui le righe vuote compaiono più spesso:
+
+- Alla **fine del file** (i fogli di calcolo ne aggiungono spesso una in automatico)
+- **Tra un prodotto e l'altro** (hai eliminato una riga ma ne è rimasta una vuota)
+- **Tra le sezioni**, se hai organizzato il foglio con spazi visivi
+- **Dopo aver cancellato il contenuto delle celle**: il tasto Canc svuota le celle di una riga ma lascia la riga vuota al suo posto
+
+---
+
+## Trovare le righe vuote
+
+### In un editor di testo
+
+Apri il file in VS Code o nel Blocco note. Le righe vuote si notano subito: sono righe con sole virgole o del tutto vuote:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← riga vuota (solo virgole o niente)
+red-shirt,Red T-Shirt,21.99
+```
+
+### In Excel
+
+Premi `Ctrl+Fine` per andare all'ultima cella dell'intervallo usato. Se l'ultima riga si trova oltre i tuoi dati (una riga vuota), Excel ha incluso righe vuote nell'intervallo usato.
+
+Per trovare tutte le righe vuote, aggiungi una colonna di supporto dopo l'ultima colonna, inserisci `=CONTA.VALORI(A2:Z2)` nella riga 2 (allarga l'intervallo fino a coprire tutte le colonne) e trascinala verso il basso. Le righe che mostrano `0` sono completamente vuote.
+
+Non cercare celle vuote in una sola colonna come `Title`: in un file Shopify le righe delle varianti lasciano `Title` vuoto di proposito, e non sono righe vuote.
+
+---
+
+## Eliminare le righe vuote in Excel
+
+**Metodo 1: eliminare le righe vuote in fondo**
+
+1. Premi `Ctrl+Fine` per vedere dove Excel pensa che finiscano i dati
+2. Se è oltre l'ultima riga di dati, seleziona le righe in più sotto i dati
+3. Clic destro → Elimina
+4. Premi di nuovo `Ctrl+Fine` per verificare che l'intervallo usato ora sia corretto
+
+**Metodo 2: eliminare tutte le righe vuote con una colonna di supporto**
+
+1. Aggiungi la colonna di supporto `=CONTA.VALORI(A2:Z2)` descritta sopra
+2. Attiva un filtro (Dati → Filtro) e mostra solo le righe in cui la colonna di supporto vale `0`
+3. Seleziona quelle righe, clic destro → Elimina riga
+4. Togli il filtro ed elimina la colonna di supporto
+
+Evita Vai a formato speciale → Celle vuote su una sola colonna: elimina ogni riga in cui quella colonna è vuota, comprese righe di variante valide.
+
+---
+
+## Eliminare le righe vuote in Google Sheets
+
+Usa la stessa colonna di supporto e un filtro:
+
+1. Aggiungi una colonna di supporto con `=CONTA.VALORI(A2:Z2)` e trascinala verso il basso
+2. Aggiungi un filtro (Dati → Crea un filtro)
+3. Nel filtro della colonna di supporto, mostra solo `0`
+4. Seleziona le righe visibili ed eliminale (clic destro → Elimina righe selezionate)
+5. Disattiva il filtro ed elimina la colonna di supporto
+
+Anche l'ordinamento sposta le righe vuote in fondo, ma ordina solo file in cui l'ordine delle righe non conta. I prodotti Shopify, le variazioni WooCommerce e le inserzioni eBay con varianti dipendono dall'ordine delle loro righe.
+
+---
+
+## Eliminare le righe vuote con Python
+
+Con i file grandi, Python è la soluzione più rapida:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Tenere la riga se almeno un campo contiene qualcosa oltre agli spazi
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Così vengono gestite anche le righe con soli spazi (righe che sembrano vuote ma contengono spazi o tabulazioni).
+
+---
+
+## Righe con soli spazi
+
+Alcune righe sembrano vuote nel foglio di calcolo ma in realtà contengono spazi o tabulazioni in una o più celle. Un semplice controllo «la riga è vuota?» non le trova.
+
+**Trovarle con Python:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+La correzione della sezione precedente (con `cell.strip()`) le elimina automaticamente.
+
+---
+
+## Evitare righe vuote nelle prossime esportazioni
+
+- **In Excel:** prima di salvare come CSV, premi `Ctrl+Fine` e verifica che l'ultima riga con dati sia davvero l'ultima riga usata. Elimina le righe sotto.
+- **In Google Sheets:** il download in CSV include tutte le righe fino all'ultima cella non vuota, quindi tieni i dati compatti.
+- **Quando elimini righe:** in Excel, fai clic destro sui numeri di riga → Elimina (non premere solo Canc sul contenuto delle celle, che lascia una riga vuota).
+- **Dopo aver filtrato:** l'esportazione CSV di Excel include le righe nascoste da un filtro, quindi togli i filtri e controlla cosa c'è davvero nel foglio prima di esportare.
+
+---
+
+## Correggilo automaticamente con StriveFormats
+
+Carica il tuo CSV in StriveFormats. Il validatore trova le righe vuote, le righe con soli spazi e le righe in cui tutti i campi obbligatori sono vuoti, e ne mostra la posizione esatta così puoi eliminarle prima dell'importazione.
+
+[Apri il correttore CSV](/app) | [Vedi i modelli CSV](/presets)

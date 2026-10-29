@@ -1,0 +1,145 @@
+---
+title: "Usuwanie pustych wierszy z pliku CSV"
+description: "Jak znaleźć i usunąć puste wiersze z pliku CSV przed importem do Shopify, WooCommerce, Etsy, eBay lub Amazon w Excelu, Arkuszach Google lub Pythonie."
+keywords: ["usuwanie pustych wierszy csv", "puste wiersze csv", "błąd pusty wiersz csv", "kasowanie pustych wierszy csv", "import csv pusty wiersz", "puste linie csv", "excel csv puste wiersze"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Skąd biorą się puste wiersze w plikach CSV i jak psują importy"
+  - "Jak znaleźć i usunąć puste wiersze w Excelu, Arkuszach Google i Pythonie"
+  - "Co zrobić z typowym pustym wierszem na końcu pliku"
+  - "Jak wykryć wiersze, które tylko wyglądają na puste (zawierają same spacje)"
+  - "Jak zapobiec ponownemu pojawianiu się pustych wierszy w eksportach"
+bestFor: "Sprzedawcy, którzy przez puste wiersze w pliku CSV widzą błędy importu lub nieoczekiwane puste produkty"
+timeToComplete: "6 minut"
+---
+
+## Dlaczego puste wiersze psują import
+
+Pusty wiersz w pliku CSV to wiersz, w którym wszystkie pola są puste (albo zawiera same przecinki bez wartości). Wiele importerów po prostu pomija całkowicie pusty wiersz, ale zależnie od platformy pusty wiersz może zamiast tego:
+
+- **Utworzyć pusty rekord produktu** (puste Title i Price), który nie przechodzi kontroli pól wymaganych
+- **Zatrzymać import** na pustym wierszu i po cichu pominąć wszystko, co jest dalej
+- **Zgłosić błąd walidacji** dla każdego wymaganego pola, którego brakuje w pustym wierszu
+
+Najczęstsze miejsca, w których pojawiają się puste wiersze:
+
+- Na **końcu pliku** (arkusze często dodają taki wiersz automatycznie)
+- **Między produktami** (usunąłeś wiersz, ale zostawiłeś pustą linię)
+- **Między sekcjami**, jeśli podzieliłeś arkusz wizualnymi odstępami
+- **Po wyczyszczeniu zawartości komórek**: klawisz Delete czyści komórki wiersza, ale pusty wiersz zostaje
+
+---
+
+## Znajdowanie pustych wierszy
+
+### W edytorze tekstu
+
+Otwórz plik w VS Code lub Notatniku. Puste wiersze łatwo zauważyć: to linie z samymi przecinkami albo zupełnie puste:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← pusty wiersz (same przecinki lub nic)
+red-shirt,Red T-Shirt,21.99
+```
+
+### W Excelu
+
+Naciśnij `Ctrl+End`, aby przejść do ostatniej komórki używanego zakresu. Jeśli ostatni wiersz leży za Twoimi danymi (pusty wiersz), Excel wliczył puste wiersze do używanego zakresu.
+
+Aby znaleźć wszystkie puste wiersze, dodaj kolumnę pomocniczą za ostatnią kolumną, wpisz `=ILE.NIEPUSTYCH(A2:Z2)` w wierszu 2 (rozszerz zakres na wszystkie kolumny) i przeciągnij formułę w dół. Wiersze z wynikiem `0` są całkowicie puste.
+
+Nie szukaj pustych komórek w jednej kolumnie, takiej jak `Title`: w pliku Shopify wiersze wariantów celowo zostawiają `Title` puste i nie są pustymi wierszami.
+
+---
+
+## Usuwanie pustych wierszy w Excelu
+
+**Metoda 1: usunięcie pustych wierszy na końcu**
+
+1. Naciśnij `Ctrl+End`, aby zobaczyć, gdzie według Excela kończą się dane
+2. Jeśli to miejsce leży za ostatnim wierszem danych, zaznacz dodatkowe wiersze pod danymi
+3. Prawy przycisk myszy → Usuń
+4. Naciśnij ponownie `Ctrl+End`, aby sprawdzić, czy używany zakres jest już poprawny
+
+**Metoda 2: usunięcie wszystkich pustych wierszy za pomocą kolumny pomocniczej**
+
+1. Dodaj opisaną wyżej kolumnę pomocniczą z `=ILE.NIEPUSTYCH(A2:Z2)`
+2. Włącz filtr (Dane → Filtruj) i pokaż tylko wiersze, w których kolumna pomocnicza ma wartość `0`
+3. Zaznacz te wiersze, prawy przycisk myszy → Usuń wiersz
+4. Wyczyść filtr i usuń kolumnę pomocniczą
+
+Unikaj Przejdź do — specjalnie → Puste w jednej kolumnie: usuwa to każdy wiersz, w którym ta kolumna akurat jest pusta, łącznie z poprawnymi wierszami wariantów.
+
+---
+
+## Usuwanie pustych wierszy w Arkuszach Google
+
+Użyj tej samej kolumny pomocniczej i filtra:
+
+1. Dodaj kolumnę pomocniczą z `=ILE.NIEPUSTYCH(A2:Z2)` i przeciągnij ją w dół
+2. Dodaj filtr (Dane → Utwórz filtr)
+3. W filtrze kolumny pomocniczej pokaż tylko `0`
+4. Zaznacz widoczne wiersze i usuń je (prawy przycisk myszy → Usuń zaznaczone wiersze)
+5. Wyłącz filtr i usuń kolumnę pomocniczą
+
+Sortowanie także przenosi puste wiersze na dół, ale sortuj tylko pliki, w których kolejność wierszy nie ma znaczenia. Produkty Shopify, odmiany WooCommerce i oferty eBay z wariantami wymagają, aby ich wiersze zostały w kolejności.
+
+---
+
+## Usuwanie pustych wierszy w Pythonie
+
+Przy dużych plikach Python jest najszybszy:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Zachowaj wiersz, jeśli którekolwiek pole ma wartość inną niż same białe znaki
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+To usuwa także wiersze z samymi spacjami (wyglądają na puste, ale zawierają spacje lub tabulatory).
+
+---
+
+## Wiersze z samymi spacjami
+
+Niektóre wiersze wyglądają w arkuszu na puste, ale w jednej lub kilku komórkach zawierają spacje lub tabulatory. Prosta kontrola „czy wiersz jest pusty?” ich nie wychwyci.
+
+**Jak je wykryć w Pythonie:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+Rozwiązanie z poprzedniej sekcji (z `cell.strip()`) usuwa je automatycznie.
+
+---
+
+## Jak zapobiec pustym wierszom w przyszłych eksportach
+
+- **W Excelu:** przed zapisem jako CSV naciśnij `Ctrl+End` i sprawdź, czy ostatni wiersz z danymi to naprawdę ostatni używany wiersz. Usuń wszystkie wiersze pod nim.
+- **W Arkuszach Google:** pobrany plik CSV obejmuje wszystkie wiersze aż do ostatniej niepustej komórki, więc trzymaj dane w zwartym bloku.
+- **Przy usuwaniu wierszy:** w Excelu kliknij prawym przyciskiem numery wierszy → Usuń (nie naciskaj tylko Delete na zawartości komórek, bo zostanie pusty wiersz).
+- **Po filtrowaniu:** eksport CSV z Excela obejmuje wiersze ukryte przez filtr, więc przed eksportem wyczyść filtry i sprawdź, co naprawdę jest w arkuszu.
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV do StriveFormats. Walidator wykrywa puste wiersze, wiersze z samymi spacjami i wiersze, w których wszystkie pola wymagane są puste, oraz pokazuje ich dokładne położenie, abyś mógł je usunąć przed importem.
+
+[Otwórz korektor CSV](/app) | [Zobacz szablony CSV](/presets)

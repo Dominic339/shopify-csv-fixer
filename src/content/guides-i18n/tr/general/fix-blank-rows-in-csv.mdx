@@ -1,0 +1,145 @@
+---
+title: "CSV dosyasındaki boş satırları silme"
+description: "Shopify, WooCommerce, Etsy, eBay veya Amazon'a içe aktarmadan önce bir CSV dosyasındaki boş satırları Excel, Google E-Tablolar veya Python ile nasıl bulup sileceğiniz."
+keywords: ["csv boş satırları düzeltme", "csv boş satır silme", "csv boş satır hatası", "csv boş satırları kaldırma", "csv içe aktarma boş satır", "csv boş satırlar", "excel csv boş satır"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV dosyalarında boş satırların neden oluştuğu ve içe aktarmaları nasıl bozduğu"
+  - "Excel, Google E-Tablolar ve Python'da boş satırları nasıl bulup sileceğiniz"
+  - "Dosya sonundaki yaygın boş satırla nasıl başa çıkacağınız"
+  - "Gerçekte boş olmayan boş görünümlü satırları (yalnızca boşluk içeren) nasıl fark edeceğiniz"
+  - "Dışa aktarımlarınızda boş satırların yeniden oluşmasını nasıl önleyeceğiniz"
+bestFor: "CSV dosyasındaki boş satırlar yüzünden içe aktarma hataları veya beklenmedik boş ürünler gören satıcılar"
+timeToComplete: "6 dakika"
+---
+
+## Boş satırlar neden içe aktarma sorunlarına yol açar
+
+CSV dosyasındaki boş satır, tüm alanlarının boş olduğu (ya da yalnızca değersiz virgüllerden oluşan) bir satırdır. Birçok içe aktarıcı tamamen boş bir satırı atlar, ancak platforma göre boş bir satır bunun yerine şunları yapabilir:
+
+- **Boş bir ürün kaydı oluşturur** (Title boş, Price boş) ve bu kayıt zorunlu alan doğrulamasından geçemez
+- **İçe aktarmayı durdurur**: boş satırda durur ve sonrasındaki her şeyi sessizce yok sayar
+- **Doğrulama hatası bildirir**: boş satırda eksik olan her zorunlu alan için
+
+Boş satırların en sık görüldüğü yerler:
+
+- **Dosyanın sonunda** (elektronik tablo düzenleyicileri çoğu zaman otomatik olarak ekler)
+- **Ürünler arasında** (bir satırı sildiniz ama boş bir satır bıraktınız)
+- **Bölümler arasında**, elektronik tablonuzu görsel boşluklarla düzenlediyseniz
+- **Hücre içeriğini sildikten sonra**: Delete tuşu bir satırın hücrelerini temizler ama boş satırı yerinde bırakır
+
+---
+
+## Boş satırları bulma
+
+### Bir metin düzenleyicide
+
+Dosyayı VS Code'da veya Not Defteri'nde açın. Boş satırları fark etmek kolaydır: yalnızca virgül içeren ya da tamamen boş satırlardır:
+
+```
+Handle,Title,Price
+blue-shirt,Blue T-Shirt,19.99
+                          ← boş satır (yalnızca virgüller veya hiçbir şey)
+red-shirt,Red T-Shirt,21.99
+```
+
+### Excel'de
+
+Kullanılan aralıktaki son hücreye gitmek için `Ctrl+End`'e basın. Son satır verilerinizin ötesindeyse (boş bir satırsa), Excel boş satırları kullanılan aralığa dahil etmiştir.
+
+Tüm boş satırları bulmak için son sütununuzdan sonra bir yardımcı sütun ekleyin, 2. satıra `=BAĞ_DEĞ_DOLU_SAY(A2:Z2)` yazın (aralığı tüm sütunlarınızı kapsayacak şekilde genişletin) ve aşağı doğru doldurun. `0` gösteren satırlar tamamen boştur.
+
+Boşlukları `Title` gibi tek bir sütunda aramayın: bir Shopify dosyasında varyant satırları `Title` alanını bilerek boş bırakır ve bunlar boş satır değildir.
+
+---
+
+## Excel'de boş satırları silme
+
+**Yöntem 1: Sondaki boş satırları silme**
+
+1. Excel'in verilerin nerede bittiğini düşündüğünü görmek için `Ctrl+End`'e basın
+2. Son veri satırınızın ötesindeyse verilerinizin altındaki fazla satırları seçin
+3. Sağ tıklayın → Sil
+4. Kullanılan aralığın artık doğru olduğunu doğrulamak için yeniden `Ctrl+End`'e basın
+
+**Yöntem 2: Tüm boş satırları bir yardımcı sütunla silme**
+
+1. Yukarıda anlatılan `=BAĞ_DEĞ_DOLU_SAY(A2:Z2)` yardımcı sütununu ekleyin
+2. Bir filtre açın (Veri → Filtre) ve yalnızca yardımcı sütunun `0` olduğu satırları gösterin
+3. Bu satırları seçin, sağ tıklayın → Satırı Sil
+4. Filtreyi temizleyin ve yardımcı sütunu silin
+
+Tek bir sütunda Özel Git → Boşluklar'ı kullanmaktan kaçının: o sütunun boş olduğu her satırı, geçerli varyant satırları dahil siler.
+
+---
+
+## Google E-Tablolar'da boş satırları silme
+
+Aynı yardımcı sütunu ve bir filtreyi kullanın:
+
+1. `=BAĞ_DEĞ_DOLU_SAY(A2:Z2)` içeren bir yardımcı sütun ekleyip aşağı doldurun
+2. Bir filtre ekleyin (Veri → Filtre oluştur)
+3. Yardımcı sütunun filtresinde yalnızca `0` değerini gösterin
+4. Görünen satırları seçip silin (sağ tıklayın → Seçili satırları sil)
+5. Filtreyi kapatın ve yardımcı sütunu silin
+
+Sıralama da boş satırları en alta taşır, ancak yalnızca satır sırasının önemli olmadığı dosyaları sıralayın. Shopify ürünleri, WooCommerce varyasyonları ve eBay'in varyasyonlu ilanları satırlarının sırasını korumasına bağlıdır.
+
+---
+
+## Python ile boş satırları silme
+
+Büyük dosyalar için en hızlı yol Python'dur:
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.reader(f_in)
+    writer = csv.writer(f_out)
+    for row in reader:
+        # Herhangi bir alanda boşluktan başka bir değer varsa satırı koru
+        if any(cell.strip() for cell in row):
+            writer.writerow(row)
+```
+
+Bu, yalnızca boşluk içeren satırları da (boş görünen ama boşluk veya sekme içeren satırlar) ele alır.
+
+---
+
+## Yalnızca boşluk içeren satırlar
+
+Bazı satırlar elektronik tabloda boş görünür ama aslında bir veya daha fazla hücrede boşluk ya da sekme karakteri içerir. Basit bir "satır boş mu?" kontrolü bunları yakalamaz.
+
+**Python ile tespit etme:**
+
+```python
+import csv
+
+with open("input.csv", newline="", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for i, row in enumerate(reader, 1):
+        if not any(cell.strip() for cell in row):
+            print(f"Blank or whitespace-only row at line {i}")
+```
+
+Önceki bölümdeki çözüm (`cell.strip()` kullanan) bunları otomatik olarak kaldırır.
+
+---
+
+## Gelecekteki dışa aktarımlarda boş satırları önleme
+
+- **Excel'de:** CSV olarak kaydetmeden önce `Ctrl+End`'e basın ve verili son satırın gerçekten son kullanılan satır olduğunu doğrulayın. Altındaki satırları silin.
+- **Google E-Tablolar'da:** CSV indirmesi boş olmayan son hücreye kadar her satırı içerir, bu yüzden verilerinizi derli toplu tutun.
+- **Satır silerken:** Excel'de satır numaralarına sağ tıklayın → Sil (hücre içeriğinde yalnızca Delete'e basmayın; bu boş bir satır bırakır).
+- **Filtreledikten sonra:** Excel'in CSV dışa aktarımı filtreyle gizlenen satırları da içerir; bu yüzden dışa aktarmadan önce filtreleri temizleyin ve sayfada gerçekte ne olduğunu kontrol edin.
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+CSV'nizi StriveFormats'a yükleyin. Doğrulayıcı boş satırları, yalnızca boşluk içeren satırları ve tüm zorunlu alanları boş olan satırları bulur. İçe aktarmadan önce kaldırabilmeniz için tam konumlarını gösterir.
+
+[CSV düzelticisini aç](/app) | [CSV şablonlarını görüntüle](/presets)
