@@ -1,0 +1,163 @@
+---
+title: "Eliminare le colonne in eccesso da un file CSV"
+description: "Come trovare e rimuovere colonne in eccesso o inattese da un file CSV prima di importarlo in Shopify, WooCommerce, Etsy, eBay o Amazon."
+keywords: ["eliminare colonne in eccesso csv", "rimuovere colonne csv", "colonna inattesa importazione csv", "errore colonna in più csv", "csv troppe colonne", "cancellare colonne csv", "pulire colonne csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Come compaiono colonne in più nei file CSV e perché causano errori di importazione"
+  - "Quali piattaforme rifiutano le colonne in più e quali le ignorano"
+  - "Come trovare e rimuovere colonne in più in Excel e Google Sheets"
+  - "Come eliminare colonne in più con Python nei file grandi"
+  - "Come evitare che le colonne in più ricompaiano nelle prossime esportazioni"
+bestFor: "Venditori con importazioni fallite o errori di convalida inattesi causati da colonne che la piattaforma non si aspetta"
+timeToComplete: "6 minuti"
+---
+
+## Come le colonne in più finiscono nel tuo CSV
+
+Le colonne in più compaiono nei file CSV per diversi motivi comuni:
+
+- **Formule o colonne di supporto**: colonne aggiunte per i tuoi calcoli, mai pensate per l'importazione
+- **Colonne di note o di uso interno**: colonne come `Internal Notes`, `Last Edited By` o `Supplier Cost`
+- **Residui di esportazione**: il tuo gestionale esporta più campi di quelli che servono alla piattaforma
+- **File di piattaforme uniti**: hai combinato colonne di due modelli diversi e ora ci sono duplicati o colonne in più
+- **Una virgola alla fine di ogni riga**: crea una colonna vuota invisibile alla fine
+
+---
+
+## La tua piattaforma accetta colonne in più?
+
+Il comportamento dipende dalla piattaforma:
+
+| Piattaforma | Cosa succede alle colonne in più |
+|---|---|
+| Shopify | Ignorate senza avvisi, nessun problema |
+| WooCommerce | Non importate: la schermata di mappatura imposta le colonne sconosciute su «Do not import» |
+| Etsy | Nessun caricamento CSV; le app di pubblicazione in blocco hanno regole proprie |
+| eBay File Exchange | Le colonne non riconosciute possono generare avvisi o errori |
+| File flat Amazon | Le colonne che non sono nel modello possono essere rifiutate |
+
+Su Shopify o WooCommerce le colonne in più sono di solito innocue. Per eBay, Amazon o un'app di pubblicazione in blocco per Etsy, elimina prima del caricamento le colonne che non sono nel modello ufficiale.
+
+---
+
+## Trovare le colonne in più
+
+**Confronta con il modello ufficiale:**
+
+1. Scarica il modello CSV ufficiale della piattaforma
+2. Apri il tuo file e il modello in un editor di testo (non in Excel)
+3. Confronta la riga 1 (le intestazioni) dei due file
+4. Ogni colonna del tuo file che non è nel modello è in più
+
+**Python: elencare le colonne in più**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Eliminare colonne in più in Excel
+
+1. Apri il CSV in Excel
+2. Fai clic sulla lettera di ogni colonna in più per selezionarla
+3. Clic destro → Elimina
+4. Per più colonne non adiacenti: tieni premuto Ctrl, fai clic sulla lettera di ogni colonna, poi clic destro → Elimina
+5. Salva come CSV UTF-8 (delimitato da virgole), non come XLSX
+
+**Eliminare l'ultima colonna se è vuota (residuo di una virgola finale):**
+
+1. Premi Ctrl+Fine per trovare l'ultima cella usata
+2. Se l'ultima colonna è vuota in tutto il file, selezionala ed eliminala
+3. Salva come CSV
+
+---
+
+## Eliminare colonne in più in Google Sheets
+
+1. Fai clic sulla lettera della colonna per selezionarla
+2. Clic destro → Elimina colonna
+3. Ripeti per tutte le colonne in più
+4. File → Scarica → Valori separati da virgole
+
+---
+
+## Eliminare colonne in più con Python (file grandi)
+
+Per i file grandi, lenti o scomodi da aprire in un foglio di calcolo:
+
+```python
+import csv
+
+# Colonne da mantenere (nomi esatti della piattaforma)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig evita che un BOM resti attaccato al primo nome di colonna
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Scrivere solo le colonne presenti in KEEP e nel file
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Correggere le virgole finali (colonna in più nascosta)
+
+Una virgola alla fine di ogni riga crea una colonna vuota in posizione N+1. Appare così:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+La colonna vuota dopo l'ultima virgola è una colonna in più, senza nome e senza valori.
+
+**Correzione con Python:** togli esattamente una virgola dalla fine di ogni riga. Togliere tutte le virgole finali cancellerebbe anche celle vuote reali alla fine di una riga.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Correzione in VS Code:** usa Trova e sostituisci in modalità espressione regolare. Cerca `,$` e sostituiscilo con niente. Fallo solo se ogni riga, intestazione compresa, termina con la virgola in più.
+
+---
+
+## Evitare colonne in più nelle prossime esportazioni
+
+- Elimina le colonne di supporto dal foglio prima di esportare (o tienile in un foglio separato)
+- Parti dal modello ufficiale della piattaforma e aggiungi solo colonne che ci sono nel modello
+- Se usi un gestionale personalizzato, configura l'esportazione perché produca solo le colonne supportate
+- Tieni una versione «esportazione pulita» del tuo modello con solo le colonne necessarie
+
+---
+
+## Correggilo automaticamente con StriveFormats
+
+StriveFormats confronta le colonne del tuo file con quelle attese dalla piattaforma scelta, individua le colonne in più e segnala quelle che causeranno errori di importazione sulle piattaforme più rigide.
+
+[Apri il correttore CSV](/app) | [Vedi i modelli CSV](/presets)

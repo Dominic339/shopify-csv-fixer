@@ -1,0 +1,163 @@
+---
+title: "CSV ファイルの余分な列を削除する"
+description: "Shopify、WooCommerce、Etsy、eBay、Amazon にインポートする前に、CSV ファイルの余分な列や想定外の列を見つけて削除する方法です。"
+keywords: ["csv 余分な列 削除", "csv 列 削除", "csv インポート 想定外の列", "csv 余分な列 エラー", "csv 列が多すぎる", "csv 列を消す", "csv 列 整理"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV ファイルに余分な列が入る理由と、それがインポートエラーになる理由"
+  - "余分な列を拒否するプラットフォームと、無視するプラットフォーム"
+  - "Excel と Google スプレッドシートで余分な列を見つけて削除する方法"
+  - "大きなファイルの余分な列を Python で取り除く方法"
+  - "今後の書き出しで余分な列ができるのを防ぐ方法"
+bestFor: "プラットフォームが想定していない列のせいで、インポートの失敗や思わぬ検証エラーが出ているセラー"
+timeToComplete: "6 分"
+---
+
+## 余分な列が CSV に入る理由
+
+CSV ファイルに余分な列ができる、よくある理由は次のとおりです。
+
+- **数式や補助列**：自分の計算のために追加した、インポートするつもりのない列
+- **メモや社内管理用の列**：`Internal Notes`、`Last Edited By`、`Supplier Cost` などの列
+- **エクスポートの残り**：在庫管理システムが、インポート先に必要な項目以上を書き出している
+- **複数のプラットフォームのファイルを合わせた**：2 つの違うテンプレートの列を組み合わせ、重複や余分な列ができた
+- **すべての行の末尾のカンマ**：末尾に見えない空の列ができる
+
+---
+
+## プラットフォームは余分な列を受け付けるか
+
+動きはプラットフォームによって違います。
+
+| プラットフォーム | 余分な列の扱い |
+|---|---|
+| Shopify | 黙って無視されるので問題ない |
+| WooCommerce | インポートされない（対応付けの画面で、知らない列は「Do not import」になる） |
+| Etsy | CSV アップロードがない（一括出品アプリが独自のルールを決める） |
+| eBay File Exchange | 認識できない列は警告やエラーの原因になることがある |
+| Amazon のフラットファイル | テンプレートにない列は拒否されることがある |
+
+Shopify や WooCommerce なら、余分な列はたいてい無害です。eBay、Amazon、Etsy の一括出品アプリでは、アップロードの前に公式テンプレートにない列を削除します。
+
+---
+
+## 余分な列を見つける
+
+**公式テンプレートと比べる**：
+
+1. プラットフォームの公式 CSV テンプレートをダウンロードします
+2. 自分のファイルとテンプレートを（Excel ではなく）テキストエディタで開きます
+3. 2 つのファイルの 1 行目（見出し）を比べます
+4. テンプレートになく、自分のファイルにある列は、すべて余分な列です
+
+**Python で余分な列を一覧にする**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Excel で余分な列を削除する
+
+1. CSV を Excel で開きます
+2. 余分な列の列番号（アルファベット）をクリックして選択します
+3. 右クリック → 削除
+4. 離れた複数の列を消すときは、Ctrl を押しながら各列の列番号をクリックし、右クリック → 削除
+5. XLSX ではなく、CSV UTF-8 (コンマ区切り) で保存します
+
+**最後の列が空なら削除する（行末のカンマの名残）**：
+
+1. Ctrl+End で最後に使われたセルを探します
+2. 最後の列がファイル全体で空なら、その列を選んで削除します
+3. CSV で保存します
+
+---
+
+## Google スプレッドシートで余分な列を削除する
+
+1. 列番号をクリックして列を選択します
+2. 右クリック → 列を削除
+3. 余分な列すべてで繰り返します
+4. ファイル → ダウンロード → カンマ区切り形式
+
+---
+
+## Python で余分な列を削除する（大きなファイル）
+
+スプレッドシートで開くと遅い、または扱いにくい大きなファイルの場合：
+
+```python
+import csv
+
+# 残す列（プラットフォームの列名を正確に書く）
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig を使うと、BOM が最初の列名にくっつかない
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # KEEP にあり、ファイルにもある列だけを書き出す
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## 行末のカンマを直す（隠れた余分な列）
+
+すべての行の末尾にカンマがあると、N+1 番目に空の列ができます。次のような状態です。
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+最後のカンマのあとの空の列は、名前も値もない余分な列です。
+
+**Python での直し方**：各行の末尾からカンマをちょうど 1 つだけ取り除きます。末尾のカンマをすべて取り除くと、行末にある本来の空セルまで消えてしまいます。
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**VS Code での直し方**：正規表現モードで検索と置換を使い、`,$` を検索して空文字に置き換えます。見出しを含むすべての行が余分なカンマで終わっている場合にだけ行ってください。
+
+---
+
+## 今後の書き出しで余分な列を防ぐ
+
+- 書き出す前に、スプレッドシートから補助列を削除します（または別のシートに置きます）
+- プラットフォームの公式テンプレートから始め、テンプレートにある列だけを追加します
+- 独自の在庫管理ソフトを使っているなら、対応している列だけを書き出すように設定します
+- 必要な列だけを入れた「きれいな書き出し用」のテンプレートを用意しておきます
+
+---
+
+## StriveFormats で自動的に直す
+
+StriveFormats は、ファイルの列を選んだプラットフォームが求める列と比べ、余分な列を特定し、厳しいプラットフォームでインポートエラーになる列を指摘します。
+
+[CSV 修正ツールを開く](/app) | [CSV テンプレートを見る](/presets)

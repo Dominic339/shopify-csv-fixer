@@ -1,0 +1,163 @@
+---
+title: "Überzählige Spalten in einer CSV entfernen"
+description: "So findest und entfernst du zusätzliche oder unerwartete Spalten aus einer CSV, bevor du sie zu Shopify, WooCommerce, Etsy, eBay oder Amazon importierst."
+keywords: ["überzählige spalten csv", "zusätzliche spalten csv entfernen", "unerwartete spalte csv import", "csv zusätzliche spalte fehler", "csv zu viele spalten", "spalten aus csv löschen", "csv spalten aufräumen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wie zusätzliche Spalten in CSV-Dateien entstehen und warum sie Importfehler verursachen"
+  - "Welche Plattformen zusätzliche Spalten ablehnen und welche sie stillschweigend ignorieren"
+  - "Wie du zusätzliche Spalten in Excel und Google Tabellen findest und entfernst"
+  - "Wie du zusätzliche Spalten bei großen Dateien mit Python entfernst"
+  - "Wie du verhinderst, dass in künftigen Exporten wieder zusätzliche Spalten auftauchen"
+bestFor: "Händler mit gescheiterten Importen oder unerwarteten Prüffehlern durch Spalten, die die Plattform nicht erwartet"
+timeToComplete: "6 Minuten"
+---
+
+## Wie zusätzliche Spalten in deine CSV kommen
+
+Zusätzliche Spalten entstehen in CSV-Dateien aus mehreren typischen Gründen:
+
+- **Formeln oder Hilfsspalten**: Spalten, die du für eigene Berechnungen angelegt hast und die nie importiert werden sollten
+- **Notiz- oder interne Spalten**: Spalten wie `Internal Notes`, `Last Edited By` oder `Supplier Cost`
+- **Überbleibsel von Exporten**: Dein Warenwirtschaftssystem exportiert mehr Felder, als die Importplattform braucht
+- **Zusammengeführte Plattformdateien**: Du hast Spalten aus zwei verschiedenen Vorlagen kombiniert, und nun gibt es doppelte oder überzählige
+- **Ein Komma am Ende jeder Zeile**: erzeugt eine unsichtbare leere Spalte am Ende
+
+---
+
+## Akzeptiert deine Plattform zusätzliche Spalten?
+
+Das Verhalten hängt von der Plattform ab:
+
+| Plattform | Verhalten bei zusätzlichen Spalten |
+|---|---|
+| Shopify | Werden stillschweigend ignoriert, kein Problem |
+| WooCommerce | Werden nicht importiert: Die Zuordnungsseite setzt unbekannte Spalten auf „Do not import“ |
+| Etsy | Kein CSV-Upload; Apps für Massen-Einstellungen legen eigene Regeln fest |
+| eBay File Exchange | Nicht erkannte Spalten können Warnungen oder Fehler auslösen |
+| Amazon-Flatfiles | Spalten, die nicht in der Vorlage stehen, können abgelehnt werden |
+
+Bei Shopify oder WooCommerce sind zusätzliche Spalten meist harmlos. Für eBay, Amazon oder eine Etsy-App für Massen-Einstellungen entfernst du vor dem Hochladen alle Spalten, die nicht in der offiziellen Vorlage stehen.
+
+---
+
+## Zusätzliche Spalten finden
+
+**Mit der offiziellen Vorlage vergleichen:**
+
+1. Lade die offizielle CSV-Vorlage der Plattform herunter
+2. Öffne deine Datei und die Vorlage in einem Texteditor (nicht in Excel)
+3. Vergleiche Zeile 1 (die Spaltenköpfe) der beiden Dateien
+4. Jede Spalte in deiner Datei, die nicht in der Vorlage steht, ist überzählig
+
+**Python: zusätzliche Spalten auflisten**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Zusätzliche Spalten in Excel entfernen
+
+1. Öffne die CSV in Excel
+2. Klicke auf den Spaltenbuchstaben jeder zusätzlichen Spalte, um sie zu markieren
+3. Rechtsklick → Zellen löschen
+4. Bei mehreren nicht nebeneinanderliegenden Spalten: Halte Strg gedrückt, klicke auf jeden Spaltenbuchstaben und wähle dann Rechtsklick → Zellen löschen
+5. Speichere als CSV UTF-8 (durch Trennzeichen getrennt), nicht als XLSX
+
+**Die letzte Spalte entfernen, wenn sie leer ist (Überbleibsel eines Kommas am Zeilenende):**
+
+1. Drücke Strg+Ende, um die letzte benutzte Zelle zu finden
+2. Ist die letzte Spalte in der ganzen Datei leer, markiere sie und lösche sie
+3. Speichere als CSV
+
+---
+
+## Zusätzliche Spalten in Google Tabellen entfernen
+
+1. Klicke auf den Spaltenbuchstaben, um die Spalte zu markieren
+2. Rechtsklick → Spalte löschen
+3. Wiederhole das für alle zusätzlichen Spalten
+4. Datei → Herunterladen → Kommagetrennte Werte
+
+---
+
+## Zusätzliche Spalten mit Python entfernen (große Dateien)
+
+Für große Dateien, bei denen das Öffnen in einer Tabelle langsam oder unpraktisch ist:
+
+```python
+import csv
+
+# Spalten, die bleiben sollen (exakte Spaltennamen der Plattform)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig verhindert, dass ein BOM am ersten Spaltennamen hängen bleibt
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Nur Spalten schreiben, die in KEEP und in der Datei vorkommen
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Kommas am Zeilenende beheben (versteckte zusätzliche Spalte)
+
+Ein Komma am Ende jeder Zeile erzeugt eine leere Spalte an Position N+1. Das sieht so aus:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+Die leere Spalte nach dem letzten Komma ist eine zusätzliche Spalte ohne Namen und ohne Werte.
+
+**Lösung mit Python:** Entferne am Ende jeder Zeile genau ein Komma. Würdest du alle Kommas am Ende entfernen, gingen auch echte leere Zellen am Zeilenende verloren.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Lösung in VS Code:** Nutze Suchen und Ersetzen im Regex-Modus. Suche nach `,$` und ersetze es durch nichts. Tu das nur, wenn jede Zeile, auch die Kopfzeile, mit dem zusätzlichen Komma endet.
+
+---
+
+## Zusätzliche Spalten in künftigen Exporten verhindern
+
+- Lösche Hilfsspalten vor dem Export aus deiner Tabelle (oder führe sie in einem eigenen Tabellenblatt)
+- Beginne mit der offiziellen Vorlage der Plattform und füge nur Spalten hinzu, die in der Vorlage stehen
+- Nutzt du eigene Warenwirtschaftssoftware, stelle den Export so ein, dass nur unterstützte Spalten ausgegeben werden
+- Halte eine „saubere Export“-Version deiner Tabellenvorlage bereit, die nur die benötigten Spalten enthält
+
+---
+
+## Automatisch beheben mit StriveFormats
+
+StriveFormats vergleicht die Spalten deiner Datei mit den erwarteten Spalten der gewählten Plattform, erkennt zusätzliche Spalten und markiert Spalten, die auf strengen Plattformen Importfehler verursachen.
+
+[CSV-Fixer öffnen](/app) | [CSV-Vorlagen ansehen](/presets)

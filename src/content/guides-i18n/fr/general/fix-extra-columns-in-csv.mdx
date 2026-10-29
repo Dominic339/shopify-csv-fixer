@@ -1,0 +1,163 @@
+---
+title: "Supprimer les colonnes en trop d'un fichier CSV"
+description: "Comment trouver et supprimer les colonnes en trop ou inattendues d'un fichier CSV avant de l'importer dans Shopify, WooCommerce, Etsy, eBay ou Amazon."
+keywords: ["supprimer colonnes en trop csv", "retirer colonnes csv", "colonne inattendue import csv", "erreur colonne en trop csv", "csv trop de colonnes", "effacer colonnes csv", "nettoyer colonnes csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Comment des colonnes en trop arrivent dans un CSV et pourquoi elles provoquent des erreurs d'import"
+  - "Quelles plateformes refusent les colonnes en trop et lesquelles les ignorent"
+  - "Comment repérer et supprimer les colonnes en trop dans Excel et Google Sheets"
+  - "Comment retirer des colonnes en trop avec Python pour les gros fichiers"
+  - "Comment éviter que des colonnes en trop reviennent dans vos exports"
+bestFor: "Vendeurs confrontés à des imports échoués ou à des erreurs de validation inattendues causées par des colonnes que la plateforme n'attend pas"
+timeToComplete: "6 minutes"
+---
+
+## Comment des colonnes en trop arrivent dans votre CSV
+
+Les colonnes en trop apparaissent dans les CSV pour plusieurs raisons courantes :
+
+- **Formules ou colonnes auxiliaires** : des colonnes ajoutées pour vos propres calculs, qui n'ont jamais été destinées à l'import
+- **Colonnes de notes ou de suivi interne** : par exemple `Internal Notes`, `Last Edited By` ou `Supplier Cost`
+- **Restes d'export** : votre logiciel de stock exporte plus de champs que la plateforme d'import n'en a besoin
+- **Fichiers de plateformes fusionnés** : vous avez combiné les colonnes de deux modèles différents et le résultat contient des doublons ou des colonnes en trop
+- **Une virgule à la fin de chaque ligne** : elle crée une colonne vide invisible à la fin
+
+---
+
+## Votre plateforme accepte-t-elle les colonnes en trop ?
+
+Le comportement dépend de la plateforme :
+
+| Plateforme | Ce qui arrive aux colonnes en trop |
+|---|---|
+| Shopify | Ignorées sans avertissement, pas de problème |
+| WooCommerce | Pas importées : l'écran de correspondance règle les colonnes inconnues sur « Do not import » |
+| Etsy | Pas d'envoi de CSV ; les applications de mise en ligne en masse fixent leurs propres règles |
+| eBay File Exchange | Les colonnes non reconnues peuvent provoquer des avertissements ou des erreurs |
+| Fichiers plats Amazon | Les colonnes absentes du modèle peuvent être rejetées |
+
+Sur Shopify ou WooCommerce, les colonnes en trop sont généralement sans conséquence. Pour eBay, Amazon ou une application de mise en ligne en masse pour Etsy, supprimez avant l'envoi les colonnes absentes du modèle officiel.
+
+---
+
+## Trouver les colonnes en trop
+
+**Comparer au modèle officiel :**
+
+1. Téléchargez le modèle CSV officiel de la plateforme
+2. Ouvrez votre fichier et le modèle dans un éditeur de texte (pas dans Excel)
+3. Comparez la ligne 1 (les en-têtes) des deux fichiers
+4. Toute colonne de votre fichier absente du modèle est en trop
+
+**Python : lister les colonnes en trop**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Supprimer des colonnes en trop dans Excel
+
+1. Ouvrez le CSV dans Excel
+2. Cliquez sur la lettre de chaque colonne en trop pour la sélectionner
+3. Clic droit → Supprimer
+4. Pour plusieurs colonnes non adjacentes : maintenez Ctrl, cliquez sur la lettre de chaque colonne, puis clic droit → Supprimer
+5. Enregistrez au format CSV UTF-8 (délimité par des virgules), pas en XLSX
+
+**Supprimer la dernière colonne si elle est vide (reste d'une virgule finale) :**
+
+1. Appuyez sur Ctrl+Fin pour trouver la dernière cellule utilisée
+2. Si la dernière colonne est vide dans tout le fichier, sélectionnez-la et supprimez-la
+3. Enregistrez en CSV
+
+---
+
+## Supprimer des colonnes en trop dans Google Sheets
+
+1. Cliquez sur la lettre de la colonne pour la sélectionner
+2. Clic droit → Supprimer la colonne
+3. Répétez pour toutes les colonnes en trop
+4. Fichier → Télécharger → Valeurs séparées par des virgules
+
+---
+
+## Supprimer des colonnes en trop avec Python (gros fichiers)
+
+Pour les gros fichiers, lents ou peu pratiques à ouvrir dans un tableur :
+
+```python
+import csv
+
+# Colonnes à garder (noms exacts de la plateforme)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig évite qu'un BOM reste collé au premier nom de colonne
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # N'écrire que les colonnes présentes dans KEEP et dans le fichier
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Corriger les virgules en fin de ligne (colonne en trop cachée)
+
+Une virgule à la fin de chaque ligne crée une colonne vide en position N+1. Cela ressemble à ceci :
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+La colonne vide après la dernière virgule est une colonne en trop, sans nom et sans valeurs.
+
+**Correction avec Python :** retirez exactement une virgule à la fin de chaque ligne. Retirer toutes les virgules finales supprimerait aussi de vraies cellules vides en fin de ligne.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Correction dans VS Code :** utilisez Rechercher et remplacer en mode expression régulière. Recherchez `,$` et remplacez-le par rien. Ne le faites que si chaque ligne, en-tête compris, se termine par la virgule en trop.
+
+---
+
+## Éviter les colonnes en trop dans vos prochains exports
+
+- Supprimez les colonnes auxiliaires de votre tableur avant l'export (ou gardez-les dans une feuille séparée)
+- Partez du modèle officiel de la plateforme et n'ajoutez que des colonnes qui y figurent
+- Si vous utilisez un logiciel de stock, configurez l'export pour qu'il ne produise que les colonnes prises en charge
+- Gardez une version « export propre » de votre modèle de tableur avec uniquement les colonnes nécessaires
+
+---
+
+## Corrigez-le automatiquement avec StriveFormats
+
+StriveFormats compare les colonnes de votre fichier à celles qu'attend la plateforme choisie, repère les colonnes en trop et signale celles qui provoqueront des erreurs d'import sur les plateformes strictes.
+
+[Ouvrir le correcteur CSV](/app) | [Voir les modèles CSV](/presets)

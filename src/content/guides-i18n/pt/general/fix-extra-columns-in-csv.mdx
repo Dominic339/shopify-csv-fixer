@@ -1,0 +1,163 @@
+---
+title: "Remover colunas extras de um arquivo CSV"
+description: "Como encontrar e remover colunas extras ou inesperadas de um arquivo CSV antes de importar no Shopify, WooCommerce, Etsy, eBay ou Amazon."
+keywords: ["remover colunas extras csv", "excluir colunas csv", "coluna inesperada importação csv", "erro coluna extra csv", "csv colunas demais", "apagar colunas csv", "limpar colunas csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Como colunas extras aparecem nos arquivos CSV e por que causam erros de importação"
+  - "Quais plataformas rejeitam colunas extras e quais as ignoram"
+  - "Como encontrar e remover colunas extras no Excel e no Google Sheets"
+  - "Como remover colunas extras com Python em arquivos grandes"
+  - "Como evitar que colunas extras voltem nas próximas exportações"
+bestFor: "Vendedores com importações que falham ou erros de validação inesperados por causa de colunas que a plataforma não espera"
+timeToComplete: "6 minutos"
+---
+
+## Como colunas extras entram no seu CSV
+
+Colunas extras aparecem em arquivos CSV por vários motivos comuns:
+
+- **Fórmulas ou colunas auxiliares**: colunas que você criou para seus próprios cálculos e que nunca deveriam ser importadas
+- **Colunas de notas ou controle interno**: colunas como `Internal Notes`, `Last Edited By` ou `Supplier Cost`
+- **Sobras de exportação**: seu sistema de estoque exporta mais campos do que a plataforma precisa
+- **Arquivos de plataformas mesclados**: você juntou colunas de dois modelos diferentes e o resultado tem duplicadas ou sobrando
+- **Uma vírgula no fim de cada linha**: cria uma coluna vazia invisível no fim
+
+---
+
+## Sua plataforma aceita colunas extras?
+
+O comportamento varia conforme a plataforma:
+
+| Plataforma | O que acontece com colunas extras |
+|---|---|
+| Shopify | São ignoradas sem aviso, não é problema |
+| WooCommerce | Não são importadas: a tela de mapeamento marca colunas desconhecidas como "Do not import" |
+| Etsy | Não tem envio de CSV; os apps de publicação em massa definem as próprias regras |
+| eBay File Exchange | Colunas não reconhecidas podem gerar avisos ou erros |
+| Arquivos flat da Amazon | Colunas que não estão no modelo podem ser rejeitadas |
+
+No Shopify ou no WooCommerce, colunas extras costumam ser inofensivas. Para o eBay, a Amazon ou um app de publicação em massa da Etsy, remova antes de enviar as colunas que não estão no modelo oficial.
+
+---
+
+## Encontrar colunas extras
+
+**Compare com o modelo oficial:**
+
+1. Baixe o modelo CSV oficial da plataforma
+2. Abra seu arquivo e o modelo num editor de texto (não no Excel)
+3. Compare a linha 1 (cabeçalhos) dos dois arquivos
+4. Qualquer coluna do seu arquivo que não esteja no modelo é extra
+
+**Python: listar as colunas extras**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Remover colunas extras no Excel
+
+1. Abra o CSV no Excel
+2. Clique na letra de cada coluna extra para selecioná-la
+3. Botão direito → Excluir
+4. Para várias colunas não vizinhas: segure Ctrl, clique na letra de cada coluna e depois botão direito → Excluir
+5. Salve como CSV UTF-8 (delimitado por vírgulas), não como XLSX
+
+**Remover a última coluna se ela estiver vazia (sobra de vírgula no fim da linha):**
+
+1. Pressione Ctrl+End para achar a última célula usada
+2. Se a última coluna estiver vazia no arquivo todo, selecione-a e exclua
+3. Salve como CSV
+
+---
+
+## Remover colunas extras no Google Sheets
+
+1. Clique na letra da coluna para selecioná-la
+2. Botão direito → Excluir coluna
+3. Repita para todas as colunas extras
+4. Arquivo → Fazer download → Valores separados por vírgula
+
+---
+
+## Remover colunas extras com Python (arquivos grandes)
+
+Para arquivos grandes, lentos ou difíceis de abrir numa planilha:
+
+```python
+import csv
+
+# Colunas que ficam (use os nomes exatos da plataforma)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig impede que um BOM fique grudado no primeiro nome de coluna
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Gravar só as colunas que estão em KEEP e no arquivo
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Corrigir vírgulas no fim da linha (coluna extra escondida)
+
+Uma vírgula no fim de cada linha cria uma coluna vazia na posição N+1. Fica assim:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+A coluna vazia depois da última vírgula é uma coluna extra, sem nome e sem valores.
+
+**Correção com Python:** remova exatamente uma vírgula do fim de cada linha. Remover todas as vírgulas finais apagaria também células vazias reais no fim de uma linha.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Correção no VS Code:** use Localizar e Substituir com o modo de expressão regular. Procure `,$` e substitua por nada. Só faça isso se todas as linhas, inclusive o cabeçalho, terminarem com a vírgula extra.
+
+---
+
+## Evitar colunas extras nas próximas exportações
+
+- Exclua as colunas auxiliares da planilha antes de exportar (ou deixe-as numa aba separada)
+- Comece pelo modelo oficial da plataforma e só acrescente colunas que estão nele
+- Se você usa um sistema de estoque próprio, configure a exportação para gerar só as colunas aceitas
+- Mantenha uma versão de "exportação limpa" do seu modelo, só com as colunas necessárias
+
+---
+
+## Corrija automaticamente com o StriveFormats
+
+O StriveFormats compara as colunas do seu arquivo com as que a plataforma escolhida espera, identifica colunas extras e aponta as que vão causar erros de importação em plataformas rígidas.
+
+[Abrir o corretor de CSV](/app) | [Ver modelos de CSV](/presets)

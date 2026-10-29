@@ -1,0 +1,163 @@
+---
+title: "CSV 파일의 불필요한 열 삭제하기"
+description: "Shopify, WooCommerce, Etsy, eBay, Amazon에 가져오기 전에 CSV 파일의 불필요하거나 예상치 못한 열을 찾아 삭제하는 방법입니다."
+keywords: ["csv 불필요한 열 삭제", "csv 열 제거", "csv 가져오기 예상치 못한 열", "csv 여분 열 오류", "csv 열이 너무 많음", "csv 열 지우기", "csv 열 정리"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV 파일에 여분의 열이 생기는 이유와 그것이 가져오기 오류를 일으키는 이유"
+  - "여분의 열을 거부하는 플랫폼과 무시하는 플랫폼"
+  - "Excel과 Google 스프레드시트에서 여분의 열을 찾아 지우는 방법"
+  - "큰 파일의 여분 열을 Python으로 제거하는 방법"
+  - "앞으로의 내보내기에서 여분의 열이 생기지 않게 하는 방법"
+bestFor: "플랫폼이 예상하지 않는 열 때문에 가져오기 실패나 예상치 못한 검증 오류를 겪는 판매자"
+timeToComplete: "6분"
+---
+
+## CSV에 여분의 열이 생기는 이유
+
+CSV 파일에 여분의 열이 생기는 흔한 이유는 다음과 같습니다.
+
+- **수식이나 보조 열**: 직접 계산하려고 추가했지만 가져올 생각이 없던 열
+- **메모나 내부 관리용 열**: `Internal Notes`, `Last Edited By`, `Supplier Cost` 같은 열
+- **내보내기에서 남은 열**: 재고 관리 시스템이 가져오기 플랫폼에 필요한 것보다 많은 필드를 내보냄
+- **여러 플랫폼 파일을 합침**: 서로 다른 두 템플릿의 열을 합쳐 중복되거나 남는 열이 생김
+- **모든 행 끝의 쉼표**: 끝에 보이지 않는 빈 열이 생김
+
+---
+
+## 플랫폼이 여분의 열을 받아들이나요?
+
+동작은 플랫폼마다 다릅니다.
+
+| 플랫폼 | 여분 열의 처리 |
+|---|---|
+| Shopify | 조용히 무시되므로 문제없음 |
+| WooCommerce | 가져오지 않음: 매핑 화면이 모르는 열을 "Do not import"로 설정함 |
+| Etsy | CSV 업로드가 없음. 대량 등록 앱이 자체 규칙을 정함 |
+| eBay File Exchange | 인식할 수 없는 열이 경고나 오류를 낼 수 있음 |
+| Amazon 플랫 파일 | 템플릿에 없는 열은 거부될 수 있음 |
+
+Shopify나 WooCommerce에서는 여분의 열이 대개 해가 없습니다. eBay, Amazon, Etsy 대량 등록 앱을 쓴다면 업로드하기 전에 공식 템플릿에 없는 열을 지우세요.
+
+---
+
+## 여분의 열 찾기
+
+**공식 템플릿과 비교하기:**
+
+1. 플랫폼의 공식 CSV 템플릿을 다운로드합니다
+2. 내 파일과 템플릿을 텍스트 편집기(Excel 아님)로 엽니다
+3. 두 파일의 1행(머리글)을 비교합니다
+4. 템플릿에는 없고 내 파일에만 있는 열은 모두 여분의 열입니다
+
+**Python: 여분의 열 목록 만들기**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Excel에서 여분의 열 지우기
+
+1. CSV를 Excel로 엽니다
+2. 여분의 열마다 열 문자를 클릭해 선택합니다
+3. 마우스 오른쪽 클릭 → 삭제
+4. 떨어져 있는 여러 열은 Ctrl을 누른 채 각 열 문자를 클릭한 다음 마우스 오른쪽 클릭 → 삭제
+5. XLSX가 아니라 CSV UTF-8(쉼표로 분리)로 저장합니다
+
+**마지막 열이 비어 있다면 지우기(행 끝 쉼표의 흔적):**
+
+1. Ctrl+End를 눌러 마지막으로 사용한 셀을 찾습니다
+2. 마지막 열이 파일 전체에서 비어 있다면 그 열을 선택해 지웁니다
+3. CSV로 저장합니다
+
+---
+
+## Google 스프레드시트에서 여분의 열 지우기
+
+1. 열 문자를 클릭해 열을 선택합니다
+2. 마우스 오른쪽 클릭 → 열 삭제
+3. 모든 여분의 열에 대해 반복합니다
+4. 파일 → 다운로드 → 쉼표로 구분된 값
+
+---
+
+## Python으로 여분의 열 지우기(큰 파일)
+
+스프레드시트로 열면 느리거나 다루기 힘든 큰 파일이라면:
+
+```python
+import csv
+
+# 남길 열(플랫폼의 정확한 열 이름 사용)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig를 쓰면 BOM이 첫 열 이름에 붙지 않습니다
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # KEEP에 있고 파일에도 있는 열만 기록
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## 행 끝 쉼표 고치기(숨은 여분 열)
+
+모든 행 끝에 쉼표가 있으면 N+1번째에 빈 열이 생깁니다. 다음과 같은 모습입니다.
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+마지막 쉼표 뒤의 빈 열은 이름도 값도 없는 여분의 열입니다.
+
+**Python으로 고치기:** 각 줄 끝에서 쉼표를 정확히 하나만 지우세요. 끝의 쉼표를 모두 지우면 행 끝에 있는 실제 빈 셀까지 사라집니다.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**VS Code에서 고치기:** 정규식 모드로 찾기 및 바꾸기를 쓰세요. `,$`를 찾아 빈 값으로 바꿉니다. 머리글을 포함한 모든 행이 여분의 쉼표로 끝날 때만 이렇게 하세요.
+
+---
+
+## 앞으로의 내보내기에서 여분의 열 막기
+
+- 내보내기 전에 스프레드시트에서 보조 열을 지우세요(또는 별도 시트에 두세요)
+- 플랫폼의 공식 템플릿에서 시작하고 템플릿에 있는 열만 추가하세요
+- 자체 재고 관리 소프트웨어를 쓴다면 지원되는 열만 내보내도록 설정하세요
+- 필요한 열만 담은 "깨끗한 내보내기"용 템플릿을 따로 두세요
+
+---
+
+## StriveFormats로 자동 수정하기
+
+StriveFormats는 파일의 열을 선택한 플랫폼이 기대하는 열과 비교해 여분의 열을 찾아내고, 엄격한 플랫폼에서 가져오기 오류를 일으킬 열을 표시합니다.
+
+[CSV 수정기 열기](/app) | [CSV 템플릿 보기](/presets)

@@ -1,0 +1,163 @@
+---
+title: "Extra kolommen uit een CSV-bestand verwijderen"
+description: "Hoe je extra of onverwachte kolommen in een CSV-bestand vindt en verwijdert voordat je importeert in Shopify, WooCommerce, Etsy, eBay of Amazon."
+keywords: ["extra kolommen csv verwijderen", "kolommen uit csv halen", "onverwachte kolom csv import", "csv extra kolom fout", "csv te veel kolommen", "kolommen csv wissen", "csv kolommen opschonen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Hoe extra kolommen in CSV-bestanden terechtkomen en waarom ze importfouten geven"
+  - "Welke platforms extra kolommen afwijzen en welke ze negeren"
+  - "Hoe je extra kolommen vindt en verwijdert in Excel en Google Spreadsheets"
+  - "Hoe je extra kolommen in grote bestanden met Python weghaalt"
+  - "Hoe je voorkomt dat extra kolommen terugkomen in je exports"
+bestFor: "Verkopers met mislukte imports of onverwachte validatiefouten door kolommen die het platform niet verwacht"
+timeToComplete: "6 minuten"
+---
+
+## Hoe extra kolommen in je CSV komen
+
+Extra kolommen ontstaan in CSV-bestanden om een paar veelvoorkomende redenen:
+
+- **Formules of hulpkolommen**: kolommen die je voor je eigen berekeningen hebt toegevoegd en die nooit bedoeld waren om te importeren
+- **Notitiekolommen of interne kolommen**: kolommen zoals `Internal Notes`, `Last Edited By` of `Supplier Cost`
+- **Restanten van exports**: je voorraadsysteem exporteert meer velden dan het importplatform nodig heeft
+- **Samengevoegde platformbestanden**: je hebt kolommen uit twee verschillende sjablonen gecombineerd en nu zijn er dubbele of overbodige
+- **Een komma aan het eind van elke rij**: maakt een onzichtbare lege kolom aan het eind
+
+---
+
+## Accepteert je platform extra kolommen?
+
+Dat verschilt per platform:
+
+| Platform | Wat er met extra kolommen gebeurt |
+|---|---|
+| Shopify | Worden zonder melding genegeerd, geen probleem |
+| WooCommerce | Worden niet geïmporteerd: het koppelscherm zet onbekende kolommen op "Do not import" |
+| Etsy | Geen CSV-upload; apps voor bulkplaatsing hanteren eigen regels |
+| eBay File Exchange | Onbekende kolommen kunnen waarschuwingen of fouten geven |
+| Amazon-flatfiles | Kolommen die niet in het sjabloon staan, kunnen worden afgewezen |
+
+Bij Shopify of WooCommerce zijn extra kolommen meestal onschuldig. Voor eBay, Amazon of een Etsy-app voor bulkplaatsing verwijder je vóór het uploaden de kolommen die niet in het officiële sjabloon staan.
+
+---
+
+## Extra kolommen vinden
+
+**Vergelijk met het officiële sjabloon:**
+
+1. Download het officiële CSV-sjabloon van het platform
+2. Open je bestand en het sjabloon in een teksteditor (niet in Excel)
+3. Vergelijk rij 1 (de kolomkoppen) van beide bestanden
+4. Elke kolom in je bestand die niet in het sjabloon staat, is extra
+
+**Python: extra kolommen opsommen**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Extra kolommen verwijderen in Excel
+
+1. Open de CSV in Excel
+2. Klik op de kolomletter van elke extra kolom om die te selecteren
+3. Rechtermuisknop → Verwijderen
+4. Bij meerdere kolommen die niet naast elkaar staan: houd Ctrl ingedrukt, klik op elke kolomletter en kies daarna rechtermuisknop → Verwijderen
+5. Sla op als CSV UTF-8 (door komma's gescheiden), niet als XLSX
+
+**De laatste kolom verwijderen als die leeg is (restant van een komma aan het eind):**
+
+1. Druk op Ctrl+End om de laatst gebruikte cel te vinden
+2. Is de laatste kolom in het hele bestand leeg, selecteer die dan en verwijder hem
+3. Sla op als CSV
+
+---
+
+## Extra kolommen verwijderen in Google Spreadsheets
+
+1. Klik op de kolomletter om de kolom te selecteren
+2. Rechtermuisknop → Kolom verwijderen
+3. Herhaal dit voor alle extra kolommen
+4. Bestand → Downloaden → Kommagescheiden waarden
+
+---
+
+## Extra kolommen verwijderen met Python (grote bestanden)
+
+Voor grote bestanden die traag of lastig in een spreadsheet te openen zijn:
+
+```python
+import csv
+
+# Kolommen die blijven (gebruik de exacte kolomnamen van het platform)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig voorkomt dat een BOM aan de eerste kolomnaam blijft hangen
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Alleen kolommen schrijven die in KEEP én in het bestand staan
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Komma's aan het eind herstellen (verborgen extra kolom)
+
+Een komma aan het eind van elke rij maakt een lege kolom op positie N+1. Dat ziet er zo uit:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+De lege kolom na de laatste komma is een extra kolom zonder naam en zonder waarden.
+
+**Oplossing met Python:** haal aan het eind van elke regel precies één komma weg. Als je alle komma's aan het eind weghaalt, verdwijnen ook echte lege cellen aan het eind van een rij.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Oplossing in VS Code:** gebruik Zoeken en vervangen in regex-modus. Zoek naar `,$` en vervang het door niets. Doe dat alleen als elke rij, ook de koprij, op de extra komma eindigt.
+
+---
+
+## Extra kolommen in toekomstige exports voorkomen
+
+- Verwijder hulpkolommen uit je spreadsheet voordat je exporteert (of bewaar ze op een apart werkblad)
+- Begin met het officiële sjabloon van het platform en voeg alleen kolommen toe die in het sjabloon staan
+- Gebruik je eigen voorraadsoftware, stel de export dan zo in dat alleen ondersteunde kolommen worden uitgevoerd
+- Houd een "schone export"-versie van je spreadsheetsjabloon bij met alleen de nodige kolommen
+
+---
+
+## Automatisch oplossen met StriveFormats
+
+StriveFormats vergelijkt de kolommen van je bestand met de kolommen die het gekozen platform verwacht, herkent extra kolommen en markeert kolommen die op strenge platforms importfouten veroorzaken.
+
+[CSV-fixer openen](/app) | [CSV-sjablonen bekijken](/presets)
