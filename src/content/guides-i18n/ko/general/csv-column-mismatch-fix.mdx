@@ -1,0 +1,152 @@
+---
+title: "CSV 열 불일치 오류 해결"
+description: "CSV 가져오기의 열 불일치 오류를 진단하고 해결하는 방법입니다. 잘못된 열 이름, 대소문자 차이, 불필요한 공백, 플랫폼별 열 순서 문제를 다룹니다."
+keywords: ["csv 열 불일치", "csv 열 이름 오류", "csv 헤더 불일치", "csv 가져오기 열 오류", "csv 열 수정", "csv 열 매핑 오류", "csv 헤더 인식 안 됨"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV 가져오기에서 열 불일치 오류가 생기는 원인"
+  - "머리글을 플랫폼이 기대하는 열과 비교하는 방법"
+  - "대소문자 차이, 불필요한 공백, 이름을 바꾼 열을 고치는 방법"
+  - "가져오기를 망가뜨리지 않고 여분의 열이나 빠진 열을 다루는 방법"
+  - "플랫폼의 공식 템플릿을 출발점으로 쓰는 방법"
+bestFor: "플랫폼이 인식할 수 없거나 빠진 열을 보고해 가져오기가 실패하는 판매자"
+timeToComplete: "7분"
+---
+
+## 열 불일치란?
+
+열 불일치는 CSV 머리글 행의 열 이름이 가져오기 플랫폼이 기대하는 것과 맞지 않을 때 생깁니다. 플랫폼은 열 이름으로 데이터를 올바른 상품 필드에 연결합니다. 열 이름이 공백 하나나 글자 하나만 달라도 플랫폼은 그 열을 무시하거나(데이터가 조용히 사라짐) 가져오기 전체를 거부합니다.
+
+열 불일치는 "아무것도 가져오지 않음"이나 "모든 필드가 비어 있음" 문제의 가장 흔한 원인 중 하나입니다.
+
+---
+
+## 열 불일치의 흔한 원인
+
+### 1. 이름을 바꾼 열
+
+필수 열의 이름을 나에게는 이해되지만 플랫폼에는 통하지 않는 이름으로 바꾼 경우입니다.
+
+| 내가 쓴 이름 | 플랫폼이 기대하는 이름 |
+|---|---|
+| `Product Title` | `Title`(Shopify) |
+| `product_name` | `Name`(WooCommerce) |
+| `Item Name` | `item_name`(Amazon) |
+| `Listing Title` | `TITLE`(Etsy 내보내기) |
+| `Listing Title` | `Title`(eBay) |
+
+**해결 방법:** 플랫폼의 열 이름을 정확히 쓰세요. 알아보기 쉽게 하려고 단어를 더하거나 이름을 바꾸지 마세요.
+
+### 2. 잘못된 대소문자
+
+일부 가져오기 도구는 대소문자를 구분해 열 이름을 비교하므로, 템플릿의 표기를 그대로 쓰는 것만이 안전합니다.
+
+| 잘못됨 | 올바름 |
+|---|---|
+| `handle` | `Handle`(Shopify) |
+| `TITLE` | `Title`(Shopify) |
+| `Variant price` | `Variant Price`(Shopify) |
+| `regular_price` | `Regular price`(WooCommerce) |
+
+**해결 방법:** 한 글자씩 비교하세요. `Regular Price`와 `Regular price`(소문자 p)의 차이도 문제가 될 수 있습니다. WooCommerce는 가져오기 중에 매핑 화면을 보여 주며, 인식하지 못한 열마다 올바른 필드를 고를 수 있습니다.
+
+### 3. 앞뒤 공백
+
+스프레드시트는 열 이름 앞뒤에 몰래 공백을 넣을 수 있습니다. 플랫폼은 `" Title"`(앞에 공백)을 `"Title"`과 완전히 다른 열로 봅니다.
+
+**찾는 방법:** CSV를 스프레드시트가 아닌 일반 텍스트 편집기로 열고 첫 줄을 그대로 보세요. 열 이름 앞뒤의 공백이 거기서 보입니다.
+
+**Excel에서 고치기:** 공백에 찾기 및 바꾸기를 쓰지 마세요. `Variant Price` 같은 이름 안의 공백까지 지워집니다. 대신 빈 행에 `=TRIM(A1)`을 입력하고 모든 열에 걸쳐 오른쪽으로 채운 다음, 그 행을 복사해 선택하여 붙여넣기 > 값으로 1행에 덮어쓰세요. 그런 다음 보조 행을 지우세요.
+
+**Python으로 고치기:**
+
+```python
+import csv
+
+# utf-8-sig는 strip()이 남겨 두는 BOM도 제거합니다
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # 모든 열 이름에서 공백 제거
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. BOM이 첫 열 이름을 망가뜨림
+
+파일을 "BOM이 있는 UTF-8"로 저장했다면 첫 열 이름 앞에 보이지 않는 3바이트가 붙습니다. Excel에서는 `Handle`로 보이는 머리글이 BOM을 예상하지 않는 도구에는 `﻿Handle`로 전달되어 더는 일치하지 않을 수 있습니다.
+
+**해결 방법:** 가져오기 도구가 첫 열을 인식하지 못한다고 하면 BOM 없이 다시 저장하세요. VS Code에서 인코딩 표시 클릭 → "Save with Encoding" → UTF-8(BOM 없음)을 선택하세요.
+
+### 5. 열 순서 문제
+
+일부 플랫폼은 정해진 순서의 열을 요구합니다(eBay File Exchange, 일부 Amazon 플랫 파일 템플릿). Excel에서 열 순서를 바꾸면 열 이름이 맞더라도 가져오기가 깨질 수 있습니다.
+
+**해결 방법:** 내 파일의 열 순서를 바꾸지 말고, 플랫폼에서 새 템플릿을 다운로드해 그 안에 데이터를 붙여 넣으세요.
+
+---
+
+## 머리글을 플랫폼 템플릿과 비교하는 방법
+
+1. 플랫폼의 공식 CSV 템플릿을 다운로드합니다
+2. 두 파일을 텍스트 편집기(Excel 아님)로 엽니다
+3. 두 머리글 행(1행)을 비교 도구에 복사하거나 직접 비교합니다
+4. 다른 글자, 불필요한 공백, 다른 대소문자, 여분의 열이나 빠진 열을 찾습니다
+
+**온라인 비교 도구:** 두 머리글 행을 붙여 넣고 나란히 비교하세요.
+
+**Python으로 비교하기:**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# BOM은 utf-8-sig가 이미 제거했으니 공백을 제거
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## 여분의 열 다루기
+
+플랫폼이 인식하지 못하는 여분의 열이 파일에 있다면:
+
+- **대부분의 플랫폼**(Shopify, WooCommerce): 여분의 열은 조용히 무시되므로 문제가 되지 않습니다
+- **Amazon 플랫 파일**: 템플릿에 없는 열은 거부될 수 있습니다
+- **eBay File Exchange**: 인식할 수 없는 열은 경고나 오류를 낼 수 있습니다
+
+**엄격한 플랫폼에서의 해결 방법:** 공식 템플릿에 없는 열은 모두 지우세요.
+
+---
+
+## 빠진 선택 열 다루기
+
+파일에 선택 열이 빠져 있다면:
+
+- 플랫폼은 해당 필드에 기본값을 씁니다
+- 선택 필드라면 거의 항상 괜찮습니다
+- 필수 필드의 열이 빠지면 가져오기가 실패하며, 모든 행이 실패합니다
+
+---
+
+## StriveFormats로 자동 수정하기
+
+CSV를 업로드하면 StriveFormats가 머리글을 선택한 플랫폼이 기대하는 열과 비교합니다. 빠진 필수 열을 표시하고, 여분의 열을 찾아내며, BOM과 대소문자 차이를 감지합니다.
+
+[CSV 수정기 열기](/app) | [CSV 템플릿 보기](/presets)

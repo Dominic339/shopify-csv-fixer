@@ -1,0 +1,152 @@
+---
+title: "Naprawianie niezgodnych kolumn w CSV"
+description: "Jak wykryć i naprawić błędy kolumn w importach CSV: złe nazwy kolumn, różnice w wielkości liter, nadmiarowe spacje i problemy z kolejnością kolumn na różnych platformach."
+keywords: ["niezgodne kolumny csv", "zła nazwa kolumny csv", "nagłówek csv nie pasuje", "błąd kolumny przy imporcie csv", "naprawa kolumn csv", "błąd mapowania kolumn csv", "nierozpoznany nagłówek csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Co powoduje błędy niezgodnych kolumn przy imporcie CSV"
+  - "Jak porównać nagłówki z kolumnami, których oczekuje platforma"
+  - "Jak poprawić wielkość liter, nadmiarowe spacje i zmienione nazwy kolumn"
+  - "Jak poradzić sobie z dodatkowymi lub brakującymi kolumnami, nie psując importu"
+  - "Jak wyjść od oficjalnego szablonu platformy"
+bestFor: "Sprzedawcy, którzy rozwiązują nieudane importy, gdy platforma zgłasza nierozpoznane lub brakujące kolumny"
+timeToComplete: "7 minut"
+---
+
+## Czym są niezgodne kolumny?
+
+Kolumny są niezgodne, gdy nazwy w wierszu nagłówka pliku CSV nie odpowiadają temu, czego oczekuje platforma importu. Platforma na podstawie nazw kolumn przypisuje dane do właściwych pól produktu. Jeśli nazwa kolumny jest błędna, nawet o jedną spację czy literę, platforma pomija kolumnę (dane po cichu znikają) albo odrzuca cały import.
+
+To jedna z najczęstszych przyczyn problemów typu „nic się nie zaimportowało” albo „wszystkie pola są puste”.
+
+---
+
+## Najczęstsze przyczyny
+
+### 1. Zmienione nazwy kolumn
+
+Zmieniłeś nazwę wymaganej kolumny na taką, która ma sens dla Ciebie, ale nie dla platformy.
+
+| Co wpisałeś | Czego oczekuje platforma |
+|---|---|
+| `Product Title` | `Title` (Shopify) |
+| `product_name` | `Name` (WooCommerce) |
+| `Item Name` | `item_name` (Amazon) |
+| `Listing Title` | `TITLE` (eksport Etsy) |
+| `Listing Title` | `Title` (eBay) |
+
+**Rozwiązanie:** używaj dokładnie tej nazwy kolumny, której używa platforma. Nie dodawaj słów i nie zmieniaj nazw dla jasności.
+
+### 2. Zła wielkość liter
+
+Niektóre importery porównują nazwy kolumn z rozróżnianiem wielkości liter, więc bezpieczne jest tylko dokładne przepisanie zapisu z szablonu.
+
+| Źle | Dobrze |
+|---|---|
+| `handle` | `Handle` (Shopify) |
+| `TITLE` | `Title` (Shopify) |
+| `Variant price` | `Variant Price` (Shopify) |
+| `regular_price` | `Regular price` (WooCommerce) |
+
+**Rozwiązanie:** porównuj znak po znaku. Nawet `Regular Price` i `Regular price` (małe p) mogą mieć znaczenie. WooCommerce pokazuje podczas importu ekran mapowania, na którym możesz wybrać właściwe pole dla każdej nierozpoznanej kolumny.
+
+### 3. Spacje na początku lub końcu
+
+Arkusze kalkulacyjne potrafią po cichu dodać spację przed nazwą kolumny lub po niej. Platforma widzi `" Title"` (ze spacją na początku) jako zupełnie inną kolumnę niż `"Title"`.
+
+**Jak to wykryć:** otwórz plik CSV w zwykłym edytorze tekstu (nie w arkuszu) i spójrz na pierwszy wiersz w surowej postaci. Każda spacja przed nazwą kolumny lub po niej jest tam widoczna.
+
+**Rozwiązanie w Excelu:** nie używaj Znajdź i zamień na spacjach, bo usunie to także spacje wewnątrz nazw takich jak `Variant Price`. Zamiast tego w pustym wierszu wpisz `=USUŃ.ZBĘDNE.ODSTĘPY(A1)` i przeciągnij w prawo przez wszystkie kolumny, potem skopiuj ten wiersz i użyj Wklej specjalnie > Wartości na wierszu 1. Na koniec usuń wiersz pomocniczy.
+
+**Rozwiązanie w Pythonie:**
+
+```python
+import csv
+
+# utf-8-sig usuwa też BOM, którego strip() by nie ruszył
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Usunięcie spacji ze wszystkich nazw kolumn
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. BOM psuje nazwę pierwszej kolumny
+
+Jeśli plik zapisano jako „UTF-8 z BOM”, przed nazwą pierwszej kolumny stoją 3 niewidoczne bajty. Nagłówek, który w Excelu wygląda jak `Handle`, może trafić do narzędzia, które nie spodziewa się BOM, jako `﻿Handle` i już nie pasuje.
+
+**Rozwiązanie:** jeśli importer zgłasza pierwszą kolumnę jako nierozpoznaną, zapisz plik ponownie bez BOM. W VS Code: kliknij wskaźnik kodowania → „Save with Encoding” → wybierz UTF-8 (bez BOM).
+
+### 5. Problemy z kolejnością kolumn
+
+Niektóre platformy wymagają kolumn w określonej kolejności (eBay File Exchange, niektóre szablony plików płaskich Amazon). Przestawienie kolumn w Excelu może zepsuć takie importy, nawet jeśli nazwy są poprawne.
+
+**Rozwiązanie:** pobierz świeży szablon z platformy i wklej do niego dane, zamiast zmieniać kolejność kolumn we własnym pliku.
+
+---
+
+## Jak porównać nagłówki z szablonem platformy
+
+1. Pobierz oficjalny szablon CSV platformy
+2. Otwórz oba pliki w edytorze tekstu (nie w Excelu)
+3. Skopiuj oba wiersze nagłówka (wiersz 1) do narzędzia porównującego albo porównaj je ręcznie
+4. Szukaj: innego tekstu, nadmiarowych spacji, innej wielkości liter, dodatkowych lub brakujących kolumn
+
+**Narzędzia do porównywania online:** wklej oba wiersze nagłówka i porównaj je obok siebie.
+
+**Porównanie w Pythonie:**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# utf-8-sig już usunął BOM; teraz usuwamy spacje
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## Co zrobić z dodatkowymi kolumnami
+
+Jeśli plik ma dodatkowe kolumny, których platforma nie rozpoznaje:
+
+- **Większość platform** (Shopify, WooCommerce): dodatkowe kolumny są po cichu pomijane, więc nie stanowią problemu
+- **Pliki płaskie Amazon**: kolumny, których nie ma w szablonie, mogą zostać odrzucone
+- **eBay File Exchange**: nierozpoznane kolumny mogą wywołać ostrzeżenia lub błędy
+
+**Rozwiązanie dla surowych platform:** usuń każdą kolumnę, której nie ma w oficjalnym szablonie.
+
+---
+
+## Co zrobić z brakującymi kolumnami opcjonalnymi
+
+Jeśli w pliku brakuje kolumn opcjonalnych:
+
+- Platforma używa dla tych pól swojej wartości domyślnej
+- W przypadku pól opcjonalnych prawie zawsze jest to w porządku
+- W przypadku pól wymaganych brak kolumny powoduje niepowodzenie importu i błąd w każdym wierszu
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+Prześlij plik CSV, a StriveFormats porówna Twoje nagłówki z kolumnami, których oczekuje wybrana platforma. Zgłasza brakujące wymagane kolumny, wskazuje dodatkowe kolumny oraz wykrywa znaczniki BOM i różnice w wielkości liter.
+
+[Otwórz korektor CSV](/app) | [Zobacz szablony CSV](/presets)

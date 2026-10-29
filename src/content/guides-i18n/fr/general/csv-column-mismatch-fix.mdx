@@ -1,0 +1,152 @@
+---
+title: "Corriger les colonnes CSV qui ne correspondent pas"
+description: "Comment diagnostiquer et corriger les erreurs de colonnes dans les imports CSV : mauvais noms de colonne, différences de casse, espaces en trop et problèmes d'ordre des colonnes selon les plateformes."
+keywords: ["colonnes csv ne correspondent pas", "mauvais nom de colonne csv", "en-tête csv incorrect", "erreur de colonne import csv", "corriger colonnes csv", "erreur de mappage colonnes csv", "en-tête csv non reconnu"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Ce qui provoque les erreurs de colonnes non correspondantes à l'import CSV"
+  - "Comment comparer vos en-têtes aux colonnes attendues par la plateforme"
+  - "Comment corriger la casse, les espaces en trop et les colonnes renommées"
+  - "Comment gérer les colonnes en trop ou manquantes sans casser l'import"
+  - "Comment partir du modèle officiel de la plateforme"
+bestFor: "Vendeurs qui résolvent des imports échoués où la plateforme signale des colonnes inconnues ou manquantes"
+timeToComplete: "7 minutes"
+---
+
+## Que signifie « colonnes qui ne correspondent pas » ?
+
+Les colonnes ne correspondent pas quand les noms de la ligne d'en-tête de votre CSV ne sont pas ceux qu'attend la plateforme d'import. La plateforme se sert des noms de colonnes pour associer vos données aux bons champs produit. Si un nom est faux, même d'une seule espace ou d'une seule lettre, la plateforme ignore la colonne (vos données disparaissent sans avertissement) ou rejette tout l'import.
+
+C'est l'une des causes les plus fréquentes des problèmes du type « rien n'a été importé » ou « tous les champs sont vides ».
+
+---
+
+## Causes courantes
+
+### 1. Colonnes renommées
+
+Vous avez renommé une colonne obligatoire avec un nom qui a du sens pour vous, mais pas pour la plateforme.
+
+| Ce que vous avez écrit | Ce qu'attend la plateforme |
+|---|---|
+| `Product Title` | `Title` (Shopify) |
+| `product_name` | `Name` (WooCommerce) |
+| `Item Name` | `item_name` (Amazon) |
+| `Listing Title` | `TITLE` (export Etsy) |
+| `Listing Title` | `Title` (eBay) |
+
+**Solution :** utilisez le nom de colonne exact de la plateforme. N'ajoutez pas de mots et ne renommez rien pour plus de clarté.
+
+### 2. Mauvaise casse
+
+Certains outils d'import comparent les noms de colonnes en tenant compte des majuscules : la seule solution sûre est de reprendre exactement la casse du modèle.
+
+| Incorrect | Correct |
+|---|---|
+| `handle` | `Handle` (Shopify) |
+| `TITLE` | `Title` (Shopify) |
+| `Variant price` | `Variant Price` (Shopify) |
+| `regular_price` | `Regular price` (WooCommerce) |
+
+**Solution :** comparez caractère par caractère. Même `Regular Price` et `Regular price` (p minuscule) peuvent faire la différence. WooCommerce affiche un écran de correspondance pendant l'import, où vous pouvez choisir le bon champ pour toute colonne qu'il ne reconnaît pas.
+
+### 3. Espaces au début ou à la fin
+
+Les tableurs peuvent ajouter sans prévenir une espace avant ou après un nom de colonne. La plateforme voit `" Title"` (avec une espace au début) comme une colonne totalement différente de `"Title"`.
+
+**Comment le repérer :** ouvrez le CSV dans un éditeur de texte brut (pas dans un tableur) et regardez la première ligne telle quelle. Toute espace avant ou après un nom de colonne y est visible.
+
+**Correction dans Excel :** n'utilisez pas Rechercher et remplacer sur les espaces, car cela supprimerait aussi celles à l'intérieur des noms comme `Variant Price`. À la place, dans une ligne vide, saisissez `=SUPPRESPACE(A1)` et recopiez la formule vers la droite sur toutes les colonnes, puis copiez cette ligne et utilisez Collage spécial > Valeurs sur la ligne 1. Supprimez ensuite la ligne auxiliaire.
+
+**Correction avec Python :**
+
+```python
+import csv
+
+# utf-8-sig retire aussi le BOM, que strip() laisserait en place
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Retirer les espaces de tous les noms de colonnes
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. Le BOM abîme le premier nom de colonne
+
+Si votre fichier a été enregistré en « UTF-8 avec BOM », 3 octets invisibles précèdent le premier nom de colonne. Un en-tête qui ressemble à `Handle` dans Excel peut arriver dans un outil qui n'attend pas de BOM sous la forme `﻿Handle`, qui ne correspond plus.
+
+**Solution :** si un outil d'import signale la première colonne comme inconnue, réenregistrez le fichier sans BOM. Dans VS Code : cliquez sur l'indicateur d'encodage → « Save with Encoding » → choisissez UTF-8 (sans BOM).
+
+### 5. Problèmes d'ordre des colonnes
+
+Certaines plateformes exigent les colonnes dans un ordre précis (eBay File Exchange, certains modèles de fichiers plats Amazon). Réorganiser les colonnes dans Excel peut casser ces imports même si les noms sont corrects.
+
+**Solution :** téléchargez un nouveau modèle sur la plateforme et collez-y vos données au lieu de modifier l'ordre des colonnes de votre propre fichier.
+
+---
+
+## Comparer vos en-têtes au modèle de la plateforme
+
+1. Téléchargez le modèle CSV officiel de la plateforme
+2. Ouvrez les deux fichiers dans un éditeur de texte (pas dans Excel)
+3. Copiez les deux lignes d'en-tête (ligne 1) dans un outil de comparaison ou comparez-les à la main
+4. Cherchez : un texte différent, des espaces en trop, une casse différente, des colonnes en trop ou manquantes
+
+**Outils de comparaison en ligne :** collez les deux lignes d'en-tête et comparez-les côte à côte.
+
+**Comparaison avec Python :**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# utf-8-sig a déjà retiré le BOM ; on retire maintenant les espaces
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## Que faire des colonnes en trop
+
+Si votre fichier contient des colonnes que la plateforme ne reconnaît pas :
+
+- **La plupart des plateformes** (Shopify, WooCommerce) : les colonnes en trop sont ignorées sans avertissement, ce n'est donc pas un problème
+- **Fichiers plats Amazon** : les colonnes absentes du modèle peuvent être rejetées
+- **eBay File Exchange** : les colonnes non reconnues peuvent provoquer des avertissements ou des erreurs
+
+**Solution pour les plateformes strictes :** supprimez toute colonne qui n'est pas dans le modèle officiel.
+
+---
+
+## Que faire des colonnes facultatives manquantes
+
+S'il manque des colonnes facultatives à votre fichier :
+
+- La plateforme utilise sa valeur par défaut pour ces champs
+- Pour les champs facultatifs, c'est presque toujours acceptable
+- Pour les champs obligatoires, une colonne manquante fait échouer l'import, et chaque ligne échouera
+
+---
+
+## Corrigez-le automatiquement avec StriveFormats
+
+Envoyez votre CSV et StriveFormats compare vos en-têtes aux colonnes attendues par la plateforme choisie. Il signale les colonnes obligatoires manquantes, repère les colonnes en trop et détecte les marques BOM et les différences de casse.
+
+[Ouvrir le correcteur CSV](/app) | [Voir les modèles CSV](/presets)

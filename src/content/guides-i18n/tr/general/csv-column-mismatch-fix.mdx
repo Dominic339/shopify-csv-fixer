@@ -1,0 +1,152 @@
+---
+title: "CSV sütun uyuşmazlığı hatalarını düzeltme"
+description: "CSV içe aktarmalarındaki sütun uyuşmazlığı hatalarını nasıl teşhis edip düzelteceğiniz: yanlış sütun adları, büyük/küçük harf farkları, fazla boşluklar ve platformlar arasındaki sütun sırası sorunları."
+keywords: ["csv sütun uyuşmazlığı", "csv yanlış sütun adı", "csv başlık uyuşmazlığı", "csv içe aktarma sütun hatası", "csv sütunlarını düzeltme", "csv sütun eşleme hatası", "csv başlığı tanınmadı"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV içe aktarmalarında sütun uyuşmazlığı hatalarına neyin yol açtığı"
+  - "Başlıklarınızı platformun beklediği sütunlarla nasıl karşılaştıracağınız"
+  - "Büyük/küçük harf farklarını, fazla boşlukları ve yeniden adlandırılmış sütunları nasıl düzelteceğiniz"
+  - "İçe aktarmayı bozmadan fazla veya eksik sütunlarla nasıl başa çıkacağınız"
+  - "Platformun resmi şablonunu başlangıç noktası olarak nasıl kullanacağınız"
+bestFor: "Platformun tanınmayan veya eksik sütun bildirdiği içe aktarma hatalarını gideren satıcılar"
+timeToComplete: "7 dakika"
+---
+
+## Sütun uyuşmazlığı nedir?
+
+Sütun uyuşmazlığı, CSV başlık satırınızdaki sütun adları içe aktarma platformunun beklediğiyle eşleşmediğinde oluşur. Platform, verilerinizi doğru ürün alanlarına eşlemek için sütun adlarını kullanır. Bir sütun adı tek bir boşluk veya harf bile yanlışsa, platform ya sütunu yok sayar (verileriniz sessizce kaybolur) ya da içe aktarmanın tamamını reddeder.
+
+Sütun uyuşmazlıkları, "hiçbir şey içe aktarılmadı" veya "tüm alanlar boş" sorunlarının en yaygın nedenlerinden biridir.
+
+---
+
+## Sütun uyuşmazlıklarının yaygın nedenleri
+
+### 1. Yeniden adlandırılmış sütunlar
+
+Zorunlu bir sütunu sizin için anlamlı olan ama platform için anlam taşımayan bir adla yeniden adlandırdınız.
+
+| Yazdığınız | Platformun beklediği |
+|---|---|
+| `Product Title` | `Title` (Shopify) |
+| `product_name` | `Name` (WooCommerce) |
+| `Item Name` | `item_name` (Amazon) |
+| `Listing Title` | `TITLE` (Etsy dışa aktarımı) |
+| `Listing Title` | `Title` (eBay) |
+
+**Çözüm:** platformun tam sütun adını kullanın. Anlaşılır olsun diye kelime eklemeyin veya yeniden adlandırmayın.
+
+### 2. Yanlış büyük/küçük harf
+
+Bazı içe aktarıcılar sütun adlarını büyük/küçük harf duyarlı karşılaştırır, bu yüzden güvenli tek seçenek şablondaki yazımı aynen kullanmaktır.
+
+| Yanlış | Doğru |
+|---|---|
+| `handle` | `Handle` (Shopify) |
+| `TITLE` | `Title` (Shopify) |
+| `Variant price` | `Variant Price` (Shopify) |
+| `regular_price` | `Regular price` (WooCommerce) |
+
+**Çözüm:** karakter karakter karşılaştırın. `Regular Price` ile `Regular price` (küçük p) bile fark yaratabilir. WooCommerce içe aktarma sırasında bir eşleme ekranı gösterir; orada tanımadığı her sütun için doğru alanı seçebilirsiniz.
+
+### 3. Baştaki veya sondaki boşluklar
+
+Elektronik tablo düzenleyicileri bir sütun adının önüne veya arkasına fark ettirmeden boşluk ekleyebilir. Platform `" Title"` (başında boşluk olan) sütununu `"Title"` sütunundan tamamen farklı görür.
+
+**Nasıl fark edilir:** CSV'yi düz bir metin düzenleyicide açın (elektronik tablo uygulamasında değil) ve ilk satırın ham hâline bakın. Bir sütun adının önündeki veya arkasındaki her boşluk orada görünür.
+
+**Excel'de düzeltme:** boşluklar için Bul ve Değiştir kullanmayın; bu, `Variant Price` gibi adların içindeki boşlukları da siler. Bunun yerine boş bir satıra `=KIRP(A1)` yazıp tüm sütunlar boyunca sağa doğru doldurun, ardından o satırı kopyalayıp 1. satırın üzerine Özel Yapıştır > Değerler ile yapıştırın. Sonra yardımcı satırı silin.
+
+**Python ile düzeltme:**
+
+```python
+import csv
+
+# utf-8-sig, strip()'in yerinde bırakacağı BOM'u da kaldırır
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Tüm sütun adlarından boşlukları kaldır
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. İlk sütun adını bozan BOM işareti
+
+Dosyanız "BOM'lu UTF-8" olarak kaydedildiyse ilk sütun adının önünde 3 görünmez bayt vardır. Excel'de `Handle` gibi görünen bir başlık, BOM beklemeyen bir araca `﻿Handle` olarak ulaşabilir ve artık eşleşmez.
+
+**Çözüm:** bir içe aktarıcı ilk sütunu tanınmayan olarak bildiriyorsa dosyayı BOM'suz yeniden kaydedin. VS Code'da: kodlama göstergesine tıklayın → "Save with Encoding" → UTF-8'i (BOM'suz) seçin.
+
+### 5. Sütun sırası sorunları
+
+Bazı platformlar sütunları belirli bir sırada ister (eBay File Exchange, bazı Amazon düz dosya şablonları). Excel'de sütunları yeniden sıralamak, sütun adları doğru olsa bile bu içe aktarmaları bozabilir.
+
+**Çözüm:** kendi dosyanızın sütun sırasını değiştirmek yerine platformdan yeni bir şablon indirin ve verilerinizi onun içine yapıştırın.
+
+---
+
+## Başlıkları platform şablonuyla karşılaştırma
+
+1. Platformun resmi CSV şablonunu indirin
+2. İki dosyayı da bir metin düzenleyicide açın (Excel'de değil)
+3. İki başlık satırını (1. satır) bir karşılaştırma aracına kopyalayın veya elle karşılaştırın
+4. Şunlara bakın: farklı metin, fazla boşluklar, farklı büyük/küçük harf, fazla veya eksik sütunlar
+
+**Çevrimiçi karşılaştırma araçları:** iki başlık satırını yapıştırın ve yan yana karşılaştırın.
+
+**Python ile karşılaştırma:**
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# utf-8-sig BOM'u zaten kaldırdı; şimdi boşlukları kaldır
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## Fazla sütunlarla başa çıkma
+
+Dosyanızda platformun tanımadığı fazla sütunlar varsa:
+
+- **Çoğu platform** (Shopify, WooCommerce): fazla sütunlar sessizce yok sayılır, yani sorun olmaz
+- **Amazon düz dosyaları**: şablonda olmayan sütunlar reddedilebilir
+- **eBay File Exchange**: tanınmayan sütunlar uyarılara veya hatalara yol açabilir
+
+**Katı platformlar için çözüm:** resmi şablonda olmayan her sütunu kaldırın.
+
+---
+
+## Eksik isteğe bağlı sütunlarla başa çıkma
+
+Dosyanızda isteğe bağlı sütunlar eksikse:
+
+- Platform bu alanlar için kendi varsayılan değerini kullanır
+- İsteğe bağlı alanlar için bu neredeyse her zaman kabul edilebilir
+- Zorunlu alanlarda eksik sütunlar içe aktarmanın başarısız olmasına yol açar ve her satır başarısız olur
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+CSV'nizi yükleyin; StriveFormats başlıklarınızı seçtiğiniz platformun beklediği sütunlarla karşılaştırır. Eksik zorunlu sütunları işaretler, fazla sütunları belirler ve BOM işaretlerini ve büyük/küçük harf farklarını tespit eder.
+
+[CSV düzelticisini aç](/app) | [CSV şablonlarını görüntüle](/presets)

@@ -1,0 +1,152 @@
+---
+title: "CSV の列の不一致エラーを直す"
+description: "CSV インポートの列の不一致エラーを診断して直す方法です。列名の誤り、大文字・小文字の違い、余分なスペース、プラットフォームごとの列の順序の問題を扱います。"
+keywords: ["csv 列 不一致", "csv 列名 間違い", "csv ヘッダー 不一致", "csv インポート 列 エラー", "csv 列 修正", "csv 列 マッピング エラー", "csv ヘッダー 認識されない"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV インポートで列の不一致エラーが起きる原因"
+  - "見出しをプラットフォームが求める列と比べる方法"
+  - "大文字・小文字の違い、余分なスペース、名前を変えた列の直し方"
+  - "インポートを壊さずに、余分な列や足りない列に対処する方法"
+  - "プラットフォームの公式テンプレートを出発点にする方法"
+bestFor: "プラットフォームが認識できない列や足りない列を報告して、インポートが失敗しているセラー"
+timeToComplete: "7 分"
+---
+
+## 列の不一致とは
+
+列の不一致は、CSV の見出し行の列名が、インポート先のプラットフォームが求めるものと一致しないときに起こります。プラットフォームは列名を使ってデータを正しい商品項目に割り当てます。列名が 1 文字やスペース 1 つでも違うと、プラットフォームはその列を無視する（データが黙って捨てられる）か、インポート全体を拒否します。
+
+列の不一致は、「何もインポートされなかった」「すべての項目が空になった」という問題の最もよくある原因のひとつです。
+
+---
+
+## 列の不一致のよくある原因
+
+### 1. 列名を変えてしまった
+
+必須の列を、自分にはわかりやすくてもプラットフォームには通じない名前に変えてしまったケースです。
+
+| 書いた名前 | プラットフォームが求める名前 |
+|---|---|
+| `Product Title` | `Title`（Shopify） |
+| `product_name` | `Name`（WooCommerce） |
+| `Item Name` | `item_name`（Amazon） |
+| `Listing Title` | `TITLE`（Etsy のエクスポート） |
+| `Listing Title` | `Title`（eBay） |
+
+**対処法**：プラットフォームの列名を正確に使います。わかりやすくするために言葉を足したり、名前を変えたりしないでください。
+
+### 2. 大文字・小文字の違い
+
+大文字・小文字を区別して列名を比べるインポート機能もあるので、テンプレートの書き方をそのまま使うのが唯一安全な方法です。
+
+| 間違い | 正しい |
+|---|---|
+| `handle` | `Handle`（Shopify） |
+| `TITLE` | `Title`（Shopify） |
+| `Variant price` | `Variant Price`（Shopify） |
+| `regular_price` | `Regular price`（WooCommerce） |
+
+**対処法**：1 文字ずつ比べます。`Regular Price` と `Regular price`（小文字の p）の違いでさえ問題になることがあります。WooCommerce はインポート中に対応付けの画面を表示し、認識できない列ごとに正しい項目を選べます。
+
+### 3. 先頭や末尾のスペース
+
+スプレッドシートは、列名の前後に気づかないうちにスペースを入れることがあります。プラットフォームは `" Title"`（先頭にスペース）を `"Title"` とはまったく別の列とみなします。
+
+**見つけ方**：CSV を（スプレッドシートではなく）テキストエディタで開き、1 行目をそのまま見ます。列名の前後のスペースはそこで見えます。
+
+**Excel での直し方**：スペースに対して検索と置換を使ってはいけません。`Variant Price` のような名前の中のスペースまで消えてしまいます。代わりに空の行に `=TRIM(A1)` と入力してすべての列まで右にコピーし、その行をコピーして「形式を選択して貼り付け > 値」で 1 行目に上書きします。最後に補助の行を削除します。
+
+**Python での直し方**：
+
+```python
+import csv
+
+# utf-8-sig は strip() では残ってしまう BOM も取り除く
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # すべての列名からスペースを取り除く
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. BOM が最初の列名を壊している
+
+ファイルが「BOM 付き UTF-8」で保存されていると、最初の列名の前に見えない 3 バイトが付きます。Excel では `Handle` に見える見出しが、BOM を想定していないツールには `﻿Handle` として届き、一致しなくなることがあります。
+
+**対処法**：インポート機能が 1 列目を認識できないと報告する場合は、BOM なしで保存し直します。VS Code では、文字コードの表示をクリック →「Save with Encoding」→ UTF-8（BOM なし）を選びます。
+
+### 5. 列の順番の問題
+
+列を決まった順番で求めるプラットフォームもあります（eBay File Exchange、Amazon のフラットファイルの一部のテンプレート）。Excel で列を並べ替えると、列名が正しくてもインポートが壊れることがあります。
+
+**対処法**：自分のファイルの列の順番を変えるのではなく、プラットフォームから新しいテンプレートをダウンロードし、そこにデータを貼り付けます。
+
+---
+
+## 見出しをプラットフォームのテンプレートと比べる方法
+
+1. プラットフォームの公式 CSV テンプレートをダウンロードします
+2. 両方のファイルを（Excel ではなく）テキストエディタで開きます
+3. 両方の見出し行（1 行目）を差分ツールにコピーするか、目で比べます
+4. 違う文字、余分なスペース、大文字・小文字の違い、余分な列や足りない列を探します
+
+**オンラインの差分ツール**：両方の見出し行を貼り付けて、並べて比べます。
+
+**Python で比べる**：
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# BOM は utf-8-sig で取り除き済み。ここでスペースを取り除く
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## 余分な列への対処
+
+プラットフォームが認識できない余分な列がファイルにある場合：
+
+- **ほとんどのプラットフォーム**（Shopify、WooCommerce）：余分な列は黙って無視されるので、問題になりません
+- **Amazon のフラットファイル**：テンプレートにない列は拒否されることがあります
+- **eBay File Exchange**：認識できない列は警告やエラーの原因になることがあります
+
+**厳しいプラットフォームでの対処法**：公式テンプレートにない列はすべて削除します。
+
+---
+
+## 足りない任意の列への対処
+
+ファイルに任意の列が足りない場合：
+
+- プラットフォームはその項目に既定値を使います
+- 任意の項目なら、ほとんどの場合それで問題ありません
+- 必須の項目の列が足りないとインポートは失敗し、すべての行がエラーになります
+
+---
+
+## StriveFormats で自動的に直す
+
+CSV をアップロードすると、StriveFormats が見出しを選んだプラットフォームの求める列と比べます。足りない必須の列を指摘し、余分な列を特定し、BOM や大文字・小文字の違いを検出します。
+
+[CSV 修正ツールを開く](/app) | [CSV テンプレートを見る](/presets)

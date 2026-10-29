@@ -1,0 +1,152 @@
+---
+title: "修复 CSV 列不匹配错误"
+description: "如何诊断和修复 CSV 导入中的列不匹配错误：列名错误、大小写不同、多余空格，以及不同平台的列顺序问题。"
+keywords: ["csv 列不匹配", "csv 列名错误", "csv 表头不匹配", "csv 导入列错误", "修复 csv 列", "csv 列映射错误", "csv 表头无法识别"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV 导入中列不匹配错误的成因"
+  - "如何把你的表头与平台要求的列进行比较"
+  - "如何修复大小写不同、多余空格和被改名的列"
+  - "如何在不破坏导入的情况下处理多余或缺失的列"
+  - "如何以平台的官方模板为起点"
+bestFor: "平台报告无法识别或缺少列、导致导入失败的卖家"
+timeToComplete: "7 分钟"
+---
+
+## 什么是列不匹配？
+
+当 CSV 表头行中的列名与导入平台的要求不一致时，就会出现列不匹配。平台依据列名把数据对应到正确的商品字段。只要列名有误，哪怕只差一个空格或一个字母，平台要么忽略这一列（数据被悄悄丢弃），要么拒绝整个导入。
+
+列不匹配是"什么都没导入"或"所有字段都是空的"这类问题最常见的原因之一。
+
+---
+
+## 列不匹配的常见原因
+
+### 1. 列被改了名
+
+你把一个必填列改成了对你有意义、但平台无法识别的名称。
+
+| 你写的 | 平台要求的 |
+|---|---|
+| `Product Title` | `Title`（Shopify） |
+| `product_name` | `Name`（WooCommerce） |
+| `Item Name` | `item_name`（Amazon） |
+| `Listing Title` | `TITLE`（Etsy 导出） |
+| `Listing Title` | `Title`（eBay） |
+
+**解决方法**：使用平台的准确列名。不要为了好懂而添加词语或改名。
+
+### 2. 大小写错误
+
+有些导入程序在比较列名时区分大小写，所以唯一安全的做法是完全照抄模板中的写法。
+
+| 错误 | 正确 |
+|---|---|
+| `handle` | `Handle`（Shopify） |
+| `TITLE` | `Title`（Shopify） |
+| `Variant price` | `Variant Price`（Shopify） |
+| `regular_price` | `Regular price`（WooCommerce） |
+
+**解决方法**：逐个字符比较。即使是 `Regular Price` 和 `Regular price`（小写 p）的区别也可能有影响。WooCommerce 在导入时会显示列映射界面，你可以为每个它无法识别的列选择正确的字段。
+
+### 3. 开头或结尾的空格
+
+电子表格软件可能会在列名前后悄悄加上空格。平台会把 `" Title"`（开头有空格）看作与 `"Title"` 完全不同的列。
+
+**如何发现**：用纯文本编辑器（不是电子表格软件）打开 CSV，查看第一行的原始内容。列名前后的任何空格在那里都能看到。
+
+**在 Excel 中修复**：不要对空格使用查找和替换，那样会连 `Variant Price` 这类名称中间的空格也一起删掉。正确做法是在一个空行中输入 `=TRIM(A1)` 并向右填充到所有列，然后复制这一行，用"选择性粘贴 > 值"覆盖第 1 行，最后删除这个辅助行。
+
+**用 Python 修复**：
+
+```python
+import csv
+
+# utf-8-sig 还会去掉 strip() 无法去掉的 BOM
+with open("input.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # 去掉所有列名中的空格
+    fieldnames = [h.strip() for h in reader.fieldnames or []]
+    rows = [dict(zip(fieldnames, row.values())) for row in reader]
+
+with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+```
+
+### 4. BOM 破坏了第一个列名
+
+如果文件以"带 BOM 的 UTF-8"保存，第一个列名前面会多出 3 个看不见的字节。在 Excel 中看起来是 `Handle` 的表头，到了不支持 BOM 的工具里可能变成 `﻿Handle`，从而不再匹配。
+
+**解决方法**：如果导入程序报告第一列无法识别，就把文件另存为不带 BOM 的格式。在 VS Code 中：点击编码指示 →"Save with Encoding"→ 选择 UTF-8（不带 BOM）。
+
+### 5. 列顺序问题
+
+有些平台要求按特定顺序排列列（eBay File Exchange、部分 Amazon 平面文件模板）。在 Excel 中调整列顺序，即使列名都正确，也可能导致这些导入失败。
+
+**解决方法**：从平台下载一份新模板，把数据粘贴进去，而不是修改你自己文件的列顺序。
+
+---
+
+## 如何把表头与平台模板进行比较
+
+1. 从平台下载官方 CSV 模板
+2. 用文本编辑器（不是 Excel）打开两个文件
+3. 把两个表头行（第 1 行）复制到对比工具中，或手动比较
+4. 查找：文字不同、多余空格、大小写不同、多出或缺少的列
+
+**在线对比工具**：粘贴两个表头行并排比较。
+
+**用 Python 比较**：
+
+```python
+import csv
+
+with open("platform_template.csv", encoding="utf-8-sig") as f:
+    expected = next(csv.reader(f))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = next(csv.reader(f))
+
+# utf-8-sig 已去掉 BOM；现在去掉空格
+expected = [h.strip() for h in expected]
+actual = [h.strip() for h in actual]
+
+missing = set(expected) - set(actual)
+extra = set(actual) - set(expected)
+print("Missing from your file:", missing)
+print("Extra in your file:", extra)
+```
+
+---
+
+## 处理多余的列
+
+如果你的文件中有平台无法识别的多余列：
+
+- **大多数平台**（Shopify、WooCommerce）：多余的列会被悄悄忽略，所以不成问题
+- **Amazon 平面文件**：模板中没有的列可能会被拒绝
+- **eBay File Exchange**：无法识别的列可能会引发警告或错误
+
+**针对严格平台的解决方法**：删除所有不在官方模板中的列。
+
+---
+
+## 处理缺失的可选列
+
+如果你的文件缺少可选列：
+
+- 平台会为这些字段使用默认值
+- 对于可选字段，这几乎总是可以接受的
+- 对于必填字段，缺少列会导致导入失败，每一行都会出错
+
+---
+
+## 用 StriveFormats 自动修复
+
+上传你的 CSV，StriveFormats 会把你的表头与所选平台要求的列进行比较。它会标出缺失的必填列、找出多余的列，并检测 BOM 和大小写差异。
+
+[打开 CSV 修复工具](/app) | [查看 CSV 模板](/presets)
