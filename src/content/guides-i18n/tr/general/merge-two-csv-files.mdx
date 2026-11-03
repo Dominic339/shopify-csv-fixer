@@ -1,0 +1,336 @@
+---
+title: "İki CSV dosyası nasıl birleştirilir"
+description: "Excel Power Query, Google E-Tablolar veya basit bir komut satırıyla iki CSV dosyasını tek dosyada birleştirmek için adım adım rehber; programlama deneyimi gerekmez."
+keywords: ["csv dosyalarını birleştirme", "csv birleştir", "iki csv birleştirme", "excel power query csv", "google e-tablolar csv birleştirme", "csv satır ekleme", "csv dosyalarını alt alta ekleme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV dosyalarını birleştirmenin dört yolu (Excel, E-Tablolar, komut satırı, Python)"
+  - "Ne zaman birleştirmemeniz gerektiği ve bunun yerine ne yapacağınız"
+  - "Farklı başlıkları ve sütun sırası farklarını düzeltme"
+  - "Birleştirilmiş dosyalardaki yinelenen başlık satırlarını kaldırma"
+  - "Dosyalar arasındaki kodlama ve ayırıcı farklarıyla başa çıkma"
+bestFor: "Birden fazla kaynaktan gelen ürün kataloğu dışa aktarımlarını, stok dosyalarını veya sipariş dışa aktarımlarını birleştiren satıcılar"
+timeToComplete: "15 dakika"
+---
+
+## CSV dosyalarını ne zaman birleştirmeniz gerekir?
+
+İki CSV dosyasını tek dosyada birleştirmek, e-ticaret içe aktarmasından önce sık atılan bir adımdır. Şu durumlarda gerekebilir:
+
+- İki tedarikçinin ürünlerini tek bir katalog yüklemesinde toplamak
+- Geçen ayın ürün dışa aktarımını yeni eklenen ürünlerle birleştirmek
+- Büyük bir içe aktarmayı küçük gruplara bölüp sonra yeniden birleştirmek
+- Farklı kaynaklardan gelen varyant satırlarını tek bir ürün CSV'sinde toplamak
+
+Bu rehber dört güvenilir yöntemi anlatır: Excel Power Query, Google E-Tablolar, komut satırı ve Python. Her yöntem ilk dosyanın başlık satırını korur ve ikinci dosyadan yalnızca veri satırlarını ekler.
+
+---
+
+## Başlamadan önce: başlıkları hizalayın
+
+İki dosyada da aynı sütun başlıkları aynı sırada olmalıdır. Sütunlar farklıysa birleştirme verileri yanlış alanlara kaydırır ve içe aktarmanızı bozar.
+
+Birleştirme öncesi hızlı kontrol listesi:
+
+- [ ] İki dosyayı açın ve ilk satırları (başlıkları) yan yana karşılaştırın
+- [ ] Sütun adları tam olarak eşleşiyor (bazı platformlar büyük/küçük harfe duyarlıdır)
+- [ ] Sütunlar iki dosyada da aynı sırada
+- [ ] Hiçbir dosyada özet veya alt bilgi satırı yok
+- [ ] İki dosya da UTF-8 olarak kaydedilmiş
+
+Başlıklar farklı sıradaysa, birleştirmeden önce dosyalardan birinin sütunlarını yeniden sıralayın. Python'un DictWriter yöntemi (aşağıdaki 4. yöntem) farklı sütun sıralarını otomatik olarak halleder.
+
+---
+
+## Yöntem 1: Excel Power Query (Windows, önerilen)
+
+Excel'in Power Query özelliği, formül veya makro olmadan birden fazla CSV'yi alt alta ekler. Dosyalar arasındaki kodlama ve satır sonu farklarını otomatik olarak halleder ve başlık satırını asla tekrarlamaz.
+
+### Adımlar
+
+1. Boş bir Excel çalışma kitabı açın.
+2. **Veri** sekmesine gidin, **Veri Al**'a, ardından **Dosyadan** ve **Metinden/CSV'den**'e tıklayın.
+3. **İlk CSV dosyanızı** seçin ve **İçeri Aktar**'a tıklayın. Önizleme açılınca **Verileri Dönüştür**'e tıklayın (Yükle'ye değil).
+4. Power Query Düzenleyicisi'nde **Giriş** > **Yeni Kaynak** > **Dosya** > **Metin/CSV**'ye gidin, **ikinci CSV dosyanızı** seçin ve **Tamam**'a tıklayın. Artık iki dosya da sol panelde sorgu olarak görünür.
+5. İlk sorguyu seçin, ardından **Giriş** > **Sorguları Ekle** > **Sorguları Yeni Olarak Ekle**'ye gidin.
+6. İletişim kutusunda **İki tablo**'yu seçin, ardından listeden ikinci sorgunuzu seçin.
+7. Sol panelde yeni bir birleşik sorgu belirir. Bunu yeni bir sayfaya yazmak için **Kapat ve Yükle**'ye tıklayın.
+8. Birleşik sayfa etkinken **Dosya** > **Farklı Kaydet**'e gidin ve dosya biçimi olarak **CSV UTF-8 (Virgülle ayrılmış)** seçin. Excel yalnızca etkin sayfayı kaydeder. Düz "CSV (Virgülle ayrılmış)" eski bir kodlama kullanır ve Türkçe karakterleri bozabilir.
+
+### Neden Power Query
+
+- Her dosyanın kodlamasını algılar ve tahmin yanlışsa önizlemede değiştirmenize izin verir.
+- Başlık satırını dosya başına bir kez değil, yalnızca bir kez ekler.
+- İki dosya arasına fazladan boş satır eklemez.
+- Büyük dosyaları, Excel'in sayfa başına 1.048.576 satırlık sınırına kadar işler. Daha fazla satır için komut satırını veya Python'u kullanın.
+
+---
+
+## Yöntem 2: Google E-Tablolar (tarayıcıda, küçük dosyalar)
+
+Excel'iniz yoksa Google E-Tablolar hızlı bir seçenektir. Toplamda yaklaşık 50.000 satırdan az olan dosyalar için iyi çalışır.
+
+### Adımlar
+
+1. Google Drive'ı açın ve ilk CSV'nizi yükleyin: boş bir alana sağ tıklayın, **Dosya yükle**'yi seçip CSV'yi seçin, ardından yüklenen dosyaya sağ tıklayıp **Birlikte aç > Google E-Tablolar**'ı seçin.
+2. Son veri satırının numarasını not edin (örneğin dosyanızda 499 veri satırı ve bir başlık satırı varsa 500. satır).
+3. İkinci CSV'nizi aynı şekilde yeni bir tarayıcı sekmesinde açın.
+4. İkinci sayfada **2** numaralı satıra (başlığın altındaki ilk veri satırı) tıklayın. Seçimi veri içeren son satıra ve sütuna kadar genişletmek için **Ctrl+Shift+End**'e basın.
+5. Kopyalamak için **Ctrl+C**'ye basın. İlk sekmeye geçin ve verilerinizin altındaki ilk boş satıra tıklayın.
+6. Veri satırlarını (başlık olmadan) yapıştırmak için **Ctrl+V**'ye basın.
+7. **Dosya** > **İndir** > **Virgülle ayrılmış değerler (.csv)**'ye gidin.
+
+### Dikkat edilecekler
+
+- Google E-Tablolar BOM'suz UTF-8 dışa aktarır, bu yüzden birleştirilmiş dosya olduğu gibi yüklenebilir.
+- Çok büyük dosyalar (100.000+ satır) E-Tablolar'ı yavaşlatabilir veya dondurabilir. Bu durumda komut satırını veya Python'u kullanın.
+- Yapıştırılan satırların sütunlarla hizalı olduğunu kontrol edin. Tek bir sütunluk kayma bile birleştirmenin tamamını bozar.
+
+---
+
+## Yöntem 3: komut satırı (en hızlısı, her dosya boyutu)
+
+Bir terminaliniz varsa, komut satırı dosya boyutundan bağımsız olarak bir saniyeden kısa sürer. macOS ve Linux'ta hiçbir şey kurmanız gerekmez.
+
+### macOS veya Linux
+
+```bash
+# file1.csv ile file2.csv'yi merged.csv içinde birleştir
+# tail -n +2 ikinci dosyanın başlık satırını atlar
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+`file1.csv` bir satır sonuyla bitmiyorsa, son satırı ile `file2.csv` dosyasının ilk satırı aynı satıra düşer. Sonuçta bu birleşim noktasını kontrol edin.
+
+### Windows (Komut İstemi)
+
+```bat
+:: Önce ilk dosyayı kopyala
+copy file1.csv merged.csv
+
+:: İkinci dosyanın başlık dışındaki tüm satırlarını ekle
+more +1 file2.csv >> merged.csv
+```
+
+Not: Windows'un `more +1` komutu ilk satırı atlar. Ancak sekmeleri boşluğa da çevirir, ASCII olmayan metni (Türkçe karakterler dahil) bozabilir ve çok büyük dosyalarda takılır; bu yüzden sonucu kontrol edin ya da Windows'ta Python (4. yöntem) kullanın.
+
+### Sonucu doğrulama
+
+Komut satırında birleştirdikten sonra sonucu bir metin düzenleyicide açın ve şunları doğrulayın:
+
+- Başlık satırı yalnızca bir kez (en üstte) görünüyor
+- İki dosyanın verileri arasında boş satır yok
+- file1'in son satırı ile file2'nin ilk veri satırı ardışık satırlarda
+- Sonda fazladan satır sonu yok (çoğu içe aktarıcı buna tolerans gösterir, ama olmaması daha temizdir)
+
+---
+
+## Yöntem 4: Python (her platformda, farklı sütunlar da olur)
+
+Python'un `csv.DictWriter`'ı en güvenilir birleştirme yöntemidir. Farklı sütun sıralarını, yalnızca bir dosyada olan sütunları ve büyük dosyaları kaldırır. Programcı olmanız gerekmez: Python'u kurun ve aşağıdaki betiği çalıştırın.
+
+### Betik
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Tüm sütun adlarını, ilk göründükleri sırayla topla
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" bir sütunu içermeyen dosyadan gelen satırlarda o sütunu boş bırakır
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig varsa BOM'u kaldırır
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Bu dosyayı CSV dosyalarınızla aynı klasöre `merge.py` adıyla kaydedin. O klasörde bir terminal veya komut istemi açın ve şunu çalıştırın:
+
+```
+python merge.py
+```
+
+### Neden Python?
+
+- Windows, Mac ve Linux'ta çalışır.
+- BOM'u otomatik kaldırır (utf-8-sig). UTF-8 olmayan dosyaları önce dönüştürün (aşağıdaki kodlama bölümüne bakın).
+- DictWriter sütunları konuma göre değil ada göre eşlediği için farklı sütun sıralarını halleder. Bir dosyada eksik olan sütunlar boş kalır, yalnızca bir dosyada olan sütunlar korunur.
+- Dosyaları her şeyi belleğe yüklemeden satır satır işler, bu yüzden çok büyük dosyalarda da çalışır.
+
+---
+
+## Ne zaman birleştirmemelisiniz
+
+Birleştirme, aynı yapıdaki dosyaların satırlarını alt alta koymak için doğru araçtır. Şu durumlarda birleştirmeyin:
+
+- **Dosyaların yapıları farklıysa.** file1'de 30 sütun, file2'de 25 farklı sütun varsa, gelişigüzel bir birleştirme verileri kaymış bir dosya üretir. Tüm sütunları koruyan ve boşlukları boş bırakan Python DictWriter yöntemini (4. yöntem) kullanın ya da önce yapıları uzlaştırın.
+- **Bir anahtar üzerinden eşleştirmek istiyorsanız (SQL tarzı JOIN).** Birleştirme satırları alt alta koyar; iki dosyadaki satırları ortak bir SKU, Handle veya kimlik üzerinden eşleştirmez. Anahtar üzerinden eşleştirme için Python'un `csv.DictReader`'ını bir sözlükle ya da pandas gibi bir aracı kullanın.
+- **Dosyalardan birinde toplamlar, özetler veya pivot tablolar varsa.** Birleştirmeden önce yalnızca ham veri satırlarını dışa aktarın. Özet satırları, TOPLA formülleri ve ortalama satırları birleştirmeden sonra ürün verisi olarak görünür.
+- **Dosyalar farklı dışa aktarma şablonlarından geliyorsa.** Bir Shopify ürün dışa aktarımı ile bir Shopify stok dışa aktarımının sütunları farklıdır ve satır ekleyerek birleştirilemez.
+
+---
+
+## Birleştirmeden önce farklı başlıkları düzeltme
+
+İki dosyada aynı sütunlar farklı başlık adlarıyla varsa (örneğin `Title` ile `Product Title`, ya da `Price` ile `Variant Price`), birleştirmeden önce bunları standartlaştırın.
+
+### Excel veya Google E-Tablolar'da elle düzeltme
+
+1. İki dosyayı yan yana açın.
+2. Her dosyanın 1. satırını (başlıklarını) karşılaştırın.
+3. Bir dosyadaki standart dışı başlıkları diğerine uyacak şekilde yeniden adlandırın. Hücreyi doğrudan düzenleyin (Excel'de F2 tuşu).
+4. Birleştirmeye geçmeden önce iki dosyayı da CSV olarak kaydedin.
+
+### Python ile otomatik düzeltme
+
+```python
+import csv
+
+# file2'deki standart dışı adları file1'de kullanılan standart adlarla eşle
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Başlıkları yeniden adlandır
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Sütunları aynı sıraya getirme
+
+Sütun adları aynı ama sıraları farklıysa, Python DictWriter yöntemi (4. yöntem) ada göre eşlediği için bunu otomatik halleder. Excel veya E-Tablolar'da elle yeniden sıralayın:
+
+**Excel'de:**
+1. Dosyalardan birinde 1. satırın üstüne boş bir satır ekleyin.
+2. Sütunları hedef dosyada olmasını istediğiniz sırayla numaralandırın (1, 2, 3...).
+3. Sütunları bu numara satırına göre sıralayın (Veri > Sırala > Seçenekler > Soldan sağa sırala, 1. satıra göre).
+4. Yardımcı numara satırını silin.
+
+**Google E-Tablolar'da:**
+1. En üste boş bir satır ekleyin.
+2. Her sütunun olmasını istediğiniz konum numarasını girin.
+3. Yardımcı bir sayfada `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` kullanın (sütun numaralarını istediğiniz sırayla yazarak) ya da sütunları doğru sıraya elle kesip yapıştırın.
+4. İndir > CSV.
+
+---
+
+## Birleştirilmiş dosyadaki yinelenen başlık satırlarını kaldırma
+
+Birleştirilmiş bir dosyanın ortasında yanlışlıkla yinelenen bir başlık satırı varsa (aynı aracın dışa aktarımlarını birkaç kez birleştirirken sık olur), Python ile kaldırın:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Başlıkla aynı olmayan satırları tut (ilki hariç)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Dosyalar arasındaki kodlama ve ayırıcı farkları
+
+Bir dosya UTF-8, diğeri Windows-1254 veya Windows-1252 (ANSI) ise, birleştirilmiş dosyada ANSI dosyasında Türkçe ya da aksanlı harf, tipografik tırnak veya para birimi simgesi olan her yerde bozuk karakterler olur.
+
+**Birleştirmeden önce ANSI dosyasını UTF-8'e dönüştürün:**
+
+macOS veya Linux'ta (Türkçe ANSI dosyaları genellikle `windows-1254`'tür):
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Python ile:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+İki dosya aynı kodlamayı ama farklı ayırıcıları (virgül ve noktalı virgül) kullanıyorsa, birleştirmeden önce birinin ayırıcısını dönüştürün. CSV temelleri rehberindeki ayırıcılar bölümüne bakın.
+
+---
+
+## Birleştirilmiş dosyalardaki sorunları giderme
+
+| Sorun | Neden | Çözüm |
+|---|---|---|
+| Birleştirilmiş dosyanın ortasında fazladan boş satır | İkinci dosyanın sonunda satır sonu veya özet satırı vardı | Boş satırı silin veya Python'da `writer.writerow(row)` öncesine `if any(row.values()):` ekleyin |
+| Ortada yinelenen başlık satırı | İkinci dosyanın başlığı atlanmadı | `tail -n +2` (komut satırı) veya başlığı otomatik atlayan Power Query Ekle'yi kullanın |
+| Veriler yanlış sütunlarda | Sütun sırası dosyalar arasında farklı | Önce bir dosyanın sütunlarını yeniden sıralayın veya Python DictWriter yöntemini kullanın |
+| Birleştirilmiş dosyada bozuk karakterler | Dosyaların kodlamaları farklı | Önce Mac/Linux'ta iconv ile iki dosyayı da UTF-8'e dönüştürün: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Yüklemeden sonra ilk sütun tanınmıyor | Birleştirilmiş dosyada platformun yanlış okuduğu bir BOM var | VS Code'da açıp BOM'suz UTF-8 olarak yeniden kaydedin |
+
+---
+
+## Yapmamanız gerekenler
+
+- **Büyük veya karmaşık dosyalarda elle kopyala-yapıştıra güvenmeyin.** Bir satırı atlamak, bir sütun kaydırarak yapıştırmak veya başlığı yanlışlıkla tekrarlamak kolaydır. 2. yöntem, sonucu kontrol ederseniz küçük dosyalar için uygundur; aksi hâlde Power Query, komut satırı veya Python kullanın.
+- **Satırları kesip yapıştırmak için iki dosyayı da Excel'de çift tıklayarak açmayın.** Excel bir CSV'yi bu şekilde açtığında tarihleri, uzun sayıları ve baştaki sıfırları yeniden biçimlendirir ve verileri sessizce bozar.
+- **Sütun sayıları farklı dosyaları önce başlıkları düzeltmeden birleştirmeyin.** Sonuçta veriler kayar.
+
+---
+
+## Birleştirme sonrası kontrol listesi
+
+Birleştirilmiş dosyayı içe aktarmadan önce şunları doğrulayın:
+
+- [ ] Başlık satırı yalnızca bir kez görünüyor (1. satırda, ortada tekrar etmiyor)
+- [ ] Satır sayısı doğru: (file1'deki satırlar − 1 başlık) + (file2'deki satırlar − 1 başlık) = toplam veri satırı
+- [ ] İki dosyanın veri bölümleri arasında fazladan boş satır yok
+- [ ] Yinelenmemesi gereken SKU'lar veya Handle'lar yinelenmiyor (CSV düzelticisinden geçirin)
+- [ ] İki kaynak dosyanın tüm sütunları mevcut (farklı yapılarla DictWriter kullandıysanız)
+- [ ] Dosya UTF-8 olarak kaydedilmiş
+- [ ] Dosya uzantısı .csv ve içerik virgülle ayrılmış düz metin
+
+---
+
+## Birleştirdikten sonra: içe aktarmadan önce doğrulayın
+
+Birleştirdikten sonra, içe aktarmadan önce birleşik dosyayı CSV düzelticisinden geçirin. Birleştirme, kaynak dosyaların hiçbirinde olmayan sorunlar ortaya çıkarabilir:
+
+- Ortada fazladan bir başlık satırı (düzeltici bunu yapısal sorun olarak yakalar)
+- Yinelenen SKU'lar veya Handle'lar (yinelenen doğrulaması yakalar)
+- Kodlama tutarsızlıkları (düzelticinin kodlama analizi yakalar)
+
+Birleştirilmiş CSV'nizi düzelticiye yükleyin ve platformunuza göndermeden önce dosyanın tamamını doğrulamasına izin verin.

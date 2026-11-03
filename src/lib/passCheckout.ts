@@ -5,6 +5,7 @@
 // tool stashes the file it is working on and picks it up again on return.
 "use client";
 
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 
 export type PassCheckoutResult = "redirected" | "signin" | "unavailable" | "error";
@@ -25,7 +26,7 @@ export async function startPassCheckout(): Promise<PassCheckoutResult> {
     });
     const j = await r.json().catch(() => ({}));
     if (r.status === 401) return "signin";
-    if (j?.error === "stripe_not_configured") return "unavailable";
+    if (j?.error === "stripe_not_configured" || j?.error === "price_not_configured") return "unavailable";
     if (!r.ok || !j?.url) return "error";
 
     window.location.href = j.url;
@@ -33,6 +34,31 @@ export async function startPassCheckout(): Promise<PassCheckoutResult> {
   } catch {
     return "error";
   }
+}
+
+let passAvailable: Promise<boolean> | null = null;
+
+/** Whether the pass can be bought (Stripe and STRIPE_PRICE_PASS configured). Fetched once per page load. */
+export function fetchPassAvailable(): Promise<boolean> {
+  passAvailable ??= fetch("/api/stripe/status", { cache: "no-store" })
+    .then((r) => r.json())
+    .then((j) => j?.prices?.pass !== false && j?.enabled !== false)
+    // If the status check itself fails, keep offering the pass; checkout reports the real error.
+    .catch(() => true);
+  return passAvailable;
+}
+
+/** False once the server says the pass isn't configured; true until then, so the button doesn't flicker in. */
+export function usePassAvailable(): boolean {
+  const [available, setAvailable] = useState(true);
+  useEffect(() => {
+    let live = true;
+    void fetchPassAvailable().then((v) => live && setAvailable(v));
+    return () => {
+      live = false;
+    };
+  }, []);
+  return available;
 }
 
 /** Login URL that brings the user back to the current page. */

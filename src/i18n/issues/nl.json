@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "Variantopties niet uniek",
 "explanation": "Twee of meer varianten van dezelfde handle hebben identieke optiewaarden.",
-"whyPlatformCares": "Shopify voegt varianten met identieke optiecombinaties samen. Dat kan gegevensverlies of overschreven varianten veroorzaken.",
+"whyPlatformCares": "Shopify weigert een product waarvan varianten dezelfde optiecombinatie hebben, dus de import van dat product mislukt.",
 "howToFix": "Maak elke combinatie van variantopties uniek (of verwijder de dubbele)."
 },
 "shopify/missing_option1_for_variant_data": {

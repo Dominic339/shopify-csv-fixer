@@ -304,6 +304,7 @@
     "faq": "FAQ",
     "presetFormats": "Formati preimpostati",
     "checksCount": "{count} controlli",
+    "checksShared": "I preset WooCommerce condividono i loro controlli, così come i preset eBay, quindi i conteggi qui sotto si sovrappongono. Il totale della home page conta ogni controllo una sola volta.",
     "variationsFixer": "Correttore varianti {platform}",
     "englishContent": "La descrizione dettagliata qui sotto è in inglese.",
     "checksTitle": "Cosa controlla questo modello",
@@ -522,6 +523,7 @@
     "readyFor": "Pronto per l’importazione in {platform}",
     "readyGeneric": "Pronto per l’esportazione",
     "readyDesc": "Nessun problema bloccante. Esporta il file corretto e importalo.",
+    "readyDescErrors": "Nessun problema bloccante, ma restano {count} errori. Non impediranno l'importazione; controllali qui sotto.",
     "blockedTitle": "{count} problemi bloccheranno l’importazione",
     "blockedTitleOne": "1 problema bloccherà l’importazione",
     "blockedDesc": "Correggili qui sotto prima di importare, oppure esporta comunque e completa le modifiche in un foglio di calcolo.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "1 correzione automatica applicata",
     "moreInLog": "…e altre {count}. Scarica il registro per l’elenco completo.",
     "advancedChecks": "Controlli avanzati",
-    "importConfidenceHelp": "Una stima di quanto sarà sicura l’importazione. Blocchi, rischi di sovrascrittura e righe vuote la abbassano.",
+    "importConfidenceHelp": "Il punteggio di validazione conta ogni problema trovato. La confidenza di importazione stima quanto sarà sicura l'importazione: blocchi, rischi di sovrascrittura e righe vuote la riducono.",
     "simulateHelp": "Stima cosa la piattaforma unirebbe, salterebbe o rifiuterebbe importando questo file.",
     "simPass": "Importazione simulata: OK",
     "simFail": "Importazione simulata: NON RIUSCITA",
@@ -770,7 +772,7 @@
     "billingUnavailable": "La fatturazione è temporaneamente non disponibile. Riprova più tardi.",
     "starting": "Avvio in corso…",
     "freeBullet1": "Correggere ed esportare file CSV",
-    "freeBullet2": "3 esportazioni al mese per dispositivo",
+    "freeBullet2": "3 esportazioni al mese per dispositivo per i file oltre 100 righe",
     "freeBullet3": "Accesso a tutti i formati integrati",
     "freeBullet4": "Nessun account richiesto",
     "basicBullet1": "100 esportazioni al mese",
@@ -796,7 +798,7 @@
     "buyPass": "Acquista il pass",
     "signInToBuy": "Accedi per acquistare",
     "passActiveUntil": "Attivo fino alle {time}",
-    "freeBulletSmall": "File fino a 100 righe sempre gratis"
+    "freeBulletSmall": "I file fino a 100 righe sono sempre gratuiti e non consumano esportazioni"
   },
   "auth": {
     "loginTitle": "Accedi",

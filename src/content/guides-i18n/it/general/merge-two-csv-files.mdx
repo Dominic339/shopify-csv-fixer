@@ -1,0 +1,336 @@
+---
+title: "Come unire due file CSV"
+description: "Guida passo passo per combinare due file CSV in uno con Power Query di Excel, Google Sheets o una semplice riga di comando, senza esperienza di programmazione."
+keywords: ["unire file csv", "combinare csv", "unire due csv", "power query excel csv", "unire csv google sheets", "accodare csv", "impilare file csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Quattro metodi per unire file CSV (Excel, Sheets, riga di comando, Python)"
+  - "Quando NON unire e cosa fare invece"
+  - "Come sistemare intestazioni diverse e un diverso ordine delle colonne"
+  - "Come eliminare le righe di intestazione duplicate da un file unito"
+  - "Come gestire codifiche e delimitatori diversi tra i file"
+bestFor: "Venditori che combinano esportazioni di catalogo, file di magazzino o esportazioni di ordini da più fonti"
+timeToComplete: "15 minuti"
+---
+
+## Quando serve unire file CSV?
+
+Unire due file CSV in uno è un passaggio comune prima di un'importazione e-commerce. Può servirti per:
+
+- Riunire i prodotti di due fornitori in un unico caricamento del catalogo
+- Combinare l'esportazione prodotti del mese scorso con le novità
+- Dividere un'importazione grande in lotti più piccoli e poi riunirli
+- Riunire in un unico CSV di prodotti righe di varianti provenienti da fonti diverse
+
+Questa guida copre quattro metodi affidabili: Power Query di Excel, Google Sheets, la riga di comando e Python. Ognuno mantiene la riga di intestazione del primo file e aggiunge solo le righe di dati del secondo.
+
+---
+
+## Prima di iniziare: allinea le intestazioni
+
+I due file devono avere le stesse intestazioni di colonna nello stesso ordine. Se le colonne sono diverse, l'unione sposta i dati nei campi sbagliati e rovina l'importazione.
+
+Checklist rapida prima di unire:
+
+- [ ] Apri i due file e confronta la prima riga (le intestazioni) una accanto all'altra
+- [ ] I nomi delle colonne corrispondono esattamente (alcune piattaforme distinguono maiuscole e minuscole)
+- [ ] Le colonne sono nello stesso ordine nei due file
+- [ ] Nessuno dei due file ha righe di riepilogo o di piè di pagina
+- [ ] I due file sono salvati in UTF-8
+
+Se le intestazioni sono in un ordine diverso, riordina le colonne di uno dei file prima di unirli. Il metodo Python con DictWriter (metodo 4 più sotto) gestisce automaticamente le differenze di ordine.
+
+---
+
+## Metodo 1: Power Query di Excel (Windows, consigliato)
+
+Power Query di Excel accoda più CSV senza formule né macro. Gestisce automaticamente le differenze di codifica e di fine riga tra i file e non ripete mai la riga di intestazione.
+
+### Passaggi
+
+1. Apri una cartella di lavoro vuota di Excel.
+2. Vai alla scheda **Dati**, fai clic su **Recupera dati**, poi **Da file** e **Da testo/CSV**.
+3. Seleziona il **primo file CSV** e fai clic su **Importa**. Nell'anteprima, fai clic su **Trasforma dati** (non su Carica).
+4. Nell'editor di Power Query, vai su **Home** > **Nuova origine** > **File** > **Testo/CSV**, seleziona il **secondo file CSV** e fai clic su **OK**. Ora entrambi i file compaiono come query nel riquadro di sinistra.
+5. Seleziona la prima query, poi vai su **Home** > **Accoda query** > **Accoda query come nuova**.
+6. Nella finestra, scegli **Due tabelle**, poi seleziona la seconda query dall'elenco.
+7. Nel riquadro di sinistra compare una nuova query combinata. Fai clic su **Chiudi e carica** per scriverla in un nuovo foglio.
+8. Con il foglio combinato attivo, vai su **File** > **Salva con nome** e scegli **CSV UTF-8 (delimitato da virgole)** come formato. Excel salva solo il foglio attivo. Il semplice «CSV (delimitato dal separatore di elenco)» usa una vecchia codifica e può rovinare gli accenti.
+
+### Perché Power Query
+
+- Rileva la codifica di ogni file e ti permette di correggerla nell'anteprima se la rilevazione sbaglia.
+- Aggiunge la riga di intestazione una sola volta, non una per file.
+- Non aggiunge righe vuote tra i due file.
+- Gestisce file grandi, fino al limite di Excel di 1.048.576 righe per foglio. Per più righe, usa la riga di comando o Python.
+
+---
+
+## Metodo 2: Google Sheets (nel browser, file più piccoli)
+
+Google Sheets è una soluzione rapida se non hai Excel. Funziona bene con file di meno di circa 50.000 righe in totale.
+
+### Passaggi
+
+1. Apri Google Drive e carica il primo CSV: clic destro su un'area vuota, **Caricamento di file**, scegli il CSV, poi clic destro sul file caricato e **Apri con > Fogli Google**.
+2. Annota il numero dell'ultima riga di dati (per esempio la riga 500 se il file ha 499 righe di dati più una di intestazione).
+3. Apri il secondo CSV allo stesso modo in una nuova scheda del browser.
+4. Nel secondo foglio, fai clic sul numero di riga **2** (la prima riga di dati, sotto l'intestazione). Premi **Ctrl+Maiusc+Fine** per estendere la selezione fino all'ultima riga e all'ultima colonna con dati.
+5. Premi **Ctrl+C** per copiare. Torna alla prima scheda e fai clic sulla prima riga vuota sotto i dati.
+6. Premi **Ctrl+V** per incollare le righe di dati (senza intestazione).
+7. Vai su **File** > **Scarica** > **Valori separati da virgole (.csv)**.
+
+### Attenzione a
+
+- Google Sheets esporta UTF-8 senza BOM, quindi il file unito si può caricare così com'è.
+- I file molto grandi (oltre 100.000 righe) possono rallentare o bloccare Sheets. Usa allora la riga di comando o Python.
+- Controlla che le righe incollate siano allineate alle colonne. Un solo spostamento di una colonna rovina l'intera unione.
+
+---
+
+## Metodo 3: riga di comando (il più veloce, qualsiasi dimensione)
+
+Se hai un terminale, la riga di comando impiega meno di un secondo, qualunque sia la dimensione del file. Su macOS e Linux non serve installare nulla.
+
+### macOS o Linux
+
+```bash
+# Unire file1.csv e file2.csv in merged.csv
+# tail -n +2 salta la riga di intestazione del secondo file
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Se `file1.csv` non termina con un a capo, la sua ultima riga e la prima riga di `file2.csv` finiscono sulla stessa riga. Controlla quel punto nel risultato.
+
+### Windows (prompt dei comandi)
+
+```bat
+:: Copiare prima il primo file
+copy file1.csv merged.csv
+
+:: Accodare tutte le righe del secondo file tranne l'intestazione
+more +1 file2.csv >> merged.csv
+```
+
+Nota: il comando Windows `more +1` salta la prima riga. Converte però anche le tabulazioni in spazi, può rovinare il testo non ASCII e si blocca con file molto grandi, quindi controlla il risultato o usa Python (metodo 4) su Windows.
+
+### Verificare il risultato
+
+Dopo l'unione da riga di comando, apri il risultato in un editor di testo e verifica che:
+
+- La riga di intestazione compaia una sola volta (in cima)
+- Non ci siano righe vuote tra i dati dei due file
+- L'ultima riga di file1 e la prima riga di dati di file2 siano su righe consecutive
+- Non ci sia un a capo in più alla fine (la maggior parte degli importatori lo tollera, ma senza è più pulito)
+
+---
+
+## Metodo 4: Python (multipiattaforma, gestisce colonne diverse)
+
+`csv.DictWriter` di Python è il metodo di unione più affidabile. Gestisce un ordine di colonne diverso, colonne presenti in un solo file e file grandi. Non serve essere programmatori: installa Python ed esegui lo script qui sotto.
+
+### Lo script
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Raccogliere tutti i nomi di colonna, nell'ordine in cui compaiono la prima volta
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" lascia vuota una colonna nelle righe di un file che non ce l'ha
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig rimuove il BOM se presente
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Salva questo file come `merge.py` nella stessa cartella dei tuoi CSV. Apri un terminale o un prompt dei comandi in quella cartella ed esegui:
+
+```
+python merge.py
+```
+
+### Perché Python?
+
+- Funziona su Windows, Mac e Linux.
+- Rimuove automaticamente il BOM (utf-8-sig). Converti prima qualsiasi file che non sia in UTF-8 (vedi la sezione sulla codifica più sotto).
+- Gestisce colonne in ordine diverso, perché DictWriter le associa per nome e non per posizione. Le colonne che mancano in un file restano vuote, e quelle presenti in un solo file vengono mantenute.
+- Elabora i file riga per riga senza caricare tutto in memoria, quindi funziona con file molto grandi.
+
+---
+
+## Quando NON unire
+
+L'unione serve a impilare righe di file con la stessa struttura. Non unire quando:
+
+- **I file hanno strutture diverse.** Se file1 ha 30 colonne e file2 ne ha 25 diverse, un'unione ingenua produce un file con dati disallineati. Usa il metodo Python con DictWriter (metodo 4), che mantiene tutte le colonne e lascia vuoti i buchi, oppure allinea prima le strutture.
+- **Vuoi collegare tramite una chiave (un JOIN in stile SQL).** L'unione impila righe; non abbina le righe di due file tramite uno SKU, un Handle o un ID comune. Per i collegamenti tramite chiave, usa `csv.DictReader` di Python con un dizionario, o uno strumento come pandas.
+- **Un file contiene totali, riepiloghi o tabelle pivot.** Prima di unire, esporta solo le righe di dati grezzi. Righe di riepilogo, formule SOMMA e righe di medie compariranno come dati di prodotto dopo l'unione.
+- **I file vengono da modelli di esportazione diversi.** Un'esportazione dei prodotti Shopify e un'esportazione del magazzino Shopify hanno colonne diverse e non si possono unire accodando righe.
+
+---
+
+## Sistemare le intestazioni diverse prima di unire
+
+Se i due file hanno le stesse colonne ma con nomi diversi (per esempio `Title` e `Product Title`, o `Price` e `Variant Price`), uniformali prima di unirli.
+
+### A mano in Excel o Google Sheets
+
+1. Apri i due file uno accanto all'altro.
+2. Confronta la riga 1 (le intestazioni) di ciascun file.
+3. Rinomina in un file le intestazioni non standard perché corrispondano all'altro. Modifica direttamente la cella (tasto F2 in Excel).
+4. Salva entrambi i file come CSV prima di procedere con l'unione.
+
+### In automatico con Python
+
+```python
+import csv
+
+# Associare i nomi non standard di file2 ai nomi standard usati in file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Rinominare le intestazioni
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Riordinare le colonne perché corrispondano
+
+Se i nomi delle colonne sono identici ma l'ordine è diverso, il metodo Python con DictWriter (metodo 4) lo gestisce in automatico, perché associa per nome. In Excel o Sheets, riordina a mano:
+
+**In Excel:**
+1. Inserisci una riga vuota sopra la riga 1 in uno dei file.
+2. Numera le colonne nell'ordine che devono avere nel file di destinazione (1, 2, 3...).
+3. Ordina le colonne in base a questa riga di numeri (Dati > Ordina > Opzioni > Ordina da sinistra a destra, per la riga 1).
+4. Elimina la riga di numeri di supporto.
+
+**In Google Sheets:**
+1. Inserisci una riga vuota in cima.
+2. Scrivi la posizione desiderata di ogni colonna.
+3. In un foglio di supporto, usa `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (con i numeri di colonna nell'ordine che vuoi), oppure taglia e incolla le colonne a mano nell'ordine corretto.
+4. Scarica > CSV.
+
+---
+
+## Eliminare le righe di intestazione duplicate da un file unito
+
+Se un file unito contiene per errore una riga di intestazione duplicata a metà (succede spesso unendo più volte esportazioni dello stesso strumento), eliminala con Python:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Tenere solo le righe diverse dall'intestazione (tranne la prima)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Codifiche e delimitatori diversi tra i file
+
+Se un file è in UTF-8 e l'altro in Windows-1252 (ANSI), il file unito avrà caratteri illeggibili ovunque il file Windows-1252 avesse lettere accentate, virgolette tipografiche o simboli di valuta.
+
+**Converti Windows-1252 in UTF-8 prima di unire:**
+
+Su macOS o Linux:
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Con Python:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Se i due file usano la stessa codifica ma delimitatori diversi (virgole e punti e virgola), converti il delimitatore di uno dei due prima di unire. Vedi la sezione sui delimitatori della guida alle nozioni di base sul CSV.
+
+---
+
+## Risolvere i problemi dei file uniti
+
+| Problema | Causa | Soluzione |
+|---|---|---|
+| Riga vuota in più a metà del file unito | Il secondo file aveva un a capo o una riga di riepilogo alla fine | Elimina la riga vuota, oppure aggiungi `if any(row.values()):` prima di `writer.writerow(row)` in Python |
+| Riga di intestazione duplicata a metà | Non è stata saltata l'intestazione del secondo file | Usa `tail -n +2` (riga di comando) o Accoda di Power Query (che la salta in automatico) |
+| Dati nelle colonne sbagliate | L'ordine delle colonne è diverso tra i file | Riordina prima le colonne di un file, oppure usa il metodo Python con DictWriter |
+| Caratteri illeggibili nel file unito | I file hanno codifiche diverse | Converti prima entrambi i file in UTF-8 con iconv su Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Prima colonna non riconosciuta dopo il caricamento | Il file unito ha un BOM che la piattaforma legge male | Aprilo in VS Code e salvalo di nuovo come UTF-8 senza BOM |
+
+---
+
+## Cosa non fare
+
+- **Non affidarti al copia e incolla a mano con file grandi o complessi.** È facile saltare una riga, incollare con una colonna di scarto o ripetere per sbaglio l'intestazione. Il metodo 2 va bene per file piccoli se controlli il risultato; altrimenti usa Power Query, la riga di comando o Python.
+- **Non aprire i due file con un doppio clic in Excel per tagliare e incollare righe.** Excel riformatta date, numeri lunghi e zeri iniziali quando apre un CSV in questo modo, rovinando i dati senza avvisare.
+- **Non unire file con un numero di colonne diverso senza prima sistemare le intestazioni.** Il risultato avrà dati disallineati.
+
+---
+
+## Checklist dopo l'unione
+
+Prima di importare il file unito, verifica questi punti:
+
+- [ ] La riga di intestazione compare una sola volta (nella riga 1, non ripetuta a metà)
+- [ ] Il numero di righe è corretto: (righe di file1 − 1 intestazione) + (righe di file2 − 1 intestazione) = totale delle righe di dati
+- [ ] Nessuna riga vuota in più tra le parti di dati dei due file
+- [ ] Nessuno SKU o Handle duplicato che non dovrebbe esserlo (passa il file nel correttore CSV)
+- [ ] Ci sono tutte le colonne dei due file di origine (se usi DictWriter con strutture diverse)
+- [ ] File salvato in UTF-8
+- [ ] L'estensione è .csv e il contenuto è testo semplice separato da virgole
+
+---
+
+## Dopo l'unione: convalida prima di importare
+
+Dopo l'unione, fai passare il file combinato nel correttore CSV prima di importarlo. L'unione può introdurre problemi che non c'erano in nessuno dei file di origine:
+
+- Una riga di intestazione in più a metà (individuata dal correttore come problema di struttura)
+- SKU o Handle duplicati (individuati dal controllo dei duplicati)
+- Codifica non uniforme (individuata dall'analisi della codifica del correttore)
+
+Carica il CSV unito nel correttore e lascia che convalidi l'intero file prima di inviarlo alla tua piattaforma.

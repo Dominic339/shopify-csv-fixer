@@ -1,0 +1,163 @@
+---
+title: "Eliminar columnas sobrantes de un archivo CSV"
+description: "Cómo encontrar y quitar columnas sobrantes o inesperadas de un archivo CSV antes de importarlo en Shopify, WooCommerce, Etsy, eBay o Amazon."
+keywords: ["eliminar columnas sobrantes csv", "quitar columnas de más csv", "columna inesperada importación csv", "error columna de más csv", "csv demasiadas columnas", "borrar columnas csv", "limpiar columnas csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cómo aparecen columnas de más en los CSV y por qué provocan errores de importación"
+  - "Qué plataformas rechazan los archivos con columnas de más y cuáles las ignoran"
+  - "Cómo encontrar y quitar columnas de más en Excel y Google Sheets"
+  - "Cómo eliminar columnas de más con Python en archivos grandes"
+  - "Cómo evitar que vuelvan a aparecer columnas de más en tus exportaciones"
+bestFor: "Vendedores con importaciones fallidas o errores de validación inesperados causados por columnas que la plataforma no espera"
+timeToComplete: "6 minutos"
+---
+
+## Cómo llegan columnas de más a tu CSV
+
+Las columnas de más aparecen en los CSV por varios motivos habituales:
+
+- **Fórmulas o columnas auxiliares**: columnas que añadiste para tus propios cálculos y que nunca debían importarse
+- **Columnas de notas o de seguimiento interno**: columnas como `Internal Notes`, `Last Edited By` o `Supplier Cost`
+- **Restos de exportaciones**: tu sistema de inventario exporta más campos de los que necesita la plataforma
+- **Archivos de plataformas combinados**: juntaste columnas de dos plantillas distintas y el resultado tiene duplicadas o sobrantes
+- **Una coma al final de cada fila**: crea una columna vacía invisible al final
+
+---
+
+## ¿Acepta tu plataforma columnas de más?
+
+El comportamiento depende de la plataforma:
+
+| Plataforma | Qué pasa con las columnas de más |
+|---|---|
+| Shopify | Se ignoran sin avisar, no son un problema |
+| WooCommerce | No se importan: la pantalla de asignación marca las columnas desconocidas como «Do not import» |
+| Etsy | No tiene subida de CSV; las apps de publicación masiva fijan sus propias reglas |
+| eBay File Exchange | Las columnas no reconocidas pueden producir avisos o errores |
+| Archivos planos de Amazon | Las columnas que no están en la plantilla pueden rechazarse |
+
+En Shopify o WooCommerce, las columnas de más suelen ser inofensivas. Para eBay, Amazon o una app de publicación masiva de Etsy, elimina antes de subir las columnas que no estén en la plantilla oficial.
+
+---
+
+## Encontrar columnas de más
+
+**Comparar con la plantilla oficial:**
+
+1. Descarga la plantilla CSV oficial de la plataforma
+2. Abre tu archivo y la plantilla en un editor de texto (no en Excel)
+3. Compara la fila 1 (encabezados) de los dos archivos
+4. Cualquier columna de tu archivo que no esté en la plantilla sobra
+
+**Python: listar las columnas de más**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Quitar columnas de más en Excel
+
+1. Abre el CSV en Excel
+2. Haz clic en la letra de cada columna sobrante para seleccionarla
+3. Clic derecho → Eliminar
+4. Para varias columnas no contiguas: mantén pulsado Ctrl, haz clic en la letra de cada columna y luego clic derecho → Eliminar
+5. Guarda como CSV UTF-8 (delimitado por comas), no como XLSX
+
+**Quitar la última columna si está vacía (resto de una coma final):**
+
+1. Pulsa Ctrl+Fin para encontrar la última celda usada
+2. Si la última columna está vacía en todo el archivo, selecciónala y elimínala
+3. Guarda como CSV
+
+---
+
+## Quitar columnas de más en Google Sheets
+
+1. Haz clic en la letra de la columna para seleccionarla
+2. Clic derecho → Eliminar columna
+3. Repite con todas las columnas sobrantes
+4. Archivo → Descargar → Valores separados por comas
+
+---
+
+## Quitar columnas de más con Python (archivos grandes)
+
+Para archivos grandes que tardan o cuesta abrir en una hoja de cálculo:
+
+```python
+import csv
+
+# Columnas que se conservan (usa los nombres exactos de la plataforma)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig evita que un BOM quede pegado al primer nombre de columna
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Escribir solo las columnas que están en KEEP y en el archivo
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Corregir comas finales (columna de más oculta)
+
+Una coma al final de cada fila crea una columna vacía en la posición N+1. Se ve así:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+La columna vacía después de la última coma es una columna de más, sin nombre y sin valores.
+
+**Solución con Python:** quita exactamente una coma del final de cada línea. Quitar todas las comas finales borraría también celdas vacías reales al final de una fila.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Solución en VS Code:** usa Buscar y reemplazar en modo de expresión regular. Busca `,$` y reemplázalo por nada. Hazlo solo si todas las filas, incluido el encabezado, terminan con la coma de más.
+
+---
+
+## Evitar columnas de más en futuras exportaciones
+
+- Elimina las columnas auxiliares de tu hoja antes de exportar (o guárdalas en otra hoja)
+- Parte de la plantilla oficial de la plataforma y añade solo columnas que estén en ella
+- Si usas un software de inventario propio, configura la exportación para que solo saque columnas admitidas
+- Ten una versión de «exportación limpia» de tu plantilla con solo las columnas necesarias
+
+---
+
+## Corrígelo automáticamente con StriveFormats
+
+StriveFormats compara las columnas de tu archivo con las que espera la plataforma elegida, identifica las columnas de más y señala las que provocarán errores de importación en plataformas estrictas.
+
+[Abrir el corrector de CSV](/app) | [Ver plantillas CSV](/presets)

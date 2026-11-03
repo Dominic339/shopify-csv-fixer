@@ -1,0 +1,145 @@
+---
+title: "Jak powstrzymać Excela przed zamianą SKU i kodów kreskowych na notację naukową"
+description: "Nie pozwól Excelowi zamieniać SKU, kodów EAN i UPC na notację naukową, np. 1.23456E+11. Ustaw format tekstowy przed wklejeniem, użyj kreatora importu i napraw istniejące pliki."
+keywords: ["excel notacja naukowa csv", "sku notacja naukowa", "kod kreskowy excel", "zera wiodące csv", "format tekstowy excel", "upc ean excel", "naprawa 1.23456e+11", "format liczb excel csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Dlaczego Excel zamienia długie liczby na notację naukową i usuwa zera wiodące"
+  - "Jak ustawić format tekstowy kolumn przed wpisaniem danych"
+  - "Jak w kreatorze importu Excela ustawić typy kolumn"
+  - "Jak naprawić wartości w notacji naukowej w zapisanym pliku CSV"
+  - "Jak każdy krok wygląda w Arkuszach Google"
+bestFor: "Sprzedawcy z katalogami pełnymi SKU, kodów kreskowych (EAN-13, UPC-A), numerów ISBN lub innych kodów liczbowych, które muszą zostać zachowane dokładnie"
+timeToComplete: "8 minut"
+---
+
+## Dlaczego tak się dzieje
+
+Excel jest stworzony do danych finansowych. Gdy widzi wartość, która wygląda jak liczba, zamienia ją na format liczbowy. To powoduje dwa problemy w plikach CSV dla e-commerce:
+
+1. **Notacja naukowa:** 13-cyfrowy kod kreskowy EAN, np. `4006381333931`, zmienia się w `4,00638E+12`. Przy eksporcie do CSV Excel zapisuje `4,00638E+12` (lub `4.00638E+12`), co nie jest poprawnym kodem kreskowym.
+2. **Utracone zera wiodące:** SKU `00714` zmienia się w `714`. 8-cyfrowy EAN-8, np. `01234565`, zmienia się w `1234565`. Platforma importu dostaje złą wartość.
+
+Te zmiany dzieją się po cichu. Możesz to zauważyć dopiero wtedy, gdy import się nie powiedzie albo stany magazynowe się nie zgodzą.
+
+---
+
+## Których pól to dotyczy
+
+Zagrożone jest każde pole z długimi ciągami cyfr lub zerami wiodącymi:
+
+- **Kody kreskowe:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKU** z zerami wiodącymi (częste w katalogach odzieży i artykułów technicznych)
+- **SKU wariantów** przejęte z numerów katalogowych producenta
+- **Kolumna Variant Barcode** w Shopify
+- **ASIN / FNSKU Amazon** (alfanumeryczne, ale częściowo złożone z cyfr)
+- **Kolumna SKU** w WooCommerce
+
+---
+
+## Zapobieganie: format tekstowy kolumn przed wpisaniem danych
+
+Najbezpieczniej jest ustawić format **Tekstowy** kolumny, zanim cokolwiek do niej wpiszesz lub wkleisz.
+
+### W Excelu (nowy arkusz)
+
+1. Zaznacz całą kolumnę lub kolumny, w których będą kody kreskowe lub SKU (np. kliknij literę `C`, aby zaznaczyć kolumnę C).
+2. Prawy przycisk myszy → **Formatuj komórki**.
+3. Na liście **Kategoria** wybierz **Tekstowe**.
+4. Kliknij **OK**.
+5. Teraz wpisz lub wklej wartości. Excel potraktuje je jako tekst i zachowa dokładnie.
+
+> **Ważne:** ustawienie formatu tekstowego komórki *po* wpisaniu liczby nie cofa zamiany. Najpierw trzeba ustawić format, a dopiero potem wprowadzić dane. Jeśli wklejasz do sformatowanej wcześniej kolumny, wklej **tylko wartości** (Ctrl+Shift+V lub Wklej specjalnie → Wartości), żeby nie przenieść formatu liczbowego ze źródła.
+
+### W Excelu (z apostrofem na początku)
+
+Szybki sposób dla pojedynczych komórek: wpisz apostrof (`'`) przed liczbą:
+
+```
+'4006381333931
+```
+
+Excel traktuje jako tekst każdą wartość zaczynającą się od `'`. Apostrof nie jest zapisywany w wartości komórki; zapisywana jest tylko liczba. Działa to dla pojedynczych komórek, ale przy dużej ilości danych jest uciążliwe.
+
+---
+
+## Naprawa istniejących plików: otwieranie CSV kreatorem importu
+
+Jeśli masz już plik CSV, w którym Excel zepsuł kody kreskowe, użyj kreatora importu zamiast otwierać plik dwukrotnym kliknięciem:
+
+### Excel 2016+ (Pobieranie i przekształcanie)
+
+1. Otwórz pusty skoroszyt.
+2. Przejdź do **Dane → Z pliku tekstowego/CSV**.
+3. Wybierz plik CSV.
+4. Otworzy się podgląd. Znajdź kolumnę z kodami kreskowymi lub SKU. Jeśli widać w niej notację naukową, typ został automatycznie rozpoznany jako „Liczba całkowita”.
+5. Kliknij **Przekształć dane** (otworzy się edytor Power Query).
+6. Zaznacz problematyczne kolumny.
+7. Na karcie **Narzędzia główne** z listy **Typ danych** wybierz **Tekst**. Gdy Power Query zapyta, kliknij **Zamień bieżące**, aby zmiana typu zastąpiła automatyczną konwersję na liczbę i zachowała oryginalne cyfry.
+8. Zamknij i załaduj.
+9. Wyeksportuj ponownie do CSV przez **Plik → Zapisz jako → CSV UTF-8**.
+
+### Excel (starszy Kreator importu tekstu)
+
+Jeśli masz dostęp do starszego kreatora:
+
+1. Przejdź do **Dane → Z tekstu** albo zmień rozszerzenie pliku z `.csv` na `.txt` i otwórz go przez **Plik → Otwórz**, co uruchomi kreatora.
+2. W **kroku 3** kreatora zaznacz kolumnę i ustaw jej typ danych na **Tekst**.
+3. Zakończ import.
+
+---
+
+## Naprawa notacji naukowej w zapisanym pliku CSV
+
+Jeśli masz już plik CSV z wartościami takimi jak `4.00638E+12`:
+
+### Opcja A: wpisanie wartości od nowa (małe pliki)
+
+Gdy sam plik CSV zawiera już `4.00638E+12`, brakujących cyfr nie ma w pliku i żaden edytor tekstu ich nie przywróci. Możesz tylko wpisać poprawne wartości od nowa na podstawie swoich danych, co ma sens najwyżej przy kilku wierszach.
+
+### Opcja B: odtworzenie ze źródła
+
+Jeśli oryginalne dane są w bazie danych, systemie PIM lub pliku od dostawcy, wyeksportuj je ponownie bez otwierania w Excelu. Wiele portali dostawców pozwala pobrać plik `.xlsx`. Otwórz go, ustaw format tekstowy kolumn, a potem zapisz jako CSV.
+
+### Opcja C: przywrócenie za pomocą formuły
+
+Jeśli skoroszyt jest nadal otwarty w Excelu (lub zapisany jako .xlsx), Excel może wciąż przechowywać pełną liczbę, np. `4006381333931`, a tylko wyświetlać ją w notacji naukowej:
+
+1. Dodaj kolumnę pomocniczą.
+2. Użyj `=TEKST(A2;"0")`, aby zamienić liczbę na tekst bez notacji naukowej.
+3. Skopiuj kolumnę pomocniczą i wklej ją jako **Wartości** na oryginalną kolumnę.
+4. Usuń kolumnę pomocniczą.
+5. Zapisz jako CSV.
+
+> To działa tylko wtedy, gdy Excel nadal przechowuje pełną liczbę. Jeśli wartość została obcięta (ponad 15 cyfr znaczących), precyzja przepadła na zawsze i trzeba pobrać oryginalne dane ze źródła.
+
+---
+
+## Jak to wygląda w Arkuszach Google
+
+Arkusze Google mają ten sam problem z zamianą liczb:
+
+- **Ustaw zwykły tekst przed wklejeniem:** zaznacz kolumnę → **Format → Liczba → Zwykły tekst**.
+- **Importuj przez Plik → Importuj:** w oknie importu odznacz **Konwertuj tekst na liczby, daty i formuły**, aby kody zostały tekstem, a po imporcie sprawdź, czy kody kreskowe wyglądają poprawnie.
+- **Napraw istniejące wartości:** użyj `=TEXT(A2; "0")` tak samo jak w Excelu.
+
+---
+
+## Bezpieczny eksport z Excela do CSV
+
+Po naprawieniu lub poprawnym sformatowaniu kolumn:
+
+1. **Plik → Zapisz jako → CSV UTF-8 (rozdzielany przecinkami) (.csv)**.
+2. Excel może ostrzec, że ten format nie obsługuje wielu arkuszy. Kliknij **Tak/Zachowaj bieżący format**.
+3. **Nie otwieraj CSV ponownie w Excelu, żeby go sprawdzić**: użyj edytora tekstu (VS Code, Notepad++), aby upewnić się, że kody kreskowe to zwykłe liczby, a nie notacja naukowa.
+
+---
+
+## Lista kontrolna zapobiegania
+
+- [ ] Ustaw format **Tekstowy** kolumn z kodami kreskowymi i SKU przed wpisaniem jakichkolwiek danych
+- [ ] Otwieraj istniejące pliki CSV przez **Dane → Z pliku tekstowego/CSV** (a nie dwukrotnym kliknięciem)
+- [ ] W kreatorze importu ustaw typ **Tekst** dla kolumn, które wyglądają jak liczby
+- [ ] Sprawdzaj wyeksportowany plik CSV w edytorze tekstu, a nie w Excelu
+- [ ] W Arkuszach Google ustaw kolumny jako **Zwykły tekst** przed importem

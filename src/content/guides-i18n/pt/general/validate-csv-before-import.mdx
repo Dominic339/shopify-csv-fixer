@@ -1,0 +1,183 @@
+---
+title: "Valide seu CSV antes de enviar para qualquer plataforma de e-commerce"
+description: "Um checklist prático para pegar erros de codificação, cabeçalhos ausentes, linhas com tamanhos diferentes, problemas de aspas e outros problemas antes que a importação falhe. Cobre Shopify, WooCommerce, eBay, Amazon e Etsy."
+keywords: ["validar csv antes de importar", "checklist csv", "erros de importação csv", "verificar cabeçalhos csv", "verificar codificação csv", "aspas csv", "tamanho das linhas csv", "validar csv shopify", "validar csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "O que verificar antes de enviar qualquer CSV para uma plataforma de e-commerce"
+  - "Como conferir codificação, cabeçalhos, tamanho das linhas e aspas"
+  - "Como fazer um envio de teste seguro antes de importar todas as linhas"
+  - "Quais ferramentas ajudam a automatizar a validação antes da importação"
+  - "Quais colunas obrigatórias cada plataforma exige"
+bestFor: "Gestores de catálogo, desenvolvedores e vendedores que importam produtos com frequência e querem reduzir envios com falha e dados corrompidos"
+timeToComplete: "12 minutos"
+---
+
+## Por que validar antes de importar
+
+Uma importação CSV com falha pode ir de inofensiva (nada muda) a destrutiva (atualizações parciais deixam o catálogo num estado inconsistente). Na Shopify, um erro de aspas costuma interromper toda a importação e informa a linha em que falhou. No WooCommerce, uma linha com as colunas deslocadas pode gravar valores errados num produto existente.
+
+Cinco minutos de validação antes do envio podem poupar horas de limpeza.
+
+---
+
+## O checklist antes da importação
+
+### 1. Codificação: UTF-8
+
+**O que verificar:** o arquivo deve estar codificado em UTF-8. Um BOM (marca de ordem de bytes) no início não é problema para a Shopify nem para o WooCommerce, mas algumas ferramentas o leem como parte do nome da primeira coluna.
+
+**Como verificar:**
+- Abra o arquivo no VS Code. A barra de status, no canto inferior direito, deve mostrar `UTF-8` (ou `UTF-8 with BOM`), e não `Windows 1252` ou `ISO 8859-1`.
+- Se mostrar outra coisa, confira primeiro se o texto aparece corretamente (se não, clique no indicador de codificação e escolha **Reabrir com Codificação** com a codificação real do arquivo). Depois clique de novo no indicador e escolha **Salvar com Codificação → UTF-8**.
+
+**Correção comum:** no Excel, salve sempre como **CSV UTF-8 (delimitado por vírgulas)**, e não como CSV comum.
+
+---
+
+### 2. Linha de cabeçalho: nomes corretos, nada a mais
+
+**O que verificar:**
+- A primeira linha contém os nomes das colunas exatamente como a plataforma espera.
+- Nenhum espaço no início ou no fim dos nomes das colunas.
+- Nenhum nome de coluna repetido.
+- Nenhuma coluna vazia a mais no fim.
+
+**Como verificar:**
+Abra o arquivo num editor de texto e leia a linha 1 com atenção. Compare com o modelo oficial da plataforma:
+
+- Shopify: consulte o [modelo CSV de produtos da Shopify](https://help.shopify.com/en/manual/products/import-export/import-products).
+- WooCommerce: compare com o CSV de produtos de exemplo do WooCommerce no seu painel.
+- Amazon: baixe o Inventory Loader ou o modelo da categoria no Seller Central (**Catálogo → Adicionar produtos via upload**).
+
+**Problemas comuns:**
+- `"Handle "` com um espaço no fim (invisível no Excel).
+- `handle` (minúsculo) em vez de `Handle`.
+- Colunas obrigatórias totalmente ausentes.
+
+---
+
+### 3. Colunas obrigatórias: todas presentes e preenchidas
+
+**O que verificar:**
+- Todas as colunas obrigatórias da plataforma estão no cabeçalho.
+- Os campos obrigatórios não estão vazios em nenhuma linha.
+
+**Campos obrigatórios por plataforma (mínimo):**
+
+| Plataforma | Colunas obrigatórias |
+|---|---|
+| Shopify | Title (mais Handle ao atualizar produtos existentes) |
+| WooCommerce | Name, Type (mais ID ou SKU ao atualizar produtos existentes) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | Sem envio de CSV: a Etsy só exporta CSV, então não há nada para validar para importação |
+
+**Como verificar no Excel:**
+1. Ative os filtros (**Dados → Filtro**).
+2. Em cada coluna obrigatória, filtre pelas células vazias.
+3. Qualquer campo obrigatório vazio fará essa linha falhar.
+
+---
+
+### 4. Tamanho de linha uniforme
+
+**O que verificar:** cada linha deve ter o mesmo número de colunas que o cabeçalho. Linhas diferentes indicam:
+- Uma descrição ou título com vírgulas sem escape.
+- Um campo com quebras de linha internas que divide a linha em várias.
+- Um erro de copiar e colar que inseriu colunas a mais.
+
+**Como verificar no Excel (linhas longas demais):**
+1. Encontre a primeira coluna depois do seu último cabeçalho. Se os cabeçalhos terminam na coluna T, é a coluna U.
+2. Numa coluna vazia bem à direita (por exemplo, AAA), digite `=CONT.VALORES(U2:ZZ2)`.
+3. Copie para todas as linhas e filtre os valores acima de 0. Essas linhas têm campos a mais.
+
+O Excel não consegue mostrar linhas curtas demais, porque um campo ausente parece igual a um vazio.
+
+**Como verificar num editor de texto:**
+No VS Code com a extensão Rainbow CSV, execute o comando **Rainbow CSV: CSVLint**. Ele aponta cada linha cujo número de campos é diferente do cabeçalho, inclusive as linhas curtas.
+
+**Correção comum:** coloque entre aspas duplas qualquer campo que contenha vírgulas, aspas ou quebras de linha. Se o campo já contiver aspas duplas, faça o escape de cada uma duplicando-a (`""`).
+
+---
+
+### 5. Campos entre aspas: aspas corretas e com escape
+
+**O que verificar:**
+- Campos com vírgulas, aspas duplas ou quebras de linha estão entre aspas duplas.
+- Cada aspa dupla dentro de um campo entre aspas tem escape duplicado (`""`, não `\"`).
+
+**Exemplo de aspas corretas:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**O que observar:**
+- Campos que começam com `"` devem terminar com `"` na mesma linha lógica.
+- Apóstrofos não precisam de escape: `Men's` fica como está. Só as aspas duplas são duplicadas.
+
+---
+
+### 6. Nenhum caractere inválido nos campos-chave
+
+**O que verificar:**
+- Handles/slugs contêm apenas letras minúsculas, números e hífens.
+- Campos de preço contêm apenas números e um ponto decimal (sem símbolo de moeda, sem separador de milhar).
+- Campos de sim/não (por exemplo, Published, Featured) usam os valores esperados (TRUE/FALSE, yes/no ou 1/0, conforme a plataforma).
+
+**Problemas comuns:**
+- `$19.99` numa coluna de preço (deveria ser `19.99`).
+- `Blue Shirt` com maiúsculas e um espaço numa coluna de handle (deveria ser `blue-shirt`).
+- Preços como `19,99` (vírgula decimal europeia) em vez de `19.99`.
+
+---
+
+### 7. URLs de imagens: acessíveis e no formato certo
+
+**O que verificar:**
+- As URLs de imagens começam com `https://` (algumas plataformas rejeitam ou ignoram imagens `http://`).
+- As URLs não têm espaços (codifique-os como `%20` ou remova-os).
+- Na Shopify: são aceitas até 250 URLs de imagem por produto. A primeira linha com `Image Src` de cada Handle é a imagem principal.
+- As URLs são públicas (sem login, sem localhost).
+
+---
+
+### 8. Nenhuma linha vazia no fim
+
+**O que verificar:** muitas planilhas adicionam linhas vazias no fim. As plataformas podem tratar uma linha vazia como inválida e gerar um erro.
+
+**Como corrigir no Excel:**
+1. Pressione **Ctrl+End** para ir à última célula usada.
+2. Se a última linha estiver vazia (todas as células vazias), selecione dessa linha até algumas abaixo e exclua-as.
+3. Salve o arquivo.
+
+---
+
+## Estratégia de envio de teste
+
+Nunca envie o catálogo completo de 10.000 linhas como primeiro teste. Em vez disso:
+
+1. Faça uma cópia do seu CSV.
+2. Mantenha só 5–10 linhas representativas (inclua pelo menos um produto com variantes, se houver).
+3. Envie a amostra para um ambiente de teste ou uma loja de staging.
+4. Confira se cada linha foi importada corretamente.
+5. Corrija os erros no arquivo completo.
+6. Envie o arquivo completo.
+
+Na Shopify: o importador mostra uma prévia antes de você confirmar e envia um e-mail quando a importação termina. Leia esse e-mail mesmo que a importação pareça concluída, porque algumas linhas podem ser puladas enquanto o resto é importado.
+
+---
+
+## Ferramentas para validar antes da importação
+
+| Ferramenta | O que verifica |
+|---|---|
+| **StriveFormats CSV Fixer** | Cabeçalhos de cada plataforma, codificação, campos obrigatórios, aspas, valores de sim/não |
+| **VS Code com a extensão Rainbow CSV** | Alinhamento visual das colunas, linhas desalinhadas |
+| **csvkit (`csvclean`)** | Linhas com o número errado de campos, na linha de comando |
+| **Google Sheets Arquivo → Importar** | Como as colunas se dividem com o separador escolhido |
+| **Excel Dados → De Texto/CSV** | Prévia da codificação e do delimitador antes de carregar |
+
+Um validador não pega erros de conteúdo (SKU errado, ID de categoria errado, uma URL de imagem que não carrega mais). Para isso é preciso um envio de teste. Mas os validadores pegam os erros de estrutura que impedem uma importação de terminar.

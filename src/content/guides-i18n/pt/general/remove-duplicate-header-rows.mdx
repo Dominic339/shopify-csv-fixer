@@ -1,0 +1,170 @@
+---
+title: "Remover linhas de cabeçalho duplicadas de arquivos CSV"
+description: "Encontre e exclua linhas de cabeçalho repetidas que aparecem no meio das exportações CSV. Entenda as causas, detecte-as com filtros do Excel e do Google Sheets e evite-as nas próximas exportações."
+keywords: ["linhas de cabeçalho duplicadas csv", "cabeçalhos repetidos csv", "cabeçalho no meio do csv", "remover cabeçalhos csv", "linhas duplicadas importação csv", "cabeçalhos csv shopify", "cabeçalhos csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Por que aparecem linhas de cabeçalho duplicadas em CSVs exportados"
+  - "Como detectá-las com filtros do Excel e do Google Sheets"
+  - "Como removê-las passo a passo filtrando, classificando e excluindo"
+  - "Como usar um editor de texto em arquivos grandes"
+  - "Como evitar cabeçalhos duplicados nas próximas exportações"
+bestFor: "Vendedores que juntam CSVs à mão, usam ferramentas de exportação em massa ou recebem de fornecedores CSVs com cabeçalhos repetidos no meio do arquivo"
+timeToComplete: "8 minutos"
+---
+
+## O que são linhas de cabeçalho duplicadas?
+
+Uma linha de cabeçalho duplicada acontece quando a primeira linha do seu CSV (os nomes das colunas) aparece de novo em algum ponto da área de dados. Por exemplo:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← linha de cabeçalho repetida
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Quando uma ferramenta de importação encontra `Handle` numa linha de dados, não consegue lê-la como um produto. A maioria das plataformas pula a linha sem avisar ou mostra um erro de formato. Algumas a contam como linha com falha.
+
+---
+
+## Por que aparecem cabeçalhos duplicados
+
+### Juntar vários arquivos exportados
+
+A causa mais comum é combinar dois CSVs copiando e colando no Excel ou no Google Sheets. A linha de cabeçalho do segundo arquivo vai parar no meio do arquivo combinado.
+
+### Exportações paginadas
+
+Algumas plataformas exportam os dados em páginas (por exemplo, 500 linhas por arquivo). Se você baixar todas as páginas e juntá-las, a linha de cabeçalho de cada arquivo é acrescentada junto.
+
+### Sistemas de relatórios agendados
+
+Sistemas automáticos que acrescentam linhas a um CSV todos os dias às vezes repetem o cabeçalho no início de cada bloco acrescentado.
+
+### "Atualizar tudo" ou exportações do Power Query no Excel
+
+Atualizar conexões de dados no Excel pode inserir de novo a linha de cabeçalho se a consulta estiver mal configurada.
+
+---
+
+## Detectar linhas de cabeçalho duplicadas
+
+### No Excel
+
+1. Abra o CSV (**Dados → De Texto/CSV**, não com clique duplo, para preservar a formatação).
+2. Clique em qualquer célula dos dados.
+3. Vá em **Dados → Filtro** para ativar os filtros.
+4. Clique na seta da coluna **Handle** (ou da sua primeira coluna).
+5. Na caixa de pesquisa, digite exatamente o nome do cabeçalho (por exemplo, `Handle`).
+6. Se aparecerem linhas no resultado do filtro, elas são linhas de cabeçalho duplicadas.
+
+### No Google Sheets
+
+1. Selecione todos os dados (**Ctrl+A**).
+2. Vá em **Dados → Criar um filtro**.
+3. Clique na seta da primeira coluna.
+4. Na caixa de texto do filtro, digite o nome do cabeçalho (por exemplo, `Handle`).
+5. Todas as linhas que mostram esse valor são cabeçalhos duplicados.
+
+### Marcá-las com uma fórmula
+
+Numa coluna vazia, adicione esta fórmula ao lado de cada linha para marcar os duplicados:
+
+```
+=SE(A2="Handle";"CABEÇALHO DUPLICADO";"")
+```
+
+Troque `"Handle"` pelo nome real da sua primeira coluna. Filtre por `CABEÇALHO DUPLICADO` para encontrar todas as ocorrências.
+
+---
+
+## Remover linhas de cabeçalho duplicadas
+
+### Método 1: filtrar e excluir (Excel / Sheets)
+
+1. Filtre a primeira coluna para mostrar só as linhas com o valor do cabeçalho (por exemplo, `Handle`).
+2. Selecione todas as linhas filtradas visíveis (clique no número da linha do primeiro resultado e Shift+clique no último).
+3. Clique com o botão direito → **Excluir linhas**.
+4. Remova o filtro (Dados → Limpar filtro, ou Filtro → Desativar).
+5. Confira se os dados estão íntegros.
+
+### Método 2: classificar, excluir e classificar de volta (Excel)
+
+Classificar junta todas as linhas de cabeçalho duplicadas, mas muda a ordem dos seus produtos, então sempre classifique de volta depois. Arquivos da Shopify, do WooCommerce e do eBay dependem da ordem das linhas.
+
+1. Adicione uma coluna auxiliar com números de linha (1, 2, 3...) para guardar a ordem original.
+2. Classifique pela primeira coluna de A a Z.
+3. As linhas de cabeçalho duplicadas agora ficam juntas, onde `Handle` cai em ordem alfabética entre os seus valores (a classificação do Excel ignora maiúsculas e minúsculas, então procure-as entre os valores que começam com H).
+4. Selecione esse bloco de linhas e exclua-o.
+5. Classifique pela coluna auxiliar para restaurar a ordem original.
+6. Exclua a coluna auxiliar.
+
+### Método 3: editor de texto (arquivos grandes)
+
+Para arquivos grandes demais para o Excel (mais de cerca de 100.000 linhas), use o VS Code ou o Notepad++:
+
+**VS Code:**
+1. Abra o arquivo.
+2. Pressione **Ctrl+H** (Localizar e substituir).
+3. Ative o modo de **expressão regular** (o ícone `.*`).
+4. Em Localizar, digite: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (troque pelos seus cabeçalhos reais, com escape onde for preciso)
+5. Deixe Substituir vazio.
+6. Clique em **Substituir tudo**.
+7. Depois de remover todos os duplicados, adicione de novo o cabeçalho à mão como primeira linha.
+
+> Cuidado com substituições por expressão regular. Guarde sempre o arquivo original como backup e confira se o cabeçalho aparece uma única vez depois da substituição.
+
+**Notepad++ (Windows):**
+1. Abra o arquivo → **Pesquisar → Substituir** (Ctrl+H).
+2. Marque o modo **Expressão regular**.
+3. Use o mesmo padrão do VS Code.
+4. Substituir tudo e, depois, adicione de novo a linha de cabeçalho à mão.
+
+---
+
+## Depois de remover os cabeçalhos duplicados
+
+Quando o arquivo estiver limpo:
+
+1. Confira se o cabeçalho aparece uma única vez, na linha 1.
+2. Conte as linhas. O total deve ser o número original de linhas menos o número de cabeçalhos duplicados removidos.
+3. Verifique algumas linhas perto de onde estavam os duplicados para confirmar que os dados estão íntegros.
+4. Salve como **CSV UTF-8** (no Excel: **Arquivo → Salvar como → CSV UTF-8**).
+
+---
+
+## Evitar cabeçalhos duplicados nas próximas junções
+
+Quando juntar vários CSVs à mão:
+
+1. Abra o primeiro arquivo (o seu arquivo "base") no Excel ou no Sheets.
+2. Abra cada arquivo adicional.
+3. **Exclua a linha de cabeçalho** do arquivo adicional antes de copiar os dados.
+4. Copie só as linhas de dados.
+5. Cole-as no fim do arquivo base.
+
+Se você automatiza a junção de CSVs com scripts, pule sempre a linha de cabeçalho de todos os arquivos depois do primeiro. O `csv.DictReader` lê o cabeçalho de cada arquivo como nomes de coluna, então ele nunca vai parar nos dados:
+
+```python
+# Exemplo em Python: supõe que todos os arquivos têm as mesmas colunas
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig remove o BOM, que senão mudaria o nome da primeira coluna
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Se as colunas dos arquivos forem diferentes, use o script do guia para juntar dois arquivos CSV, que mantém todas as colunas.

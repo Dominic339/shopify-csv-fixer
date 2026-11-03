@@ -321,6 +321,7 @@
     "name_ebay_variations": "eBay Variations",
     "desc_ebay_variations": "Validate eBay variation listing CSVs: variation specifics pairing, duplicate variation combos, price and quantity fields.",
     "checksCount": "{count} checks",
+    "checksShared": "The WooCommerce presets share their checks, as do the eBay presets, so the counts below overlap. The homepage total counts each check once.",
     "variationsFixer": "{platform} Variations Fixer",
     "englishContent": "The detailed description below is in English.",
     "checksTitle": "What this preset checks",
@@ -525,6 +526,7 @@
     "readyFor": "Ready for {platform} import",
     "readyGeneric": "Ready to export",
     "readyDesc": "No blocking issues found. Export the fixed file and import it.",
+    "readyDescErrors": "No blocking issues, but {count} errors remain. They won't stop the import; review them below.",
     "blockedTitle": "{count} issues will block the import",
     "blockedTitleOne": "1 issue will block the import",
     "blockedDesc": "Fix these below before importing, or export anyway and finish the edits in a spreadsheet.",
@@ -546,7 +548,7 @@
     "autoFixesAppliedOne": "1 automatic fix applied",
     "moreInLog": "…and {count} more. Download the fix log for the full list.",
     "advancedChecks": "Advanced checks",
-    "importConfidenceHelp": "An estimate of how safely the file will import. Blockers, overwrite risks and blank rows lower it.",
+    "importConfidenceHelp": "The validation score counts every issue found. Import confidence estimates how safely the file will import: blockers, overwrite risks and blank rows lower it.",
     "simulateHelp": "Estimate what the platform would merge, skip, or reject when importing this file.",
     "simPass": "Simulated import: PASS",
     "simFail": "Simulated import: FAIL",
@@ -719,7 +721,7 @@
     "billingUnavailable": "Billing is temporarily unavailable. Please try again later.",
     "starting": "Starting…",
     "freeBullet1": "Fix and export CSV files",
-    "freeBullet2": "3 exports per month per device",
+    "freeBullet2": "3 exports per month per device for files over 100 rows",
     "freeBullet3": "Access to all built-in formats",
     "freeBullet4": "No account required",
     "basicBullet1": "100 exports per month",
@@ -745,7 +747,7 @@
     "buyPass": "Buy pass",
     "signInToBuy": "Sign in to buy",
     "passActiveUntil": "Active until {time}",
-    "freeBulletSmall": "Files up to 100 rows are always free"
+    "freeBulletSmall": "Files up to 100 rows are always free and don't use an export"
   },
   "inspector": {
     "title": "CSV Inspector",

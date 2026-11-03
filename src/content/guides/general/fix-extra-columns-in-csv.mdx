@@ -19,7 +19,7 @@ timeToComplete: "6 minutes"
 Extra columns appear in CSV files for several common reasons:
 
 - **Spreadsheet formulas or helper columns**: columns you added for your own calculations that were never meant to be imported
-- **Notes or internal tracking columns**: columns like `Internal Notes`, `Last Edited By`, or `Status`
+- **Notes or internal tracking columns**: columns like `Internal Notes`, `Last Edited By`, or `Supplier Cost`
 - **Export artifacts**: your inventory system exports more fields than the import platform needs
 - **Merged platform files**: you combined columns from two different templates and the result has duplicates or extras
 - **Trailing comma on every row**: creates an invisible empty column at the end
@@ -33,12 +33,12 @@ The behavior varies by platform:
 | Platform | Extra columns behavior |
 |---|---|
 | Shopify | Silently ignored, not a problem |
-| WooCommerce | Silently ignored, not a problem |
-| Etsy | Unknown columns may cause row-level errors |
-| eBay File Exchange | Can cause row or file parse failures |
-| Amazon flat files | Extra columns cause row validation errors |
+| WooCommerce | Not imported: the mapping screen sets unknown columns to "Do not import" |
+| Etsy | No CSV upload; bulk-listing apps set their own rules |
+| eBay File Exchange | Unrecognized columns may cause warnings or errors |
+| Amazon flat files | Columns that aren't in the template may be rejected |
 
-If you're on Shopify or WooCommerce, extra columns are usually harmless. If you're on eBay, Amazon, or Etsy, remove columns not in the official template before uploading.
+If you're on Shopify or WooCommerce, extra columns are usually harmless. For eBay, Amazon or an Etsy bulk-listing app, remove columns that aren't in the official template before uploading.
 
 ---
 
@@ -107,7 +107,8 @@ KEEP = [
     "Image Src", "Published",
 ]
 
-with open("input.csv", newline="", encoding="utf-8") as f_in, \
+# utf-8-sig keeps a BOM from sticking to the first column name
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
      open("output.csv", "w", newline="", encoding="utf-8") as f_out:
     reader = csv.DictReader(f_in)
     # Only write columns that are in KEEP and present in the file
@@ -131,18 +132,18 @@ blue-shirt,Blue T-Shirt,19.99,
 
 The blank column after the last comma is an extra column with no name and no values.
 
-**Fix in Python:**
+**Fix in Python:** remove exactly one comma from the end of each line. Stripping every trailing comma would also delete real empty cells at the end of a row.
 
 ```python
-with open("input.csv", encoding="utf-8") as f:
-    lines = f.readlines()
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
 
-with open("output.csv", "w", encoding="utf-8") as f:
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
     for line in lines:
-        f.write(line.rstrip(",\r\n") + "\n")
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
 ```
 
-**Fix in VS Code:** Use Find and Replace with regex mode enabled. Search for `,\n` and replace with `\n`.
+**Fix in VS Code:** Use Find and Replace with regex mode enabled. Search for `,$` and replace it with nothing. Only do this when every row, including the header, ends with the extra comma.
 
 ---
 

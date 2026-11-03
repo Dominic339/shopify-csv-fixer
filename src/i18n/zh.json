@@ -304,6 +304,7 @@
     "faq": "常见问题",
     "presetFormats": "预设格式",
     "checksCount": "{count} 项检查",
+    "checksShared": "WooCommerce 的预设之间、eBay 的预设之间共用检查，因此下面的数量有重叠。首页的总数对每项检查只计一次。",
     "variationsFixer": "{platform} 变体修复工具",
     "englishContent": "以下详细说明为英文。",
     "checksTitle": "此预设检查的内容",
@@ -522,6 +523,7 @@
     "readyFor": "可导入 {platform}",
     "readyGeneric": "可以导出",
     "readyDesc": "未发现阻止导入的问题。导出修复后的文件并导入即可。",
+    "readyDescErrors": "没有阻止导入的问题，但还有 {count} 个错误。它们不会阻止导入，请在下方查看。",
     "blockedTitle": "{count} 个问题会阻止导入",
     "blockedTitleOne": "1 个问题会阻止导入",
     "blockedDesc": "请在导入前在下方修复,或直接导出并在电子表格中完成修改。",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "已应用 1 项自动修复",
     "moreInLog": "……还有 {count} 项。下载修复日志查看完整列表。",
     "advancedChecks": "高级检查",
-    "importConfidenceHelp": "估计该文件导入的安全程度。阻止性问题、覆盖风险和空行都会降低该值。",
+    "importConfidenceHelp": "验证分数统计发现的每个问题。导入置信度估计文件能否安全导入：阻止导入的问题、覆盖风险和空行都会降低它。",
     "simulateHelp": "估计平台在导入此文件时会合并、跳过或拒绝哪些内容。",
     "simPass": "模拟导入:通过",
     "simFail": "模拟导入:失败",
@@ -770,7 +772,7 @@
     "billingUnavailable": "账单服务暂时不可用。请稍后再试。",
     "starting": "启动中…",
     "freeBullet1": "修复和导出CSV文件",
-    "freeBullet2": "每设备每月3次导出",
+    "freeBullet2": "超过 100 行的文件每台设备每月可导出 3 次",
     "freeBullet3": "访问所有内置格式",
     "freeBullet4": "无需账户",
     "basicBullet1": "每月100次导出",
@@ -796,7 +798,7 @@
     "buyPass": "购买通行证",
     "signInToBuy": "登录后购买",
     "passActiveUntil": "有效期至 {time}",
-    "freeBulletSmall": "不超过 100 行的文件始终免费"
+    "freeBulletSmall": "100 行以内的文件始终免费，不占用导出次数"
   },
   "auth": {
     "loginTitle": "登录",

@@ -318,6 +318,7 @@
     "name_ebay_variations": "eBay-Variationen",
     "desc_ebay_variations": "eBay-Variations-Listing-CSVs validieren: Variations-Spezifikationen, doppelte Variationskombinationen, Preis- und Mengenfelder.",
     "checksCount": "{count} Prüfungen",
+    "checksShared": "Die WooCommerce-Vorlagen teilen sich ihre Prüfungen, ebenso die eBay-Vorlagen, daher überschneiden sich die Zahlen unten. Die Gesamtzahl auf der Startseite zählt jede Prüfung einmal.",
     "variationsFixer": "{platform}-Varianten-Reparatur",
     "englishContent": "Die ausführliche Beschreibung unten ist auf Englisch.",
     "checksTitle": "Was diese Vorlage prüft",
@@ -522,6 +523,7 @@
     "readyFor": "Bereit für den Import in {platform}",
     "readyGeneric": "Bereit zum Export",
     "readyDesc": "Keine blockierenden Probleme gefunden. Exportiere die korrigierte Datei und importiere sie.",
+    "readyDescErrors": "Keine blockierenden Probleme, aber es bleiben {count} Fehler. Sie verhindern den Import nicht; prüfe sie unten.",
     "blockedTitle": "{count} Probleme blockieren den Import",
     "blockedTitleOne": "1 Problem blockiert den Import",
     "blockedDesc": "Behebe diese unten vor dem Import, oder exportiere trotzdem und erledige den Rest in einer Tabellenkalkulation.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "1 automatische Korrektur angewendet",
     "moreInLog": "…und {count} weitere. Lade das Protokoll für die vollständige Liste herunter.",
     "advancedChecks": "Erweiterte Prüfungen",
-    "importConfidenceHelp": "Eine Schätzung, wie sicher die Datei importiert wird. Blockierende Fehler, Überschreibrisiken und leere Zeilen senken sie.",
+    "importConfidenceHelp": "Die Validierungspunktzahl zählt jedes gefundene Problem. Die Import-Konfidenz schätzt, wie sicher die Datei importiert wird: Blocker, Überschreibrisiken und leere Zeilen senken sie.",
     "simulateHelp": "Schätzt, was die Plattform beim Import dieser Datei zusammenführen, überspringen oder ablehnen würde.",
     "simPass": "Simulierter Import: OK",
     "simFail": "Simulierter Import: FEHLER",
@@ -770,7 +772,7 @@
     "billingUnavailable": "Die Abrechnung ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.",
     "starting": "Wird gestartet…",
     "freeBullet1": "CSV-Dateien reparieren und exportieren",
-    "freeBullet2": "3 Exporte pro Monat und Gerät",
+    "freeBullet2": "3 Exporte pro Monat und Gerät für Dateien über 100 Zeilen",
     "freeBullet3": "Zugriff auf alle integrierten Formate",
     "freeBullet4": "Kein Konto erforderlich",
     "basicBullet1": "100 Exporte pro Monat",
@@ -796,7 +798,7 @@
     "buyPass": "Pass kaufen",
     "signInToBuy": "Zum Kaufen anmelden",
     "passActiveUntil": "Aktiv bis {time}",
-    "freeBulletSmall": "Dateien bis 100 Zeilen immer kostenlos"
+    "freeBulletSmall": "Dateien bis 100 Zeilen sind immer kostenlos und verbrauchen keinen Export"
   },
   "auth": {
     "loginTitle": "Anmelden",

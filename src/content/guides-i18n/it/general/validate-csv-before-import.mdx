@@ -1,0 +1,183 @@
+---
+title: "Convalida il tuo CSV prima di caricarlo su qualsiasi piattaforma e-commerce"
+description: "Una checklist pratica per individuare errori di codifica, intestazioni mancanti, righe di lunghezza diversa, problemi di virgolette e altri difetti prima che l'importazione fallisca. Copre Shopify, WooCommerce, eBay, Amazon ed Etsy."
+keywords: ["convalidare csv prima dell'importazione", "checklist csv", "errori importazione csv", "controllo intestazioni csv", "controllo codifica csv", "virgolette csv", "lunghezza righe csv", "convalida csv shopify", "convalida csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Cosa controllare prima di caricare un CSV su una piattaforma e-commerce"
+  - "Come verificare codifica, intestazioni, lunghezza delle righe e virgolette"
+  - "Come fare un caricamento di prova sicuro prima di importare tutte le righe"
+  - "Quali strumenti aiutano ad automatizzare la convalida prima dell'importazione"
+  - "Quali colonne obbligatorie richiede ogni piattaforma"
+bestFor: "Responsabili di catalogo, sviluppatori e venditori che importano prodotti regolarmente e vogliono ridurre i caricamenti falliti e i dati danneggiati"
+timeToComplete: "12 minuti"
+---
+
+## Perché conviene convalidare prima di importare
+
+Un'importazione CSV fallita può essere innocua (non cambia nulla) o distruttiva (aggiornamenti parziali lasciano il catalogo in uno stato incoerente). Su Shopify, un errore di virgolette di solito blocca l'intera importazione e indica la riga in cui si è fermata. Su WooCommerce, una riga con le colonne spostate può scrivere valori sbagliati in un prodotto esistente.
+
+Cinque minuti di controllo prima del caricamento possono risparmiare ore di pulizia.
+
+---
+
+## La checklist prima dell'importazione
+
+### 1. Codifica: UTF-8
+
+**Cosa controllare:** il file deve essere codificato in UTF-8. Un BOM (Byte Order Mark) all'inizio va bene per Shopify e WooCommerce, ma alcuni strumenti lo leggono come parte del nome della prima colonna.
+
+**Come controllare:**
+- Apri il file in VS Code. Nella barra di stato in basso a destra deve comparire `UTF-8` (o `UTF-8 with BOM`), non `Windows 1252` o `ISO 8859-1`.
+- Se compare altro, verifica prima che il testo si legga bene (altrimenti fai clic sull'indicatore della codifica e scegli **Riapri con codifica** con la codifica reale del file). Poi fai di nuovo clic sull'indicatore e scegli **Salva con codifica → UTF-8**.
+
+**Correzione comune:** in Excel salva sempre come **CSV UTF-8 (delimitato da virgole)**, non come CSV semplice.
+
+---
+
+### 2. Riga di intestazione: nomi corretti, niente in più
+
+**Cosa controllare:**
+- La prima riga contiene i nomi delle colonne esattamente come li aspetta la piattaforma.
+- Nessuno spazio all'inizio o alla fine dei nomi di colonna.
+- Nessun nome di colonna duplicato.
+- Nessuna colonna vuota in più alla fine.
+
+**Come controllare:**
+Apri il file in un editor di testo e leggi con attenzione la riga 1. Confrontala con il modello ufficiale della piattaforma:
+
+- Shopify: consulta il [modello CSV dei prodotti Shopify](https://help.shopify.com/en/manual/products/import-export/import-products).
+- WooCommerce: confrontala con il CSV di prodotti di esempio di WooCommerce dal tuo pannello.
+- Amazon: scarica l'Inventory Loader o il modello di categoria da Seller Central (**Catalogo → Aggiungi prodotti tramite caricamento**).
+
+**Problemi comuni:**
+- `"Handle "` con uno spazio finale (invisibile in Excel).
+- `handle` (minuscolo) invece di `Handle`.
+- Colonne obbligatorie del tutto assenti.
+
+---
+
+### 3. Colonne obbligatorie: tutte presenti e compilate
+
+**Cosa controllare:**
+- Tutte le colonne obbligatorie della piattaforma sono presenti nell'intestazione.
+- I campi obbligatori non sono vuoti in nessuna riga.
+
+**Campi obbligatori per piattaforma (minimo):**
+
+| Piattaforma | Colonne obbligatorie |
+|---|---|
+| Shopify | Title (più Handle quando aggiorni prodotti esistenti) |
+| WooCommerce | Name, Type (più ID o SKU quando aggiorni prodotti esistenti) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | Nessun caricamento CSV: Etsy esporta soltanto in CSV, quindi non c'è nulla da convalidare per l'importazione |
+
+**Come controllare in Excel:**
+1. Attiva i filtri (**Dati → Filtro**).
+2. Per ogni colonna obbligatoria, filtra le celle vuote.
+3. Ogni vuoto in un campo obbligatorio fa fallire quella riga.
+
+---
+
+### 4. Lunghezza delle righe uniforme
+
+**Cosa controllare:** ogni riga deve avere lo stesso numero di colonne dell'intestazione. Righe diverse indicano:
+- Una descrizione o un titolo con virgole non protette.
+- Un campo con a capo interni che spezza la riga su più righe.
+- Un errore di copia e incolla che ha inserito colonne in più.
+
+**Come controllare in Excel (righe troppo lunghe):**
+1. Trova la prima colonna dopo la tua ultima intestazione. Se le intestazioni finiscono nella colonna T, è la colonna U.
+2. In una colonna vuota molto a destra (per esempio AAA), inserisci `=CONTA.VALORI(U2:ZZ2)`.
+3. Copiala in tutte le righe e filtra i valori maggiori di 0. Quelle righe hanno campi in più.
+
+Excel non può mostrare le righe troppo corte, perché un campo mancante sembra uguale a uno vuoto.
+
+**Come controllare in un editor di testo:**
+In VS Code con l'estensione Rainbow CSV, esegui il comando **Rainbow CSV: CSVLint**. Segnala ogni riga il cui numero di campi è diverso dall'intestazione, comprese le righe corte.
+
+**Correzione comune:** racchiudi tra virgolette doppie ogni campo che contiene virgole, virgolette o a capo. Se il campo contiene già virgolette doppie, proteggi ciascuna raddoppiandola (`""`).
+
+---
+
+### 5. Campi tra virgolette: virgolette corrette e protette
+
+**Cosa controllare:**
+- I campi che contengono virgole, virgolette doppie o a capo sono racchiusi tra virgolette doppie.
+- Ogni virgoletta doppia dentro un campo tra virgolette è protetta raddoppiandola (`""`, non `\"`).
+
+**Esempio di virgolette corrette:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**A cosa fare attenzione:**
+- I campi che iniziano con `"` devono finire con `"` sulla stessa riga logica.
+- Gli apostrofi non vanno protetti: `Men's` resta così com'è. Si raddoppiano solo le virgolette doppie.
+
+---
+
+### 6. Nessun carattere non valido nei campi chiave
+
+**Cosa controllare:**
+- Handle/slug contengono solo lettere minuscole, numeri e trattini.
+- I campi prezzo contengono solo numeri e un punto decimale (niente simboli di valuta, niente separatori delle migliaia).
+- I campi sì/no (per esempio Published, Featured) usano i valori previsti (TRUE/FALSE, yes/no o 1/0, a seconda della piattaforma).
+
+**Problemi comuni:**
+- `$19.99` in una colonna prezzo (dovrebbe essere `19.99`).
+- `Blue Shirt` con maiuscole e uno spazio in una colonna handle (dovrebbe essere `blue-shirt`).
+- Prezzi come `19,99` (virgola decimale europea) invece di `19.99`.
+
+---
+
+### 7. URL delle immagini: raggiungibili e nel formato giusto
+
+**Cosa controllare:**
+- Gli URL delle immagini iniziano con `https://` (alcune piattaforme rifiutano o saltano le immagini `http://`).
+- Gli URL non contengono spazi (vanno codificati come `%20` o rimossi).
+- Per Shopify: sono supportati fino a 250 URL di immagini per prodotto. La prima riga con `Image Src` di ogni Handle è l'immagine principale.
+- Gli URL sono accessibili pubblicamente (non dietro un login, non localhost).
+
+---
+
+### 8. Nessuna riga vuota alla fine
+
+**Cosa controllare:** molti fogli di calcolo aggiungono righe vuote alla fine. Le piattaforme possono trattare una riga vuota come non valida e segnalare un errore.
+
+**Come correggere in Excel:**
+1. Premi **Ctrl+Fine** per andare all'ultima cella usata.
+2. Se l'ultima riga è vuota (tutte le celle vuote), seleziona da quella riga ad alcune righe sotto ed eliminale.
+3. Salva il file.
+
+---
+
+## Strategia di caricamento di prova
+
+Non caricare mai l'intero catalogo da 10.000 righe come primo test. Invece:
+
+1. Fai una copia del tuo CSV.
+2. Tieni solo 5–10 righe rappresentative (includi almeno un prodotto con varianti, se ne hai).
+3. Carica il campione in un ambiente di test o in un negozio di staging.
+4. Verifica che ogni riga sia stata importata correttamente.
+5. Correggi gli errori nel file completo.
+6. Carica il file completo.
+
+Per Shopify: lo strumento di importazione mostra un'anteprima prima della conferma e ti invia un'e-mail al termine dell'importazione. Leggi quell'e-mail anche se l'importazione sembra conclusa, perché alcune righe possono essere saltate mentre il resto viene importato.
+
+---
+
+## Strumenti per la convalida prima dell'importazione
+
+| Strumento | Cosa controlla |
+|---|---|
+| **StriveFormats CSV Fixer** | Intestazioni specifiche della piattaforma, codifica, campi obbligatori, virgolette, valori sì/no |
+| **VS Code con l'estensione Rainbow CSV** | Allineamento visivo delle colonne, righe non allineate |
+| **csvkit (`csvclean`)** | Righe con un numero di campi sbagliato, da riga di comando |
+| **Google Sheets File → Importa** | Come si dividono le colonne con il separatore scelto |
+| **Excel Dati → Da testo/CSV** | Anteprima di codifica e delimitatore prima del caricamento |
+
+Un validatore non rileva gli errori di contenuto (SKU sbagliato, ID di categoria sbagliato, un URL di immagine che non si carica più). Per quelli serve un caricamento di prova. Ma i validatori rilevano gli errori di struttura che impediscono di completare un'importazione.

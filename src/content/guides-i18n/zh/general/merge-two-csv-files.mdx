@@ -1,0 +1,336 @@
+---
+title: "如何合并两个 CSV 文件"
+description: "使用 Excel Power Query、Google 表格或简单的命令行将两个 CSV 文件合并为一个的分步指南，无需编程经验。"
+keywords: ["合并 csv 文件", "组合 csv", "合并两个 csv", "excel power query csv", "google 表格 合并 csv", "追加 csv", "上下拼接 csv 文件"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "合并 CSV 文件的四种方法（Excel、Google 表格、命令行、Python）"
+  - "什么时候不该合并，以及应该怎么做"
+  - "如何修复表头不一致和列顺序不同的问题"
+  - "如何删除合并后文件中重复的表头行"
+  - "如何处理文件之间编码和分隔符的差异"
+bestFor: "需要合并来自多个来源的商品目录导出、库存文件或订单导出的卖家"
+timeToComplete: "15 分钟"
+---
+
+## 什么时候需要合并 CSV 文件？
+
+把两个 CSV 文件合并成一个，是电商导入前很常见的一步。以下情况可能需要：
+
+- 把两个供应商的商品合并到一次目录上传中
+- 把上个月的商品导出和新增商品合在一起
+- 把一次大的导入拆成小批次，之后再合并回来
+- 把来自不同来源的多属性行合并到一个商品 CSV 中
+
+本指南介绍四种可靠的方法：Excel Power Query、Google 表格、命令行和 Python。每种方法都保留第一个文件的表头行，只追加第二个文件的数据行。
+
+---
+
+## 开始之前：对齐表头
+
+两个文件必须有相同的列标题，且顺序一致。如果列不同，合并会把数据挪到错误的字段中，导致导入出错。
+
+合并前快速检查清单：
+
+- [ ] 打开两个文件，并排比较第一行（表头）
+- [ ] 列名完全一致（有些平台区分大小写）
+- [ ] 两个文件中的列顺序相同
+- [ ] 两个文件中都没有汇总行或页脚行
+- [ ] 两个文件都已保存为 UTF-8
+
+如果表头顺序不同，请在合并前调整其中一个文件的列顺序。Python 的 DictWriter 方法（下面的方法 4）会自动处理列顺序不同的问题。
+
+---
+
+## 方法 1：Excel Power Query（Windows，推荐）
+
+Excel 的 Power Query 可以在不用公式或宏的情况下把多个 CSV 上下拼接起来。它会自动处理文件之间编码和换行符的差异，而且不会重复表头行。
+
+### 步骤
+
+1. 打开一个空白的 Excel 工作簿。
+2. 进入 **数据** 选项卡，依次点击 **获取数据**、**来自文件**、**从文本/CSV**。
+3. 选择你的 **第一个 CSV 文件**，点击 **导入**。出现预览时，点击 **转换数据**（不是加载）。
+4. 在 Power Query 编辑器中，选择 **主页** > **新建源** > **文件** > **文本/CSV**，选择你的 **第二个 CSV 文件**，然后点击 **确定**。现在两个文件都作为查询显示在左侧面板中。
+5. 选中第一个查询，然后选择 **主页** > **追加查询** > **将查询追加为新查询**。
+6. 在对话框中选择 **两个表**，然后从下拉列表中选择第二个查询。
+7. 左侧面板中会出现一个新的合并查询。点击 **关闭并上载**，把它写入新的工作表。
+8. 在合并后的工作表处于活动状态时，选择 **文件** > **另存为**，文件格式选择 **CSV UTF-8（逗号分隔）**。Excel 只保存活动工作表。普通的"CSV（逗号分隔）"使用旧编码（简体中文系统上为 GBK），在其他平台上可能出现乱码。
+
+### 为什么用 Power Query
+
+- 会检测每个文件的编码，如果判断有误，可以在预览中修改。
+- 表头行只添加一次，而不是每个文件一次。
+- 不会在两个文件之间多加空行。
+- 能处理大文件，但每个工作表最多只能容纳 1,048,576 行。行数更多时，请使用命令行或 Python。
+
+---
+
+## 方法 2：Google 表格（在浏览器中，适合较小的文件）
+
+如果没有 Excel，Google 表格是一个快速的选择。它适合总行数少于大约 50,000 行的文件。
+
+### 步骤
+
+1. 打开 Google 云端硬盘并上传第一个 CSV：右键点击空白处，选择 **文件上传**，选中 CSV，然后右键点击上传的文件，选择 **打开方式 > Google 表格**。
+2. 记下最后一行数据的行号（例如，如果文件有 499 行数据和 1 行表头，就是第 500 行）。
+3. 用同样的方式在新的浏览器标签页中打开第二个 CSV。
+4. 在第二个表格中，点击行号 **2**（表头下面的第一行数据）。按 **Ctrl+Shift+End**，把选区扩展到有数据的最后一行和最后一列。
+5. 按 **Ctrl+C** 复制。切换到第一个标签页，点击数据下方的第一个空行。
+6. 按 **Ctrl+V** 粘贴数据行（不含表头）。
+7. 选择 **文件** > **下载** > **逗号分隔值 (.csv)**。
+
+### 注意事项
+
+- Google 表格导出的是不带 BOM 的 UTF-8，所以合并后的文件可以直接上传。
+- 非常大的文件（10 万行以上）可能会让表格变慢甚至卡死。这种情况下请改用命令行或 Python。
+- 仔细检查粘贴的行是否与列对齐。只要错开一列，整个合并结果就会出错。
+
+---
+
+## 方法 3：命令行（最快，适用于任何大小的文件）
+
+如果你能使用终端，无论文件多大，命令行合并都不到一秒。在 macOS 和 Linux 上无需安装任何软件。
+
+### macOS 或 Linux
+
+```bash
+# 把 file1.csv 和 file2.csv 合并为 merged.csv
+# tail -n +2 会跳过第二个文件的表头行
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+如果 `file1.csv` 末尾没有换行符，它的最后一行会和 `file2.csv` 的第一行连在同一行上。请检查结果中的衔接处。
+
+### Windows（命令提示符）
+
+```bat
+:: 先复制第一个文件
+copy file1.csv merged.csv
+
+:: 追加第二个文件中除表头外的所有行
+more +1 file2.csv >> merged.csv
+```
+
+注意：Windows 的 `more +1` 命令会跳过第一行。但它也会把制表符变成空格，可能破坏非 ASCII 文字（包括中文），而且遇到非常大的文件会卡住，所以请检查结果，或在 Windows 上使用 Python（方法 4）。
+
+### 检查结果
+
+用命令行合并后，用文本编辑器打开结果，确认：
+
+- 表头行只出现一次（在最上面）
+- 两个文件的数据之间没有空行
+- file1 的最后一行和 file2 的第一行数据是相邻的两行
+- 末尾没有多余的换行（大多数导入程序可以接受，但没有会更整洁）
+
+---
+
+## 方法 4：Python（跨平台，可处理不同的列）
+
+Python 的 `csv.DictWriter` 是最可靠的合并方法。它能处理列顺序不同、只有一个文件才有的列以及大文件。你不需要会编程：安装 Python 后运行下面的脚本即可。
+
+### 脚本
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# 按首次出现的顺序收集所有列名
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" 会让缺少该列的文件中的行在该列留空
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig 会去掉 BOM（如果有的话）
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+把这个文件以 `merge.py` 为名保存在 CSV 文件所在的文件夹中。在该文件夹中打开终端或命令提示符，然后运行：
+
+```
+python merge.py
+```
+
+### 为什么用 Python？
+
+- 可在 Windows、Mac 和 Linux 上运行。
+- 自动去除 BOM（utf-8-sig）。不是 UTF-8 的文件请先转换（见下面的编码部分）。
+- DictWriter 按列名而不是位置对应各列，所以列顺序不同也没关系。某个文件缺少的列会留空，只有一个文件才有的列也会保留。
+- 逐行处理文件，不会把所有内容都载入内存，因此非常大的文件也能处理。
+
+---
+
+## 什么时候不该合并
+
+合并适用于把结构相同的文件的行上下叠起来。以下情况不要合并：
+
+- **文件结构不同。** 如果 file1 有 30 列，而 file2 有另外 25 列，简单合并会得到数据错位的文件。请使用 Python DictWriter 方法（方法 4），它会保留所有列并把空缺处留空，或者先统一结构。
+- **你想按某个键关联（类似 SQL 的 JOIN）。** 合并只是把行叠起来，不会根据共同的 SKU、Handle 或 ID 匹配两个文件中的行。如需按键关联，请使用 Python 的 `csv.DictReader` 配合字典，或使用 pandas 等工具。
+- **某个文件里有合计、汇总或数据透视表。** 合并前只导出原始数据行。汇总行、SUM 公式和平均值行在合并后会变成商品数据。
+- **文件来自不同的导出模板。** Shopify 的商品导出和库存导出的列不同，不能通过追加行来合并。
+
+---
+
+## 合并前修复不一致的表头
+
+如果两个文件的列相同但表头名称不同（例如 `Title` 和 `Product Title`，或 `Price` 和 `Variant Price`），请在合并前统一名称。
+
+### 在 Excel 或 Google 表格中手动修复
+
+1. 并排打开两个文件。
+2. 比较每个文件的第 1 行（表头）。
+3. 把其中一个文件中不规范的表头改成与另一个文件一致。直接编辑单元格（在 Excel 中按 F2）。
+4. 在合并前把两个文件都保存为 CSV。
+
+### 用 Python 自动修复
+
+```python
+import csv
+
+# 把 file2 中不规范的名称对应到 file1 使用的标准名称
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # 重命名表头
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## 调整列顺序使其一致
+
+如果列名相同但顺序不同，Python DictWriter 方法（方法 4）会按名称对应，自动处理。在 Excel 或 Google 表格中则需要手动调整：
+
+**在 Excel 中**：
+1. 在其中一个文件的第 1 行上方插入一个空行。
+2. 按目标文件中想要的顺序给各列编号（1、2、3……）。
+3. 按这一行编号对列排序（数据 > 排序 > 选项 > 按行排序，依据第 1 行）。
+4. 删除辅助的编号行。
+
+**在 Google 表格中**：
+1. 在顶部插入一个空行。
+2. 输入每一列想要的位置编号。
+3. 在辅助工作表中使用 `=CHOOSECOLS(Sheet1!A:Z, 3, 1, 2)`（按想要的顺序填写列号），或者手动把各列剪切粘贴到正确的位置。
+4. 下载 > CSV。
+
+---
+
+## 删除合并后文件中重复的表头行
+
+如果合并后的文件中间意外多了一行重复的表头（多次合并同一工具的导出时很常见），可以用 Python 删除：
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# 只保留与表头不同的行（第一行表头除外）
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## 文件之间编码和分隔符的差异
+
+如果一个文件是 UTF-8，另一个是 GBK 或 Windows-1252（ANSI），合并后的文件中，凡是 ANSI 文件里有中文、带重音的字母、弯引号或货币符号的地方都会出现乱码。
+
+**合并前把 ANSI 文件转换为 UTF-8：**
+
+在 macOS 或 Linux 上（简体中文 Excel 导出的 CSV 通常是 `gbk`）：
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+用 Python：
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+如果两个文件编码相同但分隔符不同（逗号和分号），请在合并前转换其中一个文件的分隔符。参见 CSV 基础知识指南中的分隔符部分。
+
+---
+
+## 合并文件的故障排除
+
+| 问题 | 原因 | 解决方法 |
+|---|---|---|
+| 合并后的文件中间多了一个空行 | 第二个文件末尾有换行或汇总行 | 删除空行，或在 Python 中的 `writer.writerow(row)` 前加上 `if any(row.values()):` |
+| 中间出现重复的表头行 | 忘了跳过第二个文件的表头 | 使用 `tail -n +2`（命令行）或 Power Query 的追加查询（会自动跳过） |
+| 数据跑到了错误的列 | 两个文件的列顺序不同 | 先调整其中一个文件的列顺序，或使用 Python DictWriter 方法 |
+| 合并后的文件出现乱码 | 两个文件的编码不同 | 先把两个文件都转换为 UTF-8，在 Mac/Linux 上可用 iconv：`iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| 上传后第一列无法识别 | 合并后的文件带有平台会误读的 BOM | 在 VS Code 中打开，另存为不带 BOM 的 UTF-8 |
+
+---
+
+## 不要这样做
+
+- **处理大文件或复杂文件时，不要依赖手动复制粘贴。** 很容易漏掉一行、错开一列粘贴，或不小心重复表头。如果你会检查结果，方法 2 适合小文件；否则请使用 Power Query、命令行或 Python。
+- **不要双击在 Excel 中打开两个文件再剪切粘贴行。** 用这种方式打开 CSV 时，Excel 会改变日期、长数字和前导零的格式，悄悄破坏数据。
+- **不要在没有先修复表头的情况下合并列数不同的文件。** 结果的数据会错位。
+
+---
+
+## 合并后检查清单
+
+导入合并后的文件之前，请确认以下几项：
+
+- [ ] 表头行只出现一次（在第 1 行，中间没有重复）
+- [ ] 行数正确：（file1 的行数 − 1 行表头）+（file2 的行数 − 1 行表头）= 数据行总数
+- [ ] 两个文件的数据之间没有多余的空行
+- [ ] 不应重复的 SKU 或 Handle 没有重复（用 CSV 修复工具检查）
+- [ ] 两个源文件的所有列都在（如果用 DictWriter 合并了结构不同的文件）
+- [ ] 文件已保存为 UTF-8
+- [ ] 文件扩展名为 .csv，内容是逗号分隔的纯文本
+
+---
+
+## 合并之后：导入前先校验
+
+合并后，请在导入前把合并好的文件交给 CSV 修复工具检查。合并可能带来两个源文件中都没有的问题：
+
+- 中间多出一行表头（修复工具会将其识别为结构问题）
+- SKU 或 Handle 重复（重复项检查会发现）
+- 编码不一致（修复工具的编码分析会发现）
+
+把合并后的 CSV 上传到修复工具，在发送到你的平台之前，让它校验整个文件。

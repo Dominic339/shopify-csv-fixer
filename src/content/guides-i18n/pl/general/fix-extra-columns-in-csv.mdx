@@ -1,0 +1,163 @@
+---
+title: "Usuwanie nadmiarowych kolumn z pliku CSV"
+description: "Jak znaleźć i usunąć nadmiarowe lub nieoczekiwane kolumny z pliku CSV przed importem do Shopify, WooCommerce, Etsy, eBay lub Amazon."
+keywords: ["usuwanie nadmiarowych kolumn csv", "usunąć kolumny csv", "nieoczekiwana kolumna import csv", "błąd dodatkowej kolumny csv", "csv za dużo kolumn", "kasowanie kolumn csv", "porządkowanie kolumn csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Skąd w plikach CSV biorą się dodatkowe kolumny i dlaczego powodują błędy importu"
+  - "Które platformy odrzucają dodatkowe kolumny, a które je pomijają"
+  - "Jak znaleźć i usunąć dodatkowe kolumny w Excelu i Arkuszach Google"
+  - "Jak usunąć dodatkowe kolumny z dużych plików w Pythonie"
+  - "Jak zapobiec pojawianiu się dodatkowych kolumn w przyszłych eksportach"
+bestFor: "Sprzedawcy z nieudanymi importami lub nieoczekiwanymi błędami walidacji przez kolumny, których platforma się nie spodziewa"
+timeToComplete: "6 minut"
+---
+
+## Skąd w pliku CSV biorą się dodatkowe kolumny
+
+Dodatkowe kolumny pojawiają się w plikach CSV z kilku typowych powodów:
+
+- **Formuły lub kolumny pomocnicze**: kolumny dodane do własnych obliczeń, które nigdy nie miały być importowane
+- **Kolumny z notatkami lub do użytku wewnętrznego**: np. `Internal Notes`, `Last Edited By` czy `Supplier Cost`
+- **Pozostałości eksportu**: system magazynowy eksportuje więcej pól, niż potrzebuje platforma
+- **Połączone pliki z różnych platform**: połączyłeś kolumny z dwóch różnych szablonów i powstały duplikaty lub nadmiarowe kolumny
+- **Przecinek na końcu każdego wiersza**: tworzy na końcu niewidoczną pustą kolumnę
+
+---
+
+## Czy Twoja platforma przyjmuje dodatkowe kolumny?
+
+To zależy od platformy:
+
+| Platforma | Co się dzieje z dodatkowymi kolumnami |
+|---|---|
+| Shopify | Po cichu pomijane, nie ma problemu |
+| WooCommerce | Nie są importowane: ekran mapowania ustawia nieznane kolumny na „Do not import” |
+| Etsy | Brak przesyłania CSV; aplikacje do masowego wystawiania mają własne zasady |
+| eBay File Exchange | Nierozpoznane kolumny mogą wywołać ostrzeżenia lub błędy |
+| Pliki płaskie Amazon | Kolumny spoza szablonu mogą zostać odrzucone |
+
+W Shopify i WooCommerce dodatkowe kolumny zwykle nie szkodzą. Przy eBay, Amazon lub aplikacji do masowego wystawiania na Etsy przed przesłaniem usuń kolumny, których nie ma w oficjalnym szablonie.
+
+---
+
+## Znajdowanie dodatkowych kolumn
+
+**Porównaj z oficjalnym szablonem:**
+
+1. Pobierz oficjalny szablon CSV platformy
+2. Otwórz swój plik i szablon w edytorze tekstu (nie w Excelu)
+3. Porównaj wiersz 1 (nagłówki) obu plików
+4. Każda kolumna w Twoim pliku, której nie ma w szablonie, jest nadmiarowa
+
+**Python: lista dodatkowych kolumn**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Usuwanie dodatkowych kolumn w Excelu
+
+1. Otwórz plik CSV w Excelu
+2. Kliknij literę każdej dodatkowej kolumny, aby ją zaznaczyć
+3. Prawy przycisk myszy → Usuń
+4. Przy kilku niesąsiadujących kolumnach przytrzymaj Ctrl, kliknij literę każdej kolumny, a potem prawy przycisk myszy → Usuń
+5. Zapisz jako CSV UTF-8 (rozdzielany przecinkami), a nie XLSX
+
+**Usunięcie ostatniej kolumny, jeśli jest pusta (pozostałość po przecinku na końcu):**
+
+1. Naciśnij Ctrl+End, aby znaleźć ostatnią używaną komórkę
+2. Jeśli ostatnia kolumna jest pusta w całym pliku, zaznacz ją i usuń
+3. Zapisz jako CSV
+
+---
+
+## Usuwanie dodatkowych kolumn w Arkuszach Google
+
+1. Kliknij literę kolumny, aby ją zaznaczyć
+2. Prawy przycisk myszy → Usuń kolumnę
+3. Powtórz dla wszystkich dodatkowych kolumn
+4. Plik → Pobierz → Wartości rozdzielone przecinkami
+
+---
+
+## Usuwanie dodatkowych kolumn w Pythonie (duże pliki)
+
+Przy dużych plikach, które w arkuszu otwierają się wolno lub niewygodnie:
+
+```python
+import csv
+
+# Kolumny do zachowania (dokładne nazwy z platformy)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig nie pozwala, by BOM przykleił się do nazwy pierwszej kolumny
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Zapisz tylko kolumny, które są w KEEP i w pliku
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Naprawa przecinków na końcu wierszy (ukryta dodatkowa kolumna)
+
+Przecinek na końcu każdego wiersza tworzy pustą kolumnę na pozycji N+1. Wygląda to tak:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+Pusta kolumna za ostatnim przecinkiem to dodatkowa kolumna bez nazwy i bez wartości.
+
+**Rozwiązanie w Pythonie:** usuń dokładnie jeden przecinek z końca każdej linii. Usunięcie wszystkich końcowych przecinków skasowałoby też prawdziwe puste komórki na końcu wiersza.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**Rozwiązanie w VS Code:** użyj Znajdź i zamień w trybie wyrażeń regularnych. Wyszukaj `,$` i zamień na nic. Rób to tylko wtedy, gdy każdy wiersz, łącznie z nagłówkiem, kończy się dodatkowym przecinkiem.
+
+---
+
+## Jak zapobiec dodatkowym kolumnom w przyszłych eksportach
+
+- Przed eksportem usuń z arkusza kolumny pomocnicze (albo trzymaj je w osobnym arkuszu)
+- Zaczynaj od oficjalnego szablonu platformy i dodawaj tylko kolumny, które w nim są
+- Jeśli używasz własnego oprogramowania magazynowego, ustaw eksport tak, by zawierał tylko obsługiwane kolumny
+- Trzymaj wersję „czystego eksportu” swojego szablonu tylko z potrzebnymi kolumnami
+
+---
+
+## Napraw to automatycznie w StriveFormats
+
+StriveFormats porównuje kolumny Twojego pliku z kolumnami, których oczekuje wybrana platforma, wskazuje dodatkowe kolumny i oznacza te, które na surowych platformach spowodują błędy importu.
+
+[Otwórz korektor CSV](/app) | [Zobacz szablony CSV](/presets)

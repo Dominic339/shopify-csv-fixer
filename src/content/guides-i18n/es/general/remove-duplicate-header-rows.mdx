@@ -1,0 +1,170 @@
+---
+title: "Eliminar filas de encabezado duplicadas en archivos CSV"
+description: "Encuentra y elimina las filas de encabezado repetidas que aparecen a mitad de las exportaciones CSV. Conoce sus causas, detéctalas con los filtros de Excel y Google Sheets, y evítalas en futuras exportaciones."
+keywords: ["filas de encabezado duplicadas csv", "encabezados repetidos csv", "encabezado en medio del csv", "quitar encabezados csv", "filas duplicadas importación csv", "encabezados csv shopify", "encabezados csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Por qué aparecen filas de encabezado duplicadas en los CSV exportados"
+  - "Cómo detectarlas con los filtros de Excel y Google Sheets"
+  - "Cómo eliminarlas paso a paso filtrando, ordenando y borrando"
+  - "Cómo usar un editor de texto con archivos grandes"
+  - "Cómo evitar encabezados duplicados en futuras exportaciones"
+bestFor: "Vendedores que juntan CSV a mano, usan herramientas de exportación masiva o reciben de proveedores CSV con encabezados repetidos a mitad del archivo"
+timeToComplete: "8 minutos"
+---
+
+## ¿Qué son las filas de encabezado duplicadas?
+
+Una fila de encabezado duplicada aparece cuando la primera fila de tu CSV (los nombres de columna) vuelve a aparecer en algún punto de la zona de datos. Por ejemplo:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← fila de encabezado repetida
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Cuando una herramienta de importación encuentra `Handle` en una fila de datos, no puede leerla como un producto. La mayoría de las plataformas se salta la fila sin avisar o da un error de formato. Algunas la cuentan como fila fallida.
+
+---
+
+## Por qué aparecen encabezados duplicados
+
+### Al juntar varios archivos exportados
+
+La causa más habitual es combinar dos CSV copiando y pegando en Excel o Google Sheets. La fila de encabezado del segundo archivo acaba en medio del archivo combinado.
+
+### Exportaciones paginadas
+
+Algunas plataformas exportan los datos por páginas (por ejemplo, 500 filas por archivo). Si descargas todas las páginas y las juntas, la fila de encabezado de cada archivo se va encadenando.
+
+### Sistemas de informes programados
+
+Los sistemas automáticos que añaden filas a un CSV cada día a veces repiten el encabezado al principio de cada bloque añadido.
+
+### «Actualizar todo» o exportaciones de Power Query en Excel
+
+Actualizar las conexiones de datos en Excel puede volver a insertar la fila de encabezado si la consulta está mal configurada.
+
+---
+
+## Detectar filas de encabezado duplicadas
+
+### En Excel
+
+1. Abre tu CSV (**Datos → Desde el texto/CSV**, no con doble clic, para conservar el formato).
+2. Haz clic en cualquier celda de tus datos.
+3. Ve a **Datos → Filtro** para activar los filtros.
+4. Haz clic en la flecha de la columna **Handle** (o de tu primera columna).
+5. En el cuadro de búsqueda, escribe exactamente el nombre del encabezado (por ejemplo, `Handle`).
+6. Si aparecen filas en el resultado del filtro, son filas de encabezado duplicadas.
+
+### En Google Sheets
+
+1. Selecciona todos los datos (**Ctrl+A**).
+2. Ve a **Datos → Crear un filtro**.
+3. Haz clic en la flecha de la primera columna.
+4. En el cuadro de texto del filtro, escribe el nombre del encabezado (por ejemplo, `Handle`).
+5. Todas las filas que muestren ese valor son encabezados duplicados.
+
+### Marcarlas con una fórmula
+
+En una columna vacía, añade esta fórmula junto a cada fila para marcar los duplicados:
+
+```
+=SI(A2="Handle";"ENCABEZADO DUPLICADO";"")
+```
+
+Sustituye `"Handle"` por el nombre real de tu primera columna. Filtra por `ENCABEZADO DUPLICADO` para encontrar todos los casos.
+
+---
+
+## Eliminar filas de encabezado duplicadas
+
+### Método 1: filtrar y eliminar (Excel / Sheets)
+
+1. Filtra la primera columna para que solo muestre las filas con el valor del encabezado (por ejemplo, `Handle`).
+2. Selecciona todas las filas visibles filtradas (haz clic en el número de fila del primer resultado y Mayús+clic en el último).
+3. Clic derecho → **Eliminar filas**.
+4. Quita el filtro (Datos → Borrar filtro, o Filtro → Desactivar).
+5. Comprueba que tus datos siguen completos.
+
+### Método 2: ordenar, eliminar y volver a ordenar (Excel)
+
+Ordenar reúne todas las filas de encabezado duplicadas, pero cambia el orden de tus productos, así que vuelve siempre a ordenarlos después. Los archivos de Shopify, WooCommerce y eBay dependen del orden de sus filas.
+
+1. Añade una columna auxiliar con números de fila (1, 2, 3...) para conservar el orden original.
+2. Ordena por la primera columna de la A a la Z.
+3. Las filas de encabezado duplicadas quedan ahora juntas, donde `Handle` caiga por orden alfabético entre tus valores (Excel no distingue mayúsculas al ordenar, así que búscalas entre los valores que empiezan por H).
+4. Selecciona ese bloque de filas y elimínalo.
+5. Ordena por la columna auxiliar para recuperar el orden original.
+6. Elimina la columna auxiliar.
+
+### Método 3: editor de texto (archivos grandes)
+
+Para archivos demasiado grandes para Excel (más de unas 100.000 filas), usa VS Code o Notepad++:
+
+**VS Code:**
+1. Abre el archivo.
+2. Pulsa **Ctrl+H** (Buscar y reemplazar).
+3. Activa el modo de **expresión regular** (el icono `.*`).
+4. En Buscar, escribe: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (sustitúyelo por tus encabezados reales, escapados si hace falta)
+5. Deja vacío Reemplazar.
+6. Haz clic en **Reemplazar todo**.
+7. Después de quitar todos los duplicados, vuelve a añadir a mano el encabezado como primera línea.
+
+> Ten cuidado con los reemplazos con expresiones regulares. Guarda siempre el archivo original como copia de seguridad y comprueba que el encabezado aparece una sola vez después de reemplazar.
+
+**Notepad++ (Windows):**
+1. Abre el archivo → **Buscar → Reemplazar** (Ctrl+H).
+2. Marca el modo **Expresión regular**.
+3. Usa el mismo patrón que en VS Code.
+4. Reemplazar todo y, después, vuelve a añadir a mano la línea de encabezado.
+
+---
+
+## Después de eliminar los encabezados duplicados
+
+Cuando el archivo esté limpio:
+
+1. Comprueba que el encabezado aparece una sola vez, en la línea 1.
+2. Cuenta las filas. El total debe ser el número original de filas menos el número de encabezados duplicados que quitaste.
+3. Revisa unas cuantas filas cerca de donde estaban los duplicados para confirmar que los datos están completos.
+4. Guarda como **CSV UTF-8** (en Excel: **Archivo → Guardar como → CSV UTF-8**).
+
+---
+
+## Evitar encabezados duplicados en futuras combinaciones
+
+Cuando juntes varios CSV a mano:
+
+1. Abre el primer archivo (tu archivo «base») en Excel o Sheets.
+2. Abre cada archivo adicional.
+3. **Elimina la fila de encabezado** del archivo adicional antes de copiar sus datos.
+4. Copia solo las filas de datos.
+5. Pégalas al final del archivo base.
+
+Si automatizas la combinación de CSV con scripts, sáltate siempre la fila de encabezado de todos los archivos menos el primero. `csv.DictReader` lee el encabezado de cada archivo como nombres de columna, así que nunca acaba en los datos:
+
+```python
+# Ejemplo en Python: supone que todos los archivos tienen las mismas columnas
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig quita el BOM, que si no cambiaría el nombre de la primera columna
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Si las columnas de los archivos son distintas, usa el script de la guía para combinar dos archivos CSV, que conserva todas las columnas.

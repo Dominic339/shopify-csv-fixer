@@ -1,0 +1,183 @@
+---
+title: "Valideer je CSV voordat je hem naar een e-commerceplatform uploadt"
+description: "Een praktische checklist om coderingsfouten, ontbrekende kolomkoppen, rijen met verschillende lengtes, problemen met aanhalingstekens en meer te vinden voordat je import mislukt. Voor Shopify, WooCommerce, eBay, Amazon en Etsy."
+keywords: ["csv valideren voor import", "csv checklist", "csv importfouten", "csv kolomkoppen controleren", "csv codering controleren", "csv aanhalingstekens", "csv rijlengte", "shopify csv valideren", "woocommerce csv valideren"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Wat je controleert voordat je een CSV naar een e-commerceplatform uploadt"
+  - "Hoe je codering, kolomkoppen, rijlengtes en aanhalingstekens nakijkt"
+  - "Hoe je een veilige testupload doet voordat je alle rijen importeert"
+  - "Welke tools de controle vóór de import automatiseren"
+  - "Welke verplichte kolommen elk platform vraagt"
+bestFor: "Catalogusbeheerders, ontwikkelaars en verkopers die regelmatig producten importeren en mislukte uploads en beschadigde gegevens willen beperken"
+timeToComplete: "12 minuten"
+---
+
+## Waarom valideren vóór de import loont
+
+Een mislukte CSV-import varieert van onschuldig (er verandert niets) tot schadelijk (gedeeltelijke updates laten je catalogus inconsistent achter). Bij Shopify stopt een fout met aanhalingstekens meestal de hele import en noemt de regel waar het misging. Bij WooCommerce kan een rij met verschoven kolommen verkeerde waarden in een bestaand product schrijven.
+
+Vijf minuten controle vóór het uploaden kan uren opruimwerk besparen.
+
+---
+
+## De checklist vóór de import
+
+### 1. Codering: UTF-8
+
+**Wat je controleert:** het bestand moet in UTF-8 gecodeerd zijn. Een BOM (Byte Order Mark) aan het begin is prima voor Shopify en WooCommerce, maar sommige tools lezen het als deel van de eerste kolomnaam.
+
+**Zo controleer je het:**
+- Open het bestand in VS Code. In de statusbalk rechtsonder moet `UTF-8` (of `UTF-8 with BOM`) staan, niet `Windows 1252` of `ISO 8859-1`.
+- Staat er iets anders, controleer dan eerst of de tekst er goed uitziet (zo niet, klik op het coderingslabel en kies **Opnieuw openen met codering** met de echte codering van het bestand). Klik daarna nogmaals op het label en kies **Opslaan met codering → UTF-8**.
+
+**Gangbare oplossing:** sla in Excel altijd op als **CSV UTF-8 (door komma's gescheiden)**, niet als gewone CSV.
+
+---
+
+### 2. Koprij: juiste namen, niets extra
+
+**Wat je controleert:**
+- De eerste rij bevat de kolomnamen precies zoals het platform ze verwacht.
+- Geen spaties aan het begin of eind van kolomnamen.
+- Geen dubbele kolomnamen.
+- Geen extra lege kolommen aan het eind.
+
+**Zo controleer je het:**
+Open het bestand in een teksteditor en lees regel 1 zorgvuldig. Vergelijk hem met de officiële sjabloon van het platform:
+
+- Shopify: bekijk de [Shopify-product-CSV-sjabloon](https://help.shopify.com/en/manual/products/import-export/import-products).
+- WooCommerce: vergelijk met de voorbeeld-product-CSV van WooCommerce uit je beheeromgeving.
+- Amazon: download de Inventory Loader of de categoriesjabloon in Seller Central (**Catalogus → Producten toevoegen via upload**).
+
+**Veelvoorkomende problemen:**
+- `"Handle "` met een spatie aan het eind (onzichtbaar in Excel).
+- `handle` (kleine letters) in plaats van `Handle`.
+- Verplichte kolommen die helemaal ontbreken.
+
+---
+
+### 3. Verplichte kolommen: allemaal aanwezig en gevuld
+
+**Wat je controleert:**
+- Alle verplichte kolommen van het platform staan in de koprij.
+- Verplichte velden zijn in geen enkele rij leeg.
+
+**Verplichte velden per platform (minimum):**
+
+| Platform | Verplichte kolommen |
+|---|---|
+| Shopify | Title (plus Handle bij het bijwerken van bestaande producten) |
+| WooCommerce | Name, Type (plus ID of SKU bij het bijwerken van bestaande producten) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | Geen CSV-upload: Etsy exporteert alleen CSV, dus er valt niets te valideren voor een import |
+
+**Zo controleer je het in Excel:**
+1. Zet filters aan (**Gegevens → Filter**).
+2. Filter in elke verplichte kolom op lege cellen.
+3. Elk leeg verplicht veld laat die rij mislukken.
+
+---
+
+### 4. Gelijke rijlengte
+
+**Wat je controleert:** elke rij moet evenveel kolommen hebben als de koprij. Ongelijke rijen wijzen op:
+- Een beschrijving of titel met niet-afgeschermde komma's.
+- Een veld met regeleinden erin dat de rij over meerdere regels verdeelt.
+- Een kopieer-plakfout die extra kolommen heeft toegevoegd.
+
+**Zo controleer je het in Excel (te lange rijen):**
+1. Zoek de eerste kolom na je laatste kolomkop. Eindigen je kolomkoppen in kolom T, dan is dat kolom U.
+2. Zet in een lege kolom ver naar rechts (bijvoorbeeld AAA) `=AANTALARG(U2:ZZ2)`.
+3. Kopieer hem naar alle rijen en filter op waarden boven 0. Die rijen hebben extra velden.
+
+Te korte rijen kan Excel niet laten zien, omdat een ontbrekend veld er hetzelfde uitziet als een leeg veld.
+
+**Zo controleer je het in een teksteditor:**
+Voer in VS Code met de extensie Rainbow CSV de opdracht **Rainbow CSV: CSVLint** uit. Die meldt elke rij waarvan het aantal velden afwijkt van de koprij, ook te korte rijen.
+
+**Gangbare oplossing:** zet elk veld met komma's, aanhalingstekens of regeleinden tussen dubbele aanhalingstekens. Bevat het veld al dubbele aanhalingstekens, scherm elk ervan dan af door het te verdubbelen (`""`).
+
+---
+
+### 5. Velden tussen aanhalingstekens: juist geplaatst en afgeschermd
+
+**Wat je controleert:**
+- Velden met komma's, dubbele aanhalingstekens of regeleinden staan tussen dubbele aanhalingstekens.
+- Elk dubbel aanhalingsteken in zo'n veld is afgeschermd door verdubbeling (`""`, niet `\"`).
+
+**Voorbeeld van juiste aanhalingstekens:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**Waar je op let:**
+- Velden die met `"` beginnen, moeten op dezelfde logische regel met `"` eindigen.
+- Apostroffen hoeven niet afgeschermd te worden: `Men's` blijft zoals het is. Alleen dubbele aanhalingstekens worden verdubbeld.
+
+---
+
+### 6. Geen ongeldige tekens in sleutelvelden
+
+**Wat je controleert:**
+- Handles/slugs bevatten alleen kleine letters, cijfers en koppeltekens.
+- Prijsvelden bevatten alleen cijfers en een decimale punt (geen valutatekens, geen scheidingstekens voor duizendtallen).
+- Ja/nee-velden (bijvoorbeeld Published, Featured) gebruiken de verwachte waarden (TRUE/FALSE, yes/no of 1/0, afhankelijk van je platform).
+
+**Veelvoorkomende problemen:**
+- `$19.99` in een prijskolom (moet `19.99` zijn).
+- `Blue Shirt` met hoofdletters en een spatie in een handle-kolom (moet `blue-shirt` zijn).
+- Prijzen als `19,99` (Europese decimale komma) in plaats van `19.99`.
+
+---
+
+### 7. Afbeeldings-URL's: bereikbaar en juist opgemaakt
+
+**Wat je controleert:**
+- Afbeeldings-URL's beginnen met `https://` (sommige platforms weigeren of slaan `http://`-afbeeldingen over).
+- URL's bevatten geen spaties (codeer ze als `%20` of haal ze weg).
+- Voor Shopify: per product worden tot 250 afbeeldings-URL's ondersteund. De eerste `Image Src`-rij per Handle is de hoofdafbeelding.
+- URL's zijn openbaar bereikbaar (niet achter een login, geen localhost).
+
+---
+
+### 8. Geen lege rijen aan het eind
+
+**Wat je controleert:** veel spreadsheetprogramma's voegen lege rijen toe aan het eind. Platforms kunnen een lege rij als ongeldig behandelen en een fout geven.
+
+**Zo los je het op in Excel:**
+1. Druk op **Ctrl+End** om naar de laatst gebruikte cel te gaan.
+2. Is de laatste rij leeg (alle cellen leeg), selecteer dan die rij en een paar rijen eronder en verwijder ze.
+3. Sla het bestand op.
+
+---
+
+## Strategie voor een testupload
+
+Upload nooit je volledige catalogus van 10.000 rijen als eerste test. Doe in plaats daarvan dit:
+
+1. Maak een kopie van je CSV.
+2. Houd alleen 5–10 representatieve rijen over (met minstens één product met varianten, als je die hebt).
+3. Upload de steekproef naar een testomgeving of een stagingwinkel.
+4. Controleer of elke rij goed is geïmporteerd.
+5. Herstel de fouten in het volledige bestand.
+6. Upload het volledige bestand.
+
+Voor Shopify: de importtool toont een voorbeeld voordat je bevestigt en stuurt je een e-mail als de import klaar is. Lees die e-mail ook als de import klaar lijkt, want sommige rijen kunnen worden overgeslagen terwijl de rest wel wordt geïmporteerd.
+
+---
+
+## Tools voor validatie vóór de import
+
+| Tool | Wat het controleert |
+|---|---|
+| **StriveFormats CSV Fixer** | Platformspecifieke kolomkoppen, codering, verplichte velden, aanhalingstekens, ja/nee-waarden |
+| **VS Code met de extensie Rainbow CSV** | Visuele uitlijning van kolommen, afwijkende rijen |
+| **csvkit (`csvclean`)** | Rijen met het verkeerde aantal velden, op de opdrachtregel |
+| **Google Sheets Bestand → Importeren** | Hoe de kolommen splitsen met het gekozen scheidingsteken |
+| **Excel Gegevens → Van tekst/CSV** | Voorbeeld van codering en scheidingsteken vóór het laden |
+
+Een validator vindt geen inhoudelijke fouten (verkeerde SKU, verkeerde categorie-ID, een afbeeldings-URL die niet meer laadt). Daarvoor heb je een testupload nodig. Maar validators vinden wel de structurele fouten waardoor een import niet kan worden afgerond.

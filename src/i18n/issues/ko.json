@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "변형 옵션이 고유하지 않습니다",
 "explanation": "같은 handle의 변형 두 개 이상이 같은 옵션 값을 가집니다.",
-"whyPlatformCares": "Shopify는 옵션 조합이 같은 변형을 하나로 합칩니다. 데이터가 손실되거나 변형이 덮어쓰일 수 있습니다.",
+"whyPlatformCares": "Shopify는 옵션 조합이 같은 변형이 있는 상품을 거부하므로 해당 상품의 가져오기가 실패합니다.",
 "howToFix": "변형 옵션 조합을 각각 고유하게 만드세요(또는 중복을 삭제하세요)."
 },
 "shopify/missing_option1_for_variant_data": {

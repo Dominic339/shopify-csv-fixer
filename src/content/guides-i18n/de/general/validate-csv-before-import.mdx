@@ -1,0 +1,183 @@
+---
+title: "CSV vor dem Hochladen auf eine E-Commerce-Plattform prüfen"
+description: "Eine praktische Checkliste, mit der du Kodierungsfehler, fehlende Spaltenköpfe, unterschiedliche Zeilenlängen, Anführungszeichenprobleme und mehr findest, bevor dein Import scheitert. Für Shopify, WooCommerce, eBay, Amazon und Etsy."
+keywords: ["csv vor import prüfen", "csv checkliste", "csv importfehler", "csv spaltenköpfe prüfen", "csv kodierung prüfen", "csv anführungszeichen", "csv zeilenlänge", "shopify csv prüfen", "woocommerce csv prüfen"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Was du vor dem Hochladen einer CSV auf eine E-Commerce-Plattform prüfen solltest"
+  - "Wie du Kodierung, Spaltenköpfe, Zeilenlängen und Anführungszeichen kontrollierst"
+  - "Wie du vor dem Import aller Zeilen einen sicheren Testupload machst"
+  - "Welche Tools die Prüfung vor dem Import automatisieren"
+  - "Welche Pflichtspalten die einzelnen Plattformen verlangen"
+bestFor: "Katalogverantwortliche, Entwickler und Händler, die regelmäßig Produkte importieren und fehlgeschlagene Uploads und beschädigte Daten vermeiden wollen"
+timeToComplete: "12 Minuten"
+---
+
+## Warum sich eine Prüfung vor dem Import lohnt
+
+Ein fehlgeschlagener CSV-Import reicht von harmlos (nichts ändert sich) bis zerstörerisch (Teilaktualisierungen hinterlassen deinen Katalog in einem uneinheitlichen Zustand). Bei Shopify stoppt ein Anführungszeichenfehler meist den gesamten Import und nennt die Zeile, an der er gescheitert ist. Bei WooCommerce kann eine Zeile mit verschobenen Spalten falsche Werte in ein bestehendes Produkt schreiben.
+
+Fünf Minuten Prüfung vor dem Hochladen können Stunden an Aufräumarbeit sparen.
+
+---
+
+## Die Checkliste vor dem Import
+
+### 1. Kodierung: UTF-8
+
+**Was du prüfst:** Die Datei muss in UTF-8 kodiert sein. Ein BOM (Byte Order Mark) am Anfang ist für Shopify und WooCommerce in Ordnung, manche Tools lesen es aber als Teil des ersten Spaltennamens.
+
+**So prüfst du es:**
+- Öffne die Datei in VS Code. In der Statusleiste unten rechts sollte `UTF-8` (oder `UTF-8 with BOM`) stehen, nicht `Windows 1252` oder `ISO 8859-1`.
+- Steht dort etwas anderes, prüfe zuerst, ob der Text richtig aussieht (falls nicht, klicke auf die Kodierungsanzeige und wähle **Mit Codierung erneut öffnen** mit der tatsächlichen Kodierung der Datei). Klicke dann erneut auf die Anzeige und wähle **Mit Codierung speichern → UTF-8**.
+
+**Übliche Lösung:** Speichere in Excel immer als **CSV UTF-8 (durch Trennzeichen getrennt)**, nicht als normale CSV.
+
+---
+
+### 2. Kopfzeile: richtige Namen, nichts Überflüssiges
+
+**Was du prüfst:**
+- Die erste Zeile enthält die Spaltennamen genau so, wie die Plattform sie erwartet.
+- Keine Leerzeichen am Anfang oder Ende von Spaltennamen.
+- Keine doppelten Spaltennamen.
+- Keine zusätzlichen leeren Spalten am Ende.
+
+**So prüfst du es:**
+Öffne die Datei in einem Texteditor und lies Zeile 1 sorgfältig. Vergleiche sie mit der offiziellen Vorlage der Plattform:
+
+- Shopify: sieh dir die [Shopify-Produkt-CSV-Vorlage](https://help.shopify.com/en/manual/products/import-export/import-products) an.
+- WooCommerce: vergleiche mit der Beispiel-Produkt-CSV von WooCommerce aus deinem Admin-Bereich.
+- Amazon: lade im Seller Central den Inventory Loader oder die Kategorievorlage herunter (**Katalog → Produkte per Upload hinzufügen**).
+
+**Häufige Probleme:**
+- `"Handle "` mit Leerzeichen am Ende (in Excel unsichtbar).
+- `handle` (klein geschrieben) statt `Handle`.
+- Pflichtspalten fehlen ganz.
+
+---
+
+### 3. Pflichtspalten: alle vorhanden und gefüllt
+
+**Was du prüfst:**
+- Alle Pflichtspalten der Plattform stehen in der Kopfzeile.
+- Pflichtfelder sind in keiner Zeile leer.
+
+**Pflichtfelder je Plattform (Minimum):**
+
+| Plattform | Pflichtspalten |
+|---|---|
+| Shopify | Title (plus Handle beim Aktualisieren bestehender Produkte) |
+| WooCommerce | Name, Type (plus ID oder SKU beim Aktualisieren bestehender Produkte) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | Kein CSV-Upload: Etsy exportiert CSV nur, für einen Import gibt es also nichts zu prüfen |
+
+**So prüfst du es in Excel:**
+1. Schalte Filter ein (**Daten → Filtern**).
+2. Filtere jede Pflichtspalte nach leeren Zellen.
+3. Jede Lücke in einem Pflichtfeld lässt diese Zeile scheitern.
+
+---
+
+### 4. Gleiche Zeilenlänge
+
+**Was du prüfst:** Jede Zeile muss genauso viele Spalten haben wie die Kopfzeile. Ungleiche Zeilen deuten hin auf:
+- Eine Beschreibung oder einen Titel mit nicht maskierten Kommas.
+- Ein Feld mit eingebetteten Zeilenumbrüchen, das die Zeile auf mehrere Zeilen verteilt.
+- Einen Kopierfehler, der zusätzliche Spalten eingefügt hat.
+
+**So prüfst du es in Excel (zu lange Zeilen):**
+1. Suche die erste Spalte nach deiner letzten Kopfspalte. Enden deine Spaltenköpfe in Spalte T, ist das Spalte U.
+2. Füge in einer leeren Spalte weit rechts (zum Beispiel AAA) `=ANZAHL2(U2:ZZ2)` ein.
+3. Kopiere die Formel in alle Zeilen und filtere nach Werten über 0. Diese Zeilen haben zusätzliche Felder.
+
+Zu kurze Zeilen kann Excel nicht zeigen, weil ein fehlendes Feld genauso aussieht wie ein leeres.
+
+**So prüfst du es in einem Texteditor:**
+Führe in VS Code mit der Erweiterung Rainbow CSV den Befehl **Rainbow CSV: CSVLint** aus. Er meldet jede Zeile, deren Feldanzahl von der Kopfzeile abweicht, auch zu kurze Zeilen.
+
+**Übliche Lösung:** Setze jedes Feld, das Kommas, Anführungszeichen oder Zeilenumbrüche enthält, in doppelte Anführungszeichen. Enthält das Feld bereits doppelte Anführungszeichen, maskiere jedes davon durch Verdoppeln (`""`).
+
+---
+
+### 5. Felder in Anführungszeichen: richtig gesetzt und maskiert
+
+**Was du prüfst:**
+- Felder mit Kommas, doppelten Anführungszeichen oder Zeilenumbrüchen stehen in doppelten Anführungszeichen.
+- Jedes doppelte Anführungszeichen in einem solchen Feld ist durch Verdoppeln maskiert (`""`, nicht `\"`).
+
+**Beispiel für richtiges Setzen:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**Worauf du achtest:**
+- Felder, die mit `"` beginnen, müssen in derselben logischen Zeile mit `"` enden.
+- Apostrophe müssen nicht maskiert werden: `Men's` bleibt, wie es ist. Nur doppelte Anführungszeichen werden verdoppelt.
+
+---
+
+### 6. Keine unzulässigen Zeichen in Schlüsselfeldern
+
+**Was du prüfst:**
+- Handles/Slugs enthalten nur Kleinbuchstaben, Ziffern und Bindestriche.
+- Preisfelder enthalten nur Ziffern und einen Dezimalpunkt (keine Währungssymbole, keine Tausendertrennzeichen).
+- Ja/Nein-Felder (z. B. Published, Featured) nutzen die erwarteten Werte (TRUE/FALSE, yes/no oder 1/0, je nach Plattform).
+
+**Häufige Probleme:**
+- `$19.99` in einer Preisspalte (richtig wäre `19.99`).
+- `Blue Shirt` mit Großbuchstaben und Leerzeichen in einer Handle-Spalte (richtig wäre `blue-shirt`).
+- Preise wie `19,99` (europäische Dezimalschreibweise) statt `19.99`.
+
+---
+
+### 7. Bild-URLs: erreichbar und richtig formatiert
+
+**Was du prüfst:**
+- Bild-URLs beginnen mit `https://` (manche Plattformen lehnen `http://`-Bilder ab oder überspringen sie).
+- URLs enthalten keine Leerzeichen (Leerzeichen müssen als `%20` kodiert oder entfernt werden).
+- Für Shopify: Pro Produkt werden bis zu 250 Bild-URLs unterstützt. Die erste `Image Src`-Zeile pro Handle ist das Hauptbild.
+- URLs sind öffentlich erreichbar (nicht hinter einem Login, nicht localhost).
+
+---
+
+### 8. Keine leeren Zeilen am Ende
+
+**Was du prüfst:** Viele Tabellenprogramme hängen am Ende leere Zeilen an. Plattformen können eine leere Zeile als ungültig behandeln und einen Fehler melden.
+
+**So behebst du es in Excel:**
+1. Drücke **Strg+Ende**, um zur letzten benutzten Zelle zu springen.
+2. Ist die letzte Zeile leer (alle Zellen leer), markiere sie und ein paar Zeilen darunter und lösche sie.
+3. Speichere die Datei.
+
+---
+
+## Strategie für den Testupload
+
+Lade nie als ersten Test deinen kompletten Katalog mit 10.000 Zeilen hoch. Stattdessen:
+
+1. Erstelle eine Kopie deiner CSV.
+2. Behalte nur 5–10 repräsentative Zeilen (mit mindestens einem Variantenprodukt, falls vorhanden).
+3. Lade die Stichprobe in eine Testumgebung oder einen Staging-Shop hoch.
+4. Prüfe, ob jede Zeile richtig importiert wurde.
+5. Behebe die Fehler in der vollständigen Datei.
+6. Lade die vollständige Datei hoch.
+
+Für Shopify: Der Importer zeigt vor dem Bestätigen eine Vorschau und schickt dir eine E-Mail, wenn der Import fertig ist. Lies diese E-Mail auch dann, wenn der Import fertig aussieht, denn einzelne Zeilen können übersprungen werden, während der Rest importiert wird.
+
+---
+
+## Tools für die Prüfung vor dem Import
+
+| Tool | Was es prüft |
+|---|---|
+| **StriveFormats CSV Fixer** | Plattformspezifische Spaltenköpfe, Kodierung, Pflichtfelder, Anführungszeichen, Ja/Nein-Werte |
+| **VS Code mit der Erweiterung Rainbow CSV** | Spaltenausrichtung auf einen Blick, abweichende Zeilen |
+| **csvkit (`csvclean`)** | Zeilen mit falscher Feldanzahl, auf der Kommandozeile |
+| **Google Tabellen Datei → Importieren** | Wie sich die Spalten mit einem gewählten Trennzeichen aufteilen |
+| **Excel Daten → Aus Text/CSV** | Vorschau von Kodierung und Trennzeichen vor dem Laden |
+
+Ein Prüftool findet keine inhaltlichen Fehler (falsche SKU, falsche Kategorie-ID, eine Bild-URL, die nicht mehr lädt). Dafür brauchst du einen Testupload. Prüftools finden aber die strukturellen Fehler, die einen Import scheitern lassen.

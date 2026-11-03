@@ -1,0 +1,183 @@
+---
+title: "CSV dosyanızı herhangi bir e-ticaret platformuna yüklemeden önce doğrulayın"
+description: "İçe aktarma başarısız olmadan önce kodlama hatalarını, eksik başlıkları, satır uzunluğu uyuşmazlıklarını, tırnak sorunlarını ve diğer problemleri yakalamak için pratik bir kontrol listesi. Shopify, WooCommerce, eBay, Amazon ve Etsy'yi kapsar."
+keywords: ["içe aktarmadan önce csv doğrulama", "csv kontrol listesi", "csv içe aktarma hataları", "csv başlık kontrolü", "csv kodlama kontrolü", "csv tırnak", "csv satır uzunluğu", "shopify csv doğrulama", "woocommerce csv doğrulama"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Bir CSV'yi e-ticaret platformuna yüklemeden önce neleri kontrol etmeniz gerektiği"
+  - "Kodlama, başlıklar, satır uzunlukları ve tırnakların nasıl doğrulanacağı"
+  - "Tüm satırları içe aktarmadan önce güvenli bir deneme yüklemesinin nasıl yapılacağı"
+  - "İçe aktarma öncesi doğrulamayı hangi araçların otomatikleştirdiği"
+  - "Her platformun hangi zorunlu sütunları istediği"
+bestFor: "Düzenli olarak ürün içe aktaran ve başarısız yüklemeleri ve bozuk verileri en aza indirmek isteyen katalog yöneticileri, geliştiriciler ve satıcılar"
+timeToComplete: "12 dakika"
+---
+
+## İçe aktarmadan önce doğrulama neden önemli
+
+Başarısız bir CSV içe aktarımı zararsız (hiçbir şey değişmez) ile yıkıcı (kısmi güncellemeler kataloğunuzu tutarsız bırakır) arasında değişebilir. Shopify'da bir tırnak hatası genellikle tüm içe aktarmayı durdurur ve hatanın olduğu satırı belirtir. WooCommerce'te sütunları kaymış bir satır, mevcut bir ürüne yanlış değerler yazabilir.
+
+Yüklemeden önceki beş dakikalık bir kontrol, saatlerce temizlik yapmaktan kurtarabilir.
+
+---
+
+## İçe aktarma öncesi kontrol listesi
+
+### 1. Kodlama: UTF-8
+
+**Neyi kontrol edin:** dosya UTF-8 ile kodlanmış olmalıdır. Başlangıçtaki bir BOM (Bayt Sırası İşareti) Shopify ve WooCommerce için sorun değildir, ancak bazı araçlar onu ilk sütun adının parçası olarak okur.
+
+**Nasıl kontrol edilir:**
+- Dosyayı VS Code'da açın. Sağ alttaki durum çubuğunda `Windows 1252` veya `ISO 8859-1` değil, `UTF-8` (ya da `UTF-8 with BOM`) yazmalıdır.
+- Başka bir şey yazıyorsa önce metnin doğru göründüğünden emin olun (görünmüyorsa kodlama etiketine tıklayıp dosyanın gerçek kodlamasıyla **Kodlamayla Yeniden Aç**'ı seçin). Ardından etikete yeniden tıklayıp **Kodlamayla Kaydet → UTF-8**'i seçin.
+
+**Yaygın çözüm:** Excel'de her zaman düz CSV olarak değil, **CSV UTF-8 (Virgülle ayrılmış)** olarak kaydedin.
+
+---
+
+### 2. Başlık satırı: doğru adlar, fazlası yok
+
+**Neyi kontrol edin:**
+- İlk satır, sütun adlarını tam olarak platformun beklediği şekilde içerir.
+- Sütun adlarının başında veya sonunda boşluk yoktur.
+- Yinelenen sütun adı yoktur.
+- Sonda fazladan boş sütun yoktur.
+
+**Nasıl kontrol edilir:**
+Dosyayı bir metin düzenleyicide açın ve 1. satırı dikkatle okuyun. Platformun resmi şablonuyla karşılaştırın:
+
+- Shopify: [Shopify ürün CSV şablonuna](https://help.shopify.com/en/manual/products/import-export/import-products) bakın.
+- WooCommerce: yönetim panelinizdeki WooCommerce örnek ürün CSV'siyle karşılaştırın.
+- Amazon: Seller Central'dan Inventory Loader'ı veya kategori şablonunu indirin (**Katalog → Yükleme ile Ürün Ekle**).
+
+**Yaygın sorunlar:**
+- Sonunda boşluk olan `"Handle "` (Excel'de görünmez).
+- `Handle` yerine `handle` (küçük harf).
+- Zorunlu sütunların tamamen eksik olması.
+
+---
+
+### 3. Zorunlu sütunlar: hepsi mevcut ve dolu
+
+**Neyi kontrol edin:**
+- Platformun tüm zorunlu sütunları başlıkta yer alır.
+- Zorunlu alanlar hiçbir satırda boş değildir.
+
+**Platforma göre zorunlu alanlar (en az):**
+
+| Platform | Zorunlu sütunlar |
+|---|---|
+| Shopify | Title (mevcut ürünleri güncellerken ayrıca Handle) |
+| WooCommerce | Name, Type (mevcut ürünleri güncellerken ayrıca ID veya SKU) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | CSV yükleme yok: Etsy yalnızca CSV dışa aktarır, bu yüzden içe aktarma için doğrulanacak bir şey yoktur |
+
+**Excel'de nasıl kontrol edilir:**
+1. Filtreleri açın (**Veri → Filtre**).
+2. Her zorunlu sütunda boş hücreleri filtreleyin.
+3. Zorunlu bir alandaki her boşluk o satırın başarısız olmasına yol açar.
+
+---
+
+### 4. Tutarlı satır uzunluğu
+
+**Neyi kontrol edin:** her satırda başlık satırı kadar sütun olmalıdır. Eşit olmayan satırlar şunlara işaret eder:
+- Kaçış yapılmamış virgüller içeren bir açıklama veya başlık.
+- Satırı birden çok satıra bölen, içinde satır sonu olan bir alan.
+- Fazladan sütun ekleyen bir kopyala-yapıştır hatası.
+
+**Excel'de nasıl kontrol edilir (fazla uzun satırlar):**
+1. Son başlığınızdan sonraki ilk sütunu bulun. Başlıklarınız T sütununda bitiyorsa bu U sütunudur.
+2. Çok sağdaki boş bir sütuna (örneğin AAA) `=BAĞ_DEĞ_DOLU_SAY(U2:ZZ2)` yazın.
+3. Formülü tüm satırlara kopyalayın ve 0'dan büyük değerleri filtreleyin. Bu satırlarda fazladan alan vardır.
+
+Excel fazla kısa satırları gösteremez, çünkü eksik bir alan boş bir alanla aynı görünür.
+
+**Metin düzenleyicide nasıl kontrol edilir:**
+Rainbow CSV uzantısı yüklü VS Code'da **Rainbow CSV: CSVLint** komutunu çalıştırın. Alan sayısı başlıktan farklı olan her satırı, kısa satırlar dahil, bildirir.
+
+**Yaygın çözüm:** virgül, tırnak veya satır sonu içeren her alanı çift tırnak içine alın. Alan zaten çift tırnak içeriyorsa her birini ikiye katlayarak kaçış yapın (`""`).
+
+---
+
+### 5. Tırnaklı alanlar: doğru tırnaklama ve kaçış
+
+**Neyi kontrol edin:**
+- Virgül, çift tırnak veya satır sonu içeren alanlar çift tırnak içindedir.
+- Tırnaklı bir alanın içindeki her çift tırnak ikiye katlanarak kaçış yapılmıştır (`\"` değil `""`).
+
+**Doğru tırnaklama örneği:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**Nelere dikkat edilmeli:**
+- `"` ile başlayan alanlar aynı mantıksal satırda `"` ile bitmelidir.
+- Kesme işaretleri için kaçış gerekmez: `Men's` olduğu gibi kalır. Yalnızca çift tırnaklar ikiye katlanır.
+
+---
+
+### 6. Anahtar alanlarda geçersiz karakter yok
+
+**Neyi kontrol edin:**
+- Handle/slug değerleri yalnızca küçük harf, rakam ve kısa çizgi içerir.
+- Fiyat alanları yalnızca rakam ve ondalık nokta içerir (para birimi simgesi yok, binlik ayırıcı yok).
+- Evet/hayır alanları (ör. Published, Featured) beklenen değerleri kullanır (platformunuza göre TRUE/FALSE, yes/no veya 1/0).
+
+**Yaygın sorunlar:**
+- Fiyat sütununda `$19.99` (`19.99` olmalı).
+- Handle sütununda büyük harf ve boşluk içeren `Blue Shirt` (`blue-shirt` olmalı).
+- `19.99` yerine `19,99` gibi fiyatlar (Avrupa ondalık virgülü).
+
+---
+
+### 7. Görsel URL'leri: erişilebilir ve doğru biçimde
+
+**Neyi kontrol edin:**
+- Görsel URL'leri `https://` ile başlar (bazı platformlar `http://` görselleri reddeder veya atlar).
+- URL'lerde boşluk yoktur (boşluklar `%20` olarak kodlanmalı veya kaldırılmalıdır).
+- Shopify için: ürün başına en fazla 250 görsel URL'si desteklenir. Her Handle için ilk `Image Src` satırı ana görseldir.
+- URL'ler herkese açıktır (giriş gerektirmez, localhost değildir).
+
+---
+
+### 8. Sonda boş satır yok
+
+**Neyi kontrol edin:** birçok elektronik tablo aracı sona boş satırlar ekler. Platformlar boş bir satırı geçersiz sayıp hata verebilir.
+
+**Excel'de nasıl düzeltilir:**
+1. Son kullanılan hücreye gitmek için **Ctrl+End** tuşlarına basın.
+2. Son satır boşsa (tüm hücreler boş), o satırdan birkaç satır aşağıya kadar seçip silin.
+3. Dosyayı kaydedin.
+
+---
+
+## Deneme yüklemesi stratejisi
+
+10.000 satırlık tüm kataloğunuzu asla ilk test olarak yüklemeyin. Bunun yerine:
+
+1. CSV'nizin bir kopyasını oluşturun.
+2. Yalnızca 5–10 temsili satır bırakın (varsa en az bir varyantlı ürün ekleyin).
+3. Örneği bir test ortamına veya hazırlık (staging) mağazasına yükleyin.
+4. Her satırın doğru içe aktarıldığını doğrulayın.
+5. Hataları tam dosyada düzeltin.
+6. Tam dosyayı yükleyin.
+
+Shopify için: içe aktarma aracı onaylamadan önce bir önizleme gösterir ve içe aktarma bittiğinde size e-posta gönderir. İçe aktarma bitmiş görünse bile bu e-postayı okuyun, çünkü bazı satırlar atlanırken geri kalanı içe aktarılabilir.
+
+---
+
+## İçe aktarma öncesi doğrulama araçları
+
+| Araç | Neyi kontrol eder |
+|---|---|
+| **StriveFormats CSV Fixer** | Platforma özgü başlıklar, kodlama, zorunlu alanlar, tırnaklama, evet/hayır değerleri |
+| **Rainbow CSV uzantılı VS Code** | Görsel sütun hizası, uyuşmayan satırlar |
+| **csvkit (`csvclean`)** | Alan sayısı yanlış olan satırlar, komut satırında |
+| **Google E-Tablolar Dosya → İçe aktar** | Seçilen ayırıcıyla sütunların nasıl bölündüğü |
+| **Excel Veri → Metinden/CSV'den** | Yüklemeden önce kodlama ve ayırıcı önizlemesi |
+
+Bir doğrulayıcı anlamsal hataları (yanlış SKU, yanlış kategori kimliği, artık yüklenmeyen bir görsel URL'si) yakalayamaz. Bunlar için deneme yüklemesi gerekir. Ancak doğrulayıcılar, bir içe aktarmanın tamamlanmasını engelleyen yapısal hataları yakalar.

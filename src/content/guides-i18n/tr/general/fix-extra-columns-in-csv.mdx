@@ -1,0 +1,163 @@
+---
+title: "CSV dosyasındaki fazla sütunları kaldırma"
+description: "Shopify, WooCommerce, Etsy, eBay veya Amazon'a içe aktarmadan önce bir CSV dosyasındaki fazla veya beklenmeyen sütunları nasıl bulup kaldıracağınız."
+keywords: ["csv fazla sütunları düzeltme", "csv fazla sütun kaldırma", "beklenmeyen sütun csv içe aktarma", "csv fazla sütun hatası", "csv çok fazla sütun", "csv sütun silme", "csv sütunlarını temizleme"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV dosyalarına fazla sütunların nasıl girdiği ve neden içe aktarma hatalarına yol açtığı"
+  - "Hangi platformların fazla sütunları reddettiği, hangilerinin yok saydığı"
+  - "Excel ve Google E-Tablolar'da fazla sütunları nasıl bulup kaldıracağınız"
+  - "Büyük dosyalarda fazla sütunları Python ile nasıl temizleyeceğiniz"
+  - "Gelecekteki dışa aktarımlarda fazla sütunların oluşmasını nasıl önleyeceğiniz"
+bestFor: "Platformun beklemediği sütunlar yüzünden içe aktarma hataları veya beklenmedik doğrulama hatalarıyla uğraşan satıcılar"
+timeToComplete: "6 dakika"
+---
+
+## Fazla sütunlar CSV'nize nasıl girer
+
+Fazla sütunlar CSV dosyalarında birkaç yaygın nedenle ortaya çıkar:
+
+- **Formüller veya yardımcı sütunlar**: kendi hesaplamalarınız için eklediğiniz ve hiçbir zaman içe aktarılması amaçlanmayan sütunlar
+- **Not veya iç takip sütunları**: `Internal Notes`, `Last Edited By` veya `Supplier Cost` gibi sütunlar
+- **Dışa aktarma kalıntıları**: stok sisteminiz içe aktarma platformunun ihtiyacından fazla alan dışa aktarır
+- **Birleştirilmiş platform dosyaları**: iki farklı şablonun sütunlarını birleştirdiniz ve sonuçta yinelenen veya fazla sütunlar var
+- **Her satırın sonunda bir virgül**: sonda görünmez, boş bir sütun oluşturur
+
+---
+
+## Platformunuz fazla sütunları kabul ediyor mu?
+
+Davranış platforma göre değişir:
+
+| Platform | Fazla sütunlara ne olur |
+|---|---|
+| Shopify | Sessizce yok sayılır, sorun değildir |
+| WooCommerce | İçe aktarılmaz: eşleme ekranı bilinmeyen sütunları "Do not import" olarak ayarlar |
+| Etsy | CSV yüklemesi yoktur; toplu yayınlama uygulamaları kendi kurallarını belirler |
+| eBay File Exchange | Tanınmayan sütunlar uyarılara veya hatalara yol açabilir |
+| Amazon düz dosyaları | Şablonda olmayan sütunlar reddedilebilir |
+
+Shopify veya WooCommerce kullanıyorsanız fazla sütunlar genellikle zararsızdır. eBay, Amazon veya bir Etsy toplu yayınlama uygulaması için, yüklemeden önce resmi şablonda olmayan sütunları kaldırın.
+
+---
+
+## Fazla sütunları bulma
+
+**Resmi şablonla karşılaştırın:**
+
+1. Platformun resmi CSV şablonunu indirin
+2. Dosyanızı ve şablonu bir metin düzenleyicide açın (Excel'de değil)
+3. İki dosyanın 1. satırını (başlıkları) karşılaştırın
+4. Dosyanızda olup şablonda olmayan her sütun fazladır
+
+**Python: fazla sütunları listeleme**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## Excel'de fazla sütunları kaldırma
+
+1. CSV'yi Excel'de açın
+2. Seçmek için her fazla sütunun harfine tıklayın
+3. Sağ tıklayın → Sil
+4. Yan yana olmayan birden fazla sütun için: Ctrl'yi basılı tutarak her sütun harfine tıklayın, ardından sağ tıklayın → Sil
+5. XLSX olarak değil, CSV UTF-8 (Virgülle ayrılmış) olarak kaydedin
+
+**Son sütun boşsa kaldırma (satır sonu virgülü kalıntısı):**
+
+1. Son kullanılan hücreyi bulmak için Ctrl+End'e basın
+2. Son sütun dosyanın tamamında boşsa o sütunu seçip silin
+3. CSV olarak kaydedin
+
+---
+
+## Google E-Tablolar'da fazla sütunları kaldırma
+
+1. Sütunu seçmek için sütun harfine tıklayın
+2. Sağ tıklayın → Sütunu sil
+3. Tüm fazla sütunlar için tekrarlayın
+4. Dosya → İndir → Virgülle ayrılmış değerler
+
+---
+
+## Python ile fazla sütunları kaldırma (büyük dosyalar)
+
+Elektronik tabloda açması yavaş veya zahmetli olan büyük dosyalar için:
+
+```python
+import csv
+
+# Kalacak sütunlar (platformun tam sütun adlarını kullanın)
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig, BOM'un ilk sütun adına yapışmasını önler
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # Yalnızca hem KEEP'te hem de dosyada bulunan sütunları yaz
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## Satır sonundaki virgülleri düzeltme (gizli fazla sütun)
+
+Her satırın sonundaki bir virgül, N+1 konumunda boş bir sütun oluşturur. Şöyle görünür:
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+Son virgülden sonraki boş sütun, adı ve değeri olmayan fazla bir sütundur.
+
+**Python ile düzeltme:** her satırın sonundan tam olarak bir virgül kaldırın. Sondaki tüm virgülleri kaldırmak, bir satırın sonundaki gerçek boş hücreleri de siler.
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**VS Code'da düzeltme:** Bul ve Değiştir'i normal ifade modunda kullanın. `,$` arayın ve hiçbir şeyle değiştirin. Bunu yalnızca başlık dahil her satır fazladan virgülle bitiyorsa yapın.
+
+---
+
+## Gelecekteki dışa aktarımlarda fazla sütunları önleme
+
+- Dışa aktarmadan önce yardımcı sütunları elektronik tablonuzdan silin (veya ayrı bir sayfada tutun)
+- Platformun resmi şablonundan başlayın ve yalnızca şablonda olan sütunları ekleyin
+- Özel bir stok yazılımı kullanıyorsanız dışa aktarmayı yalnızca desteklenen sütunları çıkaracak şekilde ayarlayın
+- Elektronik tablo şablonunuzun yalnızca gerekli sütunları içeren "temiz dışa aktarma" sürümünü saklayın
+
+---
+
+## StriveFormats ile otomatik düzeltin
+
+StriveFormats dosyanızın sütunlarını seçilen platformun beklediği sütunlarla karşılaştırır, fazla sütunları belirler ve katı platformlarda içe aktarma hatasına yol açacak sütunları işaretler.
+
+[CSV düzelticisini aç](/app) | [CSV şablonlarını görüntüle](/presets)

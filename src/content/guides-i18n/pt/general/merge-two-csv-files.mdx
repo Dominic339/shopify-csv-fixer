@@ -1,0 +1,336 @@
+---
+title: "Como mesclar dois arquivos CSV"
+description: "Guia passo a passo para combinar dois arquivos CSV em um só com o Power Query do Excel, Google Sheets ou uma simples linha de comando, sem experiência em programação."
+keywords: ["mesclar arquivos csv", "combinar csv", "juntar dois csv", "power query excel csv", "mesclar csv google sheets", "anexar csv", "empilhar arquivos csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Quatro métodos para mesclar arquivos CSV (Excel, Sheets, linha de comando, Python)"
+  - "Quando NÃO mesclar e o que fazer no lugar"
+  - "Como corrigir cabeçalhos diferentes e colunas em outra ordem"
+  - "Como remover linhas de cabeçalho duplicadas de um arquivo mesclado"
+  - "Como lidar com codificações e delimitadores diferentes entre arquivos"
+bestFor: "Vendedores que juntam exportações de catálogo, arquivos de estoque ou exportações de pedidos de várias fontes"
+timeToComplete: "15 minutos"
+---
+
+## Quando é preciso mesclar arquivos CSV?
+
+Mesclar dois arquivos CSV em um é um passo comum antes de uma importação de e-commerce. Você pode precisar disso para:
+
+- Reunir os produtos de dois fornecedores num único envio de catálogo
+- Juntar a exportação de produtos do mês passado com as novidades
+- Dividir uma importação grande em lotes menores e depois juntá-los de novo
+- Reunir num único CSV de produtos linhas de variantes vindas de fontes diferentes
+
+Este guia mostra quatro métodos confiáveis: Power Query do Excel, Google Sheets, linha de comando e Python. Todos mantêm a linha de cabeçalho do primeiro arquivo e acrescentam só as linhas de dados do segundo.
+
+---
+
+## Antes de começar: alinhe os cabeçalhos
+
+Os dois arquivos precisam ter os mesmos cabeçalhos de coluna na mesma ordem. Se as colunas forem diferentes, a mesclagem vai jogar dados nos campos errados e estragar a importação.
+
+Checklist rápido antes de mesclar:
+
+- [ ] Abra os dois arquivos e compare a primeira linha (cabeçalhos) lado a lado
+- [ ] Os nomes das colunas batem exatamente (algumas plataformas diferenciam maiúsculas e minúsculas)
+- [ ] As colunas estão na mesma ordem nos dois arquivos
+- [ ] Nenhum dos arquivos tem linhas de resumo ou de rodapé
+- [ ] Os dois arquivos estão salvos em UTF-8
+
+Se os cabeçalhos estiverem em outra ordem, reorganize as colunas de um dos arquivos antes de mesclar. O método em Python com DictWriter (método 4, abaixo) resolve diferenças de ordem automaticamente.
+
+---
+
+## Método 1: Power Query do Excel (Windows, recomendado)
+
+O Power Query do Excel junta vários CSV sem fórmulas nem macros. Ele resolve automaticamente diferenças de codificação e de quebra de linha entre os arquivos e nunca repete a linha de cabeçalho.
+
+### Passos
+
+1. Abra uma pasta de trabalho em branco no Excel.
+2. Vá à guia **Dados**, clique em **Obter Dados**, depois em **De Arquivo** e **De Texto/CSV**.
+3. Selecione o **primeiro arquivo CSV** e clique em **Importar**. Quando a prévia aparecer, clique em **Transformar Dados** (não em Carregar).
+4. No Editor do Power Query, vá em **Página Inicial** > **Nova Fonte** > **Arquivo** > **Texto/CSV**, selecione o **segundo arquivo CSV** e clique em **OK**. Os dois arquivos agora aparecem como consultas no painel esquerdo.
+5. Selecione a primeira consulta e vá em **Página Inicial** > **Acrescentar Consultas** > **Acrescentar Consultas como Novas**.
+6. Na caixa de diálogo, escolha **Duas tabelas** e selecione a segunda consulta na lista.
+7. Uma nova consulta combinada aparece no painel esquerdo. Clique em **Fechar e Carregar** para gravá-la numa nova planilha.
+8. Com a planilha combinada ativa, vá em **Arquivo** > **Salvar como** e escolha **CSV UTF-8 (delimitado por vírgulas)** como formato. O Excel só salva a planilha ativa. O simples "CSV (separado por vírgulas)" usa uma codificação antiga e pode estragar os acentos.
+
+### Por que o Power Query
+
+- Detecta a codificação de cada arquivo e deixa você corrigi-la na prévia se o palpite estiver errado.
+- Acrescenta a linha de cabeçalho uma só vez, não uma por arquivo.
+- Não acrescenta linhas em branco entre os dois arquivos.
+- Lida com arquivos grandes, até o limite do Excel de 1.048.576 linhas por planilha. Para mais linhas, use a linha de comando ou o Python.
+
+---
+
+## Método 2: Google Sheets (no navegador, arquivos menores)
+
+O Google Sheets é uma opção rápida se você não tem o Excel. Funciona bem para arquivos com menos de cerca de 50.000 linhas no total.
+
+### Passos
+
+1. Abra o Google Drive e envie o primeiro CSV: clique com o botão direito numa área vazia, escolha **Upload de arquivo**, selecione o CSV, depois clique com o botão direito no arquivo enviado e escolha **Abrir com > Planilhas Google**.
+2. Anote o número da última linha de dados (por exemplo, a linha 500 se o arquivo tem 499 linhas de dados mais uma de cabeçalho).
+3. Abra o segundo CSV do mesmo jeito numa nova guia do navegador.
+4. Na segunda planilha, clique no número da linha **2** (a primeira linha de dados, abaixo do cabeçalho). Pressione **Ctrl+Shift+End** para estender a seleção até a última linha e a última coluna com dados.
+5. Pressione **Ctrl+C** para copiar. Volte à primeira guia e clique na primeira linha vazia abaixo dos dados.
+6. Pressione **Ctrl+V** para colar as linhas de dados (sem o cabeçalho).
+7. Vá em **Arquivo** > **Fazer download** > **Valores separados por vírgula (.csv)**.
+
+### Cuidado com
+
+- O Google Sheets exporta UTF-8 sem BOM, então o arquivo mesclado pode ser enviado como está.
+- Arquivos muito grandes (mais de 100.000 linhas) podem deixar o Sheets lento ou travado. Use a linha de comando ou o Python nesses casos.
+- Confira se as linhas coladas estão alinhadas com as colunas. Um único deslocamento de coluna estraga toda a mesclagem.
+
+---
+
+## Método 3: linha de comando (o mais rápido, qualquer tamanho)
+
+Se você tem um terminal, a linha de comando leva menos de um segundo, seja qual for o tamanho do arquivo. No macOS e no Linux não é preciso instalar nada.
+
+### macOS ou Linux
+
+```bash
+# Mesclar file1.csv e file2.csv em merged.csv
+# tail -n +2 pula a linha de cabeçalho do segundo arquivo
+cat file1.csv <(tail -n +2 file2.csv) > merged.csv
+```
+
+Se `file1.csv` não terminar com uma quebra de linha, a última linha dele e a primeira linha de `file2.csv` ficam na mesma linha. Confira essa junção no resultado.
+
+### Windows (Prompt de Comando)
+
+```bat
+:: Copiar primeiro o primeiro arquivo
+copy file1.csv merged.csv
+
+:: Acrescentar todas as linhas do segundo arquivo, menos o cabeçalho
+more +1 file2.csv >> merged.csv
+```
+
+Observação: o comando `more +1` do Windows pula a primeira linha. Ele também troca tabulações por espaços, pode estragar texto que não seja ASCII e trava com arquivos muito grandes, então confira o resultado ou use o Python (método 4) no Windows.
+
+### Conferir o resultado
+
+Depois de mesclar pela linha de comando, abra o resultado num editor de texto e confira se:
+
+- A linha de cabeçalho aparece uma vez só (no topo)
+- Não há linha em branco entre os dados dos dois arquivos
+- A última linha de file1 e a primeira linha de dados de file2 estão em linhas seguidas
+- Não há quebra de linha a mais no fim (a maioria dos importadores tolera, mas fica mais limpo sem)
+
+---
+
+## Método 4: Python (multiplataforma, aceita colunas diferentes)
+
+O `csv.DictWriter` do Python é o método mais confiável. Ele lida com colunas em outra ordem, colunas que só um arquivo tem e arquivos grandes. Não é preciso saber programar: instale o Python e rode o script abaixo.
+
+### O script
+
+```python
+import csv
+
+files_to_merge = ["file1.csv", "file2.csv"]
+output_file = "merged.csv"
+
+# Reunir todos os nomes de coluna, na ordem em que aparecem pela primeira vez
+fieldnames = []
+for fname in files_to_merge:
+    with open(fname, newline="", encoding="utf-8-sig") as f:
+        for h in csv.DictReader(f).fieldnames or []:
+            if h not in fieldnames:
+                fieldnames.append(h)
+
+with open(output_file, "w", newline="", encoding="utf-8") as out:
+    # restval="" deixa vazia uma coluna nas linhas de um arquivo que não a tem
+    writer = csv.DictWriter(out, fieldnames=fieldnames, restval="")
+    writer.writeheader()
+    for fname in files_to_merge:
+        # utf-8-sig remove o BOM, se houver
+        with open(fname, newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                writer.writerow(row)
+
+print(f"Done: merged {len(files_to_merge)} files into {output_file}")
+```
+
+Salve este arquivo como `merge.py` na mesma pasta dos seus CSV. Abra um terminal ou prompt de comando nessa pasta e rode:
+
+```
+python merge.py
+```
+
+### Por que usar Python?
+
+- Funciona no Windows, no Mac e no Linux.
+- Remove o BOM automaticamente (utf-8-sig). Converta antes qualquer arquivo que não esteja em UTF-8 (veja a seção sobre codificação abaixo).
+- Lida com colunas em outra ordem, porque o DictWriter associa as colunas pelo nome, não pela posição. Colunas que faltam num arquivo ficam vazias, e as que só um arquivo tem são mantidas.
+- Processa os arquivos linha a linha, sem carregar tudo na memória, então funciona com arquivos muito grandes.
+
+---
+
+## Quando NÃO mesclar
+
+Mesclar é a ferramenta certa para empilhar linhas de arquivos com a mesma estrutura. Não mescle quando:
+
+- **Os arquivos têm estruturas diferentes.** Se file1 tem 30 colunas e file2 tem 25 colunas diferentes, uma mesclagem ingênua gera um arquivo com dados desalinhados. Use o método em Python com DictWriter (método 4), que mantém todas as colunas e deixa as lacunas vazias, ou alinhe as estruturas antes.
+- **Você quer unir por uma chave (um JOIN como no SQL).** Mesclar empilha linhas; não associa linhas de dois arquivos por um SKU, Handle ou ID em comum. Para uniões por chave, use o `csv.DictReader` do Python com um dicionário, ou uma ferramenta como o pandas.
+- **Um arquivo tem totais, resumos ou tabelas dinâmicas.** Exporte só as linhas de dados brutos antes de mesclar. Linhas de resumo, fórmulas SOMA e linhas de média vão aparecer como dados de produto depois da mesclagem.
+- **Os arquivos vêm de modelos de exportação diferentes.** Uma exportação de produtos da Shopify e uma exportação de estoque da Shopify têm colunas diferentes e não podem ser mescladas acrescentando linhas.
+
+---
+
+## Corrigir cabeçalhos diferentes antes de mesclar
+
+Se os dois arquivos têm as mesmas colunas, mas com nomes diferentes (por exemplo, `Title` e `Product Title`, ou `Price` e `Variant Price`), padronize-os antes de mesclar.
+
+### À mão no Excel ou no Google Sheets
+
+1. Abra os dois arquivos lado a lado.
+2. Compare a linha 1 (cabeçalhos) de cada arquivo.
+3. Renomeie num dos arquivos os cabeçalhos fora do padrão para que batam com o outro. Edite a célula diretamente (tecla F2 no Excel).
+4. Salve os dois arquivos como CSV antes de mesclar.
+
+### Automaticamente com Python
+
+```python
+import csv
+
+# Associar os nomes fora do padrão de file2 aos nomes padrão usados em file1
+RENAME = {
+    "Product Title": "Title",
+    "Price": "Variant Price",
+    "SKU": "Variant SKU",
+}
+
+with open("file2.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    # Renomear os cabeçalhos
+    fieldnames = [RENAME.get(h, h) for h in (reader.fieldnames or [])]
+    rows = list(reader)
+
+with open("file2_normalized.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({RENAME.get(k, k): v for k, v in row.items()})
+```
+
+---
+
+## Reorganizar as colunas para baterem
+
+Se os nomes das colunas são idênticos, mas a ordem é diferente, o método em Python com DictWriter (método 4) resolve sozinho, porque associa pelo nome. No Excel ou no Sheets, reorganize à mão:
+
+**No Excel:**
+1. Insira uma linha em branco acima da linha 1 num dos arquivos.
+2. Numere as colunas na ordem que elas devem ter no arquivo de destino (1, 2, 3...).
+3. Classifique as colunas por essa linha de números (Dados > Classificar > Opções > Da esquerda para a direita, pela linha 1).
+4. Exclua a linha auxiliar de números.
+
+**No Google Sheets:**
+1. Insira uma linha em branco no topo.
+2. Digite a posição desejada de cada coluna.
+3. Numa planilha auxiliar, use `=CHOOSECOLS(Sheet1!A:Z; 3; 1; 2)` (com os números das colunas na ordem que você quer), ou recorte e cole as colunas à mão na ordem certa.
+4. Fazer download > CSV.
+
+---
+
+## Remover linhas de cabeçalho duplicadas de um arquivo mesclado
+
+Se um arquivo mesclado acabou com uma linha de cabeçalho duplicada no meio (comum ao mesclar várias vezes exportações da mesma ferramenta), remova-a com Python:
+
+```python
+import csv
+
+with open("merged.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    rows = list(reader)
+
+if not rows:
+    raise ValueError("File is empty")
+
+header = rows[0]
+# Manter só as linhas diferentes do cabeçalho (exceto a primeira)
+clean = [header] + [r for r in rows[1:] if r != header]
+
+with open("merged_clean.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean)
+
+print(f"Removed {len(rows) - len(clean)} duplicate header row(s).")
+```
+
+---
+
+## Codificações e delimitadores diferentes entre arquivos
+
+Se um arquivo está em UTF-8 e o outro em Windows-1252 (ANSI), o arquivo mesclado vai ter caracteres embaralhados em todo lugar onde o arquivo Windows-1252 tinha letras acentuadas, aspas tipográficas ou símbolos de moeda.
+
+**Converta Windows-1252 para UTF-8 antes de mesclar:**
+
+No macOS ou no Linux:
+```bash
+iconv -f windows-1252 -t utf-8 file2_ansi.csv > file2_utf8.csv
+```
+
+Com Python:
+```python
+with open("file2_ansi.csv", encoding="windows-1252") as f:
+    content = f.read()
+with open("file2_utf8.csv", "w", encoding="utf-8") as f:
+    f.write(content)
+```
+
+Se os dois arquivos usam a mesma codificação, mas delimitadores diferentes (vírgulas e ponto e vírgula), converta o delimitador de um deles antes de mesclar. Veja a seção sobre delimitadores do guia de noções básicas de CSV.
+
+---
+
+## Resolver problemas em arquivos mesclados
+
+| Problema | Causa | Solução |
+|---|---|---|
+| Linha em branco a mais no meio do arquivo mesclado | O segundo arquivo tinha uma quebra de linha ou uma linha de resumo no fim | Exclua a linha em branco, ou acrescente `if any(row.values()):` antes de `writer.writerow(row)` no Python |
+| Linha de cabeçalho duplicada no meio | O cabeçalho do segundo arquivo não foi pulado | Use `tail -n +2` (linha de comando) ou Acrescentar do Power Query (que o pula automaticamente) |
+| Dados nas colunas erradas | A ordem das colunas é diferente entre os arquivos | Reorganize antes as colunas de um arquivo, ou use o método em Python com DictWriter |
+| Caracteres embaralhados no arquivo mesclado | Os arquivos têm codificações diferentes | Converta antes os dois arquivos para UTF-8 com o iconv no Mac/Linux: `iconv -f windows-1252 -t utf-8 file2.csv > file2_utf8.csv` |
+| Primeira coluna não reconhecida depois do envio | O arquivo mesclado tem um BOM que a plataforma lê errado | Abra no VS Code e salve de novo como UTF-8 sem BOM |
+
+---
+
+## O que não fazer
+
+- **Não dependa de copiar e colar à mão em arquivos grandes ou complexos.** É fácil pular uma linha, colar com uma coluna de deslocamento ou repetir o cabeçalho sem querer. O método 2 serve para arquivos pequenos se você conferir o resultado; caso contrário, use o Power Query, a linha de comando ou o Python.
+- **Não abra os dois arquivos com clique duplo no Excel para recortar e colar linhas.** O Excel muda o formato de datas, números longos e zeros à esquerda quando abre um CSV desse jeito, estragando os dados sem avisar.
+- **Não mescle arquivos com números de colunas diferentes sem corrigir os cabeçalhos antes.** O resultado vai ter dados desalinhados.
+
+---
+
+## Checklist depois de mesclar
+
+Antes de importar o arquivo mesclado, confira estes itens:
+
+- [ ] A linha de cabeçalho aparece uma vez só (na linha 1, sem repetição no meio)
+- [ ] O número de linhas está certo: (linhas de file1 − 1 cabeçalho) + (linhas de file2 − 1 cabeçalho) = total de linhas de dados
+- [ ] Não há linha em branco a mais entre as partes de dados dos dois arquivos
+- [ ] Não há SKUs ou Handles duplicados que não deveriam estar (passe o arquivo pelo corretor de CSV)
+- [ ] Estão presentes todas as colunas dos dois arquivos de origem (se você usou DictWriter com estruturas diferentes)
+- [ ] O arquivo está salvo em UTF-8
+- [ ] A extensão é .csv e o conteúdo é texto simples separado por vírgulas
+
+---
+
+## Depois de mesclar: valide antes de importar
+
+Depois de mesclar, passe o arquivo combinado pelo corretor de CSV antes de importar. A mesclagem pode trazer problemas que não existiam em nenhum dos arquivos de origem:
+
+- Uma linha de cabeçalho a mais no meio (detectada pelo corretor como problema de estrutura)
+- SKUs ou Handles duplicados (detectados pela verificação de duplicatas)
+- Codificação inconsistente (detectada pela análise de codificação do corretor)
+
+Envie seu CSV mesclado ao corretor e deixe que ele valide o arquivo inteiro antes de mandá-lo para a sua plataforma.

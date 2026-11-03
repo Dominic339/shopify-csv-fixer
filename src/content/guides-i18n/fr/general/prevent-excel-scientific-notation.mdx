@@ -1,0 +1,145 @@
+---
+title: "Empêcher Excel de convertir les SKU et codes-barres en notation scientifique"
+description: "Empêchez Excel de transformer les SKU, codes EAN et UPC en notation scientifique comme 1.23456E+11. Formatez les colonnes en texte avant de coller, utilisez l'assistant d'import et réparez les fichiers existants."
+keywords: ["excel notation scientifique csv", "sku notation scientifique", "code-barres excel", "zéros en tête csv", "format texte excel", "upc ean excel", "corriger 1.23456e+11", "format nombre excel csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Pourquoi Excel convertit les nombres longs en notation scientifique et supprime les zéros en tête"
+  - "Comment mettre les colonnes au format Texte avant de saisir les données"
+  - "Comment utiliser l'assistant d'import d'Excel pour définir le type des colonnes"
+  - "Comment réparer des valeurs en notation scientifique dans un CSV déjà enregistré"
+  - "L'équivalent de chaque étape dans Google Sheets"
+bestFor: "Vendeurs dont le catalogue contient des SKU, codes-barres (EAN-13, UPC-A), ISBN ou tout code numérique qui doit être conservé à l'identique"
+timeToComplete: "8 minutes"
+---
+
+## Pourquoi cela arrive
+
+Excel est conçu pour les données financières. Quand une valeur ressemble à un nombre, il la convertit en format numérique. Cela pose deux problèmes pour les CSV e-commerce :
+
+1. **Notation scientifique :** un code-barres EAN à 13 chiffres comme `4006381333931` devient `4,00638E+12`. À l'export en CSV, Excel écrit `4,00638E+12` (ou `4.00638E+12`), qui n'est pas un code-barres valide.
+2. **Zéros en tête perdus :** un SKU comme `00714` devient `714`. Un EAN-8 à 8 chiffres comme `01234565` devient `1234565`. La plateforme d'import reçoit une mauvaise valeur.
+
+Ces conversions se font sans prévenir. Vous ne le remarquerez peut-être qu'au moment où l'import échoue ou où le stock est mal compté.
+
+---
+
+## Champs concernés
+
+Tout champ contenant de longues suites de chiffres ou des zéros en tête est à risque :
+
+- **Codes-barres :** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKU** avec zéros en tête (fréquents dans les catalogues de mode et de bricolage)
+- **SKU de variantes** repris des références fabricant
+- **Colonne Variant Barcode** de Shopify
+- **ASIN / FNSKU Amazon** (alphanumériques, mais en partie numériques)
+- **Colonne SKU** de WooCommerce
+
+---
+
+## Prévention : mettre les colonnes au format Texte avant la saisie
+
+Le plus sûr est de mettre la colonne au format **Texte** avant d'y taper ou d'y coller quoi que ce soit.
+
+### Dans Excel (nouvelle feuille)
+
+1. Sélectionnez la ou les colonnes entières qui contiendront des codes-barres ou des SKU (par exemple, cliquez sur la lettre `C` pour sélectionner la colonne C).
+2. Clic droit → **Format de cellule**.
+3. Dans la liste **Catégorie**, choisissez **Texte**.
+4. Cliquez sur **OK**.
+5. Tapez ou collez maintenant vos valeurs. Excel les traite comme du texte et les conserve à l'identique.
+
+> **Important :** mettre une cellule au format Texte *après* avoir saisi un nombre n'annule pas la conversion. Il faut d'abord formater, puis saisir les données. Si vous collez dans une colonne déjà formatée, collez **les valeurs uniquement** (Ctrl+Maj+V ou Collage spécial → Valeurs) pour ne pas importer le format numérique de la source.
+
+### Dans Excel (avec une apostrophe devant)
+
+Une astuce rapide pour des cellules isolées : tapez une apostrophe (`'`) avant le nombre :
+
+```
+'4006381333931
+```
+
+Excel traite comme du texte toute valeur qui commence par `'`. L'apostrophe n'est pas stockée dans la valeur de la cellule ; seul le nombre est enregistré. Cela marche cellule par cellule, mais devient fastidieux pour beaucoup de données.
+
+---
+
+## Réparer des fichiers existants : ouvrir un CSV avec l'assistant d'import
+
+Si vous avez déjà un CSV dont Excel a abîmé les codes-barres, ouvrez-le avec l'assistant d'import plutôt que par un double-clic :
+
+### Excel 2016+ (Récupérer et transformer)
+
+1. Ouvrez un classeur vierge.
+2. Allez dans **Données → À partir d'un fichier texte/CSV**.
+3. Sélectionnez votre fichier CSV.
+4. La fenêtre d'aperçu s'ouvre. Regardez la colonne des codes-barres ou des SKU. Si elle affiche une notation scientifique, le type a été détecté automatiquement comme « Nombre entier ».
+5. Cliquez sur **Transformer les données** (l'éditeur Power Query s'ouvre).
+6. Sélectionnez les colonnes concernées.
+7. Dans l'onglet **Accueil**, dans la liste **Type de données**, choisissez **Texte**. Quand Power Query le demande, cliquez sur **Remplacer l'actuelle** : le changement de type remplace la conversion automatique en nombre et les chiffres d'origine sont conservés.
+8. Fermer et charger.
+9. Réexportez en CSV via **Fichier → Enregistrer sous → CSV UTF-8**.
+
+### Excel (ancien Assistant Importation de texte)
+
+Si l'ancien assistant est disponible :
+
+1. Allez dans **Données → À partir du texte**, ou renommez le fichier de `.csv` en `.txt` et ouvrez-le avec **Fichier → Ouvrir**, ce qui lance l'assistant.
+2. À l'**étape 3** de l'assistant, sélectionnez la colonne et réglez son type de données sur **Texte**.
+3. Terminez l'import.
+
+---
+
+## Réparer la notation scientifique dans un CSV déjà enregistré
+
+Si vous avez déjà un fichier CSV contenant des valeurs comme `4.00638E+12` :
+
+### Option A : ressaisir les valeurs (petits fichiers)
+
+Une fois que le fichier CSV lui-même contient `4.00638E+12`, les chiffres manquants ont disparu du fichier : aucun éditeur de texte ne peut les retrouver. Vous ne pouvez que ressaisir les bonnes valeurs à partir de vos données, ce qui n'est réaliste que pour quelques lignes.
+
+### Option B : reconstruire à partir de la source
+
+Si les données d'origine se trouvent dans une base de données, un PIM ou un fichier fournisseur, réexportez-les sans les ouvrir dans Excel. Beaucoup de portails fournisseurs permettent de télécharger en `.xlsx`. Ouvrez ce fichier, mettez les colonnes au format Texte, puis enregistrez en CSV.
+
+### Option C : utiliser une formule pour revenir au texte
+
+Si le classeur est toujours ouvert dans Excel (ou enregistré en .xlsx), Excel garde peut-être encore le nombre complet, par exemple `4006381333931`, et ne fait que l'afficher en notation scientifique :
+
+1. Ajoutez une colonne auxiliaire.
+2. Utilisez `=TEXTE(A2;"0")` pour convertir le nombre en texte sans notation scientifique.
+3. Copiez la colonne auxiliaire et collez-la en **Valeurs** sur la colonne d'origine.
+4. Supprimez la colonne auxiliaire.
+5. Enregistrez en CSV.
+
+> Cela ne fonctionne que si Excel a encore le nombre complet en mémoire. Si la valeur a été tronquée (plus de 15 chiffres significatifs), la précision est perdue définitivement et vous devez récupérer les données d'origine à leur source.
+
+---
+
+## L'équivalent dans Google Sheets
+
+Google Sheets a le même problème de conversion numérique :
+
+- **Mettre au format Texte brut avant de coller :** sélectionnez la colonne → **Format → Nombre → Texte brut**.
+- **Importer via Fichier → Importer :** dans la boîte d'import, décochez **Convertir le texte en nombres, dates et formules** pour que les codes restent du texte, puis vérifiez que vos codes-barres sont corrects après l'import.
+- **Réparer l'existant :** utilisez `=TEXT(A2; "0")` comme dans Excel.
+
+---
+
+## Exporter sans risque d'Excel vers le CSV
+
+Une fois vos colonnes réparées ou correctement formatées :
+
+1. **Fichier → Enregistrer sous → CSV UTF-8 (délimité par des virgules) (.csv)**.
+2. Excel peut avertir que ce format ne prend pas en charge plusieurs feuilles. Cliquez sur **Oui/Conserver le format actuel**.
+3. **Ne rouvrez pas le CSV dans Excel pour vérifier** : utilisez un éditeur de texte (VS Code, Notepad++) pour confirmer que les codes-barres sont de simples nombres, sans notation scientifique.
+
+---
+
+## Liste de contrôle de prévention
+
+- [ ] Mettre les colonnes de codes-barres et de SKU au format **Texte** avant toute saisie
+- [ ] Utiliser **Données → À partir d'un fichier texte/CSV** (pas le double-clic) pour ouvrir les CSV existants
+- [ ] Choisir le type **Texte** dans l'assistant d'import pour les colonnes qui ressemblent à des nombres
+- [ ] Vérifier le CSV exporté dans un éditeur de texte, pas dans Excel
+- [ ] Dans Google Sheets, mettre les colonnes au format **Texte brut** avant l'import

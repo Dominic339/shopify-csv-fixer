@@ -1,0 +1,145 @@
+---
+title: "Impedir que o Excel converta SKUs e códigos de barras em notação científica"
+description: "Evite que o Excel transforme SKUs, códigos EAN e UPC em notação científica como 1.23456E+11. Formate as colunas como texto antes de colar, use o assistente de importação e corrija arquivos existentes."
+keywords: ["excel notação científica csv", "sku notação científica", "código de barras excel", "zeros à esquerda csv", "formato texto excel", "upc ean excel", "corrigir 1.23456e+11", "formato de número excel csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Por que o Excel converte números longos em notação científica e remove zeros à esquerda"
+  - "Como formatar colunas como Texto antes de digitar os dados"
+  - "Como usar o assistente de importação do Excel para definir o tipo das colunas"
+  - "Como corrigir valores em notação científica num CSV já salvo"
+  - "O equivalente de cada passo no Google Sheets"
+bestFor: "Vendedores com catálogos cheios de SKUs, códigos de barras (EAN-13, UPC-A), ISBN ou qualquer código numérico que precise ser mantido exatamente"
+timeToComplete: "8 minutos"
+---
+
+## Por que isso acontece
+
+O Excel foi feito para dados financeiros. Quando vê um valor que parece número, ele o converte para formato numérico. Isso causa dois problemas em arquivos CSV de e-commerce:
+
+1. **Notação científica:** um código de barras EAN de 13 dígitos como `4006381333931` vira `4,00638E+12`. Ao exportar para CSV, o Excel grava `4,00638E+12` (ou `4.00638E+12`), que não é um código de barras válido.
+2. **Zeros à esquerda perdidos:** um SKU como `00714` vira `714`. Um EAN-8 de 8 dígitos como `01234565` vira `1234565`. A plataforma de importação recebe o valor errado.
+
+Essas conversões acontecem sem aviso. Talvez você só perceba quando a importação falhar ou o estoque não bater.
+
+---
+
+## Campos afetados
+
+Qualquer campo com sequências numéricas longas ou zeros à esquerda está em risco:
+
+- **Códigos de barras:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKUs** com zeros à esquerda (comuns em catálogos de moda e ferragens)
+- **SKUs de variantes** herdados de códigos do fabricante
+- **Coluna Variant Barcode** da Shopify
+- **ASIN / FNSKU da Amazon** (alfanuméricos, mas em parte numéricos)
+- **Coluna SKU** do WooCommerce
+
+---
+
+## Prevenção: formatar as colunas como Texto antes de digitar
+
+O mais seguro é formatar a coluna como **Texto** antes de digitar ou colar qualquer coisa nela.
+
+### No Excel (planilha nova)
+
+1. Selecione a coluna ou as colunas inteiras que vão ter códigos de barras ou SKUs (por exemplo, clique na letra `C` para selecionar a coluna C).
+2. Botão direito → **Formatar Células**.
+3. Na lista **Categoria**, escolha **Texto**.
+4. Clique em **OK**.
+5. Agora digite ou cole os valores. O Excel vai tratá-los como texto e mantê-los exatamente.
+
+> **Importante:** formatar uma célula como Texto *depois* de digitar um número não desfaz a conversão. É preciso formatar primeiro e depois digitar os dados. Se você colar numa coluna já formatada, cole **só os valores** (Ctrl+Shift+V ou Colar Especial → Valores) para não trazer o formato numérico da origem.
+
+### No Excel (com apóstrofo na frente)
+
+Um truque rápido para células isoladas: digite um apóstrofo (`'`) antes do número:
+
+```
+'4006381333931
+```
+
+O Excel trata como texto qualquer valor que comece com `'`. O apóstrofo não é guardado no valor da célula; só o número é salvo. Funciona célula por célula, mas é trabalhoso com muitos dados.
+
+---
+
+## Corrigir arquivos existentes: abrir um CSV com o assistente de importação
+
+Se você já tem um CSV em que o Excel estragou os códigos de barras, use o assistente de importação em vez de abrir com clique duplo:
+
+### Excel 2016+ (Obter e Transformar)
+
+1. Abra uma pasta de trabalho em branco.
+2. Vá em **Dados → De Texto/CSV**.
+3. Selecione o arquivo CSV.
+4. A prévia é aberta. Procure a coluna de códigos de barras ou SKUs. Se ela mostrar notação científica, o tipo foi detectado automaticamente como "Número Inteiro".
+5. Clique em **Transformar Dados** (o Editor do Power Query é aberto).
+6. Selecione as colunas afetadas.
+7. Na guia **Página Inicial**, na lista **Tipo de Dados**, escolha **Texto**. Quando o Power Query perguntar, clique em **Substituir atual**, para que a mudança de tipo substitua a conversão automática para número e os dígitos originais sejam mantidos.
+8. Fechar e Carregar.
+9. Exporte de novo para CSV em **Arquivo → Salvar como → CSV UTF-8**.
+
+### Excel (Assistente de Importação de Texto antigo)
+
+Se você tiver o assistente antigo disponível:
+
+1. Vá em **Dados → De Texto**, ou renomeie o arquivo de `.csv` para `.txt` e abra-o com **Arquivo → Abrir**, o que inicia o assistente.
+2. Na **etapa 3** do assistente, selecione a coluna e defina o tipo de dado como **Texto**.
+3. Conclua a importação.
+
+---
+
+## Corrigir notação científica num CSV já salvo
+
+Se você já tem um arquivo CSV com valores como `4.00638E+12`:
+
+### Opção A: digitar os valores de novo (arquivos pequenos)
+
+Quando o próprio arquivo CSV já contém `4.00638E+12`, os dígitos que faltam não estão mais no arquivo, e nenhum editor de texto consegue recuperá-los. Só dá para digitar os valores certos de novo a partir dos seus registros, o que no máximo vale para poucas linhas.
+
+### Opção B: reconstruir a partir da origem
+
+Se os dados originais estão num banco de dados, num PIM ou num arquivo do fornecedor, exporte de novo sem abrir no Excel. Muitos portais de fornecedores permitem baixar em `.xlsx`. Abra esse arquivo, formate as colunas como Texto e depois salve como CSV.
+
+### Opção C: usar uma fórmula para voltar ao texto
+
+Se a pasta de trabalho ainda está aberta no Excel (ou foi salva como .xlsx), o Excel pode ainda guardar o número inteiro, por exemplo `4006381333931`, e só exibi-lo em notação científica:
+
+1. Crie uma coluna auxiliar.
+2. Use `=TEXTO(A2;"0")` para converter o número em texto sem notação científica.
+3. Copie a coluna auxiliar e cole como **Valores** sobre a original.
+4. Exclua a coluna auxiliar.
+5. Salve como CSV.
+
+> Isso só funciona se o Excel ainda tiver o número completo guardado. Se o valor foi truncado (mais de 15 dígitos significativos), a precisão se perdeu de vez e você precisa buscar os dados originais na fonte.
+
+---
+
+## O equivalente no Google Sheets
+
+O Google Sheets tem o mesmo problema de conversão numérica:
+
+- **Formatar como texto simples antes de colar:** selecione a coluna → **Formatar → Número → Texto simples**.
+- **Importar por Arquivo → Importar:** na caixa de importação, desmarque **Converter texto em números, datas e fórmulas** para que os códigos continuem como texto, e depois confira se os códigos de barras estão certos.
+- **Corrigir o que já existe:** use `=TEXT(A2; "0")` do mesmo jeito que no Excel.
+
+---
+
+## Exportar do Excel para CSV com segurança
+
+Depois de corrigir ou formatar as colunas do jeito certo:
+
+1. **Arquivo → Salvar como → CSV UTF-8 (delimitado por vírgulas) (.csv)**.
+2. O Excel pode avisar que o formato não aceita várias planilhas. Clique em **Sim/Manter o formato atual**.
+3. **Não abra o CSV de novo no Excel para conferir**: use um editor de texto (VS Code, Notepad++) para confirmar que os códigos de barras são números simples, sem notação científica.
+
+---
+
+## Checklist de prevenção
+
+- [ ] Formatar as colunas de códigos de barras e SKUs como **Texto** antes de digitar qualquer dado
+- [ ] Usar **Dados → De Texto/CSV** (e não o clique duplo) para abrir CSVs existentes
+- [ ] Definir o tipo **Texto** no assistente de importação para colunas que parecem números
+- [ ] Conferir o CSV exportado num editor de texto, não no Excel
+- [ ] No Google Sheets, formatar as colunas como **Texto simples** antes de importar

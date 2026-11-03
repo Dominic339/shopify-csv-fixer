@@ -1,0 +1,163 @@
+---
+title: "删除 CSV 文件中多余的列"
+description: "在导入 Shopify、WooCommerce、Etsy、eBay 或 Amazon 之前，如何查找并删除 CSV 文件中多余或意外的列。"
+keywords: ["修复 csv 多余列", "删除 csv 多余列", "csv 导入意外列", "csv 多余列错误", "csv 列太多", "删除 csv 列", "整理 csv 列"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "CSV 文件中为什么会出现多余的列，以及它们为何导致导入错误"
+  - "哪些平台会拒绝多余的列，哪些会直接忽略"
+  - "如何在 Excel 和 Google 表格中查找并删除多余的列"
+  - "如何用 Python 删除大文件中多余的列"
+  - "如何防止以后导出时再出现多余的列"
+bestFor: "因平台不认识的列而遇到导入失败或意外校验错误的卖家"
+timeToComplete: "6 分钟"
+---
+
+## 多余的列是怎么进入 CSV 的
+
+CSV 文件中出现多余的列，常见原因有以下几种：
+
+- **公式或辅助列**：你为了自己计算而添加、从没打算导入的列
+- **备注或内部跟踪列**：例如 `Internal Notes`、`Last Edited By` 或 `Supplier Cost`
+- **导出遗留**：你的库存系统导出的字段比导入平台需要的多
+- **合并了不同平台的文件**：你把两个不同模板的列合在一起，结果出现重复或多余的列
+- **每一行末尾都有逗号**：会在末尾产生一个看不见的空列
+
+---
+
+## 你的平台接受多余的列吗？
+
+不同平台的处理方式不同：
+
+| 平台 | 多余列的处理方式 |
+|---|---|
+| Shopify | 会被悄悄忽略，没有问题 |
+| WooCommerce | 不会被导入：列映射界面会把未知列设为"Do not import" |
+| Etsy | 没有 CSV 上传功能；批量刊登应用有各自的规则 |
+| eBay File Exchange | 无法识别的列可能会引发警告或错误 |
+| Amazon 平面文件 | 模板中没有的列可能会被拒绝 |
+
+如果你用的是 Shopify 或 WooCommerce，多余的列通常没有影响。如果是 eBay、Amazon 或 Etsy 的批量刊登应用，请在上传前删除官方模板中没有的列。
+
+---
+
+## 查找多余的列
+
+**与官方模板比较**：
+
+1. 下载该平台的官方 CSV 模板
+2. 用文本编辑器（不是 Excel）打开你的文件和模板
+3. 比较两个文件的第 1 行（表头）
+4. 你的文件中有、模板中没有的列，就是多余的列
+
+**用 Python 列出多余的列**
+
+```python
+import csv
+
+with open("official_template.csv", encoding="utf-8-sig") as f:
+    expected = set(h.strip() for h in next(csv.reader(f)))
+
+with open("your_file.csv", encoding="utf-8-sig") as f:
+    actual = [h.strip() for h in next(csv.reader(f))]
+
+extras = [col for col in actual if col not in expected]
+print("Extra columns:", extras)
+```
+
+---
+
+## 在 Excel 中删除多余的列
+
+1. 用 Excel 打开 CSV
+2. 点击每个多余列的列标以选中它
+3. 右键 → 删除
+4. 对于多个不相邻的列：按住 Ctrl 依次点击各列的列标，然后右键 → 删除
+5. 另存为 CSV UTF-8（逗号分隔），而不是 XLSX
+
+**如果最后一列是空的，就删除它（行尾逗号留下的空列）**：
+
+1. 按 Ctrl+End 找到最后一个使用过的单元格
+2. 如果最后一列在整个文件中都是空的，选中并删除这一列
+3. 保存为 CSV
+
+---
+
+## 在 Google 表格中删除多余的列
+
+1. 点击列标选中该列
+2. 右键 → 删除列
+3. 对所有多余的列重复以上操作
+4. 文件 → 下载 → 逗号分隔值
+
+---
+
+## 用 Python 删除多余的列（大文件）
+
+对于在电子表格中打开很慢或很不方便的大文件：
+
+```python
+import csv
+
+# 要保留的列（使用平台的准确列名）
+KEEP = [
+    "Handle", "Title", "Vendor", "Type", "Tags",
+    "Variant Price", "Variant SKU", "Variant Inventory Qty",
+    "Image Src", "Published",
+]
+
+# utf-8-sig 可以防止 BOM 粘在第一个列名上
+with open("input.csv", newline="", encoding="utf-8-sig") as f_in, \
+     open("output.csv", "w", newline="", encoding="utf-8") as f_out:
+    reader = csv.DictReader(f_in)
+    # 只写入既在 KEEP 中、又在文件中出现的列
+    fields = [h for h in (reader.fieldnames or []) if h in KEEP]
+    writer = csv.DictWriter(f_out, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for row in reader:
+        writer.writerow(row)
+```
+
+---
+
+## 修复行尾逗号（隐藏的多余列）
+
+每一行末尾的逗号会在第 N+1 个位置产生一个空列。看起来是这样的：
+
+```
+Handle,Title,Price,
+blue-shirt,Blue T-Shirt,19.99,
+```
+
+最后一个逗号后面的空列，就是一个没有名称也没有值的多余列。
+
+**用 Python 修复**：从每一行末尾删除恰好一个逗号。如果把末尾的逗号全部删掉，行尾真正的空单元格也会被删掉。
+
+```python
+with open("input.csv", encoding="utf-8", newline="") as f:
+    lines = f.read().splitlines()
+
+with open("output.csv", "w", encoding="utf-8", newline="") as f:
+    for line in lines:
+        f.write((line[:-1] if line.endswith(",") else line) + "\n")
+```
+
+**在 VS Code 中修复**：在正则表达式模式下使用查找和替换，搜索 `,$` 并替换为空。只有当包括表头在内的每一行都以多余的逗号结尾时才这样做。
+
+---
+
+## 防止以后导出时出现多余的列
+
+- 导出前从电子表格中删除辅助列（或把它们放在另一个工作表中）
+- 从平台的官方模板开始，只添加模板中有的列
+- 如果你使用自定义的库存软件，请把导出设置为只输出平台支持的列
+- 保留一个只含必需列的"干净导出"版表格模板
+
+---
+
+## 用 StriveFormats 自动修复
+
+StriveFormats 会把文件中的列与所选平台要求的列进行比较，找出多余的列，并标出在严格平台上会导致导入错误的列。
+
+[打开 CSV 修复工具](/app) | [查看 CSV 模板](/presets)

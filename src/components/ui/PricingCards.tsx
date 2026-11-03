@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { createClient } from "@/lib/supabase/browser";
 import { PASS_PRICE_LABEL } from "@/lib/plans";
-import { startPassCheckout } from "@/lib/passCheckout";
+import { startPassCheckout, usePassAvailable } from "@/lib/passCheckout";
 
 type SubStatus = {
   signedIn: boolean;
@@ -115,7 +115,8 @@ export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) 
   // Advanced: always show
   const showFree = !activePlan;
   const showBasic = activePlan !== "advanced";
-  const showPass = activePlan !== "advanced";
+  const passAvailable = usePassAvailable();
+  const showPass = activePlan !== "advanced" && passAvailable;
   const cardCount = 1 + Number(showFree) + Number(showBasic) + Number(showPass);
   const gridCols = cardCount >= 4 ? "md:grid-cols-2 lg:grid-cols-4" : cardCount === 3 ? "md:grid-cols-3" : "md:grid-cols-2";
   const passTime = passExpiresAt

@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "Opcje wariantów nie są unikalne",
 "explanation": "Co najmniej dwa warianty tego samego handle mają identyczne wartości opcji.",
-"whyPlatformCares": "Shopify scala warianty o identycznych kombinacjach opcji. Może to spowodować utratę danych albo nadpisanie wariantów.",
+"whyPlatformCares": "Shopify odrzuca produkt, którego warianty mają tę samą kombinację opcji, więc import tego produktu się nie powiedzie.",
 "howToFix": "Niech każda kombinacja opcji wariantu będzie unikalna (albo usuń duplikaty)."
 },
 "shopify/missing_option1_for_variant_data": {

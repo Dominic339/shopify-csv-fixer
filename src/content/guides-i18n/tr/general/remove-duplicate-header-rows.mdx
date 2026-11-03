@@ -1,0 +1,170 @@
+---
+title: "CSV dosyalarındaki yinelenen başlık satırlarını kaldırma"
+description: "CSV dışa aktarımlarının ortasında tekrar eden başlık satırlarını bulup silin. Yaygın nedenlerini öğrenin, Excel ve Google E-Tablolar filtreleriyle tespit edin ve sonraki dışa aktarımlarda önleyin."
+keywords: ["yinelenen başlık satırları csv", "tekrar eden başlıklar csv", "csv ortasında başlık", "csv başlıklarını kaldırma", "csv içe aktarma yinelenen satırlar", "shopify csv başlık", "woocommerce csv başlık"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Dışa aktarılan CSV'lerde neden yinelenen başlık satırları oluştuğu"
+  - "Excel ve Google E-Tablolar filtreleriyle bunları nasıl bulacağınız"
+  - "Filtreleme, sıralama ve silme ile adım adım nasıl kaldıracağınız"
+  - "Büyük dosyalar için metin düzenleyiciyi nasıl kullanacağınız"
+  - "Sonraki dışa aktarımlarda yinelenen başlıkları nasıl önleyeceğiniz"
+bestFor: "CSV'leri elle birleştiren, toplu dışa aktarma araçları kullanan veya tedarikçilerden ortasında başlıkları tekrar eden CSV'ler alan satıcılar"
+timeToComplete: "8 dakika"
+---
+
+## Yinelenen başlık satırları nedir?
+
+Yinelenen başlık satırı, CSV'nizin ilk satırının (sütun adlarının) veri bölümünde bir yerde yeniden görünmesidir. Örneğin:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← tekrar eden başlık satırı
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Bir içe aktarma aracı bir veri satırında `Handle` ile karşılaştığında, o satırı ürün olarak okuyamaz. Çoğu platform satırı sessizce atlar ya da biçim hatası verir. Bazıları onu başarısız satır olarak sayar.
+
+---
+
+## Yinelenen başlıklar neden oluşur
+
+### Birden fazla dışa aktarım dosyasını birleştirmek
+
+En yaygın neden, iki CSV'yi Excel'de veya Google E-Tablolar'da kopyalayıp yapıştırarak birleştirmektir. İkinci dosyanın başlık satırı birleşik dosyanın ortasına düşer.
+
+### Sayfalara bölünmüş dışa aktarımlar
+
+Bazı platformlar verileri sayfa sayfa dışa aktarır (örneğin dosya başına 500 satır). Tüm sayfaları indirip birleştirirseniz her dosyanın başlık satırı da eklenir.
+
+### Zamanlanmış raporlama sistemleri
+
+Her gün bir CSV'ye satır ekleyen otomatik sistemler bazen eklenen her bloğun başında başlığı tekrarlar.
+
+### Excel'de "Tümünü Yenile" veya Power Query dışa aktarımları
+
+Excel'de veri bağlantılarını yenilemek, sorgu yanlış ayarlanmışsa başlık satırını yeniden ekleyebilir.
+
+---
+
+## Yinelenen başlık satırlarını bulma
+
+### Excel'de
+
+1. CSV'nizi açın (biçimi korumak için çift tıklayarak değil, **Veri → Metinden/CSV'den** ile).
+2. Verilerinizdeki herhangi bir hücreye tıklayın.
+3. Filtreleri açmak için **Veri → Filtre**'ye gidin.
+4. **Handle** sütunundaki (veya ilk sütununuzdaki) oka tıklayın.
+5. Arama kutusuna başlık adını tam olarak yazın (örneğin `Handle`).
+6. Filtre sonucunda satır görünüyorsa, bunlar yinelenen başlık satırlarıdır.
+
+### Google E-Tablolar'da
+
+1. Tüm verileri seçin (**Ctrl+A**).
+2. **Veri → Filtre oluştur**'a gidin.
+3. İlk sütundaki oka tıklayın.
+4. Filtrenin metin kutusuna başlık adını yazın (örneğin `Handle`).
+5. Bu değeri gösteren tüm satırlar yinelenen başlıklardır.
+
+### Formülle işaretleme
+
+Boş bir sütunda, yinelenenleri işaretlemek için her satırın yanına şu formülü ekleyin:
+
+```
+=EĞER(A2="Handle";"YİNELENEN BAŞLIK";"")
+```
+
+`"Handle"` yerine ilk sütununuzun gerçek adını yazın. Tüm örnekleri bulmak için `YİNELENEN BAŞLIK` değerine göre filtreleyin.
+
+---
+
+## Yinelenen başlık satırlarını kaldırma
+
+### Yöntem 1: filtrele ve sil (Excel / E-Tablolar)
+
+1. İlk sütunu yalnızca başlık değerini (örneğin `Handle`) içeren satırları gösterecek şekilde filtreleyin.
+2. Görünen tüm filtrelenmiş satırları seçin (ilk sonucun satır numarasına tıklayın, sonuncusuna Shift+tıklayın).
+3. Sağ tıklayın → **Satırları Sil**.
+4. Filtreyi kaldırın (Veri → Filtreyi Temizle veya Filtre → Kapat).
+5. Verilerinizin eksiksiz olduğunu kontrol edin.
+
+### Yöntem 2: sırala, sil, geri sırala (Excel)
+
+Sıralama tüm yinelenen başlık satırlarını bir araya getirir, ancak ürünlerinizin sırasını değiştirir; bu yüzden ardından her zaman geri sıralayın. Shopify, WooCommerce ve eBay dosyaları satır sırasına bağlıdır.
+
+1. Özgün sırayı korumak için satır numaralarını (1, 2, 3...) içeren bir yardımcı sütun ekleyin.
+2. İlk sütuna göre A'dan Z'ye sıralayın.
+3. Yinelenen başlık satırları artık, `Handle` değerinin değerleriniz arasında alfabetik olarak düştüğü yerde yan yanadır (Excel sıralaması büyük/küçük harf ayırt etmez, bu yüzden onları H ile başlayan değerler arasında arayın).
+4. Bu satır bloğunu seçip silin.
+5. Özgün sırayı geri getirmek için yardımcı sütuna göre sıralayın.
+6. Yardımcı sütunu silin.
+
+### Yöntem 3: metin düzenleyici (büyük dosyalar)
+
+Excel için fazla büyük dosyalarda (yaklaşık 100.000 satırın üzeri) VS Code veya Notepad++ kullanın:
+
+**VS Code:**
+1. Dosyayı açın.
+2. **Ctrl+H** tuşlarına basın (Bul ve değiştir).
+3. **Normal ifade** modunu açın (`.*` simgesi).
+4. Bul alanına şunu girin: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (gerçek başlıklarınızla değiştirin, gerekirse kaçış karakterleriyle)
+5. Değiştir alanını boş bırakın.
+6. **Tümünü Değiştir**'e tıklayın.
+7. Tüm yinelenenleri kaldırdıktan sonra başlığı elle ilk satır olarak geri ekleyin.
+
+> Normal ifadeyle değiştirmede dikkatli olun. Özgün dosyayı her zaman yedek olarak saklayın ve değiştirmeden sonra başlığın tam olarak bir kez göründüğünü kontrol edin.
+
+**Notepad++ (Windows):**
+1. Dosyayı açın → **Ara → Değiştir** (Ctrl+H).
+2. **Düzenli ifade** modunu seçin.
+3. Yukarıdaki VS Code ile aynı deseni kullanın.
+4. Tümünü değiştirin, ardından başlık satırını elle geri ekleyin.
+
+---
+
+## Yinelenen başlıkları kaldırdıktan sonra
+
+Dosya temizlendiğinde:
+
+1. Başlığın tam olarak bir kez, 1. satırda göründüğünü kontrol edin.
+2. Satırlarınızı sayın. Toplam, özgün satır sayısından kaldırılan yinelenen başlık sayısının çıkarılmasına eşit olmalıdır.
+3. Verilerin eksiksiz olduğunu doğrulamak için yinelenenlerin bulunduğu yerlerin yakınındaki birkaç satırı kontrol edin.
+4. **CSV UTF-8** olarak kaydedin (Excel'de: **Dosya → Farklı Kaydet → CSV UTF-8**).
+
+---
+
+## Sonraki birleştirmelerde yinelenen başlıkları önleme
+
+Birden fazla CSV'yi elle birleştirirken:
+
+1. İlk dosyayı ("ana" dosyanızı) Excel'de veya E-Tablolar'da açın.
+2. Her ek dosyayı açın.
+3. Verilerini kopyalamadan önce ek dosyanın **başlık satırını silin**.
+4. Yalnızca veri satırlarını kopyalayın.
+5. Bunları ana dosyanın sonuna yapıştırın.
+
+CSV birleştirmeyi betiklerle otomatikleştiriyorsanız, ilkinden sonraki her dosyanın başlık satırını her zaman atlayın. `csv.DictReader` her dosyanın başlığını sütun adları olarak okur, bu yüzden başlık hiçbir zaman verilere karışmaz:
+
+```python
+# Python örneği: tüm dosyaların aynı sütunlara sahip olduğunu varsayar
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig BOM'u kaldırır; aksi halde BOM ilk sütunun adını değiştirirdi
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Dosyaların sütunları farklıysa, iki CSV dosyasını birleştirme rehberindeki betiği kullanın; o betik tüm sütunları korur.

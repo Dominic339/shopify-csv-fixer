@@ -1,0 +1,145 @@
+---
+title: "Excel'in SKU ve barkodları bilimsel gösterime çevirmesini önleme"
+description: "Excel'in SKU, EAN ve UPC kodlarını 1.23456E+11 gibi bilimsel gösterime çevirmesini engelleyin. Yapıştırmadan önce sütunları metin olarak biçimlendirin, içe aktarma sihirbazını kullanın ve mevcut dosyaları onarın."
+keywords: ["excel bilimsel gösterim csv", "sku bilimsel gösterim", "barkod excel", "baştaki sıfırlar csv", "excel metin biçimi", "upc ean excel", "1.23456e+11 düzeltme", "excel sayı biçimi csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Excel'in uzun sayıları neden bilimsel gösterime çevirdiği ve baştaki sıfırları neden sildiği"
+  - "Veri girmeden önce sütunları Metin olarak nasıl biçimlendireceğiniz"
+  - "Sütun türlerini ayarlamak için Excel içe aktarma sihirbazını nasıl kullanacağınız"
+  - "Kaydedilmiş bir CSV'deki bilimsel gösterim değerlerini nasıl düzelteceğiniz"
+  - "Her adımın Google E-Tablolar'daki karşılığı"
+bestFor: "SKU'lar, barkodlar (EAN-13, UPC-A), ISBN numaraları veya tam olarak korunması gereken başka sayısal kodlar içeren ürün kataloglarını yöneten satıcılar"
+timeToComplete: "8 dakika"
+---
+
+## Bu neden olur
+
+Excel finansal veriler için tasarlanmıştır. Bir hücre değeri sayı gibi görünüyorsa onu sayı biçimine çevirir. Bu, e-ticaret CSV dosyalarında iki soruna yol açar:
+
+1. **Bilimsel gösterim:** `4006381333931` gibi 13 haneli bir EAN barkodu `4,00638E+12` olur. CSV'ye dışa aktardığınızda Excel `4,00638E+12` (veya `4.00638E+12`) yazar ve bu geçerli bir barkod değildir.
+2. **Kaybolan baştaki sıfırlar:** `00714` gibi bir SKU `714` olur. `01234565` gibi 8 haneli bir EAN-8 `1234565` olur. İçe aktarma platformu yanlış değeri görür.
+
+Bu dönüşümler sessizce gerçekleşir. İçe aktarma başarısız olana veya stok yanlış sayılana kadar fark etmeyebilirsiniz.
+
+---
+
+## Etkilenen alanlar
+
+Uzun sayı dizileri veya baştaki sıfırlar içeren her alan risk altındadır:
+
+- **Barkodlar:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **Baştaki sıfırları olan SKU'lar** (moda ve hırdavat kataloglarında yaygındır)
+- **Üretici parça numaralarından alınan varyant SKU'ları**
+- **Shopify'ın Variant Barcode sütunu**
+- **Amazon ASIN / FNSKU** (alfanümerik ama kısmen sayısal)
+- **WooCommerce'in SKU sütunu**
+
+---
+
+## Önleme: veri girmeden önce sütunları Metin olarak biçimlendirin
+
+En güvenli yöntem, sütuna herhangi bir şey yazmadan veya yapıştırmadan önce sütunu **Metin** olarak biçimlendirmektir.
+
+### Excel'de (yeni sayfa)
+
+1. Barkod veya SKU içerecek sütunun ya da sütunların tamamını seçin (örneğin C sütununu seçmek için `C` sütun harfine tıklayın).
+2. Sağ tıklayın → **Hücreleri Biçimlendir**.
+3. **Kategori** listesinden **Metin**'i seçin.
+4. **Tamam**'a tıklayın.
+5. Şimdi değerlerinizi yazın veya yapıştırın. Excel bunları metin olarak ele alır ve aynen korur.
+
+> **Önemli:** bir hücreyi sayı girdikten *sonra* Metin olarak biçimlendirmek dönüşümü geri almaz. Önce biçimlendirmeli, sonra veriyi girmelisiniz. Önceden biçimlendirilmiş bir sütuna yapıştırıyorsanız, kaynaktan sayı biçimi gelmemesi için **yalnızca değerleri** yapıştırın (Ctrl+Shift+V veya Özel Yapıştır → Değerler).
+
+### Excel'de (başa kesme işareti koyarak)
+
+Tek tek hücreler için hızlı bir yol: sayıdan önce bir kesme işareti (`'`) yazın:
+
+```
+'4006381333931
+```
+
+Excel `'` ile başlayan her değeri metin olarak ele alır. Kesme işareti hücre değerinde saklanmaz; yalnızca sayı kaydedilir. Bu hücre başına çalışır ama toplu veriler için zahmetlidir.
+
+---
+
+## Mevcut dosyaları düzeltme: bir CSV'yi içe aktarma sihirbazıyla açma
+
+Excel'in barkodlarını bozduğu bir CSV'niz zaten varsa, dosyayı çift tıklayarak açmak yerine içe aktarma sihirbazını kullanın:
+
+### Excel 2016+ (Al ve Dönüştür)
+
+1. Boş bir çalışma kitabı açın.
+2. **Veri → Metinden/CSV'den**'e gidin.
+3. CSV dosyanızı seçin.
+4. Önizleme penceresi açılır. Barkod veya SKU sütununa bakın. Bilimsel gösterim görüyorsanız tür otomatik olarak "Tam Sayı" olarak algılanmıştır.
+5. **Verileri Dönüştür**'e tıklayın (Power Query Düzenleyicisi açılır).
+6. Etkilenen sütunları seçin.
+7. **Giriş** sekmesinde **Veri Türü** listesinden **Metin**'i seçin. Power Query sorduğunda, tür değişikliğinin otomatik sayı dönüşümünün yerini alması ve özgün rakamların korunması için **Geçerli olanı değiştir**'e tıklayın.
+8. Kapat ve Yükle.
+9. **Dosya → Farklı Kaydet → CSV UTF-8** ile yeniden CSV'ye dışa aktarın.
+
+### Excel (eski Metin İçeri Aktarma Sihirbazı)
+
+Eski sihirbaz kullanılabiliyorsa:
+
+1. **Veri → Metinden**'e gidin ya da dosyanın uzantısını `.csv`'den `.txt`'ye değiştirip **Dosya → Aç** ile açın; bu sihirbazı başlatır.
+2. Sihirbazın **3. adımında** sütunu seçin ve veri türünü **Metin** olarak ayarlayın.
+3. İçe aktarmayı tamamlayın.
+
+---
+
+## Kaydedilmiş bir CSV'deki bilimsel gösterimi düzeltme
+
+Elinizde `4.00638E+12` gibi değerler içeren bir CSV dosyası zaten varsa:
+
+### Seçenek A: değerleri yeniden yazma (küçük dosyalar)
+
+CSV dosyasının kendisi `4.00638E+12` içerdiğinde eksik rakamlar dosyada artık yoktur ve hiçbir metin düzenleyici onları geri getiremez. Doğru değerleri yalnızca kendi kayıtlarınızdan yeniden yazabilirsiniz; bu da en fazla birkaç satır için pratiktir.
+
+### Seçenek B: kaynaktan yeniden oluşturma
+
+Özgün veriler bir veritabanında, PIM'de veya tedarikçi dosyasındaysa, Excel'de açmadan yeniden dışa aktarın. Birçok tedarikçi portalı `.xlsx` olarak indirmeye izin verir. Onu açın, sütunları Metin olarak biçimlendirin ve ardından CSV olarak kaydedin.
+
+### Seçenek C: bir formülle geri dönüştürme
+
+Çalışma kitabı hâlâ Excel'de açıksa (veya .xlsx olarak kaydedildiyse), Excel tam sayıyı, örneğin `4006381333931`, hâlâ tutuyor ve yalnızca bilimsel gösterimle görüntülüyor olabilir:
+
+1. Bir yardımcı sütun ekleyin.
+2. Sayıyı bilimsel gösterim olmadan metne çevirmek için `=METNEÇEVİR(A2;"0")` kullanın.
+3. Yardımcı sütunu kopyalayın ve özgün sütunun üzerine **Değerler** olarak yapıştırın.
+4. Yardımcı sütunu silin.
+5. CSV olarak kaydedin.
+
+> Bu yalnızca Excel tam sayıyı hâlâ saklıyorsa işe yarar. Değer kesildiyse (15'ten fazla anlamlı basamak), hassasiyet kalıcı olarak kaybolmuştur ve özgün verileri kaynağından almanız gerekir.
+
+---
+
+## Google E-Tablolar'daki karşılıkları
+
+Google E-Tablolar'da da aynı sayı dönüşümü sorunu vardır:
+
+- **Yapıştırmadan önce düz metin olarak biçimlendirin:** sütunu seçin → **Biçim → Sayı → Düz metin**.
+- **Dosya → İçe aktar ile içe aktarın:** içe aktarma penceresinde, kodların metin olarak kalması için **Metni sayılara, tarihlere ve formüllere dönüştür** seçeneğinin işaretini kaldırın, sonra barkodlarınızın doğru göründüğünü kontrol edin.
+- **Mevcut değerleri düzeltin:** Excel'deki gibi `=TEXT(A2; "0")` kullanın.
+
+---
+
+## Excel'den CSV'ye güvenle dışa aktarma
+
+Sütunlarınızı düzelttikten veya doğru biçimlendirdikten sonra:
+
+1. **Dosya → Farklı Kaydet → CSV UTF-8 (Virgülle ayrılmış) (.csv)**.
+2. Excel dosya biçiminin birden fazla sayfayı desteklemediği konusunda uyarabilir. **Evet/Geçerli Biçimi Koru**'ya tıklayın.
+3. **Kontrol etmek için CSV'yi Excel'de yeniden açmayın**: barkod değerlerinin bilimsel gösterim değil düz sayılar olduğunu doğrulamak için bir metin düzenleyici (VS Code, Notepad++) kullanın.
+
+---
+
+## Önleme kontrol listesi
+
+- [ ] Veri girmeden önce barkod ve SKU sütunlarını **Metin** olarak biçimlendirin
+- [ ] Mevcut CSV'leri açmak için (çift tıklama yerine) **Veri → Metinden/CSV'den**'i kullanın
+- [ ] İçe aktarma sihirbazında sayıya benzeyen sütunların türünü **Metin** olarak ayarlayın
+- [ ] Dışa aktarılan CSV'yi Excel'de değil, bir metin düzenleyicide doğrulayın
+- [ ] Google E-Tablolar kullanıyorsanız içe aktarmadan önce sütunları **Düz metin** olarak ayarlayın

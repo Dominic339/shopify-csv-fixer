@@ -304,6 +304,7 @@
     "faq": "자주 묻는 질문",
     "presetFormats": "사전 설정 형식",
     "checksCount": "검사 {count}개",
+    "checksShared": "WooCommerce 프리셋끼리, eBay 프리셋끼리 검사를 공유하므로 아래 개수는 겹칩니다. 홈페이지 합계는 각 검사를 한 번만 셉니다.",
     "variationsFixer": "{platform} 옵션 수정 도구",
     "englishContent": "아래 자세한 설명은 영어로 되어 있습니다.",
     "checksTitle": "이 프리셋이 검사하는 항목",
@@ -522,6 +523,7 @@
     "readyFor": "{platform} 가져오기 준비 완료",
     "readyGeneric": "내보내기 준비 완료",
     "readyDesc": "차단 문제가 없습니다. 수정된 파일을 내보내서 가져오세요.",
+    "readyDescErrors": "가져오기를 막는 문제는 없지만 오류가 {count}개 남아 있습니다. 가져오기를 막지는 않으니 아래에서 검토하세요.",
     "blockedTitle": "{count}개 문제가 가져오기를 차단합니다",
     "blockedTitleOne": "1개 문제가 가져오기를 차단합니다",
     "blockedDesc": "가져오기 전에 아래에서 수정하거나, 그대로 내보낸 뒤 스프레드시트에서 마무리하세요.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "자동 수정 1개 적용됨",
     "moreInLog": "…외 {count}개. 전체 목록은 수정 로그를 다운로드하세요.",
     "advancedChecks": "고급 검사",
-    "importConfidenceHelp": "파일이 얼마나 안전하게 가져와질지에 대한 추정치입니다. 차단 문제, 덮어쓰기 위험, 빈 행이 있으면 낮아집니다.",
+    "importConfidenceHelp": "검증 점수는 발견된 모든 문제를 셉니다. 가져오기 신뢰도는 파일이 얼마나 안전하게 가져와질지 추정하며, 차단 문제, 덮어쓰기 위험, 빈 행이 있으면 낮아집니다.",
     "simulateHelp": "이 파일을 가져올 때 플랫폼이 병합, 건너뛰기, 거부할 항목을 추정합니다.",
     "simPass": "가져오기 시뮬레이션: 통과",
     "simFail": "가져오기 시뮬레이션: 실패",
@@ -770,7 +772,7 @@
     "billingUnavailable": "청구 서비스가 일시적으로 이용 불가합니다. 나중에 다시 시도해 주세요.",
     "starting": "시작 중…",
     "freeBullet1": "CSV 파일 수정 및 내보내기",
-    "freeBullet2": "월 3회 내보내기 (기기당)",
+    "freeBullet2": "100행이 넘는 파일은 기기당 월 3회 내보내기",
     "freeBullet3": "모든 기본 제공 형식에 액세스",
     "freeBullet4": "계정 불필요",
     "basicBullet1": "월 100회 내보내기",
@@ -796,7 +798,7 @@
     "buyPass": "패스 구매",
     "signInToBuy": "로그인하고 구매",
     "passActiveUntil": "{time}까지 사용 가능",
-    "freeBulletSmall": "100행 이하 파일은 언제나 무료"
+    "freeBulletSmall": "100행까지의 파일은 항상 무료이며 내보내기 횟수를 쓰지 않습니다"
   },
   "auth": {
     "loginTitle": "로그인",

@@ -122,10 +122,10 @@ export const SHOPIFY_ISSUE_META: IssueMetaMap = {
     code: "shopify/options_not_unique",
     title: "Variant options not unique",
     explanation: "Two or more variants under the same handle share identical option values.",
-    whyPlatformCares: "Why this matters: Shopify merges variants with identical option combinations. This may cause data loss or variant overwrites.",
+    whyPlatformCares: "Shopify rejects a product whose variants share the same option combination, so the import fails for that product.",
     howToFix: "Make each variant option combination unique (or remove duplicates).",
     category: "variant",
-    blocking: false,
+    blocking: true,
     autoFixable: false,
   },
 

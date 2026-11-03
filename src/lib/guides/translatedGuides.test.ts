@@ -21,7 +21,7 @@ function shape(mdx: string) {
   };
 }
 
-/** Closing "**" that sit between CJK punctuation and a letter, so Markdown won't close the bold. */
+/** Closing "**" that sit between punctuation and a letter (e.g. "（…）**を" or "(…)**을"), so Markdown won't close the bold. */
 function badBoldClosers(mdx: string): string[] {
   const bad: string[] = [];
   for (const line of mdx.split("\n")) {
@@ -30,7 +30,7 @@ function badBoldClosers(mdx: string): string[] {
       if (i % 2 === 0) return; // an opener
       const before = line[m.index - 1] ?? "";
       const after = line[m.index + 2] ?? "";
-      if (/[：、。！？）」]/.test(before) && after && !/[\s\p{P}]/u.test(after)) bad.push(line);
+      if (/\p{P}/u.test(before) && after && !/[\s\p{P}\p{S}]/u.test(after)) bad.push(line);
     });
   }
   return bad;

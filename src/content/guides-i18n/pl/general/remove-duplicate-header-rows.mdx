@@ -1,0 +1,170 @@
+---
+title: "Usuwanie powtórzonych wierszy nagłówka z plików CSV"
+description: "Znajdź i usuń powtórzone wiersze nagłówka w środku eksportów CSV. Poznaj typowe przyczyny, wykryj je filtrami w Excelu i Arkuszach Google i zapobiegaj im w kolejnych eksportach."
+keywords: ["powtórzone wiersze nagłówka csv", "zduplikowane nagłówki csv", "nagłówek w środku csv", "usuwanie nagłówków csv", "zduplikowane wiersze import csv", "nagłówki csv shopify", "nagłówki csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Dlaczego w eksportowanych plikach CSV pojawiają się powtórzone wiersze nagłówka"
+  - "Jak je wykryć filtrami w Excelu i Arkuszach Google"
+  - "Jak usunąć je krok po kroku przez filtrowanie, sortowanie i usuwanie"
+  - "Jak użyć edytora tekstu przy dużych plikach"
+  - "Jak zapobiegać powtórzonym nagłówkom w przyszłych eksportach"
+bestFor: "Sprzedawców, którzy łączą pliki CSV ręcznie, korzystają z narzędzi do eksportu zbiorczego lub dostają od dostawców pliki CSV z nagłówkami powtórzonymi w środku"
+timeToComplete: "8 minut"
+---
+
+## Czym są powtórzone wiersze nagłówka?
+
+Powtórzony wiersz nagłówka pojawia się, gdy pierwszy wiersz pliku CSV (nazwy kolumn) występuje ponownie gdzieś w części z danymi. Na przykład:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← powtórzony wiersz nagłówka
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Gdy narzędzie importu trafi na `Handle` w wierszu danych, nie może odczytać go jako produktu. Większość platform pomija taki wiersz bez ostrzeżenia albo zgłasza błąd formatu. Niektóre liczą go jako wiersz z błędem.
+
+---
+
+## Skąd się biorą powtórzone nagłówki
+
+### Łączenie kilku wyeksportowanych plików
+
+Najczęstsza przyczyna to łączenie dwóch plików CSV przez kopiowanie i wklejanie w Excelu lub Arkuszach Google. Wiersz nagłówka drugiego pliku ląduje w środku połączonego pliku.
+
+### Eksporty podzielone na strony
+
+Niektóre platformy eksportują dane stronami (np. 500 wierszy na plik). Jeśli pobierzesz wszystkie strony i połączysz je, wiersz nagłówka każdego pliku zostanie dołączony razem z danymi.
+
+### Zaplanowane systemy raportowe
+
+Automatyczne systemy, które codziennie dopisują wiersze do pliku CSV, czasem powtarzają nagłówek na początku każdego dopisanego bloku.
+
+### „Odśwież wszystko” lub eksporty Power Query w Excelu
+
+Odświeżenie połączeń danych w Excelu może ponownie wstawić wiersz nagłówka, jeśli zapytanie jest źle skonfigurowane.
+
+---
+
+## Wykrywanie powtórzonych wierszy nagłówka
+
+### W Excelu
+
+1. Otwórz plik CSV (**Dane → Z pliku tekstowego/CSV**, a nie dwukrotnym kliknięciem, aby zachować formatowanie).
+2. Kliknij dowolną komórkę z danymi.
+3. Wybierz **Dane → Filtruj**, aby włączyć filtry.
+4. Kliknij strzałkę w kolumnie **Handle** (lub w swojej pierwszej kolumnie).
+5. W polu wyszukiwania wpisz dokładnie nazwę nagłówka (np. `Handle`).
+6. Jeśli w wyniku filtrowania pojawią się wiersze, są to powtórzone wiersze nagłówka.
+
+### W Arkuszach Google
+
+1. Zaznacz wszystkie dane (**Ctrl+A**).
+2. Wybierz **Dane → Utwórz filtr**.
+3. Kliknij strzałkę w pierwszej kolumnie.
+4. W polu tekstowym filtra wpisz nazwę nagłówka (np. `Handle`).
+5. Wszystkie wiersze z tą wartością to powtórzone nagłówki.
+
+### Oznaczanie formułą
+
+W pustej kolumnie dodaj obok każdego wiersza tę formułę, aby oznaczyć duplikaty:
+
+```
+=JEŻELI(A2="Handle";"POWTÓRZONY NAGŁÓWEK";"")
+```
+
+Zastąp `"Handle"` prawdziwą nazwą swojej pierwszej kolumny. Odfiltruj `POWTÓRZONY NAGŁÓWEK`, aby znaleźć wszystkie wystąpienia.
+
+---
+
+## Usuwanie powtórzonych wierszy nagłówka
+
+### Metoda 1: filtrowanie i usuwanie (Excel / Arkusze)
+
+1. Odfiltruj pierwszą kolumnę tak, aby pokazywała tylko wiersze z wartością nagłówka (np. `Handle`).
+2. Zaznacz wszystkie widoczne odfiltrowane wiersze (kliknij numer wiersza pierwszego wyniku i Shift+kliknij ostatni).
+3. Prawy przycisk myszy → **Usuń wiersze**.
+4. Wyłącz filtr (Dane → Wyczyść filtr albo Filtr → Wyłącz).
+5. Sprawdź, czy dane są kompletne.
+
+### Metoda 2: sortowanie, usuwanie i przywracanie kolejności (Excel)
+
+Sortowanie zbiera wszystkie powtórzone wiersze nagłówka w jednym miejscu, ale zmienia kolejność produktów, więc zawsze przywróć ją potem. Pliki dla Shopify, WooCommerce i eBay zależą od kolejności wierszy.
+
+1. Dodaj kolumnę pomocniczą z numerami wierszy (1, 2, 3...), aby zachować pierwotną kolejność.
+2. Posortuj według pierwszej kolumny od A do Z.
+3. Powtórzone wiersze nagłówka stoją teraz obok siebie, tam gdzie `Handle` wypada alfabetycznie wśród Twoich wartości (sortowanie w Excelu nie rozróżnia wielkości liter, więc szukaj ich wśród wartości zaczynających się na H).
+4. Zaznacz ten blok wierszy i usuń go.
+5. Posortuj według kolumny pomocniczej, aby przywrócić pierwotną kolejność.
+6. Usuń kolumnę pomocniczą.
+
+### Metoda 3: edytor tekstu (duże pliki)
+
+W przypadku plików zbyt dużych dla Excela (powyżej około 100 000 wierszy) użyj VS Code lub Notepad++:
+
+**VS Code:**
+1. Otwórz plik.
+2. Naciśnij **Ctrl+H** (Znajdź i zamień).
+3. Włącz tryb **wyrażeń regularnych** (ikona `.*`).
+4. W polu Znajdź wpisz: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (zastąp swoimi prawdziwymi nagłówkami, w razie potrzeby z escapowaniem)
+5. Pole Zamień zostaw puste.
+6. Kliknij **Zamień wszystko**.
+7. Po usunięciu wszystkich duplikatów dodaj ręcznie nagłówek z powrotem jako pierwszy wiersz.
+
+> Uważaj przy zamianach z użyciem wyrażeń regularnych. Zawsze zachowaj oryginalny plik jako kopię zapasową i sprawdź po zamianie, czy nagłówek występuje dokładnie raz.
+
+**Notepad++ (Windows):**
+1. Otwórz plik → **Wyszukiwanie → Zamień** (Ctrl+H).
+2. Wybierz tryb **Wyrażenia regularne**.
+3. Użyj tego samego wzorca co w VS Code powyżej.
+4. Zamień wszystko, a potem ręcznie dodaj z powrotem wiersz nagłówka.
+
+---
+
+## Po usunięciu powtórzonych nagłówków
+
+Gdy plik jest już czysty:
+
+1. Sprawdź, czy nagłówek występuje dokładnie raz, w wierszu 1.
+2. Policz wiersze. Liczba powinna być równa pierwotnej liczbie wierszy minus liczba usuniętych powtórzonych nagłówków.
+3. Sprawdź wyrywkowo kilka wierszy w pobliżu miejsc, gdzie były duplikaty, aby potwierdzić, że dane są kompletne.
+4. Zapisz jako **CSV UTF-8** (w Excelu: **Plik → Zapisz jako → CSV UTF-8**).
+
+---
+
+## Zapobieganie powtórzonym nagłówkom przy kolejnym łączeniu
+
+Gdy łączysz kilka plików CSV ręcznie:
+
+1. Otwórz pierwszy plik (swój plik „bazowy”) w Excelu lub Arkuszach.
+2. Otwórz każdy dodatkowy plik.
+3. **Usuń wiersz nagłówka** z dodatkowego pliku, zanim skopiujesz jego dane.
+4. Skopiuj tylko wiersze danych.
+5. Wklej je na końcu pliku bazowego.
+
+Jeśli automatyzujesz łączenie plików CSV skryptami, zawsze pomijaj wiersz nagłówka każdego pliku po pierwszym. `csv.DictReader` odczytuje nagłówek każdego pliku jako nazwy kolumn, więc nigdy nie trafia on do danych:
+
+```python
+# Przykład w Pythonie: zakłada, że wszystkie pliki mają te same kolumny
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig usuwa BOM, który inaczej zmieniłby nazwę pierwszej kolumny
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Jeśli pliki mają różne kolumny, użyj skryptu z poradnika o łączeniu dwóch plików CSV, który zachowuje wszystkie kolumny.

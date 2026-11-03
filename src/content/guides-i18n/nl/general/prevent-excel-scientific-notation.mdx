@@ -1,0 +1,145 @@
+---
+title: "Voorkomen dat Excel SKU's en barcodes omzet naar wetenschappelijke notatie"
+description: "Voorkom dat Excel SKU's, EAN- en UPC-codes omzet naar wetenschappelijke notatie zoals 1.23456E+11. Zet kolommen op tekst voordat je plakt, gebruik de importwizard en herstel bestaande bestanden."
+keywords: ["excel wetenschappelijke notatie csv", "sku wetenschappelijke notatie", "barcode excel", "voorloopnullen csv", "excel tekstnotatie", "upc ean excel", "1.23456e+11 oplossen", "excel getalnotatie csv"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Waarom Excel lange getallen omzet naar wetenschappelijke notatie en voorloopnullen weghaalt"
+  - "Hoe je kolommen op Tekst zet voordat je gegevens invoert"
+  - "Hoe je met de importwizard van Excel kolomtypen instelt"
+  - "Hoe je waarden in wetenschappelijke notatie in een opgeslagen CSV herstelt"
+  - "Hoe elke stap werkt in Google Spreadsheets"
+bestFor: "Verkopers met productcatalogi vol SKU's, barcodes (EAN-13, UPC-A), ISBN-nummers of andere cijfercodes die precies behouden moeten blijven"
+timeToComplete: "8 minuten"
+---
+
+## Waarom dit gebeurt
+
+Excel is gemaakt voor financiële gegevens. Ziet een celwaarde eruit als een getal, dan zet Excel die om naar een getalnotatie. Dat geeft bij e-commerce-CSV's twee problemen:
+
+1. **Wetenschappelijke notatie:** een EAN-barcode van 13 cijfers zoals `4006381333931` wordt `4,00638E+12`. Bij exporteren naar CSV schrijft Excel `4,00638E+12` (of `4.00638E+12`), en dat is geen geldige barcode.
+2. **Verloren voorloopnullen:** een SKU zoals `00714` wordt `714`. Een EAN-8 van 8 cijfers zoals `01234565` wordt `1234565`. Het importplatform krijgt de verkeerde waarde.
+
+Deze omzettingen gebeuren ongemerkt. Vaak merk je het pas als de import mislukt of de voorraad niet klopt.
+
+---
+
+## Welke velden het raakt
+
+Elk veld met lange cijferreeksen of voorloopnullen loopt risico:
+
+- **Barcodes:** EAN-13, UPC-A, EAN-8, ISBN-13, ASIN
+- **SKU's** met voorloopnullen (veel voorkomend in mode- en bouwmarktcatalogi)
+- **Variant-SKU's** die zijn overgenomen van artikelnummers van de fabrikant
+- **Kolom Variant Barcode** in Shopify
+- **Amazon ASIN / FNSKU** (alfanumeriek, maar deels alleen cijfers)
+- **Kolom SKU** in WooCommerce
+
+---
+
+## Voorkomen: kolommen op Tekst zetten vóór het invoeren
+
+Het veiligst is om de kolom op **Tekst** te zetten voordat je er iets in typt of plakt.
+
+### In Excel (nieuw werkblad)
+
+1. Selecteer de hele kolom of kolommen voor barcodes of SKU's (klik bijvoorbeeld op kolomletter `C` om kolom C te selecteren).
+2. Rechtermuisknop → **Celeigenschappen**.
+3. Kies in de lijst **Categorie** de optie **Tekst**.
+4. Klik op **OK**.
+5. Typ of plak nu je waarden. Excel behandelt ze als tekst en houdt ze precies zoals ze zijn.
+
+> **Belangrijk:** een cel pas *na* het invoeren van een getal op Tekst zetten, draait de omzetting niet terug. Je moet eerst de notatie instellen en daarna de gegevens invoeren. Plak je in een al ingestelde kolom, plak dan **alleen waarden** (Ctrl+Shift+V of Plakken speciaal → Waarden), zodat er geen getalnotatie uit de bron meekomt.
+
+### In Excel (met een apostrof ervoor)
+
+Een snelle truc voor losse cellen: typ een apostrof (`'`) vóór het getal:
+
+```
+'4006381333931
+```
+
+Excel behandelt elke waarde die met `'` begint als tekst. De apostrof wordt niet in de celwaarde opgeslagen; alleen het getal wordt bewaard. Dit werkt per cel, maar is omslachtig bij veel gegevens.
+
+---
+
+## Bestaande bestanden herstellen: een CSV openen met de importwizard
+
+Heb je al een CSV waarin Excel de barcodes heeft beschadigd, open die dan met de importwizard in plaats van te dubbelklikken:
+
+### Excel 2016+ (Ophalen en transformeren)
+
+1. Open een lege werkmap.
+2. Ga naar **Gegevens → Van tekst/CSV**.
+3. Selecteer je CSV-bestand.
+4. Het voorbeeldvenster opent. Bekijk de kolom met barcodes of SKU's. Staat daar wetenschappelijke notatie, dan is het type automatisch herkend als "Geheel getal".
+5. Klik op **Gegevens transformeren** (de Power Query-editor opent).
+6. Selecteer de betreffende kolommen.
+7. Kies op het tabblad **Start** in de lijst **Gegevenstype** de optie **Tekst**. Vraagt Power Query het, klik dan op **Huidige vervangen**, zodat de typewijziging de automatische omzetting naar een getal vervangt en de oorspronkelijke cijfers behouden blijven.
+8. Sluiten en laden.
+9. Exporteer opnieuw als CSV via **Bestand → Opslaan als → CSV UTF-8**.
+
+### Excel (oude wizard Tekst importeren)
+
+Als je de oude wizard beschikbaar hebt:
+
+1. Ga naar **Gegevens → Van tekst**, of hernoem het bestand van `.csv` naar `.txt` en open het via **Bestand → Openen**, waarna de wizard start.
+2. Selecteer in **stap 3** van de wizard de kolom en zet het gegevenstype op **Tekst**.
+3. Rond de import af.
+
+---
+
+## Wetenschappelijke notatie herstellen in een opgeslagen CSV
+
+Heb je al een CSV-bestand met waarden als `4.00638E+12`:
+
+### Optie A: de waarden opnieuw invoeren (kleine bestanden)
+
+Staat `4.00638E+12` eenmaal in het CSV-bestand zelf, dan ontbreken de overige cijfers in het bestand en kan geen teksteditor ze terughalen. Je kunt de juiste waarden alleen opnieuw invoeren vanuit je eigen gegevens, wat hooguit voor een handvol rijen te doen is.
+
+### Optie B: opnieuw opbouwen vanuit de bron
+
+Staan de oorspronkelijke gegevens in een database, een PIM of een bestand van de leverancier, exporteer ze dan opnieuw zonder ze in Excel te openen. Veel leveranciersportalen bieden een download als `.xlsx`. Open die, zet de kolommen op Tekst en sla daarna op als CSV.
+
+### Optie C: met een formule terugzetten
+
+Is de werkmap nog open in Excel (of opgeslagen als .xlsx), dan heeft Excel misschien nog het volledige getal, bijvoorbeeld `4006381333931`, en toont het dit alleen in wetenschappelijke notatie:
+
+1. Voeg een hulpkolom toe.
+2. Gebruik `=TEKST(A2;"0")` om het getal om te zetten in tekst zonder wetenschappelijke notatie.
+3. Kopieer de hulpkolom en plak die als **Waarden** over de oorspronkelijke kolom.
+4. Verwijder de hulpkolom.
+5. Sla op als CSV.
+
+> Dit werkt alleen als Excel het volledige getal nog heeft opgeslagen. Is de waarde afgekapt (meer dan 15 significante cijfers), dan is de nauwkeurigheid voorgoed weg en moet je de oorspronkelijke gegevens uit de bron halen.
+
+---
+
+## Zo werkt het in Google Spreadsheets
+
+Google Spreadsheets heeft hetzelfde probleem met het omzetten van getallen:
+
+- **Vóór het plakken op Tekst zonder opmaak zetten:** selecteer de kolom → **Opmaak → Getal → Tekst zonder opmaak**.
+- **Importeren via Bestand → Importeren:** zet in het importvenster **Tekst converteren naar getallen, datums en formules** uit, zodat codes tekst blijven, en controleer na de import of je barcodes kloppen.
+- **Bestaande waarden herstellen:** gebruik `=TEXT(A2; "0")` net als in Excel.
+
+---
+
+## Veilig exporteren van Excel naar CSV
+
+Nadat je je kolommen hebt hersteld of goed hebt opgemaakt:
+
+1. **Bestand → Opslaan als → CSV UTF-8 (door komma's gescheiden) (.csv)**.
+2. Excel waarschuwt misschien dat de bestandsindeling geen meerdere werkbladen ondersteunt. Klik op **Ja/Huidige indeling behouden**.
+3. **Open de CSV ter controle niet opnieuw in Excel**: controleer met een teksteditor (VS Code, Notepad++) of de barcodes gewone getallen zijn en geen wetenschappelijke notatie.
+
+---
+
+## Checklist om problemen te voorkomen
+
+- [ ] Zet barcode- en SKU-kolommen op **Tekst** voordat je gegevens invoert
+- [ ] Open bestaande CSV's via **Gegevens → Van tekst/CSV** (niet door te dubbelklikken)
+- [ ] Kies in de importwizard het type **Tekst** voor kolommen die op getallen lijken
+- [ ] Controleer de geëxporteerde CSV in een teksteditor, niet in Excel
+- [ ] Zet in Google Spreadsheets de kolommen vóór het importeren op **Tekst zonder opmaak**

@@ -22,7 +22,10 @@ jobs:
 
       - run: npm run lint
 
-      - run: npm run test
+      # Runs the unit tests and prints a coverage summary.
+      - run: npm run test:coverage
+
+      - run: npm run shopify:regression
 
       - run: npm run build
 
