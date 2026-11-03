@@ -68,6 +68,8 @@ export async function RootDocument({ lang, children }: { lang: string; children:
 
   return (
     <html lang={lang} data-theme="light" suppressHydrationWarning>
+      {/* App Router root layouts render <head> directly; next/head is for the Pages Router. */}
+      {/* eslint-disable-next-line @next/next/no-head-element */}
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>

@@ -111,6 +111,8 @@ export function EditableIssuesTable(props: {
       m.set(idx, { errors, warnings, tips, hasEW: errors + warnings > 0 });
     }
     return m;
+    // Keyed on the row numbers: the parent passes a new pinnedRows array on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
   }, [pinnedRows.join("|"), issuesByRow]);
 
   function toggleOpen(rowIndex: number) {

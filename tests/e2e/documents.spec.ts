@@ -33,3 +33,14 @@ test("pages share the same link-preview image", async ({ request }) => {
   const img = await request.get("/og.png");
   expect(img.headers()["content-type"]).toBe("image/png");
 });
+
+test("pages send the security headers", async ({ request }) => {
+  const h = (await request.get("/", { headers: { "Accept-Language": "en" } })).headers();
+  expect(h["x-content-type-options"]).toBe("nosniff");
+  expect(h["x-frame-options"]).toBe("DENY");
+  expect(h["x-powered-by"]).toBeUndefined();
+  const csp = h["content-security-policy"] ?? "";
+  for (const directive of ["default-src 'self'", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'"]) {
+    expect(csp).toContain(directive);
+  }
+});

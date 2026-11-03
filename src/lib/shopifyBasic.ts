@@ -886,7 +886,7 @@ export function validateAndFixShopifyBasic(headers: string[], rows: CsvRow[]): F
       sigs.set(sig, list);
     }
 
-    for (const [sig, list] of sigs.entries()) {
+    for (const list of sigs.values()) {
       if (list.length <= 1) continue;
 
       // If these are image-only rows (no sku/options, only an image URL), don't warn.

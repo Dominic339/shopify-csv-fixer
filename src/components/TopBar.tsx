@@ -133,6 +133,8 @@ export default function TopBar({ navByLocale }: Props) {
       await supabase.auth.signOut();
     } finally {
       setMenuOpen(false);
+      // A full reload on purpose: it clears every signed-in state held in memory.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/";
     }
   }

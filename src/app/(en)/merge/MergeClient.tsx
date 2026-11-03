@@ -330,7 +330,6 @@ export default function MergeClient({ t }: Props) {
 
         {/* Schema compatibility warning — shown before merge and in results */}
         {fileA && fileB && (() => {
-          const setA = new Set(fileA.headers);
           const setB = new Set(fileB.headers);
           const shared = fileA.headers.filter((h) => setB.has(h)).length;
           const total = new Set([...fileA.headers, ...fileB.headers]).size;

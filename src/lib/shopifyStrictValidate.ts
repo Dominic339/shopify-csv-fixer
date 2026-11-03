@@ -352,7 +352,6 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
       if (!combo.replace(/\|/g, "").trim()) continue;
       if (list.length <= 1) continue;
 
-      const rowsList = list.map((i) => i + 1).join(", ");
       const sample = fixedRows[list[0]] ?? {};
       const n1Raw = String(sample[COL.opt1Name] ?? '').trim();
       const n2Raw = String(sample[COL.opt2Name] ?? '').trim();

@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { createClient } from "@/lib/supabase/browser";
 import { PASS_PRICE_LABEL } from "@/lib/plans";
@@ -18,7 +18,6 @@ type SubStatus = {
 type Props = {
   sub?: SubStatus | null;
   tPricing: Translations["pricing"];
-  onBillingUnavailable?: () => void;
 };
 
 async function postJson(url: string, body?: unknown, token?: string | null) {
@@ -33,7 +32,7 @@ async function postJson(url: string, body?: unknown, token?: string | null) {
   return { ok: r.ok, json: j as any };
 }
 
-export function PricingCards({ sub, tPricing: t, onBillingUnavailable }: Props) {
+export function PricingCards({ sub, tPricing: t }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string>("");
