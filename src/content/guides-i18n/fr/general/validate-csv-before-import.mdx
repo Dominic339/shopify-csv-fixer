@@ -1,0 +1,183 @@
+---
+title: "Valider votre CSV avant de l'envoyer à une plateforme e-commerce"
+description: "Une liste de contrôle pratique pour repérer les erreurs d'encodage, en-têtes manquants, longueurs de ligne incohérentes, problèmes de guillemets et autres soucis avant l'échec de votre import. Couvre Shopify, WooCommerce, eBay, Amazon et Etsy."
+keywords: ["valider csv avant import", "liste de contrôle csv", "erreurs import csv", "vérifier en-têtes csv", "vérifier encodage csv", "guillemets csv", "longueur des lignes csv", "valider csv shopify", "valider csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Ce qu'il faut vérifier avant d'envoyer un CSV à une plateforme e-commerce"
+  - "Comment contrôler l'encodage, les en-têtes, la longueur des lignes et les guillemets"
+  - "Comment faire un envoi test sans risque avant d'importer toutes les lignes"
+  - "Quels outils automatisent la validation avant import"
+  - "Quelles colonnes obligatoires chaque plateforme exige"
+bestFor: "Responsables catalogue, développeurs et vendeurs qui importent régulièrement des produits et veulent limiter les imports ratés et les données abîmées"
+timeToComplete: "12 minutes"
+---
+
+## Pourquoi valider avant d'importer
+
+Un import CSV raté peut être sans conséquence (rien ne change) ou destructeur (des mises à jour partielles laissent votre catalogue dans un état incohérent). Sur Shopify, une erreur de guillemets arrête généralement tout l'import et indique la ligne en cause. Sur WooCommerce, une ligne dont les colonnes sont décalées peut écrire de mauvaises valeurs dans un produit existant.
+
+Cinq minutes de vérification avant l'envoi peuvent épargner des heures de nettoyage.
+
+---
+
+## La liste de contrôle avant import
+
+### 1. Encodage : UTF-8
+
+**À vérifier :** le fichier doit être encodé en UTF-8. Un BOM (indicateur d'ordre des octets) au début ne pose pas de problème à Shopify ni à WooCommerce, mais certains outils le lisent comme une partie du nom de la première colonne.
+
+**Comment vérifier :**
+- Ouvrez le fichier dans VS Code. La barre d'état, en bas à droite, doit indiquer `UTF-8` (ou `UTF-8 with BOM`), et non `Windows 1252` ou `ISO 8859-1`.
+- Si elle indique autre chose, vérifiez d'abord que le texte s'affiche correctement (sinon, cliquez sur l'indicateur d'encodage et choisissez **Rouvrir avec l'encodage** avec l'encodage réel du fichier). Cliquez ensuite à nouveau sur l'indicateur et choisissez **Enregistrer avec l'encodage → UTF-8**.
+
+**Correction courante :** dans Excel, enregistrez toujours en **CSV UTF-8 (délimité par des virgules)**, pas en CSV simple.
+
+---
+
+### 2. Ligne d'en-tête : noms corrects, rien en trop
+
+**À vérifier :**
+- La première ligne contient les noms de colonnes exactement comme la plateforme les attend.
+- Aucun espace au début ou à la fin des noms de colonnes.
+- Aucun nom de colonne en double.
+- Aucune colonne vide en trop à la fin.
+
+**Comment vérifier :**
+Ouvrez le fichier dans un éditeur de texte et lisez attentivement la ligne 1. Comparez-la au modèle officiel de la plateforme :
+
+- Shopify : consultez le [modèle CSV de produits Shopify](https://help.shopify.com/en/manual/products/import-export/import-products).
+- WooCommerce : comparez avec le CSV de produits d'exemple de WooCommerce depuis votre administration.
+- Amazon : téléchargez l'Inventory Loader ou le modèle de catégorie dans Seller Central (**Catalogue → Ajouter des produits via un chargement**).
+
+**Problèmes courants :**
+- `"Handle "` avec un espace final (invisible dans Excel).
+- `handle` (en minuscules) au lieu de `Handle`.
+- Des colonnes obligatoires totalement absentes.
+
+---
+
+### 3. Colonnes obligatoires : toutes présentes et remplies
+
+**À vérifier :**
+- Toutes les colonnes obligatoires de la plateforme figurent dans l'en-tête.
+- Les champs obligatoires ne sont vides sur aucune ligne.
+
+**Champs obligatoires par plateforme (minimum) :**
+
+| Plateforme | Colonnes obligatoires |
+|---|---|
+| Shopify | Title (plus Handle pour mettre à jour des produits existants) |
+| WooCommerce | Name, Type (plus ID ou SKU pour mettre à jour des produits existants) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | Pas d'import CSV : Etsy ne fait qu'exporter en CSV, il n'y a donc rien à valider pour un import |
+
+**Comment vérifier dans Excel :**
+1. Activez les filtres (**Données → Filtrer**).
+2. Pour chaque colonne obligatoire, filtrez sur les cellules vides.
+3. Toute case vide dans un champ obligatoire fera échouer la ligne.
+
+---
+
+### 4. Longueur de ligne cohérente
+
+**À vérifier :** chaque ligne doit avoir autant de colonnes que la ligne d'en-tête. Des lignes inégales signalent :
+- Une description ou un titre contenant des virgules non protégées.
+- Un champ avec des retours à la ligne internes qui coupe la ligne en plusieurs lignes.
+- Une erreur de copier-coller qui a ajouté des colonnes.
+
+**Comment vérifier dans Excel (lignes trop longues) :**
+1. Repérez la première colonne après votre dernier en-tête. Si vos en-têtes s'arrêtent en colonne T, c'est la colonne U.
+2. Dans une colonne vide loin à droite (par exemple AAA), saisissez `=NBVAL(U2:ZZ2)`.
+3. Recopiez-la sur toutes les lignes et filtrez les valeurs supérieures à 0. Ces lignes ont des champs en trop.
+
+Excel ne peut pas montrer les lignes trop courtes, car un champ manquant ressemble à un champ vide.
+
+**Comment vérifier dans un éditeur de texte :**
+Dans VS Code avec l'extension Rainbow CSV, lancez la commande **Rainbow CSV: CSVLint**. Elle signale chaque ligne dont le nombre de champs diffère de l'en-tête, y compris les lignes trop courtes.
+
+**Correction courante :** entourez de guillemets doubles tout champ qui contient des virgules, des guillemets ou des retours à la ligne. Si le champ contient déjà des guillemets doubles, protégez chacun en le doublant (`""`).
+
+---
+
+### 5. Champs entre guillemets : guillemets corrects et protégés
+
+**À vérifier :**
+- Les champs qui contiennent des virgules, des guillemets doubles ou des retours à la ligne sont entourés de guillemets doubles.
+- Chaque guillemet double à l'intérieur d'un tel champ est protégé en le doublant (`""`, pas `\"`).
+
+**Exemple de guillemets corrects :**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**Points d'attention :**
+- Un champ qui commence par `"` doit se terminer par `"` sur la même ligne logique.
+- Les apostrophes n'ont pas besoin d'être protégées : `Men's` reste tel quel. Seuls les guillemets doubles sont doublés.
+
+---
+
+### 6. Pas de caractères interdits dans les champs clés
+
+**À vérifier :**
+- Les handles/slugs ne contiennent que des minuscules, des chiffres et des tirets.
+- Les champs de prix ne contiennent que des chiffres et un point décimal (pas de symbole monétaire, pas de séparateur de milliers).
+- Les champs oui/non (par exemple Published, Featured) utilisent les valeurs attendues (TRUE/FALSE, yes/no ou 1/0, selon votre plateforme).
+
+**Problèmes courants :**
+- `$19.99` dans une colonne de prix (il faut `19.99`).
+- `Blue Shirt` avec des majuscules et un espace dans une colonne handle (il faut `blue-shirt`).
+- Des prix comme `19,99` (virgule décimale européenne) au lieu de `19.99`.
+
+---
+
+### 7. URL d'images : accessibles et au bon format
+
+**À vérifier :**
+- Les URL d'images commencent par `https://` (certaines plateformes refusent ou ignorent les images en `http://`).
+- Les URL ne contiennent pas d'espaces (ils doivent être encodés en `%20` ou supprimés).
+- Pour Shopify : jusqu'à 250 URL d'images sont prises en charge par produit. La première ligne `Image Src` de chaque Handle est l'image principale.
+- Les URL sont accessibles publiquement (pas derrière une connexion, pas en localhost).
+
+---
+
+### 8. Pas de lignes vides à la fin
+
+**À vérifier :** beaucoup de tableurs ajoutent des lignes vides à la fin. Les plateformes peuvent traiter une ligne vide comme invalide et renvoyer une erreur.
+
+**Comment corriger dans Excel :**
+1. Appuyez sur **Ctrl+Fin** pour aller à la dernière cellule utilisée.
+2. Si la dernière ligne est vide (toutes ses cellules vides), sélectionnez-la avec quelques lignes en dessous et supprimez-les.
+3. Enregistrez le fichier.
+
+---
+
+## Stratégie d'envoi test
+
+N'envoyez jamais votre catalogue complet de 10 000 lignes comme premier test. À la place :
+
+1. Faites une copie de votre CSV.
+2. Gardez seulement 5 à 10 lignes représentatives (avec au moins un produit à variantes, le cas échéant).
+3. Envoyez l'échantillon dans un environnement de test ou une boutique de préproduction.
+4. Vérifiez que chaque ligne a été importée correctement.
+5. Corrigez les erreurs dans le fichier complet.
+6. Envoyez le fichier complet.
+
+Pour Shopify : l'outil d'import affiche un aperçu avant confirmation et vous envoie un e-mail à la fin de l'import. Lisez cet e-mail même si l'import semble terminé, car certaines lignes peuvent être ignorées pendant que le reste est importé.
+
+---
+
+## Outils de validation avant import
+
+| Outil | Ce qu'il vérifie |
+|---|---|
+| **StriveFormats CSV Fixer** | En-têtes propres à chaque plateforme, encodage, champs obligatoires, guillemets, valeurs oui/non |
+| **VS Code avec l'extension Rainbow CSV** | Alignement visuel des colonnes, lignes décalées |
+| **csvkit (`csvclean`)** | Lignes avec un mauvais nombre de champs, en ligne de commande |
+| **Google Sheets Fichier → Importer** | Comment les colonnes se découpent avec le séparateur choisi |
+| **Excel Données → À partir d'un fichier texte/CSV** | Aperçu de l'encodage et du délimiteur avant chargement |
+
+Un validateur ne détecte pas les erreurs de contenu (mauvais SKU, mauvais ID de catégorie, URL d'image qui ne se charge plus). Pour cela, il faut un envoi test. Mais les validateurs repèrent les erreurs de structure qui empêchent un import d'aboutir.

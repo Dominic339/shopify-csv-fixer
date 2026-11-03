@@ -1,0 +1,183 @@
+---
+title: "Sprawdź plik CSV przed przesłaniem na dowolną platformę e-commerce"
+description: "Praktyczna lista kontrolna, która pozwala wychwycić błędy kodowania, brakujące nagłówki, wiersze różnej długości, problemy z cudzysłowami i inne kłopoty, zanim import się nie powiedzie. Obejmuje Shopify, WooCommerce, eBay, Amazon i Etsy."
+keywords: ["sprawdzenie csv przed importem", "lista kontrolna csv", "błędy importu csv", "sprawdzenie nagłówków csv", "sprawdzenie kodowania csv", "cudzysłowy csv", "długość wierszy csv", "walidacja csv shopify", "walidacja csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Co sprawdzić przed przesłaniem pliku CSV na platformę e-commerce"
+  - "Jak zweryfikować kodowanie, nagłówki, długość wierszy i cudzysłowy"
+  - "Jak bezpiecznie przesłać próbkę przed importem wszystkich wierszy"
+  - "Które narzędzia pomagają zautomatyzować sprawdzanie przed importem"
+  - "Jakich wymaganych kolumn oczekuje każda platforma"
+bestFor: "Menedżerów katalogu, programistów i sprzedawców, którzy regularnie importują produkty i chcą ograniczyć nieudane przesyłki i uszkodzone dane"
+timeToComplete: "12 minut"
+---
+
+## Dlaczego warto sprawdzić plik przed importem
+
+Nieudany import CSV może być nieszkodliwy (nic się nie zmienia) albo destrukcyjny (częściowe aktualizacje zostawiają katalog w niespójnym stanie). W Shopify błąd cudzysłowu zwykle zatrzymuje cały import i wskazuje wiersz, w którym wystąpił. W WooCommerce wiersz z przesuniętymi kolumnami może zapisać błędne wartości w istniejącym produkcie.
+
+Pięć minut sprawdzania przed przesłaniem może oszczędzić godzin sprzątania.
+
+---
+
+## Lista kontrolna przed importem
+
+### 1. Kodowanie: UTF-8
+
+**Co sprawdzić:** plik musi być zakodowany w UTF-8. BOM (znacznik kolejności bajtów) na początku nie przeszkadza Shopify ani WooCommerce, ale niektóre narzędzia odczytują go jako część nazwy pierwszej kolumny.
+
+**Jak to sprawdzić:**
+- Otwórz plik w VS Code. Pasek stanu w prawym dolnym rogu powinien pokazywać `UTF-8` (lub `UTF-8 with BOM`), a nie `Windows 1252` czy `ISO 8859-1`.
+- Jeśli pokazuje coś innego, najpierw sprawdź, czy tekst wygląda poprawnie (jeśli nie, kliknij oznaczenie kodowania i wybierz **Otwórz ponownie z kodowaniem** z prawdziwym kodowaniem pliku). Potem kliknij oznaczenie jeszcze raz i wybierz **Zapisz z kodowaniem → UTF-8**.
+
+**Typowa poprawka:** w Excelu zawsze zapisuj jako **CSV UTF-8 (rozdzielany przecinkami)**, a nie zwykły CSV.
+
+---
+
+### 2. Wiersz nagłówka: poprawne nazwy, nic ponadto
+
+**Co sprawdzić:**
+- Pierwszy wiersz zawiera nazwy kolumn dokładnie takie, jakich oczekuje platforma.
+- Nazwy kolumn nie mają spacji na początku ani na końcu.
+- Nazwy kolumn się nie powtarzają.
+- Na końcu nie ma dodatkowych pustych kolumn.
+
+**Jak to sprawdzić:**
+Otwórz plik w edytorze tekstu i uważnie przeczytaj wiersz 1. Porównaj go z oficjalnym szablonem platformy:
+
+- Shopify: zajrzyj do [szablonu CSV produktów Shopify](https://help.shopify.com/en/manual/products/import-export/import-products).
+- WooCommerce: porównaj z przykładowym plikiem CSV produktów WooCommerce z panelu.
+- Amazon: pobierz Inventory Loader lub szablon kategorii w Seller Central (**Katalog → Dodaj produkty przez przesłanie pliku**).
+
+**Częste problemy:**
+- `"Handle "` ze spacją na końcu (niewidoczną w Excelu).
+- `handle` (małymi literami) zamiast `Handle`.
+- Całkowity brak wymaganych kolumn.
+
+---
+
+### 3. Wymagane kolumny: wszystkie obecne i wypełnione
+
+**Co sprawdzić:**
+- Wszystkie wymagane kolumny platformy są w nagłówku.
+- Wymagane pola nie są puste w żadnym wierszu.
+
+**Wymagane pola według platformy (minimum):**
+
+| Platforma | Wymagane kolumny |
+|---|---|
+| Shopify | Title (oraz Handle przy aktualizowaniu istniejących produktów) |
+| WooCommerce | Name, Type (oraz ID lub SKU przy aktualizowaniu istniejących produktów) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | Brak importu CSV: Etsy tylko eksportuje CSV, więc nie ma czego sprawdzać przed importem |
+
+**Jak to sprawdzić w Excelu:**
+1. Włącz filtry (**Dane → Filtruj**).
+2. W każdej wymaganej kolumnie odfiltruj puste komórki.
+3. Każda luka w wymaganym polu sprawi, że ten wiersz się nie zaimportuje.
+
+---
+
+### 4. Jednakowa długość wierszy
+
+**Co sprawdzić:** każdy wiersz musi mieć tyle kolumn co wiersz nagłówka. Nierówne wiersze wskazują na:
+- Opis lub tytuł z niezabezpieczonymi przecinkami.
+- Pole z wewnętrznymi znakami nowego wiersza, które dzieli wiersz na kilka linii.
+- Błąd kopiowania i wklejania, który dodał kolumny.
+
+**Jak to sprawdzić w Excelu (za długie wiersze):**
+1. Znajdź pierwszą kolumnę po ostatnim nagłówku. Jeśli nagłówki kończą się w kolumnie T, jest to kolumna U.
+2. W pustej kolumnie daleko po prawej (na przykład AAA) wpisz `=ILE.NIEPUSTYCH(U2:ZZ2)`.
+3. Skopiuj formułę do wszystkich wierszy i odfiltruj wartości większe od 0. Te wiersze mają dodatkowe pola.
+
+Excel nie pokaże za krótkich wierszy, bo brakujące pole wygląda tak samo jak puste.
+
+**Jak to sprawdzić w edytorze tekstu:**
+W VS Code z rozszerzeniem Rainbow CSV uruchom polecenie **Rainbow CSV: CSVLint**. Zgłasza ono każdy wiersz, którego liczba pól różni się od nagłówka, także za krótkie wiersze.
+
+**Typowa poprawka:** ujmij w cudzysłowy każde pole zawierające przecinki, cudzysłowy lub znaki nowego wiersza. Jeśli pole już zawiera cudzysłowy, zabezpiecz każdy z nich, podwajając go (`""`).
+
+---
+
+### 5. Pola w cudzysłowach: poprawne i zabezpieczone
+
+**Co sprawdzić:**
+- Pola zawierające przecinki, cudzysłowy lub znaki nowego wiersza są ujęte w cudzysłowy.
+- Każdy cudzysłów wewnątrz takiego pola jest zabezpieczony przez podwojenie (`""`, a nie `\"`).
+
+**Przykład poprawnych cudzysłowów:**
+```
+Handle,Title,Body HTML
+blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
+```
+
+**Na co zwrócić uwagę:**
+- Pola zaczynające się od `"` muszą kończyć się `"` w tym samym wierszu logicznym.
+- Apostrofów nie trzeba zabezpieczać: `Men's` zostaje bez zmian. Podwaja się tylko cudzysłowy.
+
+---
+
+### 6. Brak niedozwolonych znaków w kluczowych polach
+
+**Co sprawdzić:**
+- Handle/slugi zawierają tylko małe litery, cyfry i myślniki.
+- Pola cen zawierają tylko cyfry i kropkę dziesiętną (bez symboli waluty i separatorów tysięcy).
+- Pola tak/nie (np. Published, Featured) mają oczekiwane wartości (TRUE/FALSE, yes/no lub 1/0, zależnie od platformy).
+
+**Częste problemy:**
+- `$19.99` w kolumnie ceny (powinno być `19.99`).
+- `Blue Shirt` z wielkimi literami i spacją w kolumnie handle (powinno być `blue-shirt`).
+- Ceny w stylu `19,99` (europejski przecinek dziesiętny) zamiast `19.99`.
+
+---
+
+### 7. Adresy URL obrazów: dostępne i w poprawnym formacie
+
+**Co sprawdzić:**
+- Adresy URL obrazów zaczynają się od `https://` (niektóre platformy odrzucają lub pomijają obrazy `http://`).
+- Adresy URL nie zawierają spacji (trzeba je zakodować jako `%20` lub usunąć).
+- W Shopify: obsługiwanych jest do 250 adresów URL obrazów na produkt. Pierwszy wiersz z `Image Src` dla każdego Handle to obraz główny.
+- Adresy URL są publicznie dostępne (bez logowania, nie localhost).
+
+---
+
+### 8. Brak pustych wierszy na końcu
+
+**Co sprawdzić:** wiele arkuszy kalkulacyjnych dodaje puste wiersze na końcu. Platformy mogą uznać pusty wiersz za nieprawidłowy i zgłosić błąd.
+
+**Jak to naprawić w Excelu:**
+1. Naciśnij **Ctrl+End**, aby przejść do ostatniej używanej komórki.
+2. Jeśli ostatni wiersz jest pusty (wszystkie komórki puste), zaznacz go wraz z kilkoma wierszami poniżej i usuń je.
+3. Zapisz plik.
+
+---
+
+## Strategia przesłania próbki
+
+Nigdy nie przesyłaj całego katalogu z 10 000 wierszy jako pierwszego testu. Zamiast tego:
+
+1. Zrób kopię pliku CSV.
+2. Zostaw tylko 5–10 reprezentatywnych wierszy (z co najmniej jednym produktem z wariantami, jeśli takie masz).
+3. Prześlij próbkę do środowiska testowego lub sklepu stagingowego.
+4. Sprawdź, czy każdy wiersz zaimportował się poprawnie.
+5. Popraw błędy w pełnym pliku.
+6. Prześlij pełny plik.
+
+W Shopify: narzędzie importu pokazuje podgląd przed potwierdzeniem i wysyła e-mail po zakończeniu importu. Przeczytaj ten e-mail, nawet jeśli import wygląda na zakończony, bo niektóre wiersze mogą zostać pominięte, a reszta się zaimportuje.
+
+---
+
+## Narzędzia do sprawdzania przed importem
+
+| Narzędzie | Co sprawdza |
+|---|---|
+| **StriveFormats CSV Fixer** | Nagłówki właściwe dla platformy, kodowanie, wymagane pola, cudzysłowy, wartości tak/nie |
+| **VS Code z rozszerzeniem Rainbow CSV** | Wizualne wyrównanie kolumn, niepasujące wiersze |
+| **csvkit (`csvclean`)** | Wiersze z błędną liczbą pól, w wierszu poleceń |
+| **Arkusze Google Plik → Importuj** | Jak kolumny dzielą się przy wybranym separatorze |
+| **Excel Dane → Z pliku tekstowego/CSV** | Podgląd kodowania i separatora przed wczytaniem |
+
+Walidator nie wykryje błędów merytorycznych (zły SKU, złe ID kategorii, adres URL obrazu, który już się nie ładuje). Do tego potrzebne jest przesłanie próbki. Walidatory wykrywają jednak błędy struktury, które uniemożliwiają dokończenie importu.

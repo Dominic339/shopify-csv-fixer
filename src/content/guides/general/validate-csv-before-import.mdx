@@ -16,7 +16,7 @@ timeToComplete: "12 minutes"
 
 ## Why Pre-Import Validation Matters
 
-A failed CSV import can range from harmless (nothing changes) to destructive (partial updates leave your catalog in an inconsistent state). On platforms like Shopify, a mid-file format error may cause all rows after the error to be silently skipped. On WooCommerce, a malformed row can corrupt an existing product.
+A failed CSV import can range from harmless (nothing changes) to destructive (partial updates leave your catalog in an inconsistent state). On Shopify, a quoting error usually stops the whole import and names the line it failed on. On WooCommerce, a row whose columns have shifted can write the wrong values into an existing product.
 
 A five-minute validation check before uploading can save hours of cleanup.
 
@@ -30,7 +30,7 @@ A five-minute validation check before uploading can save hours of cleanup.
 
 **How to check:**
 - Open the file in VS Code. The bottom-right status bar should say `UTF-8` (or `UTF-8 with BOM`), not `Windows 1252` or `ISO 8859-1`.
-- If it shows anything other than `UTF-8`, click the encoding label, choose **Save with Encoding → UTF-8**.
+- If it shows anything else, first make sure the text looks right (if it doesn't, click the encoding label and choose **Reopen with Encoding** with the file's real encoding). Then click the label again and choose **Save with Encoding → UTF-8**.
 
 **Common fix:** In Excel, always save as **CSV UTF-8 (Comma delimited)**, not plain CSV.
 
@@ -49,7 +49,7 @@ Open the file in a text editor and read line 1 carefully. Compare against the pl
 
 - Shopify: check the [Shopify product CSV template](https://help.shopify.com/en/manual/products/import-export/import-products).
 - WooCommerce: compare against the WooCommerce sample product CSV from your admin.
-- Amazon: use the category-specific Flat File template from Seller Central.
+- Amazon: download the Inventory Loader or category template from Seller Central (**Catalog → Add Products via Upload**).
 
 **Common issues:**
 - `"Handle "` with a trailing space (invisible in Excel).
@@ -68,11 +68,11 @@ Open the file in a text editor and read line 1 carefully. Compare against the pl
 
 | Platform | Required columns |
 |---|---|
-| Shopify | Handle, Title, Variant Price |
-| WooCommerce | post_title (or Name), post_status |
-| eBay File Exchange | Action, Title, Category (or CategoryID) |
-| Amazon Flat File | item_sku, item_name, price, quantity |
-| Etsy | TITLE, DESCRIPTION, PRICE, QUANTITY |
+| Shopify | Title (plus Handle when updating existing products) |
+| WooCommerce | Name, Type (plus ID or SKU when updating existing products) |
+| eBay File Exchange | Action, Title, Category, StartPrice, ConditionID |
+| Amazon Inventory Loader | sku, product-id, product-id-type, price, item-condition, quantity, add-delete |
+| Etsy | No CSV upload: Etsy only exports CSV, so there is nothing to validate for import |
 
 **How to check in Excel:**
 1. Apply filters (**Data → Filter**).
@@ -88,13 +88,15 @@ Open the file in a text editor and read line 1 carefully. Compare against the pl
 - A field with embedded newlines that breaks the row into multiple lines.
 - A copy-paste error that inserted extra columns.
 
-**How to check in Excel:**
-1. Add a helper column with `=COUNTA(A2:ZZ2)` (adjust the range to cover all columns).
-2. Copy down to all rows.
-3. Filter by any value that differs from the header count.
+**How to check in Excel (rows that are too long):**
+1. Find the first column after your last header. If your headers end in column T, that is column U.
+2. In an empty column far to the right (for example AAA), add `=COUNTA(U2:ZZ2)`.
+3. Copy it down to all rows and filter for values above 0. Those rows have extra fields.
+
+Excel can't show rows that are too short, because a missing field looks the same as an empty one.
 
 **How to check in a text editor:**
-For large files, use this principle: every unquoted comma is a column separator. If any row has a different count of unquoted commas than the header row, that row is malformed.
+In VS Code with the Rainbow CSV extension, run the **Rainbow CSV: CSVLint** command. It reports every row whose field count differs from the header, including short rows.
 
 **Common fix:** Wrap any field that contains commas, quotes, or newlines in double quotes. If the field already contains double quotes, escape each one by doubling it (`""`).
 
@@ -114,7 +116,7 @@ blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
 
 **What to look for:**
 - Fields that start with `"` must end with `"` on the same logical line.
-- A field containing `"it's great"` should be written as `"it's great"` (no escaping needed for apostrophes, only for double quotes).
+- Apostrophes need no escaping: `Men's` is fine as it is. Only double quotes are doubled.
 
 ---
 
@@ -122,12 +124,12 @@ blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
 
 **What to check:**
 - Handles/slugs contain only lowercase letters, numbers, and hyphens.
-- Price fields contain only numbers and a decimal point (no currency symbols, commas as thousands separators).
+- Price fields contain only numbers and a decimal point (no currency symbols, no thousands separators).
 - Boolean fields (e.g., Published, Featured) use the expected values (TRUE/FALSE, yes/no, or 1/0, depending on your platform).
 
 **Common problems:**
 - `$19.99` in a price column (should be `19.99`).
-- `Handle: blue-shirt` with a colon prefix.
+- `Blue Shirt` with capitals and a space in a handle column (should be `blue-shirt`).
 - Prices like `19,99` (European decimal convention) instead of `19.99`.
 
 ---
@@ -135,7 +137,7 @@ blue-shirt,"Blue T-Shirt, Men's","<p>""Premium"" cotton.</p>"
 ### 7. Image URLs: reachable and correct format
 
 **What to check:**
-- Image URLs start with `https://` (most platforms reject `http://`).
+- Image URLs start with `https://` (some platforms reject or skip `http://` images).
 - URLs do not contain spaces (spaces must be URL-encoded as `%20` or removed).
 - For Shopify: up to 250 image URLs are supported per product. The first `Image Src` row per Handle is the primary image.
 - URLs are publicly accessible (not behind login, not localhost).
@@ -164,7 +166,7 @@ Never upload your full 10,000-row catalog as a first test. Instead:
 5. Fix any errors in the full file.
 6. Upload the full file.
 
-For Shopify: the importer shows an error summary after upload. Check it even if the import completes, because "X rows failed" may not always display prominently.
+For Shopify: the importer shows a preview before you confirm and emails you when the import finishes. Read that email even if the import looks done, because some rows can be skipped while the rest import.
 
 ---
 
@@ -174,8 +176,8 @@ For Shopify: the importer shows an error summary after upload. Check it even if 
 |---|---|
 | **StriveFormats CSV Fixer** | Platform-specific headers, encoding, required fields, quoting, boolean values |
 | **VS Code with Rainbow CSV extension** | Visual column alignment, mismatched rows |
-| **csvlint.io** | RFC 4180 compliance, row length consistency |
-| **Google Sheets import preview** | Column detection, encoding issues |
+| **csvkit (`csvclean`)** | Rows with the wrong number of fields, on the command line |
+| **Google Sheets File → Import** | How the columns split with a chosen separator |
 | **Excel Data → From Text/CSV** | Encoding and delimiter preview before loading |
 
-A validator cannot catch semantic errors (wrong SKU, wrong category ID, invalid image URL). Those require a sample upload. But validators do catch the structural errors that stop an import from completing.
+A validator cannot catch semantic errors (wrong SKU, wrong category ID, an image URL that no longer loads). Those require a sample upload. But validators do catch the structural errors that stop an import from completing.
