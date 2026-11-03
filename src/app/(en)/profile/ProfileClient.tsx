@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, isValidLocale, localeHref, type Locale } from "@/lib/i18n/locales";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import type { Translations } from "@/lib/i18n/getTranslations";
@@ -66,7 +66,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
   async function load() {
     const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
 
-    const supabase = createClient();
+    const supabase = await getSupabase();
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
@@ -126,7 +126,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
     setMsg("");
 
     try {
-      const supabase = createClient();
+      const supabase = await getSupabase();
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
 
@@ -171,7 +171,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         return;
       }
 
-      const supabase = createClient();
+      const supabase = await getSupabase();
       const { data: { session: sess } } = await supabase.auth.getSession();
       const token = sess?.access_token;
 

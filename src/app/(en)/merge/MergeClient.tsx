@@ -12,7 +12,7 @@ import {
   type MergeResult,
 } from "@/lib/mergeCsv";
 import type { Plan } from "@/lib/quota";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { FileDropZone } from "@/components/FileDropZone";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import Link from "next/link";
@@ -72,7 +72,7 @@ export default function MergeClient({ t }: Props) {
     let alive = true;
     (async () => {
       try {
-        const supabase = createClient();
+        const supabase = await getSupabase();
         const { data: { session } } = await supabase.auth.getSession();
         if (!alive) return;
         if (!session?.user) { setPlan("free"); return; }

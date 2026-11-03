@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Translations } from "@/lib/i18n/getTranslations";
@@ -21,7 +21,7 @@ export default function ResetPasswordClient({ authByLocale }: Props) {
     setBusy(true);
 
     try {
-      const supabase = createClient();
+      const supabase = await getSupabase();
       const redirectTo = `${window.location.origin}/auth/callback?redirect=/update-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) throw error;

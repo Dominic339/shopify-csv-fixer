@@ -6,14 +6,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 
 export type PassCheckoutResult = "redirected" | "signin" | "unavailable" | "error";
 
 /** Send a signed-in user to Stripe Checkout for the pass. */
 export async function startPassCheckout(): Promise<PassCheckoutResult> {
   try {
-    const supabase = createClient();
+    const supabase = await getSupabase();
     const {
       data: { session },
     } = await supabase.auth.getSession();
