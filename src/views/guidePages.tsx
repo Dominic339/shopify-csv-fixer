@@ -34,7 +34,7 @@ import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
 import { rehypeWrapSections } from "@/lib/guides/rehypeWrapSections";
 import { fmt, getTranslations, platformLabel, type Translations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, LOCALES, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { mdxGuideComponentsFor } from "@/views/mdxGuideComponents";
 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
@@ -74,7 +74,7 @@ export async function guidesHubMetadata(locale: Locale): Promise<Metadata> {
     title: t.guides.title,
     description: t.guides.description,
     alternates: pageAlternates(locale, "/guides"),
-    openGraph: { title: t.guides.title, description: t.guides.description, url: `${SITE_URL}${localeHref(locale, "/guides")}` },
+    openGraph: { images: SHARE_IMAGES, title: t.guides.title, description: t.guides.description, url: `${SITE_URL}${localeHref(locale, "/guides")}` },
   };
 }
 
@@ -148,7 +148,7 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
                     <div className={`mt-1 text-sm ${muted}`}>
                       {count} {count === 1 ? t.guides.guideCount : t.guides.guidesCount}
                     </div>
-                    {PLATFORM_FIXER_HREF[p] && <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),0.7)]">{t.guides.includesFixer}</div>}
+                    {PLATFORM_FIXER_HREF[p] && <div className="mt-2 text-xs text-[var(--muted)]">{t.guides.includesFixer}</div>}
                   </Link>
                 );
               })}
@@ -200,7 +200,7 @@ export async function guidesPlatformMetadata(locale: Locale, platform: string): 
     title,
     description,
     alternates: pageAlternates(locale, `/guides/${platform}`),
-    openGraph: { title, description },
+    openGraph: { images: SHARE_IMAGES, title, description },
   };
 }
 
@@ -322,8 +322,8 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
     keywords: [guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
     // Until a language has the article body, its copy points its canonical at the English page.
     alternates: pageAlternates(locale, path, bodyLocales),
-    openGraph: { title, description, url },
-    twitter: { card: "summary", title, description },
+    openGraph: { images: SHARE_IMAGES, title, description, url },
+    twitter: { card: "summary_large_image", title, description, images: SHARE_IMAGES },
   };
 }
 
@@ -461,14 +461,17 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
         <header className="mb-8">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold ${muted}`}>{label}</span>
-            <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs ${muted}`}>{categoryLabel(t, guide.category)}</span>
+            {/* General guides have the category "general" too; don't show the same word twice. */}
+            {categoryLabel(t, guide.category) !== label && (
+              <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs ${muted}`}>{categoryLabel(t, guide.category)}</span>
+            )}
             {guide.blocking && <span className={badgeRed}>{t.guide.importBlocker}</span>}
             {guide.autoFixable && <span className={badgeGreen}>{t.guide.autoFixableBadge}</span>}
           </div>
           <h1 className="mt-4 text-2xl font-semibold text-[var(--text)] sm:text-3xl">{guide.title}</h1>
           <p className={`mt-3 text-base ${muted}`}>{guide.description}</p>
           {guide.lastUpdated && (
-            <div className="mt-2 text-xs text-[color:rgba(var(--muted-rgb),0.7)]">
+            <div className="mt-2 text-xs text-[var(--muted)]">
               {t.guide.updated} {guide.lastUpdated}
             </div>
           )}
@@ -482,7 +485,7 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                 <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap">
                   {curated.frontmatter.whatYouLearn && (
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.7)]">{t.guide.whatYouLearn}</div>
+                      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">{t.guide.whatYouLearn}</div>
                       <ul className="space-y-1">
                         {curated.frontmatter.whatYouLearn.map((item, i) => (
                           <li key={i} className={`flex items-start gap-2 text-sm ${muted}`}>
@@ -524,9 +527,9 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                 />
               </div>
               {toc.length > 0 && (
-                <aside className="sticky top-24 hidden w-56 shrink-0 lg:block">
+                <div className="sticky top-24 hidden w-56 shrink-0 lg:block">
                   <MdxGuideToc items={toc} onThisPage={t.toc.onThisPage} />
-                </aside>
+                </div>
               )}
             </div>
 
@@ -673,8 +676,8 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
       </article>
 
       {related.length > 0 && (
-        <aside className="mt-12">
-          <h2 className="mb-4 text-lg font-semibold text-[var(--text)]">{t.guide.relatedGuides}</h2>
+        <aside aria-labelledby="related-guides" className="mt-12">
+          <h2 id="related-guides" className="mb-4 text-lg font-semibold text-[var(--text)]">{t.guide.relatedGuides}</h2>
           <ul className="space-y-2">
             {related.map((g) => (
               <li key={g.slug}>

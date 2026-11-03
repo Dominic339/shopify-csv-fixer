@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
 
 type MeResponse =
@@ -84,9 +86,9 @@ export default function AccountClient() {
               </button>
 
               {!email ? (
-                <a className="rgb-btn bg-[var(--surface)] px-5 py-3 text-sm" href="/login">
+                <Link className="rgb-btn bg-[var(--surface)] px-5 py-3 text-sm" href="/login">
                   Sign in
-                </a>
+                </Link>
               ) : null}
             </div>
 

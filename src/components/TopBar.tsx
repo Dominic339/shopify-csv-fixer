@@ -367,7 +367,7 @@ export default function TopBar({ navByLocale }: Props) {
                 {l.label}
               </Link>
             ))}
-            <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.8)]">
+            <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
               {navT.tools}
             </div>
             {tools.map((tool) => (

@@ -12,7 +12,7 @@ import JsonLd from "@/components/JsonLd";
 import { Screenshot, type ScreenName } from "@/components/ui/Screenshot";
 import { fmt } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { FREE_ROWS_PER_EXPORT } from "@/lib/plans";
 import { loadPages } from "@/views/infoPages";
 
@@ -36,7 +36,7 @@ export async function howItWorksMetadata(locale: Locale = DEFAULT_LOCALE): Promi
     title: d.metaTitle,
     description: d.metaDescription,
     alternates: pageAlternates(locale, PATH),
-    openGraph: { title: d.metaTitle, description: d.metaDescription, url: `${SITE_URL}${localeHref(locale, PATH)}` },
+    openGraph: { images: SHARE_IMAGES, title: d.metaTitle, description: d.metaDescription, url: `${SITE_URL}${localeHref(locale, PATH)}` },
   };
 }
 

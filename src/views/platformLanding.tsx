@@ -18,7 +18,7 @@ import { localizedLandings } from "@/lib/landing/localize";
 import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
 import { SHOPIFY_HEADER_ALIASES } from "@/lib/shopifySchema";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { fmt, getTranslations, platformLabel } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { loadValidationDicts, validationText } from "@/lib/i18n/validationText";
@@ -34,7 +34,7 @@ export async function platformLandingMetadata(slug: LandingSlug, locale: Locale 
     title: { absolute: p.metaTitle },
     description: p.metaDescription,
     alternates: pageAlternates(locale, p.path),
-    openGraph: { title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${localeHref(locale, p.path)}` },
+    openGraph: { images: SHARE_IMAGES, title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${localeHref(locale, p.path)}` },
   };
 }
 
@@ -99,7 +99,8 @@ function DemoTable({ caption, headers, rows, tone }: { caption: string; headers:
   return (
     <figure className="min-w-0">
       <figcaption className={`mb-2 text-xs font-bold uppercase tracking-widest ${tone === "before" ? "text-red-600 dark:text-red-400" : "text-emerald-700 dark:text-green-400"}`}>{caption}</figcaption>
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+      {/* Focusable so keyboard users can scroll the table sideways. */}
+      <div tabIndex={0} role="region" aria-label={caption} className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-[var(--border)]">
@@ -258,7 +259,7 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
         <ol className="mt-5 grid gap-4 md:grid-cols-3">
           {p.gotchas.map((g, i) => (
             <li key={g.title} className={`${card} p-5`}>
-              <span className={`text-4xl font-black ${p.accent.text} opacity-60`}>{String(i + 1).padStart(2, "0")}</span>
+              <span aria-hidden="true" className={`text-4xl font-black ${p.accent.text}`}>{String(i + 1).padStart(2, "0")}</span>
               <h3 className="mt-2 text-base font-bold text-[var(--text)]">{g.title}</h3>
               <p className={`mt-2 text-sm leading-6 ${muted}`}>{g.body}</p>
             </li>

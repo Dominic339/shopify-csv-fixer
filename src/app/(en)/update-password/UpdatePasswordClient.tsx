@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
@@ -76,12 +78,12 @@ export default function UpdatePasswordClient({ authByLocale }: Props) {
           <p className="mt-2 text-sm text-[var(--muted)]">
             {t.linkExpiredDesc}
           </p>
-          <a
+          <Link
             href="/reset-password"
             className="rg-btn mt-6 inline-block px-4 py-3 text-sm font-semibold"
           >
             {t.requestNewLink}
-          </a>
+          </Link>
         </div>
       </main>
     );

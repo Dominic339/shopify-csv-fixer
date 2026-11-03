@@ -62,7 +62,7 @@ export default function GuideSidebar({ searchPlaceholder, allGuides, platformsLa
   // Mobile: search + a horizontally scrolling row of platforms above the content.
   // Desktop: a sticky sidebar.
   return (
-    <aside className="w-full md:w-52 md:shrink-0">
+    <aside aria-label={platformsLabel} className="w-full md:w-52 md:shrink-0">
       <div className="md:sticky md:top-24">
         <input
           type="search"
@@ -70,7 +70,7 @@ export default function GuideSidebar({ searchPlaceholder, allGuides, platformsLa
           placeholder={searchPlaceholder ?? "Search guides…"}
           ref={inputRef}
           onChange={(e) => handleSearch(e.target.value)}
-          className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-base text-[var(--text)] placeholder:text-[color:rgba(var(--muted-rgb),0.6)] focus:outline-none focus:ring-1 focus:ring-[var(--ring)] md:mb-5 md:text-sm"
+          className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-base text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-1 focus:ring-[var(--ring)] md:mb-5 md:text-sm"
         />
         <nav aria-label={platformsLabel ?? "Platforms"}>
           <div className="mb-1 hidden text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),1)] md:block">

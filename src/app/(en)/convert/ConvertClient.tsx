@@ -21,7 +21,7 @@ import { localeHref } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { fmt } from "@/lib/i18n/fmt";
 import { useValidationText } from "@/lib/i18n/useValidationText";
-import { card, muted, platformLabel, StepTitle } from "@/app/app/fixer/ui";
+import { card, muted, platformLabel, StepTitle } from "@/app/(en)/app/fixer/ui";
 import { readTextFile } from "@/lib/textFile";
 
 function downloadFile(filename: string, content: string, type: string) {
@@ -194,9 +194,11 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
 
   const selectCls = "w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)]";
   const migration = routeFor(sourceFormatId, targetFormatId);
+  const Wrapper = embedded ? "div" : "main";
 
   return (
-    <div className={embedded ? "" : "mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12"}>
+    // Embedded in a migration page, which already has its own <main>.
+    <Wrapper className={embedded ? "" : "mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12"}>
       {!embedded && (
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-[var(--text)]">{t.title}</h1>
@@ -393,6 +395,6 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
           </div>
         </section>
       )}
-    </div>
+    </Wrapper>
   );
 }

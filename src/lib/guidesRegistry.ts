@@ -52,7 +52,7 @@ export function issueCodeToSlug(code: string): string {
 }
 
 function issueMetaToGuides(platform: GuidePlatform, metaMap: IssueMetaMap): Guide[] {
-  return Object.values(metaMap).map((m) => ({
+  return Object.values(metaMap).filter((m) => !m.aliasOf).map((m) => ({
     platform,
     slug: issueCodeToSlug(m.code),
     title: m.title,

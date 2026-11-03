@@ -7,7 +7,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { FileDropZone } from "@/components/FileDropZone";
-import { card, muted } from "@/app/app/fixer/ui";
+import { card, muted } from "@/app/(en)/app/fixer/ui";
 import { parseCsv, toCsv, type CsvRow } from "@/lib/csv";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { fmt } from "@/lib/i18n/fmt";

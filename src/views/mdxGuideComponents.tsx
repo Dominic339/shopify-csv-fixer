@@ -39,7 +39,8 @@ export const mdxGuideComponents = {
       </code>
     ),
   pre: ({ children }: C) => (
-    <pre className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-4 font-mono text-sm leading-relaxed text-[var(--code-text)]">
+    // tabIndex: wide code scrolls sideways, so keyboard users need to be able to focus it.
+    <pre tabIndex={0} className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-4 font-mono text-sm leading-relaxed text-[var(--code-text)]">
       {children}
     </pre>
   ),
@@ -65,7 +66,7 @@ export const mdxGuideComponents = {
   ),
   strong: ({ children }: C) => <strong className="font-semibold text-[var(--text)]">{children}</strong>,
   blockquote: ({ children }: C) => (
-    <blockquote className="border-l-4 border-[var(--border)] pl-4 italic text-[color:rgba(var(--muted-rgb),0.8)]">{children}</blockquote>
+    <blockquote className="border-l-4 border-[var(--border)] pl-4 italic text-[var(--muted)]">{children}</blockquote>
   ),
 };
 

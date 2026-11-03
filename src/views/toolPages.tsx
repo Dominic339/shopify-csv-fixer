@@ -5,16 +5,16 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import HomeClient from "@/app/HomeClient";
-import AppClient from "@/app/app/AppClient";
-import ConvertClient from "@/app/convert/ConvertClient";
-import MergeClient from "@/app/merge/MergeClient";
-import InspectorClient from "@/app/csv-inspector/InspectorClient";
-import ProfileClient from "@/app/profile/ProfileClient";
+import HomeClient from "@/app/(en)/HomeClient";
+import AppClient from "@/app/(en)/app/AppClient";
+import ConvertClient from "@/app/(en)/convert/ConvertClient";
+import MergeClient from "@/app/(en)/merge/MergeClient";
+import InspectorClient from "@/app/(en)/csv-inspector/InspectorClient";
+import ProfileClient from "@/app/(en)/profile/ProfileClient";
 import { getTranslations, presetText, type Translations } from "@/lib/i18n/getTranslations";
 import { getAllFormats } from "@/lib/formats";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 
 /** Distinct import checks across the built-in formats (formats can share a rule set). */
@@ -69,7 +69,7 @@ export async function toolMetadata(locale: Locale, tool: ToolId): Promise<Metada
     title: tool === "home" ? { absolute: title } : title,
     description,
     alternates: pageAlternates(locale, path),
-    openGraph: { title, description, url, locale },
+    openGraph: { images: SHARE_IMAGES, title, description, url, locale },
   };
 }
 
