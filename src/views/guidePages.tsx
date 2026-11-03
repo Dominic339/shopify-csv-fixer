@@ -34,7 +34,7 @@ import { extractTocFromMdx } from "@/lib/guides/mdxHeadings";
 import { rehypeWrapSections } from "@/lib/guides/rehypeWrapSections";
 import { fmt, getTranslations, platformLabel, type Translations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, LOCALES, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, fitTitle, pageAlternates, seoTitle, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { mdxGuideComponentsFor } from "@/views/mdxGuideComponents";
 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
@@ -71,8 +71,8 @@ export async function GuidesShell({ locale, children }: { locale: Locale; childr
 export async function guidesHubMetadata(locale: Locale): Promise<Metadata> {
   const t = await getTranslations(locale);
   return {
-    title: t.guides.title,
-    description: t.guides.description,
+    title: seoTitle(t.guides.title),
+    description: fitDescription(t.guides.description),
     alternates: pageAlternates(locale, "/guides"),
     openGraph: { images: SHARE_IMAGES, title: t.guides.title, description: t.guides.description, url: `${SITE_URL}${localeHref(locale, "/guides")}` },
   };
@@ -194,10 +194,11 @@ export async function guidesPlatformMetadata(locale: Locale, platform: string): 
   if (!isPlatform(platform)) return {};
   const t = await getTranslations(locale);
   const label = platformLabel(t, platform);
-  const title = fmt(t.guides.platformTitle, { platform: label });
-  const description = platform === "general" ? t.guides.generalGuidesDesc : fmt(t.guides.platformMetaDesc, { platform: label });
+  // "General" doesn't fit the "{platform} CSV Import Guides" pattern in every language.
+  const title = fitTitle(platform === "general" ? t.guides.generalGuidesTitle : fmt(t.guides.platformTitle, { platform: label }));
+  const description = fitDescription(platform === "general" ? t.guides.generalGuidesDesc : fmt(t.guides.platformMetaDesc, { platform: label }));
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: pageAlternates(locale, `/guides/${platform}`),
     openGraph: { images: SHARE_IMAGES, title, description },
@@ -309,15 +310,24 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
   if (!english || !guide) return {};
   const t = await getTranslations(locale);
   const label = platformLabel(t, guide.platform);
-  const title = fmt(t.guide.metaTitle, { title: guide.title, platform: label });
-  const description =
-    guide.kind === "issue" ? fmt(t.guide.metaIssueDescription, { description: guide.description, platform: label }) : guide.description;
+  // "{title} | Shopify CSV Guide": the platform part is dropped first when the title is long,
+  // and left out for general guides ("CSV guide for General" reads badly in most languages).
+  const guidePart = fmt(t.guide.metaTitle, { title: "\u0000", platform: label }).split("\u0000").join("").replace(/^\s*\|\s*/, "");
+  let title = fitTitle(guide.title, guide.platform === "general" ? null : guidePart);
+  // Issue guides share titles across platforms ("Invalid image URL"); keep the platform name at least.
+  if (guide.platform !== "general" && !title.includes(label)) {
+    const short = fitTitle(guide.title, label);
+    title = short.includes(label) ? short : `${title} | ${label}`;
+  }
+  const description = fitDescription(
+    guide.kind === "issue" ? fmt(t.guide.metaIssueDescription, { description: guide.description, platform: label }) : guide.description,
+  );
   const bodyLocales = await guideBodyLocales(english);
   const translated = locale === DEFAULT_LOCALE || bodyLocales.includes(locale);
   const path = `/guides/${platform}/${slug}`;
   const url = `${SITE_URL}${localeHref(translated ? locale : DEFAULT_LOCALE, path)}`;
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: [guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
     // Until a language has the article body, its copy points its canonical at the English page.

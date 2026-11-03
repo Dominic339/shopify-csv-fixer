@@ -12,7 +12,7 @@ import JsonLd from "@/components/JsonLd";
 import { Screenshot, type ScreenName } from "@/components/ui/Screenshot";
 import { fmt } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, pageAlternates, seoTitle, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { FREE_ROWS_PER_EXPORT } from "@/lib/plans";
 import { loadPages } from "@/views/infoPages";
 
@@ -33,8 +33,8 @@ const lead = "text-base leading-7 text-[var(--muted)] sm:text-lg sm:leading-8";
 export async function howItWorksMetadata(locale: Locale = DEFAULT_LOCALE): Promise<Metadata> {
   const d = (await loadPages(locale)).howItWorks;
   return {
-    title: d.metaTitle,
-    description: d.metaDescription,
+    title: seoTitle(d.metaTitle),
+    description: fitDescription(d.metaDescription),
     alternates: pageAlternates(locale, PATH),
     openGraph: { images: SHARE_IMAGES, title: d.metaTitle, description: d.metaDescription, url: `${SITE_URL}${localeHref(locale, PATH)}` },
   };

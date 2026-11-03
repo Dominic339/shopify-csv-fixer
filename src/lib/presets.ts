@@ -39,7 +39,7 @@ export const PRESET_FORMATS: PresetFormat[] = [
     name: "Etsy Listings",
     category: "Ecommerce",
     description:
-      "Prepare Etsy listing CSVs with cleaner structure, required fields, and safer formatting for uploads.",
+      "Clean up Etsy listing CSVs for bulk-editing apps or a master catalogue: required fields, tags, prices and safer formatting.",
   },
   {
     id: "amazon_inventory_loader",

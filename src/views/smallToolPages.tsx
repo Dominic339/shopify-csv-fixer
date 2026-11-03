@@ -10,7 +10,7 @@ import FAQJsonLd from "@/components/FAQJsonLd";
 import JsonLd from "@/components/JsonLd";
 import { getTranslations, type Translations } from "@/lib/i18n/getTranslations";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, pageAlternates, seoTitle, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { SMALL_TOOLS, smallToolBySlug, type SmallToolKey } from "@/lib/tools/registry";
 import BarcodeClient from "@/app/(en)/tools/clients/BarcodeClient";
 import DedupeClient from "@/app/(en)/tools/clients/DedupeClient";
@@ -36,8 +36,8 @@ export async function smallToolsIndexMetadata(locale: Locale): Promise<Metadata>
   const t = (await getTranslations(locale)).smallTools;
   const url = `${SITE_URL}${localeHref(locale, "/tools")}`;
   return {
-    title: t.indexMetaTitle,
-    description: t.indexDescription,
+    title: seoTitle(t.indexMetaTitle),
+    description: fitDescription(t.indexDescription),
     alternates: pageAlternates(locale, "/tools"),
     openGraph: { images: SHARE_IMAGES, title: t.indexMetaTitle, description: t.indexDescription, url, locale },
   };
@@ -49,8 +49,8 @@ export async function smallToolMetadata(locale: Locale, slug: string): Promise<M
   const s = (await getTranslations(locale)).smallTools.tools[tool.key];
   const path = `/tools/${slug}`;
   return {
-    title: s.metaTitle,
-    description: s.description,
+    title: seoTitle(s.metaTitle),
+    description: fitDescription(s.description),
     alternates: pageAlternates(locale, path),
     openGraph: { images: SHARE_IMAGES, title: s.metaTitle, description: s.description, url: `${SITE_URL}${localeHref(locale, path)}`, locale },
   };
