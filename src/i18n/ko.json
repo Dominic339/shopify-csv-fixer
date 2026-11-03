@@ -39,6 +39,12 @@
     "language": "언어",
     "themeDark": "다크 모드로 전환",
     "themeLight": "라이트 모드로 전환",
+    "descFixer": "가져오기 전에 상품 CSV를 검사하고 수정",
+    "descConverter": "한 플랫폼의 CSV를 다른 플랫폼 형식으로 변환",
+    "descMerger": "두 파일을 합치고 중복 제거",
+    "descInspector": "열, 빈칸, 문제를 한눈에",
+    "descFreeTools": "간단한 도구: 인코딩, 바코드, 핸들",
+    "descMigrations": "플랫폼 간 단계별 이전",
     "freeTools": "무료 CSV 도구",
     "storeMigrations": "스토어 이전"
   },

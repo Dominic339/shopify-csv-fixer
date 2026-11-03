@@ -24,6 +24,31 @@ type SupabaseSession = { user?: SupabaseUser };
 
 type NavStrings = Translations["nav"];
 
+/** 24px stroke icons for the tools menu. */
+const TOOL_ICONS: Record<string, React.ReactNode> = {
+  fixer: <path d="M9 12l2 2 4-4M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" />,
+  convert: <path d="M4 8h13l-3-3M20 16H7l3 3" />,
+  merge: <path d="M6 4v5a4 4 0 004 4h4a4 4 0 014 4v3M18 4v5a4 4 0 01-4 4M6 20v-3" />,
+  inspect: <path d="M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4" />,
+  tools: <path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v6H4zM14 15h6v6h-6z" />,
+  migrate: <path d="M3 7h11v10H3zM14 10h4l3 3v4h-7M7 20a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17 20a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />,
+};
+
+function ToolIcon({ name, tone }: { name: string; tone: "teal" | "indigo" }) {
+  return (
+    <span
+      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+        tone === "teal" ? "bg-[var(--accent-soft)] text-[var(--accent-text)]" : "bg-[var(--secondary-soft)] text-[var(--secondary-text)]"
+      }`}
+      aria-hidden="true"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {TOOL_ICONS[name]}
+      </svg>
+    </span>
+  );
+}
+
 type Props = {
   /** Nav strings for every locale; the active one is picked from the URL. */
   navByLocale: Record<Locale, NavStrings>;
@@ -158,13 +183,17 @@ export default function TopBar({ navByLocale }: Props) {
   const customFormatsUpgradeMessage = signedIn ? navT.customFormatsUpgrade : navT.customFormatsUpgradeSignedOut;
 
   const tools = [
-    { path: "/convert", label: navT.formatConverter },
-    { path: "/merge", label: navT.csvMerger },
-    { path: "/csv-inspector", label: navT.csvInspector },
-    { path: "/tools", label: navT.freeTools },
+    { path: "/convert", label: navT.formatConverter, desc: navT.descConverter, icon: "convert", tone: "indigo" as const },
+    { path: "/merge", label: navT.csvMerger, desc: navT.descMerger, icon: "merge", tone: "indigo" as const },
+    { path: "/csv-inspector", label: navT.csvInspector, desc: navT.descInspector, icon: "inspect", tone: "teal" as const },
+    { path: "/tools", label: navT.freeTools, desc: navT.descFreeTools, icon: "tools", tone: "teal" as const },
     // English-only pages, so not prefixed with the reader's locale.
-    { path: "/migrate", label: navT.storeMigrations, englishOnly: true },
+    { path: "/migrate", label: navT.storeMigrations, desc: navT.descMigrations, icon: "migrate", tone: "indigo" as const, englishOnly: true },
   ];
+  // The page you're on, for aria-current (which also styles the link).
+  const bare = currentLocale === DEFAULT_LOCALE ? pathname ?? "/" : (pathname ?? "/").replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/";
+  const current = (path: string) => (bare === path || bare.startsWith(path + "/") ? ("page" as const) : undefined);
+  const toolsActive = tools.some((tool) => current(tool.path));
   const openCustomFormats = () => {
     setMenuOpen(false);
     setMobileOpen(false);
@@ -271,44 +300,81 @@ export default function TopBar({ navByLocale }: Props) {
 
         {/* Desktop navigation */}
         <nav className="hidden items-center gap-1 md:flex">
-          <Link className="nav-link" href={href("/presets")}>
+          <Link className="nav-link" href={href("/presets")} aria-current={current("/presets")}>
             {navT.templates}
           </Link>
-          <Link className="nav-link" href={href("/guides")}>
+          <Link className="nav-link" href={href("/guides")} aria-current={current("/guides")}>
             {navT.guides}
           </Link>
 
           <div className="relative" ref={toolsRef}>
             <button
               type="button"
-              className="nav-link"
+              className={`nav-link gap-1 ${toolsActive ? "text-[var(--accent-text)]" : ""}`}
               onClick={() => setToolsOpen((v) => !v)}
               aria-expanded={toolsOpen}
-              aria-haspopup="menu"
+              aria-haspopup="true"
             >
               {navT.tools}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className={`transition-transform ${toolsOpen ? "rotate-180" : ""}`} aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
             </button>
             {toolsOpen && (
-              <div className="popover-surface absolute left-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl shadow-xl">
-                <div className="p-2">
-                  {tools.map((tool) => (
-                    <Link
-                      key={tool.path}
-                      href={tool.englishOnly ? tool.path : href(tool.path)}
-                      className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)]"
-                      onClick={() => setToolsOpen(false)}
-                    >
-                      {tool.label}
-                      {betaBadge}
-                    </Link>
-                  ))}
+              <div className="popover-surface menu-in absolute left-1/2 z-50 mt-3 w-[600px] -translate-x-1/2 overflow-hidden rounded-3xl shadow-2xl">
+                <div className="grid grid-cols-[1fr_1.35fr]">
+                  {/* The main tool, featured */}
+                  <Link
+                    href={href("/app")}
+                    className="group relative flex flex-col justify-between gap-6 overflow-hidden bg-[var(--accent-soft)] p-5"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    <ToolIcon name="fixer" tone="teal" />
+                    {/* A tiny sheet: one cell fixed (teal), one flagged (amber). */}
+                    <div aria-hidden="true" className="space-y-1.5 rounded-xl border border-[rgba(var(--accent-rgb),0.25)] bg-[var(--surface)] p-2.5">
+                      {[["w-10", "w-8", "bg-[rgba(var(--accent-rgb),0.35)] w-6"], ["w-8", "w-10", "w-7"], ["w-9", "bg-amber-400/60 w-8", "w-6"], ["w-10", "w-7", "w-8"]].map((row, r) => (
+                        <div key={r} className="flex gap-1.5">
+                          {row.map((c, k) => (
+                            <span key={k} className={`h-2 rounded-full ${c.includes("bg-") ? c : `bg-[var(--surface-2)] ${c}`}`} />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1 text-base font-semibold text-[var(--text)]">
+                        {navT.csvFixer}
+                        <span className="transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                      </div>
+                      <p className="mt-1 text-sm leading-5 text-[var(--muted)]">{navT.descFixer}</p>
+                    </div>
+                  </Link>
+                  <div className="p-2">
+                    {tools.map((tool) => (
+                      <Link
+                        key={tool.path}
+                        href={tool.englishOnly ? tool.path : href(tool.path)}
+                        aria-current={current(tool.path)}
+                        className="flex items-start gap-3 rounded-2xl px-3 py-2.5 text-[var(--text)] hover:bg-[var(--surface-2)] aria-[current=page]:bg-[var(--surface-2)]"
+                        onClick={() => setToolsOpen(false)}
+                      >
+                        <ToolIcon name={tool.icon} tone={tool.tone} />
+                        <span className="min-w-0">
+                          <span className="flex items-center text-sm font-semibold">
+                            {tool.label}
+                            {tool.path === "/merge" ? betaBadge : null}
+                          </span>
+                          <span className="mt-0.5 block text-xs leading-5 text-[var(--muted)]">{tool.desc}</span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
           {canAccessCustomFormats ? (
-            <Link className="nav-link" href="/formats">
+            <Link className="nav-link" href="/formats" aria-current={current("/formats")}>
               {navT.customFormats}
             </Link>
           ) : (
@@ -370,19 +436,23 @@ export default function TopBar({ navByLocale }: Props) {
                 {l.label}
               </Link>
             ))}
-            <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+            <div className="px-3 pb-2 pt-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
               {navT.tools}
             </div>
-            {tools.map((tool) => (
-              <Link
-                key={tool.path}
-                href={tool.englishOnly ? tool.path : href(tool.path)}
-                className="flex items-center justify-between rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]"
-              >
-                {tool.label}
-                {betaBadge}
-              </Link>
-            ))}
+            <div className="grid grid-cols-2 gap-2">
+              {tools.map((tool) => (
+                <Link
+                  key={tool.path}
+                  href={tool.englishOnly ? tool.path : href(tool.path)}
+                  aria-current={current(tool.path)}
+                  className="flex flex-col gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm font-semibold text-[var(--text)] last:odd:col-span-2 aria-[current=page]:border-[var(--accent)]"
+                >
+                  <ToolIcon name={tool.icon} tone={tool.tone} />
+                  {tool.label}
+                </Link>
+              ))}
+            </div>
+            <div className="h-2" />
             {canAccessCustomFormats ? (
               <Link href="/formats" className="rounded-xl px-3 py-3 text-base text-[var(--text)] hover:bg-[var(--surface-2)]">
                 {navT.customFormats}

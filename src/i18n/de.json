@@ -39,6 +39,12 @@
     "language": "Sprache",
     "themeDark": "Zum dunklen Modus wechseln",
     "themeLight": "Zum hellen Modus wechseln",
+    "descFixer": "Produkt-CSV vor dem Import prüfen und reparieren",
+    "descConverter": "CSV einer Plattform ins Format einer anderen umwandeln",
+    "descMerger": "Zwei Dateien zusammenführen und Duplikate entfernen",
+    "descInspector": "Spalten, Lücken und Probleme auf einen Blick",
+    "descFreeTools": "Kleine Helfer: Kodierung, Barcodes, Handles",
+    "descMigrations": "Schritt für Schritt zwischen Plattformen umziehen",
     "freeTools": "Kostenlose CSV-Tools",
     "storeMigrations": "Shop-Umzüge"
   },

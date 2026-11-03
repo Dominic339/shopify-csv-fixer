@@ -144,96 +144,138 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
       <SEOJsonLd />
       <FAQJsonLd items={faqs.map((f) => ({ question: f.q, answer: f.a }))} />
 
-      {/* ── Hero ── */}
-      <section className="mx-auto max-w-6xl px-4 pt-14 text-center sm:px-6 sm:pt-20">
-        <p className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium text-[var(--muted)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          {t.heroBadge}
-        </p>
-        <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-bold tracking-tight text-[var(--text)] sm:text-6xl sm:leading-[1.05]">
-          {t.heroTitleA} <span className="text-[var(--accent-text)]">{t.heroTitleB}</span>
-        </h1>
-        <p className={`mx-auto mt-6 max-w-2xl ${lead}`}>{t.heroDesc}</p>
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href={href("/app")} className="btn-primary px-6 py-3 text-base">
-            {t.ctaFixer}
-          </Link>
-          <Link href={href("/how-it-works")} className="rgb-btn px-6 py-3 text-base">
-            {t.ctaHowItWorks}
-          </Link>
-        </div>
-        <ul className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[var(--muted)]">
-          {[t.trust1, t.trust2, fmt(t.trustSmallFiles, { rows: FREE_ROWS_PER_EXPORT })].map((x) => (
-            <li key={x} className="flex items-center gap-1.5">
-              <Check />
-              {x}
-            </li>
-          ))}
-        </ul>
-
-        <div className="relative mx-auto mt-14 max-w-5xl text-left">
-          <Screenshot name="hero" alt={t.heroShotAlt} priority />
-        </div>
-      </section>
-
-      {/* ── Works with ── */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <p className="text-center text-sm text-[var(--muted)]">{t.worksWith}</p>
-        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-          {PLATFORMS.map((p) => (
-            <li key={p.name}>
-              <Link href={href(p.path)} className="text-xl font-semibold tracking-tight text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-                {p.name}
+      {/* ── Hero: an ink band, with the product shot and stats on it ── */}
+      <div data-theme="dark" className="ink-band">
+        <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-12 lg:gap-8 lg:pb-24">
+          <div className="lg:col-span-5">
+            <p className="glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-[var(--muted)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+              {t.heroBadge}
+            </p>
+            <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--text)] sm:text-5xl lg:text-[3.4rem] lg:leading-[1.05]">
+              {t.heroTitleA} <span className="text-[var(--accent-text)]">{t.heroTitleB}</span>
+            </h1>
+            <p className={`mt-6 max-w-xl ${lead}`}>{t.heroDesc}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href={href("/app")} className="btn-primary px-6 py-3 text-base">
+                {t.ctaFixer}
               </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ── Stats ── */}
-      <section className="border-y border-[var(--border)] bg-[var(--surface)]">
-        <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-y-8 px-4 py-10 sm:grid-cols-4 sm:px-6">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <dt className="sr-only">{s.label}</dt>
-              <dd className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">{s.value}</dd>
-              <dd className="mt-1 text-sm text-[var(--muted)]">{s.label}</dd>
+              <Link href={href("/how-it-works")} className="glass inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:bg-white/10">
+                {t.ctaHowItWorks}
+              </Link>
             </div>
-          ))}
-        </dl>
-      </section>
+            <ul className="mt-7 space-y-2 text-sm text-[var(--muted)]">
+              {[t.trust1, t.trust2, fmt(t.trustSmallFiles, { rows: FREE_ROWS_PER_EXPORT })].map((x) => (
+                <li key={x} className="flex items-center gap-2">
+                  <Check />
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-      {/* ── Showcases ── */}
-      <div className="mx-auto max-w-6xl space-y-24 px-4 py-24 sm:px-6">
-        {showcases.map((s, i) => (
-          <section key={s.title} className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
-            <div className={`lg:col-span-5 ${i % 2 ? "lg:order-last" : ""}`}>
-              <p className={eyebrow}>{s.eyebrow}</p>
-              <h2 className={`mt-3 ${h2}`}>{s.title}</h2>
-              <p className={`mt-4 ${lead}`}>{s.desc}</p>
-              <ul className="mt-6 space-y-3">
-                {s.points.map((pt) => (
-                  <li key={pt} className="flex gap-3 text-sm leading-6 text-[var(--text)]">
-                    <Check />
-                    {pt}
+          {/* Product shot, tilted, with a few of the fixes it makes floating over it */}
+          <div className="relative lg:col-span-7">
+            <div className="glow-frame lg:[transform:perspective(1800px)_rotateY(-7deg)_rotateX(2deg)]">
+              <Screenshot name="hero" alt={t.heroShotAlt} priority frame={false} className="!rounded-[calc(1.25rem-1px)] !border-0 !shadow-none" sizes="(min-width: 1024px) 760px, 100vw" />
+            </div>
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden sm:block">
+              <span className="float-chip absolute -left-4 top-[18%] flex items-center gap-2 rounded-xl px-3 py-2 font-mono text-xs text-[var(--text)] shadow-lg lg:-left-10">
+                <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
+                $19.99 → 19.99
+              </span>
+              <span className="float-chip delay-1 absolute -right-3 top-[44%] flex items-center gap-2 rounded-xl px-3 py-2 font-mono text-xs text-[var(--text)] shadow-lg">
+                <span className="h-2 w-2 rounded-full bg-[var(--secondary)]" />
+                Blue Shirt → blue-shirt
+              </span>
+              <span className="float-chip delay-2 absolute bottom-[10%] left-[12%] flex items-center gap-2 rounded-xl px-3 py-2 font-mono text-xs text-[var(--text)] shadow-lg">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                yes → TRUE
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Works with + stats */}
+        <div className="mx-auto max-w-7xl px-4 pb-14 sm:px-6">
+          <div className="grid gap-4 lg:grid-cols-12">
+            <div className="glass flex flex-col justify-center gap-3 rounded-2xl p-5 lg:col-span-5">
+              <p className="text-sm text-[var(--muted)]">{t.worksWith}</p>
+              <ul className="flex flex-wrap gap-2">
+                {PLATFORMS.map((p) => (
+                  <li key={p.name}>
+                    <Link href={href(p.path)} className="inline-block rounded-full border border-white/15 px-3 py-1 text-sm font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-text)]">
+                      {p.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
-              {s.link && (
-                <Link href={s.link.href} className="mt-6 inline-block text-sm font-semibold text-[var(--secondary-text)] hover:underline">
-                  {s.link.label} →
-                </Link>
-              )}
             </div>
-            <div className="lg:col-span-7">
-              <Screenshot name={s.shot} alt={s.alt} frame={false} sizes="(min-width: 1024px) 640px, 100vw" />
-            </div>
-          </section>
-        ))}
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:col-span-7">
+              {stats.map((s) => (
+                <div key={s.label} className="glass rounded-2xl p-5">
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd className="text-3xl font-bold tracking-tight text-[var(--text)]">{s.value}</dd>
+                  <dd className="mt-1 text-sm text-[var(--muted)]">{s.label}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
       </div>
 
+      {/* ── Showcases: a bento grid ── */}
+      <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+        <div className="grid gap-5 lg:grid-cols-6">
+          {showcases.map((s, i) => {
+            // Wide card, tall narrow card, then a full-width card with the shot beside the text.
+            const layout = ["lg:col-span-4", "lg:col-span-2", "lg:col-span-6"][i];
+            const wash = ["wash-teal", "wash-indigo", "wash-teal"][i];
+            const side = i === 2;
+            return (
+              <article key={s.title} className={`lift flex min-w-0 flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] ${layout}`}>
+                <div className={`${wash} flex h-full flex-col ${side ? "lg:grid lg:grid-cols-12 lg:items-center" : ""}`}>
+                  <div className={`p-7 sm:p-8 ${side ? "lg:col-span-5" : ""}`}>
+                    <p className={eyebrow}>{s.eyebrow}</p>
+                    <h2 className="mt-3 text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">{s.title}</h2>
+                    <p className="mt-3 text-sm leading-6 text-[var(--muted)] sm:text-base sm:leading-7">{s.desc}</p>
+                    <ul className="mt-5 space-y-2.5">
+                      {s.points.map((pt) => (
+                        <li key={pt} className="flex gap-3 text-sm leading-6 text-[var(--text)]">
+                          <Check />
+                          {pt}
+                        </li>
+                      ))}
+                    </ul>
+                    {s.link && (
+                      <Link href={s.link.href} className="mt-5 inline-block text-sm font-semibold text-[var(--secondary-text)] hover:underline">
+                        {s.link.label} →
+                      </Link>
+                    )}
+                  </div>
+                  {/* The screenshot peeks in from the bottom (or the side, on the wide card). */}
+                  <div className={`mt-auto ${side ? "px-7 pb-7 lg:col-span-7 lg:py-8 lg:pl-0 lg:pr-8" : "pl-7 sm:pl-8"}`}>
+                    {/* The narrow card shows a close-up crop instead of a tiny full screenshot. */}
+                    <div className={i === 1 ? "overflow-hidden lg:h-80" : ""}>
+                      <Screenshot
+                        name={s.shot}
+                        alt={s.alt}
+                        frame={false}
+                        className={side ? "" : `rounded-b-none rounded-r-none border-b-0 border-r-0 ${i === 1 ? "lg:w-[190%] lg:max-w-none" : ""}`}
+                        sizes={i === 1 ? "(min-width: 1024px) 720px, 100vw" : "(min-width: 1024px) 760px, 100vw"}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
       {/* ── Why not just ask an AI? ── */}
-      <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6" aria-labelledby="ai-title">
+      <div className="wash-indigo border-y border-[var(--border)]">
+      <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6" aria-labelledby="ai-title">
         <div className="max-w-3xl">
           <p className={eyebrow}>{t.aiLabel}</p>
           <h2 id="ai-title" className={`mt-3 ${h2}`}>
@@ -275,32 +317,36 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
         </div>
         <p className="mt-6 max-w-3xl text-sm leading-6 text-[var(--muted)]">{t.aiNote}</p>
       </section>
+      </div>
 
-      {/* ── How it works ── */}
-      <section className="border-y border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <p className={eyebrow}>{t.howLabel}</p>
-              <h2 className={`mt-3 ${h2}`}>{t.howTitle}</h2>
-            </div>
-            <Link href={href("/how-it-works")} className="text-sm font-semibold text-[var(--secondary-text)] hover:underline">
-              {t.ctaWalkthrough} →
-            </Link>
+      {/* ── How it works: a connected timeline ── */}
+      <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className={eyebrow}>{t.howLabel}</p>
+            <h2 className={`mt-3 ${h2}`}>{t.howTitle}</h2>
           </div>
-          <ol className="mt-10 grid gap-6 md:grid-cols-3">
-            {steps.map((s, i) => (
-              <li key={s.title} className="rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-6">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-bold text-[var(--accent-text)]">{i + 1}</span>
-                <h3 className="mt-4 text-base font-semibold text-[var(--text)]">{s.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{s.desc}</p>
-              </li>
-            ))}
-          </ol>
+          <Link href={href("/how-it-works")} className="text-sm font-semibold text-[var(--secondary-text)] hover:underline">
+            {t.ctaWalkthrough} →
+          </Link>
         </div>
+        <ol className="relative mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+          {/* The line joining the steps */}
+          <span aria-hidden="true" className="absolute left-5 top-5 h-[calc(100%-2.5rem)] w-px bg-gradient-to-b from-[var(--accent)] to-[var(--secondary)] md:left-5 md:right-5 md:h-px md:w-auto md:bg-gradient-to-r" />
+          {steps.map((s, i) => (
+            <li key={s.title} className="relative pl-16 md:pl-0">
+              <span className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-[var(--on-primary)] shadow-[0_0_0_6px_var(--bg)] md:static">
+                {i + 1}
+              </span>
+              <h3 className="text-lg font-semibold text-[var(--text)] md:mt-6">{s.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{s.desc}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {/* ── Privacy ── */}
+      <div className="wash-teal border-y border-[var(--border)]">
       <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-5">
@@ -318,7 +364,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
               { title: t.safe2Title, desc: t.safe2Desc },
               { title: t.safe3Title, desc: t.safe3Desc },
             ].map((x) => (
-              <div key={x.title} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+              <div key={x.title} className="lift rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
                 <dt className="text-sm font-semibold text-[var(--text)]">{x.title}</dt>
                 <dd className="mt-2 text-sm leading-6 text-[var(--muted)]">{x.desc}</dd>
               </div>
@@ -326,9 +372,10 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
           </dl>
         </div>
       </section>
+      </div>
 
       {/* ── Pricing ── */}
-      <section className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-24 sm:px-6" id="pricing">
+      <section className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 sm:px-6" id="pricing">
         <div className="max-w-2xl">
           <p className={eyebrow}>{t.pricingLabel}</p>
           <h2 className={`mt-3 ${h2}`}>{t.pricingTitle}</h2>
@@ -358,14 +405,14 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
 
       {/* ── Final call to action ── */}
       <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] px-6 py-14 text-center sm:px-12">
+        <div data-theme="dark" className="ink-band overflow-hidden rounded-3xl px-6 py-16 text-center sm:px-12">
           <h2 className={h2}>{t.finalTitle}</h2>
           <p className={`mx-auto mt-4 max-w-xl ${lead}`}>{fmt(t.finalDesc, { rows: FREE_ROWS_PER_EXPORT })}</p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href={href("/app")} className="btn-primary px-6 py-3 text-base">
               {t.ctaFixer}
             </Link>
-            <Link href={href("/convert")} className="rgb-btn px-6 py-3 text-base">
+            <Link href={href("/convert")} className="glass inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:bg-white/10">
               {t.ctaConverter}
             </Link>
           </div>

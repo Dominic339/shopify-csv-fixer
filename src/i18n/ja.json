@@ -39,6 +39,12 @@
     "language": "言語",
     "themeDark": "ダークモードに切り替え",
     "themeLight": "ライトモードに切り替え",
+    "descFixer": "インポート前に商品 CSV をチェックして修正",
+    "descConverter": "あるプラットフォームの CSV を別の形式に変換",
+    "descMerger": "2 つのファイルを結合して重複を削除",
+    "descInspector": "列、空欄、問題点をひと目で確認",
+    "descFreeTools": "すぐ使える小ツール：文字コード、バーコード、ハンドル",
+    "descMigrations": "プラットフォーム間の移行を手順どおりに",
     "freeTools": "無料CSVツール",
     "storeMigrations": "ストア移行"
   },
