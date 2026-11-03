@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
 import { fmt } from "@/lib/i18n/fmt";
@@ -31,7 +31,7 @@ export default function CheckoutClient({ authByLocale }: Props) {
     let cancelled = false;
 
     async function pollAndRedirect() {
-      const supabase = createClient();
+      const supabase = await getSupabase();
 
       for (let i = 0; i < 8; i++) {
         if (cancelled) return;

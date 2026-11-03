@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { Logo } from "@/components/brand/Logo";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -52,24 +52,25 @@ export default function TopBar({ navByLocale }: Props) {
 
 
   useEffect(() => {
-    const supabase = createClient();
-
     let unsub: { data?: { subscription?: { unsubscribe: () => void } } } | null = null;
+    let alive = true;
 
     (async () => {
       try {
+        const supabase = await getSupabase();
+        if (!alive) return;
+        unsub = supabase.auth.onAuthStateChange((_event, nextSession) => {
+          setSession((nextSession as any) ?? null);
+        });
         const { data } = await supabase.auth.getSession();
-        setSession((data?.session as any) ?? null);
+        if (alive) setSession((data?.session as any) ?? null);
       } catch {
         // ignore
       }
     })();
 
-    unsub = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession((nextSession as any) ?? null);
-    });
-
     return () => {
+      alive = false;
       try {
         unsub?.data?.subscription?.unsubscribe();
       } catch {
@@ -82,7 +83,7 @@ export default function TopBar({ navByLocale }: Props) {
     let alive = true;
     (async () => {
       try {
-        const supabase = createClient();
+        const supabase = await getSupabase();
         const { data: { session: s } } = await supabase.auth.getSession();
         if (!alive) return;
         if (!s?.user) {
@@ -129,7 +130,7 @@ export default function TopBar({ navByLocale }: Props) {
 
   async function signOut() {
     try {
-      const supabase = createClient();
+      const supabase = await getSupabase();
       await supabase.auth.signOut();
     } finally {
       setMenuOpen(false);

@@ -14,7 +14,7 @@ import { fmt } from "@/lib/i18n/fmt";
 import { localeHref, LOCALES } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { FREE_EXPORTS_PER_MONTH, FREE_ROWS_PER_EXPORT } from "@/lib/plans";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 
 type SubStatus = {
   signedIn: boolean;
@@ -67,7 +67,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
     let cancelled = false;
     (async () => {
       try {
-        const supabase = createClient();
+        const supabase = await getSupabase();
         const {
           data: { session },
         } = await supabase.auth.getSession();

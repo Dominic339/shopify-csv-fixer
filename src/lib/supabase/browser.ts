@@ -1,14 +1,14 @@
-import { createBrowserClient } from "@supabase/ssr";
+// The Supabase browser client, loaded on first use. The library is about 70 KB compressed and
+// most pages only need it after they have rendered (to read the sign-in state), so it stays out
+// of the initial JavaScript.
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const supabaseConfigured = Boolean(url && anonKey);
 
-// Export the name your UI code expects
-export function createClient(): SupabaseClient {
-  if (!supabaseConfigured) {
-    // Return a typed no-op stub so the app renders without crashing when
+function makeStub(): SupabaseClient {
+    // A typed no-op stub so the app renders without crashing when
     // NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are absent
     // (e.g. CI E2E runs, local dev without .env.local).
     const stub = {
@@ -31,12 +31,14 @@ export function createClient(): SupabaseClient {
         }),
       }),
     };
-    return stub as unknown as SupabaseClient;
-  }
-  return createBrowserClient(url, anonKey);
+  return stub as unknown as SupabaseClient;
 }
 
-// Keep this export too (so other files can use the more explicit name)
-export function createSupabaseBrowserClient() {
-  return createClient();
+let client: Promise<SupabaseClient> | null = null;
+
+/** The shared browser client. Without Supabase settings it is a no-op stub. */
+export function getSupabase(): Promise<SupabaseClient> {
+  if (!supabaseConfigured) return Promise.resolve(makeStub());
+  client ??= import("@supabase/ssr").then(({ createBrowserClient }) => createBrowserClient(url, anonKey));
+  return client;
 }

@@ -13,7 +13,7 @@ import { CONVERT_ROUTES, routeFor } from "@/lib/convertRoutes";
 import { consumeExport } from "@/lib/quota";
 import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
 import { clearPendingFile, loginHrefForHere, stashPendingFile, startPassCheckout, takePendingFile, usePassAvailable } from "@/lib/passCheckout";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { trackToolEvent } from "@/lib/analytics";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { FileDropZone } from "@/components/FileDropZone";
@@ -83,8 +83,8 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   const targetOptions = CONVERT_FORMAT_OPTIONS.filter((o) => o.id !== sourceFormatId);
 
   useEffect(() => {
-    createClient()
-      .auth.getSession()
+    getSupabase()
+      .then((supabase) => supabase.auth.getSession())
       .then(({ data: { session } }) => setSignedIn(Boolean(session?.user)))
       .catch(() => {});
   }, []);

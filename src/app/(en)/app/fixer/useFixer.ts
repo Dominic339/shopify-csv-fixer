@@ -10,7 +10,7 @@ import { processCsv } from "@/lib/processCsvClient";
 import { consumeExport, getPlanLimits, getQuota } from "@/lib/quota";
 import { exportCountsTowardLimit } from "@/lib/plans";
 import { clearPendingFile, loginHrefForHere, stashPendingFile, startPassCheckout, takePendingFile } from "@/lib/passCheckout";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import type { Translations } from "@/lib/i18n/getTranslations";
 
 import { getShopifyVariantSignature, resolveShopifyVariantColumns } from "@/lib/shopifyVariantSignature";
@@ -269,7 +269,7 @@ export function useFixer(t: AppStrings) {
   async function refreshQuotaAndPlan() {
     const FALLBACK_SUB = { ok: true, plan: "free" as const, status: "none", signedIn: false };
     try {
-      const supabase = createClient();
+      const supabase = await getSupabase();
       // Run quota fetch and session lookup in parallel; subscription query depends on session.
       const [q, { data: { session } }] = await Promise.all([
         getQuota(),

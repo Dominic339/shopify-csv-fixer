@@ -18,7 +18,7 @@ import {
 } from "@/lib/formats/customUser";
 import { parseCsv } from "@/lib/csv";
 import type { CsvRow } from "@/lib/formats/types";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { fmt } from "@/lib/i18n/fmt";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
@@ -125,7 +125,7 @@ export default function FormatsClient({ formatsByLocale }: Props) {
     let cancelled = false;
     (async () => {
       try {
-        const supabase = createClient();
+        const supabase = await getSupabase();
         const { data: { session } } = await supabase.auth.getSession();
         if (cancelled) return;
         if (!session?.user) {

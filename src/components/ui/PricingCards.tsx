@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { Translations } from "@/lib/i18n/getTranslations";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { PASS_PRICE_LABEL } from "@/lib/plans";
 import { startPassCheckout, usePassAvailable } from "@/lib/passCheckout";
 
@@ -41,8 +41,9 @@ export function PricingCards({ sub, tPricing: t }: Props) {
   const [passExpiresAt, setPassExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    void getSupabase()
+      .then((supabase) => supabase.auth.getSession())
+      .then(({ data: { session } }) => {
       setAccessToken(session?.access_token ?? null);
     });
     fetch("/api/quota/status", { cache: "no-store" })

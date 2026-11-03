@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/browser";
+import { getSupabase } from "@/lib/supabase/browser";
 import { useCookieLocale } from "@/lib/i18n/useCookieLocale";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Translations } from "@/lib/i18n/getTranslations";
@@ -21,17 +21,24 @@ export default function UpdatePasswordClient({ authByLocale }: Props) {
   const [sessionReady, setSessionReady] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if a session is present (set by the auth callback after the reset link)
-    const supabase = createClient();
-    supabase.auth.getSession().then((result) => {
-      setSessionReady(!!result.data?.session);
+    let unsubscribe: (() => void) | null = null;
+    let alive = true;
+    void getSupabase().then((supabase) => {
+      if (!alive) return;
+      // Listen for the PASSWORD_RECOVERY event emitted when a recovery link is clicked
+      const authListener = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") setSessionReady(true);
+      });
+      unsubscribe = () => authListener.data.subscription.unsubscribe();
+      // Check if a session is present (set by the auth callback after the reset link)
+      void supabase.auth.getSession().then((result) => {
+        if (alive) setSessionReady(!!result.data?.session);
+      });
     });
-
-    // Also listen for the PASSWORD_RECOVERY event emitted when a recovery link is clicked
-    const authListener = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setSessionReady(true);
-    });
-    return () => authListener.data.subscription.unsubscribe();
+    return () => {
+      alive = false;
+      unsubscribe?.();
+    };
   }, []);
 
   async function onSubmit(e: React.FormEvent) {
@@ -48,7 +55,7 @@ export default function UpdatePasswordClient({ authByLocale }: Props) {
     setBusy(true);
 
     try {
-      const supabase = createClient();
+      const supabase = await getSupabase();
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       setMsg({ text: t.passwordUpdated, ok: true });
