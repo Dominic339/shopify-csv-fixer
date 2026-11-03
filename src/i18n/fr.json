@@ -39,6 +39,12 @@
     "language": "Langue",
     "themeDark": "Passer en mode sombre",
     "themeLight": "Passer en mode clair",
+    "descFixer": "Vérifiez et corrigez un CSV produits avant l'import",
+    "descConverter": "Convertissez le CSV d'une plateforme vers une autre",
+    "descMerger": "Fusionnez deux fichiers et supprimez les doublons",
+    "descInspector": "Colonnes, cases vides et problèmes en un coup d'œil",
+    "descFreeTools": "Petits outils : encodage, codes-barres, handles",
+    "descMigrations": "Migrations pas à pas entre plateformes",
     "freeTools": "Outils CSV gratuits",
     "storeMigrations": "Migrations de boutique"
   },

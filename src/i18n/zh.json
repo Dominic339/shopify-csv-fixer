@@ -39,6 +39,12 @@
     "language": "语言",
     "themeDark": "切换到深色模式",
     "themeLight": "切换到浅色模式",
+    "descFixer": "导入前检查并修复商品 CSV",
+    "descConverter": "把一个平台的 CSV 转成另一个平台的格式",
+    "descMerger": "合并两个文件并去除重复",
+    "descInspector": "一眼看清列、空值和问题",
+    "descFreeTools": "快捷小工具：编码、条形码、Handle",
+    "descMigrations": "分步完成平台迁移",
     "freeTools": "免费 CSV 工具",
     "storeMigrations": "店铺迁移"
   },

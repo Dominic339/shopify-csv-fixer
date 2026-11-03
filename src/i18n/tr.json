@@ -39,6 +39,12 @@
     "language": "Dil",
     "themeDark": "Koyu moda geç",
     "themeLight": "Açık moda geç",
+    "descFixer": "Ürün CSV'nizi içe aktarmadan önce kontrol edip düzeltin",
+    "descConverter": "Bir platformun CSV'sini diğerininkine dönüştürün",
+    "descMerger": "İki dosyayı birleştirip yinelenenleri kaldırın",
+    "descInspector": "Sütunlar, boşluklar ve sorunlar bir bakışta",
+    "descFreeTools": "Hızlı araçlar: kodlama, barkodlar, handle'lar",
+    "descMigrations": "Platformlar arası adım adım geçiş",
     "freeTools": "Ücretsiz CSV araçları",
     "storeMigrations": "Mağaza taşıma"
   },

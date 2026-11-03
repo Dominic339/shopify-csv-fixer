@@ -39,6 +39,12 @@
     "language": "Taal",
     "themeDark": "Overschakelen naar donkere modus",
     "themeLight": "Overschakelen naar lichte modus",
+    "descFixer": "Controleer en herstel een product-CSV vóór de import",
+    "descConverter": "Zet de CSV van het ene platform om naar het andere",
+    "descMerger": "Voeg twee bestanden samen en verwijder dubbele rijen",
+    "descInspector": "Kolommen, lege cellen en problemen in één oogopslag",
+    "descFreeTools": "Snelle hulpmiddelen: codering, barcodes, handles",
+    "descMigrations": "Stap voor stap overstappen tussen platforms",
     "freeTools": "Gratis CSV-tools",
     "storeMigrations": "Winkelverhuizingen"
   },
