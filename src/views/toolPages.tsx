@@ -15,18 +15,8 @@ import { getTranslations, presetText, type Translations } from "@/lib/i18n/getTr
 import { getAllFormats } from "@/lib/formats";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
 import { fitDescription, fitTitle, fitTitleString, pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
-import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
+import { countChecks } from "@/lib/validation/checkCount";
 
-/** Distinct import checks across the built-in formats (formats can share a rule set). */
-function countChecks(): number {
-  // Each check once, even when presets share it (both WooCommerce presets, both eBay presets), and only checks that run.
-  const codes = Object.values(ISSUE_META_REGISTRY).flatMap((checks) =>
-    Object.entries(checks)
-      .filter(([, m]) => m.checked !== false)
-      .map(([code]) => code),
-  );
-  return new Set(codes).size;
-}
 
 /** Built-in format names in the page's language, for the fixer's format picker. */
 function presetNames(t: Translations): Record<string, string> {
