@@ -10,7 +10,9 @@ import Link from "next/link";
 import en from "@/i18n/pages/en.json";
 import JsonLd from "@/components/JsonLd";
 import { Screenshot, type ScreenName } from "@/components/ui/Screenshot";
-import { fmt } from "@/lib/i18n/getTranslations";
+import { AiComparison } from "@/components/marketing/AiComparison";
+import { fmt, getTranslations } from "@/lib/i18n/getTranslations";
+import { countChecks } from "@/lib/validation/checkCount";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { fitDescription, pageAlternates, seoTitle, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { FREE_ROWS_PER_EXPORT } from "@/lib/plans";
@@ -59,6 +61,7 @@ function Marker({ n }: { n: number }) {
 
 export async function HowItWorksView({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
   const d: HowDict = (await loadPages(locale)).howItWorks;
+  const tHome = (await getTranslations(locale)).home;
   const href = (path: string) => localeHref(locale, path);
   const rows = (s: string) => fmt(s, { rows: FREE_ROWS_PER_EXPORT });
 
@@ -152,6 +155,8 @@ export async function HowItWorksView({ locale = DEFAULT_LOCALE }: { locale?: Loc
           ))}
         </ul>
       </section>
+
+      <AiComparison t={tHome} checksCount={countChecks()} />
 
       <section className="mx-auto max-w-3xl px-4 pb-24 text-center sm:px-6">
         <h2 className="text-3xl font-bold tracking-tight text-[var(--text)]">{d.finalTitle}</h2>

@@ -521,3 +521,89 @@ select option {
     transform: none;
   }
 }
+
+/* ===== Homepage shapes: bubbles, brackets, ribbon ===== */
+
+/* Large soft glows that drift slowly behind a section. */
+@keyframes drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(28px, -22px, 0) scale(1.06); }
+}
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(48px);
+  pointer-events: none;
+  animation: drift 16s ease-in-out infinite alternate;
+}
+.orb-teal { background: radial-gradient(circle at 35% 35%, rgba(var(--accent-rgb), 0.38), rgba(var(--accent-rgb), 0) 70%); }
+.orb-indigo { background: radial-gradient(circle at 35% 35%, rgba(var(--secondary-rgb), 0.34), rgba(var(--secondary-rgb), 0) 70%); }
+.orb.slow { animation-duration: 22s; animation-delay: -6s; }
+
+/* Small crisp bubbles: a glassy circle with a highlight. */
+.bubble {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 38%),
+    radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.14), rgba(var(--secondary-rgb), 0.18));
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.25), inset 0 0 12px rgba(255, 255, 255, 0.25);
+  animation: float-y 7s ease-in-out infinite;
+}
+[data-theme="dark"] .bubble {
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 38%),
+    radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.18), rgba(var(--secondary-rgb), 0.22));
+}
+
+/* Right-angle corner brackets, like a viewfinder, around a picture. */
+.brackets {
+  position: absolute;
+  inset: -14px;
+  pointer-events: none;
+}
+.brackets > span {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-color: var(--accent);
+  border-style: solid;
+  border-width: 0;
+}
+.brackets > span:nth-child(1) { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 10px; }
+.brackets > span:nth-child(2) { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 10px; border-color: var(--secondary); }
+.brackets > span:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 10px; border-color: var(--secondary); }
+.brackets > span:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 10px; }
+
+/* A slanted ribbon that scrolls sideways. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ribbon {
+  transform: rotate(-2.2deg);
+  background: linear-gradient(90deg, var(--accent), var(--secondary));
+  color: #fff;
+  box-shadow: 0 18px 40px -20px rgba(var(--secondary-rgb), 0.6);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+.ribbon:hover .marquee-track { animation-play-state: paused; }
+
+/* A cell the fixer changed: teal glow. */
+.cell-glow {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12), 0 0 18px rgba(var(--accent-rgb), 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .bubble,
+  .marquee-track {
+    animation: none;
+  }
+}
