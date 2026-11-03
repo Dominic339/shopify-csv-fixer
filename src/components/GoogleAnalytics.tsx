@@ -29,6 +29,8 @@ export default function GoogleAnalytics() {
     // Init
     window.dataLayer = window.dataLayer || [];
     window.gtag = function gtag() {
+      // gtag.js reads real Arguments objects from the queue; a rest-parameter array would break tracking.
+      // eslint-disable-next-line prefer-rest-params
       window.dataLayer.push(arguments);
     };
 

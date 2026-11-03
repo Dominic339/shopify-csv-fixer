@@ -26,6 +26,8 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/use-memo": "warn",
       "prefer-rest-params": "warn",
+      // A leading underscore marks a parameter or variable that is unused on purpose.
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
     },
   },
 ]);

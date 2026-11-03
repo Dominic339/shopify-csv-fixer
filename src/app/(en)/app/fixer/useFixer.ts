@@ -49,6 +49,12 @@ type PlanLimits = {
 
 type CsvRow = Record<string, string>;
 
+/** The message of anything thrown: an Error, or a plain object with a message (Supabase errors). */
+function errorMessage(e: unknown): string | undefined {
+  const m = typeof e === "object" && e !== null ? (e as { message?: unknown }).message : undefined;
+  return typeof m === "string" && m ? m : undefined;
+}
+
 type UiIssue = {
   row?: number; // 1-based (legacy)
   rowIndex?: number; // 0-based (new)
@@ -129,7 +135,7 @@ export function useFixer(t: AppStrings) {
   const [uploadRunId, setUploadRunId] = useState(0);
   const lastAutoFixRunIdRef = useRef<number>(-1);
 
-  const [quota, setQuota] = useState<any>(null);
+  const [quota, setQuota] = useState<Awaited<ReturnType<typeof getQuota>> | null>(null);
   // False until the first quota lookup finishes, so the header doesn't flash the default "3 of 3".
   const [quotaReady, setQuotaReady] = useState(false);
   const [subStatus, setSubStatus] = useState<SubStatus>({ ok: true, plan: "free" });
@@ -324,7 +330,6 @@ export function useFixer(t: AppStrings) {
     const onChanged = () => refreshCustomFormats();
     window.addEventListener("striveformats-formats-changed", onChanged);
     return () => window.removeEventListener("striveformats-formats-changed", onChanged);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canAccessCustomFormats]);
 
   const isUnlimited = useMemo(() => {
@@ -349,45 +354,29 @@ export function useFixer(t: AppStrings) {
   // Track doc status based on current issues when active doc changes
   useEffect(() => {
     if (!activeWorkspaceDocId) return;
-    const hasErrors = (issues as any[]).some((i) => (i?.severity ?? i?.level) === "error");
-    const hasWarnings = (issues as any[]).some((i) => (i?.severity ?? i?.level) === "warning");
+    const hasErrors = issues.some((i) => (i.severity ?? i.level) === "error");
+    const hasWarnings = issues.some((i) => (i.severity ?? i.level) === "warning");
     const status: DocStatus = hasErrors ? "errors" : hasWarnings ? "warnings" : issues.length ? "warnings" : "clean";
     setDocStatuses((prev) => new Map(prev).set(activeWorkspaceDocId, status));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWorkspaceDocId, issues]);
 
-  // ✅ FIXED: preserve Issue.details without @ts-expect-error
-  const issuesForTable: CsvIssue[] = useMemo(() => {
-    return (issues ?? [])
-      .map((it) => {
-        const rowIndex =
-          typeof (it as any).rowIndex === "number"
-            ? (it as any).rowIndex
-            : typeof (it as any).row === "number"
-              ? Math.max(0, (it as any).row - 1)
-              : -1;
-
-        const col = ((it as any).column ?? (it as any).field ?? "").toString();
-        const sev = (((it as any).severity ?? (it as any).level ?? "error") as "error" | "warning" | "info") ?? "error";
-
-        if (typeof rowIndex !== "number") return null;
-
-        const details = (it as any).details as Record<string, unknown> | undefined;
-
-        const out: CsvIssue = {
-          rowIndex,
-          column: col || "(file)",
-          message: String((it as any).message ?? ""),
-          severity: sev,
-          code: (it as any).code,
-          suggestion: (it as any).suggestion,
-          details,
-        };
-
-        return out;
-      })
-      .filter(Boolean) as CsvIssue[];
-  }, [issues]);
+  // Validators report issues in two shapes (1-based `row`/`level`/`field`, or 0-based
+  // `rowIndex`/`severity`/`column`); the table uses the second.
+  const issuesForTable: CsvIssue[] = useMemo(
+    () =>
+      (issues ?? []).map(
+        (it): CsvIssue => ({
+          rowIndex: typeof it.rowIndex === "number" ? it.rowIndex : typeof it.row === "number" ? Math.max(0, it.row - 1) : -1,
+          column: String(it.column ?? it.field ?? "") || "(file)",
+          message: String(it.message ?? ""),
+          severity: it.severity ?? it.level ?? "error",
+          code: it.code,
+          suggestion: it.suggestion,
+          details: it.details,
+        }),
+      ),
+    [issues],
+  );
 
   const issuesForDisplay = useMemo(() => {
     if (issueSeverityFilter === "all") return issuesForTable;
@@ -423,7 +412,7 @@ export function useFixer(t: AppStrings) {
       // Groups keyed by handle||comboKey → list of row indexes
       const mergeGroups = new Map<string, number[]>();
       const cols = resolveShopifyVariantColumns(headers);
-      const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+      const get = (r: CsvRow, k: string) => String(r?.[k] ?? "");
 
       for (let i = 0; i < rows.length; i++) {
         // Skip rejected and truly blank rows — they won't reach Shopify's merge logic
@@ -431,7 +420,7 @@ export function useFixer(t: AppStrings) {
         const r = rows[i] ?? {};
         if (Object.values(r).every((v) => !String(v ?? "").trim())) continue;
 
-        const sig = getShopifyVariantSignature(r, cols, (row, col) => get(row as any, col));
+        const sig = getShopifyVariantSignature(r, cols, (row, col) => get(row, col));
         if (!sig.handle) continue;
         if (!sig.hasVariantSignals) continue;
         if (!sig.comboKey.replace(/\|/g, "").trim()) continue;
@@ -462,7 +451,7 @@ export function useFixer(t: AppStrings) {
       const parentKeys = new Set<string>();
       const skuCounts = new Map<string, number>();
       const comboCounts = new Map<string, number>();
-      const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+      const get = (r: CsvRow, k: string) => String(r?.[k] ?? "");
 
       for (let i = 0; i < rows.length; i++) {
         const r = rows[i] ?? {};
@@ -526,7 +515,7 @@ export function useFixer(t: AppStrings) {
 
       const listingIdCounts = new Map<string, number>();
       const skuCounts = new Map<string, number>();
-      const get = (r: any, k: string) => (typeof r?.[k] === "string" ? r[k] : String(r?.[k] ?? ""));
+      const get = (r: CsvRow, k: string) => String(r?.[k] ?? "");
 
       for (let i = 0; i < rows.length; i++) {
         const r = rows[i] ?? {};
@@ -561,7 +550,7 @@ export function useFixer(t: AppStrings) {
 
   const readiness = useMemo(() => computeReadinessSummary(issuesForTable, formatId), [issuesForTable, formatId]);
   const scoreNotes = useMemo(
-    () => buildScoreNotes(validation as any, issuesForTable, formatId),
+    () => buildScoreNotes(validation, issuesForTable, formatId),
     [validation, issuesForTable, formatId]
   );
 
@@ -571,12 +560,12 @@ export function useFixer(t: AppStrings) {
     const supported = new Set(["shopify_products", "woocommerce_products", "woocommerce_variable_products", "etsy_listings"]);
     if (!supported.has(formatId)) return null;
 
-    const base = Number((validation as any)?.score ?? 0);
+    const base = Number(validation?.score ?? 0);
     if (!Number.isFinite(base)) return 0;
 
-    const blockingCount = Number((validation as any)?.counts?.blockingErrors ?? 0);
-    const errors = Number((validation as any)?.counts?.errors ?? 0);
-    const warnings = Number((validation as any)?.counts?.warnings ?? 0);
+    const blockingCount = Number(validation?.counts?.blockingErrors ?? 0);
+    const errors = Number(validation?.counts?.errors ?? 0);
+    const warnings = Number(validation?.counts?.warnings ?? 0);
 
     let conf = base;
 
@@ -830,8 +819,7 @@ useEffect(() => {
     revalidateTimerRef.current = window.setTimeout(() => {
       try {
         const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
-        const mergedIssues = [...((res.issues as any) ?? []), ...(parseIssues ?? [])];
-        setIssues(mergedIssues as any);
+        setIssues([...(res.issues ?? []), ...(parseIssues ?? [])]);
       } catch {
         // ignore
       }
@@ -874,8 +862,7 @@ useEffect(() => {
     setHeaders(res.fixedHeaders ?? nextHeaders);
     setRows(res.fixedRows ?? nextRows);
 
-    const mergedIssues = [...((res.issues as any) ?? []), ...(parseIssues ?? [])];
-    setIssues(mergedIssues as any);
+    setIssues([...(res.issues ?? []), ...(parseIssues ?? [])]);
 
     setAutoFixes([...(additionalFixes ?? []), ...(res.fixesApplied ?? [])]);
   }
@@ -884,8 +871,7 @@ useEffect(() => {
     if (formatId !== "shopify_products") return null;
     if (!rows.length) return null;
     return fixAllShopifyBlocking(tableHeaders, rows, issuesForTable);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formatId, tableHeaders.join("||"), rows, issuesForTable]);
+  }, [formatId, tableHeaders, rows, issuesForTable]);
 
   const realFixableBlockingCount = fixAllDryRun?.fixesApplied?.length ?? 0;
 
@@ -934,7 +920,7 @@ useEffect(() => {
       setRows(res.fixedRows ?? []);
       setPreamble(res.preamble ?? []);
 
-      setIssues([...(res.issues ?? []), ...nextParseIssues] as any);
+      setIssues([...(res.issues ?? []), ...nextParseIssues]);
 
       setAutoFixes(res.fixesApplied ?? []);
       if (typeof name === "string") setFileName(name);
@@ -958,8 +944,8 @@ useEffect(() => {
       );
 
       await refreshQuotaAndPlan();
-    } catch (e: any) {
-      setErrorBanner(e?.message ?? t.processFailed);
+    } catch (e) {
+      setErrorBanner(errorMessage(e) ?? t.processFailed);
     } finally {
       setBusy(false);
       setEditing(null);
@@ -990,8 +976,8 @@ useEffect(() => {
       if (activeFormat) {
         await runFormatOnText(activeFormat, text, file.name);
       }
-    } catch (e: any) {
-      setErrorBanner(e?.message ?? t.processFailed);
+    } catch (e) {
+      setErrorBanner(errorMessage(e) ?? t.processFailed);
     } finally {
       setBusy(false);
       setEditing(null);
@@ -1114,10 +1100,10 @@ useEffect(() => {
       setUpsellDismissed(false);
 
       await refreshQuotaAndPlan();
-    } catch (e: any) {
+    } catch (e) {
       const isLimitError =
-        (e?.message ?? "").toLowerCase().includes("limit") ||
-        (e?.message ?? "").toLowerCase().includes("quota");
+        (errorMessage(e) ?? "").toLowerCase().includes("limit") ||
+        (errorMessage(e) ?? "").toLowerCase().includes("quota");
       if (isLimitError) {
         trackToolEvent(
           "export_limit_hit",
@@ -1125,7 +1111,7 @@ useEffect(() => {
           subStatus?.plan,
         );
       }
-      setErrorBanner(e?.message ?? t.exportFailed);
+      setErrorBanner(errorMessage(e) ?? t.exportFailed);
       try {
         await refreshQuotaAndPlan();
       } catch {

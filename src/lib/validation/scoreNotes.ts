@@ -1,5 +1,6 @@
 // src/lib/validation/scoreNotes.ts
 import type { CsvIssue } from "@/lib/formats/types";
+import type { ValidationBreakdown } from "@/lib/validation/scoring";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 
 export type ScoreNoteKey =
@@ -50,7 +51,7 @@ function lowScoreHint(formatId: string | undefined, key: ScoreNoteKey): ScoreHin
   return (known as string[]).includes(id) ? (id as ScoreHintId) : null;
 }
 
-export function buildScoreNotes(validation: any, issues: CsvIssue[], formatId?: string): ScoreNote[] {
+export function buildScoreNotes(validation: Pick<ValidationBreakdown, "categories">, issues: CsvIssue[], formatId?: string): ScoreNote[] {
   const keys = keysForFormat(formatId);
 
   const counts: Record<string, { blocking: number; errors: number; warnings: number }> = {};

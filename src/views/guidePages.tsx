@@ -21,7 +21,6 @@ import {
   getGuide,
   getGuidesByPlatform,
   GUIDE_PLATFORMS,
-  PLATFORM_LABEL,
   PLATFORM_PRESET_ID,
   PLATFORM_FIXER_HREF,
   type Guide,
