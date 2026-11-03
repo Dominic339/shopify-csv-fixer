@@ -145,7 +145,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
       <FAQJsonLd items={faqs.map((f) => ({ question: f.q, answer: f.a }))} />
 
       {/* ── Hero: an ink band, with the product shot and stats on it ── */}
-      <div data-theme="dark" className="ink-band">
+      <div className="hero-glow">
         <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-12 lg:gap-8 lg:pb-24">
           <div className="lg:col-span-5">
             <p className="glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-[var(--muted)]">
@@ -160,7 +160,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
               <Link href={href("/app")} className="btn-primary px-6 py-3 text-base">
                 {t.ctaFixer}
               </Link>
-              <Link href={href("/how-it-works")} className="glass inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:bg-white/10">
+              <Link href={href("/how-it-works")} className="rgb-btn px-6 py-3 text-base">
                 {t.ctaHowItWorks}
               </Link>
             </div>
@@ -204,7 +204,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
               <ul className="flex flex-wrap gap-2">
                 {PLATFORMS.map((p) => (
                   <li key={p.name}>
-                    <Link href={href(p.path)} className="inline-block rounded-full border border-white/15 px-3 py-1 text-sm font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-text)]">
+                    <Link href={href(p.path)} className="inline-block rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-sm font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-text)]">
                       {p.name}
                     </Link>
                   </li>
@@ -274,7 +274,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
       </section>
 
       {/* ── Why not just ask an AI? ── */}
-      <div className="wash-indigo border-y border-[var(--border)]">
+      <div className="wash-indigo">
       <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6" aria-labelledby="ai-title">
         <div className="max-w-3xl">
           <p className={eyebrow}>{t.aiLabel}</p>
@@ -346,7 +346,7 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
       </section>
 
       {/* ── Privacy ── */}
-      <div className="wash-teal border-y border-[var(--border)]">
+      <div className="wash-teal">
       <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-5">
@@ -405,14 +405,14 @@ export default function HomeClient({ tHome: t, tPricing, checksCount }: Props) {
 
       {/* ── Final call to action ── */}
       <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <div data-theme="dark" className="ink-band overflow-hidden rounded-3xl px-6 py-16 text-center sm:px-12">
+        <div className="hero-glow overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] px-6 py-16 text-center sm:px-12">
           <h2 className={h2}>{t.finalTitle}</h2>
           <p className={`mx-auto mt-4 max-w-xl ${lead}`}>{fmt(t.finalDesc, { rows: FREE_ROWS_PER_EXPORT })}</p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href={href("/app")} className="btn-primary px-6 py-3 text-base">
               {t.ctaFixer}
             </Link>
-            <Link href={href("/convert")} className="glass inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-[var(--text)] transition-colors hover:bg-white/10">
+            <Link href={href("/convert")} className="rgb-btn px-6 py-3 text-base">
               {t.ctaConverter}
             </Link>
           </div>
