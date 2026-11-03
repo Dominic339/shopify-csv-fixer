@@ -401,47 +401,66 @@ select option {
 }
 
 
-/* ===== Ink bands =====
-   A deep teal-to-indigo section (homepage hero, final call to action). Put data-theme="dark"
-   on the same element so the colour tokens, dark: utilities and dark screenshots apply inside. */
-.ink-band {
+/* ===== Hero glow =====
+   Soft teal and indigo light behind the homepage hero and final call to action, with a faint
+   CSV-style grid. It has no background of its own and fades out at the bottom, so there is
+   never a hard edge between it and the rest of the page (in either theme). */
+.hero-glow {
   position: relative;
   isolation: isolate;
-  background:
-    radial-gradient(640px circle at 12% 18%, rgba(43, 179, 163, 0.32), transparent 62%),
-    radial-gradient(560px circle at 88% 26%, rgba(129, 140, 248, 0.28), transparent 60%),
-    linear-gradient(165deg, #0a1a1f 0%, #0e2327 42%, #15163a 100%);
-  color: var(--text);
 }
-/* A faint CSV-style grid, fading out towards the edges. */
-.ink-band::before {
+.hero-glow::before,
+.hero-glow::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 70% 65% at 50% 40%, #000 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 40%, #000 30%, transparent 100%);
   pointer-events: none;
 }
+.hero-glow::after {
+  background:
+    radial-gradient(640px circle at 12% 18%, rgba(var(--accent-rgb), 0.16), transparent 62%),
+    radial-gradient(560px circle at 88% 26%, rgba(var(--secondary-rgb), 0.14), transparent 60%);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+.hero-glow::before {
+  background-image:
+    linear-gradient(rgba(var(--muted-rgb), 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--muted-rgb), 0.09) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 25%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 25%, transparent 100%);
+}
+[data-theme="dark"] .hero-glow::after {
+  background:
+    radial-gradient(680px circle at 12% 18%, rgba(var(--accent-rgb), 0.22), transparent 62%),
+    radial-gradient(600px circle at 88% 26%, rgba(var(--secondary-rgb), 0.2), transparent 60%);
+}
 
-/* Soft colour washes for alternating sections. */
+/* Soft colour washes for alternating sections. They fade in and out instead of starting and
+   stopping at a line; in dark mode the page stays one continuous background. */
 .wash-teal {
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.07), rgba(var(--accent-rgb), 0.02));
+  background: linear-gradient(180deg, transparent, rgba(var(--accent-rgb), 0.07) 18%, rgba(var(--accent-rgb), 0.07) 82%, transparent);
 }
 .wash-indigo {
-  background: linear-gradient(180deg, rgba(var(--secondary-rgb), 0.07), rgba(var(--secondary-rgb), 0.02));
+  background: linear-gradient(180deg, transparent, rgba(var(--secondary-rgb), 0.07) 18%, rgba(var(--secondary-rgb), 0.07) 82%, transparent);
+}
+[data-theme="dark"] .wash-teal,
+[data-theme="dark"] .wash-indigo {
+  background: none;
 }
 
-/* Glass cards on an ink band. */
+/* Frosted cards (hero stats, badge, secondary hero button). */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--border);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+}
+[data-theme="dark"] .glass {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* A gradient edge around screenshots and feature cards. */
@@ -464,8 +483,9 @@ select option {
 .float-chip {
   animation: float-y 6s ease-in-out infinite;
   /* Solid enough to read over the screenshot behind it. */
-  background: rgba(13, 22, 30, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px -12px rgba(16, 24, 40, 0.35);
 }
 .float-chip.delay-1 { animation-delay: -2s; }
 .float-chip.delay-2 { animation-delay: -4s; }
