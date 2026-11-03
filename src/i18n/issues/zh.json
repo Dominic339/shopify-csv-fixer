@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "变体选项不唯一",
 "explanation": "同一 handle 下有两个或更多变体的选项值完全相同。",
-"whyPlatformCares": "Shopify 会合并选项组合相同的变体，可能导致数据丢失或变体被覆盖。",
+"whyPlatformCares": "Shopify 会拒绝变体选项组合相同的商品，因此该商品的导入会失败。",
 "howToFix": "请让每个变体的选项组合唯一（或删除重复项）。"
 },
 "shopify/missing_option1_for_variant_data": {

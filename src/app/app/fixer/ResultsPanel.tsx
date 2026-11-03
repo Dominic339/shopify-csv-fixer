@@ -6,6 +6,7 @@ import Link from "next/link";
 import { localeHref } from "@/lib/i18n/locales";
 import { fmt, plural } from "@/lib/i18n/fmt";
 import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
+import { usePassAvailable } from "@/lib/passCheckout";
 import { FIX_TYPE_LABELS, groupFixesByType, generateFixesLogText, type FixLogText, type FixTypeId } from "@/lib/validation/fixesLog";
 import type { ScoreNote } from "@/lib/validation/scoreNotes";
 import { downloadText, type AppStrings, type Fixer } from "./useFixer";
@@ -29,6 +30,8 @@ export function formatPassTime(iso: string, locale: string) {
 
 /** One-time pass button; signed-out users are sent to sign in first. */
 function PassButton({ f, t }: { f: Fixer; t: AppStrings }) {
+  const passAvailable = usePassAvailable();
+  if (!passAvailable) return null;
   return (
     <button type="button" className="rg-btn is-secondary mt-3 justify-center" onClick={() => void f.buyPass()} disabled={f.passBusy}>
       {f.passBusy
@@ -43,6 +46,7 @@ function PassButton({ f, t }: { f: Fixer; t: AppStrings }) {
 /** Step 3: is the file ready, export it, and what was changed. */
 export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings; onJumpToIssues: () => void }) {
   const [copied, setCopied] = useState(false);
+  const passAvailable = usePassAvailable();
   const platform = platformLabel(f.formatId);
   const blocked = f.blockingCount > 0;
   const counts = f.validation.counts;
@@ -111,7 +115,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
         <div className={`text-lg font-semibold ${blocked ? "text-red-700 dark:text-red-300" : "text-[var(--accent-text)]"}`}>
           {blocked ? plural(f.blockingCount, t.blockedTitleOne, t.blockedTitle) : platform ? fmt(t.readyFor, { platform }) : t.readyGeneric}
         </div>
-        <p className={`mt-1 text-sm ${muted}`}>{blocked ? t.blockedDesc : t.readyDesc}</p>
+        <p className={`mt-1 text-sm ${muted}`}>{blocked ? t.blockedDesc : counts.errors ? fmt(t.readyDescErrors, { count: counts.errors }) : t.readyDesc}</p>
 
         {blocked && f.readiness.blockingGroups.length > 0 && (
           <ul className="mt-3 space-y-1 text-sm">
@@ -209,7 +213,8 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
           <div>
             <p className="font-semibold text-[var(--text)]">{fmt(t.upsellTitle, { limit: f.limit ?? 3 })}</p>
             <p className={`mt-0.5 ${muted}`}>
-              {t.upsellBody} {fmt(t.upsellPass, { price: PASS_PRICE_LABEL })}
+              {t.upsellBody}
+              {passAvailable ? ` ${fmt(t.upsellPass, { price: PASS_PRICE_LABEL })}` : ""}
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
               <PassButton f={f} t={t} />

@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "Variantenoptionen nicht eindeutig",
 "explanation": "Zwei oder mehr Varianten desselben Handles haben identische Optionswerte.",
-"whyPlatformCares": "Shopify führt Varianten mit identischer Optionskombination zusammen. Dabei können Daten verloren gehen oder Varianten überschrieben werden.",
+"whyPlatformCares": "Shopify lehnt ein Produkt ab, dessen Varianten dieselbe Optionskombination haben, daher schlägt der Import für dieses Produkt fehl.",
 "howToFix": "Mach jede Optionskombination eindeutig (oder entferne die Duplikate)."
 },
 "shopify/missing_option1_for_variant_data": {

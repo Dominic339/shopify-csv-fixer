@@ -318,6 +318,7 @@
     "name_ebay_variations": "Variations eBay",
     "desc_ebay_variations": "Valide les CSV de variantes eBay : appairage des spécifiques, combos de variations dupliquées, champs prix et quantité.",
     "checksCount": "{count} vérifications",
+    "checksShared": "Les préréglages WooCommerce partagent leurs contrôles, tout comme les préréglages eBay : les nombres ci-dessous se recoupent. Le total de la page d'accueil compte chaque contrôle une seule fois.",
     "variationsFixer": "Correcteur de variantes {platform}",
     "englishContent": "La description détaillée ci-dessous est en anglais.",
     "checksTitle": "Ce que vérifie ce modèle",
@@ -522,6 +523,7 @@
     "readyFor": "Prêt pour l’import {platform}",
     "readyGeneric": "Prêt à exporter",
     "readyDesc": "Aucun problème bloquant. Exportez le fichier corrigé puis importez-le.",
+    "readyDescErrors": "Aucun problème bloquant, mais il reste {count} erreurs. Elles n'empêcheront pas l'import ; vérifiez-les ci-dessous.",
     "blockedTitle": "{count} problèmes bloqueront l’import",
     "blockedTitleOne": "1 problème bloquera l’import",
     "blockedDesc": "Corrigez-les ci-dessous avant l’import, ou exportez quand même et terminez les modifications dans un tableur.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "1 correction automatique appliquée",
     "moreInLog": "…et {count} de plus. Téléchargez le journal pour la liste complète.",
     "advancedChecks": "Vérifications avancées",
-    "importConfidenceHelp": "Une estimation de la sûreté de l’import. Les blocages, les risques d’écrasement et les lignes vides la font baisser.",
+    "importConfidenceHelp": "Le score de validation compte chaque problème trouvé. La confiance d'importation estime la sûreté de l'import : les blocages, les risques d'écrasement et les lignes vides la font baisser.",
     "simulateHelp": "Estime ce que la plateforme fusionnerait, ignorerait ou rejetterait à l’import de ce fichier.",
     "simPass": "Import simulé : RÉUSSI",
     "simFail": "Import simulé : ÉCHEC",
@@ -770,7 +772,7 @@
     "billingUnavailable": "La facturation est temporairement indisponible. Veuillez réessayer plus tard.",
     "starting": "Démarrage…",
     "freeBullet1": "Corriger et exporter des fichiers CSV",
-    "freeBullet2": "3 exportations par mois et par appareil",
+    "freeBullet2": "3 exports par mois et par appareil pour les fichiers de plus de 100 lignes",
     "freeBullet3": "Accès à tous les formats intégrés",
     "freeBullet4": "Aucun compte requis",
     "basicBullet1": "100 exportations par mois",
@@ -796,7 +798,7 @@
     "buyPass": "Acheter le pass",
     "signInToBuy": "Connectez-vous pour acheter",
     "passActiveUntil": "Actif jusqu'à {time}",
-    "freeBulletSmall": "Fichiers jusqu'à 100 lignes toujours gratuits"
+    "freeBulletSmall": "Les fichiers jusqu'à 100 lignes sont toujours gratuits et ne consomment pas d'export"
   },
   "auth": {
     "loginTitle": "Se connecter",

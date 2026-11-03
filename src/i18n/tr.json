@@ -304,6 +304,7 @@
     "faq": "Sık sorulan sorular",
     "presetFormats": "Ön ayarlı formatlar",
     "checksCount": "{count} kontrol",
+    "checksShared": "WooCommerce ön ayarları kontrollerini paylaşır, eBay ön ayarları da öyle; bu yüzden aşağıdaki sayılar örtüşür. Ana sayfadaki toplam her kontrolü bir kez sayar.",
     "variationsFixer": "{platform} varyasyon düzeltici",
     "englishContent": "Aşağıdaki ayrıntılı açıklama İngilizcedir.",
     "checksTitle": "Bu şablon neleri kontrol eder",
@@ -522,6 +523,7 @@
     "readyFor": "{platform} içe aktarımına hazır",
     "readyGeneric": "Dışa aktarmaya hazır",
     "readyDesc": "Engelleyici sorun bulunamadı. Düzeltilmiş dosyayı dışa aktarın ve içe aktarın.",
+    "readyDescErrors": "Engelleyici sorun yok, ancak {count} hata kaldı. İçe aktarmayı durdurmazlar; aşağıda gözden geçirin.",
     "blockedTitle": "{count} sorun içe aktarmayı engelleyecek",
     "blockedTitleOne": "1 sorun içe aktarmayı engelleyecek",
     "blockedDesc": "İçe aktarmadan önce bunları aşağıda düzeltin ya da yine de dışa aktarıp düzenlemeleri bir elektronik tabloda tamamlayın.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "1 otomatik düzeltme uygulandı",
     "moreInLog": "…ve {count} tane daha. Tam liste için düzeltme günlüğünü indirin.",
     "advancedChecks": "Gelişmiş kontroller",
-    "importConfidenceHelp": "Dosyanın ne kadar güvenli içe aktarılacağına dair bir tahmin. Engelleyiciler, üzerine yazma riskleri ve boş satırlar bunu düşürür.",
+    "importConfidenceHelp": "Doğrulama skoru bulunan her sorunu sayar. İçe aktarma güveni, dosyanın ne kadar güvenle içe aktarılacağını tahmin eder: engelleyiciler, üzerine yazma riskleri ve boş satırlar onu düşürür.",
     "simulateHelp": "Platformun bu dosyayı içe aktarırken neleri birleştireceğini, atlayacağını veya reddedeceğini tahmin edin.",
     "simPass": "Simüle edilen içe aktarma: BAŞARILI",
     "simFail": "Simüle edilen içe aktarma: BAŞARISIZ",
@@ -770,7 +772,7 @@
     "billingUnavailable": "Faturalama geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
     "starting": "Başlatılıyor…",
     "freeBullet1": "CSV dosyalarını düzeltin ve dışa aktarın",
-    "freeBullet2": "Aylık cihaz başına 3 dışa aktarma",
+    "freeBullet2": "100 satırdan büyük dosyalar için cihaz başına ayda 3 dışa aktarma",
     "freeBullet3": "Tüm yerleşik formatlara erişim",
     "freeBullet4": "Hesap gerekmez",
     "basicBullet1": "Aylık 100 dışa aktarma",
@@ -796,7 +798,7 @@
     "buyPass": "Geçiş satın al",
     "signInToBuy": "Satın almak için giriş yapın",
     "passActiveUntil": "{time} saatine kadar etkin",
-    "freeBulletSmall": "100 satıra kadar dosyalar her zaman ücretsiz"
+    "freeBulletSmall": "100 satıra kadar dosyalar her zaman ücretsizdir ve dışa aktarma hakkı harcamaz"
   },
   "auth": {
     "loginTitle": "Giriş yap",

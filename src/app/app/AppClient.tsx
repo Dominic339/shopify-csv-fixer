@@ -40,9 +40,14 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
               </span>
             ) : (
               <>
-                <span className="font-semibold text-[var(--text)]">
-                  {f.isUnlimited ? t.unlimitedExports : fmt(t.exportsLeft, { left: f.left ?? 0, limit: f.limit ?? 0 })}
-                </span>
+                {f.quotaReady ? (
+                  <span className="font-semibold text-[var(--text)]">
+                    {f.isUnlimited ? t.unlimitedExports : fmt(t.exportsLeft, { left: f.left ?? 0, limit: f.limit ?? 0 })}
+                  </span>
+                ) : (
+                  // Placeholder while the saved quota loads.
+                  <span aria-hidden="true" className="inline-block h-4 w-28 animate-pulse rounded bg-[var(--border)] align-middle" />
+                )}
                 <span className={`ml-2 ${muted}`}>· {fmt(t.planLabel, { plan: t[`plan_${plan}`] })}</span>
               </>
             )}

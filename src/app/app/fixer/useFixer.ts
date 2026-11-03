@@ -130,6 +130,8 @@ export function useFixer(t: AppStrings) {
   const lastAutoFixRunIdRef = useRef<number>(-1);
 
   const [quota, setQuota] = useState<any>(null);
+  // False until the first quota lookup finishes, so the header doesn't flash the default "3 of 3".
+  const [quotaReady, setQuotaReady] = useState(false);
   const [subStatus, setSubStatus] = useState<SubStatus>({ ok: true, plan: "free" });
   const [planLimits, setPlanLimits] = useState<PlanLimits>({ exportsPerMonth: 3 });
   const [showQuotaModal, setShowQuotaModal] = useState(false);
@@ -292,6 +294,8 @@ export function useFixer(t: AppStrings) {
       setPlanLimits(limits);
     } catch {
       // Silently fail — quota/plan remain at defaults
+    } finally {
+      setQuotaReady(true);
     }
   }
 
@@ -1190,6 +1194,7 @@ useEffect(() => {
     subStatus,
     isAdvancedActive,
     isUnlimited,
+    quotaReady,
     used,
     limit,
     left,

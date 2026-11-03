@@ -318,6 +318,7 @@
     "name_ebay_variations": "Variaciones de eBay",
     "desc_ebay_variations": "Valida CSVs de listados de variaciones eBay: especificaciones de variaciones, combinaciones duplicadas, campos de precio y cantidad.",
     "checksCount": "{count} comprobaciones",
+    "checksShared": "Los presets de WooCommerce comparten sus comprobaciones, igual que los de eBay, así que los recuentos de abajo se solapan. El total de la página de inicio cuenta cada comprobación una vez.",
     "variationsFixer": "Corrector de variaciones de {platform}",
     "englishContent": "La descripción detallada de abajo está en inglés.",
     "checksTitle": "Qué comprueba esta plantilla",
@@ -522,6 +523,7 @@
     "readyFor": "Listo para importar en {platform}",
     "readyGeneric": "Listo para exportar",
     "readyDesc": "No hay problemas que bloqueen la importación. Exporta el archivo corregido e impórtalo.",
+    "readyDescErrors": "No hay problemas bloqueantes, pero quedan {count} errores. No impedirán la importación; revísalos abajo.",
     "blockedTitle": "{count} problemas bloquearán la importación",
     "blockedTitleOne": "1 problema bloqueará la importación",
     "blockedDesc": "Corrígelos abajo antes de importar, o exporta igualmente y termina los cambios en una hoja de cálculo.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "Se aplicó 1 corrección automática",
     "moreInLog": "…y {count} más. Descarga el registro para ver la lista completa.",
     "advancedChecks": "Comprobaciones avanzadas",
-    "importConfidenceHelp": "Una estimación de lo seguro que es importar el archivo. Los bloqueos, los riesgos de sobrescritura y las filas vacías la reducen.",
+    "importConfidenceHelp": "La puntuación de validación cuenta cada problema encontrado. La confianza de importación estima lo segura que será la importación: los bloqueos, los riesgos de sobrescritura y las filas vacías la reducen.",
     "simulateHelp": "Calcula qué fusionaría, omitiría o rechazaría la plataforma al importar este archivo.",
     "simPass": "Importación simulada: CORRECTA",
     "simFail": "Importación simulada: FALLA",
@@ -770,7 +772,7 @@
     "billingUnavailable": "La facturación no está disponible temporalmente. Por favor, inténtalo más tarde.",
     "starting": "Iniciando…",
     "freeBullet1": "Reparar y exportar archivos CSV",
-    "freeBullet2": "3 exportaciones por mes y dispositivo",
+    "freeBullet2": "3 exportaciones al mes por dispositivo para archivos de más de 100 filas",
     "freeBullet3": "Acceso a todos los formatos integrados",
     "freeBullet4": "Sin cuenta requerida",
     "basicBullet1": "100 exportaciones por mes",
@@ -796,7 +798,7 @@
     "buyPass": "Comprar pase",
     "signInToBuy": "Inicia sesión para comprar",
     "passActiveUntil": "Activo hasta las {time}",
-    "freeBulletSmall": "Archivos de hasta 100 filas, siempre gratis"
+    "freeBulletSmall": "Los archivos de hasta 100 filas son siempre gratis y no gastan exportaciones"
   },
   "auth": {
     "loginTitle": "Iniciar sesión",

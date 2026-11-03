@@ -12,7 +12,7 @@ import { convertCsv, CONVERT_FORMAT_OPTIONS, type ConvertResult } from "@/lib/co
 import { CONVERT_ROUTES, routeFor } from "@/lib/convertRoutes";
 import { consumeExport } from "@/lib/quota";
 import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
-import { clearPendingFile, loginHrefForHere, stashPendingFile, startPassCheckout, takePendingFile } from "@/lib/passCheckout";
+import { clearPendingFile, loginHrefForHere, stashPendingFile, startPassCheckout, takePendingFile, usePassAvailable } from "@/lib/passCheckout";
 import { createClient } from "@/lib/supabase/browser";
 import { trackToolEvent } from "@/lib/analytics";
 import type { Translations } from "@/lib/i18n/getTranslations";
@@ -68,6 +68,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   const [limitHit, setLimitHit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [passBusy, setPassBusy] = useState(false);
+  const passAvailable = usePassAvailable();
   const [signedIn, setSignedIn] = useState(false);
 
   /** "Etsy", "Shopify" … for sentences; the select shows the full format names. */
@@ -356,9 +357,11 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
               <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
                 {t.limitReached} {fmt(t.freeNote, { rows: FREE_ROWS_PER_EXPORT })}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                  <button type="button" className="rg-btn is-secondary mt-3 justify-center" onClick={() => void buyPass()} disabled={passBusy}>
-                    {passBusy ? t.passStarting : fmt(signedIn ? t.passCta : t.passSignIn, { price: PASS_PRICE_LABEL })}
-                  </button>
+                  {passAvailable && (
+                    <button type="button" className="rg-btn is-secondary mt-3 justify-center" onClick={() => void buyPass()} disabled={passBusy}>
+                      {passBusy ? t.passStarting : fmt(signedIn ? t.passCta : t.passSignIn, { price: PASS_PRICE_LABEL })}
+                    </button>
+                  )}
                   <Link href={`${href("/")}#pricing`} className="mt-1 font-semibold underline sm:mt-3">
                     {t.viewPlans}
                   </Link>

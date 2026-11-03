@@ -106,6 +106,7 @@ export async function PresetsView({ locale }: { locale: Locale }) {
       <header className="mb-8 sm:mb-10">
         <h1 className="text-2xl font-semibold text-[var(--text)] sm:text-3xl">{t.presets.title}</h1>
         <p className={`mt-3 max-w-3xl text-base ${muted}`}>{t.presets.description}</p>
+        <p className={`mt-2 max-w-3xl text-sm ${muted}`}>{t.presets.checksShared}</p>
       </header>
 
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2">

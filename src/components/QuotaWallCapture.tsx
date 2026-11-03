@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fmt } from "@/lib/i18n/fmt";
 import type { Translations } from "@/lib/i18n/getTranslations";
 import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
+import { usePassAvailable } from "@/lib/passCheckout";
 
 interface Props {
   t: Translations["app"];
@@ -25,6 +26,7 @@ function nextResetDate(now = new Date()) {
 
 export function QuotaWallCapture({ t, locale, limit, pricingHref, onDismiss, onBuyPass, passBusy }: Props) {
   const [email, setEmail] = useState("");
+  const passAvailable = usePassAvailable();
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   useEffect(() => {
@@ -69,9 +71,11 @@ export function QuotaWallCapture({ t, locale, limit, pricingHref, onDismiss, onB
         <p className="mt-2 text-sm text-[var(--muted)]">{fmt(t.quotaBody, { limit, date: resetDate })}</p>
         <p className="mt-2 text-sm text-[var(--muted)]">{fmt(t.smallFilesFree, { rows: FREE_ROWS_PER_EXPORT })}</p>
 
-        <button type="button" className="rg-btn is-secondary mt-5 w-full justify-center" onClick={onBuyPass} disabled={passBusy}>
-          {passBusy ? t.passStarting : fmt(t.passSignIn, { price: PASS_PRICE_LABEL })}
-        </button>
+        {passAvailable && (
+          <button type="button" className="rg-btn is-secondary mt-5 w-full justify-center" onClick={onBuyPass} disabled={passBusy}>
+            {passBusy ? t.passStarting : fmt(t.passSignIn, { price: PASS_PRICE_LABEL })}
+          </button>
+        )}
 
         <p className="mt-4 text-sm text-[var(--muted)]">{t.upsellBody}</p>
 

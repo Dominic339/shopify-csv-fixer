@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "Opciones de variante no únicas",
 "explanation": "Dos o más variantes del mismo handle tienen valores de opción idénticos.",
-"whyPlatformCares": "Shopify fusiona las variantes con combinaciones de opciones idénticas. Esto puede provocar pérdida de datos o variantes sobrescritas.",
+"whyPlatformCares": "Shopify rechaza un producto cuyas variantes comparten la misma combinación de opciones, así que la importación de ese producto falla.",
 "howToFix": "Haz que cada combinación de opciones de variante sea única (o elimina los duplicados)."
 },
 "shopify/missing_option1_for_variant_data": {

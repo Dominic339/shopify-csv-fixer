@@ -304,6 +304,7 @@
     "faq": "Veelgestelde vragen",
     "presetFormats": "Vooringestelde formaten",
     "checksCount": "{count} controles",
+    "checksShared": "De WooCommerce-presets delen hun controles, net als de eBay-presets, dus de aantallen hieronder overlappen. Het totaal op de homepage telt elke controle één keer.",
     "variationsFixer": "{platform} variatie-fixer",
     "englishContent": "De uitgebreide beschrijving hieronder is in het Engels.",
     "checksTitle": "Wat dit sjabloon controleert",
@@ -522,6 +523,7 @@
     "readyFor": "Klaar voor import in {platform}",
     "readyGeneric": "Klaar om te exporteren",
     "readyDesc": "Geen blokkerende problemen gevonden. Exporteer het gecorrigeerde bestand en importeer het.",
+    "readyDescErrors": "Geen blokkerende problemen, maar er zijn nog {count} fouten. Ze houden de import niet tegen; bekijk ze hieronder.",
     "blockedTitle": "{count} problemen blokkeren de import",
     "blockedTitleOne": "1 probleem blokkeert de import",
     "blockedDesc": "Los ze hieronder op vóór het importeren, of exporteer toch en rond de wijzigingen af in een spreadsheet.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "1 automatische correctie toegepast",
     "moreInLog": "…en nog {count}. Download het correctielogboek voor de volledige lijst.",
     "advancedChecks": "Geavanceerde controles",
-    "importConfidenceHelp": "Een schatting van hoe veilig het bestand wordt geïmporteerd. Blokkades, overschrijfrisico's en lege rijen verlagen deze.",
+    "importConfidenceHelp": "De validatiescore telt elk gevonden probleem. Het importvertrouwen schat hoe veilig het bestand importeert: blokkades, overschrijfrisico's en lege rijen verlagen het.",
     "simulateHelp": "Schat wat het platform bij het importeren van dit bestand zou samenvoegen, overslaan of weigeren.",
     "simPass": "Gesimuleerde import: GESLAAGD",
     "simFail": "Gesimuleerde import: MISLUKT",
@@ -770,7 +772,7 @@
     "billingUnavailable": "Facturering is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
     "starting": "Wordt gestart…",
     "freeBullet1": "CSV-bestanden repareren en exporteren",
-    "freeBullet2": "3 exports per maand per apparaat",
+    "freeBullet2": "3 exports per maand per apparaat voor bestanden van meer dan 100 rijen",
     "freeBullet3": "Toegang tot alle ingebouwde formaten",
     "freeBullet4": "Geen account vereist",
     "basicBullet1": "100 exports per maand",
@@ -796,7 +798,7 @@
     "buyPass": "Pas kopen",
     "signInToBuy": "Log in om te kopen",
     "passActiveUntil": "Actief tot {time}",
-    "freeBulletSmall": "Bestanden tot 100 rijen altijd gratis"
+    "freeBulletSmall": "Bestanden tot 100 rijen zijn altijd gratis en kosten geen export"
   },
   "auth": {
     "loginTitle": "Inloggen",

@@ -6,13 +6,21 @@ export type StripeEnvStatus = {
   enabled: boolean;
   /** Names of required env vars that are absent. */
   missing: string[];
+  /** Which checkout prices are configured; a plan without a price can't be bought. */
+  prices: { basic: boolean; advanced: boolean; pass: boolean };
 };
 
 const REQUIRED = ["STRIPE_SECRET_KEY"] as const;
 
 export function getStripeEnvStatus(): StripeEnvStatus {
   const missing = REQUIRED.filter((k) => !process.env[k]);
-  return { enabled: missing.length === 0, missing };
+  const enabled = missing.length === 0;
+  const has = (k: string) => enabled && Boolean(process.env[k]);
+  return {
+    enabled,
+    missing,
+    prices: { basic: has("STRIPE_PRICE_BASIC"), advanced: has("STRIPE_PRICE_ADVANCED"), pass: has("STRIPE_PRICE_PASS") },
+  };
 }
 
 /** Returns the Stripe secret key, or null if not set. */

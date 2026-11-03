@@ -38,7 +38,7 @@ export async function POST(req: Request) {
             : null;
 
     if (!priceId) {
-      return NextResponse.json({ error: "Missing price for plan" }, { status: 500 });
+      return NextResponse.json({ error: "price_not_configured" }, { status: 503 });
     }
 
     // Look up existing Stripe customer for this user if one already exists

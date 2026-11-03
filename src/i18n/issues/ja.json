@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "バリエーションのオプションが重複しています",
 "explanation": "同じ handle の 2 つ以上のバリエーションでオプション値が同じです。",
-"whyPlatformCares": "Shopify はオプションの組み合わせが同じバリエーションを統合します。データが失われたり、バリエーションが上書きされたりする可能性があります。",
+"whyPlatformCares": "Shopify は、オプションの組み合わせが同じバリエーションを持つ商品を受け付けないため、その商品のインポートは失敗します。",
 "howToFix": "バリエーションのオプションの組み合わせをそれぞれ一意にしてください（または重複を削除）。"
 },
 "shopify/missing_option1_for_variant_data": {

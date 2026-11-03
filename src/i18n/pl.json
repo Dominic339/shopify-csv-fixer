@@ -304,6 +304,7 @@
     "faq": "Najczęściej zadawane pytania",
     "presetFormats": "Predefiniowane formaty",
     "checksCount": "Kontrole: {count}",
+    "checksShared": "Presety WooCommerce mają wspólne kontrole, podobnie jak presety eBay, więc liczby poniżej się pokrywają. Suma na stronie głównej liczy każdą kontrolę raz.",
     "variationsFixer": "Naprawa wariantów {platform}",
     "englishContent": "Szczegółowy opis poniżej jest po angielsku.",
     "checksTitle": "Co sprawdza ten szablon",
@@ -522,6 +523,7 @@
     "readyFor": "Gotowe do importu w {platform}",
     "readyGeneric": "Gotowe do eksportu",
     "readyDesc": "Nie znaleziono blokujących problemów. Wyeksportuj poprawiony plik i zaimportuj go.",
+    "readyDescErrors": "Brak problemów blokujących, ale pozostało błędów: {count}. Nie zatrzymają importu; sprawdź je poniżej.",
     "blockedTitle": "Problemy blokujące import: {count}",
     "blockedTitleOne": "1 problem zablokuje import",
     "blockedDesc": "Popraw je poniżej przed importem albo wyeksportuj mimo to i dokończ zmiany w arkuszu kalkulacyjnym.",
@@ -543,7 +545,7 @@
     "autoFixesAppliedOne": "Zastosowano 1 automatyczną poprawkę",
     "moreInLog": "…i jeszcze {count}. Pobierz dziennik poprawek, aby zobaczyć pełną listę.",
     "advancedChecks": "Zaawansowane kontrole",
-    "importConfidenceHelp": "Szacunek, jak bezpiecznie plik się zaimportuje. Blokady, ryzyko nadpisania i puste wiersze go obniżają.",
+    "importConfidenceHelp": "Wynik walidacji liczy każdy znaleziony problem. Zaufanie importu szacuje, jak bezpiecznie plik się zaimportuje: blokady, ryzyko nadpisania i puste wiersze je obniżają.",
     "simulateHelp": "Oszacuj, co platforma scali, pominie lub odrzuci przy imporcie tego pliku.",
     "simPass": "Symulowany import: OK",
     "simFail": "Symulowany import: BŁĄD",
@@ -770,7 +772,7 @@
     "billingUnavailable": "Rozliczenia są tymczasowo niedostępne. Spróbuj ponownie później.",
     "starting": "Uruchamianie…",
     "freeBullet1": "Naprawianie i eksportowanie plików CSV",
-    "freeBullet2": "3 eksporty miesięcznie na urządzenie",
+    "freeBullet2": "3 eksporty miesięcznie na urządzenie dla plików powyżej 100 wierszy",
     "freeBullet3": "Dostęp do wszystkich wbudowanych formatów",
     "freeBullet4": "Nie wymagane konto",
     "basicBullet1": "100 eksportów miesięcznie",
@@ -796,7 +798,7 @@
     "buyPass": "Kup karnet",
     "signInToBuy": "Zaloguj się, aby kupić",
     "passActiveUntil": "Aktywny do {time}",
-    "freeBulletSmall": "Pliki do 100 wierszy zawsze za darmo"
+    "freeBulletSmall": "Pliki do 100 wierszy są zawsze darmowe i nie zużywają eksportów"
   },
   "auth": {
     "loginTitle": "Zaloguj się",

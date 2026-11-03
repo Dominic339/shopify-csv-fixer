@@ -28,6 +28,7 @@ export async function GET() {
     STRIPE_WEBHOOK_SECRET: hasEnv("STRIPE_WEBHOOK_SECRET"),
     STRIPE_PRICE_BASIC: hasEnv("STRIPE_PRICE_BASIC"),
     STRIPE_PRICE_ADVANCED: hasEnv("STRIPE_PRICE_ADVANCED"),
+    STRIPE_PRICE_PASS: hasEnv("STRIPE_PRICE_PASS"),
   };
 
   let auth: AuthState = { signedIn: false, userId: null };

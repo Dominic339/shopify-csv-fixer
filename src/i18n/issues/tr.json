@@ -56,7 +56,7 @@
 "shopify/options_not_unique": {
 "title": "Varyant seçenekleri benzersiz değil",
 "explanation": "Aynı handle altındaki iki veya daha fazla varyant aynı seçenek değerlerine sahip.",
-"whyPlatformCares": "Shopify aynı seçenek kombinasyonuna sahip varyantları birleştirir. Bu, veri kaybına veya varyantların üzerine yazılmasına yol açabilir.",
+"whyPlatformCares": "Shopify, varyantları aynı seçenek kombinasyonunu paylaşan bir ürünü reddeder; bu yüzden o ürünün içe aktarımı başarısız olur.",
 "howToFix": "Her varyant seçenek kombinasyonunu benzersiz yapın (veya yinelenenleri kaldırın)."
 },
 "shopify/missing_option1_for_variant_data": {
