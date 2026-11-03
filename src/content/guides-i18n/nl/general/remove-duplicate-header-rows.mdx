@@ -1,0 +1,170 @@
+---
+title: "Dubbele koprijen uit CSV-bestanden verwijderen"
+description: "Vind en verwijder herhaalde koprijen midden in CSV-exports. Begrijp de oorzaken, spoor ze op met filters in Excel en Google Sheets, en voorkom ze bij volgende exports."
+keywords: ["dubbele koprijen csv", "herhaalde kolomkoppen csv", "koprij midden in csv", "csv koprijen verwijderen", "dubbele rijen csv import", "shopify csv koprij", "woocommerce csv koprij"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Waarom er dubbele koprijen in geëxporteerde CSV-bestanden verschijnen"
+  - "Hoe je ze opspoort met filters in Excel en Google Sheets"
+  - "Hoe je ze stap voor stap verwijdert met filteren, sorteren en verwijderen"
+  - "Hoe je een teksteditor gebruikt voor grote bestanden"
+  - "Hoe je dubbele koprijen in toekomstige exports voorkomt"
+bestFor: "Verkopers die CSV-bestanden handmatig samenvoegen, bulkexporttools gebruiken of van leveranciers CSV's krijgen met herhaalde kolomkoppen halverwege"
+timeToComplete: "8 minuten"
+---
+
+## Wat zijn dubbele koprijen?
+
+Een dubbele koprij ontstaat wanneer de eerste rij van je CSV (de kolomnamen) ergens in het gegevensdeel opnieuw voorkomt. Bijvoorbeeld:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← herhaalde koprij
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Als een importtool `Handle` in een gegevensrij tegenkomt, kan het die rij niet als product lezen. De meeste platforms slaan de rij stilletjes over of geven een opmaakfout. Sommige tellen haar als mislukte rij.
+
+---
+
+## Waarom dubbele koprijen ontstaan
+
+### Meerdere exportbestanden samenvoegen
+
+De meest voorkomende oorzaak: twee CSV's combineren door te kopiëren en plakken in Excel of Google Sheets. De koprij van het tweede bestand belandt midden in het gecombineerde bestand.
+
+### Exports in pagina's
+
+Sommige platforms exporteren gegevens per pagina (bijvoorbeeld 500 rijen per bestand). Download je alle pagina's en voeg je ze samen, dan komt de koprij van elk bestand mee.
+
+### Geplande rapportagesystemen
+
+Geautomatiseerde systemen die dagelijks rijen aan een CSV toevoegen, herhalen soms de koprij aan het begin van elk toegevoegd blok.
+
+### 'Alles vernieuwen' of Power Query-exports in Excel
+
+Het vernieuwen van gegevensverbindingen in Excel kan de koprij opnieuw invoegen als de query verkeerd is ingesteld.
+
+---
+
+## Dubbele koprijen opsporen
+
+### In Excel
+
+1. Open je CSV (**Gegevens → Van tekst/CSV**, niet door te dubbelklikken, zodat de opmaak behouden blijft).
+2. Klik in een willekeurige cel van je gegevens.
+3. Ga naar **Gegevens → Filter** om filters aan te zetten.
+4. Klik op de pijl in de kolom **Handle** (of je eerste kolom).
+5. Typ in het zoekvak precies de naam van de kolomkop (bijvoorbeeld `Handle`).
+6. Verschijnen er rijen in het filterresultaat, dan zijn dat dubbele koprijen.
+
+### In Google Sheets
+
+1. Selecteer alle gegevens (**Ctrl+A**).
+2. Ga naar **Gegevens → Een filter maken**.
+3. Klik op de pijl in de eerste kolom.
+4. Typ in het tekstvak van het filter de naam van de kolomkop (bijvoorbeeld `Handle`).
+5. Alle rijen met die waarde zijn dubbele koprijen.
+
+### Markeren met een formule
+
+Voeg in een lege kolom naast elke rij deze formule toe om duplicaten te markeren:
+
+```
+=ALS(A2="Handle";"DUBBELE KOPRIJ";"")
+```
+
+Vervang `"Handle"` door de echte naam van je eerste kolom. Filter op `DUBBELE KOPRIJ` om alle gevallen te vinden.
+
+---
+
+## Dubbele koprijen verwijderen
+
+### Methode 1: filteren en verwijderen (Excel / Sheets)
+
+1. Filter de eerste kolom zodat alleen rijen met de waarde van de kolomkop zichtbaar zijn (bijvoorbeeld `Handle`).
+2. Selecteer alle zichtbare gefilterde rijen (klik op het rijnummer van het eerste resultaat en Shift+klik op het laatste).
+3. Rechtsklik → **Rijen verwijderen**.
+4. Haal het filter weg (Gegevens → Filter wissen, of Filter → Uitschakelen).
+5. Controleer of je gegevens nog compleet zijn.
+
+### Methode 2: sorteren, verwijderen en terugsorteren (Excel)
+
+Sorteren zet alle dubbele koprijen bij elkaar, maar verandert de volgorde van je producten, dus sorteer daarna altijd terug. Bestanden voor Shopify, WooCommerce en eBay zijn afhankelijk van hun rijvolgorde.
+
+1. Voeg een hulpkolom met rijnummers (1, 2, 3...) toe om de oorspronkelijke volgorde vast te leggen.
+2. Sorteer op de eerste kolom van A naar Z.
+3. De dubbele koprijen staan nu bij elkaar, op de plek waar `Handle` alfabetisch tussen je waarden valt (Excel negeert hoofdletters bij het sorteren, dus zoek ze tussen de waarden die met H beginnen).
+4. Selecteer dat blok rijen en verwijder het.
+5. Sorteer op de hulpkolom om de oorspronkelijke volgorde te herstellen.
+6. Verwijder de hulpkolom.
+
+### Methode 3: teksteditor (grote bestanden)
+
+Voor bestanden die te groot zijn voor Excel (meer dan ongeveer 100.000 rijen) gebruik je VS Code of Notepad++:
+
+**VS Code:**
+1. Open het bestand.
+2. Druk op **Ctrl+H** (Zoeken en vervangen).
+3. Zet de modus **reguliere expressie** aan (het pictogram `.*`).
+4. Vul bij Zoeken in: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (vervang door je echte kolomkoppen, waar nodig ge-escapet)
+5. Laat Vervangen leeg.
+6. Klik op **Alles vervangen**.
+7. Zet na het verwijderen van alle duplicaten de koprij handmatig terug als eerste regel.
+
+> Wees voorzichtig met vervangen via reguliere expressies. Bewaar het originele bestand altijd als back-up en controleer na het vervangen of de koprij precies één keer voorkomt.
+
+**Notepad++ (Windows):**
+1. Open het bestand → **Zoeken → Vervangen** (Ctrl+H).
+2. Kies de modus **Reguliere expressie**.
+3. Gebruik hetzelfde patroon als bij VS Code hierboven.
+4. Alles vervangen en zet daarna de koprij handmatig terug.
+
+---
+
+## Na het verwijderen van dubbele koprijen
+
+Als het bestand schoon is:
+
+1. Controleer of de koprij precies één keer voorkomt, in regel 1.
+2. Tel je rijen. Het totaal moet gelijk zijn aan het oorspronkelijke aantal rijen min het aantal verwijderde dubbele koprijen.
+3. Controleer steekproefsgewijs een paar rijen rond de plekken waar de duplicaten stonden, om te bevestigen dat de gegevens compleet zijn.
+4. Sla op als **CSV UTF-8** (in Excel: **Bestand → Opslaan als → CSV UTF-8**).
+
+---
+
+## Dubbele koprijen voorkomen bij volgende samenvoegingen
+
+Als je meerdere CSV's handmatig combineert:
+
+1. Open het eerste bestand (je 'basisbestand') in Excel of Sheets.
+2. Open elk extra bestand.
+3. **Verwijder de koprij** van het extra bestand voordat je de gegevens kopieert.
+4. Kopieer alleen de gegevensrijen.
+5. Plak ze onderaan het basisbestand.
+
+Automatiseer je het samenvoegen van CSV's met scripts, sla dan altijd de koprij over van elk bestand na het eerste. `csv.DictReader` leest de koprij van elk bestand als kolomnamen, zodat die nooit in de gegevens belandt:
+
+```python
+# Python-voorbeeld: gaat ervan uit dat alle bestanden dezelfde kolommen hebben
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig verwijdert de BOM, die anders de naam van de eerste kolom zou veranderen
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Verschillen de kolommen van de bestanden, gebruik dan het script uit de gids over het samenvoegen van twee CSV-bestanden, dat alle kolommen behoudt.

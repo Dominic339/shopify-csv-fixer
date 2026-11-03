@@ -1,0 +1,170 @@
+---
+title: "Doppelte Kopfzeilen aus CSV-Dateien entfernen"
+description: "Finde und lösche wiederholte Kopfzeilen mitten in CSV-Exporten: typische Ursachen, Erkennung mit Filtern in Excel und Google Sheets und wie du sie künftig vermeidest."
+keywords: ["doppelte kopfzeilen csv", "wiederholte spaltenköpfe csv", "csv kopfzeile mitten in der datei", "csv kopfzeilen entfernen", "csv import doppelte zeilen", "shopify csv kopfzeile", "woocommerce csv kopfzeile"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Warum in exportierten CSV-Dateien doppelte Kopfzeilen auftauchen"
+  - "Wie du doppelte Kopfzeilen mit Filtern in Excel und Google Tabellen findest"
+  - "Schritt für Schritt entfernen mit Filtern, Sortieren und Löschen"
+  - "Wie du bei großen Dateien einen Texteditor nutzt"
+  - "Wie du doppelte Kopfzeilen in künftigen Exporten vermeidest"
+bestFor: "Händler, die CSV-Dateien von Hand zusammenführen, Massenexport-Tools nutzen oder von Lieferanten CSVs mit wiederholten Spaltenköpfen in der Mitte bekommen"
+timeToComplete: "8 Minuten"
+---
+
+## Was sind doppelte Kopfzeilen?
+
+Eine doppelte Kopfzeile liegt vor, wenn die erste Zeile deiner CSV (die Spaltennamen) irgendwo im Datenteil noch einmal auftaucht. Zum Beispiel:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← wiederholte Kopfzeile
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Trifft ein Import-Tool in einer Datenzeile auf `Handle`, kann es sie nicht als Produkt lesen. Die meisten Plattformen überspringen die Zeile stillschweigend oder melden einen Formatfehler. Manche zählen sie als fehlgeschlagene Zeile.
+
+---
+
+## Warum doppelte Kopfzeilen entstehen
+
+### Mehrere Exportdateien zusammenführen
+
+Die häufigste Ursache: Zwei CSV-Dateien werden in Excel oder Google Tabellen per Kopieren und Einfügen kombiniert. Die Kopfzeile der zweiten Datei landet mitten in der kombinierten Datei.
+
+### Exporte in Seiten
+
+Manche Plattformen exportieren Daten seitenweise (z. B. 500 Zeilen pro Datei). Lädst du alle Seiten herunter und kombinierst sie, wird die Kopfzeile jeder Datei mit aneinandergehängt.
+
+### Automatische Berichtssysteme
+
+Automatisierte CSV-Systeme, die täglich Zeilen anhängen, wiederholen manchmal die Kopfzeile am Anfang jedes angehängten Blocks.
+
+### „Alle aktualisieren“ oder Power-Query-Exporte in Excel
+
+Das Aktualisieren von Datenverbindungen in Excel kann die Kopfzeile manchmal erneut einfügen, wenn die Abfrage falsch eingerichtet ist.
+
+---
+
+## Doppelte Kopfzeilen finden
+
+### In Excel
+
+1. Öffne deine CSV-Datei (**Daten → Aus Text/CSV**, nicht per Doppelklick, damit die Formatierung erhalten bleibt).
+2. Klicke in eine beliebige Zelle deiner Daten.
+3. Gehe zu **Daten → Filtern**, um Filter einzuschalten.
+4. Klicke auf den Pfeil in der Spalte **Handle** (oder in deiner ersten Spalte).
+5. Gib im Suchfeld genau den Namen des Spaltenkopfs ein (z. B. `Handle`).
+6. Erscheinen Zeilen im Filterergebnis, sind das doppelte Kopfzeilen.
+
+### In Google Tabellen
+
+1. Markiere alle Daten (**Strg+A**).
+2. Gehe zu **Daten → Filter erstellen**.
+3. Klicke auf den Pfeil in der ersten Spalte.
+4. Gib im Textfeld des Filters den Namen des Spaltenkopfs ein (z. B. `Handle`).
+5. Alle Zeilen mit diesem Wert sind doppelte Kopfzeilen.
+
+### Mit einer Formel markieren
+
+Füge in einer leeren Spalte neben jeder Zeile diese Formel ein, um Duplikate zu markieren:
+
+```
+=WENN(A2="Handle";"DOPPELTE KOPFZEILE";"")
+```
+
+Ersetze `"Handle"` durch den tatsächlichen Namen deiner ersten Spalte. Filtere nach `DOPPELTE KOPFZEILE`, um alle Vorkommen zu finden.
+
+---
+
+## Doppelte Kopfzeilen entfernen
+
+### Methode 1: Filtern und löschen (Excel / Tabellen)
+
+1. Filtere die erste Spalte so, dass nur Zeilen mit dem Wert des Spaltenkopfs angezeigt werden (z. B. `Handle`).
+2. Markiere alle sichtbaren gefilterten Zeilen (Zeilennummer des ersten Treffers anklicken, Umschalt+Klick auf den letzten).
+3. Rechtsklick → **Zeilen löschen**.
+4. Entferne den Filter (Daten → Filter löschen bzw. Filter → Deaktivieren).
+5. Prüfe, ob deine Daten vollständig sind.
+
+### Methode 2: Sortieren, löschen, zurücksortieren (Excel)
+
+Sortieren bringt alle doppelten Kopfzeilen zusammen, ändert aber die Reihenfolge deiner Produkte. Sortiere also danach immer zurück. Dateien für Shopify, WooCommerce und eBay sind auf ihre Zeilenreihenfolge angewiesen.
+
+1. Füge eine Hilfsspalte mit Zeilennummern (1, 2, 3 ...) hinzu, um die ursprüngliche Reihenfolge festzuhalten.
+2. Sortiere nach der ersten Spalte von A bis Z.
+3. Die doppelten Kopfzeilen stehen jetzt direkt untereinander, dort, wo `Handle` alphabetisch zwischen deinen Werten liegt (Excel ignoriert beim Sortieren Groß- und Kleinschreibung, such also bei den Werten mit H).
+4. Markiere diesen Block von Zeilen und lösche ihn.
+5. Sortiere nach der Hilfsspalte, um die ursprüngliche Reihenfolge wiederherzustellen.
+6. Lösche die Hilfsspalte.
+
+### Methode 3: Texteditor (große Dateien)
+
+Für Dateien, die für Excel zu groß sind (über ca. 100.000 Zeilen), nutze VS Code oder Notepad++:
+
+**VS Code:**
+1. Öffne die Datei.
+2. Drücke **Strg+H** (Suchen und Ersetzen).
+3. Schalte den Modus **Regulärer Ausdruck** ein (das Symbol `.*`).
+4. Gib bei Suchen ein: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (durch deine tatsächlichen Spaltenköpfe ersetzen, bei Bedarf maskiert)
+5. Lass das Feld Ersetzen leer.
+6. Klicke auf **Alle ersetzen**.
+7. Nachdem alle Duplikate entfernt sind, füge die Kopfzeile von Hand wieder als erste Zeile ein.
+
+> Sei mit Ersetzungen per regulärem Ausdruck vorsichtig. Bewahre die Originaldatei immer als Sicherung auf und prüfe nach dem Ersetzen, ob die Kopfzeile genau einmal vorkommt.
+
+**Notepad++ (Windows):**
+1. Datei öffnen → **Suchen → Ersetzen** (Strg+H).
+2. Aktiviere den Modus **Regulärer Ausdruck**.
+3. Dasselbe Muster wie oben bei VS Code.
+4. Alle ersetzen, dann die Kopfzeile von Hand wieder einfügen.
+
+---
+
+## Nach dem Entfernen der doppelten Kopfzeilen
+
+Wenn die Datei sauber ist:
+
+1. Prüfe, ob die Kopfzeile genau einmal vorkommt, in Zeile 1.
+2. Zähle deine Zeilen. Die Zahl sollte der ursprünglichen Zeilenzahl minus der Anzahl entfernter doppelter Kopfzeilen entsprechen.
+3. Prüfe stichprobenartig ein paar Zeilen in der Nähe der früheren Duplikate, ob die Daten vollständig sind.
+4. Speichere als **CSV UTF-8** (in Excel: **Datei → Speichern unter → CSV UTF-8**).
+
+---
+
+## Doppelte Kopfzeilen beim nächsten Zusammenführen vermeiden
+
+Wenn du mehrere CSV-Dateien von Hand kombinierst:
+
+1. Öffne die erste Datei (deine „Basisdatei“) in Excel oder Tabellen.
+2. Öffne jede weitere Datei.
+3. **Lösche die Kopfzeile** der weiteren Datei, bevor du ihre Daten kopierst.
+4. Kopiere nur die Datenzeilen.
+5. Füge sie unten in der Basisdatei ein.
+
+Automatisierst du das Zusammenführen mit Skripten, überspringe immer die Kopfzeile jeder Datei nach der ersten. `csv.DictReader` liest die Kopfzeile jeder Datei als Spaltennamen, sodass sie nie in den Daten landet:
+
+```python
+# Python-Beispiel: setzt voraus, dass alle Dateien dieselben Spalten haben
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig entfernt ein BOM, das sonst den ersten Spaltennamen verändern würde
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Unterscheiden sich die Spalten der Dateien, nutze das Skript aus dem Leitfaden zum Zusammenführen zweier CSV-Dateien, das alle Spalten behält.

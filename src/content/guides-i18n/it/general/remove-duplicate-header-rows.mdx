@@ -1,0 +1,170 @@
+---
+title: "Rimuovere le righe di intestazione duplicate dai file CSV"
+description: "Trova ed elimina le righe di intestazione ripetute a metà delle esportazioni CSV. Scopri le cause più comuni, individuale con i filtri di Excel e Google Sheets ed evitale nelle esportazioni future."
+keywords: ["righe di intestazione duplicate csv", "intestazioni ripetute csv", "intestazione a metà csv", "rimuovere intestazioni csv", "righe duplicate importazione csv", "intestazioni csv shopify", "intestazioni csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Perché compaiono righe di intestazione duplicate nei CSV esportati"
+  - "Come individuarle con i filtri di Excel e Google Sheets"
+  - "Come eliminarle passo passo filtrando, ordinando e cancellando"
+  - "Come usare un editor di testo per i file grandi"
+  - "Come evitare intestazioni duplicate nelle esportazioni future"
+bestFor: "Venditori che uniscono CSV a mano, usano strumenti di esportazione in blocco o ricevono dai fornitori CSV con intestazioni ripetute a metà file"
+timeToComplete: "8 minuti"
+---
+
+## Cosa sono le righe di intestazione duplicate?
+
+Una riga di intestazione duplicata si ha quando la prima riga del tuo CSV (i nomi delle colonne) compare di nuovo da qualche parte nella zona dei dati. Per esempio:
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← riga di intestazione ripetuta
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Quando uno strumento di importazione trova `Handle` in una riga di dati, non può leggerla come un prodotto. La maggior parte delle piattaforme salta la riga senza avvisi o segnala un errore di formato. Alcune la contano come riga non riuscita.
+
+---
+
+## Perché compaiono intestazioni duplicate
+
+### Unione di più file esportati
+
+La causa più comune è combinare due CSV copiando e incollando in Excel o Google Sheets. La riga di intestazione del secondo file finisce a metà del file combinato.
+
+### Esportazioni a pagine
+
+Alcune piattaforme esportano i dati a pagine (per esempio 500 righe per file). Se scarichi tutte le pagine e le unisci, la riga di intestazione di ogni file viene accodata.
+
+### Sistemi di report programmati
+
+I sistemi automatici che ogni giorno aggiungono righe a un CSV a volte ripetono l'intestazione all'inizio di ogni blocco aggiunto.
+
+### «Aggiorna tutto» o esportazioni di Power Query in Excel
+
+Aggiornare le connessioni dati in Excel può reinserire la riga di intestazione se la query è configurata male.
+
+---
+
+## Individuare le righe di intestazione duplicate
+
+### In Excel
+
+1. Apri il CSV (**Dati → Da testo/CSV**, non con un doppio clic, per conservare la formattazione).
+2. Fai clic su una cella qualsiasi dei dati.
+3. Vai su **Dati → Filtro** per attivare i filtri.
+4. Fai clic sulla freccia della colonna **Handle** (o della tua prima colonna).
+5. Nella casella di ricerca, scrivi esattamente il nome dell'intestazione (per esempio `Handle`).
+6. Se nel risultato del filtro compaiono righe, quelle sono righe di intestazione duplicate.
+
+### In Google Sheets
+
+1. Seleziona tutti i dati (**Ctrl+A**).
+2. Vai su **Dati → Crea un filtro**.
+3. Fai clic sulla freccia della prima colonna.
+4. Nella casella di testo del filtro, scrivi il nome dell'intestazione (per esempio `Handle`).
+5. Tutte le righe che mostrano quel valore sono intestazioni duplicate.
+
+### Segnalarle con una formula
+
+In una colonna vuota, aggiungi questa formula accanto a ogni riga per segnalare i duplicati:
+
+```
+=SE(A2="Handle";"INTESTAZIONE DUPLICATA";"")
+```
+
+Sostituisci `"Handle"` con il nome reale della tua prima colonna. Filtra per `INTESTAZIONE DUPLICATA` per trovare tutti i casi.
+
+---
+
+## Eliminare le righe di intestazione duplicate
+
+### Metodo 1: filtrare ed eliminare (Excel / Sheets)
+
+1. Filtra la prima colonna perché mostri solo le righe con il valore dell'intestazione (per esempio `Handle`).
+2. Seleziona tutte le righe filtrate visibili (fai clic sul numero di riga del primo risultato e Maiusc+clic sull'ultimo).
+3. Clic destro → **Elimina righe**.
+4. Togli il filtro (Dati → Cancella filtro, o Filtro → Disattiva).
+5. Verifica che i dati siano integri.
+
+### Metodo 2: ordinare, eliminare e riordinare (Excel)
+
+L'ordinamento riunisce tutte le righe di intestazione duplicate, ma cambia l'ordine dei prodotti: riordina quindi sempre dopo. I file di Shopify, WooCommerce ed eBay dipendono dall'ordine delle righe.
+
+1. Aggiungi una colonna di supporto con i numeri di riga (1, 2, 3...) per conservare l'ordine originale.
+2. Ordina per la prima colonna dalla A alla Z.
+3. Le righe di intestazione duplicate ora sono una accanto all'altra, nel punto in cui `Handle` cade in ordine alfabetico tra i tuoi valori (l'ordinamento di Excel non distingue maiuscole e minuscole, quindi cercale tra i valori che iniziano con H).
+4. Seleziona quel blocco di righe ed eliminalo.
+5. Ordina per la colonna di supporto per ripristinare l'ordine originale.
+6. Elimina la colonna di supporto.
+
+### Metodo 3: editor di testo (file grandi)
+
+Per i file troppo grandi per Excel (oltre circa 100.000 righe), usa VS Code o Notepad++:
+
+**VS Code:**
+1. Apri il file.
+2. Premi **Ctrl+H** (Trova e sostituisci).
+3. Attiva la modalità **espressione regolare** (l'icona `.*`).
+4. In Trova, inserisci: `^Handle,Title,Vendor,Variant Price\r?\n`
+   (sostituiscilo con le tue intestazioni reali, con l'escape dove serve)
+5. Lascia vuoto Sostituisci.
+6. Fai clic su **Sostituisci tutto**.
+7. Dopo aver eliminato tutti i duplicati, aggiungi di nuovo a mano l'intestazione come prima riga.
+
+> Fai attenzione con le sostituzioni tramite espressioni regolari. Conserva sempre il file originale come copia di sicurezza e controlla che, dopo la sostituzione, l'intestazione compaia una sola volta.
+
+**Notepad++ (Windows):**
+1. Apri il file → **Cerca → Sostituisci** (Ctrl+H).
+2. Seleziona la modalità **Espressione regolare**.
+3. Usa lo stesso schema di VS Code.
+4. Sostituisci tutto, poi aggiungi di nuovo a mano la riga di intestazione.
+
+---
+
+## Dopo aver eliminato le intestazioni duplicate
+
+Quando il file è pulito:
+
+1. Verifica che l'intestazione compaia una sola volta, nella riga 1.
+2. Conta le righe. Il totale deve essere pari al numero di righe originale meno il numero di intestazioni duplicate eliminate.
+3. Controlla a campione alcune righe vicino ai punti in cui c'erano i duplicati per confermare che i dati sono integri.
+4. Salva come **CSV UTF-8** (in Excel: **File → Salva con nome → CSV UTF-8**).
+
+---
+
+## Evitare intestazioni duplicate nelle prossime unioni
+
+Quando unisci più CSV a mano:
+
+1. Apri il primo file (il tuo file «base») in Excel o Sheets.
+2. Apri ogni file aggiuntivo.
+3. **Elimina la riga di intestazione** del file aggiuntivo prima di copiarne i dati.
+4. Copia solo le righe di dati.
+5. Incollale in fondo al file base.
+
+Se automatizzi l'unione dei CSV con script, salta sempre la riga di intestazione di ogni file dopo il primo. `csv.DictReader` legge l'intestazione di ogni file come nomi di colonna, quindi non finisce mai nei dati:
+
+```python
+# Esempio in Python: presuppone che tutti i file abbiano le stesse colonne
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig rimuove il BOM, che altrimenti cambierebbe il nome della prima colonna
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Se le colonne dei file sono diverse, usa lo script della guida per unire due file CSV, che mantiene tutte le colonne.

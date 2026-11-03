@@ -1,0 +1,170 @@
+---
+title: "Supprimer les lignes d'en-tête en double des fichiers CSV"
+description: "Trouvez et supprimez les lignes d'en-tête répétées au milieu des exports CSV. Comprenez leurs causes, repérez-les avec les filtres d'Excel et de Google Sheets, et évitez-les lors des prochains exports."
+keywords: ["lignes d'en-tête en double csv", "en-têtes répétés csv", "en-tête au milieu du csv", "supprimer en-têtes csv", "lignes en double import csv", "en-têtes csv shopify", "en-têtes csv woocommerce"]
+lastUpdated: "2026-10-29"
+kind: "curated"
+whatYouLearn:
+  - "Pourquoi des lignes d'en-tête en double apparaissent dans les CSV exportés"
+  - "Comment les repérer avec les filtres d'Excel et de Google Sheets"
+  - "Comment les supprimer pas à pas par filtrage, tri et suppression"
+  - "Comment utiliser un éditeur de texte pour les gros fichiers"
+  - "Comment éviter les en-têtes en double lors des prochains exports"
+bestFor: "Vendeurs qui fusionnent des CSV à la main, utilisent des outils d'export en masse ou reçoivent de leurs fournisseurs des CSV avec des en-têtes répétés au milieu"
+timeToComplete: "8 minutes"
+---
+
+## Que sont les lignes d'en-tête en double ?
+
+On parle de ligne d'en-tête en double quand la première ligne de votre CSV (les noms de colonnes) réapparaît quelque part dans les données. Par exemple :
+
+```
+Handle,Title,Vendor,Variant Price
+blue-shirt,Blue T-Shirt,Acme,19.99
+Handle,Title,Vendor,Variant Price   ← ligne d'en-tête répétée
+red-shirt,Red T-Shirt,Acme,21.99
+```
+
+Quand un outil d'import rencontre `Handle` dans une ligne de données, il ne peut pas la lire comme un produit. La plupart des plateformes ignorent la ligne sans prévenir ou renvoient une erreur de format. Certaines la comptent comme une ligne en échec.
+
+---
+
+## Pourquoi des en-têtes en double apparaissent
+
+### Fusion de plusieurs fichiers exportés
+
+La cause la plus courante : combiner deux CSV par copier-coller dans Excel ou Google Sheets. La ligne d'en-tête du second fichier se retrouve au milieu du fichier combiné.
+
+### Exports paginés
+
+Certaines plateformes exportent les données par pages (par exemple 500 lignes par fichier). Si vous téléchargez toutes les pages et les assemblez, la ligne d'en-tête de chaque fichier est ajoutée à la suite.
+
+### Systèmes de rapports planifiés
+
+Les systèmes qui ajoutent automatiquement des lignes à un CSV chaque jour répètent parfois l'en-tête au début de chaque bloc ajouté.
+
+### « Actualiser tout » ou exports Power Query dans Excel
+
+L'actualisation des connexions de données dans Excel peut réinsérer la ligne d'en-tête si la requête est mal configurée.
+
+---
+
+## Repérer les lignes d'en-tête en double
+
+### Dans Excel
+
+1. Ouvrez votre CSV (**Données → À partir d'un fichier texte/CSV**, pas par un double-clic, pour préserver le format).
+2. Cliquez dans n'importe quelle cellule de vos données.
+3. Allez dans **Données → Filtrer** pour activer les filtres.
+4. Cliquez sur la flèche de la colonne **Handle** (ou de votre première colonne).
+5. Dans la zone de recherche, tapez exactement le nom de l'en-tête (par exemple `Handle`).
+6. Si des lignes apparaissent dans le résultat du filtre, ce sont des lignes d'en-tête en double.
+
+### Dans Google Sheets
+
+1. Sélectionnez toutes les données (**Ctrl+A**).
+2. Allez dans **Données → Créer un filtre**.
+3. Cliquez sur la flèche de la première colonne.
+4. Dans la zone de texte du filtre, tapez le nom de l'en-tête (par exemple `Handle`).
+5. Toutes les lignes qui affichent cette valeur sont des en-têtes en double.
+
+### Les signaler avec une formule
+
+Dans une colonne vide, ajoutez cette formule à côté de chaque ligne pour signaler les doublons :
+
+```
+=SI(A2="Handle";"EN-TÊTE EN DOUBLE";"")
+```
+
+Remplacez `"Handle"` par le vrai nom de votre première colonne. Filtrez sur `EN-TÊTE EN DOUBLE` pour trouver toutes les occurrences.
+
+---
+
+## Supprimer les lignes d'en-tête en double
+
+### Méthode 1 : filtrer et supprimer (Excel / Sheets)
+
+1. Filtrez la première colonne pour n'afficher que les lignes dont la valeur est celle de l'en-tête (par exemple `Handle`).
+2. Sélectionnez toutes les lignes filtrées visibles (cliquez sur le numéro de ligne du premier résultat, puis Maj+clic sur le dernier).
+3. Clic droit → **Supprimer les lignes**.
+4. Retirez le filtre (Données → Effacer le filtre, ou Filtre → Désactiver).
+5. Vérifiez que vos données sont intactes.
+
+### Méthode 2 : trier, supprimer, puis retrier (Excel)
+
+Le tri rassemble toutes les lignes d'en-tête en double, mais il change l'ordre de vos produits : retriez donc toujours ensuite. Les fichiers Shopify, WooCommerce et eBay dépendent de l'ordre de leurs lignes.
+
+1. Ajoutez une colonne auxiliaire avec des numéros de ligne (1, 2, 3...) pour garder l'ordre d'origine.
+2. Triez sur la première colonne de A à Z.
+3. Les lignes d'en-tête en double se retrouvent maintenant les unes à la suite des autres, là où `Handle` tombe dans l'ordre alphabétique parmi vos valeurs (le tri d'Excel ne tient pas compte de la casse : cherchez parmi les valeurs qui commencent par H).
+4. Sélectionnez ce bloc de lignes et supprimez-le.
+5. Triez sur la colonne auxiliaire pour retrouver l'ordre d'origine.
+6. Supprimez la colonne auxiliaire.
+
+### Méthode 3 : éditeur de texte (gros fichiers)
+
+Pour les fichiers trop gros pour Excel (plus de 100 000 lignes environ), utilisez VS Code ou Notepad++ :
+
+**VS Code :**
+1. Ouvrez le fichier.
+2. Appuyez sur **Ctrl+H** (Rechercher et remplacer).
+3. Activez le mode **expression régulière** (l'icône `.*`).
+4. Dans Rechercher, saisissez : `^Handle,Title,Vendor,Variant Price\r?\n`
+   (à remplacer par vos vrais en-têtes, échappés si nécessaire)
+5. Laissez le champ Remplacer vide.
+6. Cliquez sur **Remplacer tout**.
+7. Une fois tous les doublons supprimés, remettez l'en-tête à la main en première ligne.
+
+> Soyez prudent avec les remplacements par expression régulière. Gardez toujours le fichier d'origine en sauvegarde et vérifiez que l'en-tête n'apparaît qu'une seule fois après le remplacement.
+
+**Notepad++ (Windows) :**
+1. Ouvrez le fichier → **Rechercher → Remplacer** (Ctrl+H).
+2. Cochez le mode **Expression régulière**.
+3. Même motif que pour VS Code ci-dessus.
+4. Remplacer tout, puis remettez la ligne d'en-tête à la main.
+
+---
+
+## Après la suppression des en-têtes en double
+
+Une fois le fichier propre :
+
+1. Vérifiez que l'en-tête n'apparaît qu'une seule fois, en ligne 1.
+2. Comptez vos lignes. Le total doit être égal au nombre de lignes d'origine moins le nombre d'en-têtes en double supprimés.
+3. Contrôlez quelques lignes autour des anciens doublons pour confirmer que les données sont intactes.
+4. Enregistrez en **CSV UTF-8** (dans Excel : **Fichier → Enregistrer sous → CSV UTF-8**).
+
+---
+
+## Éviter les en-têtes en double lors des prochaines fusions
+
+Quand vous combinez plusieurs CSV à la main :
+
+1. Ouvrez le premier fichier (votre fichier « de base ») dans Excel ou Sheets.
+2. Ouvrez chaque fichier supplémentaire.
+3. **Supprimez la ligne d'en-tête** du fichier supplémentaire avant de copier ses données.
+4. Copiez uniquement les lignes de données.
+5. Collez-les en bas du fichier de base.
+
+Si vous automatisez la fusion de CSV avec des scripts, ignorez toujours la ligne d'en-tête de chaque fichier après le premier. `csv.DictReader` lit l'en-tête de chaque fichier comme noms de colonnes, il ne se retrouve donc jamais dans les données :
+
+```python
+# Exemple Python : suppose que tous les fichiers ont les mêmes colonnes
+import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
+
+with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
+    writer = None
+    for filename in files:
+        # utf-8-sig retire le BOM, qui changerait sinon le nom de la première colonne
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            if writer is None:
+                writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
+                writer.writeheader()
+            for row in reader:
+                writer.writerow(row)
+```
+
+Si les colonnes des fichiers diffèrent, utilisez le script du guide pour fusionner deux fichiers CSV, qui garde toutes les colonnes.

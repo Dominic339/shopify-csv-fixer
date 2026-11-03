@@ -2,7 +2,7 @@
 title: "Remove Duplicate Header Rows from CSV Files"
 description: "Find and delete repeated header rows that appear mid-file in CSV exports. Understand the common causes, detect them with Excel and Google Sheets filters, and prevent them in future exports."
 keywords: ["duplicate header rows csv", "repeated headers csv", "csv header mid-file", "remove csv headers", "csv import duplicate rows", "shopify csv headers", "woocommerce csv headers"]
-lastUpdated: "2026-03-04"
+lastUpdated: "2026-10-29"
 kind: "curated"
 whatYouLearn:
   - "Why duplicate header rows appear in exported CSV files"
@@ -90,14 +90,14 @@ Replace `"Handle"` with your actual first column name. Filter for `DUPLICATE HEA
 4. Remove the filter (Data → Clear Filter or Filter → Turn off).
 5. Verify your data is intact.
 
-### Method 2: Sort, identify, then sort back (Excel)
+### Method 2: Sort, delete, then sort back (Excel)
 
-If your data has a natural sort key (like a Handle or SKU that is always a slug/alphanumeric):
+Sorting brings every duplicate header row together, but it reorders your products, so always sort back afterwards. Shopify, WooCommerce and eBay files depend on their row order.
 
 1. Add a helper column with row numbers (1, 2, 3...) to preserve original order.
 2. Sort by the first column A-Z.
-3. Header duplicates will sort to the top (since `Handle` sorts alphabetically above most slugs).
-4. Delete the duplicate header rows at the top.
+3. The duplicate header rows now sit next to each other, wherever `Handle` falls alphabetically among your values (Excel's sort ignores case, so look among the values starting with H).
+4. Select that block of rows and delete it.
 5. Sort by the helper column to restore original order.
 6. Delete the helper column.
 
@@ -146,16 +146,19 @@ When combining multiple CSV files manually:
 4. Copy the data rows only.
 5. Paste at the bottom of the base file.
 
-If you are automating CSV merges with scripts, always skip the header row of every file after the first:
+If you are automating CSV merges with scripts, always skip the header row of every file after the first. `csv.DictReader` reads each file's header as column names, so it never ends up in the data:
 
 ```python
-# Python example
+# Python example: assumes every file has the same columns
 import csv
+
+files = ["export_page1.csv", "export_page2.csv"]
 
 with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
     writer = None
-    for i, filename in enumerate(files):
-        with open(filename, encoding="utf-8") as infile:
+    for filename in files:
+        # utf-8-sig strips a BOM, which would otherwise change the first column name
+        with open(filename, newline="", encoding="utf-8-sig") as infile:
             reader = csv.DictReader(infile)
             if writer is None:
                 writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
@@ -163,3 +166,5 @@ with open("combined.csv", "w", newline="", encoding="utf-8") as outfile:
             for row in reader:
                 writer.writerow(row)
 ```
+
+If the files' columns differ, use the merge script in the guide to merging two CSV files, which keeps every column.
