@@ -18,7 +18,7 @@ import { localizedLandings } from "@/lib/landing/localize";
 import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
 import { SHOPIFY_HEADER_ALIASES } from "@/lib/shopifySchema";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, fitTitleString, pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { fmt, getTranslations, platformLabel } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { loadValidationDicts, validationText } from "@/lib/i18n/validationText";
@@ -31,8 +31,8 @@ export async function platformLandingMetadata(slug: LandingSlug, locale: Locale 
   const p = (await localizedLandings(locale))[slug];
   return {
     // metaTitle already ends with the brand, so skip the layout's "%s | StriveFormats".
-    title: { absolute: p.metaTitle },
-    description: p.metaDescription,
+    title: { absolute: fitTitleString(p.metaTitle) },
+    description: fitDescription(p.metaDescription),
     alternates: pageAlternates(locale, p.path),
     openGraph: { images: SHARE_IMAGES, title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${localeHref(locale, p.path)}` },
   };

@@ -18,7 +18,7 @@ import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 import type { IssueMeta } from "@/lib/validation/issueMeta";
 import { fmt, getTranslations, platformLabel, presetText, type Translations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, pageAlternates, seoTitle, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { mergeExampleRow } from "@/app/(en)/presets/[id]/presetDetailHelpers";
 
 export const PRESET_TO_PLATFORM: Record<string, GuidePlatform> = {
@@ -87,8 +87,8 @@ async function PopularGuides({ t, locale, platform }: { t: Translations; locale:
 export async function presetsMetadata(locale: Locale): Promise<Metadata> {
   const t = await getTranslations(locale);
   return {
-    title: t.presets.title,
-    description: t.presets.description,
+    title: seoTitle(t.presets.title),
+    description: fitDescription(t.presets.description),
     alternates: pageAlternates(locale, "/presets"),
     openGraph: { images: SHARE_IMAGES, title: t.presets.title, description: t.presets.description, url: `${SITE_URL}${localeHref(locale, "/presets")}` },
   };
@@ -162,14 +162,15 @@ export async function presetDetailMetadata(locale: Locale, rawId: string): Promi
   if (!preset) return { title: "Template" };
   const t = await getTranslations(locale);
   const name = presetText(t, preset.id, "name") ?? preset.name;
-  const description = presetText(t, preset.id, "desc") ?? preset.description;
+  const description = fitDescription(presetText(t, preset.id, "desc") ?? preset.description);
   const path = `/presets/${encodeURIComponent(preset.id)}`;
+  const title = fmt(t.presets.templateTitle, { name });
   return {
-    title: `${name} CSV Template`,
+    title: seoTitle(title),
     description,
     keywords: KEYWORDS[preset.id],
     alternates: pageAlternates(locale, path),
-    openGraph: { images: SHARE_IMAGES, title: `${name} CSV Template`, description, url: `${SITE_URL}${localeHref(locale, path)}`, type: "website" },
+    openGraph: { images: SHARE_IMAGES, title, description, url: `${SITE_URL}${localeHref(locale, path)}`, type: "website" },
   };
 }
 

@@ -22,6 +22,10 @@ import { localeHref } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { useValidationText } from "@/lib/i18n/useValidationText";
 import { readTextFile } from "@/lib/textFile";
+import { card, muted, StepTitle } from "@/app/(en)/app/fixer/ui";
+
+// Two Shopify exports that share a product, to show append and dedupe.
+const SAMPLE_FILES = ["/samples/messy_shopify_export_1_classic_tee.csv", "/samples/messy_shopify_export_2_duplicate_sku.csv"];
 
 function downloadCsv(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
@@ -61,6 +65,7 @@ export default function MergeClient({ t }: Props) {
   const [result, setResult] = useState<MergeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loadingSamples, setLoadingSamples] = useState(false);
 
   useEffect(() => {
     // Query Supabase directly for reliable plan detection (same as TopBar/AppClient)
@@ -112,6 +117,11 @@ export default function MergeClient({ t }: Props) {
       ? fileA.headers.filter((h) => fileB.headers.includes(h))
       : fileA?.headers ?? [];
 
+  // Until a column is picked, dedupe on the obvious product key the files share (Handle, SKU, ID…).
+  const suggestedKey =
+    ["Handle", "URL handle", "Variant SKU", "SKU", "sku", "ID", "Listing ID", "item_sku", "CustomLabel"].find((k) => sharedHeaders.includes(k)) ?? "";
+  const effectiveKey = dedupeKey || suggestedKey;
+
   function handleMerge() {
     if (!fileA || !fileB) {
       setError(t.errNeedBoth);
@@ -127,7 +137,7 @@ export default function MergeClient({ t }: Props) {
         fileB.rows,
         {
           mode,
-          dedupeKey: mode === "dedupe" ? dedupeKey || undefined : undefined,
+          dedupeKey: mode === "dedupe" ? effectiveKey || undefined : undefined,
           conflictRule,
           plan,
         }
@@ -150,103 +160,77 @@ export default function MergeClient({ t }: Props) {
     downloadCsv(`${base}_merged.csv`, csv);
   }
 
-  return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="flex items-center gap-3 text-2xl font-semibold">
-        {t.title}
-        <span className="rounded-full bg-[var(--secondary-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">{t.beta}</span>
-      </h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">
-        {t.description}
-      </p>
+  async function loadSamples() {
+    setLoadingSamples(true);
+    try {
+      const [a, b] = await Promise.all(SAMPLE_FILES.map(async (u) => new File([await (await fetch(u)).text()], u.split("/").pop() ?? "sample.csv", { type: "text/csv" })));
+      await loadFileData(a, setFileA);
+      await loadFileData(b, setFileB);
+    } finally {
+      setLoadingSamples(false);
+    }
+  }
 
-      <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)]">
-        {t.yourPlan}: <span className="font-semibold">{t[`plan_${plan}`]}</span>
-        {rowLimit !== null ? (
-          <> · {t.upTo}{" "}
-          <span className="font-semibold">{rowLimit.toLocaleString()}</span> {t.combinedRows}</>
-        ) : (
-          <> · <span className="font-semibold">{t.planUnlimited}</span></>
-        )}
-        {plan === "free" && (
-          <> · <Link href="/profile?upgrade=basic" className="underline hover:no-underline">
-            {t.upgradeForLarger}
-          </Link></>
-        )}
-      </div>
-
-      <div className="mt-8 space-y-6">
-        {/* File uploads */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FileDropZone onFile={(f) => void loadFileData(f, setFileA)}>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h2 className="text-sm font-semibold">{t.fileA}</h2>
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
-                onClick={() => fileARef.current?.click()}
-              >
-                {t.chooseFile}
-              </button>
-              <span className="truncate text-xs text-[var(--muted)]">
-                {fileA ? fileA.name : t.noFile}
-              </span>
-            </div>
-            {fileA && (
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                {fmt(t.fileStats, { rows: fileA.rows.length, columns: fileA.headers.length })}
-              </p>
-            )}
-            <input
-              ref={fileARef}
-              type="file"
-              accept=".csv,text/csv"
-              className="hidden"
-              onChange={(e) => handleFileLoad(e, setFileA)}
-            />
-          </div>
-          </FileDropZone>
-
-          <FileDropZone onFile={(f) => void loadFileData(f, setFileB)}>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <h2 className="text-sm font-semibold">{t.fileB}</h2>
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                className="rgb-btn px-4 py-2 text-sm font-semibold text-[var(--text)]"
-                onClick={() => fileBRef.current?.click()}
-              >
-                {t.chooseFile}
-              </button>
-              <span className="truncate text-xs text-[var(--muted)]">
-                {fileB ? fileB.name : t.noFile}
-              </span>
-            </div>
-            {fileB && (
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                {fmt(t.fileStats, { rows: fileB.rows.length, columns: fileB.headers.length })}
-              </p>
-            )}
-            <input
-              ref={fileBRef}
-              type="file"
-              accept=".csv,text/csv"
-              className="hidden"
-              onChange={(e) => handleFileLoad(e, setFileB)}
-            />
-          </div>
-          </FileDropZone>
+  const fileSlot = (label: string, file: FileData | null, ref: React.RefObject<HTMLInputElement | null>, setter: (d: FileData) => void) => (
+    <FileDropZone onFile={(f) => void loadFileData(f, setter)}>
+      <div className="flex h-full flex-col gap-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-2)] p-4">
+        <div className="text-sm font-semibold text-[var(--text)]">{label}</div>
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <button type="button" className={file ? "pill-btn shrink-0" : "rg-btn"} onClick={() => ref.current?.click()}>
+            {t.chooseFile}
+          </button>
+          <span className={`min-w-0 truncate text-sm ${file ? "text-[var(--text)]" : muted}`}>{file ? file.name : t.noFile}</span>
         </div>
+        {file && <p className={`text-xs ${muted}`}>{fmt(t.fileStats, { rows: file.rows.length, columns: file.headers.length })}</p>}
+        <input ref={ref} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => handleFileLoad(e, setter)} />
+      </div>
+    </FileDropZone>
+  );
 
-        {/* Options */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-sm font-semibold">{t.mergeOptions}</h2>
+  return (
+    <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12">
+      <header className="mb-8">
+        <h1 className="flex flex-wrap items-center gap-3 text-3xl font-bold tracking-tight text-[var(--text)]">
+          {t.title}
+          <span className="rounded-full bg-[var(--secondary-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">{t.beta}</span>
+        </h1>
+        <p className={`mt-3 text-base ${muted}`}>{t.description}</p>
+        <p className={`mt-3 text-sm ${muted}`}>
+          {t.yourPlan}: <span className="font-semibold text-[var(--text)]">{t[`plan_${plan}`]}</span>
+          {rowLimit !== null ? (
+            <> · {t.upTo} <span className="font-semibold text-[var(--text)]">{rowLimit.toLocaleString()}</span> {t.combinedRows}</>
+          ) : (
+            <> · <span className="font-semibold text-[var(--text)]">{t.planUnlimited}</span></>
+          )}
+          {plan === "free" && (
+            <> · <Link href="/profile?upgrade=basic" className="underline hover:no-underline">{t.upgradeForLarger}</Link></>
+          )}
+        </p>
+      </header>
+
+      <div className="space-y-6">
+        {/* 1. Files */}
+        <section className={`${card} p-5 sm:p-7`}>
+          <StepTitle n={1}>{t.filesStep}</StepTitle>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {fileSlot(t.fileA, fileA, fileARef, setFileA)}
+            {fileSlot(t.fileB, fileB, fileBRef, setFileB)}
+          </div>
+          {!fileA && !fileB && (
+            <button type="button" className="mt-4 text-sm font-medium text-[var(--accent)] hover:underline disabled:opacity-60" onClick={() => void loadSamples()} disabled={loadingSamples}>
+              {t.trySamples}
+            </button>
+          )}
+        </section>
+
+        {/* 2. Options */}
+        <section className={`${card} p-5 sm:p-7`}>
+          <StepTitle n={2}>{t.mergeOptions}</StepTitle>
 
           <div className="mt-4 space-y-4">
             <div>
               <label className="block text-xs font-medium text-[var(--muted)] mb-2">{t.mode}</label>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
                 <label className="flex items-center gap-2 cursor-pointer text-sm">
                   <input
                     type="radio"
@@ -279,7 +263,7 @@ export default function MergeClient({ t }: Props) {
                   <select
                     className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)]"
                     style={{ colorScheme: theme }}
-                    value={dedupeKey}
+                    value={effectiveKey}
                     onChange={(e) => setDedupeKey(e.target.value)}
                   >
                     <option value="">{t.chooseColumn}</option>
@@ -330,24 +314,19 @@ export default function MergeClient({ t }: Props) {
               </>
             )}
           </div>
-        </div>
 
         {/* Merge button */}
-        <div>
+        <div className="mt-6">
           {error && (
             <div className="mb-3 rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-2 text-sm text-red-700 dark:text-red-300">
               {error}
             </div>
           )}
-          <button
-            type="button"
-            className="rgb-btn px-6 py-3 text-sm font-semibold text-[var(--text)] disabled:opacity-50"
-            onClick={handleMerge}
-            disabled={busy || !fileA || !fileB}
-          >
+          <button type="button" className="rg-btn disabled:opacity-50" onClick={handleMerge} disabled={busy || !fileA || !fileB}>
             {busy ? t.merging : t.mergeFiles}
           </button>
         </div>
+        </section>
 
         {/* Schema compatibility warning — shown before merge and in results */}
         {fileA && fileB && (() => {
@@ -371,8 +350,8 @@ export default function MergeClient({ t }: Props) {
 
         {/* Result */}
         {result && (
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-            <h2 className="text-sm font-semibold">{t.mergeSummary}</h2>
+          <section className={`${card} p-5 sm:p-7`}>
+            <StepTitle n={3}>{t.mergeSummary}</StepTitle>
 
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
@@ -412,15 +391,11 @@ export default function MergeClient({ t }: Props) {
             )}
 
             <div className="mt-5">
-              <button
-                type="button"
-                className="rgb-btn px-5 py-3 text-sm font-semibold text-[var(--text)]"
-                onClick={handleDownload}
-              >
+              <button type="button" className="rg-btn" onClick={handleDownload}>
                 {t.downloadMerged}
               </button>
             </div>
-          </div>
+          </section>
         )}
       </div>
 

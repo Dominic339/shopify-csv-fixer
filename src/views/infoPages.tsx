@@ -9,7 +9,7 @@ import { FREE_EXPORTS_PER_MONTH } from "@/lib/plans";
 import { SUPPORT_EMAIL } from "@/lib/contact";
 import { fmt } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates } from "@/lib/i18n/seo";
+import { fitDescription, fitTitleString, pageAlternates } from "@/lib/i18n/seo";
 
 type PagesDict = typeof en;
 type InfoPage = "about" | "privacy" | "terms";
@@ -38,8 +38,11 @@ const PATHS: Record<InfoPage, string> = { about: "/about", privacy: "/privacy", 
 export async function infoPageMetadata(page: InfoPage, locale: Locale = DEFAULT_LOCALE): Promise<Metadata> {
   const d = (await loadPages(locale))[page];
   // "About StriveFormats" already names the brand, so skip the layout's "%s | StriveFormats".
-  const title = d.metaTitle.includes("StriveFormats") ? { absolute: d.metaTitle } : d.metaTitle;
-  return { title, description: d.metaDescription, alternates: pageAlternates(locale, PATHS[page]) };
+  return {
+    title: { absolute: fitTitleString(d.metaTitle) },
+    description: fitDescription(d.metaDescription),
+    alternates: pageAlternates(locale, PATHS[page]),
+  };
 }
 
 const card = "min-w-0 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-7";

@@ -14,7 +14,7 @@ import ProfileClient from "@/app/(en)/profile/ProfileClient";
 import { getTranslations, presetText, type Translations } from "@/lib/i18n/getTranslations";
 import { getAllFormats } from "@/lib/formats";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, fitTitle, fitTitleString, pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 
 /** Distinct import checks across the built-in formats (formats can share a rule set). */
@@ -65,9 +65,9 @@ export async function toolMetadata(locale: Locale, tool: ToolId): Promise<Metada
 
   const url = `${SITE_URL}${localeHref(locale, path)}`;
   return {
-    // The home title is complete on its own; other titles get the " | StriveFormats" template.
-    title: tool === "home" ? { absolute: title } : title,
-    description,
+    // The home title already names the brand ("StriveFormats | …"); fitTitleString moves it to the end.
+    title: { absolute: tool === "home" ? fitTitleString(title) : fitTitle(title) },
+    description: fitDescription(description),
     alternates: pageAlternates(locale, path),
     openGraph: { images: SHARE_IMAGES, title, description, url, locale },
   };

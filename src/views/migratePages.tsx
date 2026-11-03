@@ -13,7 +13,7 @@ import { parseCsv } from "@/lib/csv";
 import { convertCsv } from "@/lib/convertCsv";
 import { CONVERT_ROUTES, SAMPLE_EXPORTS, type ConvertRoute } from "@/lib/convertRoutes";
 import { getTranslations } from "@/lib/i18n/getTranslations";
-import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { fitDescription, pageAlternates, seoTitle, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { card, muted } from "@/app/(en)/app/fixer/ui";
 
 const MAX_COLS = 6;
@@ -21,8 +21,8 @@ const MAX_COLS = 6;
 export function migrateMetadata(route: ConvertRoute): Metadata {
   const path = `/migrate/${route.slug}`;
   return {
-    title: { absolute: `${route.metaTitle} | StriveFormats` },
-    description: route.metaDescription,
+    title: seoTitle(route.metaTitle),
+    description: fitDescription(route.metaDescription),
     alternates: pageAlternates("en", path, false),
     openGraph: { images: SHARE_IMAGES, title: route.metaTitle, description: route.metaDescription, url: `${SITE_URL}${path}`, locale: "en" },
   };
@@ -191,7 +191,7 @@ export async function MigrateView({ route }: { route: ConvertRoute }) {
 }
 
 export const migrateIndexMetadata: Metadata = {
-  title: { absolute: "Store Migration CSV Converters: Shopify, WooCommerce, Etsy, eBay, Amazon | StriveFormats" },
+  title: seoTitle("Store Migration CSV Converters", "Shopify, WooCommerce, Etsy, eBay, Amazon"),
   description: "Move your products between Shopify, WooCommerce, Etsy, eBay and Amazon. Step-by-step export and import instructions with a free in-browser converter.",
   alternates: pageAlternates("en", "/migrate", false),
 };

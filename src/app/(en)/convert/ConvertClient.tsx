@@ -24,6 +24,12 @@ import { useValidationText } from "@/lib/i18n/useValidationText";
 import { card, muted, platformLabel, StepTitle } from "@/app/(en)/app/fixer/ui";
 import { readTextFile } from "@/lib/textFile";
 
+/** Sample files for the converter; other formats use their template's generated sample. */
+const SAMPLE_FOR: Record<string, string> = {
+  shopify_products: "/samples/shopify_product_template.csv",
+  shopify_products_legacy: "/samples/messy_shopify_export_1_classic_tee.csv",
+};
+
 function downloadFile(filename: string, content: string, type: string) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -125,6 +131,21 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   useEffect(() => {
     if (csvText) runConvert(csvText, sourceFormatId, targetFormatId);
   }, [csvText, sourceFormatId, targetFormatId, runConvert]);
+
+  const [loadingSample, setLoadingSample] = useState(false);
+  async function loadSample() {
+    const url = SAMPLE_FOR[sourceFormatId] ?? `/presets/${encodeURIComponent(sourceFormatId)}/sample.csv`;
+    setLoadingSample(true);
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(String(r.status));
+      await loadFile(new File([await r.text()], `sample_${sourceFormatId}.csv`, { type: "text/csv" }));
+    } catch {
+      setError(t.errFailed);
+    } finally {
+      setLoadingSample(false);
+    }
+  }
 
   async function loadFile(file: File) {
     setFileName(file.name);
@@ -268,6 +289,11 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
                 e.target.value = "";
               }}
             />
+            {!fileName && (
+              <button type="button" className="mt-3 text-sm font-medium text-[var(--accent)] hover:underline disabled:opacity-60" onClick={() => void loadSample()} disabled={loadingSample}>
+                {t.trySample}
+              </button>
+            )}
             {info && <p className="mt-3 text-sm text-[var(--accent-text)]">{info}</p>}
           </section>
         </FileDropZone>
