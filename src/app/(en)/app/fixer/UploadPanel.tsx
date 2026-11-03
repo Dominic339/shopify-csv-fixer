@@ -32,7 +32,7 @@ export function UploadPanel({ f, t }: { f: Fixer; t: AppStrings }) {
   }
 
   const chooser = (
-    <label className={hasFile ? "pill-btn cursor-pointer" : "rg-btn cursor-pointer"}>
+    <label className={hasFile ? "pill-btn shrink-0 cursor-pointer whitespace-nowrap" : "rg-btn cursor-pointer"}>
       {hasFile ? t.replaceFile : t.chooseFile}
       <input
         type="file"
@@ -89,7 +89,7 @@ export function UploadPanel({ f, t }: { f: Fixer; t: AppStrings }) {
       {pasting && !hasFile && (
         <div className="mt-3">
           <textarea
-            className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 font-mono text-sm text-[var(--text)] placeholder:text-[color:rgba(var(--muted-rgb),0.5)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 font-mono text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
             rows={6}
             aria-label={t.pasteCsv}
             placeholder={t.pastePlaceholder}

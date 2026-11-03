@@ -43,7 +43,7 @@ export default function MdxGuideToc({ items, onThisPage }: Props) {
 
   return (
     <nav aria-label={onThisPage ?? "On this page"} data-testid="guide-toc">
-      <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.7)]">
+      <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
         {onThisPage ?? "On this page"}
       </div>
       <ul className="space-y-1">

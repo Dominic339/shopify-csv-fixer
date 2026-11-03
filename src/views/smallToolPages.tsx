@@ -10,14 +10,14 @@ import FAQJsonLd from "@/components/FAQJsonLd";
 import JsonLd from "@/components/JsonLd";
 import { getTranslations, type Translations } from "@/lib/i18n/getTranslations";
 import { localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { SMALL_TOOLS, smallToolBySlug, type SmallToolKey } from "@/lib/tools/registry";
-import BarcodeClient from "@/app/tools/clients/BarcodeClient";
-import DedupeClient from "@/app/tools/clients/DedupeClient";
-import EncodingClient from "@/app/tools/clients/EncodingClient";
-import ExcelClient from "@/app/tools/clients/ExcelClient";
-import HandleClient from "@/app/tools/clients/HandleClient";
-import SplitClient from "@/app/tools/clients/SplitClient";
+import BarcodeClient from "@/app/(en)/tools/clients/BarcodeClient";
+import DedupeClient from "@/app/(en)/tools/clients/DedupeClient";
+import EncodingClient from "@/app/(en)/tools/clients/EncodingClient";
+import ExcelClient from "@/app/(en)/tools/clients/ExcelClient";
+import HandleClient from "@/app/(en)/tools/clients/HandleClient";
+import SplitClient from "@/app/(en)/tools/clients/SplitClient";
 
 type ToolStrings = Translations["smallTools"];
 
@@ -39,7 +39,7 @@ export async function smallToolsIndexMetadata(locale: Locale): Promise<Metadata>
     title: t.indexMetaTitle,
     description: t.indexDescription,
     alternates: pageAlternates(locale, "/tools"),
-    openGraph: { title: t.indexMetaTitle, description: t.indexDescription, url, locale },
+    openGraph: { images: SHARE_IMAGES, title: t.indexMetaTitle, description: t.indexDescription, url, locale },
   };
 }
 
@@ -52,7 +52,7 @@ export async function smallToolMetadata(locale: Locale, slug: string): Promise<M
     title: s.metaTitle,
     description: s.description,
     alternates: pageAlternates(locale, path),
-    openGraph: { title: s.metaTitle, description: s.description, url: `${SITE_URL}${localeHref(locale, path)}`, locale },
+    openGraph: { images: SHARE_IMAGES, title: s.metaTitle, description: s.description, url: `${SITE_URL}${localeHref(locale, path)}`, locale },
   };
 }
 

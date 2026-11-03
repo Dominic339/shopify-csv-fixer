@@ -8,6 +8,12 @@ import { DEFAULT_LOCALE, LOCALES, localeHref, type Locale } from "@/lib/i18n/loc
 export const SITE_URL = "https://striveformats.com";
 
 /**
+ * The share image for link previews. Pages that set their own openGraph must include it:
+ * Next merges openGraph shallowly, so a page's openGraph replaces the inherited images.
+ */
+export const SHARE_IMAGES = [{ url: "/og.png", width: 1200, height: 630, alt: "StriveFormats" }];
+
+/**
  * @param translated  true when the page's main content is translated (in every language, or
  *   in the listed ones). A localized copy whose body is still English points its canonical at
  *   the English page and claims no other-language versions; hreflang lists only languages

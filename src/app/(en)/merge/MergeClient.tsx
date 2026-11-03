@@ -169,9 +169,9 @@ export default function MergeClient({ t }: Props) {
           <> · <span className="font-semibold">{t.planUnlimited}</span></>
         )}
         {plan === "free" && (
-          <>{" "}<a href="/profile?upgrade=basic" className="underline hover:no-underline">
+          <> · <Link href="/profile?upgrade=basic" className="underline hover:no-underline">
             {t.upgradeForLarger}
-          </a></>
+          </Link></>
         )}
       </div>
 

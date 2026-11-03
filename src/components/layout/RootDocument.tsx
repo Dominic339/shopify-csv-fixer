@@ -1,5 +1,7 @@
-// src/app/layout.tsx
-import "./globals.css";
+// src/components/layout/RootDocument.tsx
+// The <html> document shared by both root layouts: app/(en)/layout.tsx and app/[locale]/layout.tsx.
+// Two root layouts let each page be served with the right <html lang>, with no client-side fix-up.
+import "@/app/globals.css";
 import type { Metadata } from "next";
 
 import { THEME_INIT_SCRIPT, ThemeProvider } from "@/components/theme/ThemeProvider";
@@ -11,8 +13,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { sectionByLocale } from "@/lib/i18n/getTranslations";
+import { SHARE_IMAGES } from "@/lib/i18n/seo";
 
-export const metadata: Metadata = {
+export const rootMetadata: Metadata = {
   metadataBase: new URL("https://striveformats.com"),
   title: {
     default: "StriveFormats | Clean. Standardize. Validate.",
@@ -31,7 +34,7 @@ export const metadata: Metadata = {
     description:
       "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
     siteName: "StriveFormats",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "StriveFormats" }],
+    images: SHARE_IMAGES,
   },
 
   twitter: {
@@ -39,7 +42,7 @@ export const metadata: Metadata = {
     title: "StriveFormats | Clean. Standardize. Validate.",
     description:
       "Fix and convert messy CSV files for Shopify and other tools. Upload, auto-fix safe issues, and export clean files in seconds.",
-    images: ["/opengraph-image"],
+    images: SHARE_IMAGES,
   },
 
   robots: {
@@ -60,11 +63,11 @@ export const metadata: Metadata = {
 
 // No cookies or headers here: every page stays statically renderable. The top bar and
 // footer pick their language from the URL, so they receive the strings for every locale.
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export async function RootDocument({ lang, children }: { lang: string; children: React.ReactNode }) {
   const navByLocale = await sectionByLocale("nav");
 
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang={lang} data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>

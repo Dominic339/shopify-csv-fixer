@@ -6,15 +6,15 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import ConvertClient from "@/app/convert/ConvertClient";
+import ConvertClient from "@/app/(en)/convert/ConvertClient";
 import FAQJsonLd from "@/components/FAQJsonLd";
 import JsonLd from "@/components/JsonLd";
 import { parseCsv } from "@/lib/csv";
 import { convertCsv } from "@/lib/convertCsv";
 import { CONVERT_ROUTES, SAMPLE_EXPORTS, type ConvertRoute } from "@/lib/convertRoutes";
 import { getTranslations } from "@/lib/i18n/getTranslations";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
-import { card, muted } from "@/app/app/fixer/ui";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { card, muted } from "@/app/(en)/app/fixer/ui";
 
 const MAX_COLS = 6;
 
@@ -24,7 +24,7 @@ export function migrateMetadata(route: ConvertRoute): Metadata {
     title: { absolute: `${route.metaTitle} | StriveFormats` },
     description: route.metaDescription,
     alternates: pageAlternates("en", path, false),
-    openGraph: { title: route.metaTitle, description: route.metaDescription, url: `${SITE_URL}${path}`, locale: "en" },
+    openGraph: { images: SHARE_IMAGES, title: route.metaTitle, description: route.metaDescription, url: `${SITE_URL}${path}`, locale: "en" },
   };
 }
 
@@ -44,7 +44,7 @@ function MiniTable({ caption, headers, rows, total }: { caption: string; headers
     <figure className="min-w-0">
       <figcaption className={`mb-2 text-xs font-semibold uppercase tracking-wider ${muted}`}>{caption}</figcaption>
       <div className="data-table-wrap">
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label={caption} className="overflow-x-auto">
           <table className="data-table">
             <thead>
               <tr>

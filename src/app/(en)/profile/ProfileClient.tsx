@@ -213,7 +213,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       <p className="mt-2 text-sm text-[var(--muted)]">{tProfile.verifySubscription}</p>
 
       {billingUnavailable ? (
-        <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+        <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
           {tProfile.billingUnavailable}
         </div>
       ) : null}

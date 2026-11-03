@@ -1,13 +1,11 @@
 // src/app/[locale]/layout.tsx
-// Layout for all non-English locale routes (e.g. /es/, /de/, /fr/).
-// Validates the locale param — calls notFound() for unknown values.
-// Sets the html lang attribute (client side; the root layout renders lang="en").
+// Root layout for all non-English locale routes (e.g. /es/, /de/, /fr/), so each page is
+// served with the right <html lang>. Unknown locale values get a 404.
 
 import { notFound } from "next/navigation";
 
+import { RootDocument, rootMetadata } from "@/components/layout/RootDocument";
 import { DEFAULT_LOCALE, isValidLocale } from "@/lib/i18n/locales";
-import type { Locale } from "@/lib/i18n/locales";
-import LangUpdater from "@/components/i18n/LangUpdater";
 
 type Props = {
   children: React.ReactNode;
@@ -15,8 +13,11 @@ type Props = {
 };
 
 export { localeParams as generateStaticParams } from "@/views/localeRoute";
+// Only the generated locales exist; anything else (e.g. /nope) goes to app/global-not-found.tsx.
+export const dynamicParams = false;
 
 // Each page sets its own canonical and hreflang alternates (see src/lib/i18n/seo.ts).
+export const metadata = rootMetadata;
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
@@ -26,11 +27,5 @@ export default async function LocaleLayout({ children, params }: Props) {
     notFound();
   }
 
-  return (
-    <>
-      {/* Client component: updates document.documentElement.lang for accessibility */}
-      <LangUpdater locale={locale as Locale} />
-      {children}
-    </>
-  );
+  return <RootDocument lang={locale}>{children}</RootDocument>;
 }

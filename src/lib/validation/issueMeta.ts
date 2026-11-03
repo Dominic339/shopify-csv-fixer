@@ -33,6 +33,8 @@ export type IssueMeta = {
    * page, but the site must not claim StriveFormats detects or fixes it.
    */
   checked?: false;
+  /** Another code for the same problem. No guide page of its own; its URL redirects to that code's guide. */
+  aliasOf?: string;
 };
 
 export type IssueMetaMap = Record<string, IssueMeta>;

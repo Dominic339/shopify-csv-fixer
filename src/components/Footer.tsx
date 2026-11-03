@@ -56,7 +56,7 @@ export default function Footer({ navByLocale }: Props) {
           <div className="font-semibold text-[var(--text)]">StriveFormats</div>
           <p className="mt-1 max-w-xs">{t.tagline}</p>
 
-          <label className="mt-5 block text-xs font-semibold uppercase tracking-wider text-[color:rgba(var(--muted-rgb),0.8)]" htmlFor="footer-language">
+          <label className="mt-5 block text-xs font-semibold uppercase tracking-wider text-[var(--muted)]" htmlFor="footer-language">
             {t.language}
           </label>
           <select
@@ -76,7 +76,7 @@ export default function Footer({ navByLocale }: Props) {
             ))}
           </select>
 
-          <div className="mt-5 text-xs text-[color:rgba(var(--muted-rgb),0.7)]">© {new Date().getFullYear()} StriveFormats</div>
+          <div className="mt-5 text-xs text-[var(--muted)]">© {new Date().getFullYear()} StriveFormats</div>
         </div>
 
         {columns.map((col) => (

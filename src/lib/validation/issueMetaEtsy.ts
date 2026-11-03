@@ -38,6 +38,7 @@ export const ETSY_ISSUE_META: IssueMetaMap = {
   "etsy/tags_too_many": {
     code: "etsy/tags_too_many",
     checked: false,
+    aliasOf: "etsy/too_many_tags",
     title: "Too many tags",
     category: "tags",
     blocking: false,

@@ -18,8 +18,8 @@ import { ISSUE_META_REGISTRY } from "@/lib/validation/issueMetaRegistry";
 import type { IssueMeta } from "@/lib/validation/issueMeta";
 import { fmt, getTranslations, platformLabel, presetText, type Translations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
-import { pageAlternates, SITE_URL } from "@/lib/i18n/seo";
-import { mergeExampleRow } from "@/app/presets/[id]/presetDetailHelpers";
+import { pageAlternates, SHARE_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { mergeExampleRow } from "@/app/(en)/presets/[id]/presetDetailHelpers";
 
 export const PRESET_TO_PLATFORM: Record<string, GuidePlatform> = {
   shopify_products: "shopify",
@@ -65,7 +65,7 @@ async function PopularGuides({ t, locale, platform }: { t: Translations; locale:
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {guides.map((g) => (
           <Link key={`${g.platform}/${g.slug}`} href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} p-5 hover:border-[var(--ring)]`}>
-            <div className="text-xs text-[color:rgba(var(--muted-rgb),0.7)]">{platformLabel(t, g.platform)}</div>
+            <div className="text-xs text-[var(--muted)]">{platformLabel(t, g.platform)}</div>
             <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
             <p className={`mt-1 line-clamp-2 text-sm ${muted}`}>{g.description}</p>
           </Link>
@@ -90,7 +90,7 @@ export async function presetsMetadata(locale: Locale): Promise<Metadata> {
     title: t.presets.title,
     description: t.presets.description,
     alternates: pageAlternates(locale, "/presets"),
-    openGraph: { title: t.presets.title, description: t.presets.description, url: `${SITE_URL}${localeHref(locale, "/presets")}` },
+    openGraph: { images: SHARE_IMAGES, title: t.presets.title, description: t.presets.description, url: `${SITE_URL}${localeHref(locale, "/presets")}` },
   };
 }
 
@@ -169,7 +169,7 @@ export async function presetDetailMetadata(locale: Locale, rawId: string): Promi
     description,
     keywords: KEYWORDS[preset.id],
     alternates: pageAlternates(locale, path),
-    openGraph: { title: `${name} CSV Template`, description, url: `${SITE_URL}${localeHref(locale, path)}`, type: "website" },
+    openGraph: { images: SHARE_IMAGES, title: `${name} CSV Template`, description, url: `${SITE_URL}${localeHref(locale, path)}`, type: "website" },
   };
 }
 
@@ -319,7 +319,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
         <section className={`${card} min-w-0 p-6 sm:p-7`}>
           <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.exampleRow}</h2>
           {exampleRow ? (
-            <div className="mt-4 overflow-x-auto rounded-2xl border border-[var(--border)]">
+            <div tabIndex={0} role="region" aria-label={t.presets.exampleRow} className="mt-4 overflow-x-auto rounded-2xl border border-[var(--border)]">
               <table className="w-full min-w-[600px] text-sm">
                 <thead className="bg-[var(--surface-2)]">
                   <tr>
