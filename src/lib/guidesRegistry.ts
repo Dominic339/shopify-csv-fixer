@@ -8,6 +8,7 @@ import { WOOCOMMERCE_ISSUE_META } from "./validation/issueMetaWooCommerce";
 import { ETSY_ISSUE_META } from "./validation/issueMetaEtsy";
 import { EBAY_ISSUE_META } from "./validation/issueMetaEbay";
 import { AMAZON_ISSUE_META } from "./validation/issueMetaAmazon";
+import { GOOGLE_ISSUE_META } from "./validation/issueMetaGoogle";
 import type { IssueMetaMap } from "./validation/issueMeta";
 
 // Re-export all shared constants so pages only need one import.
@@ -22,6 +23,7 @@ const PLATFORM_ISSUE_META: Partial<Record<GuidePlatform, IssueMetaMap>> = {
   etsy: ETSY_ISSUE_META,
   ebay: EBAY_ISSUE_META,
   amazon: AMAZON_ISSUE_META,
+  google: GOOGLE_ISSUE_META,
 };
 
 export type Guide = {

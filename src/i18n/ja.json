@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSVインポートガイド",
-    "description": "Shopify、WooCommerce、Etsy、eBay、AmazonのCSVインポートエラーを修正するためのステップバイステップガイド。",
+    "description": "Shopify、WooCommerce、Etsy、eBay、Amazon、Google Merchant CenterのCSVインポートエラーを修正するためのステップバイステップガイド。",
     "browseByPlatform": "プラットフォームで絞り込む",
     "featuredGuides": "注目のガイド",
     "searchResults": "検索結果",
@@ -137,7 +137,7 @@
       "tags": "タグ",
       "shipping": "配送"
     },
-    "hubIntro": "Shopify、WooCommerce、Etsy、eBay、Amazon の CSV インポートエラーを解決。プラットフォーム別に探すか、問題を検索してください。",
+    "hubIntro": "Shopify、WooCommerce、Etsy、eBay、Amazon、Google Merchant Center の CSV インポートエラーを解決。プラットフォーム別に探すか、問題を検索してください。",
     "resultsFor": "「{q}」の検索結果：{count} 件",
     "resultFor": "「{q}」の検索結果：1 件",
     "platformTitle": "{platform} CSV インポートガイド",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Shopify・ECサイトのCSVインポートエラーを修正",
-    "description": "Shopify、WooCommerce、Etsy、eBay、Amazonの商品CSVをブラウザで修正。安全な修正は自動で、リスクのある箇所は行とセル単位で表示します。無料・登録不要。",
+    "description": "Shopify、WooCommerce、Etsy、eBay、Amazon、Google Merchant Centerの商品CSVをブラウザで修正。安全な修正は自動で、リスクのある箇所は行とセル単位で表示します。無料・登録不要。",
     "browseTemplates": "テンプレートを閲覧",
     "openCustomFormats": "カスタムフォーマットを開く",
     "csvFixerLabel": "CSVフィクサー",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "CSV テンプレート",
-    "description": "Shopify、WooCommerce、Etsy、Amazon、eBay用のeコマースCSVテンプレートを検索します。列をプレビューし、サンプルをダウンロードし、プリセット選択済みで修正ツールを開きます。",
+    "description": "Shopify、WooCommerce、Etsy、Amazon、eBay、Google Merchant Center用のeコマースCSVテンプレートを検索します。列をプレビューし、サンプルをダウンロードし、プリセット選択済みで修正ツールを開きます。",
     "expectedColumns": "予想される列",
     "exampleRow": "サンプル行",
     "noColumns": "このプリセットはまだ固定の列リストを公開していません。",
@@ -805,7 +805,7 @@
     "close": "閉じる",
     "syncingBilling": "請求情報を同期中…",
     "billingError": "現在、請求サービスに接続できません。1分ほどしてからもう一度お試しください。",
-    "allPlansFormats": "すべてのプランで、Shopify、WooCommerce、Etsy、eBay、Amazonの組み込み形式をすべて使えます。",
+    "allPlansFormats": "すべてのプランで、Shopify、WooCommerce、Etsy、eBay、Amazon、Google Merchant Centerの組み込み形式をすべて使えます。",
     "pass": "24時間パス",
     "oneTime": "1回のみ",
     "passBullet1": "24時間エクスポート無制限",

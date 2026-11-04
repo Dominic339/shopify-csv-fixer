@@ -19,6 +19,7 @@ export const LOCALISED_PREFIXES = [
   "/ebay-csv-fixer",
   "/ebay-variations-csv-fixer",
   "/amazon-csv-fixer",
+  "/google-merchant-center-feed-checker",
   "/how-it-works",
   "/tools",
   "/about",

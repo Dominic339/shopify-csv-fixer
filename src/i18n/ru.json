@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "Руководства по импорту CSV",
-    "description": "Пошаговые руководства по исправлению ошибок импорта CSV в Shopify, WooCommerce, Etsy, eBay и Amazon.",
+    "description": "Пошаговые руководства по исправлению ошибок импорта CSV в Shopify, WooCommerce, Etsy, eBay, Amazon и Google Merchant Center.",
     "browseByPlatform": "Просмотр по платформе",
     "featuredGuides": "Рекомендуемые руководства",
     "searchResults": "Результаты поиска",
@@ -137,7 +137,7 @@
       "tags": "Теги",
       "shipping": "Доставка"
     },
-    "hubIntro": "Исправляйте ошибки импорта CSV для Shopify, WooCommerce, Etsy, eBay и Amazon. Выберите платформу или найдите конкретную проблему.",
+    "hubIntro": "Исправляйте ошибки импорта CSV для Shopify, WooCommerce, Etsy, eBay, Amazon и Google Merchant Center. Выберите платформу или найдите конкретную проблему.",
     "resultsFor": "Результатов по запросу «{q}»: {count}",
     "resultFor": "Результатов по запросу «{q}»: 1",
     "platformTitle": "Руководства по импорту CSV в {platform}",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Исправление ошибок импорта CSV для Shopify и интернет-магазинов",
-    "description": "Исправляйте CSV с товарами для Shopify, WooCommerce, Etsy, eBay и Amazon прямо в браузере. Безопасные исправления применяются автоматически, рискованные отмечаются по строке и ячейке. Бесплатно, без регистрации.",
+    "description": "Исправляйте CSV с товарами для Shopify, WooCommerce, Etsy, eBay, Amazon и Google Merchant Center прямо в браузере. Безопасные исправления применяются автоматически, рискованные отмечаются по строке и ячейке. Бесплатно, без регистрации.",
     "browseTemplates": "Просмотреть шаблоны",
     "openCustomFormats": "Открыть пользовательские форматы",
     "csvFixerLabel": "Инструмент исправления CSV",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "Шаблоны CSV",
-    "description": "Просматривайте шаблоны CSV для электронной коммерции для Shopify, WooCommerce, Etsy, Amazon и eBay. Просматривайте столбцы, скачивайте примеры и открывайте инструмент с предвыбранным шаблоном.",
+    "description": "Просматривайте шаблоны CSV для электронной коммерции для Shopify, WooCommerce, Etsy, Amazon, eBay и Google Merchant Center. Просматривайте столбцы, скачивайте примеры и открывайте инструмент с предвыбранным шаблоном.",
     "expectedColumns": "Ожидаемые столбцы",
     "exampleRow": "Пример строки",
     "noColumns": "Этот формат пока не предоставляет фиксированный список столбцов.",
@@ -805,7 +805,7 @@
     "close": "Закрыть",
     "syncingBilling": "Синхронизация данных о выставлении счёта…",
     "billingError": "Сервис оплаты сейчас недоступен. Попробуйте через минуту.",
-    "allPlansFormats": "Все тарифы включают все встроенные форматы: Shopify, WooCommerce, Etsy, eBay и Amazon.",
+    "allPlansFormats": "Все тарифы включают все встроенные форматы: Shopify, WooCommerce, Etsy, eBay, Amazon и Google Merchant Center.",
     "pass": "Пропуск на 24 часа",
     "oneTime": "разово",
     "passBullet1": "Безлимитный экспорт 24 часа",

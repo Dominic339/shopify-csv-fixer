@@ -226,5 +226,41 @@
   "title": "Corretor para o Amazon Inventory Loader",
   "intro": "O Inventory Loader adiciona ou atualiza ofertas de produtos que já existem na Amazon. O arquivo é curto, mas depende de códigos e identificadores que as planilhas adoram estragar. O corretor converte os códigos e pega os estragos.",
   "exportTip": "Seller Central → Catálogo → Adicionar produtos via upload → Baixar um arquivo de estoque (Inventory Loader)."
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "Preços precisam de código de moeda",
+    "body": "O Google quer 19.99 USD, não $19.99 nem 19,99. Símbolos de uma só moeda, como € e £, são convertidos; um $ sozinho é sinalizado, porque dólares americanos, canadenses e australianos o usam."
+   },
+   {
+    "title": "Só os valores do Google",
+    "body": "availability deve ser in_stock, out_of_stock, preorder ou backorder, e condition new, used ou refurbished. Formas comuns como \"In Stock\" ou \"pre-order\" são reescritas automaticamente."
+   },
+   {
+    "title": "Códigos de barras conferidos dígito a dígito",
+    "body": "O dígito verificador de cada GTIN é recalculado. Espaços e hífens são removidos, um zero à esquerda que a planilha apagou é restaurado quando o dígito verificador comprova, e números em notação científica são sinalizados."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Qual formato de arquivo é baixado?",
+    "a": "Um arquivo .txt delimitado por tabulação com os nomes de coluna originais, que é o que o Merchant Center espera em feeds enviados. Você pode enviar um arquivo .txt, .tsv ou .csv."
+   },
+   {
+    "q": "Ele confere atributos de vestuário?",
+    "a": "Confere os valores de gender e age_group e converte formas comuns. Ainda não exige color e size, então confira-os você mesmo em roupas."
+   },
+   {
+    "q": "Ele acessa minhas páginas de produto ou imagens?",
+    "a": "Não. Tudo roda no seu navegador e nada é enviado. Links e imagens são conferidos como endereços https:// completos, mas o Google ainda os rastreia, então garanta que carreguem."
+   }
+  ],
+  "metaTitle": "Verificador de feed do Google Merchant Center | Corrija erros | StriveFormats",
+  "metaDescription": "Confira um feed de produtos do Google Merchant Center antes de enviá-lo. Disponibilidade, condição e preços são convertidos para o formato do Google; moedas ausentes, GTINs errados e pré-vendas sem data são sinalizados.",
+  "kicker": "Google Merchant Center",
+  "title": "Verificador de feed do Google Merchant Center",
+  "intro": "O Merchant Center reprova produtos por detalhes: um preço sem código de moeda, \"In Stock\" em vez de in_stock, um código de barras que a planilha arredondou. Confira seu arquivo de produtos aqui antes de enviá-lo e corrija quase tudo com um clique.",
+  "exportTip": "Exporte o feed de produtos da sua loja ou app de feed, ou comece pelo modelo. No Merchant Center, adicione o arquivo corrigido em Produtos → Adicionar produtos de um arquivo."
  }
 }

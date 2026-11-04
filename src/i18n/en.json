@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSV Import Guides",
-    "description": "Step-by-step guides for fixing Shopify, WooCommerce, Etsy, eBay, and Amazon CSV import errors. Learn header rules, encoding, quoting, and platform-specific requirements.",
+    "description": "Step-by-step guides for fixing Shopify, WooCommerce, Etsy, eBay, Amazon, and Google Merchant Center CSV import errors. Learn header rules, encoding, quoting, and platform-specific requirements.",
     "browseByPlatform": "Browse by platform",
     "featuredGuides": "Featured guides",
     "searchResults": "Search results",
@@ -137,7 +137,7 @@
       "tags": "Tags",
       "shipping": "Shipping"
     },
-    "hubIntro": "Fix CSV import errors for Shopify, WooCommerce, Etsy, eBay, and Amazon. Browse by platform or search for a specific issue.",
+    "hubIntro": "Fix CSV import errors for Shopify, WooCommerce, Etsy, eBay, Amazon, and Google Merchant Center. Browse by platform or search for a specific issue.",
     "resultsFor": "{count} results for “{q}”",
     "resultFor": "1 result for “{q}”",
     "platformTitle": "{platform} CSV Import Guides",
@@ -162,7 +162,7 @@
   },
   "home": {
     "title": "StriveFormats | Fix Shopify & Ecommerce CSV Import Errors",
-    "description": "Fix product CSVs for Shopify, WooCommerce, Etsy, eBay and Amazon in your browser. Safe fixes are automatic, risky ones are flagged by row and cell. Free to try, no sign-up.",
+    "description": "Fix product CSVs for Shopify, WooCommerce, Etsy, eBay, Amazon and Google Merchant Center in your browser. Safe fixes are automatic, risky ones are flagged by row and cell. Free to try, no sign-up.",
     "browseTemplates": "Browse templates",
     "openCustomFormats": "Open Custom Formats",
     "csvFixerLabel": "CSV Fixer",
@@ -306,7 +306,7 @@
   },
   "presets": {
     "title": "CSV Templates",
-    "description": "Browse ecommerce CSV templates for Shopify, WooCommerce, Etsy, Amazon, and eBay. Preview columns, download samples, and open the fixer with a preset selected.",
+    "description": "Browse ecommerce CSV templates for Shopify, WooCommerce, Etsy, Amazon, eBay, and Google Merchant Center. Preview columns, download samples, and open the fixer with a preset selected.",
     "expectedColumns": "Expected columns",
     "exampleRow": "Example row",
     "noColumns": "This preset does not expose a fixed column list yet.",
@@ -754,7 +754,7 @@
     "close": "Close",
     "syncingBilling": "Syncing billing info…",
     "billingError": "Couldn't reach billing right now. Please try again in a minute.",
-    "allPlansFormats": "All plans include every built-in format: Shopify, WooCommerce, Etsy, eBay and Amazon.",
+    "allPlansFormats": "All plans include every built-in format: Shopify, WooCommerce, Etsy, eBay, Amazon and Google Merchant Center.",
     "pass": "24-hour pass",
     "oneTime": "one-time",
     "passBullet1": "Unlimited exports for 24 hours",

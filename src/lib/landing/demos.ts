@@ -65,4 +65,12 @@ export const LANDING_DEMOS: Record<string, LandingDemo> = {
       "BK-002,9780306406157,1,$12,15,10,11,two,a",
     ].join("\n"),
   },
+  google: {
+    formatId: "google_merchant_center",
+    csv: [
+      "id,title,description,link,image_link,availability,price,brand,gtin,condition",
+      "MUG-01,Acme Ceramic Coffee Mug,Hand-thrown stoneware mug.,https://example.com/p/mug,https://example.com/i/mug.jpg,In Stock,\"18,00 EUR\",Acme,4006381333931,New",
+      "TOTE-01,Acme Canvas Tote,Natural cotton tote bag.,https://example.com/p/tote,tote.jpg,preorder,$24,Acme,4006-3813-3393-2,new",
+    ].join("\n"),
+  },
 };

@@ -2,7 +2,7 @@
 // Shared platform constants for the guides system.
 // This file has no server-only imports — safe to use in Client Components.
 
-export type GuidePlatform = "shopify" | "woocommerce" | "etsy" | "ebay" | "amazon" | "general";
+export type GuidePlatform = "shopify" | "woocommerce" | "etsy" | "ebay" | "amazon" | "google" | "general";
 
 export const GUIDE_PLATFORMS: GuidePlatform[] = [
   "shopify",
@@ -10,6 +10,7 @@ export const GUIDE_PLATFORMS: GuidePlatform[] = [
   "etsy",
   "ebay",
   "amazon",
+  "google",
   "general",
 ];
 
@@ -19,6 +20,7 @@ export const PLATFORM_LABEL: Record<GuidePlatform, string> = {
   etsy: "Etsy",
   ebay: "eBay",
   amazon: "Amazon",
+  google: "Google Merchant Center",
   general: "General",
 };
 
@@ -28,6 +30,7 @@ export const PLATFORM_PRESET_ID: Record<GuidePlatform, string | null> = {
   etsy: "etsy_listings",
   ebay: "ebay_listings",
   amazon: "amazon_inventory_loader",
+  google: "google_merchant_center",
   general: null,
 };
 
@@ -37,5 +40,6 @@ export const PLATFORM_FIXER_HREF: Record<GuidePlatform, string | null> = {
   etsy: "/etsy-csv-fixer",
   ebay: "/ebay-csv-fixer",
   amazon: "/amazon-csv-fixer",
+  google: "/google-merchant-center-feed-checker",
   general: null,
 };

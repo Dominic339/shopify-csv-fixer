@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSV 가져오기 가이드",
-    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon의 CSV 가져오기 오류를 수정하기 위한 단계별 가이드.",
+    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon, Google Merchant Center의 CSV 가져오기 오류를 수정하기 위한 단계별 가이드.",
     "browseByPlatform": "플랫폼별 탐색",
     "featuredGuides": "추천 가이드",
     "searchResults": "검색 결과",
@@ -137,7 +137,7 @@
       "tags": "태그",
       "shipping": "배송"
     },
-    "hubIntro": "Shopify, WooCommerce, Etsy, eBay, Amazon의 CSV 가져오기 오류를 해결하세요. 플랫폼별로 보거나 특정 문제를 검색할 수 있습니다.",
+    "hubIntro": "Shopify, WooCommerce, Etsy, eBay, Amazon, Google Merchant Center의 CSV 가져오기 오류를 해결하세요. 플랫폼별로 보거나 특정 문제를 검색할 수 있습니다.",
     "resultsFor": "“{q}” 검색 결과 {count}개",
     "resultFor": "“{q}” 검색 결과 1개",
     "platformTitle": "{platform} CSV 가져오기 가이드",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Shopify·이커머스 CSV 가져오기 오류 수정",
-    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon 상품 CSV를 브라우저에서 수정하세요. 안전한 수정은 자동으로, 위험한 항목은 행과 셀 단위로 표시합니다. 무료, 가입 불필요.",
+    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon, Google Merchant Center 상품 CSV를 브라우저에서 수정하세요. 안전한 수정은 자동으로, 위험한 항목은 행과 셀 단위로 표시합니다. 무료, 가입 불필요.",
     "browseTemplates": "템플릿 탐색",
     "openCustomFormats": "사용자 정의 형식 열기",
     "csvFixerLabel": "CSV 수정기",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "CSV 템플릿",
-    "description": "Shopify, WooCommerce, Etsy, Amazon, eBay용 전자상거래 CSV 템플릿을 검색하세요. 열 미리보기, 샘플 다운로드 및 사전 설정이 선택된 상태로 수정 도구를 여세요.",
+    "description": "Shopify, WooCommerce, Etsy, Amazon, eBay, Google Merchant Center용 전자상거래 CSV 템플릿을 검색하세요. 열 미리보기, 샘플 다운로드 및 사전 설정이 선택된 상태로 수정 도구를 여세요.",
     "expectedColumns": "예상 열",
     "exampleRow": "예시 행",
     "noColumns": "이 형식은 아직 고정 열 목록을 제공하지 않습니다.",
@@ -805,7 +805,7 @@
     "close": "닫기",
     "syncingBilling": "결제 정보 동기화 중…",
     "billingError": "지금은 결제 서비스에 연결할 수 없습니다. 1분 후 다시 시도해 주세요.",
-    "allPlansFormats": "모든 요금제에 Shopify, WooCommerce, Etsy, eBay, Amazon 기본 형식이 모두 포함됩니다.",
+    "allPlansFormats": "모든 요금제에 Shopify, WooCommerce, Etsy, eBay, Amazon, Google Merchant Center 기본 형식이 모두 포함됩니다.",
     "pass": "24시간 패스",
     "oneTime": "1회 결제",
     "passBullet1": "24시간 무제한 내보내기",

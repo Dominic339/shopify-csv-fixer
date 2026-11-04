@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSV导入指南",
-    "description": "逐步指导解决Shopify、WooCommerce、Etsy、eBay和Amazon的CSV导入错误。",
+    "description": "逐步指导解决Shopify、WooCommerce、Etsy、eBay、Amazon和Google Merchant Center的CSV导入错误。",
     "browseByPlatform": "按平台浏览",
     "featuredGuides": "精选指南",
     "searchResults": "搜索结果",
@@ -137,7 +137,7 @@
       "tags": "标签",
       "shipping": "配送"
     },
-    "hubIntro": "修复 Shopify、WooCommerce、Etsy、eBay 和 Amazon 的 CSV 导入错误。按平台浏览，或搜索具体问题。",
+    "hubIntro": "修复 Shopify、WooCommerce、Etsy、eBay、Amazon 和 Google Merchant Center 的 CSV 导入错误。按平台浏览，或搜索具体问题。",
     "resultsFor": "“{q}”的搜索结果：{count} 条",
     "resultFor": "“{q}”的搜索结果：1 条",
     "platformTitle": "{platform} CSV 导入指南",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | 修复 Shopify 和电商 CSV 导入错误",
-    "description": "在浏览器中修复 Shopify、WooCommerce、Etsy、eBay 和 Amazon 的商品 CSV。安全的问题自动修复,有风险的问题按行和单元格标出。免费,无需注册。",
+    "description": "在浏览器中修复 Shopify、WooCommerce、Etsy、eBay、Amazon 和 Google Merchant Center 的商品 CSV。安全的问题自动修复,有风险的问题按行和单元格标出。免费,无需注册。",
     "browseTemplates": "浏览模板",
     "openCustomFormats": "打开自定义格式",
     "csvFixerLabel": "CSV修复工具",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "CSV 模板",
-    "description": "浏览适用于Shopify、WooCommerce、Etsy、Amazon和eBay的电商CSV模板。预览列、下载示例，并以预选模板打开修复工具。",
+    "description": "浏览适用于Shopify、WooCommerce、Etsy、Amazon、eBay和Google Merchant Center的电商CSV模板。预览列、下载示例，并以预选模板打开修复工具。",
     "expectedColumns": "预期列",
     "exampleRow": "示例行",
     "noColumns": "此预设尚未公开固定的列列表。",
@@ -805,7 +805,7 @@
     "close": "关闭",
     "syncingBilling": "正在同步结算信息…",
     "billingError": "暂时无法连接计费服务,请一分钟后重试。",
-    "allPlansFormats": "所有套餐都包含全部内置格式:Shopify、WooCommerce、Etsy、eBay 和 Amazon。",
+    "allPlansFormats": "所有套餐都包含全部内置格式:Shopify、WooCommerce、Etsy、eBay、Amazon 和 Google Merchant Center。",
     "pass": "24 小时通行证",
     "oneTime": "一次性",
     "passBullet1": "24 小时无限导出",

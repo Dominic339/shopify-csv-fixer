@@ -226,5 +226,41 @@
   "title": "Reparateur für den Amazon Inventory Loader",
   "intro": "Der Inventory Loader fügt Angebote für Produkte hinzu, die bereits bei Amazon existieren, oder aktualisiert sie. Die Datei ist kurz, hängt aber von Codes und Kennungen ab, die Tabellenprogramme gern beschädigen. Der Reparateur wandelt die Codes um und erkennt die Schäden.",
   "exportTip": "Seller Central → Katalog → Produkte per Upload hinzufügen → Lagerbestandsdatei herunterladen (Inventory Loader)."
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "Preise brauchen einen Währungscode",
+    "body": "Google will 19.99 USD, nicht $19.99 oder 19,99. Symbole für genau eine Währung wie € und £ werden umgewandelt; ein einzelnes $ wird markiert, weil US-, kanadische und australische Dollar es alle verwenden."
+   },
+   {
+    "title": "Nur Googles eigene Werte",
+    "body": "availability muss in_stock, out_of_stock, preorder oder backorder sein und condition new, used oder refurbished. Übliche Schreibweisen wie „In Stock“ oder „pre-order“ werden automatisch umgeschrieben."
+   },
+   {
+    "title": "Barcodes werden Ziffer für Ziffer geprüft",
+    "body": "Die Prüfziffer jeder GTIN wird neu berechnet. Leerzeichen und Bindestriche werden entfernt, eine von der Tabellenkalkulation entfernte führende Null wird ergänzt, wenn die Prüfziffer es beweist, und Zahlen in wissenschaftlicher Schreibweise werden markiert."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Welches Dateiformat wird heruntergeladen?",
+    "a": "Eine tabulatorgetrennte .txt-Datei mit deinen ursprünglichen Spaltennamen, wie Merchant Center es für hochgeladene Feeds erwartet. Du kannst eine .txt-, .tsv- oder .csv-Datei hochladen."
+   },
+   {
+    "q": "Werden Bekleidungsattribute geprüft?",
+    "a": "Die Werte von gender und age_group werden geprüft und übliche Schreibweisen umgewandelt. color und size werden noch nicht verlangt, prüfe diese bei Kleidung also selbst."
+   },
+   {
+    "q": "Werden meine Produktseiten oder Bilder aufgerufen?",
+    "a": "Nein. Alles läuft in deinem Browser, nichts wird hochgeladen. Links und Bilder werden darauf geprüft, ob sie vollständige https://-Adressen sind, aber Google ruft sie trotzdem ab, also stelle sicher, dass sie laden."
+   }
+  ],
+  "metaTitle": "Google Merchant Center Feed prüfen | Produktfeed-Fehler beheben | StriveFormats",
+  "metaDescription": "Prüfe einen Google-Merchant-Center-Produktfeed vor dem Hochladen. Verfügbarkeit, Zustand und Preise werden in Googles Format umgewandelt; fehlende Währungen, falsche GTINs und Vorbestellungen ohne Datum werden markiert.",
+  "kicker": "Google Merchant Center",
+  "title": "Google Merchant Center Feed-Prüfer",
+  "intro": "Merchant Center lehnt Produkte wegen Kleinigkeiten ab: ein Preis ohne Währungscode, „In Stock“ statt in_stock, ein Barcode, den eine Tabellenkalkulation gerundet hat. Prüfe deine Produktdatei hier vor dem Hochladen und behebe das meiste mit einem Klick.",
+  "exportTip": "Exportiere den Produktfeed aus deinem Shop oder deiner Feed-App, oder starte mit der Vorlage. Füge die korrigierte Datei in Merchant Center unter Produkte → Produkte aus einer Datei hinzufügen hinzu."
  }
 }

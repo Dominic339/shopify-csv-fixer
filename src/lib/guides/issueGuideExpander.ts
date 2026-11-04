@@ -106,7 +106,31 @@ const COLUMN_NAME_MAP: Record<string, string> = {
   blank_image_alt: "Image Alt Text",
 };
 
+/** Google's attribute names, keyed by the full code because the suffixes repeat other platforms' codes. */
+const GOOGLE_COLUMNS: Record<string, string> = {
+  "google/missing_value": "id / title / price",
+  "google/duplicate_id": "id",
+  "google/id_too_long": "id",
+  "google/title_too_long": "title",
+  "google/description_too_long": "description",
+  "google/invalid_url": "link / image_link",
+  "google/too_many_images": "additional_image_link",
+  "google/invalid_availability": "availability",
+  "google/missing_availability_date": "availability_date",
+  "google/price_missing_currency": "price",
+  "google/invalid_price": "price",
+  "google/invalid_sale_price": "sale_price",
+  "google/invalid_condition": "condition",
+  "google/missing_brand": "brand",
+  "google/invalid_gtin": "gtin",
+  "google/missing_identifiers": "gtin / mpn",
+  "google/invalid_yes_no": "identifier_exists",
+  "google/invalid_gender": "gender",
+  "google/invalid_age_group": "age_group",
+};
+
 function extractColumnName(code: string, fallback: string, tr: Tr = englishTr): string {
+  if (GOOGLE_COLUMNS[code]) return GOOGLE_COLUMNS[code];
   const suffix = code.includes("/") ? code.split("/").slice(1).join("/") : code;
   const col = COLUMN_NAME_MAP[suffix];
   // Real column names stay as they are; the one description is translated.
@@ -117,8 +141,20 @@ function extractColumnName(code: string, fallback: string, tr: Tr = englishTr): 
 // Issue type classifier
 // ---------------------------------------------------------------------------
 
+/** Codes the keyword rules below would misread (Google's availability is a status, not a quantity). */
+const TYPE_BY_CODE: Record<string, IssueType> = {
+  "google/invalid_availability": "enum",
+  "google/missing_availability_date": "required_field",
+  "google/invalid_gender": "enum",
+  "google/invalid_age_group": "enum",
+  "google/invalid_gtin": "misc",
+  "google/missing_identifiers": "misc",
+  "google/too_many_images": "misc",
+};
+
 export function classifyIssue(input: IssueInput): IssueType {
   const { issueCode, title, category, explanation, howToFix } = input;
+  if (TYPE_BY_CODE[issueCode]) return TYPE_BY_CODE[issueCode];
   const all = `${issueCode} ${title} ${category} ${explanation} ${howToFix}`.toLowerCase();
   const suffix = issueCode.includes("/") ? issueCode.split("/").slice(1).join("/") : issueCode;
 
@@ -213,6 +249,11 @@ const ENUM_BY_CODE: Record<string, string[]> = {
   "amazon/invalid_add_delete": ["a (add/update)", "d (delete)"],
   // Amazon's Inventory Loader guide: a comma-separated list of these, or N for none.
   "amazon/invalid_expedited_shipping": ["Next", "Second", "Domestic", "International", "Plus", "N"],
+  // Google's product data specification.
+  "google/invalid_availability": ["in_stock", "out_of_stock", "preorder", "backorder"],
+  "google/invalid_condition": ["new", "used", "refurbished"],
+  "google/invalid_gender": ["male", "female", "unisex"],
+  "google/invalid_age_group": ["newborn", "infant", "toddler", "kids", "adult"],
 };
 
 /** The character limit named in the rule's (English) explanation, if any. */
@@ -394,8 +435,10 @@ function boolSpellings(platform: string, tr: Tr) {
   return { t: "true", f: "false", pair: tr("true and false") };
 }
 
-/** Amazon's upload page takes tab-delimited text, so its save steps name that format instead of CSV. */
+/** Amazon and Google take tab-delimited text, so their save steps name that format instead of CSV. */
 const AMAZON_SAVE_STEPS: Record<string, string> = {
+  "Repeat for each missing column, then save as CSV (Comma delimited).":
+    "Repeat for each missing column, then save as Text (Tab delimited) (*.txt).",
   "Save as CSV UTF-8 (Comma delimited).": "Save as Text (Tab delimited) (*.txt).",
   "When done, select the helper column, right-click, and choose Delete. Save as CSV UTF-8 (Comma delimited).":
     "When done, select the helper column, right-click, and choose Delete. Save as Text (Tab delimited) (*.txt).",
@@ -406,7 +449,7 @@ const AMAZON_SAVE_STEPS: Record<string, string> = {
 };
 
 function saveStepsFor(platform: string, tr: Tr): Tr {
-  return platform === "amazon" ? (t, v) => tr(AMAZON_SAVE_STEPS[t] ?? t, v) : tr;
+  return platform === "amazon" || platform === "google" ? (t, v) => tr(AMAZON_SAVE_STEPS[t] ?? t, v) : tr;
 }
 
 function getExcelSteps(type: IssueType, input: IssueInput, column: string, tr: Tr): string[] {
@@ -768,6 +811,7 @@ function platformDisplayName(platform: string, tr: Tr = englishTr): string {
     etsy: "Etsy",
     ebay: "eBay",
     amazon: "Amazon",
+    google: "Google Merchant Center",
   };
   return platform === "general" ? tr("the platform") : (N[platform] ?? platform);
 }
@@ -888,9 +932,164 @@ function getTechnicalDetail(type: IssueType, input: IssueInput, column: string, 
 // Main expand function
 // ---------------------------------------------------------------------------
 
+/**
+ * Google Merchant Center differs from the store importers in ways the shared text gets wrong:
+ * prices must carry a currency code, yes/no attributes are spelled yes and no, and GTINs and
+ * identifiers have their own rules. These sections replace the shared ones for Google.
+ */
+function googleOverrides(type: IssueType, input: IssueInput, column: string, tr: Tr): Partial<ExpandedIssueContent> {
+  const save = saveStepsFor("google", tr);
+  const col = { column };
+  const code = input.issueCode.split("/")[1];
+  if (type === "money")
+    return {
+      validValues: [
+        tr("A number, a space, then the ISO 4217 currency code: 19.99 USD"),
+        tr("Use a period (.) as the decimal separator, not a comma"),
+        tr("No thousand separators: write 1000.00 USD, not 1,000.00 USD"),
+        tr("The currency must match the country you sell in"),
+        tr("Greater than 0"),
+      ],
+      examples: [
+        { bad: "19.99", good: "19.99 USD", note: tr("Add the currency code") },
+        { bad: "$19.99", good: "19.99 USD", note: tr("$ is used by several currencies, so Google needs the code") },
+        { bad: "19,99 EUR", good: "19.99 EUR", note: tr("Use period as decimal separator") },
+        { bad: "€19.99", good: "19.99 EUR", note: tr("Symbols that name one currency are converted automatically") },
+        { bad: "1,299.00 GBP", good: "1299.00 GBP", note: tr("Remove thousand separators") },
+      ],
+      excelSteps: [
+        tr("In Excel, click the column letter for the {column} column to select it.", col),
+        tr("Right-click the column, choose 'Format Cells', select 'Text', and click OK, so Excel doesn't turn the prices back into numbers."),
+        tr("If every price is in the same currency, add the code with a helper column: =A2&\" USD\" (replace A2 with your price cell and USD with your currency), copy it down, then paste it back over the column with Paste Special > Values."),
+        tr("Press Ctrl+H and replace any currency symbol, such as $ or €, with nothing before you add the code."),
+        tr("Check that every value looks like 19.99 USD: a number, a space and the code."),
+        save("Save as CSV UTF-8 (Comma delimited)."),
+      ],
+      sheetsSteps: [
+        tr("In Google Sheets, click the column letter for the {column} column.", col),
+        tr("Go to Format > Number > Plain text, so Sheets keeps the price and the code together as text."),
+        tr("If every price is in the same currency, add the code with a helper column: =A2&\" USD\" (replace A2 with your price cell and USD with your currency), copy it down, then paste it back with Edit > Paste special > Values only."),
+        tr("Press Ctrl+H and replace any currency symbol, such as $ or €, with nothing before you add the code."),
+        tr("Check that every value looks like 19.99 USD: a number, a space and the code."),
+        save("Go to File > Download > Comma Separated Values (.csv)."),
+      ],
+      striveNote: input.autoFixable
+        ? tr("StriveFormats rewrites prices like 19,99 EUR or €19.99 as 19.99 EUR. A price with only a $ sign, or no currency at all, is flagged instead of guessed, because $ is used by several currencies.")
+        : tr("StriveFormats flags every price without a currency code. Symbols that name one currency, such as € or £, are converted for you; a bare $ is flagged, because several currencies use it."),
+      preventTips: [
+        tr("Write prices as text with the code, like 19.99 USD, rather than formatting the cell as Currency."),
+        tr("Keep one currency per file, matching the country the feed targets."),
+        tr("Use a period (.) as the decimal separator regardless of your computer's regional settings."),
+        tr("Put the regular price in price and any discount in sale_price, never the other way round."),
+        tr("Run every file through StriveFormats before uploading it to Merchant Center."),
+      ],
+      detectionNote: tr("StriveFormats reads each {column} value as a number followed by a currency code. A missing code, a comma decimal, a price of 0, or a sale price that isn't lower than the regular price is flagged on its row.", col),
+      technicalDetail: tr("Google's product data specification asks for the price as a number with a period for decimals, followed by the ISO 4217 currency code, for example 15.00 USD. The code tells Google which currency you mean; a $ sign alone could be US, Canadian or Australian dollars. Google compares the price with your landing page, so the value in the feed must match what shoppers see when they click through. sale_price follows the same format and is only shown when it is lower than price."),
+    };
+  if (type === "boolean")
+    return {
+      validValues: ["yes", "no"],
+      examples: [
+        { bad: "TRUE", good: "yes", note: tr("Use yes or no") },
+        { bad: "FALSE", good: "no" },
+        { bad: "1", good: "yes" },
+        { bad: "N", good: "no" },
+      ],
+      excelSteps: [
+        tr("In Excel, click the column letter for the {column} column to select the entire column.", col),
+        tr("Press Ctrl+H to open Find & Replace."),
+        tr("In 'Find what', type TRUE, in 'Replace with', type yes, tick 'Match entire cell contents', then click Replace All."),
+        tr("Repeat: FALSE -> no,  1 -> yes,  0 -> no,  Y -> yes,  N -> no."),
+        tr("Scan the column to confirm only {pair} remain (and blanks if allowed).", { pair: tr("yes and no") }),
+        save("Save as CSV UTF-8 (Comma delimited)."),
+      ],
+      sheetsSteps: [
+        tr("In Google Sheets, click the column letter for the {column} column to select the whole column.", col),
+        tr("Press Ctrl+H to open Find & Replace."),
+        tr("Find TRUE, replace it with yes, tick 'Match entire cell contents', then click Replace All."),
+        tr("Repeat: FALSE -> no,  1 -> yes,  0 -> no,  Y -> yes,  N -> no."),
+        tr("Verify only {pair} remain in the column.", { pair: tr("yes and no") }),
+        save("Go to File > Download > Comma Separated Values (.csv)."),
+      ],
+      preventTips: [
+        tr("Type yes or no in lowercase. Don't use spreadsheet checkboxes; they export as TRUE and FALSE."),
+        tr("Only set identifier_exists to no for products that truly have no GTIN or MPN, such as handmade or custom items."),
+        tr("Use StriveFormats auto-fix as a final pass before every upload."),
+      ],
+      platformNote: tr("identifier_exists, adult and is_bundle take yes or no. Google ignores other values and falls back to the attribute's default, so a product that should be marked adult or bundled may not be."),
+      detectionNote: tr("StriveFormats reads identifier_exists, adult and is_bundle on every row. TRUE/FALSE, Y/N and 1/0 are converted to yes or no automatically, and anything else is flagged."),
+      technicalDetail: tr("Google's specification spells these attributes' values yes and no. Spreadsheets often turn them into TRUE and FALSE, and other feed tools write 1 and 0 or Y and N. Google doesn't treat those as yes or no, so the attribute is ignored. identifier_exists matters most: set to no, it tells Google the product has no GTIN or MPN, which stops the missing identifier warning for custom and handmade goods."),
+    };
+  if (code === "invalid_gtin")
+    return {
+      validValues: [tr("8, 12, 13 or 14 digits (GTIN-8, UPC, EAN, ITF-14)"), tr("The last digit must be the correct check digit"), tr("Digits only: no spaces, dashes or letters")],
+      examples: [
+        { bad: "4.00638E+12", good: "4006381333931", note: tr("Scientific notation loses digits") },
+        { bad: "4006-3813-3393-1", good: "4006381333931", note: tr("Remove spaces and dashes") },
+        { bad: "12345678905", good: "012345678905", note: tr("A spreadsheet dropped the leading zero") },
+        { bad: "4006381333932", good: "4006381333931", note: tr("Wrong check digit") },
+      ],
+      excelSteps: [
+        tr("In Excel, select the {column} column, right-click it and choose 'Format Cells' > 'Text'. Do this before pasting barcodes, or Excel turns them into scientific notation.", col),
+        tr("If values already show as 4.00638E+12, the digits are gone: copy the barcodes again from your supplier or product system."),
+        tr("Press Ctrl+H and replace spaces and dashes with nothing."),
+        tr("Check each barcode against the number printed on the packaging."),
+        save("Save as CSV UTF-8 (Comma delimited)."),
+      ],
+      sheetsSteps: [
+        tr("In Google Sheets, select the {column} column and go to Format > Number > Plain text before pasting barcodes.", col),
+        tr("If values already show as 4.00638E+12, the digits are gone: copy the barcodes again from your supplier or product system."),
+        tr("Press Ctrl+H and replace spaces and dashes with nothing."),
+        tr("Check each barcode against the number printed on the packaging."),
+        save("Go to File > Download > Comma Separated Values (.csv)."),
+      ],
+      striveNote: tr("StriveFormats removes spaces and dashes, restores a leading zero when the check digit proves it was dropped, and flags GTINs with the wrong length, a wrong check digit or scientific notation."),
+      preventTips: [
+        tr("Format barcode columns as Text before pasting, in every spreadsheet you use."),
+        tr("Copy GTINs from the manufacturer or GS1, never type them by hand."),
+        tr("Don't invent a GTIN. If a product has none, leave gtin blank and give an mpn, or set identifier_exists to no."),
+      ],
+      platformNote: tr("Google checks every GTIN against GS1's rules and the GS1 database. A GTIN that doesn't match the product can get it disapproved or matched to someone else's listing."),
+      detectionNote: tr("StriveFormats strips spaces and dashes from each gtin, checks that it has 8, 12, 13 or 14 digits, and recalculates the check digit. Values in scientific notation are flagged because their digits can't be recovered."),
+      technicalDetail: tr("A GTIN's last digit is a check digit calculated from the others, so a typo or a lost digit almost always shows up as a wrong check digit. Spreadsheets cause most GTIN errors: long numbers are shown as 4.00638E+12 and saved that way, and leading zeros are dropped from UPCs. StriveFormats only adds a zero back when the check digit proves the shorter number was a 12- or 13-digit GTIN missing its first zero."),
+    };
+  if (code === "missing_identifiers")
+    return {
+      validValues: [tr("gtin: the barcode number from the packaging"), tr("mpn: the manufacturer's part number"), tr("identifier_exists = no, only when the product has neither")],
+      examples: [
+        { bad: tr("gtin and mpn both blank"), good: "gtin = 4006381333931", note: tr("Branded product with a barcode") },
+        { bad: tr("gtin and mpn both blank"), good: "identifier_exists = no", note: tr("Handmade item with no barcode") },
+      ],
+      platformNote: tr("Google uses GTINs to match your product to the right catalogue entry. Products sold by many stores almost always have one; custom, handmade and vintage goods often don't, and identifier_exists = no tells Google that."),
+      detectionNote: tr("StriveFormats looks at gtin, mpn and identifier_exists on every new product. When both identifiers are blank and identifier_exists isn't no, the row gets a warning."),
+      technicalDetail: tr("Google asks for a GTIN for every product that has one, and an mpn with brand when there is no GTIN. Without identifiers, branded products can show in fewer places. Setting identifier_exists to no on a product that does have a GTIN can get it disapproved, so only use it for products that truly have none."),
+    };
+  if (code === "too_many_images")
+    return {
+      validValues: [tr("Up to 10 URLs, separated by commas"), tr("Each one a full URL starting with https://")],
+      platformNote: tr("Google uses up to 10 additional_image_link values for each product, and ignores any after the tenth. Put the most useful views first."),
+    };
+  if (code === "missing_availability_date")
+    return {
+      validValues: [tr("ISO 8601 date and time, like 2026-12-01T09:00-0500"), tr("No more than a year in the future")],
+      examples: [{ bad: tr("(empty)"), good: "2026-12-01T09:00-0500", note: tr("Required for preorder") }],
+      platformNote: tr("Google requires availability_date for preorder products and asks for it on backorders. Update it, or switch availability to in_stock, once the product ships."),
+    };
+  if (type === "required_header")
+    return {
+      platformNote: tr("Merchant Center reads Google's attribute names, such as image_link, in English whatever language the feed is in. Names are not case-sensitive, and a g: prefix is ignored, but the spelling and underscores must match."),
+    };
+  return {};
+}
+
 export function expandIssueContent(input: IssueInput, tr: Tr = englishTr): ExpandedIssueContent {
   const issueType = classifyIssue(input);
   const column = extractColumnName(input.issueCode, input.localTitle ?? input.title, tr);
+  const base = expandBase(input, issueType, column, tr);
+  return input.platform === "google" ? { ...base, ...googleOverrides(issueType, input, column, tr) } : base;
+}
+
+function expandBase(input: IssueInput, issueType: IssueType, column: string, tr: Tr): ExpandedIssueContent {
   return {
     issueType,
     whereItAppears: column,

@@ -30,6 +30,7 @@ export const PRESET_TO_PLATFORM: Record<string, GuidePlatform> = {
   ebay_listings: "ebay",
   ebay_variations: "ebay",
   amazon_inventory_loader: "amazon",
+  google_merchant_center: "google",
 };
 
 const KEYWORDS: Record<string, string[]> = {
@@ -51,6 +52,7 @@ const FIXER_PAGES: Array<{ href: string; platform: string; variations?: boolean 
   { href: "/ebay-csv-fixer", platform: "eBay" },
   { href: "/ebay-variations-csv-fixer", platform: "eBay", variations: true },
   { href: "/amazon-csv-fixer", platform: "Amazon" },
+  { href: "/google-merchant-center-feed-checker", platform: "Google Merchant Center" },
 ];
 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
