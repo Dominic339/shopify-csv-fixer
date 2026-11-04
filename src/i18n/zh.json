@@ -66,6 +66,7 @@
     "whatIsThisIssue": "这是什么问题？",
     "affectedField": "受影响字段",
     "whyRejects": "{platform} 为何拒绝",
+    "causesTitle": "常见原因",
     "platformSpecificNote": "{platform} 特别说明",
     "validValues": "有效值 / 预期格式",
     "examples": "示例",

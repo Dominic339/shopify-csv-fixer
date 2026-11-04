@@ -66,6 +66,7 @@
     "whatIsThisIssue": "What is this issue?",
     "affectedField": "Affected field",
     "whyRejects": "Why {platform} rejects this",
+    "causesTitle": "Common causes",
     "platformSpecificNote": "{platform}-specific note",
     "validValues": "Valid values / expected format",
     "examples": "Examples",

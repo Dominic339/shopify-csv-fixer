@@ -66,6 +66,7 @@
     "whatIsThisIssue": "O que é este problema?",
     "affectedField": "Campo afetado",
     "whyRejects": "Por que o {platform} rejeita isso",
+    "causesTitle": "Causas comuns",
     "platformSpecificNote": "Observação específica do {platform}",
     "validValues": "Valores válidos / formato esperado",
     "examples": "Exemplos",

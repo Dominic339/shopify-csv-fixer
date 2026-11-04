@@ -66,6 +66,7 @@
     "whatIsThisIssue": "어떤 문제인가요?",
     "affectedField": "해당 필드",
     "whyRejects": "{platform}에서 거부하는 이유",
+    "causesTitle": "흔한 원인",
     "platformSpecificNote": "{platform} 관련 참고",
     "validValues": "유효한 값 / 예상 형식",
     "examples": "예시",

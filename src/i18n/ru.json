@@ -66,6 +66,7 @@
     "whatIsThisIssue": "В чём проблема?",
     "affectedField": "Затронутое поле",
     "whyRejects": "Почему {platform} это отклоняет",
+    "causesTitle": "Частые причины",
     "platformSpecificNote": "Особенность {platform}",
     "validValues": "Допустимые значения / ожидаемый формат",
     "examples": "Примеры",

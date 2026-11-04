@@ -66,6 +66,7 @@
     "whatIsThisIssue": "Wat is dit probleem?",
     "affectedField": "Betrokken veld",
     "whyRejects": "Waarom {platform} dit weigert",
+    "causesTitle": "Veelvoorkomende oorzaken",
     "platformSpecificNote": "Opmerking specifiek voor {platform}",
     "validValues": "Geldige waarden / verwacht formaat",
     "examples": "Voorbeelden",

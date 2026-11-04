@@ -66,6 +66,7 @@
     "whatIsThisIssue": "この問題とは？",
     "affectedField": "対象フィールド",
     "whyRejects": "{platform} が拒否する理由",
+    "causesTitle": "よくある原因",
     "platformSpecificNote": "{platform} 固有の注意点",
     "validValues": "有効な値 / 想定される形式",
     "examples": "例",

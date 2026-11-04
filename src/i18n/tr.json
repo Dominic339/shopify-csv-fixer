@@ -66,6 +66,7 @@
     "whatIsThisIssue": "Bu sorun nedir?",
     "affectedField": "Etkilenen alan",
     "whyRejects": "{platform} bunu neden reddeder",
+    "causesTitle": "Yaygın nedenler",
     "platformSpecificNote": "{platform}’a özel not",
     "validValues": "Geçerli değerler / beklenen biçim",
     "examples": "Örnekler",
