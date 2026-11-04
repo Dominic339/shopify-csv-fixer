@@ -18,6 +18,7 @@ import EncodingClient from "@/app/(en)/tools/clients/EncodingClient";
 import ExcelClient from "@/app/(en)/tools/clients/ExcelClient";
 import HandleClient from "@/app/(en)/tools/clients/HandleClient";
 import SplitClient from "@/app/(en)/tools/clients/SplitClient";
+import { GlowHeader } from "@/components/ui/Decor";
 
 type ToolStrings = Translations["smallTools"];
 
@@ -83,11 +84,11 @@ export async function SmallToolsIndexView({ locale }: { locale: Locale }) {
   ];
   return (
     <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <header className="max-w-3xl">
+      <GlowHeader><header className="max-w-3xl">
         <p className={eyebrow}>{t.badge}</p>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text)] sm:text-5xl">{t.indexTitle}</h1>
+        <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-[var(--text)] sm:text-5xl">{t.indexTitle}</h1>
         <p className="mt-5 text-base leading-7 text-[var(--muted)] sm:text-lg sm:leading-8">{t.indexIntro}</p>
-      </header>
+      </header></GlowHeader>
 
       <section className="mt-12">
         <h2 className="text-xl font-bold text-[var(--text)]">{t.quickTitle}</h2>
@@ -141,11 +142,11 @@ export async function SmallToolView({ locale, slug }: { locale: Locale; slug: st
         / <span className="text-[var(--text)]">{s.name}</span>
       </nav>
 
-      <header className="mt-5 max-w-3xl">
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">{s.name}</h1>
+      <GlowHeader><header className="mt-5 max-w-3xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">{s.name}</h1>
         <p className="mt-3 text-base leading-7 text-[var(--muted)] sm:text-lg">{s.intro}</p>
         <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--secondary-text)]">{t.badge}</p>
-      </header>
+      </header></GlowHeader>
 
       <div className="mt-8">
         <Client t={t} />

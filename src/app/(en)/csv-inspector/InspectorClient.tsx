@@ -11,6 +11,7 @@ import { localeHref } from "@/lib/i18n/locales";
 import { splitLocale } from "@/lib/i18n/paths";
 import { FileDropZone } from "@/components/FileDropZone";
 import { readTextFile } from "@/lib/textFile";
+import { GlowHeader } from "@/components/ui/Decor";
 
 type T = Translations["inspector"];
 
@@ -72,12 +73,14 @@ export default function InspectorClient({ t }: Props) {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="flex flex-wrap items-center gap-3 text-2xl font-semibold">
-        {t.title}
-        <span className="rounded-full bg-[var(--secondary-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">
-          {t.beta}
-        </span>
-      </h1>
+      <GlowHeader>
+        <h1 className="flex flex-wrap items-center gap-3 text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">
+          {t.title}
+          <span className="rounded-full bg-[var(--secondary-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">
+            {t.beta}
+          </span>
+        </h1>
+      </GlowHeader>
       <p className="mt-2 text-sm text-[var(--muted)]">{t.description}</p>
 
       <FileDropZone onFile={(f) => void loadFile(f)}>

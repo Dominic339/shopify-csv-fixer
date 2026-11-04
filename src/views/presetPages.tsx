@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import JsonLd from "@/components/JsonLd";
+import { PageHero } from "@/components/ui/Decor";
 import { getPresetById, getPresetFormats } from "@/lib/presets";
 import { getFormatById } from "@/lib/formats";
 import { getPopularGuides } from "@/lib/guides/getPopularGuides";
@@ -60,11 +61,11 @@ async function PopularGuides({ t, locale, platform }: { t: Translations; locale:
   if (!guides.length) return null;
   return (
     <section className="mt-12">
-      <h2 className="text-xl font-semibold text-[var(--text)]">{t.common.popularGuides}</h2>
+      <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.common.popularGuides}</h2>
       <p className={`mt-2 text-base ${muted}`}>{t.common.popularGuidesDesc}</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {guides.map((g) => (
-          <Link key={`${g.platform}/${g.slug}`} href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} p-5 hover:border-[var(--ring)]`}>
+          <Link key={`${g.platform}/${g.slug}`} href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} lift p-5`}>
             <div className="text-xs text-[var(--muted)]">{platformLabel(t, g.platform)}</div>
             <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
             <p className={`mt-1 line-clamp-2 text-sm ${muted}`}>{g.description}</p>
@@ -103,26 +104,45 @@ export async function PresetsView({ locale }: { locale: Locale }) {
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <JsonLd data={{ "@context": "https://schema.org", "@type": "CollectionPage", name: t.presets.title, description: t.presets.description, inLanguage: locale }} />
 
-      <header className="mb-8 sm:mb-10">
-        <h1 className="text-2xl font-semibold text-[var(--text)] sm:text-3xl">{t.presets.title}</h1>
-        <p className={`mt-3 max-w-3xl text-base ${muted}`}>{t.presets.description}</p>
-        <p className={`mt-2 max-w-3xl text-sm ${muted}`}>{t.presets.checksShared}</p>
-      </header>
+      <PageHero
+        title={t.presets.title}
+        intro={
+          <>
+            {t.presets.description}
+            <span className="mt-2 block text-sm leading-6">{t.presets.checksShared}</span>
+          </>
+        }
+        stat={{ value: presets.length, label: t.presets.title }}
+      />
 
-      <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-        {presets.map((p) => {
+      {/* Template cards: a check-count bubble each, offset into two staggered columns */}
+      <div className="grid gap-5 md:grid-cols-2">
+        {presets.map((p, i) => {
           const checks = Object.values(ISSUE_META_REGISTRY[p.formatId] ?? {}).filter((m) => m.checked !== false).length;
           return (
-            <div key={p.id} className={`${card} flex flex-col p-6 sm:p-7`}>
-              <div className={`text-sm ${muted}`}>{platformLabel(t, PRESET_TO_PLATFORM[p.id]) ?? p.category}</div>
-              <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">{presetText(t, p.id, "name") ?? p.name}</h2>
-              <p className={`mt-3 flex-1 text-base ${muted}`}>{presetText(t, p.id, "desc") ?? p.description}</p>
-              {checks > 0 && <div className={`mt-4 text-sm ${muted}`}>{fmt(t.presets.checksCount, { count: checks })}</div>}
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link className="rg-btn" href={`${href("/app")}?preset=${encodeURIComponent(p.formatId)}`}>
-                  {t.common.openWithPreset}
+            <div key={p.id} className={`${card} lift relative flex flex-col overflow-hidden p-6 sm:p-7 ${i % 2 === 1 ? "md:translate-y-8" : ""}`}>
+              <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.16),transparent_70%)]" />
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--secondary-text)]">{platformLabel(t, PRESET_TO_PLATFORM[p.id]) ?? p.category}</div>
+                  <h2 className="mt-2 text-xl font-extrabold tracking-tight text-[var(--text)]">{presetText(t, p.id, "name") ?? p.name}</h2>
+                </div>
+                {checks > 0 && (
+                  <span title={fmt(t.presets.checksCount, { count: checks })} className="glass flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full text-center">
+                    <svg aria-hidden="true" className="h-3.5 w-3.5 text-[var(--accent)]" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clipRule="evenodd" />
+                    </svg>
+                    <span aria-hidden="true" className="mt-0.5 text-lg font-extrabold leading-none text-[var(--accent-text)]">{checks}</span>
+                    <span className="sr-only">{fmt(t.presets.checksCount, { count: checks })}</span>
+                  </span>
+                )}
+              </div>
+              <p className={`relative mt-3 flex-1 text-base ${muted}`}>{presetText(t, p.id, "desc") ?? p.description}</p>
+              <div className="relative mt-6 flex flex-wrap gap-3">
+                <Link className="btn-primary rounded-full px-5 py-2.5" href={`${href("/app")}?preset=${encodeURIComponent(p.formatId)}`}>
+                  {t.common.openWithPreset} →
                 </Link>
-                <Link className="pill-btn" href={href(`/presets/${encodeURIComponent(p.id)}`)}>
+                <Link className="rgb-btn rounded-full px-5 py-2.5" href={href(`/presets/${encodeURIComponent(p.id)}`)}>
                   {t.common.viewInformation}
                 </Link>
               </div>
@@ -131,13 +151,14 @@ export async function PresetsView({ locale }: { locale: Locale }) {
         })}
       </div>
 
-      <section className="mt-12">
-        <h2 className="text-xl font-semibold text-[var(--text)]">{t.common.platformFixers}</h2>
+      <section className="mt-20">
+        <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.common.platformFixers}</h2>
         <p className={`mt-2 text-base ${muted}`}>{t.common.platformFixersDesc}</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {FIXER_PAGES.map(({ href: h, platform, variations }) => (
-            <Link key={h} href={href(h)} className={`${card} p-5 text-base font-semibold text-[var(--text)] hover:border-[var(--ring)]`}>
+            <Link key={h} href={href(h)} className="lift group flex items-center justify-between gap-3 rounded-full border border-[var(--border)] bg-[var(--surface)] py-3 pl-5 pr-3 text-sm font-semibold text-[var(--text)]">
               {fmt(variations ? t.presets.variationsFixer : t.guides.fixerButton, { platform })}
+              <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-text)] transition-transform group-hover:translate-x-0.5">→</span>
             </Link>
           ))}
         </div>

@@ -23,6 +23,7 @@ import { splitLocale } from "@/lib/i18n/paths";
 import { useValidationText } from "@/lib/i18n/useValidationText";
 import { readTextFile } from "@/lib/textFile";
 import { card, muted, StepTitle } from "@/app/(en)/app/fixer/ui";
+import { GlowHeader } from "@/components/ui/Decor";
 
 // Two Shopify exports that share a product, to show append and dedupe.
 const SAMPLE_FILES = ["/samples/messy_shopify_export_1_classic_tee.csv", "/samples/messy_shopify_export_2_duplicate_sku.csv"];
@@ -189,8 +190,8 @@ export default function MergeClient({ t }: Props) {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12">
-      <header className="mb-8">
-        <h1 className="flex flex-wrap items-center gap-3 text-3xl font-bold tracking-tight text-[var(--text)]">
+      <GlowHeader><header className="mb-8">
+        <h1 className="flex flex-wrap items-center gap-3 text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">
           {t.title}
           <span className="rounded-full bg-[var(--secondary-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--secondary-text)]">{t.beta}</span>
         </h1>
@@ -206,7 +207,7 @@ export default function MergeClient({ t }: Props) {
             <> · <Link href="/profile?upgrade=basic" className="underline hover:no-underline">{t.upgradeForLarger}</Link></>
           )}
         </p>
-      </header>
+      </header></GlowHeader>
 
       <div className="space-y-6">
         {/* 1. Files */}

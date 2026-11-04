@@ -13,6 +13,7 @@ import { Screenshot } from "@/components/ui/Screenshot";
 import { sheetExampleFor } from "@/lib/guides/sheetExamples";
 
 import JsonLd from "@/components/JsonLd";
+import { CtaPanel, PageHero } from "@/components/ui/Decor";
 import MdxGuideToc from "@/components/MdxGuideToc";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import GuideSidebar from "@/components/GuideSidebar";
@@ -38,6 +39,16 @@ import { mdxGuideComponentsFor } from "@/views/mdxGuideComponents";
 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";
 const card = "rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
+
+/** A colour per platform for the guides hub tiles (matches the landing pages). */
+const PLATFORM_TONE: Record<string, { text: string; glow: string }> = {
+  shopify: { text: "text-emerald-700 dark:text-green-400", glow: "rgba(16,185,129,0.22)" },
+  woocommerce: { text: "text-purple-700 dark:text-purple-400", glow: "rgba(147,51,234,0.2)" },
+  etsy: { text: "text-orange-700 dark:text-orange-400", glow: "rgba(234,88,12,0.2)" },
+  ebay: { text: "text-sky-700 dark:text-sky-400", glow: "rgba(14,165,233,0.22)" },
+  amazon: { text: "text-amber-700 dark:text-amber-400", glow: "rgba(245,158,11,0.22)" },
+  general: { text: "text-[var(--secondary-text)]", glow: "rgba(var(--secondary-rgb),0.2)" },
+};
 const badgeRed = "rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400";
 const badgeGreen = "rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400";
 
@@ -79,12 +90,15 @@ export async function guidesHubMetadata(locale: Locale): Promise<Metadata> {
 
 function GuideLink({ g, locale, t }: { g: Guide; locale: Locale; t: Translations }) {
   return (
-    <Link href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} block p-5 hover:border-[var(--ring)]`}>
+    <Link href={localeHref(locale, `/guides/${g.platform}/${g.slug}`)} className={`${card} lift group block h-full rounded-3xl p-5`}>
       <div className="flex flex-wrap items-center gap-2">
         <span className={`text-xs font-semibold uppercase ${muted}`}>{platformLabel(t, g.platform)}</span>
         {g.kind === "curated" && <span className={`rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-xs ${muted}`}>{t.guides.guideLabel}</span>}
       </div>
-      <div className="mt-1 font-semibold text-[var(--text)]">{g.title}</div>
+      <div className="mt-1 flex items-start justify-between gap-3 font-semibold text-[var(--text)]">
+        {g.title}
+        <span aria-hidden="true" className="mt-0.5 text-[var(--accent-text)] transition-transform group-hover:translate-x-1">→</span>
+      </div>
       <div className={`mt-1 line-clamp-2 text-sm ${muted}`}>{g.description}</div>
     </Link>
   );
@@ -112,10 +126,7 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
     <>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "CollectionPage", name: t.guides.title, description: t.guides.description, url: `${SITE_URL}${localeHref(locale, "/guides")}` }} />
 
-      <header className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text)] sm:text-3xl">{t.guides.title}</h1>
-        <p className={`mt-3 text-base ${muted}`}>{t.guides.hubIntro}</p>
-      </header>
+      <PageHero title={t.guides.title} intro={t.guides.hubIntro} stat={{ value: all.length, label: t.guides.guidesCount }} />
 
       {needle ? (
         <section>
@@ -137,17 +148,28 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
       ) : (
         <>
           <section className="mb-10">
-            <h2 className="mb-4 text-xl font-semibold text-[var(--text)]">{t.guides.browseByPlatform}</h2>
+            <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.guides.browseByPlatform}</h2>
+            {/* Platform tiles: a coloured glow each, the first one wide */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {GUIDE_PLATFORMS.map((p) => {
+              {GUIDE_PLATFORMS.map((p, i) => {
                 const count = counts[p] ?? 0;
+                const tone = PLATFORM_TONE[p] ?? PLATFORM_TONE.general;
                 return (
-                  <Link key={p} href={localeHref(locale, `/guides/${p}`)} className={`${card} flex flex-col p-5 hover:border-[var(--ring)]`}>
-                    <div className="font-semibold text-[var(--text)]">{platformLabel(t, p)}</div>
-                    <div className={`mt-1 text-sm ${muted}`}>
-                      {count} {count === 1 ? t.guides.guideCount : t.guides.guidesCount}
+                  <Link
+                    key={p}
+                    href={localeHref(locale, `/guides/${p}`)}
+                    className={`lift group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 ${i === 0 ? "sm:col-span-2" : ""} ${i === GUIDE_PLATFORMS.length - 1 ? "sm:col-span-2 lg:col-span-3" : ""}`}
+                  >
+                    <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-2xl" style={{ background: `radial-gradient(circle, ${tone.glow}, transparent 70%)` }} />
+                    <div className={`relative text-xs font-bold uppercase tracking-[0.14em] ${tone.text}`}>{platformLabel(t, p)}</div>
+                    <div className="relative mt-3 flex items-end justify-between gap-3">
+                      <span>
+                        <span className="text-4xl font-extrabold leading-none text-[var(--text)]">{count}</span>{" "}
+                        <span className={`text-sm ${muted}`}>{count === 1 ? t.guides.guideCount : t.guides.guidesCount}</span>
+                      </span>
+                      <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-text)] transition-transform group-hover:translate-x-0.5">→</span>
                     </div>
-                    {PLATFORM_FIXER_HREF[p] && <div className="mt-2 text-xs text-[var(--muted)]">{t.guides.includesFixer}</div>}
+                    {PLATFORM_FIXER_HREF[p] && <div className="relative mt-3 inline-flex w-fit rounded-full bg-[var(--surface-2)] px-2.5 py-0.5 text-xs text-[var(--muted)]">{t.guides.includesFixer}</div>}
                   </Link>
                 );
               })}
@@ -156,8 +178,8 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
 
           {featured.length > 0 && (
             <section className="mb-10">
-              <h2 className="mb-4 text-xl font-semibold text-[var(--text)]">{t.guides.featuredGuides}</h2>
-              <ul className="space-y-3">
+              <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.guides.featuredGuides}</h2>
+              <ul className="grid gap-4 md:grid-cols-2">
                 {featured.map((g) => (
                   <li key={`${g.platform}/${g.slug}`}>
                     <GuideLink g={g} locale={locale} t={t} />
@@ -167,18 +189,12 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
             </section>
           )}
 
-          <section className={`${card} p-6`}>
-            <h2 className="text-lg font-semibold text-[var(--text)]">{t.guides.needHelp}</h2>
-            <p className={`mt-2 text-base ${muted}`}>{t.guides.needHelpDesc}</p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link className="rg-btn" href={localeHref(locale, "/app")}>
-                {t.guide.openCsvFixer}
-              </Link>
-              <Link className="pill-btn" href={localeHref(locale, "/presets")}>
-                {t.guides.browseTemplates}
-              </Link>
-            </div>
-          </section>
+          <CtaPanel
+            title={t.guides.needHelp}
+            desc={t.guides.needHelpDesc}
+            primary={{ href: localeHref(locale, "/app"), label: t.guide.openCsvFixer }}
+            secondary={{ href: localeHref(locale, "/presets"), label: t.guides.browseTemplates }}
+          />
         </>
       )}
     </>
@@ -223,47 +239,49 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
     <>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "CollectionPage", name: fmt(t.guides.platformTitle, { platform: label }), url: `${SITE_URL}/guides/${platform}` }} />
 
-      <header className="mb-8">
-        <div className={`text-sm font-semibold uppercase ${muted}`}>
-          <Link href={href("/guides")} className="hover:underline">
-            {t.nav.guides}
-          </Link>{" "}
-          / {label}
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold text-[var(--text)] sm:text-3xl">{fmt(t.guides.platformTitle, { platform: label })}</h1>
-        <p className={`mt-3 text-base ${muted}`}>
-          {platform === "general" ? t.guides.generalGuidesDesc : fmt(t.guides.platformDesc, { count: guides.length, platform: label })}
-        </p>
-        {(fixerHref || presetId) && (
-          <div className="mt-4 flex flex-wrap gap-3">
-            {fixerHref && (
-              <Link className="rg-btn" href={href(fixerHref)}>
-                {fmt(t.guides.fixerButton, { platform: label })}
-              </Link>
-            )}
-            {presetId && (
-              <Link className="pill-btn" href={fixerAppHref}>
-                {t.common.openWithPreset}
-              </Link>
-            )}
-          </div>
+      <PageHero
+        eyebrow={
+          <>
+            <Link href={href("/guides")} className="hover:underline">
+              {t.nav.guides}
+            </Link>{" "}
+            / {label}
+          </>
+        }
+        title={platform === "general" ? t.guides.generalGuidesTitle : fmt(t.guides.platformTitle, { platform: label })}
+        intro={platform === "general" ? t.guides.generalGuidesDesc : fmt(t.guides.platformDesc, { count: guides.length, platform: label })}
+        stat={{ value: guides.length, label: guides.length === 1 ? t.guides.guideCount : t.guides.guidesCount }}
+      >
+        {fixerHref && (
+          <Link className="btn-primary rounded-full px-6 py-3" href={href(fixerHref)}>
+            {fmt(t.guides.fixerButton, { platform: label })} →
+          </Link>
         )}
-      </header>
+        {presetId && (
+          <Link className="rgb-btn rounded-full px-6 py-3" href={fixerAppHref}>
+            {t.common.openWithPreset}
+          </Link>
+        )}
+      </PageHero>
 
       {categories.map((cat) => (
-        <section key={cat} className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold text-[var(--text)]">{categoryLabel(t, cat)}</h2>
+        <section key={cat} className="mb-10">
+          <h2 className="mb-4 flex items-center gap-3 text-xl font-extrabold tracking-tight text-[var(--text)]">
+            {categoryLabel(t, cat)}
+            <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--accent-text)]">{byCategory[cat].length}</span>
+          </h2>
           <ul className="space-y-2">
             {byCategory[cat].map((g) => (
               <li key={g.slug}>
-                <Link href={href(`/guides/${platform}/${g.slug}`)} className={`${card} flex flex-col gap-2 px-5 py-4 hover:border-[var(--ring)] sm:flex-row sm:items-center sm:justify-between`}>
+                <Link href={href(`/guides/${platform}/${g.slug}`)} className={`${card} lift group flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between`}>
                   <div className="min-w-0">
                     <div className="font-semibold text-[var(--text)]">{g.title}</div>
                     <div className={`mt-0.5 line-clamp-2 text-sm sm:line-clamp-1 ${muted}`}>{g.description}</div>
                   </div>
-                  <div className="flex shrink-0 gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     {g.blocking && <span className={badgeRed}>{t.guides.blocking}</span>}
                     {g.autoFixable && <span className={badgeGreen}>{t.guide.autoFix}</span>}
+                    <span aria-hidden="true" className="hidden text-[var(--accent-text)] transition-transform group-hover:translate-x-1 sm:inline">→</span>
                   </div>
                 </Link>
               </li>
@@ -272,20 +290,12 @@ export async function GuidesPlatformView({ locale, platform }: { locale: Locale;
         </section>
       ))}
 
-      <section className={`${card} mt-4 p-6`}>
-        <h2 className="text-lg font-semibold text-[var(--text)]">{t.guides.needHelp}</h2>
-        <p className={`mt-2 text-base ${muted}`}>{fmt(t.guides.needHelpPlatform, { platform: label })}</p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link className="rg-btn" href={fixerAppHref}>
-            {t.guide.openCsvFixer}
-          </Link>
-          {presetId && (
-            <Link className="pill-btn" href={href(`/presets/${presetId}`)}>
-              {t.guide.viewTemplate}
-            </Link>
-          )}
-        </div>
-      </section>
+      <CtaPanel
+        title={t.guides.needHelp}
+        desc={fmt(t.guides.needHelpPlatform, { platform: label })}
+        primary={{ href: fixerAppHref, label: t.guide.openCsvFixer }}
+        secondary={presetId ? { href: href(`/presets/${presetId}`), label: t.guide.viewTemplate } : undefined}
+      />
     </>
   );
 }

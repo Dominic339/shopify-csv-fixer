@@ -23,6 +23,7 @@ import { fmt } from "@/lib/i18n/fmt";
 import { useValidationText } from "@/lib/i18n/useValidationText";
 import { card, muted, platformLabel, StepTitle } from "@/app/(en)/app/fixer/ui";
 import { readTextFile } from "@/lib/textFile";
+import { GlowHeader } from "@/components/ui/Decor";
 
 /** Sample files for the converter; other formats use their template's generated sample. */
 const SAMPLE_FOR: Record<string, string> = {
@@ -221,10 +222,10 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
     // Embedded in a migration page, which already has its own <main>.
     <Wrapper className={embedded ? "" : "mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12"}>
       {!embedded && (
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--text)]">{t.title}</h1>
+        <GlowHeader><header className="mb-8">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">{t.title}</h1>
           <p className={`mt-2 max-w-2xl text-base ${muted}`}>{t.description}</p>
-        </header>
+        </header></GlowHeader>
       )}
 
       <div className="space-y-5">
