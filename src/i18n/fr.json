@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Annonces Etsy",
     "fmt_ebay_listings": "Annonces eBay",
     "fmt_amazon_inventory_loader": "Chargeur d'inventaire Amazon",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (nouveau modèle)",
     "fmt_shopify_products_legacy": "Shopify (ancien modèle)",
     "noEquivalent": "(aucun équivalent dans le format cible) :",
@@ -406,7 +407,10 @@
     "passStarting": "Ouverture du paiement…",
     "passError": "Impossible d'ouvrir le paiement. Veuillez réessayer.",
     "viewPlans": "Voir les forfaits",
-    "fileRestored": "Votre fichier est de nouveau chargé : vous pouvez le télécharger."
+    "fileRestored": "Votre fichier est de nouveau chargé : vous pouvez le télécharger.",
+    "googleIntro": "Un flux Merchant Center a besoin de deux informations absentes de votre export : l'adresse de votre boutique, pour lier chaque produit à sa page, et la devise de vos prix.",
+    "storeUrl": "Adresse de la boutique",
+    "currency": "Devise (code ISO)"
   },
   "merge": {
     "title": "Fusionneur et déduplicateur CSV",

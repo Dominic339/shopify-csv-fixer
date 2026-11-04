@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Etsy 商品",
     "fmt_ebay_listings": "eBay 刊登",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify（新模板）",
     "fmt_shopify_products_legacy": "Shopify（旧模板）",
     "noEquivalent": "（目标格式中无对应列）：",
@@ -406,7 +407,10 @@
     "passStarting": "正在打开付款页面…",
     "passError": "无法打开付款页面，请重试。",
     "viewPlans": "查看套餐",
-    "fileRestored": "文件已重新载入，现在可以下载了。"
+    "fileRestored": "文件已重新载入，现在可以下载了。",
+    "googleIntro": "Merchant Center Feed 需要两项导出文件中没有的信息：用于把每个商品链接到其页面的店铺地址，以及价格的货币。",
+    "storeUrl": "店铺地址",
+    "currency": "货币（ISO 代码）"
   },
   "merge": {
     "title": "CSV合并与去重工具",

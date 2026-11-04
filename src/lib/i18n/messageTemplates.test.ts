@@ -9,7 +9,7 @@ import { matchTemplate, translateMessage } from "@/lib/i18n/messages";
 import { parseCsv } from "@/lib/csv";
 import { getAllFormats } from "@/lib/formats";
 import { applyFormatToParsedCsv } from "@/lib/formats/engine";
-import { convertCsv, CONVERT_FORMAT_OPTIONS } from "@/lib/convertCsv";
+import { convertCsv, CONVERT_FORMAT_OPTIONS, CONVERT_SOURCE_OPTIONS } from "@/lib/convertCsv";
 import { LANDING_DEMOS } from "@/lib/landing/demos";
 
 const root = process.cwd();
@@ -45,7 +45,7 @@ describe("message templates", () => {
         });
         res.fixesApplied.forEach(check);
       }
-      for (const from of CONVERT_FORMAT_OPTIONS) {
+      for (const from of CONVERT_SOURCE_OPTIONS) {
         for (const to of CONVERT_FORMAT_OPTIONS) {
           if (from.id === to.id) continue;
           try {

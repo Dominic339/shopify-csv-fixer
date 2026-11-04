@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { exportFileFor, parseCsv, toCsv } from "@/lib/csv";
-import { convertCsv, CONVERT_FORMAT_OPTIONS, type ConvertResult } from "@/lib/convertCsv";
+import { convertCsv, CONVERT_FORMAT_OPTIONS, CONVERT_SOURCE_OPTIONS, normalizeStoreUrl, type ConvertOptions, type ConvertResult } from "@/lib/convertCsv";
 import { CONVERT_ROUTES, routeFor } from "@/lib/convertRoutes";
 import { consumeExport } from "@/lib/quota";
 import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
@@ -44,7 +44,7 @@ function downloadFile(filename: string, content: string, type: string) {
 }
 
 /** Targets that have a fixer preset to check the converted file with. */
-const FIXER_PRESETS = new Set(["shopify_products", "woocommerce_products", "woocommerce_variable_products", "etsy_listings", "ebay_listings", "amazon_inventory_loader"]);
+const FIXER_PRESETS = new Set(["shopify_products", "woocommerce_products", "woocommerce_variable_products", "etsy_listings", "ebay_listings", "amazon_inventory_loader", "google_merchant_center"]);
 
 const PREVIEW_ROWS = 5;
 const PREVIEW_COLS = 8;
@@ -75,6 +75,15 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   const [limitHit, setLimitHit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [passBusy, setPassBusy] = useState(false);
+  // Merchant Center needs the store's address and currency, which no export contains.
+  const [storeUrl, setStoreUrl] = useState("");
+  const [currency, setCurrency] = useState("");
+  const isGoogle = targetFormatId === "google_merchant_center";
+  const targetOnly = !CONVERT_SOURCE_OPTIONS.some((o) => o.id === targetFormatId);
+  const options = useMemo<ConvertOptions>(
+    () => (isGoogle ? { storeUrl, currency: /^[a-z]{3}$/i.test(currency.trim()) ? currency.trim() : "" } : {}),
+    [isGoogle, storeUrl, currency]
+  );
   const passAvailable = usePassAvailable();
   const [signedIn, setSignedIn] = useState(false);
 
@@ -103,7 +112,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   }, [t.fileRestored]);
 
   const runConvert = useCallback(
-    (text: string, src: string, tgt: string) => {
+    (text: string, src: string, tgt: string, opts: ConvertOptions) => {
       if (src === tgt) {
         setError(t.errSameFormat);
         setResult(null);
@@ -114,7 +123,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
       setLimitHit(false);
       try {
         const { headers, rows } = parseCsv(text);
-        const out = convertCsv(headers, rows, src, tgt);
+        const out = convertCsv(headers, rows, src, tgt, null, opts);
         setResult(out);
         trackToolEvent("convert_complete", { source: src, target: tgt, rows: out.rowsTotal, warnings: out.warnings.length });
       } catch (e) {
@@ -130,8 +139,8 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
 
   // Convert as soon as there is a file, and again whenever a format changes.
   useEffect(() => {
-    if (csvText) runConvert(csvText, sourceFormatId, targetFormatId);
-  }, [csvText, sourceFormatId, targetFormatId, runConvert]);
+    if (csvText) runConvert(csvText, sourceFormatId, targetFormatId, options);
+  }, [csvText, sourceFormatId, targetFormatId, options, runConvert]);
 
   const [loadingSample, setLoadingSample] = useState(false);
   async function loadSample() {
@@ -163,12 +172,13 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   }
 
   function swap() {
+    if (targetOnly) return;
     const s = sourceFormatId;
     setSourceFormatId(targetFormatId);
     setTargetFormatId(s);
   }
 
-  const outExtension = targetFormatId.startsWith("amazon_") ? "txt" : "csv";
+  const outExtension = targetFormatId.startsWith("amazon_") || isGoogle ? "txt" : "csv";
   const outName = `${(fileName ?? "products").replace(/\.(csv|txt|tsv)$/i, "")}_${targetFormatId}.${outExtension}`;
 
   async function handleDownload() {
@@ -236,14 +246,14 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
             <label className="block">
               <span className={`mb-1.5 block text-xs font-medium ${muted}`}>{t.sourceFormat}</span>
               <select className={selectCls} value={sourceFormatId} onChange={(e) => chooseSource(e.target.value)}>
-                {CONVERT_FORMAT_OPTIONS.map((o) => (
+                {CONVERT_SOURCE_OPTIONS.map((o) => (
                   <option key={o.id} value={o.id}>
                     {label(o.id)}
                   </option>
                 ))}
               </select>
             </label>
-            <button type="button" className="pill-btn h-[42px] justify-center px-3" onClick={swap} aria-label={t.swap} title={t.swap}>
+            <button type="button" className="pill-btn h-[42px] justify-center px-3 disabled:opacity-40" onClick={swap} disabled={targetOnly} aria-label={t.swap} title={t.swap}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="sm:rotate-0 rotate-90">
                 <path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4" />
               </svg>
@@ -259,6 +269,33 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
               </select>
             </label>
           </div>
+          {isGoogle && (
+            <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:grid-cols-[2fr_1fr]">
+              <p className={`text-sm leading-6 sm:col-span-2 ${muted}`}>{t.googleIntro}</p>
+              <label className="block">
+                <span className={`mb-1.5 block text-xs font-medium ${muted}`}>{t.storeUrl}</span>
+                <input
+                  className={selectCls}
+                  type="url"
+                  inputMode="url"
+                  placeholder="https://shop.example.com"
+                  value={storeUrl}
+                  onChange={(e) => setStoreUrl(e.target.value)}
+                  aria-invalid={storeUrl.trim() !== "" && !normalizeStoreUrl(storeUrl)}
+                />
+              </label>
+              <label className="block">
+                <span className={`mb-1.5 block text-xs font-medium ${muted}`}>{t.currency}</span>
+                <input
+                  className={`${selectCls} uppercase`}
+                  placeholder="USD"
+                  maxLength={3}
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value.replace(/[^a-z]/gi, "").toUpperCase())}
+                />
+              </label>
+            </div>
+          )}
           {migration && !embedded && (
             <p className={`mt-4 text-sm ${muted}`}>
               <Link href={`/migrate/${migration.slug}`} className="font-medium text-[var(--secondary-text)] hover:underline">

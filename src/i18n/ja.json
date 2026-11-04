@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Etsy出品",
     "fmt_ebay_listings": "eBay出品",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify（新テンプレート）",
     "fmt_shopify_products_legacy": "Shopify（旧テンプレート）",
     "noEquivalent": "（変換先フォーマットに対応する列なし）：",
@@ -406,7 +407,10 @@
     "passStarting": "決済画面を開いています…",
     "passError": "決済画面を開けませんでした。もう一度お試しください。",
     "viewPlans": "プランを見る",
-    "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。"
+    "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。",
+    "googleIntro": "Merchant Center のフィードには、エクスポートにない 2 つの情報が必要です。各商品をページにリンクするためのストアのアドレスと、価格の通貨です。",
+    "storeUrl": "ストアのアドレス",
+    "currency": "通貨（ISO コード）"
   },
   "merge": {
     "title": "CSVマージャー＆重複排除ツール",

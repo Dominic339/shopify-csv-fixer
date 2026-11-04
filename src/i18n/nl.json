@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Etsy-advertenties",
     "fmt_ebay_listings": "eBay-advertenties",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (nieuwe sjabloon)",
     "fmt_shopify_products_legacy": "Shopify (oude sjabloon)",
     "noEquivalent": "(geen equivalent in het doelformaat):",
@@ -406,7 +407,10 @@
     "passStarting": "Betaalpagina openen…",
     "passError": "De betaalpagina kon niet worden geopend. Probeer het opnieuw.",
     "viewPlans": "Abonnementen bekijken",
-    "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden."
+    "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden.",
+    "googleIntro": "Een Merchant Center-feed heeft twee dingen nodig die je export niet bevat: het adres van je winkel, om elk product naar zijn pagina te linken, en de valuta van je prijzen.",
+    "storeUrl": "Winkeladres",
+    "currency": "Valuta (ISO-code)"
   },
   "merge": {
     "title": "CSV-samenvoeger en deduplicator",
