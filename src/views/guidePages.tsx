@@ -13,7 +13,7 @@ import { Screenshot } from "@/components/ui/Screenshot";
 import { sheetExampleFor } from "@/lib/guides/sheetExamples";
 
 import JsonLd from "@/components/JsonLd";
-import { CtaPanel, PageHero } from "@/components/ui/Decor";
+import { CtaPanel, Orbs, PageHero } from "@/components/ui/Decor";
 import MdxGuideToc from "@/components/MdxGuideToc";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import GuideSidebar from "@/components/GuideSidebar";
@@ -477,9 +477,11 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
       />
 
       <article>
-        <header className="mb-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold ${muted}`}>{label}</span>
+        <header className="hero-glow relative mb-8 overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-9">
+          <Orbs size="sm" />
+          <span aria-hidden="true" className="absolute left-4 top-4 h-7 w-7 border-l-[3px] border-t-[3px] border-[var(--accent)] opacity-60" />
+          <div className="relative flex flex-wrap items-center gap-2">
+            <span className={`rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold ${(PLATFORM_TONE[platform] ?? PLATFORM_TONE.general).text}`}>{label}</span>
             {/* General guides have the category "general" too; don't show the same word twice. */}
             {categoryLabel(t, guide.category) !== label && (
               <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs ${muted}`}>{categoryLabel(t, guide.category)}</span>
@@ -487,14 +489,14 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
             {guide.blocking && <span className={badgeRed}>{t.guide.importBlocker}</span>}
             {guide.autoFixable && <span className={badgeGreen}>{t.guide.autoFixableBadge}</span>}
           </div>
-          <h1 className="mt-4 text-2xl font-semibold text-[var(--text)] sm:text-3xl">{guide.title}</h1>
-          <p className={`mt-3 text-base ${muted}`}>{guide.description}</p>
+          <h1 className="relative mt-4 text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">{guide.title}</h1>
+          <p className={`relative mt-3 text-base leading-7 sm:text-lg ${muted}`}>{guide.description}</p>
           {guide.lastUpdated && (
-            <div className="mt-2 text-xs text-[var(--muted)]">
+            <div className="relative mt-3 text-xs text-[var(--muted)]">
               {t.guide.updated} {guide.lastUpdated}
             </div>
           )}
-          {!bodyTranslated && <p className={`mt-3 text-sm ${muted}`}>{t.guide.englishOnly}</p>}
+          {!bodyTranslated && <p className={`relative mt-3 text-sm ${muted}`}>{t.guide.englishOnly}</p>}
         </header>
 
         {curated ? (

@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import JsonLd from "@/components/JsonLd";
-import { PageHero } from "@/components/ui/Decor";
+import { Orbs, PageHero } from "@/components/ui/Decor";
 import { getPresetById, getPresetFormats } from "@/lib/presets";
 import { getFormatById } from "@/lib/formats";
 import { getPopularGuides } from "@/lib/guides/getPopularGuides";
@@ -271,7 +271,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
-          { "@type": "ListItem", position: 2, name: "Preset Formats", item: `${SITE_URL}/presets` },
+          { "@type": "ListItem", position: 2, name: "CSV Templates", item: `${SITE_URL}/presets` },
           { "@type": "ListItem", position: 3, name: preset.name, item: pageUrl },
         ],
       },
@@ -285,8 +285,10 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <JsonLd data={jsonLd} />
 
-      <div className={`${card} p-6 sm:p-8`}>
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+      <div className="hero-glow relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-9">
+        <Orbs size="sm" />
+        <span aria-hidden="true" className="absolute left-4 top-4 h-7 w-7 border-l-[3px] border-t-[3px] border-[var(--accent)] opacity-60" />
+        <div className="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="max-w-3xl">
             <div className={`text-sm ${muted}`}>
               <Link href={href("/presets")} className="hover:underline">
@@ -294,14 +296,14 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
               </Link>
               {platform ? ` / ${platformLabel(t, platform)}` : null}
             </div>
-            <h1 className="mt-2 text-2xl font-semibold text-[var(--text)] sm:text-3xl">{name}</h1>
-            <p className={`mt-3 text-base ${muted}`}>{description}</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">{name}</h1>
+            <p className={`mt-3 text-base leading-7 sm:text-lg ${muted}`}>{description}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Link className="rg-btn" href={openFixerHref}>
-              {t.common.openWithPreset}
+            <Link className="btn-primary rounded-full px-6 py-3" href={openFixerHref}>
+              {t.common.openWithPreset} →
             </Link>
-            <Link className="pill-btn" href={sampleCsvHref}>
+            <Link className="rgb-btn rounded-full px-6 py-3" href={sampleCsvHref}>
               {t.common.downloadSample}
             </Link>
           </div>
@@ -312,7 +314,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
 
       {checks.length > 0 && platform && (
         <section className="mt-8">
-          <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.checksTitle}</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.checksTitle}</h2>
           <p className={`mt-2 text-base ${muted}`}>{fmt(t.presets.checksIntro, { count: checks.length })}</p>
           <div className="mt-5 grid gap-4 lg:grid-cols-3">
             <CheckList title={t.presets.checksBlocking} items={blocking} platform={platform} locale={locale} autoFixLabel={t.guide.autoFix} />
@@ -324,7 +326,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <section className={`${card} min-w-0 p-6 sm:p-7`}>
-          <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.expectedColumns}</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.expectedColumns}</h2>
           {headers.length ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {headers.map((h) => (
@@ -339,7 +341,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
         </section>
 
         <section className={`${card} min-w-0 p-6 sm:p-7`}>
-          <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.exampleRow}</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.exampleRow}</h2>
           {exampleRow ? (
             <div tabIndex={0} role="region" aria-label={t.presets.exampleRow} className="mt-4 overflow-x-auto rounded-2xl border border-[var(--border)]">
               <table className="w-full min-w-[600px] text-sm">
@@ -371,7 +373,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
       <div className="mt-8 grid gap-6">
         {seo.longDescription?.length ? (
           <section className={`${card} p-6 sm:p-7`}>
-            <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.aboutFormat}</h2>
+            <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.aboutFormat}</h2>
             <div className={`mt-3 space-y-3 text-base ${muted}`}>
               {seo.longDescription.map((p, i) => (
                 <p key={i}>{p}</p>
@@ -383,7 +385,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
         <div className="grid gap-6 md:grid-cols-2">
           {seo.howItWorks?.length ? (
             <section className={`${card} p-6 sm:p-7`}>
-              <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.howItWorks}</h2>
+              <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.howItWorks}</h2>
               <ol className={`mt-4 space-y-2 text-base ${muted}`}>
                 {seo.howItWorks.map((s, i) => (
                   <li key={i} className="flex gap-3">
@@ -397,7 +399,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
 
           {seo.commonFixes?.length ? (
             <section className={`${card} p-6 sm:p-7`}>
-              <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.examplesOfFixes}</h2>
+              <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.examplesOfFixes}</h2>
               <ul className={`mt-4 space-y-2 text-base ${muted}`}>
                 {seo.commonFixes.map((s, i) => (
                   <li key={i} className="flex gap-3">
@@ -412,7 +414,7 @@ export async function PresetDetailView({ locale, rawId }: { locale: Locale; rawI
 
         {seo.faq?.length ? (
           <section className={`${card} p-6 sm:p-7`}>
-            <h2 className="text-xl font-semibold text-[var(--text)]">{t.presets.faq}</h2>
+            <h2 className="text-2xl font-extrabold tracking-tight text-[var(--text)]">{t.presets.faq}</h2>
             <div className="mt-5 space-y-4">
               {seo.faq.map((f, i) => (
                 <details key={i} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5" open={i === 0}>

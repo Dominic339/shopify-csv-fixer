@@ -10,13 +10,13 @@ export function NotFoundContent() {
       <h1 className="mt-2 text-2xl font-semibold text-[var(--text)] sm:text-3xl">This page could not be found</h1>
       <p className="mt-3 text-base text-[var(--muted)]">The link may be old, or the page may have moved.</p>
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <Link href="/app" className="rg-btn justify-center">
+        <Link href="/app" className="btn-primary justify-center rounded-full px-6 py-3">
           Open the CSV Fixer
         </Link>
-        <Link href="/guides" className="rgb-btn justify-center">
+        <Link href="/guides" className="rgb-btn justify-center rounded-full px-6 py-3">
           Browse guides
         </Link>
-        <Link href="/" className="rgb-btn justify-center">
+        <Link href="/" className="rgb-btn justify-center rounded-full px-6 py-3">
           Go to the homepage
         </Link>
       </div>
