@@ -383,6 +383,7 @@
     "fmt_etsy_listings": "Etsy Listings",
     "fmt_ebay_listings": "eBay Listings",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "noEquivalent": "(no equivalent in the target format):",
     "linkFixer": "CSV Fixer",
     "linkMerger": "CSV Merger",
@@ -409,7 +410,10 @@
     "passStarting": "Opening checkout…",
     "passError": "Couldn't open checkout. Please try again.",
     "viewPlans": "View plans",
-    "fileRestored": "Your file is loaded again, so you can download it now."
+    "fileRestored": "Your file is loaded again, so you can download it now.",
+    "googleIntro": "A Merchant Center feed needs two things your export doesn't have: your store's address, to link each product to its page, and the currency of your prices.",
+    "storeUrl": "Store address",
+    "currency": "Currency (ISO code)"
   },
   "merge": {
     "title": "CSV Merger & Deduplicator",

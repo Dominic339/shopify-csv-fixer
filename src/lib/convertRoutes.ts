@@ -5,6 +5,8 @@
 //
 // English only for now; the converter UI on these pages is translated.
 
+import type { ConvertOptions } from "@/lib/convertCsv";
+
 export type ConvertRoute = {
   slug: string;
   source: string; // convert format id
@@ -24,6 +26,8 @@ export type ConvertRoute = {
   /** What the converter can't carry over, so nobody is surprised after import. */
   notCarried: string[];
   faqs: { q: string; a: string }[];
+  /** Settings the worked example runs with (a Merchant Center feed needs a store address and currency). */
+  exampleOptions?: ConvertOptions;
 };
 
 /** Small, realistic exports used for the worked example on each page. */
@@ -106,6 +110,11 @@ const importSteps: Record<string, string[]> = {
     "Or use it as a checklist while you create listings in Shop Manager; titles, descriptions, prices, tags and image links are all in one place.",
     "Either way, add a category, shipping profile and any variations in Etsy after the upload; those can't come from another platform's file.",
   ],
+  google_merchant_center: [
+    "Enter your store's address and currency above the converter, so each product gets a link and every price a currency code.",
+    "Run the file through the CSV Fixer with the Google Merchant Center preset to check GTINs, prices and required attributes.",
+    "In Merchant Center, go to Products → Add products → Add products from a file, and upload the .txt file. Google checks it and lists any problems under Products → Needs attention.",
+  ],
   ebay_listings: [
     "Fill in *Category (eBay's numeric category ID) and *ConditionID (1000 for new) for each listing; the converter leaves them blank because other platforms don't use eBay's codes.",
     "Run the file through the CSV Fixer with the eBay preset to check titles, condition IDs and variation rows.",
@@ -148,6 +157,16 @@ const notCarried: Record<string, string[]> = {
     "Products with variants become single Etsy listings at the lowest price with the combined quantity. Add Etsy variations in Shop Manager.",
     "CURRENCY_CODE is left blank because Etsy always uses your shop's currency.",
     "Etsy needs a category, who-made/when-made answers and a shipping profile, which no Shopify file contains.",
+  ],
+  "shopify_products>google_merchant_center": [
+    "Each variant becomes its own item, grouped by item_group_id. Links point to the product page, not a specific variant; Google accepts that, but a ?variant= link shows shoppers the right option.",
+    "Draft, archived and unpublished products are left out, because Google only lists products shoppers can buy.",
+    "condition is set to new for every product and google_product_category is left for Google to choose. Change them where needed.",
+  ],
+  "woocommerce_products>google_merchant_center": [
+    "WooCommerce exports don't include permalinks, so links are built as /product/<slug> from the product name. Check a few, especially if you changed a product's slug or permalink settings.",
+    "WooCommerce has no brand column. Add brand for new products; use your store's name for products you make yourself.",
+    "Each variation becomes its own item, grouped by item_group_id, with size and colour taken from its attributes.",
   ],
   "shopify_products>ebay_listings": [
     "eBay needs a category ID and a condition ID for every listing; the columns are there but empty.",
@@ -236,6 +255,28 @@ const text: Record<string, RouteText> = {
       { q: "How many images are kept?", a: "Up to ten, Etsy's limit, in IMAGE1 to IMAGE10." },
     ],
   },
+  "shopify-to-google-merchant-center": {
+    metaTitle: "Shopify to Google Merchant Center: Product Feed Converter",
+    metaDescription: "Turn a Shopify product export into a Google Merchant Center feed: one item per variant, prices with currency codes, availability, GTINs and image links.",
+    h1: "Make a Google Shopping feed from Shopify",
+    intro: "Upload your Shopify product export and get a tab-delimited Merchant Center file: one item per variant, grouped by product, with links, images, prices in Google's format and stock turned into availability.",
+    faqs: [
+      { q: "Why not use the Google & YouTube app?", a: "The app syncs automatically and is the easiest route for many stores. A file gives you control: you can review every value, fix titles or GTINs in bulk, or feed a second Merchant Center account." },
+      { q: "How are sale prices handled?", a: "When a variant has a compare-at price above its price, the compare-at price becomes price and the current price becomes sale_price, which is how Google shows a discount." },
+      { q: "Which barcodes become GTINs?", a: "Barcodes with 8, 12, 13 or 14 digits and a correct check digit. Others are left out of gtin and counted in a warning, so a wrong barcode never reaches Google." },
+    ],
+  },
+  "woocommerce-to-google-merchant-center": {
+    metaTitle: "WooCommerce to Google Merchant Center: Product Feed Converter",
+    metaDescription: "Convert a WooCommerce product export into a Google Merchant Center feed with variations, sale prices, availability, image links and currency codes.",
+    h1: "Make a Google Shopping feed from WooCommerce",
+    intro: "Upload the CSV from WooCommerce's product exporter and get a Merchant Center file with one item per variation, sale prices, stock status and links to your product pages.",
+    faqs: [
+      { q: "Do I need a feed plugin?", a: "Not for a one-off or occasional upload. Plugins keep the feed in sync automatically; this converter is free, needs no plugin and lets you check every value before Google sees it." },
+      { q: "Where do the links come from?", a: "From your store address plus /product/ and the product's slug, which is WooCommerce's default permalink. If you use a different permalink structure, edit the links before uploading." },
+      { q: "What about products without a brand?", a: "WooCommerce has no brand field, so brand is empty and the converter warns you. Fill it in with the manufacturer's brand, or your own for products you make." },
+    ],
+  },
   "shopify-to-ebay": {
     metaTitle: "Shopify to eBay CSV Converter: Products to File Exchange",
     metaDescription: "Convert your Shopify product export into an eBay listings upload CSV with variations, prices, quantities and pictures. Free and private.",
@@ -255,6 +296,7 @@ const NAMES: Record<string, string> = {
   etsy_listings: "Etsy",
   ebay_listings: "eBay",
   amazon_inventory_loader: "Amazon",
+  google_merchant_center: "Google Merchant Center",
 };
 
 const PRESET: Record<string, { preset: string; landing: string }> = {
@@ -262,6 +304,7 @@ const PRESET: Record<string, { preset: string; landing: string }> = {
   woocommerce_products: { preset: "woocommerce_products", landing: "/woocommerce-csv-fixer" },
   etsy_listings: { preset: "etsy_listings", landing: "/etsy-csv-fixer" },
   ebay_listings: { preset: "ebay_listings", landing: "/ebay-csv-fixer" },
+  google_merchant_center: { preset: "google_merchant_center", landing: "/google-merchant-center-feed-checker" },
 };
 
 const PAIRS: [string, string, string][] = [
@@ -273,7 +316,13 @@ const PAIRS: [string, string, string][] = [
   ["etsy-to-woocommerce", "etsy_listings", "woocommerce_products"],
   ["shopify-to-etsy", "shopify_products", "etsy_listings"],
   ["shopify-to-ebay", "shopify_products", "ebay_listings"],
+  ["shopify-to-google-merchant-center", "shopify_products", "google_merchant_center"],
+  ["woocommerce-to-google-merchant-center", "woocommerce_products", "google_merchant_center"],
 ];
+
+const EXAMPLE_OPTIONS: Record<string, ConvertOptions> = {
+  google_merchant_center: { storeUrl: "https://shop.example.com", currency: "USD" },
+};
 
 export const CONVERT_ROUTES: ConvertRoute[] = PAIRS.map(([slug, source, target]) => ({
   slug,
@@ -287,6 +336,7 @@ export const CONVERT_ROUTES: ConvertRoute[] = PAIRS.map(([slug, source, target])
   importSteps: importSteps[target],
   notCarried: notCarried[`${source}>${target}`],
   ...text[slug],
+  exampleOptions: EXAMPLE_OPTIONS[target],
 }));
 
 export function getConvertRoute(slug: string): ConvertRoute | undefined {

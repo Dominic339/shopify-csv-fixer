@@ -16,6 +16,7 @@ import {
   weightToGrams,
 } from "@/lib/shopifySchema";
 import { canonicalEbayColumn, parseRelationshipDetails } from "@/lib/ebayOptimizer";
+import { checkBarcode } from "@/lib/tools/barcodes";
 
 // ---------------------------------------------------------------------------
 // Product model
@@ -835,7 +836,122 @@ function writeAmazon(products: Product[]): WriteResult {
   return { headers, rows, warnings };
 }
 
-const WRITERS: Record<string, (p: Product[]) => WriteResult> = {
+// ---------------------------------------------------------------------------
+// Google Merchant Center feed
+// ---------------------------------------------------------------------------
+
+/** Settings a Merchant Center feed needs that no store export contains. */
+export type ConvertOptions = {
+  /** The shop's address, like https://shop.example.com, used to build each product's link. */
+  storeUrl?: string;
+  /** ISO 4217 code added to every price, like USD. */
+  currency?: string;
+};
+
+type WriteContext = { source: string; options: ConvertOptions };
+
+/** Where each platform serves a product page, from the product's handle or slug. */
+const PRODUCT_PATH: Record<string, string> = {
+  shopify_products: "/products/",
+  woocommerce_products: "/product/",
+  woocommerce_variable_products: "/product/",
+};
+
+/** "shop.example.com/" → "https://shop.example.com", or "" when it isn't a web address. */
+export function normalizeStoreUrl(raw: string | undefined): string {
+  let v = t(raw);
+  if (!v) return "";
+  if (!/^https?:\/\//i.test(v)) v = `https://${v}`;
+  try {
+    const u = new URL(v);
+    if (!u.hostname.includes(".")) return "";
+    return `${u.protocol}//${u.host}${u.pathname.replace(/\/+$/, "")}`;
+  } catch {
+    return "";
+  }
+}
+
+const GOOGLE_HEADERS = [
+  "id", "item_group_id", "title", "description", "link", "image_link", "additional_image_link",
+  "availability", "price", "sale_price", "brand", "gtin", "mpn", "condition", "product_type",
+  "color", "size", "shipping_weight",
+];
+
+function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
+  const store = normalizeStoreUrl(ctx.options.storeUrl);
+  const currency = t(ctx.options.currency).toUpperCase();
+  const path = PRODUCT_PATH[ctx.source];
+  const rows: CsvRow[] = [];
+  let skippedDrafts = 0;
+  let noImage = 0;
+  let noPrice = 0;
+  let badBarcodes = 0;
+  let noBrand = 0;
+  const usedIds = new Set<string>();
+  const withCurrency = (v: string) => (v && currency ? `${v} ${currency}` : v);
+  const option = (v: Variant, re: RegExp) => v.options.find((o) => re.test(o.name))?.value ?? "";
+
+  for (const p of products) {
+    if (p.status === "draft" || p.status === "archived" || p.published === "false") {
+      skippedDrafts++;
+      continue;
+    }
+    const multi = p.variants.length > 1;
+    const link = store && path ? `${store}${path}${encodeURIComponent(p.key)}` : "";
+    for (const [i, v] of p.variants.entries()) {
+      const images = [...new Set([v.image, ...p.images].filter(Boolean))];
+      if (!images.length) noImage++;
+      const price = parseLocaleNumber(v.price);
+      const compareAt = parseLocaleNumber(v.compareAt);
+      if (price == null) noPrice++;
+      if (!p.vendor) noBrand++;
+      // Google's price is the regular price; a lower current price is the sale price.
+      const onSale = price != null && compareAt != null && compareAt > price;
+      const qty = parseLocaleNumber(v.qty);
+      const availability = v.qty === "" || v.policy === "continue" || (qty != null && qty > 0) ? "in_stock" : "out_of_stock";
+      const code = checkBarcode(v.barcode);
+      const gtin = code.status === "ok" || code.status === "fixed" ? code.value : "";
+      if (v.barcode && !gtin) badBarcodes++;
+      const id = uniqueKey(v.sku || (multi ? `${p.key}-${i + 1}` : p.key), usedIds);
+      rows.push({
+        id,
+        item_group_id: multi ? p.key : "",
+        title: multi && v.options.length ? `${p.title} - ${v.options.map((o) => o.value).join(" / ")}` : p.title,
+        description: htmlToText(p.description || p.title).slice(0, 5000),
+        link,
+        image_link: images[0] ?? "",
+        additional_image_link: images.slice(1, 11).join(","),
+        availability,
+        price: withCurrency(onSale ? formatShopifyMoney(compareAt!) : price != null ? formatShopifyMoney(price) : ""),
+        sale_price: onSale ? withCurrency(formatShopifyMoney(price!)) : "",
+        brand: p.vendor,
+        gtin,
+        mpn: "",
+        condition: "new",
+        product_type: p.category || p.type,
+        color: option(v, /^colou?r$/i),
+        size: option(v, /^size$/i),
+        shipping_weight: v.grams ? `${v.grams} g` : "",
+      });
+    }
+  }
+
+  const warnings: string[] = [];
+  if (!currency) warnings.push("Prices have no currency code. Enter your store's currency, like USD, so every price reads like 19.99 USD.");
+  if (!store) warnings.push("link is blank. Enter your store's address so each product links to its page.");
+  else if (!path) warnings.push("link is blank: this source file doesn't say where each product's page is. Add the product page URLs before uploading.");
+  else warnings.push(`Each link was built as ${store}${path}<handle>. Open a few to check they reach the right product page.`);
+  if (skippedDrafts) warnings.push(`${skippedDrafts} draft or unpublished product(s) were left out, because Google only lists products shoppers can buy.`);
+  if (noImage) warnings.push(`${noImage} item(s) have no image. Google requires image_link for every product.`);
+  if (noPrice) warnings.push(`${noPrice} item(s) have no price. Google requires a price for every product.`);
+  if (noBrand) warnings.push(`${noBrand} item(s) have no brand. Google requires one for new products; use your own brand for products you make.`);
+  if (badBarcodes) warnings.push(`${badBarcodes} barcode(s) aren't valid GTINs and were left out of gtin.`);
+  warnings.push("condition is set to new for every product. Change it to used or refurbished where that applies.");
+  const headers = compact(GOOGLE_HEADERS, rows, ["id", "title", "description", "link", "image_link", "availability", "price", "brand", "condition"]);
+  return { headers, rows: rows.map((r) => Object.fromEntries(headers.map((h) => [h, r[h] ?? ""]))), warnings };
+}
+
+const WRITERS: Record<string, (p: Product[], ctx: WriteContext) => WriteResult> = {
   shopify_products: (p) => writeShopify(p, false),
   shopify_products_legacy: (p) => writeShopify(p, true),
   woocommerce_products: writeWoo,
@@ -843,6 +959,7 @@ const WRITERS: Record<string, (p: Product[]) => WriteResult> = {
   etsy_listings: writeEtsy,
   ebay_listings: writeEbay,
   amazon_inventory_loader: writeAmazon,
+  google_merchant_center: writeGoogle,
 };
 
 // User-facing display names for the converter UI
@@ -854,7 +971,11 @@ export const CONVERT_FORMAT_OPTIONS = [
   { id: "etsy_listings", label: "Etsy Listings" },
   { id: "ebay_listings", label: "eBay Listings" },
   { id: "amazon_inventory_loader", label: "Amazon Inventory Loader" },
+  { id: "google_merchant_center", label: "Google Merchant Center", targetOnly: true },
 ];
+
+/** Formats a file can be converted from (a Merchant Center feed is an output only). */
+export const CONVERT_SOURCE_OPTIONS = CONVERT_FORMAT_OPTIONS.filter((o) => !("targetOnly" in o && o.targetOnly));
 
 // ---------------------------------------------------------------------------
 // Conversion
@@ -876,7 +997,8 @@ export function convertCsv(
   sourceFormatId: string,
   targetFormatId: string,
   /** Rows to convert at most; null converts everything. */
-  limit: number | null = null
+  limit: number | null = null,
+  options: ConvertOptions = {}
 ): ConvertResult {
   const normalizedSourceId = sourceFormatId === "shopify_products_legacy" ? "shopify_products" : sourceFormatId;
   const read = READERS[normalizedSourceId];
@@ -899,7 +1021,7 @@ export function convertCsv(
   const rowsToProcess = truncated ? sourceRows.slice(0, limit) : sourceRows;
 
   const source = read(sourceHeaders, rowsToProcess);
-  const target = write(source.products);
+  const target = write(source.products, { source: normalizedSourceId, options });
   const warnings = [...source.warnings, ...target.warnings];
 
   const unmappedSourceFields = sourceHeaders.filter((h) => !source.consumed.has(h));

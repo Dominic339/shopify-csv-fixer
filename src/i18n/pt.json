@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Anúncios Etsy",
     "fmt_ebay_listings": "Anúncios eBay",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (modelo novo)",
     "fmt_shopify_products_legacy": "Shopify (modelo antigo)",
     "noEquivalent": "(sem equivalente no formato de destino):",
@@ -406,7 +407,10 @@
     "passStarting": "Abrindo o pagamento…",
     "passError": "Não foi possível abrir o pagamento. Tente novamente.",
     "viewPlans": "Ver planos",
-    "fileRestored": "Seu arquivo foi carregado de novo; você já pode baixá-lo."
+    "fileRestored": "Seu arquivo foi carregado de novo; você já pode baixá-lo.",
+    "googleIntro": "Um feed do Merchant Center precisa de duas coisas que sua exportação não tem: o endereço da sua loja, para ligar cada produto à sua página, e a moeda dos seus preços.",
+    "storeUrl": "Endereço da loja",
+    "currency": "Moeda (código ISO)"
   },
   "merge": {
     "title": "Mesclador e desduplicador de CSV",

@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Объявления Etsy",
     "fmt_ebay_listings": "Объявления eBay",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (новый шаблон)",
     "fmt_shopify_products_legacy": "Shopify (старый шаблон)",
     "noEquivalent": "(нет соответствия в целевом формате):",
@@ -406,7 +407,10 @@
     "passStarting": "Открываем оплату…",
     "passError": "Не удалось открыть оплату. Попробуйте ещё раз.",
     "viewPlans": "Посмотреть тарифы",
-    "fileRestored": "Ваш файл снова загружен — теперь его можно скачать."
+    "fileRestored": "Ваш файл снова загружен — теперь его можно скачать.",
+    "googleIntro": "Фиду Merchant Center нужны две вещи, которых нет в экспорте: адрес вашего магазина, чтобы связать каждый товар с его страницей, и валюта цен.",
+    "storeUrl": "Адрес магазина",
+    "currency": "Валюта (код ISO)"
   },
   "merge": {
     "title": "Объединитель и дедупликатор CSV",

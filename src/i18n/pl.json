@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Oferty Etsy",
     "fmt_ebay_listings": "Oferty eBay",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (nowy szablon)",
     "fmt_shopify_products_legacy": "Shopify (stary szablon)",
     "noEquivalent": "(brak odpowiednika w formacie docelowym):",
@@ -406,7 +407,10 @@
     "passStarting": "Otwieranie płatności…",
     "passError": "Nie udało się otworzyć płatności. Spróbuj ponownie.",
     "viewPlans": "Zobacz plany",
-    "fileRestored": "Twój plik został ponownie wczytany, możesz go teraz pobrać."
+    "fileRestored": "Twój plik został ponownie wczytany, możesz go teraz pobrać.",
+    "googleIntro": "Plik danych Merchant Center potrzebuje dwóch rzeczy, których nie ma w eksporcie: adresu sklepu, aby połączyć każdy produkt z jego stroną, oraz waluty cen.",
+    "storeUrl": "Adres sklepu",
+    "currency": "Waluta (kod ISO)"
   },
   "merge": {
     "title": "Scalacz i deduplikator CSV",

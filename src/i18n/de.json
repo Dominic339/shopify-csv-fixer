@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Etsy-Angebote",
     "fmt_ebay_listings": "eBay-Angebote",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (neue Vorlage)",
     "fmt_shopify_products_legacy": "Shopify (alte Vorlage)",
     "noEquivalent": "(keine Entsprechung im Zielformat):",
@@ -406,7 +407,10 @@
     "passStarting": "Bezahlseite wird geöffnet…",
     "passError": "Die Bezahlseite konnte nicht geöffnet werden. Bitte versuche es noch einmal.",
     "viewPlans": "Tarife ansehen",
-    "fileRestored": "Deine Datei ist wieder geladen. Du kannst sie jetzt herunterladen."
+    "fileRestored": "Deine Datei ist wieder geladen. Du kannst sie jetzt herunterladen.",
+    "googleIntro": "Ein Merchant-Center-Feed braucht zwei Dinge, die dein Export nicht enthält: die Adresse deines Shops, um jedes Produkt mit seiner Seite zu verlinken, und die Währung deiner Preise.",
+    "storeUrl": "Shop-Adresse",
+    "currency": "Währung (ISO-Code)"
   },
   "merge": {
     "title": "CSV-Zusammenführer & Deduplizierer",

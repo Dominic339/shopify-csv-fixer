@@ -31,7 +31,7 @@ export function migrateMetadata(route: ConvertRoute): Metadata {
 /** The route's sample export, run through the real converter. */
 function example(route: ConvertRoute) {
   const src = parseCsv(SAMPLE_EXPORTS[route.source]);
-  const out = convertCsv(src.headers, src.rows, route.source, route.target);
+  const out = convertCsv(src.headers, src.rows, route.source, route.target, null, route.exampleOptions);
   const pick = (headers: string[]) => headers.slice(0, MAX_COLS);
   return {
     before: { headers: pick(src.headers), rows: src.rows.slice(0, 4), total: src.headers.length },

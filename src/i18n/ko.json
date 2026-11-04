@@ -382,6 +382,7 @@
     "fmt_etsy_listings": "Etsy 리스팅",
     "fmt_ebay_listings": "eBay 리스팅",
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
+    "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_shopify_products": "Shopify (새 템플릿)",
     "fmt_shopify_products_legacy": "Shopify (이전 템플릿)",
     "noEquivalent": "(대상 형식에 해당 열 없음):",
@@ -406,7 +407,10 @@
     "passStarting": "결제 화면을 여는 중…",
     "passError": "결제 화면을 열 수 없습니다. 다시 시도해 주세요.",
     "viewPlans": "요금제 보기",
-    "fileRestored": "파일을 다시 불러왔습니다. 지금 내려받을 수 있습니다."
+    "fileRestored": "파일을 다시 불러왔습니다. 지금 내려받을 수 있습니다.",
+    "googleIntro": "Merchant Center 피드에는 내보내기 파일에 없는 두 가지가 필요합니다. 각 제품을 페이지에 연결할 스토어 주소와 가격의 통화입니다.",
+    "storeUrl": "스토어 주소",
+    "currency": "통화(ISO 코드)"
   },
   "merge": {
     "title": "CSV 병합 및 중복 제거 도구",
