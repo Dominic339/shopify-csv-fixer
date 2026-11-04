@@ -1,0 +1,105 @@
+---
+title: "Google Merchant Center Feed Errors: Causes and Fixes"
+description: "Fix the product data errors that get products disapproved in Google Merchant Center: missing currency codes, availability values, GTINs, identifiers, images and variants."
+keywords: ["google merchant center feed errors", "merchant center disapproved products", "google shopping feed errors", "fix google product feed", "invalid gtin merchant center", "missing currency code merchant center", "merchant center txt feed"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "Which attributes every product needs, and the format Google expects for each"
+  - "Why prices need a currency code and how to add one in bulk"
+  - "How to fix availability, preorder dates and condition values"
+  - "How GTINs, MPNs and identifier_exists work together"
+  - "How to group variants so Google shows them as one product"
+bestFor: "Store owners uploading a product file to Merchant Center, or checking a feed exported from Shopify, WooCommerce or a feed app"
+timeToComplete: "10 minutes"
+---
+
+## How Merchant Center reads your file
+
+A product file for Merchant Center has one product per line and Google's attribute names in the first row: `id`, `title`, `price` and so on. Google accepts a tab-delimited text file (.txt), and the attribute names are always in English, whatever language your products are in.
+
+After an upload, Google checks every product and lists the problems under **Products → Needs attention**. A problem on one product doesn't stop the others, so a file can be "accepted" while half of it is disapproved. Most disapprovals come from a short list of formatting mistakes, covered below.
+
+These attributes are needed for every product:
+
+| Attribute | Example | Notes |
+|---|---|---|
+| id | MUG-01 | Up to 50 characters, unique, and stable over time |
+| title | Acme Ceramic Coffee Mug, 12 oz | Up to 150 characters |
+| description | Hand-thrown stoneware mug… | Up to 5000 characters |
+| link | https://shop.example.com/products/mug | The product page |
+| image_link | https://shop.example.com/images/mug.jpg | The main image |
+| availability | in_stock | One of Google's four values |
+| price | 18.00 USD | A number and a currency code |
+
+New products also need `brand`, and products with a barcode need `gtin`.
+
+---
+
+## Price without a currency code
+
+**Cause:** The price is a bare number (`18.00`), or uses a `$` sign. Several countries use dollars, so Google can't tell which one you mean.
+
+**Fix:** Write the number with a period for decimals, a space, and the ISO 4217 code: `18.00 USD`, `24.95 CAD`, `19.99 EUR`. Don't use thousand separators: `1299.00 GBP`, not `1,299.00 GBP`.
+
+For discounts, keep the regular price in `price` and put the lower price in `sale_price`. If `sale_price` isn't lower than `price`, Google ignores it.
+
+---
+
+## Availability and preorder dates
+
+**Cause:** `availability` holds a store's own wording, such as `In Stock`, `sold out` or `Available`. Google only accepts four values: `in_stock`, `out_of_stock`, `preorder` and `backorder`.
+
+**Fix:** Replace the values with Google's. For `preorder`, also add `availability_date`, the date the product will ship, in ISO 8601 format: `2026-12-01T09:00-0500`. Google asks for the date on `backorder` too.
+
+`condition` works the same way: only `new`, `used` and `refurbished` are accepted.
+
+---
+
+## GTINs and identifiers
+
+**Cause:** The `gtin` has the wrong number of digits or a wrong check digit. Spreadsheets cause most of these: a 13-digit barcode is shown as `4.00638E+12` and saved that way, and UPCs lose their leading zero.
+
+**Fix:**
+- Format barcode columns as Text before pasting, so the digits are kept
+- Copy barcodes again from the packaging or your supplier if they already show in scientific notation
+- Remove spaces and dashes: `4006381333931`, not `4006-3813-3393-1`
+
+A product with no barcode should have its manufacturer part number in `mpn`. For handmade, custom or vintage items with neither, set `identifier_exists` to `no`. Don't make up a GTIN: Google checks them against the GS1 database.
+
+---
+
+## Images and links
+
+**Cause:** `link` or `image_link` is a relative path such as `mug.jpg`, or the image is behind a login or blocked from crawlers.
+
+**Fix:** Use the full address, starting with `https://`, for the product page and every image. Up to 10 extra images can go in `additional_image_link`, separated by commas. Open a few links in a private browser window to check they load.
+
+---
+
+## Variants: item_group_id
+
+A shirt in three sizes is three products for Google, each with its own `id`, `price` and `availability`. To show them as one product with options, give all three the same `item_group_id`, and fill in the attribute that differs, such as `size` or `color`.
+
+### Example
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+For clothing, Google also asks for `color`, `size`, `gender` and `age_group` in many countries. `gender` takes `male`, `female` or `unisex`, and `age_group` takes `newborn`, `infant`, `toddler`, `kids` or `adult`.
+
+---
+
+## Before you upload
+
+1. Check that every price has a currency code
+2. Check that `availability` and `condition` only use Google's values
+3. Check that every barcode has 8, 12, 13 or 14 digits and none show as `E+12`
+4. Check that links and images start with `https://`
+5. Save as tab-delimited text (.txt)
+
+The [Merchant Center feed checker](/google-merchant-center-feed-checker) does all five in your browser and converts the values it can. Starting from a store export? The [Shopify to Merchant Center converter](/migrate/shopify-to-google-merchant-center) builds the feed for you.

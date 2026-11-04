@@ -1,0 +1,105 @@
+---
+title: "Google Merchant Center フィードのエラー：原因と対処法"
+description: "Google Merchant Center で商品が不承認になる商品データのエラーを修正：通貨コードの欠落、在庫状況、GTIN、識別子、画像、バリエーション。"
+keywords: ["google merchant center フィード エラー", "merchant center 不承認 商品", "google ショッピング フィード エラー", "google 商品フィード 修正", "merchant center gtin 無効", "merchant center 通貨コード", "merchant center txt フィード"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "すべての商品に必要な属性と、Google がそれぞれに求める形式"
+  - "価格に通貨コードが必要な理由と、まとめて追加する方法"
+  - "在庫状況、予約注文の日付、商品の状態の値を直す方法"
+  - "GTIN、MPN、identifier_exists の関係"
+  - "Google が 1 つの商品として表示するようにバリエーションをまとめる方法"
+bestFor: "Merchant Center に商品ファイルをアップロードする方、または Shopify、WooCommerce、フィード アプリから書き出したフィードを確認する方"
+timeToComplete: "10 分"
+---
+
+## Merchant Center はファイルをどう読むか
+
+Merchant Center 用の商品ファイルは 1 行に 1 商品で、1 行目に Google の属性名（`id`、`title`、`price` など）を並べます。Google はタブ区切りのテキストファイル（.txt）を受け付け、属性名は商品の言語にかかわらず常に英語です。
+
+アップロード後、Google はすべての商品をチェックし、問題を **［商品］→［要対応］** に表示します。1 つの商品の問題は他の商品を止めないため、ファイルが「受け付け済み」でも半分の商品が不承認ということがあります。不承認の多くは、以下で説明する少数の形式の誤りが原因です。
+
+すべての商品に次の属性が必要です。
+
+| 属性 | 例 | メモ |
+|---|---|---|
+| id | MUG-01 | 最大 50 文字。一意で、ずっと変えない |
+| title | Acme Ceramic Coffee Mug, 12 oz | 最大 150 文字 |
+| description | Hand-thrown stoneware mug… | 最大 5000 文字 |
+| link | https://shop.example.com/products/mug | 商品ページ |
+| image_link | https://shop.example.com/images/mug.jpg | メイン画像 |
+| availability | in_stock | Google の 4 つの値のいずれか |
+| price | 18.00 USD | 数値と通貨コード |
+
+新品には `brand` も必要で、バーコードのある商品には `gtin` が必要です。
+
+---
+
+## 通貨コードのない価格
+
+**原因**：価格が数値だけ（`18.00`）か、`$` 記号を使っています。ドルを使う国は複数あるため、Google にはどのドルか分かりません。
+
+**対処法**：小数点にピリオドを使った数値、スペース、ISO 4217 コードの順に書きます：`18.00 USD`、`24.95 CAD`、`19.99 EUR`。桁区切りは使わず、`1,299.00 GBP` ではなく `1299.00 GBP` と書きます。
+
+割引の場合は、通常価格を `price` に残し、低い価格を `sale_price` に入れます。`sale_price` が `price` より低くないと、Google は無視します。
+
+---
+
+## 在庫状況と予約注文の日付
+
+**原因**：`availability` に `In Stock`、`sold out`、`Available` などストア独自の表現が入っています。Google が受け付けるのは `in_stock`、`out_of_stock`、`preorder`、`backorder` の 4 つだけです。
+
+**対処法**：値を Google のものに置き換えます。`preorder` の場合は、発送日を表す `availability_date` も ISO 8601 形式で追加します：`2026-12-01T09:00-0500`。Google は `backorder` にも日付を求めます。
+
+`condition` も同じで、受け付けるのは `new`、`used`、`refurbished` だけです。
+
+---
+
+## GTIN と識別子
+
+**原因**：`gtin` の桁数かチェックディジットが間違っています。たいていはスプレッドシートが原因で、13 桁のバーコードが `4.00638E+12` と表示されたまま保存されたり、UPC の先頭の 0 が消えたりします。
+
+**対処法**：
+- 桁が保たれるよう、貼り付ける前にバーコードの列を文字列の書式にする
+- すでに指数表記になっている場合は、パッケージや仕入先からバーコードをコピーし直す
+- スペースとハイフンを取り除く：`4006-3813-3393-1` ではなく `4006381333931`
+
+バーコードのない商品は、メーカー型番を `mpn` に入れます。どちらもない手作り品、オーダーメイド品、ヴィンテージ品は `identifier_exists` を `no` にします。GTIN を作らないでください。Google は GS1 のデータベースと照合します。
+
+---
+
+## 画像とリンク
+
+**原因**：`link` や `image_link` が `mug.jpg` のような相対パスになっているか、画像がログインの先にあったりクローラーをブロックしていたりします。
+
+**対処法**：商品ページとすべての画像に、`https://` で始まる完全なアドレスを使います。`additional_image_link` には、カンマ区切りで最大 10 枚の追加画像を入れられます。いくつかのリンクをシークレット ウィンドウで開き、表示できるか確認してください。
+
+---
+
+## バリエーション：item_group_id
+
+3 サイズあるシャツは、Google にとってそれぞれ独自の `id`、`price`、`availability` を持つ 3 つの商品です。オプション付きの 1 つの商品として表示するには、3 つすべてに同じ `item_group_id` を付け、`size` や `color` など異なる属性を入力します。
+
+### 例
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+衣料品の場合、多くの国で Google は `color`、`size`、`gender`、`age_group` も求めます。`gender` は `male`、`female`、`unisex`、`age_group` は `newborn`、`infant`、`toddler`、`kids`、`adult` のいずれかです。
+
+---
+
+## アップロードの前に
+
+1. すべての価格に通貨コードがあるか確認する
+2. `availability` と `condition` が Google の値だけを使っているか確認する
+3. すべてのバーコードが 8、12、13、14 桁で、`E+12` のような表示がないか確認する
+4. リンクと画像が `https://` で始まっているか確認する
+5. タブ区切りのテキスト（.txt）として保存する
+
+[Merchant Center フィードチェッカー](/google-merchant-center-feed-checker)は、この 5 つをブラウザー内でチェックし、変換できる値は自動で直します。ストアのエクスポートから始めるなら、[Shopify から Merchant Center への変換ツール](/migrate/shopify-to-google-merchant-center)がフィードを作成します。

@@ -1,0 +1,105 @@
+---
+title: "Błędy pliku danych Google Merchant Center: przyczyny i rozwiązania"
+description: "Napraw błędy danych produktów, przez które Google Merchant Center odrzuca produkty: brak kodu waluty, dostępność, numery GTIN, identyfikatory, zdjęcia i warianty."
+keywords: ["błędy pliku danych google merchant center", "odrzucone produkty merchant center", "błędy feedu google shopping", "naprawa pliku produktów google", "nieprawidłowy gtin merchant center", "brak kodu waluty merchant center", "plik txt merchant center"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "Jakich atrybutów potrzebuje każdy produkt i w jakim formacie Google ich oczekuje"
+  - "Dlaczego ceny potrzebują kodu waluty i jak dodać go hurtowo"
+  - "Jak poprawić dostępność, daty przedsprzedaży i wartości stanu"
+  - "Jak współpracują GTIN, MPN i identifier_exists"
+  - "Jak grupować warianty, by Google pokazywał je jako jeden produkt"
+bestFor: "Sprzedawcy, którzy przesyłają plik produktów do Merchant Center albo sprawdzają plik danych wyeksportowany z Shopify, WooCommerce lub aplikacji do plików danych"
+timeToComplete: "10 minut"
+---
+
+## Jak Merchant Center czyta plik
+
+Plik produktów dla Merchant Center ma jeden produkt w wierszu i nazwy atrybutów Google w pierwszym wierszu: `id`, `title`, `price` i tak dalej. Google przyjmuje plik tekstowy rozdzielany tabulatorami (.txt), a nazwy atrybutów są zawsze po angielsku, niezależnie od języka produktów.
+
+Po przesłaniu Google sprawdza każdy produkt i wymienia problemy w **Produkty → Wymaga uwagi**. Problem z jednym produktem nie zatrzymuje pozostałych, więc plik może zostać „zaakceptowany”, choć połowa produktów jest odrzucona. Większość odrzuceń wynika z krótkiej listy błędów formatu, opisanych poniżej.
+
+Każdy produkt potrzebuje tych atrybutów:
+
+| Atrybut | Przykład | Uwagi |
+|---|---|---|
+| id | MUG-01 | Do 50 znaków, unikalny i niezmienny w czasie |
+| title | Acme Ceramic Coffee Mug, 12 oz | Do 150 znaków |
+| description | Hand-thrown stoneware mug… | Do 5000 znaków |
+| link | https://shop.example.com/products/mug | Strona produktu |
+| image_link | https://shop.example.com/images/mug.jpg | Główne zdjęcie |
+| availability | in_stock | Jedna z czterech wartości Google |
+| price | 18.00 USD | Liczba i kod waluty |
+
+Nowe produkty potrzebują też `brand`, a produkty z kodem kreskowym `gtin`.
+
+---
+
+## Cena bez kodu waluty
+
+**Przyczyna:** Cena to sama liczba (`18.00`) albo ma znak `$`. Dolara używa kilka krajów, więc Google nie wie, o który chodzi.
+
+**Rozwiązanie:** Zapisz liczbę z kropką dziesiętną, spację i kod ISO 4217: `18.00 USD`, `24.95 CAD`, `19.99 EUR`. Bez separatorów tysięcy: `1299.00 GBP`, nie `1,299.00 GBP`.
+
+Przy rabatach cena regularna zostaje w `price`, a niższa trafia do `sale_price`. Jeśli `sale_price` nie jest niższa niż `price`, Google ją pomija.
+
+---
+
+## Dostępność i daty przedsprzedaży
+
+**Przyczyna:** `availability` zawiera własne sformułowania sklepu, np. `In Stock`, `sold out` lub `Available`. Google przyjmuje tylko cztery wartości: `in_stock`, `out_of_stock`, `preorder` i `backorder`.
+
+**Rozwiązanie:** Zamień wartości na wartości Google. Przy `preorder` dodaj też `availability_date`, datę wysyłki, w formacie ISO 8601: `2026-12-01T09:00-0500`. Google prosi o datę także przy `backorder`.
+
+Tak samo działa `condition`: akceptowane są tylko `new`, `used` i `refurbished`.
+
+---
+
+## GTIN i identyfikatory
+
+**Przyczyna:** `gtin` ma złą liczbę cyfr lub błędną cyfrę kontrolną. Zwykle winny jest arkusz: 13-cyfrowy kod kreskowy wyświetla się jako `4.00638E+12` i tak zostaje zapisany, a kody UPC tracą zero wiodące.
+
+**Rozwiązanie:**
+- Przed wklejeniem ustaw format Tekst dla kolumn z kodami kreskowymi, aby zachować cyfry
+- Skopiuj kody ponownie z opakowania lub od dostawcy, jeśli już widać je w zapisie naukowym
+- Usuń spacje i myślniki: `4006381333931`, nie `4006-3813-3393-1`
+
+Produkt bez kodu kreskowego powinien mieć numer części producenta w `mpn`. Dla rękodzieła, rzeczy na zamówienie lub vintage bez żadnego z nich ustaw `identifier_exists` na `no`. Nie wymyślaj GTIN: Google sprawdza je w bazie GS1.
+
+---
+
+## Zdjęcia i linki
+
+**Przyczyna:** `link` lub `image_link` to ścieżka względna, np. `mug.jpg`, albo zdjęcie wymaga logowania lub jest zablokowane dla robotów.
+
+**Rozwiązanie:** Używaj pełnego adresu zaczynającego się od `https://` dla strony produktu i każdego zdjęcia. Do 10 dodatkowych zdjęć zmieścisz w `additional_image_link`, rozdzielając je przecinkami. Otwórz kilka linków w oknie prywatnym, aby sprawdzić, czy się ładują.
+
+---
+
+## Warianty: item_group_id
+
+Koszulka w trzech rozmiarach to dla Google trzy produkty, każdy z własnym `id`, `price` i `availability`. Aby pokazać je jako jeden produkt z opcjami, nadaj wszystkim trzem ten sam `item_group_id` i wypełnij atrybut, który się różni, np. `size` lub `color`.
+
+### Przykład
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+Dla odzieży Google w wielu krajach wymaga też `color`, `size`, `gender` i `age_group`. `gender` przyjmuje `male`, `female` lub `unisex`, a `age_group` przyjmuje `newborn`, `infant`, `toddler`, `kids` lub `adult`.
+
+---
+
+## Przed przesłaniem
+
+1. Sprawdź, czy każda cena ma kod waluty
+2. Sprawdź, czy `availability` i `condition` używają tylko wartości Google
+3. Sprawdź, czy każdy kod kreskowy ma 8, 12, 13 lub 14 cyfr i żaden nie wygląda jak `E+12`
+4. Sprawdź, czy linki i zdjęcia zaczynają się od `https://`
+5. Zapisz jako tekst rozdzielany tabulatorami (.txt)
+
+[Walidator pliku danych Merchant Center](/google-merchant-center-feed-checker) wykona wszystkie pięć kontroli w przeglądarce i zamieni wartości, które się da. Zaczynasz od eksportu sklepu? [Konwerter z Shopify do Merchant Center](/migrate/shopify-to-google-merchant-center) przygotuje plik danych za Ciebie.

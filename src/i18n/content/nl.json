@@ -107,6 +107,10 @@
 "woocommerce/woocommerce-product-csv-import-errors": {
 "title": "Importfouten in WooCommerce-product-CSV's: oorzaken en oplossingen",
 "description": "Los de meest voorkomende importfouten in WooCommerce-product-CSV's op: ontbrekende SKU's, ongeldige typen, problemen met variatierijen, prijsnotatie en attribuutkolommen."
+},
+"google/google-merchant-center-feed-errors": {
+"title": "Google Merchant Center-feedfouten: oorzaken en oplossingen",
+"description": "Los de productgegevensfouten op waardoor Google Merchant Center producten afkeurt: ontbrekende valutacodes, beschikbaarheid, GTIN's, ID's, afbeeldingen en varianten."
 }
 },
 "presets": {

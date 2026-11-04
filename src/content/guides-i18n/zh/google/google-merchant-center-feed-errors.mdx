@@ -1,0 +1,105 @@
+---
+title: "Google Merchant Center Feed 错误：原因与解决方法"
+description: "修复导致 Google Merchant Center 拒登商品的商品数据错误：缺少货币代码、库存状态、GTIN、标识符、图片和变体。"
+keywords: ["google merchant center feed 错误", "merchant center 商品被拒登", "google 购物 feed 错误", "修复 google 商品 feed", "merchant center gtin 无效", "merchant center 缺少货币代码", "merchant center txt feed"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "每个商品需要哪些属性，以及 Google 对每个属性的格式要求"
+  - "为什么价格需要货币代码，以及如何批量添加"
+  - "如何修正库存状态、预购日期和商品状况的值"
+  - "GTIN、MPN 和 identifier_exists 如何配合使用"
+  - "如何对变体分组，让 Google 把它们显示为一个商品"
+bestFor: "向 Merchant Center 上传商品文件，或检查从 Shopify、WooCommerce 或 Feed 应用导出的 Feed 的店主"
+timeToComplete: "10 分钟"
+---
+
+## Merchant Center 如何读取你的文件
+
+Merchant Center 的商品文件每行一个商品，第一行是 Google 的属性名称：`id`、`title`、`price` 等。Google 接受制表符分隔的文本文件（.txt），无论商品使用什么语言，属性名称始终是英文。
+
+上传后，Google 会检查每个商品，并在 **商品 → 需要处理** 中列出问题。一个商品的问题不会影响其他商品，所以文件可能显示“已接受”，但一半商品被拒登。大多数拒登都来自下面这几种格式错误。
+
+每个商品都需要以下属性：
+
+| 属性 | 示例 | 说明 |
+|---|---|---|
+| id | MUG-01 | 最多 50 个字符，唯一且长期不变 |
+| title | Acme Ceramic Coffee Mug, 12 oz | 最多 150 个字符 |
+| description | Hand-thrown stoneware mug… | 最多 5000 个字符 |
+| link | https://shop.example.com/products/mug | 商品页面 |
+| image_link | https://shop.example.com/images/mug.jpg | 主图 |
+| availability | in_stock | Google 的四个值之一 |
+| price | 18.00 USD | 数字加货币代码 |
+
+新商品还需要 `brand`，有条形码的商品需要 `gtin`。
+
+---
+
+## 价格缺少货币代码
+
+**原因**：价格只是一个数字（`18.00`），或使用了 `$` 符号。多个国家的货币都用 $ 表示，Google 无法判断你指的是哪一种。
+
+**解决方法**：写成以句点为小数点的数字、一个空格和 ISO 4217 代码：`18.00 USD`、`24.95 CAD`、`19.99 EUR`。不要使用千位分隔符：写 `1299.00 GBP`，而不是 `1,299.00 GBP`。
+
+打折时，把原价留在 `price`，把较低的价格放在 `sale_price`。如果 `sale_price` 不低于 `price`，Google 会忽略它。
+
+---
+
+## 库存状态和预购日期
+
+**原因**：`availability` 用的是店铺自己的说法，例如 `In Stock`、`sold out` 或 `Available`。Google 只接受四个值：`in_stock`、`out_of_stock`、`preorder` 和 `backorder`。
+
+**解决方法**：把这些值换成 Google 的值。对于 `preorder`，还要按 ISO 8601 格式添加发货日期 `availability_date`：`2026-12-01T09:00-0500`。Google 对 `backorder` 也要求提供日期。
+
+`condition` 也一样：只接受 `new`、`used` 和 `refurbished`。
+
+---
+
+## GTIN 和标识符
+
+**原因**：`gtin` 的位数不对或校验位错误。大多是电子表格造成的：13 位条形码显示为 `4.00638E+12` 并按此保存，UPC 也会丢掉前导零。
+
+**解决方法**：
+- 粘贴前把条形码列设为文本格式，以保留所有数字
+- 如果已经显示为科学计数法，请从包装或供应商处重新复制条形码
+- 删除空格和连字符：写 `4006381333931`，而不是 `4006-3813-3393-1`
+
+没有条形码的商品应在 `mpn` 中填写制造商部件号。对于两者都没有的手工、定制或古着商品，把 `identifier_exists` 设为 `no`。不要编造 GTIN：Google 会与 GS1 数据库核对。
+
+---
+
+## 图片和链接
+
+**原因**：`link` 或 `image_link` 是 `mug.jpg` 这样的相对路径，或者图片需要登录才能访问、屏蔽了爬虫。
+
+**解决方法**：商品页面和每张图片都使用以 `https://` 开头的完整地址。`additional_image_link` 中最多可以放 10 张附加图片，用逗号分隔。在无痕窗口中打开几个链接，确认能正常加载。
+
+---
+
+## 变体：item_group_id
+
+一件有三个尺码的衬衫，对 Google 来说是三个商品，每个都有自己的 `id`、`price` 和 `availability`。要把它们显示为一个带选项的商品，请给三个商品设置相同的 `item_group_id`，并填写不同的属性，例如 `size` 或 `color`。
+
+### 示例
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+对于服装，Google 在许多国家/地区还要求 `color`、`size`、`gender` 和 `age_group`。`gender` 可取 `male`、`female` 或 `unisex`，`age_group` 可取 `newborn`、`infant`、`toddler`、`kids` 或 `adult`。
+
+---
+
+## 上传之前
+
+1. 检查每个价格都有货币代码
+2. 检查 `availability` 和 `condition` 只使用 Google 的值
+3. 检查每个条形码都是 8、12、13 或 14 位，没有显示成 `E+12` 的
+4. 检查链接和图片都以 `https://` 开头
+5. 另存为制表符分隔的文本（.txt）
+
+[Merchant Center Feed 检查工具](/google-merchant-center-feed-checker)会在浏览器中完成这五项检查，并转换能转换的值。从店铺导出文件开始？[Shopify 到 Merchant Center 转换工具](/migrate/shopify-to-google-merchant-center)会为你生成 Feed。

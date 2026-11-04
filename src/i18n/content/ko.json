@@ -107,6 +107,10 @@
 "woocommerce/woocommerce-product-csv-import-errors": {
 "title": "WooCommerce 상품 CSV 가져오기 오류: 원인과 해결 방법",
 "description": "WooCommerce 상품 CSV에서 가장 흔한 가져오기 오류를 해결하세요. SKU 누락, 잘못된 유형, 변형 행 문제, 가격 형식, 속성 열을 다룹니다."
+},
+"google/google-merchant-center-feed-errors": {
+"title": "Google Merchant Center 피드 오류: 원인과 해결 방법",
+"description": "Google Merchant Center에서 제품이 비승인되는 제품 데이터 오류를 고치세요: 통화 코드 누락, 재고 상태, GTIN, 식별자, 이미지, 옵션."
 }
 },
 "presets": {

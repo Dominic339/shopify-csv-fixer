@@ -107,6 +107,10 @@
 "woocommerce/woocommerce-product-csv-import-errors": {
 "title": "WooCommerce 商品 CSV のインポートエラー：原因と対処法",
 "description": "WooCommerce の商品 CSV でよくあるインポートエラーを解決します。SKU の欠落、無効なタイプ、バリエーション行の問題、価格の書式、属性の列を扱います。"
+},
+"google/google-merchant-center-feed-errors": {
+"title": "Google Merchant Center フィードのエラー：原因と対処法",
+"description": "Google Merchant Center で商品が不承認になる商品データのエラーを修正：通貨コードの欠落、在庫状況、GTIN、識別子、画像、バリエーション。"
 }
 },
 "presets": {

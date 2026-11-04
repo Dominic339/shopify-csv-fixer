@@ -1,0 +1,105 @@
+---
+title: "Google Merchant Center 피드 오류: 원인과 해결 방법"
+description: "Google Merchant Center에서 제품이 비승인되는 제품 데이터 오류를 고치세요: 통화 코드 누락, 재고 상태, GTIN, 식별자, 이미지, 옵션."
+keywords: ["google merchant center 피드 오류", "merchant center 비승인 제품", "google 쇼핑 피드 오류", "google 제품 피드 수정", "merchant center gtin 오류", "merchant center 통화 코드 누락", "merchant center txt 피드"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "모든 제품에 필요한 속성과 Google이 각 속성에 기대하는 형식"
+  - "가격에 통화 코드가 필요한 이유와 한꺼번에 추가하는 방법"
+  - "재고 상태, 예약 주문 날짜, 제품 상태 값을 고치는 방법"
+  - "GTIN, MPN, identifier_exists가 함께 작동하는 방식"
+  - "Google이 하나의 제품으로 보여 주도록 옵션을 묶는 방법"
+bestFor: "Merchant Center에 제품 파일을 업로드하거나 Shopify, WooCommerce, 피드 앱에서 내보낸 피드를 확인하는 판매자"
+timeToComplete: "10분"
+---
+
+## Merchant Center가 파일을 읽는 방식
+
+Merchant Center용 제품 파일은 한 줄에 제품 하나이고, 첫 행에 Google 속성 이름(`id`, `title`, `price` 등)이 있습니다. Google은 탭으로 구분된 텍스트 파일(.txt)을 받으며, 속성 이름은 제품의 언어와 상관없이 항상 영어입니다.
+
+업로드하면 Google이 모든 제품을 확인하고 문제를 **제품 → 조치 필요**에 표시합니다. 한 제품의 문제가 다른 제품을 막지 않기 때문에, 파일은 "승인됨"인데 제품의 절반이 비승인될 수도 있습니다. 비승인은 대부분 아래에 설명한 몇 가지 형식 오류에서 생깁니다.
+
+모든 제품에 다음 속성이 필요합니다.
+
+| 속성 | 예시 | 참고 |
+|---|---|---|
+| id | MUG-01 | 최대 50자, 고유하고 계속 유지되는 값 |
+| title | Acme Ceramic Coffee Mug, 12 oz | 최대 150자 |
+| description | Hand-thrown stoneware mug… | 최대 5000자 |
+| link | https://shop.example.com/products/mug | 제품 페이지 |
+| image_link | https://shop.example.com/images/mug.jpg | 기본 이미지 |
+| availability | in_stock | Google의 네 가지 값 중 하나 |
+| price | 18.00 USD | 숫자와 통화 코드 |
+
+새 제품에는 `brand`도 필요하고, 바코드가 있는 제품에는 `gtin`이 필요합니다.
+
+---
+
+## 통화 코드 없는 가격
+
+**원인**: 가격이 숫자만 있거나(`18.00`) `$` 기호를 씁니다. 달러를 쓰는 나라가 여럿이라 Google은 어느 달러인지 알 수 없습니다.
+
+**해결**: 소수점을 마침표로 쓴 숫자, 공백, ISO 4217 코드 순으로 쓰세요: `18.00 USD`, `24.95 CAD`, `19.99 EUR`. 천 단위 구분 기호는 쓰지 마세요. `1,299.00 GBP`가 아니라 `1299.00 GBP`입니다.
+
+할인할 때는 정상가를 `price`에 두고 더 낮은 가격을 `sale_price`에 넣으세요. `sale_price`가 `price`보다 낮지 않으면 Google은 무시합니다.
+
+---
+
+## 재고 상태와 예약 주문 날짜
+
+**원인**: `availability`에 `In Stock`, `sold out`, `Available`처럼 스토어 고유의 표현이 들어 있습니다. Google은 `in_stock`, `out_of_stock`, `preorder`, `backorder` 네 가지 값만 받습니다.
+
+**해결**: 값을 Google의 값으로 바꾸세요. `preorder`라면 배송일인 `availability_date`도 ISO 8601 형식으로 추가하세요: `2026-12-01T09:00-0500`. Google은 `backorder`에도 날짜를 요구합니다.
+
+`condition`도 같습니다. `new`, `used`, `refurbished`만 허용됩니다.
+
+---
+
+## GTIN과 식별자
+
+**원인**: `gtin`의 자릿수나 검사 숫자가 틀렸습니다. 대개 스프레드시트 때문입니다. 13자리 바코드가 `4.00638E+12`로 표시된 채 저장되고, UPC는 앞자리 0을 잃습니다.
+
+**해결**:
+- 숫자가 유지되도록 붙여넣기 전에 바코드 열을 텍스트 서식으로 지정하세요
+- 이미 지수 표기로 보인다면 포장이나 공급업체에서 바코드를 다시 복사하세요
+- 공백과 하이픈을 지우세요: `4006-3813-3393-1`이 아니라 `4006381333931`
+
+바코드가 없는 제품은 제조업체 부품 번호를 `mpn`에 넣으세요. 둘 다 없는 수제품, 맞춤 제품, 빈티지 제품은 `identifier_exists`를 `no`로 설정하세요. GTIN을 지어내지 마세요. Google은 GS1 데이터베이스와 대조합니다.
+
+---
+
+## 이미지와 링크
+
+**원인**: `link`나 `image_link`가 `mug.jpg` 같은 상대 경로이거나, 이미지가 로그인 뒤에 있거나 크롤러를 차단합니다.
+
+**해결**: 제품 페이지와 모든 이미지에 `https://`로 시작하는 전체 주소를 쓰세요. `additional_image_link`에는 쉼표로 구분해 추가 이미지를 최대 10개까지 넣을 수 있습니다. 링크 몇 개를 시크릿 창에서 열어 잘 열리는지 확인하세요.
+
+---
+
+## 옵션: item_group_id
+
+사이즈가 세 가지인 셔츠는 Google에게 각자 `id`, `price`, `availability`가 있는 세 개의 제품입니다. 옵션이 있는 하나의 제품으로 보여 주려면 세 제품 모두에 같은 `item_group_id`를 주고, `size`나 `color`처럼 달라지는 속성을 채우세요.
+
+### 예시
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+의류의 경우 많은 나라에서 Google은 `color`, `size`, `gender`, `age_group`도 요구합니다. `gender`는 `male`, `female`, `unisex`, `age_group`은 `newborn`, `infant`, `toddler`, `kids`, `adult` 중 하나입니다.
+
+---
+
+## 업로드하기 전에
+
+1. 모든 가격에 통화 코드가 있는지 확인하세요
+2. `availability`와 `condition`이 Google의 값만 쓰는지 확인하세요
+3. 모든 바코드가 8, 12, 13, 14자리이고 `E+12`처럼 보이는 것이 없는지 확인하세요
+4. 링크와 이미지가 `https://`로 시작하는지 확인하세요
+5. 탭으로 구분된 텍스트(.txt)로 저장하세요
+
+[Merchant Center 피드 검사기](/google-merchant-center-feed-checker)가 브라우저에서 다섯 가지를 모두 확인하고 바꿀 수 있는 값은 변환합니다. 스토어 내보내기 파일로 시작하나요? [Shopify에서 Merchant Center로 변환하는 도구](/migrate/shopify-to-google-merchant-center)가 피드를 만들어 줍니다.

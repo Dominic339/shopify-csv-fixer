@@ -107,6 +107,10 @@
 "woocommerce/woocommerce-product-csv-import-errors": {
 "title": "Błędy importu CSV produktów WooCommerce: przyczyny i rozwiązania",
 "description": "Napraw najczęstsze błędy importu CSV produktów WooCommerce: brakujące SKU, nieprawidłowe typy, problemy z wierszami wariantów, format cen i kolumny atrybutów."
+},
+"google/google-merchant-center-feed-errors": {
+"title": "Błędy pliku danych Google Merchant Center: przyczyny i rozwiązania",
+"description": "Napraw błędy danych produktów, przez które Google Merchant Center odrzuca produkty: brak kodu waluty, dostępność, numery GTIN, identyfikatory, zdjęcia i warianty."
 }
 },
 "presets": {
