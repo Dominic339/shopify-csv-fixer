@@ -336,7 +336,9 @@
     "name_ebay_listings": "eBay İlanları",
     "desc_ebay_listings": "Yaygın eBay ilan CSV sorunlarını düzeltin: eksik kimlikler, geçersiz değerler, bozuk URL'ler ve tutarsız fiyat veya miktar alanları.",
     "name_ebay_variations": "eBay Varyasyonları",
-    "desc_ebay_variations": "eBay varyasyonlu ilan CSV'lerini doğrulayın: varyasyon özelliklerinin eşleşmesi, yinelenen kombinasyonlar, fiyat ve miktar alanları."
+    "desc_ebay_variations": "eBay varyasyonlu ilan CSV'lerini doğrulayın: varyasyon özelliklerinin eşleşmesi, yinelenen kombinasyonlar, fiyat ve miktar alanları.",
+    "name_google_merchant_center": "Google Merchant Center Feed'i",
+    "desc_google_merchant_center": "Google Merchant Center ürün dosyanızı yüklemeden önce kontrol edin: zorunlu özellikler, para birimli fiyatlar, stok durumu, GTIN'ler ve tanımlayıcılar."
   },
   "convert": {
     "title": "CSV format dönüştürücü",

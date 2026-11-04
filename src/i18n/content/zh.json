@@ -312,6 +312,45 @@
 "a": "DEFAULT 表示由您自己发货。AMAZON_NA、AMAZON_EU、AMAZON_FE 或 AMAZON_IN 表示在该地区由亚马逊配送（FBA）。"
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center 根据商品数据文件在购物广告和免费商品详情中展示你的商品：每行一个商品，标题行使用 Google 的属性名称。此预设按照 Google 的商品数据规范检查每个商品，并保留你的列名不变。",
+"它会找出导致商品被拒登的问题：缺少必填属性、价格没有货币代码、Google 不接受的库存状态值、没有日期的预购、重复的 id，以及校验位错误的 GTIN。"
+],
+"howItWorks": [
+"上传商品文件（制表符分隔的 .txt 或 .tsv，或 Feed 的 CSV 导出）。",
+"检查每个商品的 id、title、description、link、image_link、availability 和 price。",
+"“In Stock”、“New”、“19,99 EUR”和 TRUE 等值会转换为 Google 的格式。",
+"用校验位检查 GTIN，并标出重复的 id。",
+"下载保留原始列、可直接上传的制表符分隔 .txt 文件。"
+],
+"commonFixes": [
+"将 availability 转换为 in_stock、out_of_stock、preorder 或 backorder",
+"将价格写成带句点和货币代码的 19.99 USD",
+"将 condition 转换为 new、used 或 refurbished",
+"清理 GTIN，并补回经校验位证实的前导零",
+"将 identifier_exists、adult 和 is_bundle 转换为 yes 或 no",
+"删除会破坏文件的制表符和换行符"
+],
+"faq": [
+{
+"q": "Merchant Center 接受什么文件格式？",
+"a": "制表符分隔的文本文件（.txt），第一行是 Google 的属性名称，每行一个商品。修复工具就以这种格式下载。"
+},
+{
+"q": "价格应该怎么写？",
+"a": "写成以句点为小数点的数字，后跟 ISO 4217 货币代码，例如 15.00 USD。只写 $ 符号不够，因为多种货币都使用它。"
+},
+{
+"q": "如果商品没有条形码怎么办？",
+"a": "改为填写制造商部件号（mpn）。对于两者都没有的手工或定制商品，将 identifier_exists 设为 no。"
+},
+{
+"q": "哪些属性是必填的？",
+"a": "每个商品都需要 id、title、description、link、image_link、availability 和 price，新商品还需要 brand，服装还需要 color、size、gender 和 age_group 等。"
+}
+]
 }
 }
 }

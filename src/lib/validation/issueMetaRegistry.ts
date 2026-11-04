@@ -6,6 +6,7 @@ import { WOOCOMMERCE_ISSUE_META } from "./issueMetaWooCommerce";
 import { ETSY_ISSUE_META } from "./issueMetaEtsy";
 import { EBAY_ISSUE_META } from "./issueMetaEbay";
 import { AMAZON_ISSUE_META } from "./issueMetaAmazon";
+import { GOOGLE_ISSUE_META } from "./issueMetaGoogle";
 
 // Keyed by formatId (must match preset formatId like "shopify_products")
 export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
@@ -16,6 +17,7 @@ export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
   ebay_listings: EBAY_ISSUE_META,
   ebay_variations: EBAY_ISSUE_META,
   amazon_inventory_loader: AMAZON_ISSUE_META,
+  google_merchant_center: GOOGLE_ISSUE_META,
 };
 
 export function getIssueMeta(formatId: string | undefined, code: string | undefined): IssueMeta | null {

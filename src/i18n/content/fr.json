@@ -312,6 +312,45 @@
 "a": "DEFAULT signifie que vous expédiez vous-même la commande. AMAZON_NA, AMAZON_EU, AMAZON_FE ou AMAZON_IN signifie Expédié par Amazon dans cette région."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center affiche vos produits dans les annonces Shopping et les fiches gratuites à partir d'un fichier de données produits : un produit par ligne, avec les noms d'attributs de Google dans la ligne d'en-tête. Ce modèle vérifie chaque produit selon les spécifications des données produits de Google et conserve vos noms de colonnes.",
+"Il repère les problèmes qui font refuser les produits : attributs obligatoires manquants, prix sans code de devise, valeurs de disponibilité que Google n'accepte pas, précommandes sans date, id en double et GTIN avec une clé de contrôle erronée."
+],
+"howItWorks": [
+"Importez votre fichier produits (.txt ou .tsv délimité par des tabulations, ou un export CSV de votre flux).",
+"Chaque produit est vérifié pour id, title, description, link, image_link, availability et price.",
+"Les valeurs comme « In Stock », « New », « 19,99 EUR » et TRUE sont converties au format de Google.",
+"Les GTIN sont contrôlés avec leur clé de contrôle, et les id en double sont signalés.",
+"Téléchargez un fichier .txt délimité par des tabulations avec vos colonnes d'origine, prêt à importer."
+],
+"commonFixes": [
+"Convertir availability en in_stock, out_of_stock, preorder ou backorder",
+"Écrire les prix sous la forme 19.99 USD, avec un point et un code de devise",
+"Convertir condition en new, used ou refurbished",
+"Nettoyer les GTIN et rétablir un zéro initial prouvé par la clé de contrôle",
+"Convertir identifier_exists, adult et is_bundle en yes ou no",
+"Supprimer les tabulations et sauts de ligne qui cassent le fichier"
+],
+"faq": [
+{
+"q": "Quel format de fichier Merchant Center accepte-t-il ?",
+"a": "Un fichier texte délimité par des tabulations (.txt), avec les noms d'attributs de Google dans la première ligne et un produit par ligne. Le correcteur télécharge ce format."
+},
+{
+"q": "Comment écrire les prix ?",
+"a": "Sous forme de nombre avec un point comme séparateur décimal, suivi du code de devise ISO 4217, par exemple 15.00 USD. Le signe $ seul ne suffit pas, car plusieurs devises l'utilisent."
+},
+{
+"q": "Et si mon produit n'a pas de code-barres ?",
+"a": "Indiquez plutôt la référence fabricant (mpn). Pour les produits faits main ou personnalisés qui n'ont ni l'un ni l'autre, réglez identifier_exists sur no."
+},
+{
+"q": "Quels attributs sont obligatoires ?",
+"a": "id, title, description, link, image_link, availability et price pour chaque produit, plus brand pour les produits neufs et d'autres pour l'habillement, comme color, size, gender et age_group."
+}
+]
 }
 }
 }

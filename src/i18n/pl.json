@@ -336,7 +336,9 @@
     "name_ebay_listings": "Oferty eBay",
     "desc_ebay_listings": "Napraw typowe problemy w plikach CSV ofert eBay: brakujące ID, nieprawidłowe wartości, uszkodzone adresy URL i niespójne ceny lub ilości.",
     "name_ebay_variations": "Warianty eBay",
-    "desc_ebay_variations": "Sprawdzaj pliki CSV ofert eBay z wariantami: parowanie cech wariantów, zduplikowane kombinacje, pola ceny i ilości."
+    "desc_ebay_variations": "Sprawdzaj pliki CSV ofert eBay z wariantami: parowanie cech wariantów, zduplikowane kombinacje, pola ceny i ilości.",
+    "name_google_merchant_center": "Plik danych Google Merchant Center",
+    "desc_google_merchant_center": "Sprawdź plik produktów Google Merchant Center przed przesłaniem: wymagane atrybuty, ceny z walutą, dostępność, numery GTIN i identyfikatory."
   },
   "convert": {
     "title": "Konwerter formatu CSV",

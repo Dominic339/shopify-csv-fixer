@@ -312,6 +312,45 @@
 "a": "DEFAULT significa que você mesmo envia o pedido. AMAZON_NA, AMAZON_EU, AMAZON_FE ou AMAZON_IN significa Logística da Amazon (FBA) nessa região."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"O Google Merchant Center exibe seus produtos nos anúncios do Shopping e nas listagens gratuitas a partir de um arquivo de dados de produtos: um produto por linha, com os nomes de atributo do Google na linha de cabeçalho. Este modelo confere cada produto pela especificação de dados de produtos do Google e mantém os nomes das suas colunas.",
+"Ele encontra os problemas que levam à reprovação de produtos: atributos obrigatórios ausentes, preços sem código de moeda, valores de disponibilidade que o Google não aceita, pré-vendas sem data, ids duplicados e GTINs com dígito verificador errado."
+],
+"howItWorks": [
+"Envie seu arquivo de produtos (.txt ou .tsv delimitado por tabulação, ou uma exportação CSV do seu feed).",
+"Cada produto é conferido quanto a id, title, description, link, image_link, availability e price.",
+"Valores como \"In Stock\", \"New\", \"19,99 EUR\" e TRUE são convertidos para o formato do Google.",
+"Os GTINs são conferidos pelo dígito verificador, e ids duplicados são sinalizados.",
+"Baixe um arquivo .txt delimitado por tabulação com suas colunas originais, pronto para enviar."
+],
+"commonFixes": [
+"Converter availability para in_stock, out_of_stock, preorder ou backorder",
+"Escrever preços como 19.99 USD, com ponto e código de moeda",
+"Converter condition para new, used ou refurbished",
+"Limpar GTINs e restaurar um zero à esquerda comprovado pelo dígito verificador",
+"Converter identifier_exists, adult e is_bundle para yes ou no",
+"Remover tabulações e quebras de linha que estragam o arquivo"
+],
+"faq": [
+{
+"q": "Que formato de arquivo o Merchant Center aceita?",
+"a": "Um arquivo de texto delimitado por tabulação (.txt), com os nomes de atributo do Google na primeira linha e um produto por linha. O corretor baixa esse formato."
+},
+{
+"q": "Como os preços devem ser escritos?",
+"a": "Como um número com ponto decimal, seguido do código de moeda ISO 4217, como 15.00 USD. Só o sinal $ não basta, porque várias moedas o usam."
+},
+{
+"q": "E se meu produto não tiver código de barras?",
+"a": "Informe o código do fabricante (mpn). Para produtos artesanais ou personalizados sem nenhum dos dois, defina identifier_exists como no."
+},
+{
+"q": "Quais atributos são obrigatórios?",
+"a": "id, title, description, link, image_link, availability e price em todos os produtos, além de brand para produtos novos e outros para vestuário, como color, size, gender e age_group."
+}
+]
 }
 }
 }

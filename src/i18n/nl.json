@@ -336,7 +336,9 @@
     "name_ebay_listings": "eBay-advertenties",
     "desc_ebay_listings": "Los veelvoorkomende problemen in eBay-advertentie-CSV's op: ontbrekende ID's, ongeldige waarden, kapotte URL's en inconsistente prijzen of aantallen.",
     "name_ebay_variations": "eBay-variaties",
-    "desc_ebay_variations": "Controleer eBay-advertentie-CSV's met variaties: koppeling van variatiekenmerken, dubbele combinaties, prijs- en aantalvelden."
+    "desc_ebay_variations": "Controleer eBay-advertentie-CSV's met variaties: koppeling van variatiekenmerken, dubbele combinaties, prijs- en aantalvelden.",
+    "name_google_merchant_center": "Google Merchant Center-feed",
+    "desc_google_merchant_center": "Controleer een productbestand voor Google Merchant Center voordat je het uploadt: verplichte kenmerken, prijzen met valuta, beschikbaarheid, GTIN's en ID's."
   },
   "convert": {
     "title": "CSV-formaatconverter",

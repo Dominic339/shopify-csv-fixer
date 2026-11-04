@@ -336,7 +336,9 @@
     "name_ebay_listings": "eBay出品",
     "desc_ebay_listings": "eBay出品CSVのよくある問題を修正:IDの欠落、無効な値、壊れたURL、一貫しない価格や数量。",
     "name_ebay_variations": "eBayバリエーション",
-    "desc_ebay_variations": "eBayのバリエーション出品CSVを検証:バリエーション仕様の対応、重複した組み合わせ、価格と数量の項目。"
+    "desc_ebay_variations": "eBayのバリエーション出品CSVを検証:バリエーション仕様の対応、重複した組み合わせ、価格と数量の項目。",
+    "name_google_merchant_center": "Google Merchant Center フィード",
+    "desc_google_merchant_center": "Google Merchant Center の商品ファイルをアップロード前にチェック：必須属性、通貨付きの価格、在庫状況、GTIN、識別子。"
   },
   "convert": {
     "title": "CSV形式コンバーター",

@@ -312,6 +312,45 @@
 "a": "DEFAULT betekent dat je de bestelling zelf verzendt. AMAZON_NA, AMAZON_EU, AMAZON_FE of AMAZON_IN betekent Fulfillment by Amazon in die regio."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center toont je producten in Shopping-advertenties en gratis vermeldingen op basis van een productgegevensbestand: één product per regel, met de kenmerknamen van Google in de kopregel. Deze preset controleert elk product aan de hand van Googles specificatie voor productgegevens en laat je kolomnamen ongemoeid.",
+"Hij vindt de problemen waardoor producten worden afgekeurd: ontbrekende verplichte kenmerken, prijzen zonder valutacode, beschikbaarheidswaarden die Google niet accepteert, pre-orders zonder datum, dubbele id's en GTIN's met een fout controlecijfer."
+],
+"howItWorks": [
+"Upload je productbestand (tab-gescheiden .txt of .tsv, of een CSV-export van je feed).",
+"Elk product wordt gecontroleerd op id, title, description, link, image_link, availability en price.",
+"Waarden als \"In Stock\", \"New\", \"19,99 EUR\" en TRUE worden omgezet naar het formaat van Google.",
+"GTIN's worden gecontroleerd met hun controlecijfer, en dubbele id's worden gemarkeerd.",
+"Download een tab-gescheiden .txt-bestand met je oorspronkelijke kolommen, klaar om te uploaden."
+],
+"commonFixes": [
+"availability omzetten naar in_stock, out_of_stock, preorder of backorder",
+"Prijzen schrijven als 19.99 USD, met een punt en een valutacode",
+"condition omzetten naar new, used of refurbished",
+"GTIN's opschonen en een voorloopnul herstellen die het controlecijfer bewijst",
+"identifier_exists, adult en is_bundle omzetten naar yes of no",
+"Tabs en regeleinden verwijderen die het bestand breken"
+],
+"faq": [
+{
+"q": "Welk bestandsformaat accepteert Merchant Center?",
+"a": "Een tab-gescheiden tekstbestand (.txt), met de kenmerknamen van Google in de eerste regel en één product per regel. De fixer downloadt dat formaat."
+},
+{
+"q": "Hoe moeten prijzen worden geschreven?",
+"a": "Als getal met een punt als decimaalteken, gevolgd door de ISO 4217-valutacode, zoals 15.00 USD. Alleen een $-teken is niet genoeg, omdat meerdere valuta's het gebruiken."
+},
+{
+"q": "Wat als mijn product geen streepjescode heeft?",
+"a": "Geef dan het onderdeelnummer van de fabrikant (mpn). Voor handgemaakte of maatwerkproducten zonder beide zet je identifier_exists op no."
+},
+{
+"q": "Welke kenmerken zijn verplicht?",
+"a": "id, title, description, link, image_link, availability en price voor elk product, plus brand voor nieuwe producten en meer voor kleding, zoals color, size, gender en age_group."
+}
+]
 }
 }
 }

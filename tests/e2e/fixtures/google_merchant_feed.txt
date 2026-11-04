@@ -1,0 +1,3 @@
+id	title	description	link	image_link	availability	price	brand	gtin	condition
+SKU-1	Blue Mug	A blue ceramic mug	https://example.com/p/1	https://example.com/i/1.jpg	In Stock	19,99 EUR	Acme	4006381333931	New
+SKU-2	Red Mug	A red ceramic mug	https://example.com/p/2	https://example.com/i/2.jpg	out of stock	12.00 USD	Acme		used

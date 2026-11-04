@@ -312,6 +312,45 @@
 "a": "DEFAULT oznacza, że sam wysyłasz zamówienie. AMAZON_NA, AMAZON_EU, AMAZON_FE lub AMAZON_IN oznacza realizację przez Amazon (FBA) w danym regionie."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center pokazuje Twoje produkty w reklamach produktowych i bezpłatnych informacjach o produktach na podstawie pliku danych produktów: jeden produkt w wierszu, z nazwami atrybutów Google w wierszu nagłówka. Ten szablon sprawdza każdy produkt według specyfikacji danych produktów Google i zachowuje nazwy Twoich kolumn.",
+"Wykrywa problemy, przez które produkty są odrzucane: brak wymaganych atrybutów, ceny bez kodu waluty, wartości dostępności, których Google nie akceptuje, przedsprzedaż bez daty, zduplikowane id i numery GTIN z błędną cyfrą kontrolną."
+],
+"howItWorks": [
+"Prześlij plik produktów (.txt lub .tsv rozdzielany tabulatorami albo eksport CSV pliku danych).",
+"Każdy produkt jest sprawdzany pod kątem id, title, description, link, image_link, availability i price.",
+"Wartości takie jak „In Stock”, „New”, „19,99 EUR” i TRUE są zamieniane na format Google.",
+"Numery GTIN są sprawdzane cyfrą kontrolną, a zduplikowane id są oznaczane.",
+"Pobierz plik .txt rozdzielany tabulatorami z oryginalnymi kolumnami, gotowy do przesłania."
+],
+"commonFixes": [
+"Zamiana availability na in_stock, out_of_stock, preorder lub backorder",
+"Zapis cen jako 19.99 USD, z kropką i kodem waluty",
+"Zamiana condition na new, used lub refurbished",
+"Czyszczenie numerów GTIN i przywracanie zera wiodącego potwierdzonego cyfrą kontrolną",
+"Zamiana identifier_exists, adult i is_bundle na yes lub no",
+"Usuwanie tabulatorów i podziałów wiersza, które psują plik"
+],
+"faq": [
+{
+"q": "Jaki format pliku akceptuje Merchant Center?",
+"a": "Plik tekstowy rozdzielany tabulatorami (.txt), z nazwami atrybutów Google w pierwszym wierszu i jednym produktem w każdym wierszu. Narzędzie pobiera właśnie ten format."
+},
+{
+"q": "Jak zapisywać ceny?",
+"a": "Jako liczbę z kropką dziesiętną, a po niej kod waluty ISO 4217, np. 15.00 USD. Sam znak $ nie wystarcza, bo używa go kilka walut."
+},
+{
+"q": "Co, jeśli mój produkt nie ma kodu kreskowego?",
+"a": "Podaj zamiast tego numer części producenta (mpn). Dla produktów rękodzielniczych lub na zamówienie bez żadnego z nich ustaw identifier_exists na no."
+},
+{
+"q": "Które atrybuty są wymagane?",
+"a": "id, title, description, link, image_link, availability i price dla każdego produktu, a także brand dla nowych produktów i kolejne dla odzieży, np. color, size, gender i age_group."
+}
+]
 }
 }
 }

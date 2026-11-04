@@ -65,6 +65,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     description:
       "Validate eBay variation listing CSVs: variation specifics pairing, duplicate variation combos, price and quantity fields.",
   },
+  {
+    id: "google_merchant_center",
+    formatId: "google_merchant_center",
+    name: "Google Merchant Center Feed",
+    category: "Ecommerce",
+    description:
+      "Check a Google Shopping product feed before upload: required attributes, prices with a currency code, availability, GTINs and identifiers.",
+  },
 ];
 
 export function getPresetFormats() {

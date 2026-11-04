@@ -312,6 +312,45 @@
 "a": "DEFAULT は注文を自分で出荷することを意味します。AMAZON_NA、AMAZON_EU、AMAZON_FE、AMAZON_IN は、その地域でのフルフィルメント by Amazon（FBA）を意味します。"
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center は、商品データファイルをもとにショッピング広告や無料リスティングに商品を表示します。1 行に 1 商品、ヘッダー行には Google の属性名を使います。このプリセットは Google の商品データ仕様に沿って各商品をチェックし、列名はそのまま残します。",
+"商品が不承認になる原因を見つけます：必須属性の欠落、通貨コードのない価格、Google が受け付けない在庫状況の値、日付のない予約注文、重複した id、チェックディジットが誤った GTIN。"
+],
+"howItWorks": [
+"商品ファイル（タブ区切りの .txt / .tsv、またはフィードの CSV エクスポート）をアップロードします。",
+"各商品の id、title、description、link、image_link、availability、price をチェックします。",
+"「In Stock」「New」「19,99 EUR」TRUE などの値を Google の形式に変換します。",
+"GTIN をチェックディジットで確認し、重複した id を指摘します。",
+"元の列のまま、アップロードできるタブ区切りの .txt ファイルをダウンロードします。"
+],
+"commonFixes": [
+"availability を in_stock、out_of_stock、preorder、backorder に変換",
+"価格をピリオドと通貨コード付きの 19.99 USD 形式で記述",
+"condition を new、used、refurbished に変換",
+"GTIN を整え、チェックディジットで確認できる先頭の 0 を復元",
+"identifier_exists、adult、is_bundle を yes または no に変換",
+"ファイルを壊すタブと改行を除去"
+],
+"faq": [
+{
+"q": "Merchant Center はどのファイル形式に対応していますか？",
+"a": "タブ区切りのテキストファイル（.txt）です。1 行目に Google の属性名、各行に 1 商品を記載します。修正ツールはこの形式でダウンロードします。"
+},
+{
+"q": "価格はどう書けばよいですか？",
+"a": "小数点にピリオドを使った数値の後に ISO 4217 の通貨コードを付けます（例：15.00 USD）。$ 記号だけでは不十分です。複数の通貨で使われるためです。"
+},
+{
+"q": "商品にバーコードがない場合は？",
+"a": "代わりにメーカー型番（mpn）を入力してください。どちらもない手作り品やオーダーメイド品は、identifier_exists を no にします。"
+},
+{
+"q": "必須の属性はどれですか？",
+"a": "すべての商品に id、title、description、link、image_link、availability、price が必要です。さらに新品には brand、アパレルには color、size、gender、age_group なども必要です。"
+}
+]
 }
 }
 }

@@ -22,6 +22,7 @@ export const MESSAGE_SOURCES = [
   "src/lib/etsyOptimizer.ts",
   "src/lib/ebayOptimizer.ts",
   "src/lib/amazonOptimizer.ts",
+  "src/lib/googleMerchantOptimizer.ts",
   "src/lib/formats/engine.ts",
   "src/lib/formats/customUser.ts",
   "src/lib/convertCsv.ts",
@@ -32,6 +33,8 @@ export const MESSAGE_SOURCES = [
 const MESSAGE_PROPS = new Set(["message", "suggestion"]);
 const MESSAGE_CALLS = new Set(["push", "unshift"]);
 const MESSAGE_ARRAYS = /^(fixesApplied|fixes|warnings|notes|fixLog|log)$/;
+/** Local helpers that take a message and suggestion as positional arguments: name -> argument indexes. */
+const MESSAGE_HELPERS: Record<string, number[]> = { flag: [3, 4] };
 
 const MAX_VARIANTS = 16;
 
@@ -92,6 +95,9 @@ function isMessageArg(node: ts.Node): boolean {
   }
   if (ts.isCallExpression(parent) && parent.arguments.includes(node as ts.Expression)) {
     const callee = parent.expression;
+    if (ts.isIdentifier(callee) && MESSAGE_HELPERS[callee.text]) {
+      return MESSAGE_HELPERS[callee.text].includes(parent.arguments.indexOf(node as ts.Expression));
+    }
     if (ts.isPropertyAccessExpression(callee) && MESSAGE_CALLS.has(callee.name.text)) {
       return MESSAGE_ARRAYS.test(callee.expression.getText().replace(/^.*\./, ""));
     }

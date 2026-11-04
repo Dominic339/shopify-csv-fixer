@@ -336,7 +336,9 @@
     "name_ebay_listings": "eBay 리스팅",
     "desc_ebay_listings": "eBay 리스팅 CSV의 흔한 문제 수정: 누락된 ID, 잘못된 값, 깨진 URL, 일관되지 않은 가격이나 수량.",
     "name_ebay_variations": "eBay 변형",
-    "desc_ebay_variations": "eBay 변형 리스팅 CSV 검증: 변형 사양 짝, 중복된 조합, 가격과 수량 필드."
+    "desc_ebay_variations": "eBay 변형 리스팅 CSV 검증: 변형 사양 짝, 중복된 조합, 가격과 수량 필드.",
+    "name_google_merchant_center": "Google Merchant Center 피드",
+    "desc_google_merchant_center": "Google Merchant Center 제품 파일을 업로드하기 전에 확인하세요: 필수 속성, 통화가 포함된 가격, 재고 상태, GTIN 및 식별자."
   },
   "convert": {
     "title": "CSV 형식 변환기",

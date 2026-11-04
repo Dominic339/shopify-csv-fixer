@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import { test, expect } from "@playwright/test";
 
@@ -10,7 +11,7 @@ test("app page loads, accepts CSV upload, shows issues table and Export button",
 
   // 3. Upload the minimal fixture CSV via the hidden file input.
   const csvPath = path.join(__dirname, "fixtures", "shopify_minimal.csv");
-  const fileInput = page.locator('input[type="file"][accept=".csv,text/csv"]');
+  const fileInput = page.getByTestId("fixer-file-input");
   await fileInput.setInputFiles(csvPath);
 
   // 4. Wait for the issues table to appear (the app renders a table after parsing).
@@ -37,7 +38,7 @@ test("simulate import (in Advanced checks) shows PASS/FAIL card and turns off cl
   // Upload the clean Shopify fixture (no blocking issues → should show PASS)
   await page.goto("/app?preset=shopify_products");
   const csvPath = path.join(__dirname, "fixtures", "shopify_minimal.csv");
-  await page.locator('input[type="file"][accept=".csv,text/csv"]').setInputFiles(csvPath);
+  await page.getByTestId("fixer-file-input").setInputFiles(csvPath);
   await expect(page.locator("table")).toBeVisible({ timeout: 10_000 });
 
   // 1. Open "Advanced checks", then click "Simulate Import" — card should appear with PASS
@@ -216,4 +217,16 @@ test("locale-prefixed /de/presets lists preset cards with locale-aware detail li
   // The first detail link href should start with /de/presets/
   const firstHref = await detailLinks.first().getAttribute("href");
   expect(firstHref).toMatch(/^\/de\/presets\//);
+});
+
+test("Google Merchant Center: a tab-delimited .txt feed uploads, is fixed and exports as .txt", async ({ page }) => {
+  await page.goto("/app?preset=google_merchant_center");
+  await expect(page.getByRole("radio", { name: "Google Merchant Center Feed" })).toHaveAttribute("aria-checked", "true");
+  await page.getByTestId("fixer-file-input").setInputFiles(path.join(__dirname, "fixtures", "google_merchant_feed.txt"));
+  await expect(page.locator("table")).toBeVisible({ timeout: 10_000 });
+
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: /export/i }).first().click()]);
+  expect(download.suggestedFilename()).toMatch(/\.txt$/);
+  const text = fs.readFileSync(await download.path(), "utf8");
+  expect(text.split("\r\n")[1].split("\t")).toEqual(expect.arrayContaining(["in_stock", "19.99 EUR", "new"]));
 });

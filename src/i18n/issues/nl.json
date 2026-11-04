@@ -874,5 +874,125 @@
 "explanation": "De product-id heeft niet de juiste lengte of tekens voor het type.",
 "whyPlatformCares": "Amazon koppelt aanbiedingen aan producten via deze ID; een verkeerde ID veroorzaakt fouten of koppelt de aanbieding aan het verkeerde product.",
 "howToFix": "Controleer de barcode of ASIN: UPC heeft 12 cijfers, EAN 13, ISBN 10 of 13, en ASIN 10 letters en cijfers."
+},
+"google/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "De kolom van een attribuut dat Google voor elk product vereist ontbreekt: id, title, description, link, image_link, availability of price.",
+"whyPlatformCares": "Merchant Center kan geen product tonen zonder deze attributen, dus elk product in het bestand wordt afgekeurd.",
+"howToFix": "Voeg de ontbrekende kolom toe aan de koprij, gespeld zoals Google het attribuut noemt (bijvoorbeeld image_link), en vul hem voor elk product."
+},
+"google/missing_value": {
+"title": "Verplicht attribuut is leeg",
+"explanation": "Een verplicht attribuut (id, title, description, link, image_link, availability of price) is leeg in deze rij.",
+"whyPlatformCares": "Producten zonder verplicht attribuut worden afgekeurd en verschijnen niet in Shopping-advertenties of gratis vermeldingen.",
+"howToFix": "Vul de waarde in. Moet het product niet vermeld worden, verwijder de rij dan in plaats van hem half leeg te laten."
+},
+"google/duplicate_id": {
+"title": "Dubbele id",
+"explanation": "Twee of meer rijen gebruiken dezelfde id.",
+"whyPlatformCares": "Google herkent elk product aan zijn id. Bij duplicaten overschrijft de ene rij de andere en kunnen gegevens van het verkeerde product verschijnen.",
+"howToFix": "Geef elk product en elke variant een eigen id. De SKU gebruiken is het eenvoudigst."
+},
+"google/id_too_long": {
+"title": "id langer dan 50 tekens",
+"explanation": "Google staat tot 50 tekens toe in id.",
+"whyPlatformCares": "Een te lange id wordt geweigerd en het product kan niet worden toegevoegd.",
+"howToFix": "Gebruik een kortere id, zoals de SKU. Wijzig ids niet meer zodra producten live zijn, want een wijziging zet de geschiedenis van het product terug."
+},
+"google/title_too_long": {
+"title": "Titel langer dan 150 tekens",
+"explanation": "Google staat tot 150 tekens toe in title.",
+"whyPlatformCares": "Tekst boven de limiet wordt afgekapt, en kopers zien meestal alleen de eerste 70 tekens of zo.",
+"howToFix": "Zet de belangrijkste gegevens vooraan (merk, product, kleur, maat) en kort de rest in."
+},
+"google/description_too_long": {
+"title": "Beschrijving langer dan 5000 tekens",
+"explanation": "Google staat tot 5000 tekens toe in description.",
+"whyPlatformCares": "Tekst boven de limiet wordt afgekapt, waardoor details kunnen wegvallen waar kopers op letten.",
+"howToFix": "Beperk de beschrijving tot de feiten over het product; laat verzending en winkelinformatie weg."
+},
+"google/invalid_url": {
+"title": "Ongeldige link of afbeeldings-URL",
+"explanation": "link, image_link of additional_image_link is geen volledig webadres dat begint met http:// of https://.",
+"whyPlatformCares": "Google moet de productpagina en de afbeelding laden. Een relatieve of kapotte URL zorgt dat het product wordt afgekeurd.",
+"howToFix": "Gebruik het volledige adres, met https:// en je domein, voor de productpagina en elke afbeelding."
+},
+"google/too_many_images": {
+"title": "Meer dan 10 extra afbeeldingen",
+"explanation": "additional_image_link bevat meer dan 10 URL's.",
+"whyPlatformCares": "Google gebruikt tot 10 extra afbeeldingen en negeert de rest.",
+"howToFix": "Houd de 10 nuttigste extra afbeeldingen over, gescheiden door komma's."
+},
+"google/invalid_availability": {
+"title": "Ongeldige waarde voor availability",
+"explanation": "availability moet in_stock, out_of_stock, preorder of backorder zijn.",
+"whyPlatformCares": "Google accepteert alleen eigen waarden. Al het andere zorgt dat het product wordt afgekeurd.",
+"howToFix": "Gebruik een van de vier waarden. Gangbare vormen als 'In Stock' of 'pre-order' worden automatisch omgezet."
+},
+"google/missing_availability_date": {
+"title": "Voorbestelling of nalevering zonder datum",
+"explanation": "availability is preorder of backorder, maar availability_date is leeg.",
+"whyPlatformCares": "Google vereist de verzenddatum van voorbestellingen en vraagt die ook bij naleveringen.",
+"howToFix": "Voeg availability_date toe in ISO 8601-formaat, zoals 2026-12-01T09:00-0500, tot een jaar vooruit."
+},
+"google/price_missing_currency": {
+"title": "Prijs zonder valutacode",
+"explanation": "De prijs heeft een getal maar geen valutacode, of alleen een $-teken, dat meerdere valuta gebruiken.",
+"whyPlatformCares": "Google heeft de ISO 4217-valutacode (USD, CAD, EUR ...) nodig om de juiste prijs te tonen.",
+"howToFix": "Schrijf de prijs als getal gevolgd door de code, zoals 19.99 USD. Symbolen van één valuta, zoals € of £, worden automatisch omgezet."
+},
+"google/invalid_price": {
+"title": "Ongeldige prijs",
+"explanation": "price is geen getal met valutacode, of is 0.",
+"whyPlatformCares": "Producten zonder geldige prijs of met prijs 0 worden afgekeurd.",
+"howToFix": "Gebruik een punt als decimaalteken en voeg de valutacode toe, zoals 19.99 USD. Prijzen als 19,99 EUR worden automatisch omgezet."
+},
+"google/invalid_sale_price": {
+"title": "Ongeldige actieprijs",
+"explanation": "sale_price is geen geldige prijs of is niet lager dan price.",
+"whyPlatformCares": "Google toont een aanbieding alleen als sale_price geldig is en onder de normale prijs ligt; anders wordt hij genegeerd.",
+"howToFix": "Zet de normale prijs in price en de lagere actieprijs in sale_price, allebei met valutacode."
+},
+"google/invalid_condition": {
+"title": "Ongeldige waarde voor condition",
+"explanation": "condition moet new, used of refurbished zijn.",
+"whyPlatformCares": "Google weigert andere waarden. condition is verplicht bij gebruikte en gereviseerde producten.",
+"howToFix": "Gebruik new, used of refurbished. Waarden met hoofdletters en 'renewed' worden automatisch omgezet."
+},
+"google/missing_brand": {
+"title": "Merk ontbreekt",
+"explanation": "Een nieuw product heeft geen merk (brand).",
+"whyPlatformCares": "Google vereist een merk voor nieuwe producten, behalve boeken, muziek en films. Zonder merk kunnen producten beperkt of afgekeurd worden.",
+"howToFix": "Voeg de merknaam van de fabrikant toe. Gebruik voor je eigen producten het merk van je winkel."
+},
+"google/invalid_gtin": {
+"title": "Ongeldige GTIN",
+"explanation": "De gtin heeft geen 8, 12, 13 of 14 cijfers met een juist controlecijfer, of een spreadsheet heeft hem in wetenschappelijke notatie gezet.",
+"whyPlatformCares": "Google controleert elke GTIN volgens de GS1-regels. Foute GTIN's zorgen dat producten worden afgekeurd of aan het verkeerde artikel worden gekoppeld.",
+"howToFix": "Neem de barcode over van de verpakking of je leverancier. Spaties, streepjes en een aantoonbaar ontbrekende voorloopnul worden automatisch hersteld."
+},
+"google/missing_identifiers": {
+"title": "Geen GTIN of MPN",
+"explanation": "Een nieuw product heeft geen gtin en geen mpn, en identifier_exists staat niet op no.",
+"whyPlatformCares": "Google gebruikt kenmerken om producten te koppelen. Merkproducten zonder kenmerken kunnen beperkt worden.",
+"howToFix": "Voeg de GTIN (barcode) of het artikelnummer van de fabrikant toe. Heeft het product echt geen van beide, zoals handgemaakte of maatwerkartikelen, zet identifier_exists dan op no."
+},
+"google/invalid_yes_no": {
+"title": "Ongeldige ja/nee-waarde",
+"explanation": "identifier_exists, adult of is_bundle moet yes of no zijn.",
+"whyPlatformCares": "Andere waarden worden genegeerd, en Google gebruikt de standaardwaarde van het attribuut.",
+"howToFix": "Gebruik yes of no. TRUE/FALSE, Y/N en 1/0 worden automatisch omgezet."
+},
+"google/invalid_gender": {
+"title": "Ongeldige waarde voor gender",
+"explanation": "gender moet male, female of unisex zijn.",
+"whyPlatformCares": "In veel landen is gender verplicht bij kleding, en andere waarden worden niet geaccepteerd.",
+"howToFix": "Gebruik male, female of unisex. Waarden als 'Men' of 'Women's' worden automatisch omgezet."
+},
+"google/invalid_age_group": {
+"title": "Ongeldige waarde voor age_group",
+"explanation": "age_group moet newborn, infant, toddler, kids of adult zijn.",
+"whyPlatformCares": "In veel landen is age_group verplicht bij kleding, en andere waarden worden niet geaccepteerd.",
+"howToFix": "Gebruik een van de vijf waarden van Google. 'Adults' en 'children' worden automatisch omgezet."
 }
 }
