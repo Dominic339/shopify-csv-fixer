@@ -14,6 +14,7 @@ import { ResultsPanel, formatPassTime } from "./fixer/ResultsPanel";
 import { IssuesPanel } from "./fixer/IssuesPanel";
 import { WorkspaceBar } from "./fixer/WorkspaceBar";
 import { muted } from "./fixer/ui";
+import { GlowHeader } from "@/components/ui/Decor";
 
 export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; presetNames: Record<string, string> }) {
   const t = tApp;
@@ -27,9 +28,9 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
   return (
     <>
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-        <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
+        <GlowHeader><header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-[var(--text)] sm:text-3xl">{t.title}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">{t.title}</h1>
             <p className={`mt-2 text-base ${muted}`}>{t.subtitle}</p>
           </div>
           <div className="shrink-0 self-start rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm">
@@ -52,7 +53,7 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
               </>
             )}
           </div>
-        </header>
+        </header></GlowHeader>
 
         {f.errorBanner ? (
           <div role="alert" className="mb-6 flex items-start justify-between gap-4 rounded-2xl border border-red-300 bg-red-50 px-5 py-4 text-base text-red-800 dark:border-red-900/50 dark:bg-red-900/15 dark:text-red-200">
