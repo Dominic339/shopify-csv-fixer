@@ -226,5 +226,41 @@
   "title": "Korektor dla Amazon Inventory Loader",
   "intro": "Inventory Loader dodaje lub aktualizuje oferty produktów, które już są na Amazon. To krótki plik, ale opiera się na kodach i identyfikatorach, które arkusze kalkulacyjne uwielbiają psuć. Korektor zamienia kody i wyłapuje szkody.",
   "exportTip": "Seller Central → Katalog → Dodaj produkty przez przesłanie → Pobierz plik magazynowy (Inventory Loader)."
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "Ceny potrzebują kodu waluty",
+    "body": "Google chce 19.99 USD, a nie $19.99 ani 19,99. Symbole jednej waluty, takie jak € i £, są zamieniane; sam $ jest oznaczany, bo używają go dolary amerykańskie, kanadyjskie i australijskie."
+   },
+   {
+    "title": "Tylko wartości Google",
+    "body": "availability musi mieć wartość in_stock, out_of_stock, preorder lub backorder, a condition new, used lub refurbished. Popularne zapisy, takie jak „In Stock” czy „pre-order”, są poprawiane automatycznie."
+   },
+   {
+    "title": "Kody kreskowe sprawdzane cyfra po cyfrze",
+    "body": "Cyfra kontrolna każdego GTIN jest przeliczana. Spacje i myślniki są usuwane, zero wiodące usunięte przez arkusz jest przywracane, gdy dowodzi tego cyfra kontrolna, a liczby w zapisie naukowym są oznaczane."
+   }
+  ],
+  "faq": [
+   {
+    "q": "W jakim formacie pobiera się plik?",
+    "a": "Jako plik .txt rozdzielany tabulatorami z oryginalnymi nazwami kolumn, czyli tak, jak Merchant Center oczekuje dla przesyłanych plików danych. Możesz przesłać plik .txt, .tsv lub .csv."
+   },
+   {
+    "q": "Czy sprawdza atrybuty odzieży?",
+    "a": "Sprawdza wartości gender i age_group i zamienia popularne zapisy. Nie wymaga jeszcze color i size, więc przy odzieży sprawdź je sam."
+   },
+   {
+    "q": "Czy odwiedza moje strony produktów lub zdjęcia?",
+    "a": "Nie. Wszystko działa w Twojej przeglądarce i nic nie jest wysyłane. Linki i zdjęcia są sprawdzane pod kątem pełnych adresów https://, ale Google i tak je odwiedza, więc upewnij się, że się ładują."
+   }
+  ],
+  "metaTitle": "Walidator pliku danych Google Merchant Center | Napraw błędy | StriveFormats",
+  "metaDescription": "Sprawdź plik danych produktów Google Merchant Center przed przesłaniem. Dostępność, stan i ceny są zamieniane na format Google; brakujące waluty, błędne GTIN i przedsprzedaż bez daty są oznaczane.",
+  "kicker": "Google Merchant Center",
+  "title": "Walidator pliku danych Google Merchant Center",
+  "intro": "Merchant Center odrzuca produkty przez drobiazgi: cenę bez kodu waluty, „In Stock” zamiast in_stock, kod kreskowy zaokrąglony przez arkusz. Sprawdź tu plik produktów przed przesłaniem i napraw większość jednym kliknięciem.",
+  "exportTip": "Wyeksportuj plik danych produktów ze sklepu lub aplikacji do plików danych albo zacznij od szablonu. W Merchant Center dodaj poprawiony plik w Produkty → Dodaj produkty z pliku."
  }
 }

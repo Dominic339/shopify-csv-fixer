@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSV-Import-Anleitungen",
-    "description": "Schritt-für-Schritt-Anleitungen zur Behebung von CSV-Importfehlern bei Shopify, WooCommerce, Etsy, eBay und Amazon.",
+    "description": "Schritt-für-Schritt-Anleitungen zur Behebung von CSV-Importfehlern bei Shopify, WooCommerce, Etsy, eBay, Amazon und Google Merchant Center.",
     "browseByPlatform": "Nach Plattform durchsuchen",
     "featuredGuides": "Empfohlene Anleitungen",
     "searchResults": "Suchergebnisse",
@@ -137,7 +137,7 @@
       "tags": "Tags",
       "shipping": "Versand"
     },
-    "hubIntro": "CSV-Importfehler für Shopify, WooCommerce, Etsy, eBay und Amazon beheben. Nach Plattform stöbern oder nach einem bestimmten Problem suchen.",
+    "hubIntro": "CSV-Importfehler für Shopify, WooCommerce, Etsy, eBay, Amazon und Google Merchant Center beheben. Nach Plattform stöbern oder nach einem bestimmten Problem suchen.",
     "resultsFor": "{count} Ergebnisse für „{q}“",
     "resultFor": "1 Ergebnis für „{q}“",
     "platformTitle": "{platform}-CSV-Importanleitungen",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Shopify- und E-Commerce-CSV-Importfehler beheben",
-    "description": "Repariere Produkt-CSVs für Shopify, WooCommerce, Etsy, eBay und Amazon im Browser. Sichere Korrekturen laufen automatisch, riskante werden nach Zeile und Zelle markiert. Kostenlos, ohne Anmeldung.",
+    "description": "Repariere Produkt-CSVs für Shopify, WooCommerce, Etsy, eBay, Amazon und Google Merchant Center im Browser. Sichere Korrekturen laufen automatisch, riskante werden nach Zeile und Zelle markiert. Kostenlos, ohne Anmeldung.",
     "browseTemplates": "Vorlagen durchsuchen",
     "openCustomFormats": "Benutzerdefinierte Formate öffnen",
     "csvFixerLabel": "CSV-Reparatur",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "CSV-Vorlagen",
-    "description": "E-Commerce-CSV-Vorlagen für Shopify, WooCommerce, Etsy, Amazon und eBay durchsuchen. Spalten vorschauen, Beispiele herunterladen und den Reparateur mit einer vorausgewählten Vorlage öffnen.",
+    "description": "E-Commerce-CSV-Vorlagen für Shopify, WooCommerce, Etsy, Amazon, eBay und Google Merchant Center durchsuchen. Spalten vorschauen, Beispiele herunterladen und den Reparateur mit einer vorausgewählten Vorlage öffnen.",
     "expectedColumns": "Erwartete Spalten",
     "exampleRow": "Beispielzeile",
     "noColumns": "Dieses Format gibt noch keine feste Spaltenliste an.",
@@ -805,7 +805,7 @@
     "close": "Schließen",
     "syncingBilling": "Abrechnungsdaten werden synchronisiert…",
     "billingError": "Die Abrechnung ist gerade nicht erreichbar. Bitte versuche es in einer Minute erneut.",
-    "allPlansFormats": "Alle Pläne enthalten alle integrierten Formate: Shopify, WooCommerce, Etsy, eBay und Amazon.",
+    "allPlansFormats": "Alle Pläne enthalten alle integrierten Formate: Shopify, WooCommerce, Etsy, eBay, Amazon und Google Merchant Center.",
     "pass": "24-Stunden-Pass",
     "oneTime": "einmalig",
     "passBullet1": "24 Stunden unbegrenzt exportieren",

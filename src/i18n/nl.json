@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSV-importhanleidingen",
-    "description": "Stap-voor-stap handleidingen voor het oplossen van CSV-importfouten bij Shopify, WooCommerce, Etsy, eBay en Amazon.",
+    "description": "Stap-voor-stap handleidingen voor het oplossen van CSV-importfouten bij Shopify, WooCommerce, Etsy, eBay, Amazon en Google Merchant Center.",
     "browseByPlatform": "Bladeren per platform",
     "featuredGuides": "Uitgelichte handleidingen",
     "searchResults": "Zoekresultaten",
@@ -137,7 +137,7 @@
       "tags": "Tags",
       "shipping": "Verzending"
     },
-    "hubIntro": "Los CSV-importfouten op voor Shopify, WooCommerce, Etsy, eBay en Amazon. Blader per platform of zoek een specifiek probleem.",
+    "hubIntro": "Los CSV-importfouten op voor Shopify, WooCommerce, Etsy, eBay, Amazon en Google Merchant Center. Blader per platform of zoek een specifiek probleem.",
     "resultsFor": "{count} resultaten voor ‘{q}’",
     "resultFor": "1 resultaat voor ‘{q}’",
     "platformTitle": "{platform} CSV-importgidsen",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Los importfouten in Shopify- en e-commerce-CSV's op",
-    "description": "Repareer product-CSV's voor Shopify, WooCommerce, Etsy, eBay en Amazon in je browser. Veilige correcties gaan automatisch, riskante worden per rij en cel aangewezen. Gratis, zonder account.",
+    "description": "Repareer product-CSV's voor Shopify, WooCommerce, Etsy, eBay, Amazon en Google Merchant Center in je browser. Veilige correcties gaan automatisch, riskante worden per rij en cel aangewezen. Gratis, zonder account.",
     "browseTemplates": "Sjablonen bekijken",
     "openCustomFormats": "Aangepaste formaten openen",
     "csvFixerLabel": "CSV-reparateur",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "CSV-sjablonen",
-    "description": "Blader door e-commerce CSV-sjablonen voor Shopify, WooCommerce, Etsy, Amazon en eBay. Bekijk kolommen, download voorbeelden en open de reparateur met een vooringesteld sjabloon.",
+    "description": "Blader door e-commerce CSV-sjablonen voor Shopify, WooCommerce, Etsy, Amazon, eBay en Google Merchant Center. Bekijk kolommen, download voorbeelden en open de reparateur met een vooringesteld sjabloon.",
     "expectedColumns": "Verwachte kolommen",
     "exampleRow": "Voorbeeldrij",
     "noColumns": "Dit formaat geeft nog geen vaste kolomlijst weer.",
@@ -805,7 +805,7 @@
     "close": "Sluiten",
     "syncingBilling": "Factureringsgegevens synchroniseren…",
     "billingError": "De facturatie is nu niet bereikbaar. Probeer het over een minuut opnieuw.",
-    "allPlansFormats": "Alle abonnementen bevatten alle ingebouwde formaten: Shopify, WooCommerce, Etsy, eBay en Amazon.",
+    "allPlansFormats": "Alle abonnementen bevatten alle ingebouwde formaten: Shopify, WooCommerce, Etsy, eBay, Amazon en Google Merchant Center.",
     "pass": "Pas van 24 uur",
     "oneTime": "eenmalig",
     "passBullet1": "24 uur onbeperkt exporteren",

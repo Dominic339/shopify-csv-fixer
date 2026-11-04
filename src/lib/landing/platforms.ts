@@ -11,7 +11,8 @@ export type LandingSlug =
   | "etsy"
   | "ebay"
   | "ebay-variations"
-  | "amazon";
+  | "amazon"
+  | "google";
 
 export type PlatformLanding = {
   slug: LandingSlug;
@@ -321,5 +322,50 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
       },
     ],
     related: ["ebay", "shopify", "woocommerce"],
+  },
+
+  google: {
+    slug: "google",
+    path: "/google-merchant-center-feed-checker",
+    presetId: "google_merchant_center",
+    guidePlatform: "google",
+    accent: { text: "text-blue-700 dark:text-blue-400", soft: "bg-blue-500/10", border: "border-blue-500/30" },
+    metaTitle: "Google Merchant Center Feed Checker | Fix Product Feed Errors | StriveFormats",
+    metaDescription:
+      "Check a Google Merchant Center product feed before you upload it. Availability, condition and prices are converted to Google's format; missing currencies, bad GTINs and preorders without dates are flagged.",
+    kicker: "Google Merchant Center",
+    title: "Google Merchant Center Feed Checker",
+    intro:
+      "Merchant Center disapproves products for small things: a price without a currency code, \"In Stock\" instead of in_stock, a barcode a spreadsheet rounded off. Check your product file here before you upload it, and fix most of it in one click.",
+    exportTip: "Export the product feed from your store or feed app, or start from the template. In Merchant Center, add the fixed file under Products → Add products from a file.",
+    gotchas: [
+      {
+        title: "Prices need a currency code",
+        body: "Google wants 19.99 USD, not $19.99 or 19,99. Symbols that name one currency, like € and £, are converted; a bare $ is flagged, because US, Canadian and Australian dollars all use it.",
+      },
+      {
+        title: "Google's own words only",
+        body: "availability must be in_stock, out_of_stock, preorder or backorder, and condition new, used or refurbished. Common spellings like \"In Stock\" or \"pre-order\" are rewritten automatically.",
+      },
+      {
+        title: "Barcodes are checked digit by digit",
+        body: "Every GTIN's check digit is recalculated. Spaces and dashes are removed, a leading zero the spreadsheet dropped is restored when the check digit proves it, and numbers in scientific notation are flagged.",
+      },
+    ],
+    faq: [
+      {
+        q: "Which file format does it download?",
+        a: "A tab-delimited .txt file with your original column names, which is what Merchant Center expects for uploaded feeds. You can upload a .txt, .tsv or .csv file.",
+      },
+      {
+        q: "Does it check apparel attributes?",
+        a: "It checks the values of gender and age_group and converts common spellings. It doesn't yet require color and size, so check those yourself for clothing.",
+      },
+      {
+        q: "Does it visit my product pages or images?",
+        a: "No. Everything runs in your browser and nothing is uploaded. Links and images are checked for being full https:// addresses, but Google still crawls them, so make sure they load.",
+      },
+    ],
+    related: ["shopify", "woocommerce", "amazon"],
   },
 };

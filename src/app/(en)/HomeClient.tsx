@@ -35,6 +35,7 @@ const PLATFORMS = [
   { name: "Etsy", path: "/etsy-csv-fixer" },
   { name: "eBay", path: "/ebay-csv-fixer" },
   { name: "Amazon", path: "/amazon-csv-fixer" },
+  { name: "Google Shopping", path: "/google-merchant-center-feed-checker" },
 ];
 
 const eyebrow = "text-xs font-semibold uppercase tracking-[0.14em] text-[var(--secondary-text)]";

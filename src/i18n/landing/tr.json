@@ -226,5 +226,41 @@
   "title": "Amazon Inventory Loader Düzeltici",
   "intro": "Inventory Loader, Amazon'da zaten bulunan ürünlere teklif ekler veya teklifleri günceller. Kısa bir dosyadır ama elektronik tabloların bozmayı çok sevdiği kodlara ve tanımlayıcılara dayanır. Düzeltici kodları dönüştürür ve hasarı yakalar.",
   "exportTip": "Seller Central → Katalog → Yükleme ile ürün ekle → Envanter dosyası indir (Inventory Loader)."
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "Fiyatlar para birimi kodu ister",
+    "body": "Google $19.99 veya 19,99 değil, 19.99 USD ister. € ve £ gibi tek para birimini gösteren simgeler dönüştürülür; tek başına $ işaretlenir, çünkü ABD, Kanada ve Avustralya doları hepsi onu kullanır."
+   },
+   {
+    "title": "Yalnızca Google'ın değerleri",
+    "body": "availability in_stock, out_of_stock, preorder veya backorder; condition ise new, used veya refurbished olmalıdır. \"In Stock\" veya \"pre-order\" gibi yaygın yazımlar otomatik olarak yeniden yazılır."
+   },
+   {
+    "title": "Barkodlar hane hane kontrol edilir",
+    "body": "Her GTIN'in kontrol basamağı yeniden hesaplanır. Boşluklar ve tireler kaldırılır, elektronik tablonun sildiği baştaki sıfır kontrol basamağı kanıtladığında geri eklenir ve bilimsel gösterimdeki sayılar işaretlenir."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Hangi dosya biçiminde indirilir?",
+    "a": "Orijinal sütun adlarınızla sekmeyle ayrılmış bir .txt dosyası; Merchant Center yüklenen feed'lerde bunu bekler. .txt, .tsv veya .csv dosyası yükleyebilirsiniz."
+   },
+   {
+    "q": "Giyim özelliklerini kontrol ediyor mu?",
+    "a": "gender ve age_group değerlerini kontrol eder ve yaygın yazımları dönüştürür. color ve size henüz zorunlu tutulmuyor, bu yüzden giyimde bunları kendiniz kontrol edin."
+   },
+   {
+    "q": "Ürün sayfalarımı veya görsellerimi ziyaret ediyor mu?",
+    "a": "Hayır. Her şey tarayıcınızda çalışır ve hiçbir şey yüklenmez. Bağlantılar ve görseller tam https:// adresi olup olmadıklarına göre kontrol edilir, ama Google yine de onları tarar, bu yüzden açıldıklarından emin olun."
+   }
+  ],
+  "metaTitle": "Google Merchant Center Feed Denetleyici | Ürün Feed Hatalarını Düzeltin | StriveFormats",
+  "metaDescription": "Google Merchant Center ürün feed'inizi yüklemeden önce kontrol edin. Stok durumu, ürün durumu ve fiyatlar Google'ın biçimine dönüştürülür; eksik para birimleri, hatalı GTIN'ler ve tarihsiz ön siparişler işaretlenir.",
+  "kicker": "Google Merchant Center",
+  "title": "Google Merchant Center Feed Denetleyici",
+  "intro": "Merchant Center ürünleri küçük şeyler yüzünden reddeder: para birimi kodu olmayan bir fiyat, in_stock yerine \"In Stock\", bir elektronik tablonun yuvarladığı bir barkod. Ürün dosyanızı yüklemeden önce burada kontrol edin ve çoğunu tek tıkla düzeltin.",
+  "exportTip": "Ürün feed'ini mağazanızdan veya feed uygulamanızdan dışa aktarın ya da şablonla başlayın. Merchant Center'da düzeltilmiş dosyayı Ürünler → Dosyadan ürün ekle bölümünden ekleyin."
  }
 }

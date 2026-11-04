@@ -226,5 +226,41 @@
   "title": "Amazon Inventory Loader修复工具",
   "intro": "Inventory Loader用于为Amazon上已存在的商品添加或更新报价。文件虽短，却依赖于表格软件很容易弄坏的代码和标识符。修复工具会转换这些代码并找出损坏之处。",
   "exportTip": "卖家平台 → 目录 → 批量上传商品 → 下载库存文件（Inventory Loader）。"
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "价格需要货币代码",
+    "body": "Google 要的是 19.99 USD，而不是 $19.99 或 19,99。€、£ 等只代表一种货币的符号会被转换；只有 $ 会被标出，因为美元、加元和澳元都用它。"
+   },
+   {
+    "title": "只用 Google 规定的值",
+    "body": "availability 必须是 in_stock、out_of_stock、preorder 或 backorder，condition 必须是 new、used 或 refurbished。“In Stock”或“pre-order”等常见写法会自动改写。"
+   },
+   {
+    "title": "条形码逐位检查",
+    "body": "重新计算每个 GTIN 的校验位。删除空格和连字符；当校验位证明时，补回电子表格删掉的前导零；科学计数法的数字会被标出。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "下载的是什么文件格式？",
+    "a": "保留原始列名的制表符分隔 .txt 文件，这正是 Merchant Center 对上传 Feed 的要求。你可以上传 .txt、.tsv 或 .csv 文件。"
+   },
+   {
+    "q": "会检查服装属性吗？",
+    "a": "会检查 gender 和 age_group 的值并转换常见写法。目前还不强制要求 color 和 size，服装请自行检查。"
+   },
+   {
+    "q": "会访问我的商品页面或图片吗？",
+    "a": "不会。所有处理都在你的浏览器中进行，不会上传任何内容。会检查链接和图片是否是完整的 https:// 地址，但 Google 仍会抓取它们，请确保能正常打开。"
+   }
+  ],
+  "metaTitle": "Google Merchant Center Feed 检查工具 | 修复商品 Feed 错误 | StriveFormats",
+  "metaDescription": "上传前检查 Google Merchant Center 商品 Feed。库存状态、商品状况和价格会转换为 Google 的格式；缺少货币、GTIN 错误和没有日期的预购都会被标出。",
+  "kicker": "Google Merchant Center",
+  "title": "Google Merchant Center Feed 检查工具",
+  "intro": "Merchant Center 会因为小问题拒登商品：价格没有货币代码、用了“In Stock”而不是 in_stock、条形码被电子表格四舍五入。上传前先在这里检查商品文件，大部分问题一键修复。",
+  "exportTip": "从店铺或 Feed 应用导出商品 Feed，或从模板开始。在 Merchant Center 中，通过“商品”→“从文件添加商品”添加修复后的文件。"
  }
 }

@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "Guias de importação CSV",
-    "description": "Guias passo a passo para corrigir erros de importação de CSV no Shopify, WooCommerce, Etsy, eBay e Amazon.",
+    "description": "Guias passo a passo para corrigir erros de importação de CSV no Shopify, WooCommerce, Etsy, eBay, Amazon e Google Merchant Center.",
     "browseByPlatform": "Explorar por plataforma",
     "featuredGuides": "Guias em destaque",
     "searchResults": "Resultados da pesquisa",
@@ -137,7 +137,7 @@
       "tags": "Tags",
       "shipping": "Envio"
     },
-    "hubIntro": "Corrija erros de importação CSV para Shopify, WooCommerce, Etsy, eBay e Amazon. Navegue por plataforma ou pesquise um problema específico.",
+    "hubIntro": "Corrija erros de importação CSV para Shopify, WooCommerce, Etsy, eBay, Amazon e Google Merchant Center. Navegue por plataforma ou pesquise um problema específico.",
     "resultsFor": "{count} resultados para “{q}”",
     "resultFor": "1 resultado para “{q}”",
     "platformTitle": "Guias de importação CSV do {platform}",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Corrija erros de importação CSV do Shopify e e-commerce",
-    "description": "Corrija CSVs de produtos para Shopify, WooCommerce, Etsy, eBay e Amazon no navegador. Correções seguras são automáticas e as arriscadas são indicadas por linha e célula. Grátis, sem cadastro.",
+    "description": "Corrija CSVs de produtos para Shopify, WooCommerce, Etsy, eBay, Amazon e Google Merchant Center no navegador. Correções seguras são automáticas e as arriscadas são indicadas por linha e célula. Grátis, sem cadastro.",
     "browseTemplates": "Explorar modelos",
     "openCustomFormats": "Abrir formatos personalizados",
     "csvFixerLabel": "Corretor CSV",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "Modelos CSV",
-    "description": "Navegue pelos modelos CSV de e-commerce para Shopify, WooCommerce, Etsy, Amazon e eBay. Visualize colunas, baixe amostras e abra o reparador com um modelo pré-selecionado.",
+    "description": "Navegue pelos modelos CSV de e-commerce para Shopify, WooCommerce, Etsy, Amazon, eBay e Google Merchant Center. Visualize colunas, baixe amostras e abra o reparador com um modelo pré-selecionado.",
     "expectedColumns": "Colunas esperadas",
     "exampleRow": "Linha de exemplo",
     "noColumns": "Este formato ainda não expõe uma lista de colunas fixas.",
@@ -805,7 +805,7 @@
     "close": "Fechar",
     "syncingBilling": "Sincronizando informações de cobrança…",
     "billingError": "Não foi possível acessar o faturamento agora. Tente novamente em um minuto.",
-    "allPlansFormats": "Todos os planos incluem todos os formatos integrados: Shopify, WooCommerce, Etsy, eBay e Amazon.",
+    "allPlansFormats": "Todos os planos incluem todos os formatos integrados: Shopify, WooCommerce, Etsy, eBay, Amazon e Google Merchant Center.",
     "pass": "Passe de 24 horas",
     "oneTime": "pagamento único",
     "passBullet1": "Exportações ilimitadas por 24 horas",

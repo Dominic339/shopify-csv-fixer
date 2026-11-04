@@ -226,5 +226,41 @@
   "title": "Correcteur pour Amazon Inventory Loader",
   "intro": "L'Inventory Loader ajoute ou met à jour des offres sur des produits qui existent déjà sur Amazon. Le fichier est court, mais il repose sur des codes et des identifiants que les tableurs adorent abîmer. Le correcteur convertit les codes et repère les dégâts.",
   "exportTip": "Seller Central → Catalogue → Ajouter des produits via un fichier → Télécharger un fichier d'inventaire (Inventory Loader)."
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "Les prix ont besoin d'un code de devise",
+    "body": "Google veut 19.99 USD, pas $19.99 ni 19,99. Les symboles d'une seule devise, comme € et £, sont convertis ; un $ seul est signalé, car les dollars américain, canadien et australien l'utilisent tous."
+   },
+   {
+    "title": "Uniquement les valeurs de Google",
+    "body": "availability doit valoir in_stock, out_of_stock, preorder ou backorder, et condition new, used ou refurbished. Les formes courantes comme « In Stock » ou « pre-order » sont réécrites automatiquement."
+   },
+   {
+    "title": "Les codes-barres sont vérifiés chiffre par chiffre",
+    "body": "La clé de contrôle de chaque GTIN est recalculée. Espaces et tirets sont supprimés, un zéro initial supprimé par le tableur est rétabli quand la clé de contrôle le prouve, et les nombres en notation scientifique sont signalés."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Quel format de fichier est téléchargé ?",
+    "a": "Un fichier .txt délimité par des tabulations avec vos noms de colonnes d'origine, ce qu'attend Merchant Center pour les flux importés. Vous pouvez importer un fichier .txt, .tsv ou .csv."
+   },
+   {
+    "q": "Les attributs vestimentaires sont-ils vérifiés ?",
+    "a": "Les valeurs de gender et age_group sont vérifiées et les formes courantes converties. color et size ne sont pas encore exigés : vérifiez-les vous-même pour les vêtements."
+   },
+   {
+    "q": "L'outil visite-t-il mes pages produits ou mes images ?",
+    "a": "Non. Tout se passe dans votre navigateur et rien n'est envoyé. Liens et images sont vérifiés comme adresses https:// complètes, mais Google les explore quand même : assurez-vous qu'ils se chargent."
+   }
+  ],
+  "metaTitle": "Vérificateur de flux Google Merchant Center | Corriger les erreurs | StriveFormats",
+  "metaDescription": "Vérifiez un flux produits Google Merchant Center avant de l'importer. Disponibilité, état et prix sont convertis au format de Google ; devises manquantes, GTIN erronés et précommandes sans date sont signalés.",
+  "kicker": "Google Merchant Center",
+  "title": "Vérificateur de flux Google Merchant Center",
+  "intro": "Merchant Center refuse des produits pour des détails : un prix sans code de devise, « In Stock » au lieu de in_stock, un code-barres arrondi par un tableur. Vérifiez ici votre fichier produits avant de l'importer et corrigez l'essentiel en un clic.",
+  "exportTip": "Exportez le flux produits depuis votre boutique ou votre application de flux, ou partez du modèle. Dans Merchant Center, ajoutez le fichier corrigé via Produits → Ajouter des produits à partir d'un fichier."
  }
 }

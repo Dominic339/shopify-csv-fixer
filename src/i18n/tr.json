@@ -100,7 +100,7 @@
   },
   "guides": {
     "title": "CSV İçe Aktarma Kılavuzları",
-    "description": "Shopify, WooCommerce, Etsy, eBay ve Amazon'daki CSV içe aktarma hatalarını düzeltmek için adım adım kılavuzlar.",
+    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon ve Google Merchant Center'daki CSV içe aktarma hatalarını düzeltmek için adım adım kılavuzlar.",
     "browseByPlatform": "Platforma göre gözat",
     "featuredGuides": "Öne çıkan kılavuzlar",
     "searchResults": "Arama sonuçları",
@@ -137,7 +137,7 @@
       "tags": "Etiketler",
       "shipping": "Kargo"
     },
-    "hubIntro": "Shopify, WooCommerce, Etsy, eBay ve Amazon için CSV içe aktarma hatalarını düzeltin. Platforma göre göz atın veya belirli bir sorunu arayın.",
+    "hubIntro": "Shopify, WooCommerce, Etsy, eBay, Amazon ve Google Merchant Center için CSV içe aktarma hatalarını düzeltin. Platforma göre göz atın veya belirli bir sorunu arayın.",
     "resultsFor": "“{q}” için {count} sonuç",
     "resultFor": "“{q}” için 1 sonuç",
     "platformTitle": "{platform} CSV içe aktarma rehberleri",
@@ -159,7 +159,7 @@
   },
   "home": {
     "title": "StriveFormats | Shopify ve e-ticaret CSV içe aktarma hatalarını düzeltin",
-    "description": "Shopify, WooCommerce, Etsy, eBay ve Amazon ürün CSV'lerini tarayıcınızda düzeltin. Güvenli düzeltmeler otomatiktir, riskli olanlar satır ve hücreyle gösterilir. Ücretsiz, kayıt gerekmez.",
+    "description": "Shopify, WooCommerce, Etsy, eBay, Amazon ve Google Merchant Center ürün CSV'lerini tarayıcınızda düzeltin. Güvenli düzeltmeler otomatiktir, riskli olanlar satır ve hücreyle gösterilir. Ücretsiz, kayıt gerekmez.",
     "browseTemplates": "Şablonlara Göz At",
     "openCustomFormats": "Özel Biçimleri Aç",
     "csvFixerLabel": "CSV Düzeltici",
@@ -303,7 +303,7 @@
   },
   "presets": {
     "title": "CSV şablonları",
-    "description": "Shopify, WooCommerce, Etsy, Amazon ve eBay için e-ticaret CSV şablonlarına göz atın. Sütunları önizleyin, örnekler indirin ve bir şablon seçili olarak düzelticiyi açın.",
+    "description": "Shopify, WooCommerce, Etsy, Amazon, eBay ve Google Merchant Center için e-ticaret CSV şablonlarına göz atın. Sütunları önizleyin, örnekler indirin ve bir şablon seçili olarak düzelticiyi açın.",
     "expectedColumns": "Beklenen sütunlar",
     "exampleRow": "Örnek satır",
     "noColumns": "Bu format henüz sabit bir sütun listesi sunmuyor.",
@@ -805,7 +805,7 @@
     "close": "Kapat",
     "syncingBilling": "Fatura bilgileri senkronize ediliyor…",
     "billingError": "Faturalandırmaya şu anda ulaşılamıyor. Lütfen bir dakika sonra tekrar deneyin.",
-    "allPlansFormats": "Tüm planlar her yerleşik biçimi içerir: Shopify, WooCommerce, Etsy, eBay ve Amazon.",
+    "allPlansFormats": "Tüm planlar her yerleşik biçimi içerir: Shopify, WooCommerce, Etsy, eBay, Amazon ve Google Merchant Center.",
     "pass": "24 saatlik geçiş",
     "oneTime": "tek seferlik",
     "passBullet1": "24 saat sınırsız dışa aktarma",

@@ -226,5 +226,41 @@
   "title": "Hersteller voor de Amazon Inventory Loader",
   "intro": "De Inventory Loader voegt aanbiedingen toe aan producten die al op Amazon staan, of werkt ze bij. Het is een kort bestand, maar het hangt af van codes en ID's die spreadsheets graag beschadigen. De hersteller zet de codes om en vangt de schade op.",
   "exportTip": "Seller Central → Catalogus → Producten toevoegen via upload → Een voorraadbestand downloaden (Inventory Loader)."
+ },
+ "google": {
+  "gotchas": [
+   {
+    "title": "Prijzen hebben een valutacode nodig",
+    "body": "Google wil 19.99 USD, niet $19.99 of 19,99. Symbolen voor één valuta, zoals € en £, worden omgezet; alleen een $ wordt gemarkeerd, omdat Amerikaanse, Canadese en Australische dollars het allemaal gebruiken."
+   },
+   {
+    "title": "Alleen de waarden van Google",
+    "body": "availability moet in_stock, out_of_stock, preorder of backorder zijn, en condition new, used of refurbished. Gangbare schrijfwijzen zoals \"In Stock\" of \"pre-order\" worden automatisch herschreven."
+   },
+   {
+    "title": "Streepjescodes worden cijfer voor cijfer gecontroleerd",
+    "body": "Het controlecijfer van elke GTIN wordt opnieuw berekend. Spaties en streepjes worden verwijderd, een voorloopnul die de spreadsheet weghaalde wordt hersteld als het controlecijfer dat bewijst, en getallen in wetenschappelijke notatie worden gemarkeerd."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Welk bestandsformaat wordt gedownload?",
+    "a": "Een tab-gescheiden .txt-bestand met je oorspronkelijke kolomnamen, zoals Merchant Center verwacht voor geüploade feeds. Je kunt een .txt-, .tsv- of .csv-bestand uploaden."
+   },
+   {
+    "q": "Worden kledingkenmerken gecontroleerd?",
+    "a": "De waarden van gender en age_group worden gecontroleerd en gangbare schrijfwijzen omgezet. color en size zijn nog niet verplicht, dus controleer die zelf bij kleding."
+   },
+   {
+    "q": "Bezoekt het mijn productpagina's of afbeeldingen?",
+    "a": "Nee. Alles draait in je browser en er wordt niets geüpload. Links en afbeeldingen worden gecontroleerd op volledige https://-adressen, maar Google crawlt ze toch, dus zorg dat ze laden."
+   }
+  ],
+  "metaTitle": "Google Merchant Center-feedchecker | Productfeedfouten oplossen | StriveFormats",
+  "metaDescription": "Controleer een Google Merchant Center-productfeed voordat je hem uploadt. Beschikbaarheid, staat en prijzen worden omgezet naar het formaat van Google; ontbrekende valuta's, foute GTIN's en pre-orders zonder datum worden gemarkeerd.",
+  "kicker": "Google Merchant Center",
+  "title": "Google Merchant Center-feedchecker",
+  "intro": "Merchant Center keurt producten af om kleine dingen: een prijs zonder valutacode, \"In Stock\" in plaats van in_stock, een streepjescode die een spreadsheet heeft afgerond. Controleer je productbestand hier voor het uploaden en los het meeste met één klik op.",
+  "exportTip": "Exporteer de productfeed uit je winkel of feed-app, of begin met de sjabloon. Voeg het gecorrigeerde bestand in Merchant Center toe via Producten → Producten toevoegen uit een bestand."
  }
 }

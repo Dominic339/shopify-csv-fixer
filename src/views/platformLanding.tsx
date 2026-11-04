@@ -143,8 +143,12 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
   const blockers = checks.filter((m) => m.blocking);
 
   const demo = runDemo(slug);
-  const guides = getGuidesByPlatform(p.guidePlatform)
-    .filter((g) => g.kind === "curated")
+  // Written guides first; a platform with few of them is topped up with its blocking-issue guides.
+  const platformGuides = getGuidesByPlatform(p.guidePlatform);
+  const guides = [
+    ...platformGuides.filter((g) => g.kind === "curated"),
+    ...platformGuides.filter((g) => g.kind === "issue" && g.blocking && g.checkedByFixer),
+  ]
     .slice(0, 4)
     .map(localizeGuide);
 

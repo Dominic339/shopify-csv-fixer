@@ -61,6 +61,13 @@ const woo = (col: string, pairs: [string, string][]) => column(W, wooRows, col, 
 const ebay = (col: string, pairs: [string, string][]) => column(E, ebayRows, col, pairs);
 const etsy = (col: string, pairs: [string, string][]) => column(T, etsyRows, col, pairs);
 const amz = (col: string, pairs: [string, string][]) => column(A, amzRows, col, pairs);
+const G = ["id", "title"];
+const gmcRows = [
+  ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+  ["TOTE-01", "Acme Canvas Tote Bag, Natural"],
+  ["CAP-01", "Acme Wool Beanie, Grey"],
+];
+const gmc = (col: string, pairs: [string, string][]) => column(G, gmcRows, col, pairs);
 
 const LONG_TITLE = "Handmade Ceramic Coffee Mug 12oz Speckled Glaze Stoneware Tea Cup Gift for Him Her Coffee Lover Birthday Christmas Present";
 
@@ -694,6 +701,93 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
       [0, 3],
     ],
   },
+  // ── Google Merchant Center ──
+  "google/missing_required_header": {
+    cols: ["id", "title", "price"],
+    colsAfter: ["id", "title", "price", "availability"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD"]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD", "in_stock"]],
+  },
+  "google/missing_value": gmc("link", [["", "https://example.com/products/mug"]]),
+  "google/duplicate_id": {
+    cols: G,
+    before: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["MUG-01", "Acme Travel Mug, 16 oz"],
+    ],
+    after: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["MUG-02", "Acme Travel Mug, 16 oz"],
+    ],
+    flag: [[0, 0]],
+  },
+  "google/id_too_long": {
+    cols: G,
+    before: [["ACME-CERAMIC-COFFEE-MUG-12OZ-SPECKLED-WHITE-GLAZE-2026", "Acme Ceramic Coffee Mug, 12 oz"]],
+    after: [["ACME-MUG-12OZ-WHT", "Acme Ceramic Coffee Mug, 12 oz"]],
+  },
+  "google/title_too_long": { cols: G, before: [["MUG-01", `${LONG_TITLE} Office Kitchen Home Decor Set (180 characters)`]], after: [["MUG-01", "Acme Handmade Ceramic Coffee Mug, 12 oz, Speckled Stoneware"]] },
+  "google/description_too_long": gmc("description", [["Hand-thrown stoneware mug… (5,600 characters)", "Hand-thrown stoneware mug… (1,800 characters)"]]),
+  "google/invalid_url": gmc("image_link", [
+    ["mug.jpg", "https://example.com/images/mug.jpg"],
+    ["www.example.com/tote.jpg", "https://www.example.com/tote.jpg"],
+  ]),
+  "google/too_many_images": gmc("additional_image_link", [["https://example.com/1.jpg,… (14 URLs)", "https://example.com/1.jpg,… (10 URLs)"]]),
+  "google/invalid_availability": gmc("availability", [
+    ["In Stock", "in_stock"],
+    ["sold out", "out_of_stock"],
+    ["pre-order", "preorder"],
+  ]),
+  "google/missing_availability_date": {
+    cols: [...G, "availability", "availability_date"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "preorder", ""]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "preorder", "2026-12-01T09:00-0500"]],
+  },
+  "google/price_missing_currency": gmc("price", [
+    ["18.00", "18.00 USD"],
+    ["$24", "24.00 USD"],
+  ]),
+  "google/invalid_price": gmc("price", [
+    ["18,00 EUR", "18.00 EUR"],
+    ["€24", "24.00 EUR"],
+  ]),
+  "google/invalid_sale_price": {
+    cols: [...G, "price", "sale_price"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "15.00 USD", "18.00 USD"]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD", "15.00 USD"]],
+  },
+  "google/invalid_condition": gmc("condition", [
+    ["New", "new"],
+    ["renewed", "refurbished"],
+  ]),
+  "google/missing_brand": gmc("brand", [["", "Acme"]]),
+  "google/invalid_gtin": gmc("gtin", [
+    ["4.00638E+12", "4006381333931"],
+    ["4006-3813-3393-1", "4006381333931"],
+  ]),
+  "google/missing_identifiers": {
+    cols: [...G, "gtin", "mpn", "identifier_exists"],
+    before: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "", "", ""],
+      ["CUP-07", "Handmade Raku Tea Cup", "", "", ""],
+    ],
+    after: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "4006381333931", "", ""],
+      ["CUP-07", "Handmade Raku Tea Cup", "", "", "no"],
+    ],
+  },
+  "google/invalid_yes_no": gmc("identifier_exists", [
+    ["FALSE", "no"],
+    ["Y", "yes"],
+  ]),
+  "google/invalid_gender": gmc("gender", [
+    ["Men", "male"],
+    ["Women's", "female"],
+  ]),
+  "google/invalid_age_group": gmc("age_group", [
+    ["Adults", "adult"],
+    ["children", "kids"],
+  ]),
 };
 
 /** The example for an issue code, or null when there is none. */
