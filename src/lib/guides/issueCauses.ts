@@ -129,6 +129,86 @@ export const ISSUE_CAUSES: Record<string, string[]> = {
     "A file from another platform has no handle column, so every row is blank.",
     "Variant rows were left with an empty handle, expecting Shopify to use the row above; it needs the handle on every row.",
   ],
+  "shopify/options_not_unique": [
+    "A variant row was copied to add a new colour, and the option value wasn't changed on the copy.",
+    "The product has two options, but only Option1 was filled, so Small/Blue and Small/Red both read as Small.",
+    "Rows from two exports of the same product were combined, repeating every variant.",
+  ],
+  "shopify/missing_option1_for_variant_data": [
+    "A variant row has its own SKU and price, but its size or colour was never filled in.",
+    "Option values were cleared while an option was being removed, but the variant rows stayed.",
+    "A product with one variant was given extra rows for stock in other locations, which look like new variants.",
+  ],
+  "woocommerce/parent_not_in_file": [
+    "Only the variations were exported, for example by filtering the export to variable products' children.",
+    "The parent's SKU was changed after the variations were created, so Parent no longer matches it.",
+    "The file was split into several smaller files, and the parent ended up in a different one.",
+  ],
+  "woocommerce/variation_multiple_values": [
+    "The parent's list of values, such as S | M | L, was copied down to every variation row.",
+    "A variation meant for several sizes was given all of them, instead of one variation per size.",
+    "Values were separated with commas on a variation row, which WooCommerce reads as a list.",
+  ],
+  "woocommerce/invalid_price": [
+    "The price was copied with the currency symbol, as in €24.00.",
+    "A spreadsheet in a European locale saved the price with a decimal comma, as in 24,00.",
+    "Variable product parent rows were given a price range such as 18-24; prices belong on the variations.",
+  ],
+  "shopify/invalid_image_url": [
+    "The image column holds a file name such as shirt.jpg from a folder on your computer; Shopify can only download from the web.",
+    "The address was copied without https://, as in cdn.example.com/shirt.jpg.",
+    "The address has spaces from the original file name, as in my shirt.jpg.",
+  ],
+  "etsy/invalid_image_url": [
+    "IMAGE columns hold file names from your computer instead of web addresses.",
+    "The address was copied without https://, as in i.etsystatic.com/photo.jpg.",
+    "Several image addresses were put in one cell instead of in IMAGE1, IMAGE2 and so on.",
+  ],
+  "woocommerce/invalid_image_url": [
+    "The Images column holds file names from the media folder instead of full addresses.",
+    "Several images were separated with semicolons or line breaks; WooCommerce expects commas.",
+    "The address was copied without https://, or contains spaces from the original file name.",
+  ],
+  "amazon/invalid_image_url": [
+    "The cell holds a file name or a path on your computer instead of a web address.",
+    "Several image addresses were put in one cell, separated by commas.",
+    "The address was copied without https://, as in m.media-amazon.com/images/bottle.jpg.",
+  ],
+  "shopify/blank_title": [
+    "A product's first row was deleted or sorted away, leaving only its variant rows, which have no Title.",
+    "New products were added at the bottom of the file with a handle and price but no title yet.",
+    "Titles were kept in a separate sheet and never copied into the file.",
+  ],
+  "etsy/missing_title": [
+    "Rows were added for draft listings before their titles were written.",
+    "Titles were kept in a separate sheet and never copied into the file.",
+    "A formula that builds titles from other columns returned blank for some rows.",
+  ],
+  "ebay/missing_title": [
+    "On a multi-variation listing, the title was put on a Variation row instead of on the parent row.",
+    "The parent row was rebuilt by hand and only the SKU, price and quantity were filled in.",
+    "Titles were left blank for listings that were only meant to be revised, but the Action is Add.",
+  ],
+  "etsy/duplicate_sku": [
+    "Listings were duplicated in Shop Manager to create similar items, and the SKU was copied with them.",
+    "The same supplier code is used for two different listings.",
+    "Rows from two exports of the shop were combined.",
+  ],
+  "woocommerce/duplicate_sku": [
+    "A variation has the same SKU as its parent product.",
+    "Rows were copied in a spreadsheet to create similar products, and the SKU was kept on the copy.",
+    "Two exports were combined, so products appear twice.",
+  ],
+  "amazon/duplicate_sku": [
+    "The same offer was listed twice, for example once for each condition, under one SKU.",
+    "Rows from two inventory files were merged without removing the overlap.",
+    "SKUs were shortened to fit a character limit, and two of them became identical.",
+  ],
+  "shopify/invalid_integer_inventory_qty": [
+    "Stock came from a warehouse system that counts in decimals, such as 2.5 boxes.",
+    "The cell holds text such as \"in stock\", \"10+\" or \"n/a\".",
+    "A spreadsheet formula returned an error such as #N/A for products it couldn't find.",
+  ],
 };
 
 /** The common causes for an issue code, or an empty list. */

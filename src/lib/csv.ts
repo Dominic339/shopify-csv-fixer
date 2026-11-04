@@ -131,8 +131,13 @@ export function toTsv(headers: string[], rows: CsvRow[]): string {
  * Amazon formats and Google Merchant Center feeds download as tab-delimited .txt; everything else as quoted CSV, with any
  * lines that sat above the header (eBay's "#INFO" lines) put back on top.
  */
+/** Formats whose files are tab-delimited .txt (Amazon's upload pages and Merchant Center feeds). */
+export function isTabDelimitedFormat(formatId: string | null | undefined): boolean {
+  return !!formatId && (formatId.startsWith("amazon_") || formatId === "google_merchant_center");
+}
+
 export function exportFileFor(formatId: string | null | undefined, headers: string[], rows: CsvRow[], preamble: string[] = []) {
-  if (formatId?.startsWith("amazon_") || formatId === "google_merchant_center") {
+  if (isTabDelimitedFormat(formatId)) {
     return { text: toTsv(headers, rows), extension: "txt", type: "text/tab-separated-values;charset=utf-8" };
   }
   const top = preamble.length ? preamble.join("\r\n") + "\r\n" : "";

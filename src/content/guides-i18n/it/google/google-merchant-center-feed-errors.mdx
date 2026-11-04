@@ -1,0 +1,105 @@
+---
+title: "Errori del feed Google Merchant Center: cause e soluzioni"
+description: "Correggi gli errori nei dati di prodotto che fanno rifiutare i prodotti in Google Merchant Center: codici valuta mancanti, disponibilità, GTIN, identificatori, immagini e varianti."
+keywords: ["errori feed google merchant center", "prodotti rifiutati merchant center", "errori feed google shopping", "correggere feed prodotti google", "gtin non valido merchant center", "codice valuta mancante merchant center", "feed txt merchant center"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "Quali attributi servono a ogni prodotto e il formato che Google si aspetta per ciascuno"
+  - "Perché i prezzi devono avere un codice valuta e come aggiungerlo in blocco"
+  - "Come correggere disponibilità, date di preordine e valori di condizione"
+  - "Come funzionano insieme GTIN, MPN e identifier_exists"
+  - "Come raggruppare le varianti perché Google le mostri come un unico prodotto"
+bestFor: "Negozi che caricano un file prodotti su Merchant Center o controllano un feed esportato da Shopify, WooCommerce o un'app per feed"
+timeToComplete: "10 minuti"
+---
+
+## Come Merchant Center legge il file
+
+Un file prodotti per Merchant Center ha un prodotto per riga e i nomi degli attributi di Google nella prima riga: `id`, `title`, `price` e così via. Google accetta un file di testo delimitato da tabulazioni (.txt), e i nomi degli attributi sono sempre in inglese, qualunque sia la lingua dei prodotti.
+
+Dopo il caricamento, Google controlla ogni prodotto ed elenca i problemi in **Prodotti → Richiedono attenzione**. Un problema su un prodotto non blocca gli altri, quindi un file può risultare "accettato" con metà dei prodotti rifiutati. La maggior parte dei rifiuti nasce da un breve elenco di errori di formato, descritti qui sotto.
+
+Ogni prodotto ha bisogno di questi attributi:
+
+| Attributo | Esempio | Note |
+|---|---|---|
+| id | MUG-01 | Fino a 50 caratteri, univoco e stabile nel tempo |
+| title | Acme Ceramic Coffee Mug, 12 oz | Fino a 150 caratteri |
+| description | Hand-thrown stoneware mug… | Fino a 5000 caratteri |
+| link | https://shop.example.com/products/mug | La pagina del prodotto |
+| image_link | https://shop.example.com/images/mug.jpg | L'immagine principale |
+| availability | in_stock | Uno dei quattro valori di Google |
+| price | 18.00 USD | Un numero e un codice valuta |
+
+I prodotti nuovi richiedono anche `brand`, e quelli con codice a barre richiedono `gtin`.
+
+---
+
+## Prezzo senza codice valuta
+
+**Causa:** Il prezzo è solo un numero (`18.00`) o usa il simbolo `$`. Più paesi usano il dollaro, quindi Google non sa quale intendi.
+
+**Soluzione:** Scrivi il numero con il punto per i decimali, uno spazio e il codice ISO 4217: `18.00 USD`, `24.95 CAD`, `19.99 EUR`. Niente separatori delle migliaia: `1299.00 GBP`, non `1,299.00 GBP`.
+
+Per gli sconti, lascia il prezzo normale in `price` e metti quello più basso in `sale_price`. Se `sale_price` non è inferiore a `price`, Google lo ignora.
+
+---
+
+## Disponibilità e date di preordine
+
+**Causa:** `availability` contiene espressioni del negozio, come `In Stock`, `sold out` o `Available`. Google accetta solo quattro valori: `in_stock`, `out_of_stock`, `preorder` e `backorder`.
+
+**Soluzione:** Sostituisci i valori con quelli di Google. Con `preorder`, aggiungi anche `availability_date`, la data di spedizione, nel formato ISO 8601: `2026-12-01T09:00-0500`. Google chiede la data anche con `backorder`.
+
+`condition` funziona allo stesso modo: sono accettati solo `new`, `used` e `refurbished`.
+
+---
+
+## GTIN e identificatori
+
+**Causa:** Il `gtin` ha un numero di cifre sbagliato o una cifra di controllo errata. Quasi sempre la colpa è del foglio di calcolo: un codice a barre di 13 cifre appare come `4.00638E+12` e viene salvato così, e gli UPC perdono lo zero iniziale.
+
+**Soluzione:**
+- Formatta come Testo le colonne dei codici a barre prima di incollare, per mantenere le cifre
+- Copia di nuovo i codici dalla confezione o dal fornitore se appaiono già in notazione scientifica
+- Rimuovi spazi e trattini: `4006381333931`, non `4006-3813-3393-1`
+
+Un prodotto senza codice a barre deve avere il codice produttore in `mpn`. Per articoli artigianali, personalizzati o vintage che non hanno né l'uno né l'altro, imposta `identifier_exists` su `no`. Non inventare un GTIN: Google li verifica nel database di GS1.
+
+---
+
+## Immagini e link
+
+**Causa:** `link` o `image_link` è un percorso relativo come `mug.jpg`, oppure l'immagine richiede un accesso o è bloccata per i crawler.
+
+**Soluzione:** Usa l'indirizzo completo, che inizia con `https://`, per la pagina del prodotto e ogni immagine. In `additional_image_link` puoi mettere fino a 10 immagini in più, separate da virgole. Apri alcuni link in una finestra di navigazione privata per verificare che si carichino.
+
+---
+
+## Varianti: item_group_id
+
+Una maglietta in tre taglie per Google sono tre prodotti, ognuno con il proprio `id`, `price` e `availability`. Per mostrarli come un unico prodotto con opzioni, dai a tutti e tre lo stesso `item_group_id` e compila l'attributo che cambia, come `size` o `color`.
+
+### Esempio
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+Per l'abbigliamento, in molti paesi Google chiede anche `color`, `size`, `gender` e `age_group`. `gender` accetta `male`, `female` o `unisex`, e `age_group` accetta `newborn`, `infant`, `toddler`, `kids` o `adult`.
+
+---
+
+## Prima del caricamento
+
+1. Controlla che ogni prezzo abbia un codice valuta
+2. Controlla che `availability` e `condition` usino solo i valori di Google
+3. Controlla che ogni codice a barre abbia 8, 12, 13 o 14 cifre e che nessuno appaia come `E+12`
+4. Controlla che link e immagini inizino con `https://`
+5. Salva come testo delimitato da tabulazioni (.txt)
+
+Il [verificatore di feed Merchant Center](/google-merchant-center-feed-checker) fa tutti e cinque i controlli nel browser e converte i valori che può. Parti da un'esportazione del negozio? Il [convertitore da Shopify a Merchant Center](/migrate/shopify-to-google-merchant-center) crea il feed per te.

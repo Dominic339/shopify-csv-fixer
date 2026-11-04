@@ -1,0 +1,105 @@
+---
+title: "Google Merchant Center-feedfouten: oorzaken en oplossingen"
+description: "Los de productgegevensfouten op waardoor Google Merchant Center producten afkeurt: ontbrekende valutacodes, beschikbaarheid, GTIN's, ID's, afbeeldingen en varianten."
+keywords: ["google merchant center feedfouten", "afgekeurde producten merchant center", "google shopping feedfouten", "google productfeed oplossen", "ongeldige gtin merchant center", "valutacode ontbreekt merchant center", "merchant center txt feed"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "Welke kenmerken elk product nodig heeft en welk formaat Google voor elk verwacht"
+  - "Waarom prijzen een valutacode nodig hebben en hoe je die in één keer toevoegt"
+  - "Hoe je beschikbaarheid, pre-orderdatums en staatwaarden oplost"
+  - "Hoe GTIN's, MPN's en identifier_exists samenwerken"
+  - "Hoe je varianten groepeert zodat Google ze als één product toont"
+bestFor: "Winkeliers die een productbestand uploaden naar Merchant Center of een feed controleren die uit Shopify, WooCommerce of een feed-app komt"
+timeToComplete: "10 minuten"
+---
+
+## Hoe Merchant Center je bestand leest
+
+Een productbestand voor Merchant Center heeft één product per regel en de kenmerknamen van Google in de eerste rij: `id`, `title`, `price` enzovoort. Google accepteert een tab-gescheiden tekstbestand (.txt), en de kenmerknamen zijn altijd Engels, in welke taal je producten ook zijn.
+
+Na het uploaden controleert Google elk product en zet de problemen onder **Producten → Actie vereist**. Een probleem bij één product houdt de andere niet tegen, dus een bestand kan "geaccepteerd" zijn terwijl de helft is afgekeurd. De meeste afkeuringen komen uit een korte lijst opmaakfouten, die hieronder staan.
+
+Elk product heeft deze kenmerken nodig:
+
+| Kenmerk | Voorbeeld | Opmerkingen |
+|---|---|---|
+| id | MUG-01 | Tot 50 tekens, uniek en blijvend hetzelfde |
+| title | Acme Ceramic Coffee Mug, 12 oz | Tot 150 tekens |
+| description | Hand-thrown stoneware mug… | Tot 5000 tekens |
+| link | https://shop.example.com/products/mug | De productpagina |
+| image_link | https://shop.example.com/images/mug.jpg | De hoofdafbeelding |
+| availability | in_stock | Een van de vier waarden van Google |
+| price | 18.00 USD | Een getal en een valutacode |
+
+Nieuwe producten hebben ook `brand` nodig, en producten met een streepjescode `gtin`.
+
+---
+
+## Prijs zonder valutacode
+
+**Oorzaak:** De prijs is alleen een getal (`18.00`) of gebruikt een `$`-teken. Meerdere landen gebruiken dollars, dus Google weet niet welke je bedoelt.
+
+**Oplossing:** Schrijf het getal met een punt voor decimalen, een spatie en de ISO 4217-code: `18.00 USD`, `24.95 CAD`, `19.99 EUR`. Gebruik geen scheidingstekens voor duizendtallen: `1299.00 GBP`, niet `1,299.00 GBP`.
+
+Bij kortingen blijft de normale prijs in `price` en komt de lagere prijs in `sale_price`. Als `sale_price` niet lager is dan `price`, negeert Google hem.
+
+---
+
+## Beschikbaarheid en pre-orderdatums
+
+**Oorzaak:** `availability` bevat eigen woorden van de winkel, zoals `In Stock`, `sold out` of `Available`. Google accepteert maar vier waarden: `in_stock`, `out_of_stock`, `preorder` en `backorder`.
+
+**Oplossing:** Vervang de waarden door die van Google. Voeg bij `preorder` ook `availability_date` toe, de verzenddatum, in ISO 8601-formaat: `2026-12-01T09:00-0500`. Google vraagt de datum ook bij `backorder`.
+
+`condition` werkt hetzelfde: alleen `new`, `used` en `refurbished` worden geaccepteerd.
+
+---
+
+## GTIN's en ID's
+
+**Oorzaak:** De `gtin` heeft het verkeerde aantal cijfers of een fout controlecijfer. Meestal ligt het aan de spreadsheet: een streepjescode van 13 cijfers wordt getoond als `4.00638E+12` en zo opgeslagen, en UPC's verliezen hun voorloopnul.
+
+**Oplossing:**
+- Maak kolommen met streepjescodes op als Tekst voordat je plakt, zodat de cijfers blijven
+- Kopieer streepjescodes opnieuw van de verpakking of de leverancier als ze al in wetenschappelijke notatie staan
+- Verwijder spaties en streepjes: `4006381333931`, niet `4006-3813-3393-1`
+
+Een product zonder streepjescode hoort het onderdeelnummer van de fabrikant in `mpn` te hebben. Zet voor handgemaakte, maatwerk- of vintage-artikelen zonder beide `identifier_exists` op `no`. Verzin geen GTIN: Google controleert ze in de GS1-database.
+
+---
+
+## Afbeeldingen en links
+
+**Oorzaak:** `link` of `image_link` is een relatief pad zoals `mug.jpg`, of de afbeelding zit achter een login of is geblokkeerd voor crawlers.
+
+**Oplossing:** Gebruik het volledige adres, beginnend met `https://`, voor de productpagina en elke afbeelding. In `additional_image_link` passen tot 10 extra afbeeldingen, gescheiden door komma's. Open een paar links in een privévenster om te controleren dat ze laden.
+
+---
+
+## Varianten: item_group_id
+
+Een shirt in drie maten is voor Google drie producten, elk met een eigen `id`, `price` en `availability`. Om ze als één product met opties te tonen, geef je alle drie dezelfde `item_group_id` en vul je het kenmerk in dat verschilt, zoals `size` of `color`.
+
+### Voorbeeld
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+Voor kleding vraagt Google in veel landen ook `color`, `size`, `gender` en `age_group`. `gender` neemt `male`, `female` of `unisex`, en `age_group` neemt `newborn`, `infant`, `toddler`, `kids` of `adult`.
+
+---
+
+## Voor het uploaden
+
+1. Controleer dat elke prijs een valutacode heeft
+2. Controleer dat `availability` en `condition` alleen waarden van Google gebruiken
+3. Controleer dat elke streepjescode 8, 12, 13 of 14 cijfers heeft en geen enkele als `E+12` verschijnt
+4. Controleer dat links en afbeeldingen met `https://` beginnen
+5. Sla op als tab-gescheiden tekst (.txt)
+
+De [Merchant Center-feedchecker](/google-merchant-center-feed-checker) doet alle vijf in je browser en zet de waarden om die hij kan. Begin je met een winkelexport? De [converter van Shopify naar Merchant Center](/migrate/shopify-to-google-merchant-center) maakt de feed voor je.

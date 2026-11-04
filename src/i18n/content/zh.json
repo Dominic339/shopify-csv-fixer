@@ -107,6 +107,10 @@
 "woocommerce/woocommerce-product-csv-import-errors": {
 "title": "WooCommerce 商品 CSV 导入错误：原因与解决方法",
 "description": "解决最常见的 WooCommerce 商品 CSV 导入错误：缺少 SKU、类型无效、变体行问题、价格格式和属性列问题。"
+},
+"google/google-merchant-center-feed-errors": {
+"title": "Google Merchant Center Feed 错误：原因与解决方法",
+"description": "修复导致 Google Merchant Center 拒登商品的商品数据错误：缺少货币代码、库存状态、GTIN、标识符、图片和变体。"
 }
 },
 "presets": {

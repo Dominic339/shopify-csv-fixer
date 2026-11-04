@@ -107,6 +107,10 @@
 "woocommerce/woocommerce-product-csv-import-errors": {
 "title": "WooCommerce ürün CSV içe aktarma hataları: nedenleri ve çözümleri",
 "description": "En yaygın WooCommerce ürün CSV içe aktarma hatalarını düzeltin: eksik SKU'lar, geçersiz türler, varyasyon satırı sorunları, fiyat biçimi ve nitelik sütunları."
+},
+"google/google-merchant-center-feed-errors": {
+"title": "Google Merchant Center Feed Hataları: Nedenleri ve Çözümleri",
+"description": "Google Merchant Center'da ürünlerin reddedilmesine yol açan ürün verisi hatalarını düzeltin: eksik para birimi kodları, stok durumu, GTIN'ler, tanımlayıcılar, görseller ve varyantlar."
 }
 },
 "presets": {

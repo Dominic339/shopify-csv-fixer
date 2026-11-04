@@ -1,5 +1,6 @@
 "use client";
 
+import { isTabDelimitedFormat } from "@/lib/csv";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -148,7 +149,7 @@ export function ResultsPanel({ f, t, onJumpToIssues }: { f: Fixer; t: AppStrings
           onClick={onExport}
           disabled={f.busy || f.rows.length === 0 || (f.quotaExceeded && f.exportNeedsQuota && f.subStatus?.signedIn)}
         >
-          {f.busy ? t.working : blocked ? t.exportAnyway : t.exportFixed}
+          {f.busy ? t.working : blocked ? t.exportAnyway : isTabDelimitedFormat(f.formatId) ? t.exportFixedTxt : t.exportFixed}
         </button>
         {(counts.errors > 0 || counts.warnings > 0) && (
           <button type="button" className="pill-btn justify-center" onClick={scrollToIssues}>

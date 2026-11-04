@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { exportFileFor, parseCsv, toCsv } from "@/lib/csv";
+import { exportFileFor, parseCsv, toCsv, isTabDelimitedFormat } from "@/lib/csv";
 import { convertCsv, CONVERT_FORMAT_OPTIONS, CONVERT_SOURCE_OPTIONS, normalizeStoreUrl, type ConvertOptions, type ConvertResult } from "@/lib/convertCsv";
 import { CONVERT_ROUTES, routeFor } from "@/lib/convertRoutes";
 import { consumeExport } from "@/lib/quota";
@@ -178,7 +178,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
     setTargetFormatId(s);
   }
 
-  const outExtension = targetFormatId.startsWith("amazon_") || isGoogle ? "txt" : "csv";
+  const outExtension = isTabDelimitedFormat(targetFormatId) ? "txt" : "csv";
   const outName = `${(fileName ?? "products").replace(/\.(csv|txt|tsv)$/i, "")}_${targetFormatId}.${outExtension}`;
 
   async function handleDownload() {
@@ -409,7 +409,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
             {/* Actions */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <button type="button" className="rg-btn justify-center" onClick={() => void handleDownload()} disabled={busy}>
-                {t.downloadConverted}
+                {outExtension === "txt" ? t.downloadConvertedTxt : t.downloadConverted}
               </button>
               {FIXER_PRESETS.has(targetFormatId) && (
                 <button type="button" className="rgb-btn justify-center px-5 py-2.5 text-sm" onClick={checkInFixer}>

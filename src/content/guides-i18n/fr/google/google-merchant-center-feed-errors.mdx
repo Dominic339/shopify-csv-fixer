@@ -1,0 +1,105 @@
+---
+title: "Erreurs de flux Google Merchant Center : causes et solutions"
+description: "Corrigez les erreurs de données produit qui font refuser des produits dans Google Merchant Center : codes de devise manquants, disponibilité, GTIN, identifiants, images et variantes."
+keywords: ["erreurs flux google merchant center", "produits refusés merchant center", "erreurs flux google shopping", "corriger flux produits google", "gtin non valide merchant center", "code de devise manquant merchant center", "flux txt merchant center"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "Les attributs nécessaires à chaque produit et le format attendu par Google pour chacun"
+  - "Pourquoi les prix ont besoin d'un code de devise et comment l'ajouter en masse"
+  - "Comment corriger la disponibilité, les dates de précommande et les valeurs d'état"
+  - "Comment GTIN, MPN et identifier_exists fonctionnent ensemble"
+  - "Comment regrouper les variantes pour que Google les affiche comme un seul produit"
+bestFor: "Marchands qui importent un fichier produits dans Merchant Center ou vérifient un flux exporté de Shopify, WooCommerce ou d'une application de flux"
+timeToComplete: "10 minutes"
+---
+
+## Comment Merchant Center lit votre fichier
+
+Un fichier produits pour Merchant Center contient un produit par ligne et les noms d'attributs de Google sur la première ligne : `id`, `title`, `price`, etc. Google accepte un fichier texte délimité par des tabulations (.txt), et les noms d'attributs sont toujours en anglais, quelle que soit la langue de vos produits.
+
+Après l'import, Google vérifie chaque produit et liste les problèmes dans **Produits → Action requise**. Un problème sur un produit ne bloque pas les autres : un fichier peut donc être « accepté » alors que la moitié est refusée. La plupart des refus viennent d'une courte liste d'erreurs de format, décrites ci-dessous.
+
+Chaque produit a besoin de ces attributs :
+
+| Attribut | Exemple | Remarques |
+|---|---|---|
+| id | MUG-01 | Jusqu'à 50 caractères, unique et stable dans le temps |
+| title | Acme Ceramic Coffee Mug, 12 oz | Jusqu'à 150 caractères |
+| description | Hand-thrown stoneware mug… | Jusqu'à 5000 caractères |
+| link | https://shop.example.com/products/mug | La page produit |
+| image_link | https://shop.example.com/images/mug.jpg | L'image principale |
+| availability | in_stock | L'une des quatre valeurs de Google |
+| price | 18.00 USD | Un nombre et un code de devise |
+
+Les produits neufs ont aussi besoin de `brand`, et ceux qui ont un code-barres de `gtin`.
+
+---
+
+## Prix sans code de devise
+
+**Cause :** Le prix est un nombre seul (`18.00`) ou utilise le signe `$`. Plusieurs pays utilisent le dollar, donc Google ne sait pas lequel vous voulez dire.
+
+**Solution :** Écrivez le nombre avec un point décimal, une espace et le code ISO 4217 : `18.00 USD`, `24.95 CAD`, `19.99 EUR`. Pas de séparateur de milliers : `1299.00 GBP`, pas `1,299.00 GBP`.
+
+Pour une remise, gardez le prix normal dans `price` et mettez le prix réduit dans `sale_price`. Si `sale_price` n'est pas inférieur à `price`, Google l'ignore.
+
+---
+
+## Disponibilité et dates de précommande
+
+**Cause :** `availability` contient des formulations propres à la boutique, comme `In Stock`, `sold out` ou `Available`. Google n'accepte que quatre valeurs : `in_stock`, `out_of_stock`, `preorder` et `backorder`.
+
+**Solution :** Remplacez les valeurs par celles de Google. Pour `preorder`, ajoutez aussi `availability_date`, la date d'expédition, au format ISO 8601 : `2026-12-01T09:00-0500`. Google demande aussi la date pour `backorder`.
+
+`condition` fonctionne de la même façon : seuls `new`, `used` et `refurbished` sont acceptés.
+
+---
+
+## GTIN et identifiants
+
+**Cause :** Le `gtin` n'a pas le bon nombre de chiffres ou sa clé de contrôle est fausse. Le tableur en est presque toujours responsable : un code-barres de 13 chiffres s'affiche comme `4.00638E+12` et est enregistré ainsi, et les UPC perdent leur zéro initial.
+
+**Solution :**
+- Formatez les colonnes de codes-barres en Texte avant de coller, pour garder les chiffres
+- Recopiez les codes-barres depuis l'emballage ou le fournisseur s'ils s'affichent déjà en notation scientifique
+- Supprimez espaces et tirets : `4006381333931`, pas `4006-3813-3393-1`
+
+Un produit sans code-barres doit avoir sa référence fabricant dans `mpn`. Pour les articles faits main, personnalisés ou vintage qui n'ont ni l'un ni l'autre, réglez `identifier_exists` sur `no`. N'inventez pas de GTIN : Google les vérifie dans la base de données GS1.
+
+---
+
+## Images et liens
+
+**Cause :** `link` ou `image_link` est un chemin relatif comme `mug.jpg`, ou l'image est derrière une connexion ou bloquée pour les robots.
+
+**Solution :** Utilisez l'adresse complète, commençant par `https://`, pour la page produit et chaque image. Jusqu'à 10 images supplémentaires vont dans `additional_image_link`, séparées par des virgules. Ouvrez quelques liens dans une fenêtre de navigation privée pour vérifier qu'ils se chargent.
+
+---
+
+## Variantes : item_group_id
+
+Un t-shirt en trois tailles, ce sont trois produits pour Google, chacun avec son `id`, son `price` et sa `availability`. Pour les afficher comme un seul produit avec des options, donnez aux trois le même `item_group_id` et remplissez l'attribut qui change, comme `size` ou `color`.
+
+### Exemple
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+Pour les vêtements, Google demande aussi `color`, `size`, `gender` et `age_group` dans de nombreux pays. `gender` accepte `male`, `female` ou `unisex`, et `age_group` accepte `newborn`, `infant`, `toddler`, `kids` ou `adult`.
+
+---
+
+## Avant l'import
+
+1. Vérifiez que chaque prix a un code de devise
+2. Vérifiez que `availability` et `condition` n'utilisent que les valeurs de Google
+3. Vérifiez que chaque code-barres a 8, 12, 13 ou 14 chiffres et qu'aucun ne s'affiche en `E+12`
+4. Vérifiez que liens et images commencent par `https://`
+5. Enregistrez en texte délimité par des tabulations (.txt)
+
+Le [vérificateur de flux Merchant Center](/google-merchant-center-feed-checker) fait ces cinq contrôles dans votre navigateur et convertit les valeurs qu'il peut. Vous partez d'un export de boutique ? Le [convertisseur Shopify vers Merchant Center](/migrate/shopify-to-google-merchant-center) crée le flux pour vous.

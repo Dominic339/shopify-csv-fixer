@@ -1,0 +1,105 @@
+---
+title: "Google Merchant Center Feed Hataları: Nedenleri ve Çözümleri"
+description: "Google Merchant Center'da ürünlerin reddedilmesine yol açan ürün verisi hatalarını düzeltin: eksik para birimi kodları, stok durumu, GTIN'ler, tanımlayıcılar, görseller ve varyantlar."
+keywords: ["google merchant center feed hataları", "merchant center reddedilen ürünler", "google shopping feed hataları", "google ürün feed'i düzeltme", "merchant center geçersiz gtin", "merchant center para birimi kodu eksik", "merchant center txt feed"]
+lastUpdated: "2026-11-05"
+kind: "curated"
+whatYouLearn:
+  - "Her ürünün hangi özelliklere ihtiyaç duyduğu ve Google'ın her biri için beklediği biçim"
+  - "Fiyatların neden para birimi kodu gerektirdiği ve bunu toplu olarak nasıl ekleyeceğiniz"
+  - "Stok durumu, ön sipariş tarihleri ve ürün durumu değerlerini nasıl düzelteceğiniz"
+  - "GTIN, MPN ve identifier_exists'in birlikte nasıl çalıştığı"
+  - "Varyantları Google'ın tek ürün olarak göstermesi için nasıl gruplayacağınız"
+bestFor: "Merchant Center'a ürün dosyası yükleyen veya Shopify, WooCommerce ya da bir feed uygulamasından dışa aktarılan feed'i kontrol eden mağaza sahipleri"
+timeToComplete: "10 dakika"
+---
+
+## Merchant Center dosyanızı nasıl okur
+
+Merchant Center ürün dosyasında her satırda bir ürün, ilk satırda da Google'ın özellik adları bulunur: `id`, `title`, `price` gibi. Google sekmeyle ayrılmış bir metin dosyası (.txt) kabul eder ve özellik adları, ürünleriniz hangi dilde olursa olsun her zaman İngilizcedir.
+
+Yüklemeden sonra Google her ürünü kontrol eder ve sorunları **Ürünler → İlgilenilmesi gerekenler** altında listeler. Bir üründeki sorun diğerlerini durdurmaz; bu yüzden bir dosya "kabul edilmiş" görünürken ürünlerin yarısı reddedilmiş olabilir. Reddedilmelerin çoğu, aşağıda açıklanan kısa bir biçim hatası listesinden gelir.
+
+Her ürün şu özelliklere ihtiyaç duyar:
+
+| Özellik | Örnek | Notlar |
+|---|---|---|
+| id | MUG-01 | En fazla 50 karakter, benzersiz ve zaman içinde sabit |
+| title | Acme Ceramic Coffee Mug, 12 oz | En fazla 150 karakter |
+| description | Hand-thrown stoneware mug… | En fazla 5000 karakter |
+| link | https://shop.example.com/products/mug | Ürün sayfası |
+| image_link | https://shop.example.com/images/mug.jpg | Ana görsel |
+| availability | in_stock | Google'ın dört değerinden biri |
+| price | 18.00 USD | Bir sayı ve bir para birimi kodu |
+
+Yeni ürünlerin ayrıca `brand`, barkodlu ürünlerin de `gtin` alanına ihtiyacı vardır.
+
+---
+
+## Para birimi kodu olmayan fiyat
+
+**Neden:** Fiyat yalnızca bir sayıdır (`18.00`) ya da `$` işareti kullanır. Birçok ülke dolar kullandığı için Google hangisini kastettiğinizi bilemez.
+
+**Çözüm:** Sayıyı ondalık ayırıcı olarak nokta kullanarak yazın, bir boşluk bırakın ve ISO 4217 kodunu ekleyin: `18.00 USD`, `24.95 CAD`, `19.99 EUR`. Binlik ayırıcı kullanmayın: `1,299.00 GBP` değil, `1299.00 GBP`.
+
+İndirimlerde normal fiyatı `price`'ta tutun, düşük fiyatı `sale_price`'a yazın. `sale_price`, `price`'tan düşük değilse Google onu yok sayar.
+
+---
+
+## Stok durumu ve ön sipariş tarihleri
+
+**Neden:** `availability`, mağazanın kendi ifadelerini içerir; örneğin `In Stock`, `sold out` veya `Available`. Google yalnızca dört değer kabul eder: `in_stock`, `out_of_stock`, `preorder` ve `backorder`.
+
+**Çözüm:** Değerleri Google'ınkilerle değiştirin. `preorder` için ayrıca gönderim tarihi olan `availability_date`'i ISO 8601 biçiminde ekleyin: `2026-12-01T09:00-0500`. Google `backorder` için de tarih ister.
+
+`condition` da aynı şekilde çalışır: yalnızca `new`, `used` ve `refurbished` kabul edilir.
+
+---
+
+## GTIN'ler ve tanımlayıcılar
+
+**Neden:** `gtin` yanlış sayıda haneye veya yanlış kontrol basamağına sahiptir. Çoğunlukla sebep elektronik tablodur: 13 haneli bir barkod `4.00638E+12` olarak görünür ve öyle kaydedilir, UPC'ler de baştaki sıfırı kaybeder.
+
+**Çözüm:**
+- Haneler korunsun diye yapıştırmadan önce barkod sütunlarını Metin olarak biçimlendirin
+- Barkodlar zaten bilimsel gösterimde görünüyorsa ambalajdan veya tedarikçiden yeniden kopyalayın
+- Boşlukları ve tireleri kaldırın: `4006-3813-3393-1` değil, `4006381333931`
+
+Barkodu olmayan bir ürünün üretici parça numarası `mpn` alanında olmalıdır. İkisi de olmayan el yapımı, özel veya vintage ürünlerde `identifier_exists`'i `no` yapın. GTIN uydurmayın: Google bunları GS1 veritabanıyla karşılaştırır.
+
+---
+
+## Görseller ve bağlantılar
+
+**Neden:** `link` veya `image_link`, `mug.jpg` gibi göreli bir yoldur ya da görsel bir oturum açma ekranının arkasındadır veya tarayıcılara kapalıdır.
+
+**Çözüm:** Ürün sayfası ve her görsel için `https://` ile başlayan tam adresi kullanın. `additional_image_link` alanına virgülle ayrılmış en fazla 10 ek görsel eklenebilir. Yüklendiklerini kontrol etmek için birkaç bağlantıyı gizli tarayıcı penceresinde açın.
+
+---
+
+## Varyantlar: item_group_id
+
+Üç bedenli bir tişört Google için her birinin kendi `id`, `price` ve `availability` değeri olan üç üründür. Bunları seçenekli tek bir ürün olarak göstermek için üçüne de aynı `item_group_id` değerini verin ve farklı olan özelliği, örneğin `size` veya `color`'ı doldurun.
+
+### Örnek
+
+```
+id         item_group_id  title                     size  price
+TEE-S      TEE            Organic Cotton Tee - S    S     24.00 USD
+TEE-M      TEE            Organic Cotton Tee - M    M     24.00 USD
+TEE-L      TEE            Organic Cotton Tee - L    L     24.00 USD
+```
+
+Giyim için Google birçok ülkede ayrıca `color`, `size`, `gender` ve `age_group` ister. `gender` `male`, `female` veya `unisex`; `age_group` ise `newborn`, `infant`, `toddler`, `kids` veya `adult` alır.
+
+---
+
+## Yüklemeden önce
+
+1. Her fiyatın para birimi kodu olduğunu kontrol edin
+2. `availability` ve `condition`'ın yalnızca Google'ın değerlerini kullandığını kontrol edin
+3. Her barkodun 8, 12, 13 veya 14 haneli olduğunu ve hiçbirinin `E+12` olarak görünmediğini kontrol edin
+4. Bağlantıların ve görsellerin `https://` ile başladığını kontrol edin
+5. Sekmeyle ayrılmış metin (.txt) olarak kaydedin
+
+[Merchant Center feed denetleyicisi](/google-merchant-center-feed-checker) beş kontrolün hepsini tarayıcınızda yapar ve yapabildiği değerleri dönüştürür. Bir mağaza dışa aktarımıyla mı başlıyorsunuz? [Shopify'dan Merchant Center'a dönüştürücü](/migrate/shopify-to-google-merchant-center) feed'i sizin için oluşturur.
