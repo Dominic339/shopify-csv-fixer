@@ -64,6 +64,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...GUIDE_PLATFORMS.flatMap((p) => translated(`/guides/${p}`, "monthly", 0.75)),
     ...getAllGuides().flatMap((g) => {
       const path = `/guides/${g.platform}/${g.slug}`;
+      // Guides for rules the fixer doesn't run are noindex (see guideMetadata), so they stay out.
+      if (g.kind === "issue" && g.checkedByFixer === false) return [];
       if (g.kind !== "curated") return translated(path, "monthly", 0.7);
       return translated(path, "monthly", 0.7, LOCALES.filter((l) => readCuratedGuide(g.platform, g.slug, l)?.translated));
     }),

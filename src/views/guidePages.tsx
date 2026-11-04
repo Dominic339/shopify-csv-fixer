@@ -342,6 +342,8 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
     keywords: [guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
     // Until a language has the article body, its copy points its canonical at the English page.
     alternates: pageAlternates(locale, path, bodyLocales),
+    // Guides for rules the fixer doesn't run are short reference pages: reachable, but not indexed.
+    ...(english.kind === "issue" && english.checkedByFixer === false ? { robots: { index: false, follow: true } } : {}),
     openGraph: { images: SHARE_IMAGES, title, description, url },
     twitter: { card: "summary_large_image", title, description, images: SHARE_IMAGES },
   };
@@ -611,6 +613,8 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
                 </div>
               )}
             </section>
+
+            {expanded.causes.length > 0 && <Steps title={t.guide.causesTitle} items={expanded.causes} numbered />}
 
             {expanded.validValues?.length ? <Steps title={t.guide.validValues} items={expanded.validValues} /> : null}
 

@@ -6,6 +6,8 @@
 // other languages look the template up in src/i18n/guideText/<locale>.json first
 // (see guideTextTranslator in src/lib/guides/localizeGuide.ts).
 
+import { issueCauses } from "./issueCauses";
+
 export type IssueType =
   | "boolean"
   | "required_field"
@@ -37,6 +39,8 @@ export type ExpandedIssueContent = {
   detectionNote: string;
   /** Collapsible deep-dive: parsing internals, regex patterns, heuristics used. */
   technicalDetail: string;
+  /** Hand-written causes, for the guides that have them (empty otherwise). */
+  causes: string[];
 };
 
 /**
@@ -1102,5 +1106,6 @@ function expandBase(input: IssueInput, issueType: IssueType, column: string, tr:
     platformNote: getPlatformNote(issueType, input, tr),
     detectionNote: getDetectionNote(issueType, input, column, tr),
     technicalDetail: getTechnicalDetail(issueType, input, column, tr),
+    causes: issueCauses(input.issueCode).map((c) => tr(c)),
   };
 }
