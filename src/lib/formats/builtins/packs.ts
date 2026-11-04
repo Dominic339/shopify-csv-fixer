@@ -5,6 +5,7 @@ import { woocommerceVariableProductsFormat } from "./woocommerceVariableProducts
 import { etsyListings } from "./etsyListings";
 import { ebayListingsFormat, ebayVariationsFormat } from "./ebayListings";
 import { amazonInventoryFormat } from "./amazonProducts";
+import { googleMerchantFormat } from "./googleMerchant";
 
 type FormatSpec = {
   id: string;
@@ -189,6 +190,7 @@ export const formatPackEcommerce: CsvFormat[] = [
   ebayListingsFormat,
   ebayVariationsFormat,
   amazonInventoryFormat,
+  googleMerchantFormat,
 ];
 
 // Marketing

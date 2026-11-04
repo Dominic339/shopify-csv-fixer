@@ -874,5 +874,125 @@
 "explanation": "product-id 的长度或字符与其类型不符。",
 "whyPlatformCares": "Amazon 通过此 ID 将报价与商品匹配；ID 错误会导致报错，或将报价关联到错误的商品。",
 "howToFix": "请核对条形码或 ASIN：UPC 为 12 位，EAN 为 13 位，ISBN 为 10 位或 13 位，ASIN 为 10 位字母和数字。"
+},
+"google/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "缺少 Google 要求每个商品都必须提供的某个属性列：id、title、description、link、image_link、availability 或 price。",
+"whyPlatformCares": "缺少这些属性时 Merchant Center 无法展示商品，因此文件中的所有商品都会被拒登。",
+"howToFix": "按 Google 的属性名称（例如 image_link）在标题行中添加缺少的列，并为每个商品填写。"
+},
+"google/missing_value": {
+"title": "必填属性为空",
+"explanation": "此行的某个必填属性（id、title、description、link、image_link、availability 或 price）为空。",
+"whyPlatformCares": "缺少必填属性的商品会被拒登，不会出现在购物广告和免费商品详情中。",
+"howToFix": "填写该值。如果商品不应上架，请删除这一行，而不是留着一半为空。"
+},
+"google/duplicate_id": {
+"title": "id 重复",
+"explanation": "两行或更多行使用了相同的 id。",
+"whyPlatformCares": "Google 通过 id 识别每个商品。出现重复时，一行会覆盖另一行，可能显示错误商品的数据。",
+"howToFix": "为每个商品和每个变体设置唯一的 id。最简单的做法是使用 SKU。"
+},
+"google/id_too_long": {
+"title": "id 超过 50 个字符",
+"explanation": "Google 允许 id 最多 50 个字符。",
+"whyPlatformCares": "超出限制的 id 会被拒绝，商品无法添加。",
+"howToFix": "使用更短的 id，例如 SKU。商品上线后请保持 id 不变，因为更改会重置商品的历史记录。"
+},
+"google/title_too_long": {
+"title": "标题超过 150 个字符",
+"explanation": "Google 允许 title 最多 150 个字符。",
+"whyPlatformCares": "超出部分会被截断，而且购物者通常只能看到前 70 个字符左右。",
+"howToFix": "把最重要的信息（品牌、商品、颜色、尺码）放在前面，删减其余内容。"
+},
+"google/description_too_long": {
+"title": "描述超过 5000 个字符",
+"explanation": "Google 允许 description 最多 5000 个字符。",
+"whyPlatformCares": "超出部分会被截断，可能丢失购物者依赖的细节。",
+"howToFix": "把描述精简为商品本身的信息；不要写配送和店铺信息。"
+},
+"google/invalid_url": {
+"title": "链接或图片网址无效",
+"explanation": "link、image_link 或 additional_image_link 不是以 http:// 或 https:// 开头的完整网址。",
+"whyPlatformCares": "Google 需要加载商品页面和图片。相对网址或失效网址会导致商品被拒登。",
+"howToFix": "商品页面和每张图片都使用包含 https:// 和域名的完整地址。"
+},
+"google/too_many_images": {
+"title": "附加图片超过 10 张",
+"explanation": "additional_image_link 中的网址超过 10 个。",
+"whyPlatformCares": "Google 最多使用 10 张附加图片，其余会被忽略。",
+"howToFix": "保留最有用的 10 张附加图片，用逗号分隔。"
+},
+"google/invalid_availability": {
+"title": "availability 值无效",
+"explanation": "availability 必须是 in_stock、out_of_stock、preorder 或 backorder。",
+"whyPlatformCares": "Google 只接受自己的取值，其他值会导致商品被拒登。",
+"howToFix": "使用这四个值之一。“In Stock”或“pre-order”等常见写法会自动转换。"
+},
+"google/missing_availability_date": {
+"title": "预购或延期交货缺少日期",
+"explanation": "availability 为 preorder 或 backorder，但 availability_date 为空。",
+"whyPlatformCares": "Google 要求预购商品提供发货日期，延期交货也需要该日期。",
+"howToFix": "按 ISO 8601 格式添加 availability_date，例如 2026-12-01T09:00-0500，最远一年以内。"
+},
+"google/price_missing_currency": {
+"title": "价格缺少货币代码",
+"explanation": "价格有数字但没有货币代码，或者只有多种货币通用的 $ 符号。",
+"whyPlatformCares": "Google 需要 ISO 4217 货币代码（USD、CAD、EUR 等）才能显示正确的价格。",
+"howToFix": "将价格写成数字加代码，例如 19.99 USD。€ 或 £ 等只代表一种货币的符号会自动转换。"
+},
+"google/invalid_price": {
+"title": "价格无效",
+"explanation": "price 不是带货币代码的数字，或者为 0。",
+"whyPlatformCares": "没有有效价格或价格为 0 的商品会被拒登。",
+"howToFix": "使用句点作为小数点并加上货币代码，例如 19.99 USD。19,99 EUR 这样的价格会自动转换。"
+},
+"google/invalid_sale_price": {
+"title": "促销价无效",
+"explanation": "sale_price 不是有效价格，或者不低于 price。",
+"whyPlatformCares": "只有当 sale_price 有效且低于原价时，Google 才会显示促销，否则会忽略它。",
+"howToFix": "原价填在 price，较低的促销价填在 sale_price，两者都带货币代码。"
+},
+"google/invalid_condition": {
+"title": "condition 值无效",
+"explanation": "condition 必须是 new、used 或 refurbished。",
+"whyPlatformCares": "Google 会拒绝其他值。二手和翻新商品必须提供 condition。",
+"howToFix": "使用 new、used 或 refurbished。大写的值和“renewed”会自动转换。"
+},
+"google/missing_brand": {
+"title": "缺少品牌",
+"explanation": "新商品没有品牌（brand）。",
+"whyPlatformCares": "除图书、音乐和影片外，Google 要求新商品提供品牌。缺少品牌的商品可能受限或被拒登。",
+"howToFix": "填写制造商的品牌名称。自有商品请使用店铺的品牌。"
+},
+"google/invalid_gtin": {
+"title": "GTIN 无效",
+"explanation": "gtin 不是带正确校验位的 8、12、13 或 14 位数字，或者被电子表格转成了科学计数法。",
+"whyPlatformCares": "Google 会按 GS1 规则检查每个 GTIN。错误的 GTIN 会导致商品被拒登或匹配到错误的商品。",
+"howToFix": "从包装或供应商处复制条形码。空格、连字符以及经校验位证实缺失的前导零会自动修复。"
+},
+"google/missing_identifiers": {
+"title": "没有 GTIN 或 MPN",
+"explanation": "新商品既没有 gtin 也没有 mpn，且 identifier_exists 未设为 no。",
+"whyPlatformCares": "Google 通过标识符匹配商品。没有标识符的品牌商品可能受限。",
+"howToFix": "添加 GTIN（条形码）或制造商部件号。如果商品确实两者都没有，例如手工或定制商品，请将 identifier_exists 设为 no。"
+},
+"google/invalid_yes_no": {
+"title": "yes/no 值无效",
+"explanation": "identifier_exists、adult 或 is_bundle 必须是 yes 或 no。",
+"whyPlatformCares": "其他值会被忽略，Google 会使用该属性的默认值。",
+"howToFix": "使用 yes 或 no。TRUE/FALSE、Y/N 和 1/0 会自动转换。"
+},
+"google/invalid_gender": {
+"title": "gender 值无效",
+"explanation": "gender 必须是 male、female 或 unisex。",
+"whyPlatformCares": "许多国家/地区要求服装提供 gender，且不接受其他值。",
+"howToFix": "使用 male、female 或 unisex。“Men”或“Women's”等值会自动转换。"
+},
+"google/invalid_age_group": {
+"title": "age_group 值无效",
+"explanation": "age_group 必须是 newborn、infant、toddler、kids 或 adult。",
+"whyPlatformCares": "许多国家/地区要求服装提供 age_group，且不接受其他值。",
+"howToFix": "使用 Google 的五个值之一。“Adults”和“children”会自动转换。"
 }
 }

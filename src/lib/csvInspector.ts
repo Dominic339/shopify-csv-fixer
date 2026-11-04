@@ -15,7 +15,8 @@ export type DetectedPlatform =
   | "woocommerce_products"
   | "etsy_listings"
   | "ebay_listings"
-  | "amazon_inventory_loader";
+  | "amazon_inventory_loader"
+  | "google_merchant_center";
 
 export type InspectorResult = {
   rowCount: number;
@@ -117,6 +118,7 @@ export function detectPlatform(headers: string[]): DetectedPlatform | null {
 
   if (headers.some((x) => /^\*?action\(/i.test(x.trim()))) return "ebay_listings";
   if (has("sku", "product-id", "product-id-type")) return "amazon_inventory_loader";
+  if (has("id", "title", "link", "image_link") && (h.has("availability") || h.has("price"))) return "google_merchant_center";
   if ((h.has("handle") || h.has("url handle")) && (h.has("title") || h.has("option1 name"))) return "shopify_products";
   if (has("type", "sku") && (h.has("regular price") || h.has("parent") || h.has("published"))) return "woocommerce_products";
   if (has("title", "description", "price", "quantity") && (h.has("tags") || h.has("image1") || h.has("materials"))) {

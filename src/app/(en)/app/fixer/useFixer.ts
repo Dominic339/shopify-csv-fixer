@@ -89,7 +89,7 @@ function downloadText(filename: string, text: string) {
 }
 
 function safeBaseName(name: string | null) {
-  const base = (name ?? "csv").replace(/\.csv$/i, "").trim() || "csv";
+  const base = (name ?? "csv").replace(/\.(csv|tsv|txt)$/i, "").trim() || "csv";
   return base.replace(/[^\w\d._-]+/g, "_");
 }
 
@@ -161,14 +161,10 @@ export function useFixer(t: AppStrings) {
   const [activeWorkspaceDocId, setActiveWorkspaceDocId] = useState<string | null>(null);
   const [docStatuses, setDocStatuses] = useState<Map<string, DocStatus>>(new Map());
 
-  // Initialize the selected format from the URL query param if present.
-  // This prevents the "keep valid" fallback from snapping to the first format
-  // before the preset can be applied.
-  const [formatId, setFormatId] = useState<string>(() => {
-    if (typeof window === "undefined") return "shopify_products";
-    const preset = new URLSearchParams(window.location.search).get("preset");
-    return preset?.trim() ? preset.trim() : "shopify_products";
-  });
+  // Start on Shopify on the server and the client alike; the ?preset= effect below switches to
+  // the requested format after hydration. Reading the URL here made the first client render
+  // differ from the server HTML, and React kept the server's highlighted format chip.
+  const [formatId, setFormatId] = useState<string>("shopify_products");
 
   const builtinFormats = useMemo<CsvFormat[]>(() => getAllFormats(), []);
   const [customFormats, setCustomFormats] = useState<CsvFormat[]>([]);

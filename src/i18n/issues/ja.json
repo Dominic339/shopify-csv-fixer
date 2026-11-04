@@ -874,5 +874,125 @@
 "explanation": "product-id の長さや文字が、その種類に合っていません。",
 "whyPlatformCares": "Amazon はこの ID で出品と商品を照合します。ID が間違っていると、エラーになったり別の商品に紐付いたりします。",
 "howToFix": "バーコードまたは ASIN を確認してください。UPC は 12 桁、EAN は 13 桁、ISBN は 10 桁か 13 桁、ASIN は英数字 10 文字です。"
+},
+"google/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "Google がすべての商品に求める属性の列がありません：id、title、description、link、image_link、availability、price。",
+"whyPlatformCares": "これらの属性がないと Merchant Center は商品を表示できないため、ファイル内のすべての商品が不承認になります。",
+"howToFix": "不足している列を、Google の属性名どおりの綴り（例：image_link）でヘッダー行に追加し、すべての商品で入力してください。"
+},
+"google/missing_value": {
+"title": "必須属性が空です",
+"explanation": "この行で必須属性（id、title、description、link、image_link、availability、price）が空になっています。",
+"whyPlatformCares": "必須属性が欠けた商品は不承認となり、ショッピング広告や無料リスティングに表示されません。",
+"howToFix": "値を入力してください。掲載しない商品なら、半分空のまま残さず行を削除してください。"
+},
+"google/duplicate_id": {
+"title": "id が重複しています",
+"explanation": "2 行以上で同じ id が使われています。",
+"whyPlatformCares": "Google は id で各商品を識別します。重複があると一方の行がもう一方を上書きし、別の商品のデータが表示されることがあります。",
+"howToFix": "すべての商品とバリエーションに固有の id を付けてください。SKU を使うのが最も簡単です。"
+},
+"google/id_too_long": {
+"title": "id が 50 文字を超えています",
+"explanation": "Google の id は最大 50 文字です。",
+"whyPlatformCares": "上限を超える id は拒否され、商品を追加できません。",
+"howToFix": "SKU など短い id を使ってください。商品の公開後は id を変更しないでください。変更すると商品の履歴がリセットされます。"
+},
+"google/title_too_long": {
+"title": "タイトルが 150 文字を超えています",
+"explanation": "Google の title は最大 150 文字です。",
+"whyPlatformCares": "上限を超えた部分は切り捨てられ、買い物客に表示されるのは通常最初の 70 文字程度です。",
+"howToFix": "最も重要な情報（ブランド、商品、色、サイズ）を先頭に置き、残りを削ってください。"
+},
+"google/description_too_long": {
+"title": "説明が 5000 文字を超えています",
+"explanation": "Google の description は最大 5000 文字です。",
+"whyPlatformCares": "上限を超えた部分は切り捨てられ、買い物客が必要とする情報が抜けることがあります。",
+"howToFix": "説明は商品に関する事実に絞り、配送やストアの情報は省いてください。"
+},
+"google/invalid_url": {
+"title": "リンクまたは画像 URL が無効です",
+"explanation": "link、image_link、additional_image_link が http:// または https:// で始まる完全なウェブアドレスではありません。",
+"whyPlatformCares": "Google は商品ページと画像を読み込む必要があります。相対 URL や壊れた URL だと商品は不承認になります。",
+"howToFix": "商品ページとすべての画像に、https:// とドメインを含む完全なアドレスを使ってください。"
+},
+"google/too_many_images": {
+"title": "追加画像が 10 枚を超えています",
+"explanation": "additional_image_link に 10 個を超える URL があります。",
+"whyPlatformCares": "Google が使う追加画像は最大 10 枚で、残りは無視されます。",
+"howToFix": "最も役立つ追加画像 10 枚をカンマ区切りで残してください。"
+},
+"google/invalid_availability": {
+"title": "availability の値が無効です",
+"explanation": "availability は in_stock、out_of_stock、preorder、backorder のいずれかにする必要があります。",
+"whyPlatformCares": "Google は独自の値しか受け付けません。それ以外の値だと商品は不承認になります。",
+"howToFix": "4 つの値のいずれかを使ってください。「In Stock」や「pre-order」などのよくある表記は自動で変換されます。"
+},
+"google/missing_availability_date": {
+"title": "予約注文・取り寄せに日付がありません",
+"explanation": "availability が preorder または backorder ですが、availability_date が空です。",
+"whyPlatformCares": "Google は予約注文商品の発送日を必須とし、取り寄せでも日付を求めます。",
+"howToFix": "availability_date を ISO 8601 形式（例：2026-12-01T09:00-0500）で、1 年以内の日付で追加してください。"
+},
+"google/price_missing_currency": {
+"title": "価格に通貨コードがありません",
+"explanation": "価格に数値はありますが通貨コードがないか、複数の通貨で使われる $ 記号だけです。",
+"whyPlatformCares": "Google が正しい価格を表示するには ISO 4217 の通貨コード（USD、CAD、EUR など）が必要です。",
+"howToFix": "価格は数値の後にコードを付けて、19.99 USD のように書いてください。€ や £ など 1 つの通貨を示す記号は自動で変換されます。"
+},
+"google/invalid_price": {
+"title": "価格が無効です",
+"explanation": "price が通貨コード付きの数値ではないか、0 です。",
+"whyPlatformCares": "有効な価格がない商品や価格が 0 の商品は不承認になります。",
+"howToFix": "小数点にはピリオドを使い、通貨コードを付けてください（例：19.99 USD）。19,99 EUR のような価格は自動で変換されます。"
+},
+"google/invalid_sale_price": {
+"title": "セール価格が無効です",
+"explanation": "sale_price が有効な価格ではないか、price より低くありません。",
+"whyPlatformCares": "Google がセールを表示するのは、sale_price が有効で通常価格より低い場合だけです。それ以外は無視されます。",
+"howToFix": "通常価格は price に、低いセール価格は sale_price に、どちらも通貨コード付きで入力してください。"
+},
+"google/invalid_condition": {
+"title": "condition の値が無効です",
+"explanation": "condition は new、used、refurbished のいずれかにする必要があります。",
+"whyPlatformCares": "Google はそれ以外の値を拒否します。中古品と再生品では condition が必須です。",
+"howToFix": "new、used、refurbished を使ってください。大文字の値や「renewed」は自動で変換されます。"
+},
+"google/missing_brand": {
+"title": "ブランドがありません",
+"explanation": "新品の商品にブランド（brand）がありません。",
+"whyPlatformCares": "Google は書籍、音楽、映画を除く新品にブランドを求めます。ないと商品が制限されたり不承認になったりします。",
+"howToFix": "メーカーのブランド名を入力してください。自社商品にはストアのブランドを使ってください。"
+},
+"google/invalid_gtin": {
+"title": "GTIN が無効です",
+"explanation": "gtin が正しいチェックディジットを持つ 8、12、13、14 桁ではないか、スプレッドシートで指数表記に変わっています。",
+"whyPlatformCares": "Google はすべての GTIN を GS1 の規則で確認します。誤った GTIN は不承認や別商品との誤った照合につながります。",
+"howToFix": "バーコードはパッケージか仕入先からコピーしてください。スペース、ハイフン、チェックディジットで確認できる先頭の 0 の欠落は自動で修正されます。"
+},
+"google/missing_identifiers": {
+"title": "GTIN も MPN もありません",
+"explanation": "新品の商品に gtin も mpn もなく、identifier_exists が no になっていません。",
+"whyPlatformCares": "Google は識別子で商品を照合します。識別子のないブランド商品は制限されることがあります。",
+"howToFix": "GTIN（バーコード）またはメーカー型番を追加してください。手作り品やオーダーメイド品など本当にどちらもない場合は、identifier_exists を no にしてください。"
+},
+"google/invalid_yes_no": {
+"title": "yes/no の値が無効です",
+"explanation": "identifier_exists、adult、is_bundle は yes または no にする必要があります。",
+"whyPlatformCares": "それ以外の値は無視され、Google はその属性の既定値を使います。",
+"howToFix": "yes または no を使ってください。TRUE/FALSE、Y/N、1/0 は自動で変換されます。"
+},
+"google/invalid_gender": {
+"title": "gender の値が無効です",
+"explanation": "gender は male、female、unisex のいずれかにする必要があります。",
+"whyPlatformCares": "多くの国でアパレルには gender が必須で、それ以外の値は受け付けられません。",
+"howToFix": "male、female、unisex を使ってください。「Men」や「Women's」などの値は自動で変換されます。"
+},
+"google/invalid_age_group": {
+"title": "age_group の値が無効です",
+"explanation": "age_group は newborn、infant、toddler、kids、adult のいずれかにする必要があります。",
+"whyPlatformCares": "多くの国でアパレルには age_group が必須で、それ以外の値は受け付けられません。",
+"howToFix": "Google の 5 つの値のいずれかを使ってください。「Adults」や「children」は自動で変換されます。"
 }
 }

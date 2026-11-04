@@ -72,6 +72,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     shortDescription: "Normalize Amazon inventory CSV templates so uploads are less error prone.",
     searchKeywords: ["amazon inventory csv", "amazon csv", "fix amazon csv"],
   },
+  {
+    id: "google_merchant_center",
+    slug: "google-merchant-center",
+    name: "Google Merchant Center Feed",
+    category: "Ecommerce",
+    shortDescription: "Check Google Shopping product feeds against Merchant Center's product data rules before upload.",
+    searchKeywords: ["google merchant center feed", "google shopping feed", "merchant center product data", "fix google shopping feed"],
+  },
 ];
 
 export function getPresetById(id: string) {

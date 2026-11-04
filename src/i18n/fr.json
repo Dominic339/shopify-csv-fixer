@@ -327,6 +327,8 @@
     "desc_ebay_listings": "Corrige les problèmes CSV courants des annonces eBay : ID manquants, valeurs invalides, URL incorrectes et champs de prix ou de quantité incohérents.",
     "name_ebay_variations": "Variations eBay",
     "desc_ebay_variations": "Valide les CSV de variantes eBay : appairage des spécifiques, combos de variations dupliquées, champs prix et quantité.",
+    "name_google_merchant_center": "Flux Google Merchant Center",
+    "desc_google_merchant_center": "Vérifiez un fichier produits Google Merchant Center avant de l'importer : attributs obligatoires, prix avec devise, disponibilité, GTIN et identifiants.",
     "checksCount": "{count} vérifications",
     "checksShared": "Les préréglages WooCommerce partagent leurs contrôles, tout comme les préréglages eBay : les nombres ci-dessous se recoupent. Le total de la page d'accueil compte chaque contrôle une seule fois.",
     "templateTitle": "Modèle CSV {name}",

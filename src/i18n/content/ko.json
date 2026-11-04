@@ -312,6 +312,45 @@
 "a": "DEFAULT는 주문을 직접 배송한다는 뜻입니다. AMAZON_NA, AMAZON_EU, AMAZON_FE, AMAZON_IN은 해당 지역의 FBA(Fulfillment by Amazon)를 뜻합니다."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center는 제품 데이터 파일을 바탕으로 쇼핑 광고와 무료 등록정보에 제품을 표시합니다. 한 줄에 제품 하나, 헤더 행에는 Google의 속성 이름을 씁니다. 이 프리셋은 Google 제품 데이터 사양에 따라 각 제품을 확인하고 열 이름은 그대로 유지합니다.",
+"제품이 비승인되는 원인을 찾아냅니다: 누락된 필수 속성, 통화 코드 없는 가격, Google이 받지 않는 재고 상태 값, 날짜 없는 예약 주문, 중복 id, 검사 숫자가 틀린 GTIN."
+],
+"howItWorks": [
+"제품 파일(탭으로 구분된 .txt 또는 .tsv, 또는 피드의 CSV 내보내기)을 업로드하세요.",
+"각 제품의 id, title, description, link, image_link, availability, price를 확인합니다.",
+"\"In Stock\", \"New\", \"19,99 EUR\", TRUE 같은 값을 Google 형식으로 변환합니다.",
+"GTIN을 검사 숫자로 확인하고 중복 id를 표시합니다.",
+"원래 열을 그대로 둔, 바로 업로드할 수 있는 탭 구분 .txt 파일을 다운로드하세요."
+],
+"commonFixes": [
+"availability를 in_stock, out_of_stock, preorder 또는 backorder로 변환",
+"가격을 마침표와 통화 코드를 넣어 19.99 USD 형식으로 작성",
+"condition을 new, used 또는 refurbished로 변환",
+"GTIN을 정리하고 검사 숫자로 확인되는 앞자리 0 복원",
+"identifier_exists, adult, is_bundle을 yes 또는 no로 변환",
+"파일을 깨뜨리는 탭과 줄바꿈 제거"
+],
+"faq": [
+{
+"q": "Merchant Center는 어떤 파일 형식을 받나요?",
+"a": "첫 행에 Google 속성 이름, 각 줄에 제품 하나가 있는 탭 구분 텍스트 파일(.txt)입니다. 수정 도구는 이 형식으로 다운로드합니다."
+},
+{
+"q": "가격은 어떻게 써야 하나요?",
+"a": "소수점을 마침표로 쓴 숫자 뒤에 ISO 4217 통화 코드를 붙입니다(예: 15.00 USD). 여러 통화가 쓰기 때문에 $ 기호만으로는 부족합니다."
+},
+{
+"q": "제품에 바코드가 없으면요?",
+"a": "대신 제조업체 부품 번호(mpn)를 입력하세요. 둘 다 없는 수제품이나 맞춤 제품은 identifier_exists를 no로 설정하세요."
+},
+{
+"q": "필수 속성은 무엇인가요?",
+"a": "모든 제품에 id, title, description, link, image_link, availability, price가 필요하고, 새 제품에는 brand, 의류에는 color, size, gender, age_group 등이 더 필요합니다."
+}
+]
 }
 }
 }

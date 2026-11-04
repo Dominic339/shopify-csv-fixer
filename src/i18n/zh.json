@@ -336,7 +336,9 @@
     "name_ebay_listings": "eBay 刊登",
     "desc_ebay_listings": "修复 eBay 刊登 CSV 的常见问题:缺失的 ID、无效值、失效的链接,以及不一致的价格或数量。",
     "name_ebay_variations": "eBay 多属性刊登",
-    "desc_ebay_variations": "验证 eBay 多属性刊登 CSV:变体属性配对、重复组合、价格和数量字段。"
+    "desc_ebay_variations": "验证 eBay 多属性刊登 CSV:变体属性配对、重复组合、价格和数量字段。",
+    "name_google_merchant_center": "Google Merchant Center Feed",
+    "desc_google_merchant_center": "上传前检查 Google Merchant Center 商品文件：必填属性、带货币的价格、库存状态、GTIN 和标识符。"
   },
   "convert": {
     "title": "CSV格式转换器",

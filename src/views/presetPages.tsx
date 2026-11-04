@@ -40,6 +40,7 @@ const KEYWORDS: Record<string, string[]> = {
   ebay_listings: ["ebay listing csv", "ebay file exchange csv", "ebay bulk upload csv", "fix ebay csv", "ebay csv template"],
   ebay_variations: ["ebay variations csv", "ebay relationshipdetails", "ebay variation listing csv", "fix ebay variations"],
   amazon_inventory_loader: ["amazon inventory loader", "amazon inventory file", "amazon flat file csv", "fix amazon csv", "amazon product-id-type"],
+  google_merchant_center: ["google merchant center feed", "google shopping feed template", "merchant center product data", "fix google shopping feed", "google shopping feed errors"],
 };
 
 const FIXER_PAGES: Array<{ href: string; platform: string; variations?: boolean }> = [

@@ -36,7 +36,8 @@ export function UploadPanel({ f, t }: { f: Fixer; t: AppStrings }) {
       {hasFile ? t.replaceFile : t.chooseFile}
       <input
         type="file"
-        accept=".csv,text/csv"
+        accept=".csv,.txt,.tsv,text/csv,text/tab-separated-values,text/plain"
+        data-testid="fixer-file-input"
         className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0];

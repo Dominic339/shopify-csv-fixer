@@ -312,6 +312,45 @@
 "a": "DEFAULT bedeutet, dass du die Bestellung selbst verschickst. AMAZON_NA, AMAZON_EU, AMAZON_FE oder AMAZON_IN bedeutet Versand durch Amazon in dieser Region."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center zeigt deine Produkte in Shopping-Anzeigen und kostenlosen Einträgen anhand einer Produktdatendatei: ein Produkt pro Zeile, mit Googles Attributnamen in der Kopfzeile. Diese Vorlage prüft jedes Produkt anhand von Googles Produktdatenspezifikation und lässt deine Spaltennamen unverändert.",
+"Sie findet die Probleme, die zur Ablehnung von Produkten führen: fehlende Pflichtattribute, Preise ohne Währungscode, Verfügbarkeitswerte, die Google nicht akzeptiert, Vorbestellungen ohne Datum, doppelte ids und GTINs mit falscher Prüfziffer."
+],
+"howItWorks": [
+"Lade deine Produktdatei hoch (tabulatorgetrennte .txt oder .tsv oder einen CSV-Export deines Feeds).",
+"Jedes Produkt wird auf id, title, description, link, image_link, availability und price geprüft.",
+"Werte wie „In Stock“, „New“, „19,99 EUR“ und TRUE werden in Googles Format umgewandelt.",
+"GTINs werden anhand ihrer Prüfziffer kontrolliert, und doppelte ids werden markiert.",
+"Lade eine tabulatorgetrennte .txt-Datei mit deinen ursprünglichen Spalten herunter, bereit zum Hochladen."
+],
+"commonFixes": [
+"availability in in_stock, out_of_stock, preorder oder backorder umwandeln",
+"Preise als 19.99 USD schreiben, mit Punkt und Währungscode",
+"condition in new, used oder refurbished umwandeln",
+"GTINs bereinigen und eine durch die Prüfziffer belegte führende Null ergänzen",
+"identifier_exists, adult und is_bundle in yes oder no umwandeln",
+"Tabulatoren und Zeilenumbrüche entfernen, die die Datei zerstören"
+],
+"faq": [
+{
+"q": "Welches Dateiformat akzeptiert Merchant Center?",
+"a": "Eine tabulatorgetrennte Textdatei (.txt) mit Googles Attributnamen in der ersten Zeile und einem Produkt pro Zeile. Der Fixer lädt genau dieses Format herunter."
+},
+{
+"q": "Wie sollen Preise geschrieben werden?",
+"a": "Als Zahl mit Punkt als Dezimaltrennzeichen, gefolgt vom ISO-4217-Währungscode, etwa 15.00 USD. Ein $-Zeichen allein reicht nicht, weil mehrere Währungen es verwenden."
+},
+{
+"q": "Was, wenn mein Produkt keinen Barcode hat?",
+"a": "Gib stattdessen die Herstellerteilenummer (mpn) an. Für handgefertigte oder individuelle Produkte ohne beides setze identifier_exists auf no."
+},
+{
+"q": "Welche Attribute sind Pflicht?",
+"a": "id, title, description, link, image_link, availability und price für jedes Produkt, dazu brand für neue Produkte und weitere für Bekleidung, etwa color, size, gender und age_group."
+}
+]
 }
 }
 }

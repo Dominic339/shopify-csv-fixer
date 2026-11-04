@@ -874,5 +874,125 @@
 "explanation": "product-id, türü için doğru uzunlukta veya doğru karakterlerde değil.",
 "whyPlatformCares": "Amazon teklifleri ürünlerle bu kimlik üzerinden eşleştirir; yanlış bir kimlik hatalara yol açar veya teklifi yanlış ürüne bağlar.",
 "howToFix": "Barkodu veya ASIN'i kontrol edin: UPC 12 hane, EAN 13, ISBN 10 veya 13, ASIN ise 10 harf ve rakamdır."
+},
+"google/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "Google'ın her üründe istediği özelliklerden birinin sütunu yok: id, title, description, link, image_link, availability veya price.",
+"whyPlatformCares": "Merchant Center bu özellikler olmadan bir ürünü gösteremez, bu yüzden dosyadaki tüm ürünler reddedilir.",
+"howToFix": "Eksik sütunu başlık satırına, Google'ın özelliği adlandırdığı şekilde (örneğin image_link) ekleyin ve her ürün için doldurun."
+},
+"google/missing_value": {
+"title": "Zorunlu özellik boş",
+"explanation": "Zorunlu bir özellik (id, title, description, link, image_link, availability veya price) bu satırda boş.",
+"whyPlatformCares": "Zorunlu bir özelliği eksik olan ürünler reddedilir ve Alışveriş reklamlarında ya da ücretsiz listelemelerde görünmez.",
+"howToFix": "Değeri doldurun. Ürün listelenmeyecekse satırı yarım bırakmak yerine silin."
+},
+"google/duplicate_id": {
+"title": "Yinelenen id",
+"explanation": "İki veya daha fazla satır aynı id'yi kullanıyor.",
+"whyPlatformCares": "Google her ürünü id'siyle tanır. Yinelemelerde bir satır diğerinin üzerine yazar ve yanlış ürünün verileri görünebilir.",
+"howToFix": "Her ürüne ve her varyanta kendi id'sini verin. En kolayı SKU'yu kullanmaktır."
+},
+"google/id_too_long": {
+"title": "id 50 karakterden uzun",
+"explanation": "Google id'de en fazla 50 karaktere izin verir.",
+"whyPlatformCares": "Sınırı aşan bir id reddedilir ve ürün eklenemez.",
+"howToFix": "SKU gibi daha kısa bir id kullanın. Ürünler yayına girdikten sonra id'leri değiştirmeyin; değişiklik ürünün geçmişini sıfırlar."
+},
+"google/title_too_long": {
+"title": "Başlık 150 karakterden uzun",
+"explanation": "Google title'da en fazla 150 karaktere izin verir.",
+"whyPlatformCares": "Sınırı aşan metin kesilir ve alışverişçiler genellikle yalnızca ilk 70 karakter kadarını görür.",
+"howToFix": "En önemli bilgileri (marka, ürün, renk, beden) başa koyun ve gerisini kısaltın."
+},
+"google/description_too_long": {
+"title": "Açıklama 5000 karakterden uzun",
+"explanation": "Google description'da en fazla 5000 karaktere izin verir.",
+"whyPlatformCares": "Sınırı aşan metin kesilir ve alışverişçilerin güvendiği ayrıntılar kaybolabilir.",
+"howToFix": "Açıklamayı ürünle ilgili bilgilere indirin; kargo ve mağaza bilgilerini çıkarın."
+},
+"google/invalid_url": {
+"title": "Geçersiz bağlantı veya görsel URL'si",
+"explanation": "link, image_link veya additional_image_link, http:// ya da https:// ile başlayan tam bir web adresi değil.",
+"whyPlatformCares": "Google'ın ürün sayfasını ve görseli yüklemesi gerekir. Göreli veya bozuk bir URL ürünün reddedilmesine yol açar.",
+"howToFix": "Ürün sayfası ve her görsel için https:// ve alan adınızı içeren tam adresi kullanın."
+},
+"google/too_many_images": {
+"title": "10'dan fazla ek görsel",
+"explanation": "additional_image_link 10'dan fazla URL içeriyor.",
+"whyPlatformCares": "Google en fazla 10 ek görsel kullanır ve gerisini yok sayar.",
+"howToFix": "En faydalı 10 ek görseli virgülle ayırarak tutun."
+},
+"google/invalid_availability": {
+"title": "Geçersiz availability değeri",
+"explanation": "availability in_stock, out_of_stock, preorder veya backorder olmalıdır.",
+"whyPlatformCares": "Google yalnızca kendi değerlerini kabul eder. Başka bir değer ürünün reddedilmesine yol açar.",
+"howToFix": "Dört değerden birini kullanın. \"In Stock\" veya \"pre-order\" gibi yaygın yazımlar otomatik olarak dönüştürülür."
+},
+"google/missing_availability_date": {
+"title": "Tarihsiz ön sipariş veya ileri sipariş",
+"explanation": "availability preorder veya backorder, ancak availability_date boş.",
+"whyPlatformCares": "Google ön siparişli ürünün gönderim tarihini zorunlu tutar, ileri siparişlerde de ister.",
+"howToFix": "availability_date'i ISO 8601 biçiminde, örneğin 2026-12-01T09:00-0500, en fazla bir yıl sonrası için ekleyin."
+},
+"google/price_missing_currency": {
+"title": "Para birimi kodu olmayan fiyat",
+"explanation": "Fiyatta bir sayı var ama para birimi kodu yok ya da yalnızca birçok para biriminin kullandığı $ işareti var.",
+"whyPlatformCares": "Google doğru fiyatı göstermek için ISO 4217 para birimi kodunu (USD, CAD, EUR...) ister.",
+"howToFix": "Fiyatı sayı ve ardından kod olarak yazın, örneğin 19.99 USD. € veya £ gibi tek bir para birimini gösteren simgeler otomatik olarak dönüştürülür."
+},
+"google/invalid_price": {
+"title": "Geçersiz fiyat",
+"explanation": "price para birimi kodlu bir sayı değil ya da 0.",
+"whyPlatformCares": "Geçerli fiyatı olmayan veya fiyatı 0 olan ürünler reddedilir.",
+"howToFix": "Ondalık ayırıcı olarak nokta kullanın ve para birimi kodunu ekleyin, örneğin 19.99 USD. 19,99 EUR gibi fiyatlar otomatik olarak dönüştürülür."
+},
+"google/invalid_sale_price": {
+"title": "Geçersiz indirimli fiyat",
+"explanation": "sale_price geçerli bir fiyat değil ya da price'tan düşük değil.",
+"whyPlatformCares": "Google indirimi yalnızca sale_price geçerli ve normal fiyattan düşükse gösterir; aksi halde yok sayılır.",
+"howToFix": "Normal fiyatı price'ta, daha düşük indirimli fiyatı sale_price'ta tutun; ikisinde de para birimi kodu olsun."
+},
+"google/invalid_condition": {
+"title": "Geçersiz condition değeri",
+"explanation": "condition new, used veya refurbished olmalıdır.",
+"whyPlatformCares": "Google diğer değerleri reddeder. İkinci el ve yenilenmiş ürünlerde condition zorunludur.",
+"howToFix": "new, used veya refurbished kullanın. Büyük harfli değerler ve \"renewed\" otomatik olarak dönüştürülür."
+},
+"google/missing_brand": {
+"title": "Marka eksik",
+"explanation": "Yeni bir ürünün markası (brand) yok.",
+"whyPlatformCares": "Google kitaplar, müzik ve filmler dışındaki yeni ürünler için marka ister. Marka olmadan ürünler kısıtlanabilir veya reddedilebilir.",
+"howToFix": "Üreticinin marka adını ekleyin. Kendi ürünleriniz için mağazanızın markasını kullanın."
+},
+"google/invalid_gtin": {
+"title": "Geçersiz GTIN",
+"explanation": "gtin doğru kontrol basamağına sahip 8, 12, 13 veya 14 haneli bir sayı değil ya da bir elektronik tablo onu bilimsel gösterime çevirmiş.",
+"whyPlatformCares": "Google her GTIN'i GS1 kurallarına göre denetler. Yanlış GTIN'ler ürünlerin reddedilmesine veya yanlış ürünle eşleşmesine yol açar.",
+"howToFix": "Barkodu ambalajdan veya tedarikçinizden kopyalayın. Boşluklar, tireler ve kontrol basamağıyla kanıtlanan eksik baştaki sıfır otomatik olarak düzeltilir."
+},
+"google/missing_identifiers": {
+"title": "GTIN veya MPN yok",
+"explanation": "Yeni bir üründe ne gtin ne de mpn var ve identifier_exists no olarak ayarlanmamış.",
+"whyPlatformCares": "Google ürünleri tanımlayıcılarla eşleştirir. Tanımlayıcısı olmayan markalı ürünler kısıtlanabilir.",
+"howToFix": "GTIN'i (barkod) veya üretici parça numarasını ekleyin. Ürünün gerçekten ikisi de yoksa, örneğin el yapımı veya özel ürünlerde, identifier_exists'i no yapın."
+},
+"google/invalid_yes_no": {
+"title": "Geçersiz evet/hayır değeri",
+"explanation": "identifier_exists, adult veya is_bundle yes ya da no olmalıdır.",
+"whyPlatformCares": "Diğer değerler yok sayılır ve Google o özelliğin varsayılanını kullanır.",
+"howToFix": "yes veya no kullanın. TRUE/FALSE, Y/N ve 1/0 otomatik olarak dönüştürülür."
+},
+"google/invalid_gender": {
+"title": "Geçersiz gender değeri",
+"explanation": "gender male, female veya unisex olmalıdır.",
+"whyPlatformCares": "Birçok ülkede giyimde gender zorunludur ve başka değerler kabul edilmez.",
+"howToFix": "male, female veya unisex kullanın. \"Men\" veya \"Women's\" gibi değerler otomatik olarak dönüştürülür."
+},
+"google/invalid_age_group": {
+"title": "Geçersiz age_group değeri",
+"explanation": "age_group newborn, infant, toddler, kids veya adult olmalıdır.",
+"whyPlatformCares": "Birçok ülkede giyimde age_group zorunludur ve başka değerler kabul edilmez.",
+"howToFix": "Google'ın beş değerinden birini kullanın. \"Adults\" ve \"children\" otomatik olarak dönüştürülür."
 }
 }

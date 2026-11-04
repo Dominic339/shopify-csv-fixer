@@ -189,6 +189,7 @@ function guessFormat(headers: string[]): string {
   if (has("TITLE") && has("TAGS")) return "etsy_listings";
   if (headers.some((h) => /^\*?Action\b/.test(h))) return "ebay_listings";
   if (has("sku") && has("product-id")) return "amazon_inventory_loader";
+  if (has("id") && has("link") && has("image_link")) return "google_merchant_center";
   return "";
 }
 

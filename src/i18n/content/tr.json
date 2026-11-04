@@ -312,6 +312,45 @@
 "a": "DEFAULT, siparişi kendiniz gönderdiğiniz anlamına gelir. AMAZON_NA, AMAZON_EU, AMAZON_FE veya AMAZON_IN o bölgede Amazon Lojistik (FBA) anlamına gelir."
 }
 ]
+},
+"google_merchant_center": {
+"longDescription": [
+"Google Merchant Center, ürünlerinizi bir ürün veri dosyasına göre Alışveriş reklamlarında ve ücretsiz listelemelerde gösterir: her satırda bir ürün, başlık satırında Google'ın özellik adları. Bu şablon her ürünü Google'ın ürün verisi spesifikasyonuna göre kontrol eder ve sütun adlarınızı olduğu gibi bırakır.",
+"Ürünlerin reddedilmesine yol açan sorunları yakalar: eksik zorunlu özellikler, para birimi kodu olmayan fiyatlar, Google'ın kabul etmediği stok durumu değerleri, tarihsiz ön siparişler, yinelenen id'ler ve kontrol basamağı yanlış GTIN'ler."
+],
+"howItWorks": [
+"Ürün dosyanızı yükleyin (sekmeyle ayrılmış .txt veya .tsv ya da feed'inizin CSV dışa aktarımı).",
+"Her ürün id, title, description, link, image_link, availability ve price açısından kontrol edilir.",
+"\"In Stock\", \"New\", \"19,99 EUR\" ve TRUE gibi değerler Google'ın biçimine dönüştürülür.",
+"GTIN'ler kontrol basamağıyla denetlenir ve yinelenen id'ler işaretlenir.",
+"Orijinal sütunlarınızı içeren, yüklemeye hazır, sekmeyle ayrılmış bir .txt dosyası indirin."
+],
+"commonFixes": [
+"availability'yi in_stock, out_of_stock, preorder veya backorder'a dönüştürme",
+"Fiyatları nokta ve para birimi koduyla 19.99 USD şeklinde yazma",
+"condition'ı new, used veya refurbished'a dönüştürme",
+"GTIN'leri temizleme ve kontrol basamağının kanıtladığı baştaki sıfırı geri ekleme",
+"identifier_exists, adult ve is_bundle'ı yes veya no'ya dönüştürme",
+"Dosyayı bozan sekmeleri ve satır sonlarını kaldırma"
+],
+"faq": [
+{
+"q": "Merchant Center hangi dosya biçimini kabul eder?",
+"a": "İlk satırında Google'ın özellik adları, her satırında bir ürün bulunan sekmeyle ayrılmış bir metin dosyası (.txt). Düzeltici bu biçimde indirir."
+},
+{
+"q": "Fiyatlar nasıl yazılmalı?",
+"a": "Ondalık ayırıcı olarak nokta kullanılan bir sayı ve ardından ISO 4217 para birimi kodu olarak, örneğin 15.00 USD. Yalnızca $ işareti yetmez, çünkü birçok para birimi onu kullanır."
+},
+{
+"q": "Ürünümün barkodu yoksa ne olur?",
+"a": "Bunun yerine üretici parça numarasını (mpn) girin. İkisi de olmayan el yapımı veya özel ürünler için identifier_exists'i no yapın."
+},
+{
+"q": "Hangi özellikler zorunlu?",
+"a": "Her ürün için id, title, description, link, image_link, availability ve price; ayrıca yeni ürünler için brand ve giyim için color, size, gender ve age_group gibi başka özellikler."
+}
+]
 }
 }
 }

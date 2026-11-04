@@ -874,5 +874,125 @@
 "explanation": "product-id nie ma właściwej długości lub znaków dla swojego typu.",
 "whyPlatformCares": "Amazon dopasowuje oferty do produktów po tym ID; błędne ID powoduje błędy albo przypisuje ofertę do złego produktu.",
 "howToFix": "Sprawdź kod kreskowy lub ASIN: UPC ma 12 cyfr, EAN 13, ISBN 10 lub 13, a ASIN 10 liter i cyfr."
+},
+"google/missing_required_header": {
+"title": "Brak wymaganej kolumny",
+"explanation": "Brakuje kolumny atrybutu, którego Google wymaga dla każdego produktu: id, title, description, link, image_link, availability lub price.",
+"whyPlatformCares": "Merchant Center nie może wyświetlić produktu bez tych atrybutów, więc wszystkie produkty z pliku zostają odrzucone.",
+"howToFix": "Dodaj brakującą kolumnę do wiersza nagłówka, zapisaną tak, jak Google nazywa atrybut (na przykład image_link), i wypełnij ją dla każdego produktu."
+},
+"google/missing_value": {
+"title": "Wymagany atrybut jest pusty",
+"explanation": "Wymagany atrybut (id, title, description, link, image_link, availability lub price) jest pusty w tym wierszu.",
+"whyPlatformCares": "Produkty bez wymaganego atrybutu są odrzucane i nie pojawiają się w reklamach produktowych ani bezpłatnych informacjach.",
+"howToFix": "Uzupełnij wartość. Jeśli produkt nie ma być wyświetlany, usuń wiersz, zamiast zostawiać go w połowie pusty."
+},
+"google/duplicate_id": {
+"title": "Zduplikowany id",
+"explanation": "Dwa lub więcej wierszy ma ten sam id.",
+"whyPlatformCares": "Google rozpoznaje każdy produkt po id. Przy duplikatach jeden wiersz nadpisuje drugi i mogą pojawić się dane niewłaściwego produktu.",
+"howToFix": "Nadaj każdemu produktowi i każdemu wariantowi własny id. Najprościej użyć SKU."
+},
+"google/id_too_long": {
+"title": "id dłuższy niż 50 znaków",
+"explanation": "Google pozwala na maksymalnie 50 znaków w id.",
+"whyPlatformCares": "Zbyt długi id zostaje odrzucony i produktu nie można dodać.",
+"howToFix": "Użyj krótszego id, na przykład SKU. Nie zmieniaj id po opublikowaniu produktów: zmiana zeruje historię produktu."
+},
+"google/title_too_long": {
+"title": "Tytuł dłuższy niż 150 znaków",
+"explanation": "Google pozwala na maksymalnie 150 znaków w title.",
+"whyPlatformCares": "Tekst ponad limit jest ucinany, a kupujący zwykle widzą tylko około 70 pierwszych znaków.",
+"howToFix": "Umieść najważniejsze informacje na początku (marka, produkt, kolor, rozmiar) i skróć resztę."
+},
+"google/description_too_long": {
+"title": "Opis dłuższy niż 5000 znaków",
+"explanation": "Google pozwala na maksymalnie 5000 znaków w description.",
+"whyPlatformCares": "Tekst ponad limit jest ucinany, przez co mogą zniknąć szczegóły ważne dla kupujących.",
+"howToFix": "Ogranicz opis do faktów o produkcie; pomiń wysyłkę i informacje o sklepie."
+},
+"google/invalid_url": {
+"title": "Nieprawidłowy link lub adres URL obrazu",
+"explanation": "link, image_link lub additional_image_link nie jest pełnym adresem zaczynającym się od http:// lub https://.",
+"whyPlatformCares": "Google musi załadować stronę produktu i obraz. Względny lub uszkodzony adres powoduje odrzucenie produktu.",
+"howToFix": "Podaj pełny adres z https:// i Twoją domeną dla strony produktu i każdego obrazu."
+},
+"google/too_many_images": {
+"title": "Ponad 10 dodatkowych obrazów",
+"explanation": "additional_image_link zawiera ponad 10 adresów URL.",
+"whyPlatformCares": "Google używa maksymalnie 10 dodatkowych obrazów, a resztę pomija.",
+"howToFix": "Zostaw 10 najbardziej przydatnych dodatkowych obrazów, rozdzielonych przecinkami."
+},
+"google/invalid_availability": {
+"title": "Nieprawidłowa wartość availability",
+"explanation": "availability musi mieć wartość in_stock, out_of_stock, preorder lub backorder.",
+"whyPlatformCares": "Google akceptuje tylko własne wartości. Każda inna powoduje odrzucenie produktu.",
+"howToFix": "Użyj jednej z czterech wartości. Popularne formy jak „In Stock” czy „pre-order” są zamieniane automatycznie."
+},
+"google/missing_availability_date": {
+"title": "Przedsprzedaż lub zamówienie bez daty",
+"explanation": "availability ma wartość preorder lub backorder, ale availability_date jest puste.",
+"whyPlatformCares": "Google wymaga daty wysyłki produktów w przedsprzedaży i prosi o nią także przy zamówieniach oczekujących.",
+"howToFix": "Dodaj availability_date w formacie ISO 8601, np. 2026-12-01T09:00-0500, najwyżej rok naprzód."
+},
+"google/price_missing_currency": {
+"title": "Cena bez kodu waluty",
+"explanation": "Cena ma liczbę, ale nie ma kodu waluty, albo ma tylko znak $, którego używa kilka walut.",
+"whyPlatformCares": "Google potrzebuje kodu waluty ISO 4217 (USD, CAD, EUR…), aby pokazać właściwą cenę.",
+"howToFix": "Zapisz cenę jako liczbę z kodem, np. 19.99 USD. Symbole jednej waluty, jak € czy £, są zamieniane automatycznie."
+},
+"google/invalid_price": {
+"title": "Nieprawidłowa cena",
+"explanation": "price nie jest liczbą z kodem waluty albo wynosi 0.",
+"whyPlatformCares": "Produkty bez prawidłowej ceny lub z ceną 0 są odrzucane.",
+"howToFix": "Użyj kropki jako separatora dziesiętnego i dodaj kod waluty, np. 19.99 USD. Ceny jak 19,99 EUR są zamieniane automatycznie."
+},
+"google/invalid_sale_price": {
+"title": "Nieprawidłowa cena promocyjna",
+"explanation": "sale_price nie jest prawidłową ceną albo nie jest niższa niż price.",
+"whyPlatformCares": "Google pokazuje promocję tylko wtedy, gdy sale_price jest prawidłowa i niższa od zwykłej ceny; w przeciwnym razie jest pomijana.",
+"howToFix": "Zostaw zwykłą cenę w price, a niższą cenę promocyjną w sale_price, obie z kodem waluty."
+},
+"google/invalid_condition": {
+"title": "Nieprawidłowa wartość condition",
+"explanation": "condition musi mieć wartość new, used lub refurbished.",
+"whyPlatformCares": "Google odrzuca inne wartości. condition jest wymagane dla produktów używanych i odnowionych.",
+"howToFix": "Użyj new, used lub refurbished. Wartości wielkimi literami i „renewed” są zamieniane automatycznie."
+},
+"google/missing_brand": {
+"title": "Brak marki",
+"explanation": "Nowy produkt nie ma marki (brand).",
+"whyPlatformCares": "Google wymaga marki dla nowych produktów, z wyjątkiem książek, muzyki i filmów. Bez niej produkty mogą być ograniczane lub odrzucane.",
+"howToFix": "Dodaj markę producenta. Dla własnych produktów użyj marki swojego sklepu."
+},
+"google/invalid_gtin": {
+"title": "Nieprawidłowy GTIN",
+"explanation": "gtin nie ma 8, 12, 13 ani 14 cyfr z poprawną cyfrą kontrolną albo arkusz kalkulacyjny zamienił go na zapis naukowy.",
+"whyPlatformCares": "Google sprawdza każdy GTIN według zasad GS1. Błędne numery GTIN powodują odrzucenie produktów lub przypisanie ich do złego artykułu.",
+"howToFix": "Przepisz kod kreskowy z opakowania lub od dostawcy. Spacje, myślniki i dowodnie utracone zero wiodące są poprawiane automatycznie."
+},
+"google/missing_identifiers": {
+"title": "Brak GTIN i MPN",
+"explanation": "Nowy produkt nie ma ani gtin, ani mpn, a identifier_exists nie ma wartości no.",
+"whyPlatformCares": "Google używa identyfikatorów do dopasowania produktów. Produkty markowe bez nich mogą być ograniczane.",
+"howToFix": "Dodaj GTIN (kod kreskowy) lub numer katalogowy producenta. Jeśli produkt naprawdę nie ma żadnego z nich, jak rękodzieło lub produkty na zamówienie, ustaw identifier_exists na no."
+},
+"google/invalid_yes_no": {
+"title": "Nieprawidłowa wartość tak/nie",
+"explanation": "identifier_exists, adult lub is_bundle musi mieć wartość yes lub no.",
+"whyPlatformCares": "Inne wartości są pomijane, a Google używa domyślnej wartości atrybutu.",
+"howToFix": "Użyj yes lub no. TRUE/FALSE, Y/N i 1/0 są zamieniane automatycznie."
+},
+"google/invalid_gender": {
+"title": "Nieprawidłowa wartość gender",
+"explanation": "gender musi mieć wartość male, female lub unisex.",
+"whyPlatformCares": "W wielu krajach gender jest wymagane dla odzieży, a inne wartości nie są akceptowane.",
+"howToFix": "Użyj male, female lub unisex. Wartości jak „Men” czy „Women's” są zamieniane automatycznie."
+},
+"google/invalid_age_group": {
+"title": "Nieprawidłowa wartość age_group",
+"explanation": "age_group musi mieć wartość newborn, infant, toddler, kids lub adult.",
+"whyPlatformCares": "W wielu krajach age_group jest wymagane dla odzieży, a inne wartości nie są akceptowane.",
+"howToFix": "Użyj jednej z pięciu wartości Google. „Adults” i „children” są zamieniane automatycznie."
 }
 }

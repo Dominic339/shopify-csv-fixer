@@ -10,6 +10,7 @@ export function platformLabel(formatId: string): string {
   if (formatId === "etsy_listings") return "Etsy";
   if (formatId.startsWith("ebay")) return "eBay";
   if (formatId === "amazon_inventory_loader") return "Amazon";
+  if (formatId === "google_merchant_center") return "Google Merchant Center";
   if (formatId === "shopify_products") return "Shopify";
   return "";
 }

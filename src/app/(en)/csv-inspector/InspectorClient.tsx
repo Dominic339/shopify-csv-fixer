@@ -21,6 +21,7 @@ const PLATFORM_NAMES: Record<DetectedPlatform, string> = {
   etsy_listings: "Etsy",
   ebay_listings: "eBay",
   amazon_inventory_loader: "Amazon",
+  google_merchant_center: "Google Merchant Center",
 };
 
 function delimiterLabel(t: T, d: string) {

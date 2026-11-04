@@ -336,7 +336,9 @@
     "name_ebay_listings": "Inserzioni eBay",
     "desc_ebay_listings": "Correggi i problemi comuni dei CSV delle inserzioni eBay: ID mancanti, valori non validi, URL interrotti e prezzi o quantità incoerenti.",
     "name_ebay_variations": "Variazioni eBay",
-    "desc_ebay_variations": "Convalida i CSV delle inserzioni con variazioni eBay: abbinamento delle specifiche, combinazioni duplicate, campi di prezzo e quantità."
+    "desc_ebay_variations": "Convalida i CSV delle inserzioni con variazioni eBay: abbinamento delle specifiche, combinazioni duplicate, campi di prezzo e quantità.",
+    "name_google_merchant_center": "Feed Google Merchant Center",
+    "desc_google_merchant_center": "Controlla un file prodotti di Google Merchant Center prima di caricarlo: attributi obbligatori, prezzi con valuta, disponibilità, GTIN e identificatori."
   },
   "convert": {
     "title": "Convertitore di formato CSV",
