@@ -32,9 +32,12 @@ function getStoredTheme(): Theme {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>("light");
 
-  // THEME_INIT_SCRIPT has already set the attribute; just sync React's copy.
+  // THEME_INIT_SCRIPT has normally set the attribute already; sync React's copy. Also set it
+  // here, for pages Next renders without that head script (its error and 404 shells).
   React.useEffect(() => {
-    setTheme(getStoredTheme());
+    const stored = getStoredTheme();
+    document.documentElement.setAttribute("data-theme", stored);
+    setTheme(stored);
   }, []);
 
   const choose = React.useCallback((t: Theme) => {

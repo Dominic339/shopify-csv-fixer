@@ -10,6 +10,7 @@ import { SUPPORT_EMAIL } from "@/lib/contact";
 import { fmt } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/locales";
 import { fitDescription, fitTitleString, pageAlternates } from "@/lib/i18n/seo";
+import { GlowHeader } from "@/components/ui/Decor";
 
 type PagesDict = typeof en;
 type InfoPage = "about" | "privacy" | "terms";
@@ -61,10 +62,12 @@ export async function AboutView({ locale = DEFAULT_LOCALE }: { locale?: Locale }
   const href = (path: string) => localeHref(locale, path);
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <header>
-        <h1 className="text-3xl font-black tracking-tight text-[var(--text)] sm:text-4xl">{d.title}</h1>
-        <p className={`mt-4 text-base leading-7 ${muted}`}>{d.intro}</p>
-      </header>
+      <GlowHeader>
+        <header>
+          <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] sm:text-5xl">{d.title}</h1>
+          <p className={`mt-4 text-base leading-7 sm:text-lg sm:leading-8 ${muted}`}>{d.intro}</p>
+        </header>
+      </GlowHeader>
 
       <section className={`${card} mt-8`}>
         <h2 className="text-xl font-bold text-[var(--text)]">{d.whyTitle}</h2>
@@ -160,7 +163,9 @@ export async function PolicyView({ page, locale = DEFAULT_LOCALE }: { page: "pri
   const d = dict[page];
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-semibold text-[var(--text)]">{d.title}</h1>
+      <GlowHeader>
+        <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text)] sm:text-4xl">{d.title}</h1>
+      </GlowHeader>
       {dict.translationNote && (
         <p className={`mt-3 text-xs ${muted}`}>
           {dict.translationNote}{" "}
