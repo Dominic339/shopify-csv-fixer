@@ -25,6 +25,7 @@ export function IssuesPanel({ f, t, sectionRef }: { f: Fixer; t: AppStrings; sec
     <section ref={sectionRef} className={`${card} scroll-mt-24 p-5 sm:p-7`}>
       <h2 className="text-lg font-semibold text-[var(--text)] sm:text-xl">{t.issues}</h2>
       <p className={`mt-2 text-sm sm:text-base ${muted}`}>{t.editHelp}</p>
+      <p className={`mt-1 text-xs ${muted}`}>{t.savedEditsNote}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-2" role="tablist" aria-label={t.issues}>
         {FILTERS.map((sev) => (
