@@ -1102,5 +1102,95 @@
 "explanation": "age_group은 adult, all ages, teen, kids, toddler, infant 또는 newborn이어야 합니다.",
 "whyPlatformCares": "다른 값은 무시되므로 제품이 엉뚱한 구매자에게 표시될 수 있습니다.",
 "howToFix": "Meta의 일곱 가지 값 중 하나를 사용하세요. \"Adults\", \"teens\", \"children\"은 자동으로 변환됩니다."
+},
+"tiktok/missing_required_header": {
+"title": "필수 열 누락",
+"explanation": "TikTok이 모든 상품에 요구하는 9개 필드 중 하나의 열이 없습니다: sku_id, title, description, availability, condition, price, link, image_link 또는 brand.",
+"whyPlatformCares": "필수 필드가 빠지면 TikTok은 데이터 피드 전체에 오류를 표시합니다.",
+"howToFix": "빠진 열을 TikTok의 필드 이름 그대로(예: image_link) 헤더 행에 추가하고 모든 상품에 값을 채우세요. id라는 이름의 열은 자동으로 sku_id로 이름이 바뀝니다."
+},
+"tiktok/missing_value": {
+"title": "필수 필드가 비어 있음",
+"explanation": "이 행에서 필수 필드(sku_id, title, description, availability, condition, price, link, image_link 또는 brand)가 비어 있습니다.",
+"whyPlatformCares": "TikTok은 필수 필드가 없는 제품을 업로드할 수 없습니다.",
+"howToFix": "값을 입력하세요. 직접 만든 상품의 brand에는 스토어 이름을 쓰세요. 카탈로그에 넣지 않을 상품이라면 행을 삭제하세요."
+},
+"tiktok/duplicate_id": {
+"title": "중복된 sku_id",
+"explanation": "두 개 이상의 행이 같은 sku_id를 사용합니다.",
+"whyPlatformCares": "TikTok은 sku_id로 각 상품을 식별하며, sku_id가 이미 피드에 있는 상품은 무시합니다.",
+"howToFix": "모든 상품과 옵션에 고유한 sku_id를 지정하세요. SKU를 쓰는 것이 가장 간단합니다. TikTok이 새 상품을 추가하지 않고 기존 상품을 업데이트하도록 업로드할 때마다 같은 값을 유지하세요."
+},
+"tiktok/title_promotional": {
+"title": "제목의 이모지 또는 홍보 문구",
+"explanation": "제목에 이모지나 \"무료 배송\", \"20% 할인\" 같은 혜택 문구가 있습니다.",
+"whyPlatformCares": "TikTok은 제목에 이모지와 홍보 문구를 허용하지 않으며, 이를 포함한 상품은 검토에서 거부될 수 있습니다.",
+"howToFix": "제목에는 상품 자체(브랜드, 상품, 색상, 사이즈)를 설명하고 혜택은 광고에 넣으세요."
+},
+"tiktok/invalid_url": {
+"title": "잘못된 링크 또는 이미지 URL",
+"explanation": "link, image_link 또는 additional_image_link가 http:// 또는 https://로 시작하는 완전한 웹 주소가 아닙니다.",
+"whyPlatformCares": "TikTok은 이 주소에서 제품 페이지와 이미지를 불러옵니다. 상대 URL이나 깨진 URL이면 제품을 업로드할 수 없습니다.",
+"howToFix": "제품 페이지와 모든 이미지에 https://와 도메인을 포함한 전체 주소를 사용하세요."
+},
+"tiktok/unsupported_image": {
+"title": "TikTok이 사용할 수 없는 이미지",
+"explanation": "이미지가 TikTok이 읽을 수 없는 서비스(Google Drive, Dropbox, Flickr, Pinterest, 500px, imgbb 또는 SmugMug)에 있거나 JPG 또는 PNG 파일이 아닙니다.",
+"whyPlatformCares": "TikTok에는 JPG 또는 PNG 파일에 대한 공개 링크가 필요합니다. 공유 페이지나 다른 형식의 파일은 불러올 수 없어 상품에 이미지가 표시되지 않습니다.",
+"howToFix": "스토어나 공개 이미지 호스팅에 있는 이미지 파일 자체에 링크하세요. 정사각형 이미지는 500 × 500픽셀 이상이어야 합니다."
+},
+"tiktok/too_many_images": {
+"title": "추가 이미지 10개 초과",
+"explanation": "additional_image_link에 URL이 10개를 넘습니다.",
+"whyPlatformCares": "TikTok은 추가 이미지를 최대 10개까지 사용합니다.",
+"howToFix": "가장 유용한 추가 이미지 10개를 쉼표로 구분해 남기세요."
+},
+"tiktok/invalid_availability": {
+"title": "잘못된 availability 값",
+"explanation": "availability는 in stock, available for order, preorder, out of stock 또는 discontinued여야 합니다.",
+"whyPlatformCares": "TikTok은 자체 5개 값만 받습니다. 다른 값이면 상품을 업로드할 수 없습니다.",
+"howToFix": "5개 값 중 하나를 사용하세요. in_stock, pre_order 같은 Google 형식 값과 \"Sold out\" 같은 단어는 자동으로 변환됩니다."
+},
+"tiktok/price_missing_currency": {
+"title": "통화 코드 없는 가격",
+"explanation": "가격에 숫자는 있지만 통화 코드가 없거나, 여러 통화가 쓰는 $ 기호만 있습니다.",
+"whyPlatformCares": "그러면 TikTok은 카탈로그 국가의 통화를 사용하므로, 가격이 다른 통화라면 잘못 표시됩니다.",
+"howToFix": "가격은 숫자 뒤에 ISO 4217 코드를 붙여 9.99 USD처럼 쓰세요. € 또는 £처럼 하나의 통화를 나타내는 기호는 자동으로 변환됩니다."
+},
+"tiktok/invalid_price": {
+"title": "잘못된 가격",
+"explanation": "price가 통화 코드가 붙은 숫자가 아니거나 0입니다.",
+"whyPlatformCares": "유효한 가격이 없는 상품은 카탈로그에 업로드할 수 없으며, 가격은 상품 페이지와 일치해야 합니다.",
+"howToFix": "소수점은 마침표로 쓰고 통화 코드를 붙이세요(예: 9.99 USD). 9,99 EUR 같은 가격은 자동으로 변환됩니다."
+},
+"tiktok/invalid_sale_price": {
+"title": "잘못된 할인 가격",
+"explanation": "sale_price가 유효한 가격이 아니거나 price보다 낮지 않습니다.",
+"whyPlatformCares": "TikTok은 sale_price가 유효하고 정상가보다 낮을 때만 할인을 표시합니다.",
+"howToFix": "정상가는 price에, 더 낮은 할인 가격은 sale_price에 두고 둘 다 통화 코드를 붙이세요."
+},
+"tiktok/invalid_condition": {
+"title": "잘못된 condition 값",
+"explanation": "condition은 new, refurbished 또는 used여야 합니다.",
+"whyPlatformCares": "TikTok에서 condition은 모든 제품에 필수이며 다른 값은 허용되지 않습니다.",
+"howToFix": "new, refurbished 또는 used를 사용하세요. 대문자 값과 \"renewed\"는 자동으로 변환됩니다."
+},
+"tiktok/invalid_gtin": {
+"title": "잘못된 GTIN",
+"explanation": "gtin이 올바른 검사 숫자를 가진 8, 12, 13 또는 14자리가 아니거나, 스프레드시트가 지수 표기로 바꿨습니다.",
+"whyPlatformCares": "TikTok에서 gtin은 선택 항목이지만, 잘못된 값은 상품을 다른 사람의 상품과 연결할 수 있습니다.",
+"howToFix": "포장이나 공급업체에서 바코드를 그대로 옮기거나 gtin을 비워 두세요. 공백, 하이픈, 누락이 증명된 앞자리 0은 자동으로 수정됩니다."
+},
+"tiktok/invalid_gender": {
+"title": "잘못된 gender 값",
+"explanation": "gender는 female, male 또는 unisex여야 합니다.",
+"whyPlatformCares": "TikTok은 gender를 타겟팅에 사용하므로 잘못된 값이면 상품이 엉뚱한 구매자에게 노출될 수 있습니다.",
+"howToFix": "female, male 또는 unisex를 사용하세요. \"Men\"이나 \"Women's\" 같은 값은 자동으로 변환됩니다."
+},
+"tiktok/invalid_age_group": {
+"title": "잘못된 age_group 값",
+"explanation": "age_group은 newborn, infant, toddler, kids 또는 adult여야 합니다.",
+"whyPlatformCares": "TikTok은 연령대를 타겟팅에 사용합니다. teen이나 all ages 그룹은 없습니다.",
+"howToFix": "TikTok의 5개 값 중 하나를 사용하세요. 청소년은 adult(13세 이상)에 해당하고 kids는 5~13세입니다."
 }
 }

@@ -394,6 +394,45 @@
 "a": "Meta のカタログは現在 in stock と out of stock だけを受け付けます。今すぐ注文できる商品なら in stock を使ってください。"
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"TikTokカタログは Video Shopping Ads とカタログ広告の元になります。カタログは TikTok Ads Manager で商品ファイルから作成します。1行に1商品、ヘッダー行にはTikTokのフィールド名を使います。このプリセットはTikTokのカタログ商品パラメータに沿って各商品をチェックし、列名はそのまま残します。",
+"商品のアップロードを妨げる問題を見つけます：必須フィールドの欠落、識別子を sku_id ではなく id と名付けたフィード、TikTokが受け付けない在庫状況の値、ブランドのない商品、sku_id の重複、TikTokが読み込めないサービス上の画像。"
+],
+"howItWorks": [
+"カタログファイルをアップロードします（CSV、またはタブ区切りの .txt や .tsv）。",
+"各商品の sku_id、title、description、availability、condition、price、link、image_link、brand をチェックします。",
+"Google形式やMeta形式の id 列は sku_id に名前が変更され、in_stock、pre_order、「19,99 EUR」、「New」などの値はTikTokの形式に変換されます。",
+"Google Drive や Dropbox など、TikTokが読み込めないサービス上の画像にフラグが付きます。タイトル内の絵文字やオファーも同様です。",
+"元の列のままのCSVをダウンロードし、そのまま TikTok Ads Manager にアップロードできます。"
+],
+"commonFixes": [
+"id 列の名前を sku_id に変更",
+"availability を in stock、available for order、preorder、out of stock、discontinued に変換",
+"価格をピリオドと通貨コード付きの 9.99 USD 形式で記載",
+"condition を new、refurbished、used に変換",
+"ブランドのない商品にフラグ",
+"TikTokが読み込めない画像にフラグ"
+],
+"faq": [
+{
+"q": "GoogleやMeta用のフィードをTikTokにアップロードできますか？",
+"a": "ほぼ可能です。フィールド名の大半が同じだからです。違いは、TikTokでは識別子が id ではなく sku_id であることと、すべての商品で brand が必須であることです。このプリセットは id 列の名前を変更し、ブランドのない商品にフラグを付けます。"
+},
+{
+"q": "必須のフィールドは？",
+"a": "すべての商品で sku_id、title、description、availability、condition、price、link、image_link、brand が必要です。"
+},
+{
+"q": "価格に通貨コードは必要ですか？",
+"a": "コードがない場合、TikTokはカタログの国の通貨を使います。9.99 USD のようにコードを付ければ、価格が違う通貨で読まれるのを防げます。"
+},
+{
+"q": "画像が却下されるのはなぜですか？",
+"a": "TikTokにはJPGまたはPNGファイルへの公開リンクが必要です。Google Drive、Dropbox、Flickr、Pinterest の共有リンクは使えません。正方形の画像は500 × 500ピクセル以上にしてください。"
+}
+]
 }
 }
 }

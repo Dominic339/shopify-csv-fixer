@@ -21,6 +21,7 @@ const IDENTITY: Record<string, { all?: string[]; first?: string[] }> = {
   amazon_inventory_loader: { first: ["sku", "item_sku", "seller-sku"] },
   google_merchant_center: { first: ["id"] },
   meta_catalog: { first: ["id"] },
+  tiktok_catalog: { first: ["sku_id", "id"] },
 };
 
 export type SavedEdits = Record<string, Record<string, string>>; // rowKey -> column -> value

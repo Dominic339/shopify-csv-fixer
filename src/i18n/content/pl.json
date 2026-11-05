@@ -394,6 +394,45 @@
 "a": "Katalog Meta przyjmuje teraz tylko in stock i out of stock. Użyj in stock, jeśli klienci mogą zamówić produkt już teraz."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"Katalogi TikTok zasilają Video Shopping Ads i reklamy katalogowe. Wypełniasz katalog plikiem produktów w TikTok Ads Manager: jeden produkt na wiersz, z nazwami pól TikToka w wierszu nagłówka. Ten szablon sprawdza każdy produkt według parametrów produktów katalogu TikTok i zostawia nazwy Twoich kolumn bez zmian.",
+"Wychwytuje to, co blokuje przesłanie produktów: brakujące wymagane pola, plik, w którym identyfikator nazywa się id zamiast sku_id, wartości dostępności, których TikTok nie przyjmuje, produkty bez marki, zduplikowane sku_id i obrazy w serwisach, z których TikTok nie może czytać."
+],
+"howItWorks": [
+"Prześlij plik katalogu (CSV albo .txt lub .tsv rozdzielany tabulatorami).",
+"Każdy produkt jest sprawdzany pod kątem sku_id, title, description, availability, condition, price, link, image_link i brand.",
+"Kolumna id w stylu Google lub Meta jest zmieniana na sku_id, a wartości takie jak in_stock, pre_order, „19,99 EUR” i „New” są zamieniane na format TikToka.",
+"Oznaczane są obrazy na Google Drive, Dropboksie i w innych serwisach, z których TikTok nie może czytać, a także emoji i oferty w tytułach.",
+"Pobierz plik CSV z oryginalnymi kolumnami, gotowy do przesłania w TikTok Ads Manager."
+],
+"commonFixes": [
+"Zmiana nazwy kolumny id na sku_id",
+"Zamiana availability na in stock, available for order, preorder, out of stock lub discontinued",
+"Zapis cen jako 9.99 USD, z kropką i kodem waluty",
+"Zamiana condition na new, refurbished lub used",
+"Oznaczanie produktów bez marki",
+"Oznaczanie obrazów, których TikTok nie może wczytać"
+],
+"faq": [
+{
+"q": "Czy mogę przesłać do TikToka plik z Google lub Meta?",
+"a": "W dużej mierze tak, bo większość nazw pól jest taka sama. Różnice: TikTok nazywa identyfikator sku_id zamiast id, a brand jest wymagane dla każdego produktu. Ten szablon zmienia nazwę kolumny id i oznacza produkty bez marki."
+},
+{
+"q": "Które pola są wymagane?",
+"a": "sku_id, title, description, availability, condition, price, link, image_link i brand, dla każdego produktu."
+},
+{
+"q": "Czy ceny potrzebują kodu waluty?",
+"a": "Bez kodu TikTok użyje waluty kraju katalogu. Dodanie go, np. 9.99 USD, zapobiega odczytaniu cen w niewłaściwej walucie."
+},
+{
+"q": "Dlaczego moje obrazy są odrzucane?",
+"a": "TikTok potrzebuje publicznego linku do pliku JPG lub PNG. Linki udostępniania z Google Drive, Dropboxa, Flickra czy Pinteresta nie działają. Kwadratowe obrazy powinny mieć co najmniej 500 × 500 pikseli."
+}
+]
 }
 }
 }

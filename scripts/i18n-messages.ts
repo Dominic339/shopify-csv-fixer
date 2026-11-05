@@ -24,6 +24,7 @@ export const MESSAGE_SOURCES = [
   "src/lib/amazonOptimizer.ts",
   "src/lib/googleMerchantOptimizer.ts",
   "src/lib/metaCatalogOptimizer.ts",
+  "src/lib/tiktokCatalogOptimizer.ts",
   "src/lib/formats/engine.ts",
   "src/lib/formats/customUser.ts",
   "src/lib/convertCsv.ts",

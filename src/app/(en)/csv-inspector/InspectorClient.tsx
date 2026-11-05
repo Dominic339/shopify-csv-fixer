@@ -23,6 +23,7 @@ const PLATFORM_NAMES: Record<DetectedPlatform, string> = {
   amazon_inventory_loader: "Amazon",
   google_merchant_center: "Google Merchant Center",
   meta_catalog: "Meta (Facebook & Instagram)",
+  tiktok_catalog: "TikTok",
 };
 
 function delimiterLabel(t: T, d: string) {

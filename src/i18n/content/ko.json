@@ -394,6 +394,45 @@
 "a": "Meta 카탈로그는 이제 in stock과 out of stock만 받습니다. 지금 주문할 수 있는 제품이면 in stock을 쓰세요."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"TikTok 카탈로그는 Video Shopping Ads와 카탈로그 광고의 바탕이 됩니다. 카탈로그는 TikTok Ads Manager에서 상품 파일로 채웁니다. 한 행에 상품 하나, 헤더 행에는 TikTok의 필드 이름을 씁니다. 이 프리셋은 TikTok의 카탈로그 상품 매개변수에 따라 각 상품을 확인하며 열 이름은 그대로 둡니다.",
+"상품 업로드를 막는 문제를 찾아냅니다: 빠진 필수 필드, 식별자를 sku_id가 아닌 id로 부르는 피드, TikTok이 받지 않는 재고 상태 값, 브랜드가 없는 상품, 중복된 sku_id, TikTok이 읽을 수 없는 서비스에 있는 이미지."
+],
+"howItWorks": [
+"카탈로그 파일을 업로드하세요(CSV 또는 탭으로 구분된 .txt, .tsv).",
+"각 상품의 sku_id, title, description, availability, condition, price, link, image_link, brand를 확인합니다.",
+"Google 또는 Meta 형식의 id 열은 sku_id로 이름이 바뀌고, in_stock, pre_order, \"19,99 EUR\", \"New\" 같은 값은 TikTok 형식으로 변환됩니다.",
+"Google Drive, Dropbox 등 TikTok이 읽을 수 없는 서비스의 이미지에 표시가 붙고, 제목의 이모지와 혜택 문구도 표시됩니다.",
+"원래 열 그대로의 CSV를 내려받아 TikTok Ads Manager에 바로 업로드하세요."
+],
+"commonFixes": [
+"id 열 이름을 sku_id로 변경",
+"availability를 in stock, available for order, preorder, out of stock 또는 discontinued로 변환",
+"가격을 마침표와 통화 코드를 넣어 9.99 USD 형식으로 작성",
+"condition을 new, refurbished 또는 used로 변환",
+"브랜드가 없는 상품 표시",
+"TikTok이 불러올 수 없는 이미지 표시"
+],
+"faq": [
+{
+"q": "Google이나 Meta용 피드를 TikTok에 업로드할 수 있나요?",
+"a": "대부분 가능합니다. 필드 이름이 대부분 같기 때문입니다. 차이점은 TikTok에서는 식별자가 id가 아니라 sku_id라는 것과 모든 상품에 brand가 필수라는 것입니다. 이 프리셋은 id 열의 이름을 바꾸고 브랜드가 없는 상품을 표시합니다."
+},
+{
+"q": "필수 필드는 무엇인가요?",
+"a": "모든 상품에 sku_id, title, description, availability, condition, price, link, image_link, brand가 필요합니다."
+},
+{
+"q": "가격에 통화 코드가 필요한가요?",
+"a": "코드가 없으면 TikTok은 카탈로그 국가의 통화를 사용합니다. 9.99 USD처럼 코드를 붙이면 가격이 다른 통화로 읽히는 것을 막을 수 있습니다."
+},
+{
+"q": "이미지가 거부되는 이유는 무엇인가요?",
+"a": "TikTok에는 JPG 또는 PNG 파일에 대한 공개 링크가 필요합니다. Google Drive, Dropbox, Flickr, Pinterest의 공유 링크는 작동하지 않습니다. 정사각형 이미지는 500 × 500픽셀 이상이어야 합니다."
+}
+]
 }
 }
 }

@@ -394,6 +394,45 @@
 "a": "Meta kataloğu artık yalnızca in stock ve out of stock alır. Müşteriler ürünü şimdi sipariş edebiliyorsa in stock kullanın."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"TikTok katalogları Video Shopping Ads ve katalog reklamlarını besler. Bir kataloğu TikTok Ads Manager'da bir ürün dosyasıyla doldurursunuz: her satırda bir ürün ve başlık satırında TikTok'un alan adları. Bu hazır ayar her ürünü TikTok'un katalog ürün parametrelerine göre kontrol eder ve sütun adlarınızı olduğu gibi bırakır.",
+"Ürünlerin yüklenmesini engelleyen şeyleri yakalar: eksik zorunlu alanlar, tanımlayıcısına sku_id yerine id diyen bir feed, TikTok'un kabul etmediği stok değerleri, markası olmayan ürünler, yinelenen sku_id'ler ve TikTok'un okuyamadığı hizmetlerdeki görseller."
+],
+"howItWorks": [
+"Katalog dosyanızı yükleyin (CSV ya da sekmeyle ayrılmış .txt veya .tsv).",
+"Her ürün sku_id, title, description, availability, condition, price, link, image_link ve brand açısından kontrol edilir.",
+"Google veya Meta tarzı bir id sütunu sku_id olarak yeniden adlandırılır; in_stock, pre_order, \"19,99 EUR\" ve \"New\" gibi değerler TikTok'un biçimine dönüştürülür.",
+"Google Drive, Dropbox ve TikTok'un okuyamadığı diğer hizmetlerdeki görseller işaretlenir; başlıklardaki emojiler ve teklifler de öyle.",
+"Özgün sütunlarınızla, TikTok Ads Manager'a yüklemeye hazır bir CSV indirin."
+],
+"commonFixes": [
+"id sütununu sku_id olarak yeniden adlandırma",
+"availability'yi in stock, available for order, preorder, out of stock veya discontinued değerine dönüştürme",
+"Fiyatları nokta ve para birimi koduyla 9.99 USD şeklinde yazma",
+"condition'ı new, refurbished veya used değerine dönüştürme",
+"Markası olmayan ürünleri işaretleme",
+"TikTok'un yükleyemediği görselleri işaretleme"
+],
+"faq": [
+{
+"q": "Google veya Meta feed'imi TikTok'a yükleyebilir miyim?",
+"a": "Büyük ölçüde evet, çünkü alan adlarının çoğu aynı. Farklar: TikTok tanımlayıcıya id yerine sku_id der ve brand her ürün için zorunludur. Bu hazır ayar id sütununu yeniden adlandırır ve markası olmayan ürünleri işaretler."
+},
+{
+"q": "Hangi alanlar zorunlu?",
+"a": "Her ürün için sku_id, title, description, availability, condition, price, link, image_link ve brand."
+},
+{
+"q": "Fiyatlarda para birimi kodu gerekli mi?",
+"a": "Kod yoksa TikTok kataloğun ülkesinin para birimini kullanır. 9.99 USD gibi kodu eklemek, fiyatların yanlış para biriminde okunmasını önler."
+},
+{
+"q": "Görsellerim neden reddediliyor?",
+"a": "TikTok'un bir JPG veya PNG dosyasına herkese açık bir bağlantıya ihtiyacı var. Google Drive, Dropbox, Flickr veya Pinterest paylaşım bağlantıları çalışmaz. Kare görseller en az 500 × 500 piksel olmalıdır."
+}
+]
 }
 }
 }

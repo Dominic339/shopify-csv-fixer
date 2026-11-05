@@ -12,6 +12,7 @@ export function platformLabel(formatId: string): string {
   if (formatId === "amazon_inventory_loader") return "Amazon";
   if (formatId === "google_merchant_center") return "Google Merchant Center";
   if (formatId === "meta_catalog") return "Meta";
+  if (formatId === "tiktok_catalog") return "TikTok";
   if (formatId === "shopify_products") return "Shopify";
   return "";
 }

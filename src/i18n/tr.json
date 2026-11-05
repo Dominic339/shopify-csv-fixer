@@ -341,7 +341,9 @@
     "name_google_merchant_center": "Google Merchant Center Feed'i",
     "desc_google_merchant_center": "Google Merchant Center ürün dosyanızı yüklemeden önce kontrol edin: zorunlu özellikler, para birimli fiyatlar, stok durumu, GTIN'ler ve tanımlayıcılar.",
     "name_meta_catalog": "Meta Kataloğu (Facebook ve Instagram)",
-    "desc_meta_catalog": "Facebook ve Instagram katalog feed'inizi Commerce Manager'a yüklemeden önce kontrol edin: zorunlu alanlar, stok durumu, para birimli fiyatlar, marka veya GTIN ve görseller."
+    "desc_meta_catalog": "Facebook ve Instagram katalog feed'inizi Commerce Manager'a yüklemeden önce kontrol edin: zorunlu alanlar, stok durumu, para birimli fiyatlar, marka veya GTIN ve görseller.",
+    "name_tiktok_catalog": "TikTok Kataloğu",
+    "desc_tiktok_catalog": "Bir TikTok katalog feed'ini TikTok Ads Manager'a yüklemeden önce kontrol edin: dokuz zorunlu alan, sku_id, stok durumu, fiyatlar, marka ve görsel bağlantıları."
   },
   "convert": {
     "title": "CSV format dönüştürücü",

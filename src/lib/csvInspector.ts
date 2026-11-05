@@ -17,7 +17,8 @@ export type DetectedPlatform =
   | "ebay_listings"
   | "amazon_inventory_loader"
   | "google_merchant_center"
-  | "meta_catalog";
+  | "meta_catalog"
+  | "tiktok_catalog";
 
 export type InspectorResult = {
   rowCount: number;
@@ -122,6 +123,7 @@ export function detectPlatform(headers: string[], dataRows: string[][] = []): De
 
   if (headers.some((x) => /^\*?action\(/i.test(x.trim()))) return "ebay_listings";
   if (has("sku", "product-id", "product-id-type")) return "amazon_inventory_loader";
+  if (has("sku_id", "title", "link", "image_link")) return "tiktok_catalog";
   if (has("id", "title", "link", "image_link") && (h.has("availability") || h.has("price"))) {
     if (h.has("fb_product_category") || h.has("quantity_to_sell_on_facebook")) return "meta_catalog";
     const col = headers.findIndex((x) => x.trim().toLowerCase() === "availability");

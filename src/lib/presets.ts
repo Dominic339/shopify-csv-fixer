@@ -81,6 +81,13 @@ export const PRESET_FORMATS: PresetFormat[] = [
     description:
       "Check a Facebook and Instagram catalog feed before upload: required fields, availability, prices with a currency code, and brand or GTIN.",
   },
+  {
+    id: "tiktok_catalog",
+    formatId: "tiktok_catalog",
+    name: "TikTok Catalog",
+    category: "Ecommerce",
+    description: "Check a TikTok catalog feed before upload: the nine required fields, sku_id, availability, prices, brand and image links.",
+  },
 ];
 
 export function getPresetFormats() {

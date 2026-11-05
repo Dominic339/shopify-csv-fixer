@@ -1102,5 +1102,95 @@
 "explanation": "age_group muss adult, all ages, teen, kids, toddler, infant oder newborn sein.",
 "whyPlatformCares": "Andere Werte werden ignoriert, sodass das Produkt den falschen Käufern gezeigt werden kann.",
 "howToFix": "Verwende einen der sieben Werte von Meta. „Adults“, „teens“ und „children“ werden automatisch umgewandelt."
+},
+"tiktok/missing_required_header": {
+"title": "Erforderliche Spalte fehlt",
+"explanation": "Für eines der neun Felder, die TikTok bei jedem Produkt verlangt, fehlt die Spalte: sku_id, title, description, availability, condition, price, link, image_link oder brand.",
+"whyPlatformCares": "TikTok meldet einen Fehler für den gesamten Daten-Feed, wenn ein Pflichtfeld fehlt.",
+"howToFix": "Füge die fehlende Spalte zur Kopfzeile hinzu, so geschrieben, wie TikTok das Feld nennt (zum Beispiel image_link), und fülle sie für jedes Produkt. Eine Spalte namens id wird automatisch in sku_id umbenannt."
+},
+"tiktok/missing_value": {
+"title": "Pflichtfeld ist leer",
+"explanation": "Ein Pflichtfeld (sku_id, title, description, availability, condition, price, link, image_link oder brand) ist in dieser Zeile leer.",
+"whyPlatformCares": "TikTok kann kein Produkt hochladen, dem ein Pflichtfeld fehlt.",
+"howToFix": "Trage den Wert ein. Verwende bei brand für selbst hergestellte Produkte den Namen deines Shops. Wenn das Produkt nicht in den Katalog gehört, entferne stattdessen die Zeile."
+},
+"tiktok/duplicate_id": {
+"title": "Doppelte sku_id",
+"explanation": "Zwei oder mehr Zeilen verwenden dieselbe sku_id.",
+"whyPlatformCares": "TikTok erkennt jedes Produkt an seiner sku_id und ignoriert Produkte, deren sku_id bereits im Feed vorkommt.",
+"howToFix": "Gib jedem Produkt und jeder Variante eine eigene sku_id. Am einfachsten ist die SKU. Behalte sie zwischen Uploads bei, damit TikTok das Produkt aktualisiert, statt ein neues anzulegen."
+},
+"tiktok/title_promotional": {
+"title": "Emoji oder Werbetext im Titel",
+"explanation": "Der Titel enthält ein Emoji oder ein Angebot wie „kostenloser Versand“ oder „20 % Rabatt“.",
+"whyPlatformCares": "TikTok erlaubt keine Emoji und keinen Werbetext in Titeln, und Produkte damit können bei der Prüfung abgelehnt werden.",
+"howToFix": "Beschreibe im Titel das Produkt (Marke, Produkt, Farbe, Größe) und setze Angebote stattdessen in die Anzeige."
+},
+"tiktok/invalid_url": {
+"title": "Ungültiger Link oder Bild-URL",
+"explanation": "link, image_link oder additional_image_link ist keine vollständige Webadresse, die mit http:// oder https:// beginnt.",
+"whyPlatformCares": "TikTok lädt Produktseite und Bild von diesen Adressen. Eine relative oder kaputte URL verhindert den Upload des Produkts.",
+"howToFix": "Verwende die vollständige Adresse mit https:// und deiner Domain für die Produktseite und jedes Bild."
+},
+"tiktok/unsupported_image": {
+"title": "Bild, das TikTok nicht verwenden kann",
+"explanation": "Das Bild liegt bei einem Anbieter, den TikTok nicht lesen kann (Google Drive, Dropbox, Flickr, Pinterest, 500px, imgbb oder SmugMug), oder ist keine JPG- oder PNG-Datei.",
+"whyPlatformCares": "TikTok braucht einen öffentlichen Link zu einer JPG- oder PNG-Datei. Freigabeseiten und andere Dateitypen laden nicht, sodass das Produkt kein Bild hat.",
+"howToFix": "Verlinke die Bilddatei in deinem Shop oder bei einem öffentlichen Bild-Hoster. Quadratische Bilder sollten mindestens 500 × 500 Pixel groß sein."
+},
+"tiktok/too_many_images": {
+"title": "Mehr als 10 zusätzliche Bilder",
+"explanation": "additional_image_link enthält mehr als 10 URLs.",
+"whyPlatformCares": "TikTok verwendet bis zu 10 zusätzliche Bilder.",
+"howToFix": "Behalte die 10 nützlichsten zusätzlichen Bilder, durch Kommas getrennt."
+},
+"tiktok/invalid_availability": {
+"title": "Ungültiger Wert für availability",
+"explanation": "availability muss in stock, available for order, preorder, out of stock oder discontinued sein.",
+"whyPlatformCares": "TikTok nimmt nur seine eigenen fünf Werte an. Andere Werte verhindern den Upload des Produkts.",
+"howToFix": "Verwende einen der fünf Werte. Werte im Google-Stil wie in_stock und pre_order sowie Wörter wie „Sold out“ werden automatisch umgewandelt."
+},
+"tiktok/price_missing_currency": {
+"title": "Preis ohne Währungscode",
+"explanation": "Der Preis enthält eine Zahl, aber keinen Währungscode, oder nur ein $-Zeichen, das mehrere Währungen verwenden.",
+"whyPlatformCares": "TikTok verwendet dann die Währung des Katalog-Lands, was falsch ist, wenn deine Preise in einer anderen Währung sind.",
+"howToFix": "Schreibe den Preis als Zahl, gefolgt vom ISO-4217-Code, etwa 9.99 USD. Symbole, die eine einzige Währung bezeichnen, wie € oder £, werden automatisch umgewandelt."
+},
+"tiktok/invalid_price": {
+"title": "Ungültiger Preis",
+"explanation": "price ist keine Zahl mit Währungscode, oder er ist 0.",
+"whyPlatformCares": "Produkte ohne gültigen Preis können nicht in den Katalog hochgeladen werden, und der Preis muss mit der Produktseite übereinstimmen.",
+"howToFix": "Verwende einen Punkt als Dezimaltrennzeichen und ergänze den Währungscode, etwa 9.99 USD. Preise wie 9,99 EUR werden automatisch umgewandelt."
+},
+"tiktok/invalid_sale_price": {
+"title": "Ungültiger Angebotspreis",
+"explanation": "sale_price ist kein gültiger Preis oder nicht niedriger als price.",
+"whyPlatformCares": "TikTok zeigt einen Rabatt nur, wenn sale_price gültig ist und unter dem regulären Preis liegt.",
+"howToFix": "Lass den regulären Preis in price und den niedrigeren Angebotspreis in sale_price, beide mit Währungscode."
+},
+"tiktok/invalid_condition": {
+"title": "Ungültiger Wert für condition",
+"explanation": "condition muss new, refurbished oder used sein.",
+"whyPlatformCares": "condition ist bei TikTok für jedes Produkt Pflicht, und andere Werte werden nicht akzeptiert.",
+"howToFix": "Verwende new, refurbished oder used. Großgeschriebene Werte und „renewed“ werden automatisch umgewandelt."
+},
+"tiktok/invalid_gtin": {
+"title": "Ungültige GTIN",
+"explanation": "Die gtin hat nicht 8, 12, 13 oder 14 Ziffern mit korrekter Prüfziffer, oder eine Tabellenkalkulation hat sie in wissenschaftliche Schreibweise umgewandelt.",
+"whyPlatformCares": "gtin ist bei TikTok optional, aber eine falsche GTIN kann das Produkt dem Produkt eines anderen zuordnen.",
+"howToFix": "Übernimm den Barcode von der Verpackung oder vom Lieferanten, oder lass gtin leer. Leerzeichen, Bindestriche und eine nachweislich fehlende führende Null werden automatisch korrigiert."
+},
+"tiktok/invalid_gender": {
+"title": "Ungültiger Wert für gender",
+"explanation": "gender muss female, male oder unisex sein.",
+"whyPlatformCares": "TikTok nutzt gender für die Zielgruppenauswahl, daher kann ein falscher Wert das Produkt den falschen Käufern zeigen.",
+"howToFix": "Verwende female, male oder unisex. Werte wie „Men“ oder „Women's“ werden automatisch umgewandelt."
+},
+"tiktok/invalid_age_group": {
+"title": "Ungültiger Wert für age_group",
+"explanation": "age_group muss newborn, infant, toddler, kids oder adult sein.",
+"whyPlatformCares": "TikTok nutzt die Altersgruppe für die Zielgruppenauswahl. Eine Gruppe teen oder all ages gibt es nicht.",
+"howToFix": "Verwende einen der fünf Werte von TikTok. Teenager zählen als adult (ab 13), kids sind 5 bis 13 Jahre alt."
 }
 }

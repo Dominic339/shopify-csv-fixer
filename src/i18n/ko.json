@@ -341,7 +341,9 @@
     "name_google_merchant_center": "Google Merchant Center 피드",
     "desc_google_merchant_center": "Google Merchant Center 제품 파일을 업로드하기 전에 확인하세요: 필수 속성, 통화가 포함된 가격, 재고 상태, GTIN 및 식별자.",
     "name_meta_catalog": "Meta 카탈로그(Facebook 및 Instagram)",
-    "desc_meta_catalog": "Facebook과 Instagram 카탈로그 피드를 커머스 관리자에 업로드하기 전에 확인하세요: 필수 필드, 재고 상태, 통화가 포함된 가격, 브랜드 또는 GTIN, 이미지."
+    "desc_meta_catalog": "Facebook과 Instagram 카탈로그 피드를 커머스 관리자에 업로드하기 전에 확인하세요: 필수 필드, 재고 상태, 통화가 포함된 가격, 브랜드 또는 GTIN, 이미지.",
+    "name_tiktok_catalog": "TikTok 카탈로그",
+    "desc_tiktok_catalog": "TikTok Ads Manager에 업로드하기 전에 TikTok 카탈로그 피드를 확인하세요: 9개 필수 필드, sku_id, 재고 상태, 가격, 브랜드, 이미지 링크."
   },
   "convert": {
     "title": "CSV 형식 변환기",

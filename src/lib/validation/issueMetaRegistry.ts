@@ -8,6 +8,7 @@ import { EBAY_ISSUE_META } from "./issueMetaEbay";
 import { AMAZON_ISSUE_META } from "./issueMetaAmazon";
 import { GOOGLE_ISSUE_META } from "./issueMetaGoogle";
 import { META_ISSUE_META } from "./issueMetaMeta";
+import { TIKTOK_ISSUE_META } from "./issueMetaTikTok";
 
 // Keyed by formatId (must match preset formatId like "shopify_products")
 export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
@@ -20,6 +21,7 @@ export const ISSUE_META_REGISTRY: Record<string, IssueMetaMap> = {
   amazon_inventory_loader: AMAZON_ISSUE_META,
   google_merchant_center: GOOGLE_ISSUE_META,
   meta_catalog: META_ISSUE_META,
+  tiktok_catalog: TIKTOK_ISSUE_META,
 };
 
 export function getIssueMeta(formatId: string | undefined, code: string | undefined): IssueMeta | null {

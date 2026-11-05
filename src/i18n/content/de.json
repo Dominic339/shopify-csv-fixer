@@ -394,6 +394,45 @@
 "a": "Metas Katalog nimmt nur noch in stock und out of stock. Verwende in stock, wenn Kunden das Produkt jetzt bestellen können."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"TikTok-Kataloge speisen Video Shopping Ads und Katalog-Anzeigen. Du füllst einen Katalog im TikTok Ads Manager mit einer Produktdatei: ein Produkt pro Zeile, mit TikToks Feldnamen in der Kopfzeile. Diese Vorlage prüft jedes Produkt anhand von TikToks Katalog-Produktparametern und lässt deine Spaltennamen unverändert.",
+"Sie findet, was den Upload von Produkten verhindert: fehlende Pflichtfelder, einen Feed, der seine Kennung id statt sku_id nennt, Verfügbarkeitswerte, die TikTok nicht annimmt, Produkte ohne Marke, doppelte sku_ids und Bilder bei Anbietern, die TikTok nicht lesen kann."
+],
+"howItWorks": [
+"Lade deine Katalogdatei hoch (CSV oder tabulatorgetrennte .txt oder .tsv).",
+"Jedes Produkt wird auf sku_id, title, description, availability, condition, price, link, image_link und brand geprüft.",
+"Eine id-Spalte im Google- oder Meta-Stil wird in sku_id umbenannt, und Werte wie in_stock, pre_order, „19,99 EUR“ und „New“ werden in TikToks Format umgewandelt.",
+"Bilder auf Google Drive, Dropbox und anderen Anbietern, die TikTok nicht lesen kann, werden markiert, ebenso Emoji und Angebote in Titeln.",
+"Lade eine CSV mit deinen ursprünglichen Spalten herunter, bereit zum Hochladen im TikTok Ads Manager."
+],
+"commonFixes": [
+"Eine id-Spalte in sku_id umbenennen",
+"availability in in stock, available for order, preorder, out of stock oder discontinued umwandeln",
+"Preise als 9.99 USD schreiben, mit Punkt und Währungscode",
+"condition in new, refurbished oder used umwandeln",
+"Produkte ohne Marke markieren",
+"Bilder markieren, die TikTok nicht laden kann"
+],
+"faq": [
+{
+"q": "Kann ich meinen Google- oder Meta-Feed zu TikTok hochladen?",
+"a": "Größtenteils ja, denn die meisten Feldnamen sind gleich. Die Unterschiede: TikTok nennt die Kennung sku_id statt id, und brand ist für jedes Produkt Pflicht. Diese Vorlage benennt die id-Spalte um und markiert Produkte ohne Marke."
+},
+{
+"q": "Welche Felder sind Pflicht?",
+"a": "sku_id, title, description, availability, condition, price, link, image_link und brand, für jedes Produkt."
+},
+{
+"q": "Brauchen Preise einen Währungscode?",
+"a": "Fehlt der Code, verwendet TikTok die Währung des Katalog-Lands. Fügst du ihn hinzu, etwa 9.99 USD, werden Preise nicht in der falschen Währung gelesen."
+},
+{
+"q": "Warum werden meine Bilder abgelehnt?",
+"a": "TikTok braucht einen öffentlichen Link zu einer JPG- oder PNG-Datei. Freigabelinks von Google Drive, Dropbox, Flickr oder Pinterest funktionieren nicht. Quadratische Bilder sollten mindestens 500 × 500 Pixel groß sein."
+}
+]
 }
 }
 }

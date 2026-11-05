@@ -341,7 +341,9 @@
     "name_google_merchant_center": "Google Merchant Center Feed",
     "desc_google_merchant_center": "上传前检查 Google Merchant Center 商品文件：必填属性、带货币的价格、库存状态、GTIN 和标识符。",
     "name_meta_catalog": "Meta 目录（Facebook 和 Instagram）",
-    "desc_meta_catalog": "在上传到商务管理工具之前检查 Facebook 和 Instagram 目录 Feed：必填字段、库存状态、带货币的价格、品牌或 GTIN，以及图片。"
+    "desc_meta_catalog": "在上传到商务管理工具之前检查 Facebook 和 Instagram 目录 Feed：必填字段、库存状态、带货币的价格、品牌或 GTIN，以及图片。",
+    "name_tiktok_catalog": "TikTok 目录",
+    "desc_tiktok_catalog": "在 TikTok Ads Manager 中上传前检查 TikTok 目录 Feed：9 个必填字段、sku_id、库存状态、价格、品牌和图片链接。"
   },
   "convert": {
     "title": "CSV格式转换器",

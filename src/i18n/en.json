@@ -335,6 +335,8 @@
     "desc_google_merchant_center": "Check a Google Merchant Center product file before you upload it: required attributes, prices with currency, availability, GTINs and identifiers.",
     "name_meta_catalog": "Meta Catalog (Facebook & Instagram)",
     "desc_meta_catalog": "Check a Facebook and Instagram catalog feed before you upload it to Commerce Manager: required fields, availability, prices with currency, brand or GTIN, and images.",
+    "name_tiktok_catalog": "TikTok Catalog",
+    "desc_tiktok_catalog": "Check a TikTok catalog feed before you upload it in TikTok Ads Manager: the nine required fields, sku_id, availability, prices, brand and image links.",
     "checksCount": "{count} checks",
     "checksShared": "The WooCommerce presets share their checks, as do the eBay presets, so the counts below overlap. The homepage total counts each check once.",
     "templateTitle": "{name} CSV Template",

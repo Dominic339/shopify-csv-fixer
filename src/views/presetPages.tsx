@@ -44,6 +44,7 @@ const KEYWORDS: Record<string, string[]> = {
   amazon_inventory_loader: ["amazon inventory loader", "amazon inventory file", "amazon flat file csv", "fix amazon csv", "amazon product-id-type"],
   google_merchant_center: ["google merchant center feed", "google shopping feed template", "merchant center product data", "fix google shopping feed", "google shopping feed errors"],
   meta_catalog: ["facebook catalog feed", "meta catalog csv template", "instagram shopping feed", "commerce manager data feed", "facebook product feed errors"],
+  tiktok_catalog: ["tiktok catalog feed", "tiktok product feed template", "tiktok ads catalog csv", "tiktok catalog upload errors", "tiktok sku_id"],
 };
 
 const FIXER_PAGES: Array<{ href: string; platform: string; variations?: boolean }> = [

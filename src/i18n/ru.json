@@ -341,7 +341,9 @@
     "name_google_merchant_center": "Фид Google Merchant Center",
     "desc_google_merchant_center": "Проверьте файл товаров для Google Merchant Center перед загрузкой: обязательные атрибуты, цены с валютой, наличие, GTIN и идентификаторы.",
     "name_meta_catalog": "Каталог Meta (Facebook и Instagram)",
-    "desc_meta_catalog": "Проверьте фид каталога для Facebook и Instagram перед загрузкой в Commerce Manager: обязательные поля, наличие, цены с валютой, бренд или GTIN и изображения."
+    "desc_meta_catalog": "Проверьте фид каталога для Facebook и Instagram перед загрузкой в Commerce Manager: обязательные поля, наличие, цены с валютой, бренд или GTIN и изображения.",
+    "name_tiktok_catalog": "Каталог TikTok",
+    "desc_tiktok_catalog": "Проверьте фид каталога TikTok перед загрузкой в TikTok Ads Manager: девять обязательных полей, sku_id, наличие, цены, бренд и ссылки на изображения."
   },
   "convert": {
     "title": "Конвертер форматов CSV",

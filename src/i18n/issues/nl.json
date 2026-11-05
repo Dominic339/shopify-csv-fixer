@@ -1102,5 +1102,95 @@
 "explanation": "age_group moet adult, all ages, teen, kids, toddler, infant of newborn zijn.",
 "whyPlatformCares": "Andere waarden worden genegeerd, waardoor het product aan de verkeerde kopers kan worden getoond.",
 "howToFix": "Gebruik een van de zeven waarden van Meta. \"Adults\", \"teens\" en \"children\" worden automatisch omgezet."
+},
+"tiktok/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Voor een van de negen velden die TikTok voor elk product vereist ontbreekt de kolom: sku_id, title, description, availability, condition, price, link, image_link of brand.",
+"whyPlatformCares": "TikTok meldt een fout voor de hele datafeed als een verplicht veld ontbreekt.",
+"howToFix": "Voeg de ontbrekende kolom toe aan de kopregel, gespeld zoals TikTok het veld noemt (bijvoorbeeld image_link), en vul hem voor elk product. Een kolom met de naam id wordt automatisch hernoemd naar sku_id."
+},
+"tiktok/missing_value": {
+"title": "Verplicht veld is leeg",
+"explanation": "Een verplicht veld (sku_id, title, description, availability, condition, price, link, image_link of brand) is leeg in deze rij.",
+"whyPlatformCares": "TikTok kan geen product laden waarvan een verplicht veld ontbreekt.",
+"howToFix": "Vul de waarde in. Gebruik bij brand voor producten die je zelf maakt de naam van je winkel. Hoort het product niet in de catalogus, verwijder dan de rij."
+},
+"tiktok/duplicate_id": {
+"title": "Dubbele sku_id",
+"explanation": "Twee of meer rijen gebruiken dezelfde sku_id.",
+"whyPlatformCares": "TikTok herkent elk product aan zijn sku_id en negeert producten waarvan de sku_id al in de feed staat.",
+"howToFix": "Geef elk product, en elke variant, een eigen sku_id. De SKU gebruiken is het eenvoudigst. Houd hem gelijk tussen uploads, zodat TikTok het product bijwerkt in plaats van een nieuw toe te voegen."
+},
+"tiktok/title_promotional": {
+"title": "Emoji of promotietekst in de titel",
+"explanation": "De titel bevat een emoji of een aanbieding zoals 'gratis verzending' of '20% korting'.",
+"whyPlatformCares": "TikTok staat geen emoji of promotietekst in titels toe, en producten daarmee kunnen bij de controle worden afgewezen.",
+"howToFix": "Beschrijf het product in de titel (merk, product, kleur, maat) en zet aanbiedingen in de advertentie."
+},
+"tiktok/invalid_url": {
+"title": "Ongeldige link of afbeeldings-URL",
+"explanation": "link, image_link of additional_image_link is geen volledig webadres dat begint met http:// of https://.",
+"whyPlatformCares": "TikTok laadt de productpagina en de afbeelding vanaf deze adressen. Een relatieve of kapotte URL houdt het product tegen.",
+"howToFix": "Gebruik het volledige adres, met https:// en je domein, voor de productpagina en elke afbeelding."
+},
+"tiktok/unsupported_image": {
+"title": "Afbeelding die TikTok niet kan gebruiken",
+"explanation": "De afbeelding staat bij een dienst die TikTok niet kan lezen (Google Drive, Dropbox, Flickr, Pinterest, 500px, imgbb of SmugMug), of is geen JPG- of PNG-bestand.",
+"whyPlatformCares": "TikTok heeft een openbare link naar een JPG- of PNG-bestand nodig. Deelpagina's en andere bestandstypen laden niet, dus het product heeft geen afbeelding.",
+"howToFix": "Link naar het afbeeldingsbestand in je winkel of bij een openbare afbeeldingsdienst. Vierkante afbeeldingen moeten minstens 500 × 500 pixels zijn."
+},
+"tiktok/too_many_images": {
+"title": "Meer dan 10 extra afbeeldingen",
+"explanation": "additional_image_link bevat meer dan 10 URL's.",
+"whyPlatformCares": "TikTok gebruikt maximaal 10 extra afbeeldingen.",
+"howToFix": "Houd de 10 nuttigste extra afbeeldingen, gescheiden door komma's."
+},
+"tiktok/invalid_availability": {
+"title": "Ongeldige waarde voor availability",
+"explanation": "availability moet in stock, available for order, preorder, out of stock of discontinued zijn.",
+"whyPlatformCares": "TikTok accepteert alleen zijn eigen vijf waarden. Andere waarden houden de upload van het product tegen.",
+"howToFix": "Gebruik een van de vijf waarden. Waarden in Google-stijl zoals in_stock en pre_order, en woorden als 'Sold out', worden automatisch omgezet."
+},
+"tiktok/price_missing_currency": {
+"title": "Prijs zonder valutacode",
+"explanation": "De prijs heeft een getal maar geen valutacode, of alleen een $-teken, dat meerdere valuta's gebruiken.",
+"whyPlatformCares": "TikTok gebruikt dan de valuta van het land van de catalogus, wat fout is als je prijzen in een andere valuta zijn.",
+"howToFix": "Schrijf de prijs als getal gevolgd door de ISO 4217-code, zoals 9.99 USD. Symbolen die één valuta aanduiden, zoals € of £, worden automatisch omgezet."
+},
+"tiktok/invalid_price": {
+"title": "Ongeldige prijs",
+"explanation": "price is geen getal met valutacode, of is 0.",
+"whyPlatformCares": "Producten zonder geldige prijs kunnen niet naar de catalogus worden geüpload, en de prijs moet overeenkomen met de productpagina.",
+"howToFix": "Gebruik een punt als decimaalteken en voeg de valutacode toe, zoals 9.99 USD. Prijzen als 9,99 EUR worden automatisch omgezet."
+},
+"tiktok/invalid_sale_price": {
+"title": "Ongeldige actieprijs",
+"explanation": "sale_price is geen geldige prijs of is niet lager dan price.",
+"whyPlatformCares": "TikTok toont alleen korting als sale_price geldig is en lager dan de normale prijs.",
+"howToFix": "Laat de normale prijs in price staan en de lagere actieprijs in sale_price, beide met valutacode."
+},
+"tiktok/invalid_condition": {
+"title": "Ongeldige waarde voor condition",
+"explanation": "condition moet new, refurbished of used zijn.",
+"whyPlatformCares": "Bij TikTok is condition verplicht voor elk product, en andere waarden worden niet geaccepteerd.",
+"howToFix": "Gebruik new, refurbished of used. Waarden met hoofdletters en \"renewed\" worden automatisch omgezet."
+},
+"tiktok/invalid_gtin": {
+"title": "Ongeldige GTIN",
+"explanation": "De gtin heeft geen 8, 12, 13 of 14 cijfers met een correct controlecijfer, of een spreadsheet heeft er wetenschappelijke notatie van gemaakt.",
+"whyPlatformCares": "gtin is optioneel bij TikTok, maar een verkeerde kan het product koppelen aan dat van iemand anders.",
+"howToFix": "Neem de barcode over van de verpakking of je leverancier, of laat gtin leeg. Spaties, streepjes en een aantoonbaar ontbrekende voorloopnul worden automatisch hersteld."
+},
+"tiktok/invalid_gender": {
+"title": "Ongeldige waarde voor gender",
+"explanation": "gender moet female, male of unisex zijn.",
+"whyPlatformCares": "TikTok gebruikt gender voor doelgroepgerichte advertenties, dus een verkeerde waarde kan het product aan de verkeerde kopers tonen.",
+"howToFix": "Gebruik female, male of unisex. Waarden als \"Men\" of \"Women's\" worden automatisch omgezet."
+},
+"tiktok/invalid_age_group": {
+"title": "Ongeldige waarde voor age_group",
+"explanation": "age_group moet newborn, infant, toddler, kids of adult zijn.",
+"whyPlatformCares": "TikTok gebruikt de leeftijdsgroep voor doelgroepgerichte advertenties. Er is geen groep teen of all ages.",
+"howToFix": "Gebruik een van de vijf waarden van TikTok. Tieners tellen als adult (13 jaar of ouder) en kids is 5 tot 13 jaar."
 }
 }

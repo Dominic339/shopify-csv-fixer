@@ -341,7 +341,9 @@
     "name_google_merchant_center": "Feed do Google Merchant Center",
     "desc_google_merchant_center": "Confira um arquivo de produtos do Google Merchant Center antes de enviá-lo: atributos obrigatórios, preços com moeda, disponibilidade, GTINs e identificadores.",
     "name_meta_catalog": "Catálogo da Meta (Facebook e Instagram)",
-    "desc_meta_catalog": "Confira um feed de catálogo do Facebook e Instagram antes de enviá-lo ao Commerce Manager: campos obrigatórios, disponibilidade, preços com moeda, marca ou GTIN e imagens."
+    "desc_meta_catalog": "Confira um feed de catálogo do Facebook e Instagram antes de enviá-lo ao Commerce Manager: campos obrigatórios, disponibilidade, preços com moeda, marca ou GTIN e imagens.",
+    "name_tiktok_catalog": "Catálogo do TikTok",
+    "desc_tiktok_catalog": "Verifique um feed de catálogo do TikTok antes de enviá-lo no TikTok Ads Manager: os nove campos obrigatórios, sku_id, disponibilidade, preços, marca e links de imagens."
   },
   "convert": {
     "title": "Conversor de formato CSV",

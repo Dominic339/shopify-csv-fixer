@@ -394,6 +394,45 @@
 "a": "Meta 目录现在只接受 in stock 和 out of stock。如果顾客现在就能下单，请使用 in stock。"
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"TikTok 目录为 Video Shopping Ads 和目录广告提供商品数据。您可以在 TikTok Ads Manager 中用商品文件填充目录：每行一件商品，标题行使用 TikTok 的字段名。此预设按照 TikTok 的目录商品参数检查每件商品，并保留您原有的列名。",
+"它能找出导致商品无法上传的问题：缺少必填字段、Feed 把标识符命名为 id 而不是 sku_id、TikTok 不接受的库存状态值、没有品牌的商品、重复的 sku_id，以及托管在 TikTok 无法读取的服务上的图片。"
+],
+"howItWorks": [
+"上传您的目录文件（CSV，或制表符分隔的 .txt 或 .tsv）。",
+"检查每件商品的 sku_id、title、description、availability、condition、price、link、image_link 和 brand。",
+"Google 或 Meta 风格的 id 列会重命名为 sku_id，in_stock、pre_order、“19,99 EUR”和“New”等值会转换为 TikTok 的格式。",
+"Google Drive、Dropbox 等 TikTok 无法读取的服务上的图片会被标出，标题中的表情符号和优惠信息也会被标出。",
+"下载保留原有列的 CSV，可直接在 TikTok Ads Manager 中上传。"
+],
+"commonFixes": [
+"将 id 列重命名为 sku_id",
+"将 availability 转换为 in stock、available for order、preorder、out of stock 或 discontinued",
+"将价格写成 9.99 USD，使用小数点和货币代码",
+"将 condition 转换为 new、refurbished 或 used",
+"标出没有品牌的商品",
+"标出 TikTok 无法加载的图片"
+],
+"faq": [
+{
+"q": "我可以把 Google 或 Meta 的 Feed 上传到 TikTok 吗？",
+"a": "大部分可以，因为大多数字段名相同。区别在于：TikTok 把标识符叫作 sku_id 而不是 id，并且每件商品都必须有 brand。此预设会重命名 id 列，并标出没有品牌的商品。"
+},
+{
+"q": "哪些字段是必填的？",
+"a": "每件商品都需要 sku_id、title、description、availability、condition、price、link、image_link 和 brand。"
+},
+{
+"q": "价格需要货币代码吗？",
+"a": "省略代码时，TikTok 会使用目录所在国家的货币。加上代码（例如 9.99 USD）可以避免价格被按错误的货币读取。"
+},
+{
+"q": "为什么我的图片被拒？",
+"a": "TikTok 需要指向 JPG 或 PNG 文件的公开链接。Google Drive、Dropbox、Flickr 或 Pinterest 的分享链接不可用。正方形图片至少应为 500 × 500 像素。"
+}
+]
 }
 }
 }
