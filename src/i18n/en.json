@@ -391,6 +391,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Meta Catalog (Facebook & Instagram)",
+    "fmt_tiktok_catalog": "TikTok Catalog",
     "noEquivalent": "(no equivalent in the target format):",
     "linkFixer": "CSV Fixer",
     "linkMerger": "CSV Merger",
@@ -420,6 +421,7 @@
     "fileRestored": "Your file is loaded again, so you can download it now.",
     "googleIntro": "A Merchant Center feed needs two things your export doesn't have: your store's address, to link each product to its page, and the currency of your prices.",
     "metaIntro": "A Meta catalog needs two things your export doesn't have: your store's address, to link each product to its page, and the currency of your prices.",
+    "tiktokIntro": "A TikTok catalog needs two things your export doesn't have: your store's address, to link each product to its page, and the currency of your prices.",
     "storeUrl": "Store address",
     "storeUrlHint": "Or a pattern for each product's page, such as https://shop.example.com/p/{sku} or …/products/{handle}.",
     "currency": "Currency (ISO code)"

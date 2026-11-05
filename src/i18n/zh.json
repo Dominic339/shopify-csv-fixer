@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Meta 目录（Facebook 和 Instagram）",
+    "fmt_tiktok_catalog": "TikTok 目录",
     "fmt_shopify_products": "Shopify（新模板）",
     "fmt_shopify_products_legacy": "Shopify（旧模板）",
     "noEquivalent": "（目标格式中无对应列）：",
@@ -417,6 +418,7 @@
     "fileRestored": "文件已重新载入，现在可以下载了。",
     "googleIntro": "Merchant Center Feed 需要两项导出文件中没有的信息：用于把每个商品链接到其页面的店铺地址，以及价格的货币。",
     "metaIntro": "Meta 目录需要两项导出文件中没有的信息：用于把每个商品链接到其页面的店铺地址，以及价格的货币。",
+    "tiktokIntro": "TikTok 目录需要两项导出文件中没有的信息：用于把每个商品链接到其页面的店铺地址，以及价格的货币。",
     "storeUrl": "店铺地址",
     "storeUrlHint": "或者填写每个商品页面的格式，例如 https://shop.example.com/p/{sku} 或 …/products/{handle}。",
     "currency": "货币（ISO 代码）"

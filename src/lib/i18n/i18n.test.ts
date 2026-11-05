@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import { pathInLocale, splitLocale, isLocalisedPath } from "@/lib/i18n/paths";
 import { pageAlternates } from "@/lib/i18n/seo";
 import { fmt, getTranslations } from "@/lib/i18n/getTranslations";
-import { LOCALES, pickLocale } from "@/lib/i18n/locales";
+import { LOCALES, localeHref, pickLocale } from "@/lib/i18n/locales";
 import en from "@/i18n/en.json";
 
 describe("locale paths", () => {
@@ -19,6 +19,14 @@ describe("locale paths", () => {
     expect(pathInLocale("/about", "ja")).toBe("/ja/about");
     expect(pathInLocale("/formats", "ja")).toBe("/ja");
     expect(isLocalisedPath("/formats")).toBe(false);
+  });
+
+  it("links English-only pages to the English page from every language", () => {
+    expect(localeHref("de", "/tiktok-catalog-feed-checker")).toBe("/tiktok-catalog-feed-checker");
+    expect(localeHref("de", "/guides/tiktok/tiktok-duplicate-id?x=1")).toBe("/guides/tiktok/tiktok-duplicate-id?x=1");
+    expect(localeHref("de", "/guides/tiktoken")).toBe("/de/guides/tiktoken");
+    expect(isLocalisedPath("/guides/tiktok")).toBe(false);
+    expect(pathInLocale("/guides/tiktok/x", "fr")).toBe("/fr");
   });
 });
 

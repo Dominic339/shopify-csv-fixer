@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 import { GUIDE_PLATFORMS, PLATFORM_LABEL } from "@/lib/guidesConstants";
 import type { GuidePlatform } from "@/lib/guidesConstants";
-import { isValidLocale, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { isValidLocale, DEFAULT_LOCALE, localeHref } from "@/lib/i18n/locales";
 
 type Props = {
   searchPlaceholder?: string;
@@ -84,7 +84,7 @@ export default function GuideSidebar({ searchPlaceholder, allGuides, platformsLa
             </li>
             {GUIDE_PLATFORMS.map((p) => (
               <li key={p}>
-                <Link href={`${guidesBase}/${p}`} className={linkClass(activePlatform === p)}>
+                <Link href={localeHref(locale ?? DEFAULT_LOCALE, `/guides/${p}`)} className={linkClass(activePlatform === p)}>
                   {p === "general" && generalLabel ? generalLabel : PLATFORM_LABEL[p]}
                 </Link>
               </li>

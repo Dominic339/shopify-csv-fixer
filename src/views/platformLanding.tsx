@@ -32,15 +32,18 @@ export async function platformLandingMetadata(slug: LandingSlug, locale: Locale 
     // metaTitle already ends with the brand, so skip the layout's "%s | StriveFormats".
     title: { absolute: fitTitleString(p.metaTitle) },
     description: fitDescription(p.metaDescription),
-    alternates: pageAlternates(locale, p.path),
+    alternates: pageAlternates(locale, p.path, !p.englishOnly),
     openGraph: { images: SHARE_IMAGES, title: p.metaTitle, description: p.metaDescription, url: `${SITE_URL}${localeHref(locale, p.path)}` },
   };
 }
 
+/** Output columns a fixer renames from another name (TikTok's sku_id from a Google/Meta id). */
+const RENAMED_FROM: Record<string, string[]> = { sku_id: ["id"] };
+
 /** Which input column an output column came from (Shopify renames old template columns). */
 function sourceColumn(outHeader: string, inputHeaders: string[]): string | null {
   const byKey = new Map(inputHeaders.map((h) => [h.trim().toLowerCase(), h]));
-  for (const name of [outHeader, ...(SHOPIFY_HEADER_ALIASES[outHeader] ?? [])]) {
+  for (const name of [outHeader, ...(SHOPIFY_HEADER_ALIASES[outHeader] ?? []), ...(RENAMED_FROM[outHeader] ?? [])]) {
     const hit = byKey.get(name.toLowerCase());
     if (hit) return hit;
   }

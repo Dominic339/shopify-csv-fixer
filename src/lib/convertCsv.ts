@@ -916,9 +916,13 @@ const GOOGLE_HEADERS = [
   "color", "size", "shipping_weight",
 ];
 
-/** Merchant Center and Meta catalog feeds share field names; Meta spells availability with a space. */
+/**
+ * Merchant Center, Meta and TikTok catalog feeds share field names. Meta and TikTok spell
+ * availability with a space; TikTok names the identifier sku_id and requires a brand.
+ */
 function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
   const meta = ctx.target === "meta_catalog";
+  const tiktok = ctx.target === "tiktok_catalog";
   const pattern = normalizeLinkPattern(ctx.options.storeUrl);
   const store = pattern ? "" : normalizeStoreUrl(ctx.options.storeUrl);
   const currency = t(ctx.options.currency).toUpperCase();
@@ -956,7 +960,7 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
       const onSale = price != null && compareAt != null && compareAt > price;
       const qty = parseLocaleNumber(v.qty);
       const inStock = v.qty === "" || v.policy === "continue" || (qty != null && qty > 0);
-      const availability = meta ? (inStock ? "in stock" : "out of stock") : inStock ? "in_stock" : "out_of_stock";
+      const availability = meta || tiktok ? (inStock ? "in stock" : "out of stock") : inStock ? "in_stock" : "out_of_stock";
       const code = checkBarcode(v.barcode);
       const gtin = code.status === "ok" || code.status === "fixed" ? code.value : "";
       if (v.barcode && !gtin) badBarcodes++;
@@ -992,14 +996,17 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
   else warnings.push(`Each link was built as ${store}${path}<handle>. Open a few to check they reach the right product page.`);
   if (skippedDrafts) {
     warnings.push(
-      meta
+      meta || tiktok
         ? `${skippedDrafts} draft or unpublished product(s) were left out, because a catalog should only hold products shoppers can buy.`
         : `${skippedDrafts} draft or unpublished product(s) were left out, because Google only lists products shoppers can buy.`,
     );
   }
-  if (noImage) warnings.push(meta ? `${noImage} item(s) have no image. Meta requires image_link for every product.` : `${noImage} item(s) have no image. Google requires image_link for every product.`);
-  if (noPrice) warnings.push(meta ? `${noPrice} item(s) have no price. Meta requires a price for every product.` : `${noPrice} item(s) have no price. Google requires a price for every product.`);
-  if (noBrand) {
+  if (noImage && tiktok) warnings.push(`${noImage} item(s) have no image. TikTok requires image_link for every product.`);
+  else if (noImage) warnings.push(meta ? `${noImage} item(s) have no image. Meta requires image_link for every product.` : `${noImage} item(s) have no image. Google requires image_link for every product.`);
+  if (noPrice && tiktok) warnings.push(`${noPrice} item(s) have no price. TikTok requires a price for every product.`);
+  else if (noPrice) warnings.push(meta ? `${noPrice} item(s) have no price. Meta requires a price for every product.` : `${noPrice} item(s) have no price. Google requires a price for every product.`);
+  if (noBrand && tiktok) warnings.push(`${noBrand} item(s) have no brand. TikTok requires a brand on every product; use your own brand for products you make.`);
+  else if (noBrand) {
     warnings.push(
       meta
         ? `${noBrand} item(s) have no brand or barcode. Meta needs a brand, gtin or mpn on every product; use your own brand for products you make.`
@@ -1009,7 +1016,9 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
   if (badBarcodes) warnings.push(`${badBarcodes} barcode(s) aren't valid GTINs and were left out of gtin.`);
   if (defaultCondition) warnings.push(`condition is set to new for ${defaultCondition} item(s) whose export doesn't say. Change it to used or refurbished where that applies.`);
   const headers = compact(GOOGLE_HEADERS, rows, ["id", "title", "description", "link", "image_link", "availability", "price", "brand", "condition"]);
-  return { headers, rows: rows.map((r) => Object.fromEntries(headers.map((h) => [h, r[h] ?? ""]))), warnings };
+  // TikTok reads the identifier from sku_id.
+  const outName = (h: string) => (tiktok && h === "id" ? "sku_id" : h);
+  return { headers: headers.map(outName), rows: rows.map((r) => Object.fromEntries(headers.map((h) => [outName(h), r[h] ?? ""]))), warnings };
 }
 
 const WRITERS: Record<string, (p: Product[], ctx: WriteContext) => WriteResult> = {
@@ -1022,6 +1031,7 @@ const WRITERS: Record<string, (p: Product[], ctx: WriteContext) => WriteResult> 
   amazon_inventory_loader: writeAmazon,
   google_merchant_center: writeGoogle,
   meta_catalog: writeGoogle,
+  tiktok_catalog: writeGoogle,
 };
 
 // User-facing display names for the converter UI
@@ -1035,6 +1045,7 @@ export const CONVERT_FORMAT_OPTIONS = [
   { id: "amazon_inventory_loader", label: "Amazon Inventory Loader" },
   { id: "google_merchant_center", label: "Google Merchant Center", targetOnly: true },
   { id: "meta_catalog", label: "Meta Catalog (Facebook & Instagram)", targetOnly: true },
+  { id: "tiktok_catalog", label: "TikTok Catalog", targetOnly: true },
 ];
 
 /** Formats a file can be converted from (a Merchant Center feed is an output only). */

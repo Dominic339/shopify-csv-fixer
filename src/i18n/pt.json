@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Catálogo da Meta (Facebook e Instagram)",
+    "fmt_tiktok_catalog": "Catálogo do TikTok",
     "fmt_shopify_products": "Shopify (modelo novo)",
     "fmt_shopify_products_legacy": "Shopify (modelo antigo)",
     "noEquivalent": "(sem equivalente no formato de destino):",
@@ -417,6 +418,7 @@
     "fileRestored": "Seu arquivo foi carregado de novo; você já pode baixá-lo.",
     "googleIntro": "Um feed do Merchant Center precisa de duas coisas que sua exportação não tem: o endereço da sua loja, para ligar cada produto à sua página, e a moeda dos seus preços.",
     "metaIntro": "Um catálogo da Meta precisa de duas coisas que sua exportação não tem: o endereço da sua loja, para ligar cada produto à sua página, e a moeda dos seus preços.",
+    "tiktokIntro": "Um catálogo do TikTok precisa de duas coisas que sua exportação não tem: o endereço da sua loja, para ligar cada produto à sua página, e a moeda dos seus preços.",
     "storeUrl": "Endereço da loja",
     "storeUrlHint": "Ou um padrão para a página de cada produto, como https://shop.example.com/p/{sku} ou …/products/{handle}.",
     "currency": "Moeda (código ISO)"

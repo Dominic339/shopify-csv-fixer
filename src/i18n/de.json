@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Meta-Katalog (Facebook & Instagram)",
+    "fmt_tiktok_catalog": "TikTok-Katalog",
     "fmt_shopify_products": "Shopify (neue Vorlage)",
     "fmt_shopify_products_legacy": "Shopify (alte Vorlage)",
     "noEquivalent": "(keine Entsprechung im Zielformat):",
@@ -417,6 +418,7 @@
     "fileRestored": "Deine Datei ist wieder geladen. Du kannst sie jetzt herunterladen.",
     "googleIntro": "Ein Merchant-Center-Feed braucht zwei Dinge, die dein Export nicht enthält: die Adresse deines Shops, um jedes Produkt mit seiner Seite zu verlinken, und die Währung deiner Preise.",
     "metaIntro": "Ein Meta-Katalog braucht zwei Dinge, die dein Export nicht enthält: die Adresse deines Shops, um jedes Produkt mit seiner Seite zu verlinken, und die Währung deiner Preise.",
+    "tiktokIntro": "Ein TikTok-Katalog braucht zwei Dinge, die dein Export nicht enthält: die Adresse deines Shops, um jedes Produkt mit seiner Seite zu verlinken, und die Währung deiner Preise.",
     "storeUrl": "Shop-Adresse",
     "storeUrlHint": "Oder ein Muster für die Seite jedes Produkts, etwa https://shop.example.com/p/{sku} oder …/products/{handle}.",
     "currency": "Währung (ISO-Code)"

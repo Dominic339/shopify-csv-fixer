@@ -1,7 +1,7 @@
 // src/lib/i18n/paths.ts
 // Which pages exist under /<locale>/..., and how to move between languages.
 
-import { DEFAULT_LOCALE, isValidLocale, localeHref, type Locale } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, isEnglishOnlyPath, isValidLocale, localeHref, type Locale } from "@/lib/i18n/locales";
 
 /** Page groups that have a /<locale>/ version. Other pages are English-only. */
 export const LOCALISED_PREFIXES = [
@@ -31,6 +31,7 @@ export const LOCALISED_PREFIXES = [
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
 export function isLocalisedPath(pathname: string): boolean {
+  if (isEnglishOnlyPath(pathname)) return false;
   return pathname === "/" || LOCALISED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 

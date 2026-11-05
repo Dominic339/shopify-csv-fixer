@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Katalog Meta (Facebook i Instagram)",
+    "fmt_tiktok_catalog": "Katalog TikTok",
     "fmt_shopify_products": "Shopify (nowy szablon)",
     "fmt_shopify_products_legacy": "Shopify (stary szablon)",
     "noEquivalent": "(brak odpowiednika w formacie docelowym):",
@@ -417,6 +418,7 @@
     "fileRestored": "Twój plik został ponownie wczytany, możesz go teraz pobrać.",
     "googleIntro": "Plik danych Merchant Center potrzebuje dwóch rzeczy, których nie ma w eksporcie: adresu sklepu, aby połączyć każdy produkt z jego stroną, oraz waluty cen.",
     "metaIntro": "Katalog Meta potrzebuje dwóch rzeczy, których nie ma w eksporcie: adresu sklepu, aby połączyć każdy produkt z jego stroną, oraz waluty cen.",
+    "tiktokIntro": "Katalog TikTok potrzebuje dwóch rzeczy, których nie ma w eksporcie: adresu sklepu, aby połączyć każdy produkt z jego stroną, oraz waluty cen.",
     "storeUrl": "Adres sklepu",
     "storeUrlHint": "Albo wzorzec strony każdego produktu, np. https://shop.example.com/p/{sku} lub …/products/{handle}.",
     "currency": "Waluta (kod ISO)"

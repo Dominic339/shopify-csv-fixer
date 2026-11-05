@@ -6,6 +6,7 @@ import { convertCsv, normalizeStoreUrl, type ConvertOptions } from "@/lib/conver
 import { SAMPLE_EXPORTS } from "@/lib/convertRoutes";
 import { validateAndFixGoogleMerchant } from "@/lib/googleMerchantOptimizer";
 import { validateAndFixMetaCatalog } from "@/lib/metaCatalogOptimizer";
+import { validateAndFixTikTokCatalog } from "@/lib/tiktokCatalogOptimizer";
 import { matchTemplate } from "@/lib/i18n/messages";
 
 const options = { storeUrl: "shop.example.com/", currency: "USD" };
@@ -85,6 +86,22 @@ describe("convert to Google Merchant Center", () => {
       // WooCommerce exports have no brand, so Meta's brand/gtin/mpn rule is the only error left there.
       const errors = new Set(checked.issues.filter((i) => i.severity === "error").map((i) => i.code));
       expect([...errors]).toEqual(source === "shopify_products" ? [] : ["meta/missing_identifier"]);
+      expect(out.warnings.every((w) => matchTemplate(w))).toBe(true);
+    });
+  }
+
+  for (const source of ["shopify_products", "woocommerce_products"]) {
+    it(`${source} to TikTok: sku_id column, TikTok's availability, and no blocking problems beyond brand`, () => {
+      const { headers, rows } = parseCsv(SAMPLE_EXPORTS[source]);
+      const out = convertCsv(headers, rows, source, "tiktok_catalog", null, options);
+      expect(out.headers[0]).toBe("sku_id");
+      expect(out.headers).not.toContain("id");
+      expect(out.rows.every((r) => r.sku_id)).toBe(true);
+      const checked = validateAndFixTikTokCatalog(out.headers, out.rows);
+      const errors = new Set(checked.issues.filter((i) => i.severity === "error").map((i) => i.code));
+      // WooCommerce exports have no brand, which TikTok requires; the converter warns about it.
+      expect([...errors]).toEqual(source === "shopify_products" ? [] : ["tiktok/missing_value"]);
+      if (source !== "shopify_products") expect(out.warnings.some((w) => w.includes("TikTok requires a brand"))).toBe(true);
       expect(out.warnings.every((w) => matchTemplate(w))).toBe(true);
     });
   }

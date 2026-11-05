@@ -148,6 +148,20 @@ const GOOGLE_COLUMNS: Record<string, string> = {
   "meta/invalid_gtin": "gtin",
   "meta/invalid_gender": "gender",
   "meta/invalid_age_group": "age_group",
+  "tiktok/missing_value": "sku_id / title / brand",
+  "tiktok/duplicate_id": "sku_id",
+  "tiktok/title_promotional": "title",
+  "tiktok/invalid_url": "link / image_link",
+  "tiktok/unsupported_image": "image_link",
+  "tiktok/too_many_images": "additional_image_link",
+  "tiktok/invalid_availability": "availability",
+  "tiktok/price_missing_currency": "price",
+  "tiktok/invalid_price": "price",
+  "tiktok/invalid_sale_price": "sale_price",
+  "tiktok/invalid_condition": "condition",
+  "tiktok/invalid_gtin": "gtin",
+  "tiktok/invalid_gender": "gender",
+  "tiktok/invalid_age_group": "age_group",
 };
 
 function extractColumnName(code: string, fallback: string, tr: Tr = englishTr): string {
@@ -177,6 +191,13 @@ const TYPE_BY_CODE: Record<string, IssueType> = {
   "meta/invalid_gtin": "misc",
   "meta/missing_identifier": "misc",
   "meta/too_many_images": "misc",
+  "tiktok/invalid_availability": "enum",
+  "tiktok/invalid_gender": "enum",
+  "tiktok/invalid_age_group": "enum",
+  "tiktok/invalid_gtin": "misc",
+  "tiktok/too_many_images": "misc",
+  "tiktok/title_promotional": "misc",
+  "tiktok/unsupported_image": "misc",
 };
 
 export function classifyIssue(input: IssueInput): IssueType {
@@ -286,6 +307,11 @@ const ENUM_BY_CODE: Record<string, string[]> = {
   "meta/invalid_condition": ["new", "refurbished", "used"],
   "meta/invalid_gender": ["female", "male", "unisex"],
   "meta/invalid_age_group": ["adult", "all ages", "teen", "kids", "toddler", "infant", "newborn"],
+  // TikTok's catalog product parameters.
+  "tiktok/invalid_availability": ["in stock", "available for order", "preorder", "out of stock", "discontinued"],
+  "tiktok/invalid_condition": ["new", "refurbished", "used"],
+  "tiktok/invalid_gender": ["male", "female", "unisex"],
+  "tiktok/invalid_age_group": ["newborn", "infant", "toddler", "kids", "adult"],
 };
 
 /** The character limit named in the rule's (English) explanation, if any. */
@@ -845,6 +871,7 @@ function platformDisplayName(platform: string, tr: Tr = englishTr): string {
     amazon: "Amazon",
     google: "Google Merchant Center",
     meta: "Meta",
+    tiktok: "TikTok",
   };
   return platform === "general" ? tr("the platform") : (N[platform] ?? platform);
 }
@@ -1163,12 +1190,98 @@ function metaOverrides(type: IssueType, input: IssueInput, column: string, tr: T
   return {};
 }
 
+/**
+ * TikTok's catalog takes the same price and barcode formats as Google's feed, so it starts from
+ * the Merchant Center sections and replaces the sentences that name Google, plus its own notes on
+ * sku_id, brand, image hosts, titles, availability and age groups. TikTok takes CSV.
+ * English only for now (see ENGLISH_ONLY_GUIDE_PLATFORMS).
+ */
+function tiktokOverrides(type: IssueType, input: IssueInput, column: string, tr: Tr): Partial<ExpandedIssueContent> {
+  const code = input.issueCode.split("/")[1];
+  const shared = googleOverrides(type, input, column, tr);
+  if (code === "price_missing_currency")
+    return {
+      ...shared,
+      examples: shared.examples?.map((e) => (e.bad === "$19.99" ? { ...e, note: tr("$ is used by several currencies, so add the code") } : e)),
+      preventTips: [...(shared.preventTips ?? []).slice(0, -1), tr("Run every file through StriveFormats before uploading it to TikTok Ads Manager.")],
+      platformNote: tr("TikTok doesn't reject a price without a currency code. It assumes the currency of the catalog's target country, so a feed priced in euros on a US catalog would show euro amounts as dollars. Adding the code removes the guesswork."),
+      technicalDetail: tr("TikTok's catalog parameters ask for the price as a number and an ISO 4217 code, for example 9.99 USD, and say the currency defaults to the catalog's target country when it is left out. The price must match the product page. sale_price uses the same format and needs to be lower than price."),
+    };
+  if (type === "money")
+    return {
+      ...shared,
+      examples: shared.examples?.map((e) => (e.bad === "$19.99" ? { ...e, note: tr("$ is used by several currencies, so add the code") } : e)),
+      preventTips: [...(shared.preventTips ?? []).slice(0, -1), tr("Run every file through StriveFormats before uploading it to TikTok Ads Manager.")],
+      technicalDetail: tr("TikTok's catalog parameters ask for the price as a number with a period for decimals and an ISO 4217 code, for example 9.99 USD, and the price must match the product page. sale_price follows the same format and is only shown as a discount when it is lower than price."),
+    };
+  if (code === "invalid_gtin")
+    return {
+      ...shared,
+      preventTips: [...(shared.preventTips ?? []).slice(0, 2), tr("Don't invent a GTIN. If a product has none, leave gtin blank: on TikTok it is optional.")],
+      platformNote: tr("gtin is optional on TikTok, so a blank one is fine. A wrong one is worse than none, because it can match your product to someone else's."),
+    };
+  if (code === "missing_value")
+    return {
+      platformNote: tr("TikTok requires brand on every product, unlike Google and Meta, which accept a GTIN or MPN instead. For products you make yourself, use your store's name."),
+    };
+  if (code === "duplicate_id")
+    return {
+      platformNote: tr("TikTok ignores a product whose sku_id is already in the feed, so the second row simply never appears. Keep each sku_id the same from one upload to the next: that's how TikTok knows to update a product instead of adding a new one."),
+    };
+  if (code === "too_many_images")
+    return {
+      validValues: [tr("Up to 10 URLs, separated by commas"), tr("Each one a full URL starting with https://")],
+      platformNote: tr("TikTok uses up to 10 additional_image_link values for each product. Put the most useful views first."),
+    };
+  if (code === "unsupported_image")
+    return {
+      validValues: [
+        tr("A public https:// link to the image file itself"),
+        tr("A .jpg, .jpeg or .png file (or a URL with no file extension that serves one)"),
+        tr("Square images at least 500 × 500 pixels"),
+      ],
+      examples: [
+        { bad: "https://drive.google.com/file/d/1aB…/view", good: "https://example.com/images/mug.jpg", note: tr("Share pages aren't images") },
+        { bad: "https://www.dropbox.com/s/abc/mug.jpg", good: "https://example.com/images/mug.jpg", note: tr("Host the file on your store") },
+        { bad: "https://example.com/images/mug.webp", good: "https://example.com/images/mug.jpg", note: tr("Use JPG or PNG") },
+      ],
+      platformNote: tr("TikTok's help page lists Google Drive, Dropbox, Flickr, Pinterest, 500px, imgbb and SmugMug as hosts it can't read images from. Images uploaded to Shopify, WooCommerce or another store platform work, because their links point to the file itself."),
+      detectionNote: tr("StriveFormats reads the host and file extension of every image link. A link to an unsupported host is an error; a file that isn't JPG or PNG is a warning, because some image servers convert on the fly."),
+      technicalDetail: tr("A share link opens a web page with the image on it, not the image file, so TikTok's crawler gets HTML instead of a picture. Links with no file extension, such as CDN links with ?width=800, are not flagged, because they often serve a JPG. Check that image links open the bare image in a private browser window."),
+    };
+  if (code === "title_promotional")
+    return {
+      validValues: [tr("The product name, brand and key details such as colour and size"), tr("No emoji"), tr("No offers such as free shipping or a discount")],
+      examples: [
+        { bad: "Acme Mug 🔥", good: "Acme Ceramic Coffee Mug, 12 oz", note: tr("Remove the emoji") },
+        { bad: "Acme Mug - FREE SHIPPING", good: "Acme Ceramic Coffee Mug, 12 oz", note: tr("Offers go in the ad") },
+      ],
+      platformNote: tr("TikTok's catalog rules say titles can't contain emoji or promotional text like \"free shipping\". Trademark signs such as ™ and ® are fine."),
+      detectionNote: tr("StriveFormats looks for emoji and for common offer phrases (free shipping, free delivery, a percentage off, buy now, best price) in every title."),
+      technicalDetail: tr("Products are reviewed after upload, and titles with offers or emoji can be rejected there. The check is a warning, because only TikTok's review decides; rewrite the flagged titles to describe the product."),
+    };
+  if (code === "invalid_availability")
+    return {
+      platformNote: tr("TikTok takes five values: in stock, available for order, preorder, out of stock and discontinued, written with spaces. Google-style values like in_stock and pre_order are converted for you."),
+    };
+  if (code === "invalid_age_group")
+    return {
+      platformNote: tr("TikTok's age groups are newborn (0-3 months), infant (3-12 months), toddler (1-5 years), kids (5-13 years) and adult (13 or older). There's no teen or all ages group: use adult for teens, and leave age_group blank for products meant for everyone."),
+    };
+  if (type === "required_header")
+    return {
+      platformNote: tr("TikTok Ads Manager reads its field names, such as sku_id and image_link, in English whatever language the catalog is in. A feed made for Google or Meta names the identifier id; StriveFormats renames it to sku_id for you."),
+    };
+  return {};
+}
+
 export function expandIssueContent(input: IssueInput, tr: Tr = englishTr): ExpandedIssueContent {
   const issueType = classifyIssue(input);
   const column = extractColumnName(input.issueCode, input.localTitle ?? input.title, tr);
   const base = expandBase(input, issueType, column, tr);
   if (input.platform === "google") return { ...base, ...googleOverrides(issueType, input, column, tr) };
   if (input.platform === "meta") return { ...base, ...metaOverrides(issueType, input, column, tr) };
+  if (input.platform === "tiktok") return { ...base, ...tiktokOverrides(issueType, input, column, tr) };
   return base;
 }
 

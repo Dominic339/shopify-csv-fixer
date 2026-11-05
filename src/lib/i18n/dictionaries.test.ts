@@ -16,6 +16,8 @@ import { listCuratedGuides } from "@/lib/guides/mdxLoader";
 import { getAllFormats } from "@/lib/formats";
 import { PLATFORM_LANDINGS } from "@/lib/landing/platforms";
 import { getAllGuides } from "@/lib/guidesRegistry";
+import { ENGLISH_ONLY_GUIDE_PLATFORMS } from "@/lib/guidesConstants";
+import { ENGLISH_ONLY_MESSAGE_TEMPLATES } from "@/lib/i18n/englishOnly";
 import { expandIssueContent, fillTemplate } from "@/lib/guides/issueGuideExpander";
 import en from "@/i18n/en.json";
 import enPages from "@/i18n/pages/en.json";
@@ -31,7 +33,8 @@ const guideTemplates = (() => {
   const seen = new Set<string>();
   const tr = (t: string, v?: Record<string, string | number>) => (seen.add(t), fillTemplate(t, v));
   for (const g of getAllGuides()) {
-    if (g.kind !== "issue" || !g.issueCode) continue;
+    // English-only guide platforms have no translated pages yet.
+    if (g.kind !== "issue" || !g.issueCode || ENGLISH_ONLY_GUIDE_PLATFORMS.includes(g.platform)) continue;
     expandIssueContent(
       { issueCode: g.issueCode, title: g.title, explanation: g.explanation ?? "", whyPlatformCares: g.whyPlatformCares ?? "", howToFix: g.howToFix ?? "", category: g.category, autoFixable: !!g.autoFixable, blocking: !!g.blocking, platform: g.platform },
       tr,
@@ -44,7 +47,7 @@ const presets = getAllFormats().filter((f) => f.source === "builtin" && f.seo);
 describe.each(LOCALES.filter((l) => l !== "en"))("%s dictionaries", (loc) => {
   it("translate every message template with the same placeholders", () => {
     const dict: Record<string, string> = read("messages", loc);
-    const missing = (templates as string[]).filter((t) => !dict[t]);
+    const missing = (templates as string[]).filter((t) => !dict[t] && !ENGLISH_ONLY_MESSAGE_TEMPLATES.includes(t));
     const badPlaceholders = (templates as string[]).filter((t) => dict[t] && placeholders(dict[t]).join() !== placeholders(t).join());
     expect({ missing, badPlaceholders }).toEqual({ missing: [], badPlaceholders: [] });
   });
@@ -70,6 +73,7 @@ describe.each(LOCALES.filter((l) => l !== "en"))("%s dictionaries", (loc) => {
   it("translate every platform landing page and its UI labels", () => {
     const landing = read("landing", loc);
     for (const [slug, p] of Object.entries(PLATFORM_LANDINGS)) {
+      if (p.englishOnly) continue;
       const t = landing[slug];
       expect(t, slug).toBeTruthy();
       for (const field of ["metaTitle", "metaDescription", "kicker", "title", "intro", "exportTip"] as const) {
