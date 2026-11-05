@@ -1102,5 +1102,95 @@
 "explanation": "age_group は adult、all ages、teen、kids、toddler、infant、newborn のいずれかにする必要があります。",
 "whyPlatformCares": "それ以外の値は無視されるため、商品が想定外の買い物客に表示されることがあります。",
 "howToFix": "Meta の 7 つの値のいずれかを使ってください。「Adults」「teens」「children」は自動で変換されます。"
+},
+"tiktok/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "TikTokがすべての商品に求める9つのフィールドのいずれかに列がありません：sku_id、title、description、availability、condition、price、link、image_link、brand。",
+"whyPlatformCares": "必須フィールドが欠けていると、TikTokはデータフィード全体にエラーを表示します。",
+"howToFix": "不足している列を、TikTokのフィールド名どおりの綴り（例：image_link）でヘッダー行に追加し、すべての商品で入力してください。id という名前の列は自動的に sku_id に名前が変更されます。"
+},
+"tiktok/missing_value": {
+"title": "必須項目が空です",
+"explanation": "この行で必須フィールド（sku_id、title、description、availability、condition、price、link、image_link、brand）が空です。",
+"whyPlatformCares": "必須項目が欠けた商品は TikTok にアップロードできません。",
+"howToFix": "値を入力してください。自社で作った商品の brand にはストア名を使ってください。カタログに載せない商品なら、行を削除してください。"
+},
+"tiktok/duplicate_id": {
+"title": "sku_id の重複",
+"explanation": "2つ以上の行が同じ sku_id を使っています。",
+"whyPlatformCares": "TikTokは sku_id で各商品を識別し、sku_id がすでにフィードにある商品は無視します。",
+"howToFix": "すべての商品とバリエーションに固有の sku_id を付けてください。SKUを使うのが最も簡単です。TikTokが新しい商品を追加せずに既存の商品を更新できるよう、アップロード間で同じ値を保ってください。"
+},
+"tiktok/title_promotional": {
+"title": "タイトルに絵文字や宣伝文",
+"explanation": "タイトルに絵文字、または「送料無料」「20%オフ」などのオファーが含まれています。",
+"whyPlatformCares": "TikTokはタイトルに絵文字や宣伝文を認めておらず、それらを含む商品は審査で却下されることがあります。",
+"howToFix": "タイトルでは商品そのもの（ブランド、商品、色、サイズ）を説明し、オファーは広告に載せてください。"
+},
+"tiktok/invalid_url": {
+"title": "リンクまたは画像 URL が無効です",
+"explanation": "link、image_link、additional_image_link が http:// または https:// で始まる完全なウェブアドレスではありません。",
+"whyPlatformCares": "TikTok はこれらのアドレスから商品ページと画像を読み込みます。相対 URL や壊れた URL だと商品をアップロードできません。",
+"howToFix": "商品ページとすべての画像に、https:// とドメインを含む完全なアドレスを使ってください。"
+},
+"tiktok/unsupported_image": {
+"title": "TikTokが使えない画像",
+"explanation": "画像がTikTokの読み込めないサービス（Google Drive、Dropbox、Flickr、Pinterest、500px、imgbb、SmugMug）にあるか、JPGまたはPNGファイルではありません。",
+"whyPlatformCares": "TikTokにはJPGまたはPNGファイルへの公開リンクが必要です。共有ページやほかの形式のファイルは読み込まれないため、商品に画像が表示されません。",
+"howToFix": "ストアまたは公開画像ホスティングにある画像ファイルそのものにリンクしてください。正方形の画像は500 × 500ピクセル以上にしてください。"
+},
+"tiktok/too_many_images": {
+"title": "追加画像が10枚を超えています",
+"explanation": "additional_image_link に10個を超えるURLがあります。",
+"whyPlatformCares": "TikTokが使う追加画像は最大10枚です。",
+"howToFix": "最も役立つ追加画像10枚をカンマ区切りで残してください。"
+},
+"tiktok/invalid_availability": {
+"title": "availability の値が無効です",
+"explanation": "availability は in stock、available for order、preorder、out of stock、discontinued のいずれかである必要があります。",
+"whyPlatformCares": "TikTokは独自の5つの値しか受け付けません。ほかの値では商品をアップロードできません。",
+"howToFix": "5つの値のいずれかを使ってください。in_stock や pre_order などのGoogle形式の値や、「Sold out」などの語は自動的に変換されます。"
+},
+"tiktok/price_missing_currency": {
+"title": "価格に通貨コードがありません",
+"explanation": "価格に数値はありますが通貨コードがないか、複数の通貨で使われる $ 記号だけです。",
+"whyPlatformCares": "その場合TikTokはカタログの国の通貨を使うため、価格が別の通貨なら誤りになります。",
+"howToFix": "価格は数値の後にISO 4217コードを付けて、9.99 USD のように書いてください。€ や £ のように1つの通貨を表す記号は自動的に変換されます。"
+},
+"tiktok/invalid_price": {
+"title": "価格が無効です",
+"explanation": "price が通貨コード付きの数値ではないか、0 です。",
+"whyPlatformCares": "有効な価格のない商品はカタログにアップロードできず、価格は商品ページと一致している必要があります。",
+"howToFix": "小数点にはピリオドを使い、通貨コードを付けてください（例：9.99 USD）。9,99 EUR のような価格は自動で変換されます。"
+},
+"tiktok/invalid_sale_price": {
+"title": "セール価格が無効です",
+"explanation": "sale_price が有効な価格ではないか、price より低くありません。",
+"whyPlatformCares": "TikTokは、sale_price が有効で通常価格より低い場合にのみ割引を表示します。",
+"howToFix": "通常価格は price に、低いセール価格は sale_price に、どちらも通貨コード付きで入力してください。"
+},
+"tiktok/invalid_condition": {
+"title": "condition の値が無効です",
+"explanation": "condition は new、refurbished、used のいずれかにする必要があります。",
+"whyPlatformCares": "TikTok では condition がすべての商品に必須で、それ以外の値は受け付けられません。",
+"howToFix": "new、refurbished、used を使ってください。大文字の値や「renewed」は自動で変換されます。"
+},
+"tiktok/invalid_gtin": {
+"title": "GTIN が無効です",
+"explanation": "gtin が正しいチェックディジットを持つ 8、12、13、14 桁ではないか、スプレッドシートで指数表記に変わっています。",
+"whyPlatformCares": "TikTokでは gtin は任意ですが、誤ったGTINは商品を他人の商品と結び付けるおそれがあります。",
+"howToFix": "パッケージや仕入先からバーコードを写すか、gtin を空のままにしてください。スペース、ハイフン、欠落が証明できる先頭のゼロは自動的に修正されます。"
+},
+"tiktok/invalid_gender": {
+"title": "gender の値が無効です",
+"explanation": "gender は female、male、unisex のいずれかにする必要があります。",
+"whyPlatformCares": "TikTokは gender をオーディエンスのターゲティングに使うため、誤った値だと商品が違う購入者に表示されることがあります。",
+"howToFix": "female、male、unisex を使ってください。「Men」や「Women's」などの値は自動で変換されます。"
+},
+"tiktok/invalid_age_group": {
+"title": "age_group の値が無効です",
+"explanation": "age_group は newborn、infant、toddler、kids、adult のいずれかである必要があります。",
+"whyPlatformCares": "TikTokは年齢層をオーディエンスのターゲティングに使います。teen や all ages のグループはありません。",
+"howToFix": "TikTokの5つの値のいずれかを使ってください。10代は adult（13歳以上）に含まれ、kids は5〜13歳です。"
 }
 }

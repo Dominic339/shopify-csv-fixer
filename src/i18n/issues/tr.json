@@ -1102,5 +1102,95 @@
 "explanation": "age_group adult, all ages, teen, kids, toddler, infant veya newborn olmalıdır.",
 "whyPlatformCares": "Diğer değerler yok sayılır; bu yüzden ürün yanlış alışverişçilere gösterilebilir.",
 "howToFix": "Meta'nın yedi değerinden birini kullanın. \"Adults\", \"teens\" ve \"children\" otomatik olarak dönüştürülür."
+},
+"tiktok/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "TikTok'un her ürün için istediği dokuz alandan birinin sütunu yok: sku_id, title, description, availability, condition, price, link, image_link veya brand.",
+"whyPlatformCares": "Zorunlu bir alan eksik olduğunda TikTok veri feed'inin tamamı için hata bildirir.",
+"howToFix": "Eksik sütunu başlık satırına TikTok'un alanı adlandırdığı şekilde (örneğin image_link) ekleyin ve her ürün için doldurun. id adlı bir sütun otomatik olarak sku_id olarak yeniden adlandırılır."
+},
+"tiktok/missing_value": {
+"title": "Zorunlu alan boş",
+"explanation": "Bu satırda zorunlu bir alan (sku_id, title, description, availability, condition, price, link, image_link veya brand) boş.",
+"whyPlatformCares": "TikTok, zorunlu alanı eksik bir ürünü yükleyemez.",
+"howToFix": "Değeri doldurun. Kendi ürettiğiniz ürünlerde brand için mağazanızın adını kullanın. Ürün katalogda olmamalıysa satırı silin."
+},
+"tiktok/duplicate_id": {
+"title": "Yinelenen sku_id",
+"explanation": "İki veya daha fazla satır aynı sku_id'yi kullanıyor.",
+"whyPlatformCares": "TikTok her ürünü sku_id ile tanır ve sku_id'si feed'de zaten bulunan ürünleri yok sayar.",
+"howToFix": "Her ürüne ve her varyanta kendi sku_id'sini verin. En kolayı SKU'yu kullanmaktır. TikTok'un yeni ürün eklemek yerine ürünü güncellemesi için yüklemeler arasında aynı tutun."
+},
+"tiktok/title_promotional": {
+"title": "Başlıkta emoji veya tanıtım metni",
+"explanation": "Başlıkta bir emoji ya da \"ücretsiz kargo\" veya \"%20 indirim\" gibi bir teklif var.",
+"whyPlatformCares": "TikTok başlıklarda emojiye ve tanıtım metnine izin vermez; bunları içeren ürünler incelemede reddedilebilir.",
+"howToFix": "Başlıkta ürünü anlatın (marka, ürün, renk, beden) ve teklifleri reklama koyun."
+},
+"tiktok/invalid_url": {
+"title": "Geçersiz bağlantı veya görsel URL'si",
+"explanation": "link, image_link veya additional_image_link, http:// ya da https:// ile başlayan tam bir web adresi değil.",
+"whyPlatformCares": "TikTok ürün sayfasını ve görseli bu adreslerden yükler. Göreli veya bozuk bir URL ürünün yüklenmesini engeller.",
+"howToFix": "Ürün sayfası ve her görsel için https:// ve alan adınızı içeren tam adresi kullanın."
+},
+"tiktok/unsupported_image": {
+"title": "TikTok'un kullanamadığı görsel",
+"explanation": "Görsel, TikTok'un okuyamadığı bir hizmette (Google Drive, Dropbox, Flickr, Pinterest, 500px, imgbb veya SmugMug) duruyor ya da JPG veya PNG dosyası değil.",
+"whyPlatformCares": "TikTok'un bir JPG veya PNG dosyasına herkese açık bir bağlantıya ihtiyacı var. Paylaşım sayfaları ve diğer dosya türleri yüklenmez, bu yüzden ürünün görseli olmaz.",
+"howToFix": "Mağazanızdaki veya herkese açık bir görsel barındırma hizmetindeki görsel dosyasına bağlantı verin. Kare görseller en az 500 × 500 piksel olmalıdır."
+},
+"tiktok/too_many_images": {
+"title": "10'dan fazla ek görsel",
+"explanation": "additional_image_link 10'dan fazla URL içeriyor.",
+"whyPlatformCares": "TikTok en fazla 10 ek görsel kullanır.",
+"howToFix": "En faydalı 10 ek görseli virgülle ayırarak tutun."
+},
+"tiktok/invalid_availability": {
+"title": "Geçersiz availability değeri",
+"explanation": "availability in stock, available for order, preorder, out of stock veya discontinued olmalıdır.",
+"whyPlatformCares": "TikTok yalnızca kendi beş değerini kabul eder. Diğer değerler ürünün yüklenmesini engeller.",
+"howToFix": "Beş değerden birini kullanın. in_stock ve pre_order gibi Google tarzı değerler ve \"Sold out\" gibi sözcükler otomatik olarak dönüştürülür."
+},
+"tiktok/price_missing_currency": {
+"title": "Para birimi kodu olmayan fiyat",
+"explanation": "Fiyatta bir sayı var ama para birimi kodu yok ya da yalnızca birçok para biriminin kullandığı $ işareti var.",
+"whyPlatformCares": "TikTok bu durumda kataloğun ülkesinin para birimini kullanır; fiyatlarınız başka bir para birimindeyse bu yanlış olur.",
+"howToFix": "Fiyatı bir sayı ve ardından ISO 4217 kodu olarak yazın, örneğin 9.99 USD. € veya £ gibi tek bir para birimini gösteren simgeler otomatik olarak dönüştürülür."
+},
+"tiktok/invalid_price": {
+"title": "Geçersiz fiyat",
+"explanation": "price para birimi kodlu bir sayı değil ya da 0.",
+"whyPlatformCares": "Geçerli fiyatı olmayan ürünler kataloğa yüklenemez ve fiyat ürün sayfasıyla aynı olmalıdır.",
+"howToFix": "Ondalık ayırıcı olarak nokta kullanın ve para birimi kodunu ekleyin, örneğin 9.99 USD. 9,99 EUR gibi fiyatlar otomatik olarak dönüştürülür."
+},
+"tiktok/invalid_sale_price": {
+"title": "Geçersiz indirimli fiyat",
+"explanation": "sale_price geçerli bir fiyat değil ya da price'tan düşük değil.",
+"whyPlatformCares": "TikTok indirimi yalnızca sale_price geçerli ve normal fiyattan düşük olduğunda gösterir.",
+"howToFix": "Normal fiyatı price'ta, daha düşük indirimli fiyatı sale_price'ta tutun; ikisinde de para birimi kodu olsun."
+},
+"tiktok/invalid_condition": {
+"title": "Geçersiz condition değeri",
+"explanation": "condition new, refurbished veya used olmalıdır.",
+"whyPlatformCares": "TikTok'ta condition her ürün için zorunludur ve diğer değerler kabul edilmez.",
+"howToFix": "new, refurbished veya used kullanın. Büyük harfli değerler ve \"renewed\" otomatik olarak dönüştürülür."
+},
+"tiktok/invalid_gtin": {
+"title": "Geçersiz GTIN",
+"explanation": "gtin doğru kontrol basamağına sahip 8, 12, 13 veya 14 haneli bir sayı değil ya da bir elektronik tablo onu bilimsel gösterime çevirmiş.",
+"whyPlatformCares": "gtin TikTok'ta isteğe bağlıdır, ancak yanlış bir GTIN ürünü başka birinin ürünüyle eşleştirebilir.",
+"howToFix": "Barkodu ambalajdan veya tedarikçinizden kopyalayın ya da gtin'i boş bırakın. Boşluklar, tireler ve eksik olduğu kanıtlanan baştaki sıfır otomatik olarak düzeltilir."
+},
+"tiktok/invalid_gender": {
+"title": "Geçersiz gender değeri",
+"explanation": "gender female, male veya unisex olmalıdır.",
+"whyPlatformCares": "TikTok gender'ı hedef kitle belirlemede kullanır, bu yüzden yanlış bir değer ürünü yanlış alıcılara gösterebilir.",
+"howToFix": "female, male veya unisex kullanın. \"Men\" veya \"Women's\" gibi değerler otomatik olarak dönüştürülür."
+},
+"tiktok/invalid_age_group": {
+"title": "Geçersiz age_group değeri",
+"explanation": "age_group newborn, infant, toddler, kids veya adult olmalıdır.",
+"whyPlatformCares": "TikTok yaş grubunu hedef kitle belirlemede kullanır. teen veya all ages grubu yoktur.",
+"howToFix": "TikTok'un beş değerinden birini kullanın. Gençler adult (13 yaş ve üzeri) sayılır, kids ise 5 ile 13 yaş arasıdır."
 }
 }

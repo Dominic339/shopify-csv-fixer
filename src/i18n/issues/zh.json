@@ -1102,5 +1102,95 @@
 "explanation": "age_group 必须是 adult、all ages、teen、kids、toddler、infant 或 newborn。",
 "whyPlatformCares": "其他值会被忽略，商品可能会展示给不相关的购物者。",
 "howToFix": "使用 Meta 的七个值之一。“Adults”、“teens”和“children”会自动转换。"
+},
+"tiktok/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "TikTok 要求每件商品都有的 9 个字段之一缺少列：sku_id、title、description、availability、condition、price、link、image_link 或 brand。",
+"whyPlatformCares": "缺少必填字段时，TikTok 会对整个数据 Feed 报错。",
+"howToFix": "按照 TikTok 的字段名（例如 image_link）在标题行中添加缺少的列，并为每件商品填写。名为 id 的列会自动重命名为 sku_id。"
+},
+"tiktok/missing_value": {
+"title": "必填字段为空",
+"explanation": "此行的必填字段（sku_id、title、description、availability、condition、price、link、image_link 或 brand）为空。",
+"whyPlatformCares": "TikTok 无法上传缺少必填字段的商品。",
+"howToFix": "请填写该值。自产商品的 brand 请使用您的店铺名称。如果该商品不应出现在目录中，请删除这一行。"
+},
+"tiktok/duplicate_id": {
+"title": "sku_id 重复",
+"explanation": "两行或更多行使用了相同的 sku_id。",
+"whyPlatformCares": "TikTok 通过 sku_id 识别每件商品，并会忽略 sku_id 已在 Feed 中出现过的商品。",
+"howToFix": "为每件商品和每个变体设置各自的 sku_id。使用 SKU 最简单。每次上传都保持不变，这样 TikTok 会更新商品，而不是新增一件。"
+},
+"tiktok/title_promotional": {
+"title": "标题中有表情符号或促销文字",
+"explanation": "标题中有表情符号，或“包邮”“8 折”之类的优惠信息。",
+"whyPlatformCares": "TikTok 不允许在标题中使用表情符号或促销文字，含有这些内容的商品可能在审核中被拒。",
+"howToFix": "在标题中描述商品本身（品牌、商品、颜色、尺码），把优惠放到广告里。"
+},
+"tiktok/invalid_url": {
+"title": "链接或图片网址无效",
+"explanation": "link、image_link 或 additional_image_link 不是以 http:// 或 https:// 开头的完整网址。",
+"whyPlatformCares": "TikTok 从这些地址加载商品页面和图片。相对网址或失效网址会导致商品无法上传。",
+"howToFix": "商品页面和每张图片都使用包含 https:// 和域名的完整地址。"
+},
+"tiktok/unsupported_image": {
+"title": "TikTok 无法使用的图片",
+"explanation": "图片托管在 TikTok 无法读取的服务上（Google Drive、Dropbox、Flickr、Pinterest、500px、imgbb 或 SmugMug），或者不是 JPG 或 PNG 文件。",
+"whyPlatformCares": "TikTok 需要指向 JPG 或 PNG 文件的公开链接。分享页面和其他文件类型无法加载，商品就没有图片。",
+"howToFix": "链接到您店铺或公共图床上的图片文件本身。正方形图片至少应为 500 × 500 像素。"
+},
+"tiktok/too_many_images": {
+"title": "附加图片超过 10 张",
+"explanation": "additional_image_link 中有超过 10 个网址。",
+"whyPlatformCares": "TikTok 最多使用 10 张附加图片。",
+"howToFix": "保留最有用的 10 张附加图片，用逗号分隔。"
+},
+"tiktok/invalid_availability": {
+"title": "availability 值无效",
+"explanation": "availability 必须是 in stock、available for order、preorder、out of stock 或 discontinued。",
+"whyPlatformCares": "TikTok 只接受它自己的 5 个值。其他值会导致商品无法上传。",
+"howToFix": "使用这 5 个值之一。in_stock、pre_order 等 Google 风格的值，以及“Sold out”之类的词，会自动转换。"
+},
+"tiktok/price_missing_currency": {
+"title": "价格缺少货币代码",
+"explanation": "价格有数字但没有货币代码，或者只有多种货币通用的 $ 符号。",
+"whyPlatformCares": "此时 TikTok 会使用目录所在国家的货币；如果您的价格是另一种货币，就会出错。",
+"howToFix": "价格写成数字后加 ISO 4217 代码，例如 9.99 USD。€ 或 £ 等只代表一种货币的符号会自动转换。"
+},
+"tiktok/invalid_price": {
+"title": "价格无效",
+"explanation": "price 不是带货币代码的数字，或者为 0。",
+"whyPlatformCares": "没有有效价格的商品无法上传到目录，而且价格必须与商品页面一致。",
+"howToFix": "使用句点作为小数点并加上货币代码，例如 9.99 USD。9,99 EUR 这样的价格会自动转换。"
+},
+"tiktok/invalid_sale_price": {
+"title": "促销价无效",
+"explanation": "sale_price 不是有效价格，或者不低于 price。",
+"whyPlatformCares": "只有当 sale_price 有效且低于原价时，TikTok 才会显示折扣。",
+"howToFix": "原价填在 price，较低的促销价填在 sale_price，两者都带货币代码。"
+},
+"tiktok/invalid_condition": {
+"title": "condition 值无效",
+"explanation": "condition 必须是 new、refurbished 或 used。",
+"whyPlatformCares": "在 TikTok 中，每个商品都必须提供 condition，且不接受其他值。",
+"howToFix": "使用 new、refurbished 或 used。大写的值和“renewed”会自动转换。"
+},
+"tiktok/invalid_gtin": {
+"title": "GTIN 无效",
+"explanation": "gtin 不是带正确校验位的 8、12、13 或 14 位数字，或者被电子表格转成了科学计数法。",
+"whyPlatformCares": "gtin 在 TikTok 上是可选的，但错误的 GTIN 可能会把商品匹配到别人的商品上。",
+"howToFix": "从包装或供应商处复制条形码，或将 gtin 留空。空格、连字符以及可证明缺失的前导零会自动修正。"
+},
+"tiktok/invalid_gender": {
+"title": "gender 值无效",
+"explanation": "gender 必须是 female、male 或 unisex。",
+"whyPlatformCares": "TikTok 用 gender 进行受众定向，因此值错误可能会把商品展示给不合适的买家。",
+"howToFix": "使用 female、male 或 unisex。“Men”或“Women's”等值会自动转换。"
+},
+"tiktok/invalid_age_group": {
+"title": "age_group 值无效",
+"explanation": "age_group 必须是 newborn、infant、toddler、kids 或 adult。",
+"whyPlatformCares": "TikTok 用年龄段进行受众定向。它没有 teen 或 all ages 年龄段。",
+"howToFix": "使用 TikTok 的 5 个值之一。青少年算作 adult（13 岁及以上），kids 为 5 至 13 岁。"
 }
 }

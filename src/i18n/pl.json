@@ -341,7 +341,9 @@
     "name_google_merchant_center": "Plik danych Google Merchant Center",
     "desc_google_merchant_center": "Sprawdź plik produktów Google Merchant Center przed przesłaniem: wymagane atrybuty, ceny z walutą, dostępność, numery GTIN i identyfikatory.",
     "name_meta_catalog": "Katalog Meta (Facebook i Instagram)",
-    "desc_meta_catalog": "Sprawdź plik katalogu dla Facebooka i Instagrama przed przesłaniem do Commerce Manager: wymagane pola, dostępność, ceny z walutą, marka lub GTIN oraz zdjęcia."
+    "desc_meta_catalog": "Sprawdź plik katalogu dla Facebooka i Instagrama przed przesłaniem do Commerce Manager: wymagane pola, dostępność, ceny z walutą, marka lub GTIN oraz zdjęcia.",
+    "name_tiktok_catalog": "Katalog TikTok",
+    "desc_tiktok_catalog": "Sprawdź plik katalogu TikTok przed przesłaniem go w TikTok Ads Manager: dziewięć wymaganych pól, sku_id, dostępność, ceny, markę i linki do obrazów."
   },
   "convert": {
     "title": "Konwerter formatu CSV",

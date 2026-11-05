@@ -332,6 +332,8 @@
     "desc_google_merchant_center": "Revisa un archivo de productos de Google Merchant Center antes de subirlo: atributos obligatorios, precios con moneda, disponibilidad, GTIN e identificadores.",
     "name_meta_catalog": "Catálogo de Meta (Facebook e Instagram)",
     "desc_meta_catalog": "Revisa un feed de catálogo de Facebook e Instagram antes de subirlo a Commerce Manager: campos obligatorios, disponibilidad, precios con moneda, marca o GTIN e imágenes.",
+    "name_tiktok_catalog": "Catálogo de TikTok",
+    "desc_tiktok_catalog": "Revisa un feed de catálogo de TikTok antes de subirlo en TikTok Ads Manager: los nueve campos obligatorios, sku_id, disponibilidad, precios, marca y enlaces de imágenes.",
     "checksCount": "{count} comprobaciones",
     "checksShared": "Los presets de WooCommerce comparten sus comprobaciones, igual que los de eBay, así que los recuentos de abajo se solapan. El total de la página de inicio cuenta cada comprobación una vez.",
     "templateTitle": "Plantilla CSV de {name}",

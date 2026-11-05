@@ -394,6 +394,45 @@
 "a": "Il catalogo Meta ora accetta solo in stock e out of stock. Usa in stock se i clienti possono ordinare il prodotto adesso."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"I cataloghi TikTok alimentano i Video Shopping Ads e gli annunci di catalogo. Ne compili uno da un file prodotti in TikTok Ads Manager: un prodotto per riga, con i nomi dei campi di TikTok nella riga di intestazione. Questo preset controlla ogni prodotto in base ai parametri prodotto del catalogo TikTok e lascia invariati i nomi delle tue colonne.",
+"Individua ciò che impedisce il caricamento dei prodotti: campi obbligatori mancanti, un feed che chiama il suo identificatore id invece di sku_id, valori di disponibilità che TikTok non accetta, prodotti senza marca, sku_id duplicati e immagini su servizi che TikTok non può leggere."
+],
+"howItWorks": [
+"Carica il file del catalogo (CSV, oppure .txt o .tsv delimitato da tabulazioni).",
+"Ogni prodotto viene controllato per sku_id, title, description, availability, condition, price, link, image_link e brand.",
+"Una colonna id in stile Google o Meta viene rinominata in sku_id, e valori come in_stock, pre_order, «19,99 EUR» e «New» vengono convertiti nel formato di TikTok.",
+"Vengono segnalate le immagini su Google Drive, Dropbox e altri servizi che TikTok non può leggere, così come emoji e offerte nei titoli.",
+"Scarica un CSV con le tue colonne originali, pronto da caricare in TikTok Ads Manager."
+],
+"commonFixes": [
+"Rinominare una colonna id in sku_id",
+"Convertire availability in in stock, available for order, preorder, out of stock o discontinued",
+"Scrivere i prezzi come 9.99 USD, con il punto e un codice valuta",
+"Convertire condition in new, refurbished o used",
+"Segnalare i prodotti senza marca",
+"Segnalare le immagini che TikTok non può caricare"
+],
+"faq": [
+{
+"q": "Posso caricare il mio feed Google o Meta su TikTok?",
+"a": "In gran parte sì, perché quasi tutti i nomi dei campi sono uguali. Le differenze: TikTok chiama l'identificatore sku_id invece di id, e brand è obbligatorio per ogni prodotto. Questo preset rinomina la colonna id e segnala i prodotti senza marca."
+},
+{
+"q": "Quali campi sono obbligatori?",
+"a": "sku_id, title, description, availability, condition, price, link, image_link e brand, per ogni prodotto."
+},
+{
+"q": "I prezzi hanno bisogno di un codice valuta?",
+"a": "Se il codice manca, TikTok usa la valuta del paese del catalogo. Aggiungerlo, ad esempio 9.99 USD, evita che i prezzi vengano letti nella valuta sbagliata."
+},
+{
+"q": "Perché le mie immagini vengono rifiutate?",
+"a": "TikTok ha bisogno di un link pubblico a un file JPG o PNG. I link di condivisione di Google Drive, Dropbox, Flickr o Pinterest non funzionano. Le immagini quadrate devono essere di almeno 500 × 500 pixel."
+}
+]
 }
 }
 }

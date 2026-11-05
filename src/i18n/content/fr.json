@@ -394,6 +394,45 @@
 "a": "Le catalogue Meta n'accepte plus que in stock et out of stock. Utilisez in stock si les clients peuvent commander le produit maintenant."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"Les catalogues TikTok alimentent les Video Shopping Ads et les publicités catalogue. Vous en remplissez un à partir d'un fichier produits dans TikTok Ads Manager : un produit par ligne, avec les noms de champs de TikTok dans la ligne d'en-tête. Ce préréglage vérifie chaque produit selon les paramètres produit du catalogue TikTok et conserve vos noms de colonnes tels quels.",
+"Il repère ce qui empêche l'import des produits : champs obligatoires manquants, flux qui nomme son identifiant id au lieu de sku_id, valeurs de disponibilité que TikTok refuse, produits sans marque, sku_id en double et images sur des hébergeurs que TikTok ne peut pas lire."
+],
+"howItWorks": [
+"Importez votre fichier catalogue (CSV, ou .txt ou .tsv séparé par des tabulations).",
+"Chaque produit est vérifié pour sku_id, title, description, availability, condition, price, link, image_link et brand.",
+"Une colonne id de style Google ou Meta est renommée en sku_id, et des valeurs comme in_stock, pre_order, « 19,99 EUR » et « New » sont converties au format de TikTok.",
+"Les images sur Google Drive, Dropbox et d'autres hébergeurs que TikTok ne peut pas lire sont signalées, tout comme les emoji et les offres dans les titres.",
+"Téléchargez un CSV avec vos colonnes d'origine, prêt à importer dans TikTok Ads Manager."
+],
+"commonFixes": [
+"Renommer une colonne id en sku_id",
+"Convertir availability en in stock, available for order, preorder, out of stock ou discontinued",
+"Écrire les prix sous la forme 9.99 USD, avec un point et un code de devise",
+"Convertir condition en new, refurbished ou used",
+"Signaler les produits sans marque",
+"Signaler les images que TikTok ne peut pas charger"
+],
+"faq": [
+{
+"q": "Puis-je importer mon flux Google ou Meta dans TikTok ?",
+"a": "En grande partie, car la plupart des noms de champs sont identiques. Les différences : TikTok nomme l'identifiant sku_id au lieu de id, et brand est obligatoire pour chaque produit. Ce préréglage renomme la colonne id et signale les produits sans marque."
+},
+{
+"q": "Quels champs sont obligatoires ?",
+"a": "sku_id, title, description, availability, condition, price, link, image_link et brand, pour chaque produit."
+},
+{
+"q": "Les prix ont-ils besoin d'un code de devise ?",
+"a": "Sans code, TikTok utilise la devise du pays du catalogue. L'ajouter, par exemple 9.99 USD, évite que les prix soient lus dans la mauvaise devise."
+},
+{
+"q": "Pourquoi mes images sont-elles refusées ?",
+"a": "TikTok a besoin d'un lien public vers un fichier JPG ou PNG. Les liens de partage Google Drive, Dropbox, Flickr ou Pinterest ne fonctionnent pas. Les images carrées doivent faire au moins 500 × 500 pixels."
+}
+]
 }
 }
 }

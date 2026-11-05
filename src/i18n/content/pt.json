@@ -394,6 +394,45 @@
 "a": "O catálogo da Meta agora só aceita in stock e out of stock. Use in stock se os clientes podem pedir o produto agora."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"Os catálogos do TikTok alimentam os Video Shopping Ads e os anúncios de catálogo. Você preenche um a partir de um arquivo de produtos no TikTok Ads Manager: um produto por linha, com os nomes de campo do TikTok na linha de cabeçalho. Esta predefinição verifica cada produto com base nos parâmetros de produto do catálogo do TikTok e mantém os nomes das suas colunas como estão.",
+"Ela encontra o que impede o envio dos produtos: campos obrigatórios ausentes, um feed que chama seu identificador de id em vez de sku_id, valores de disponibilidade que o TikTok não aceita, produtos sem marca, sku_id duplicados e imagens em serviços que o TikTok não consegue ler."
+],
+"howItWorks": [
+"Envie seu arquivo de catálogo (CSV, ou .txt ou .tsv separado por tabulações).",
+"Cada produto é verificado quanto a sku_id, title, description, availability, condition, price, link, image_link e brand.",
+"Uma coluna id no estilo do Google ou da Meta é renomeada para sku_id, e valores como in_stock, pre_order, \"19,99 EUR\" e \"New\" são convertidos para o formato do TikTok.",
+"Imagens no Google Drive, no Dropbox e em outros serviços que o TikTok não consegue ler são sinalizadas, assim como emoji e ofertas nos títulos.",
+"Baixe um CSV com suas colunas originais, pronto para enviar no TikTok Ads Manager."
+],
+"commonFixes": [
+"Renomear uma coluna id para sku_id",
+"Converter availability para in stock, available for order, preorder, out of stock ou discontinued",
+"Escrever preços como 9.99 USD, com ponto e código de moeda",
+"Converter condition para new, refurbished ou used",
+"Sinalizar produtos sem marca",
+"Sinalizar imagens que o TikTok não consegue carregar"
+],
+"faq": [
+{
+"q": "Posso enviar meu feed do Google ou da Meta para o TikTok?",
+"a": "Em grande parte, sim, porque a maioria dos nomes de campo é igual. As diferenças: o TikTok chama o identificador de sku_id em vez de id, e brand é obrigatório para cada produto. Esta predefinição renomeia a coluna id e sinaliza produtos sem marca."
+},
+{
+"q": "Quais campos são obrigatórios?",
+"a": "sku_id, title, description, availability, condition, price, link, image_link e brand, para cada produto."
+},
+{
+"q": "Os preços precisam de um código de moeda?",
+"a": "Sem o código, o TikTok usa a moeda do país do catálogo. Adicioná-lo, como 9.99 USD, evita que os preços sejam lidos na moeda errada."
+},
+{
+"q": "Por que minhas imagens são rejeitadas?",
+"a": "O TikTok precisa de um link público para um arquivo JPG ou PNG. Links de compartilhamento do Google Drive, Dropbox, Flickr ou Pinterest não funcionam. Imagens quadradas devem ter pelo menos 500 × 500 pixels."
+}
+]
 }
 }
 }

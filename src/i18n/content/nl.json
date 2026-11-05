@@ -394,6 +394,45 @@
 "a": "De catalogus van Meta neemt alleen nog in stock en out of stock. Gebruik in stock als klanten het product nu kunnen bestellen."
 }
 ]
+},
+"tiktok_catalog": {
+"longDescription": [
+"TikTok-catalogi voeden Video Shopping Ads en catalogusadvertenties. Je vult er een vanuit een productbestand in TikTok Ads Manager: één product per rij, met de veldnamen van TikTok in de kopregel. Deze preset controleert elk product aan de hand van de catalogusproductparameters van TikTok en laat je kolomnamen zoals ze zijn.",
+"Hij vindt wat de upload van producten tegenhoudt: ontbrekende verplichte velden, een feed die zijn ID id noemt in plaats van sku_id, beschikbaarheidswaarden die TikTok niet accepteert, producten zonder merk, dubbele sku_id's en afbeeldingen bij diensten die TikTok niet kan lezen."
+],
+"howItWorks": [
+"Upload je catalogusbestand (CSV, of een tab-gescheiden .txt of .tsv).",
+"Elk product wordt gecontroleerd op sku_id, title, description, availability, condition, price, link, image_link en brand.",
+"Een id-kolom in Google- of Meta-stijl wordt hernoemd naar sku_id, en waarden als in_stock, pre_order, '19,99 EUR' en 'New' worden omgezet naar het formaat van TikTok.",
+"Afbeeldingen op Google Drive, Dropbox en andere diensten die TikTok niet kan lezen worden gemarkeerd, net als emoji en aanbiedingen in titels.",
+"Download een CSV met je oorspronkelijke kolommen, klaar om te uploaden in TikTok Ads Manager."
+],
+"commonFixes": [
+"Een id-kolom hernoemen naar sku_id",
+"availability omzetten naar in stock, available for order, preorder, out of stock of discontinued",
+"Prijzen schrijven als 9.99 USD, met een punt en een valutacode",
+"condition omzetten naar new, refurbished of used",
+"Producten zonder merk markeren",
+"Afbeeldingen markeren die TikTok niet kan laden"
+],
+"faq": [
+{
+"q": "Kan ik mijn Google- of Meta-feed naar TikTok uploaden?",
+"a": "Grotendeels wel, want de meeste veldnamen zijn gelijk. De verschillen: TikTok noemt de ID sku_id in plaats van id, en brand is voor elk product verplicht. Deze preset hernoemt de id-kolom en markeert producten zonder merk."
+},
+{
+"q": "Welke velden zijn verplicht?",
+"a": "sku_id, title, description, availability, condition, price, link, image_link en brand, voor elk product."
+},
+{
+"q": "Hebben prijzen een valutacode nodig?",
+"a": "Zonder code gebruikt TikTok de valuta van het land van de catalogus. Voeg je hem toe, zoals 9.99 USD, dan worden prijzen niet in de verkeerde valuta gelezen."
+},
+{
+"q": "Waarom worden mijn afbeeldingen afgewezen?",
+"a": "TikTok heeft een openbare link naar een JPG- of PNG-bestand nodig. Deellinks van Google Drive, Dropbox, Flickr of Pinterest werken niet. Vierkante afbeeldingen moeten minstens 500 × 500 pixels zijn."
+}
+]
 }
 }
 }

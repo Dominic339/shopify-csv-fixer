@@ -7,6 +7,7 @@ import { ebayListingsFormat, ebayVariationsFormat } from "./ebayListings";
 import { amazonInventoryFormat } from "./amazonProducts";
 import { googleMerchantFormat } from "./googleMerchant";
 import { metaCatalogFormat } from "./metaCatalog";
+import { tiktokCatalogFormat } from "./tiktokCatalog";
 
 type FormatSpec = {
   id: string;
@@ -193,6 +194,7 @@ export const formatPackEcommerce: CsvFormat[] = [
   amazonInventoryFormat,
   googleMerchantFormat,
   metaCatalogFormat,
+  tiktokCatalogFormat,
 ];
 
 // Marketing

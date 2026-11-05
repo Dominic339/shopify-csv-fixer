@@ -88,6 +88,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     shortDescription: "Check Facebook and Instagram catalog feeds against Meta's catalog field rules before upload.",
     searchKeywords: ["facebook catalog feed", "meta catalog csv", "instagram shopping feed", "commerce manager product feed"],
   },
+  {
+    id: "tiktok_catalog",
+    slug: "tiktok-catalog",
+    name: "TikTok Catalog",
+    category: "Ecommerce",
+    shortDescription: "Check TikTok catalog feeds against TikTok's catalog product parameters before upload.",
+    searchKeywords: ["tiktok catalog feed", "tiktok product feed csv", "tiktok ads catalog", "tiktok sku_id"],
+  },
 ];
 
 export function getPresetById(id: string) {

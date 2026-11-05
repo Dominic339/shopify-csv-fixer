@@ -332,6 +332,8 @@
     "desc_google_merchant_center": "Vérifiez un fichier produits Google Merchant Center avant de l'importer : attributs obligatoires, prix avec devise, disponibilité, GTIN et identifiants.",
     "name_meta_catalog": "Catalogue Meta (Facebook et Instagram)",
     "desc_meta_catalog": "Vérifiez un flux de catalogue Facebook et Instagram avant de l'importer dans Commerce Manager : champs obligatoires, disponibilité, prix avec devise, marque ou GTIN, et images.",
+    "name_tiktok_catalog": "Catalogue TikTok",
+    "desc_tiktok_catalog": "Vérifiez un flux de catalogue TikTok avant de l'importer dans TikTok Ads Manager : les neuf champs obligatoires, sku_id, disponibilité, prix, marque et liens d'images.",
     "checksCount": "{count} vérifications",
     "checksShared": "Les préréglages WooCommerce partagent leurs contrôles, tout comme les préréglages eBay : les nombres ci-dessous se recoupent. Le total de la page d'accueil compte chaque contrôle une seule fois.",
     "templateTitle": "Modèle CSV {name}",

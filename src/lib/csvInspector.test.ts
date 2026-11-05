@@ -16,4 +16,8 @@ describe("detectPlatform: Google and Meta feeds", () => {
   it("falls back to Merchant Center from the headers alone", () => {
     expect(detectPlatform(FEED)).toBe("google_merchant_center");
   });
+
+  it("reads a feed keyed by sku_id as a TikTok catalog", () => {
+    expect(detectPlatform(["sku_id", ...FEED.slice(1), "brand"])).toBe("tiktok_catalog");
+  });
 });
