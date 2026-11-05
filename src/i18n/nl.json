@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Meta-catalogus (Facebook & Instagram)",
+    "fmt_tiktok_catalog": "TikTok-catalogus",
     "fmt_shopify_products": "Shopify (nieuwe sjabloon)",
     "fmt_shopify_products_legacy": "Shopify (oude sjabloon)",
     "noEquivalent": "(geen equivalent in het doelformaat):",
@@ -417,6 +418,7 @@
     "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden.",
     "googleIntro": "Een Merchant Center-feed heeft twee dingen nodig die je export niet bevat: het adres van je winkel, om elk product naar zijn pagina te linken, en de valuta van je prijzen.",
     "metaIntro": "Een Meta-catalogus heeft twee dingen nodig die je export niet bevat: het adres van je winkel, om elk product naar zijn pagina te linken, en de valuta van je prijzen.",
+    "tiktokIntro": "Een TikTok-catalogus heeft twee dingen nodig die je export niet bevat: het adres van je winkel, om elk product naar zijn pagina te linken, en de valuta van je prijzen.",
     "storeUrl": "Winkeladres",
     "storeUrlHint": "Of een patroon voor de pagina van elk product, zoals https://shop.example.com/p/{sku} of …/products/{handle}.",
     "currency": "Valuta (ISO-code)"

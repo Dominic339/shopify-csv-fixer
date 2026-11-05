@@ -4,6 +4,7 @@ import { SMALL_TOOLS } from "@/lib/tools/registry";
 import type { MetadataRoute } from "next";
 import { getPresetFormats } from "../lib/presets";
 import { getAllGuides, GUIDE_PLATFORMS } from "../lib/guidesRegistry";
+import { ENGLISH_ONLY_GUIDE_PLATFORMS } from "../lib/guidesConstants";
 import { LOCALES, localeHref, type Locale } from "../lib/i18n/locales";
 import { readCuratedGuide } from "../lib/guides/mdxLoader";
 import { SITE_URL } from "../lib/i18n/seo";
@@ -48,6 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/amazon-csv-fixer", "monthly", 0.8),
     ...translated("/google-merchant-center-feed-checker", "monthly", 0.8),
     ...translated("/meta-catalog-feed-checker", "monthly", 0.8),
+    english("/tiktok-catalog-feed-checker", "monthly", 0.8),
     english("/formats", "monthly", 0.7),
 
     // Store-migration pages (English only)
@@ -62,11 +64,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Guide pages: issue guides are generated in every language; a curated article is
     // listed in the languages it has been translated into.
-    ...GUIDE_PLATFORMS.flatMap((p) => translated(`/guides/${p}`, "monthly", 0.75)),
+    ...GUIDE_PLATFORMS.flatMap((p) => (ENGLISH_ONLY_GUIDE_PLATFORMS.includes(p) ? [english(`/guides/${p}`, "monthly", 0.75)] : translated(`/guides/${p}`, "monthly", 0.75))),
     ...getAllGuides().flatMap((g) => {
       const path = `/guides/${g.platform}/${g.slug}`;
       // Guides for rules the fixer doesn't run are noindex (see guideMetadata), so they stay out.
       if (g.kind === "issue" && g.checkedByFixer === false) return [];
+      if (ENGLISH_ONLY_GUIDE_PLATFORMS.includes(g.platform)) return [english(path, "monthly", 0.7)];
       if (g.kind !== "curated") return translated(path, "monthly", 0.7);
       return translated(path, "monthly", 0.7, LOCALES.filter((l) => readCuratedGuide(g.platform, g.slug, l)?.translated));
     }),

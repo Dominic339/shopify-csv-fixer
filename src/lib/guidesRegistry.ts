@@ -10,6 +10,7 @@ import { EBAY_ISSUE_META } from "./validation/issueMetaEbay";
 import { AMAZON_ISSUE_META } from "./validation/issueMetaAmazon";
 import { GOOGLE_ISSUE_META } from "./validation/issueMetaGoogle";
 import { META_ISSUE_META } from "./validation/issueMetaMeta";
+import { TIKTOK_ISSUE_META } from "./validation/issueMetaTikTok";
 import type { IssueMetaMap } from "./validation/issueMeta";
 
 // Re-export all shared constants so pages only need one import.
@@ -26,6 +27,7 @@ const PLATFORM_ISSUE_META: Partial<Record<GuidePlatform, IssueMetaMap>> = {
   amazon: AMAZON_ISSUE_META,
   google: GOOGLE_ISSUE_META,
   meta: META_ISSUE_META,
+  tiktok: TIKTOK_ISSUE_META,
 };
 
 export type Guide = {

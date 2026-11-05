@@ -32,6 +32,7 @@ export const PRESET_TO_PLATFORM: Record<string, GuidePlatform> = {
   amazon_inventory_loader: "amazon",
   google_merchant_center: "google",
   meta_catalog: "meta",
+  tiktok_catalog: "tiktok",
 };
 
 const KEYWORDS: Record<string, string[]> = {
@@ -57,6 +58,7 @@ const FIXER_PAGES: Array<{ href: string; platform: string; variations?: boolean 
   { href: "/amazon-csv-fixer", platform: "Amazon" },
   { href: "/google-merchant-center-feed-checker", platform: "Google Merchant Center" },
   { href: "/meta-catalog-feed-checker", platform: "Meta" },
+  { href: "/tiktok-catalog-feed-checker", platform: "TikTok" },
 ];
 
 const muted = "text-[color:rgba(var(--muted-rgb),1)]";

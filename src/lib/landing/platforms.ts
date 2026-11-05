@@ -13,7 +13,8 @@ export type LandingSlug =
   | "ebay-variations"
   | "amazon"
   | "google"
-  | "meta";
+  | "meta"
+  | "tiktok";
 
 export type PlatformLanding = {
   slug: LandingSlug;
@@ -31,6 +32,8 @@ export type PlatformLanding = {
   gotchas: { title: string; body: string }[];
   faq: { q: string; a: string }[];
   related: LandingSlug[];
+  /** Only an English page for now: no /<locale>/ copy, and no translation required. */
+  englishOnly?: boolean;
 };
 
 export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
@@ -413,5 +416,60 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
       },
     ],
     related: ["google", "shopify", "woocommerce"],
+  },
+
+  tiktok: {
+    slug: "tiktok",
+    path: "/tiktok-catalog-feed-checker",
+    presetId: "tiktok_catalog",
+    guidePlatform: "tiktok",
+    englishOnly: true,
+    accent: { text: "text-pink-700 dark:text-pink-400", soft: "bg-pink-500/10", border: "border-pink-500/30" },
+    metaTitle: "TikTok Catalog Feed Checker | TikTok Product Feed CSV | StriveFormats",
+    metaDescription:
+      "Check a TikTok catalog feed before uploading it to TikTok Ads Manager. The id column is renamed to sku_id, availability and prices are converted, and products with no brand or a broken image are flagged.",
+    kicker: "TikTok catalog",
+    title: "TikTok Catalog Feed Checker",
+    intro:
+      "A feed made for Google or Meta almost works on TikTok, and the gaps are what get products rejected: no sku_id column, a blank brand, an image on Google Drive. Check your catalog file here before you upload it to TikTok Ads Manager, and fix most of it in one click.",
+    exportTip:
+      "Export the product feed from your store or feed app, or reuse your Google or Meta feed, or start from the template. In TikTok Ads Manager, open Assets → Catalogs, choose your catalog and add products by data feed or file upload with the fixed CSV.",
+    gotchas: [
+      {
+        title: "The identifier is sku_id, not id",
+        body: "Google and Meta feeds call the product identifier id. TikTok reads only sku_id, so a reused feed has no identifier at all. The checker renames the column for you and flags any duplicate sku_ids, which TikTok quietly skips.",
+      },
+      {
+        title: "Brand is required on every product",
+        body: "Meta and Google accept a GTIN or MPN instead of a brand; TikTok doesn't. Products with a blank brand are flagged. For products you make yourself, your store's name is the brand.",
+      },
+      {
+        title: "Images must be real JPG or PNG files",
+        body: "Share links from Google Drive, Dropbox, Flickr or Pinterest open a web page, not an image, and TikTok lists them as unsupported. Images hosted on your store work. WebP and GIF files are flagged too.",
+      },
+    ],
+    faq: [
+      {
+        q: "Can I upload my Google Merchant Center or Meta feed to TikTok?",
+        a: "Yes, after a few changes, and this checker makes most of them. It renames id to sku_id, converts availability values like in_stock, and flags what you need to fill in yourself, usually brand.",
+      },
+      {
+        q: "Which availability values does TikTok take?",
+        a: "in stock, available for order, preorder, out of stock and discontinued, written with spaces. Google-style values such as in_stock and pre_order are converted automatically.",
+      },
+      {
+        q: "Do prices need a currency code?",
+        a: "TikTok uses the catalog country's currency when the code is missing, so the upload doesn't fail, but a feed in another currency would show the wrong prices. Prices without a code are flagged as a warning; write them like 9.99 USD.",
+      },
+      {
+        q: "Does it check emoji and offers in titles?",
+        a: "Yes. TikTok doesn't allow emoji or promotional text like \"free shipping\" in titles, so those are flagged for you to rewrite. Trademark signs such as ™ and ® are fine.",
+      },
+      {
+        q: "Is my file uploaded anywhere?",
+        a: "No. The check runs in your browser and the file stays on your computer. Image links are checked by their address only, so make sure they open.",
+      },
+    ],
+    related: ["meta", "google", "shopify"],
   },
 };

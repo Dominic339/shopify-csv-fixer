@@ -81,4 +81,12 @@ export const LANDING_DEMOS: Record<string, LandingDemo> = {
       "TOTE-01,Canvas Tote,Natural cotton tote bag.,preorder,new,$24,https://example.com/p/tote,https://example.com/i/tote.jpg,",
     ].join("\n"),
   },
+  tiktok: {
+    formatId: "tiktok_catalog",
+    csv: [
+      "id,title,description,availability,condition,price,link,image_link,brand",
+      "MUG-01,Acme Ceramic Coffee Mug,Hand-thrown stoneware mug.,in_stock,New,\"18,00 EUR\",https://example.com/p/mug,https://example.com/i/mug.jpg,Acme",
+      "TOTE-01,Canvas Tote 🔥 Free Shipping,Natural cotton tote bag.,pre_order,new,24.00 USD,https://example.com/p/tote,https://drive.google.com/file/d/1aB/view,",
+    ].join("\n"),
+  },
 };

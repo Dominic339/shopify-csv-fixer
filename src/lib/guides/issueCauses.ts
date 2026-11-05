@@ -209,6 +209,31 @@ export const ISSUE_CAUSES: Record<string, string[]> = {
     "The cell holds text such as \"in stock\", \"10+\" or \"n/a\".",
     "A spreadsheet formula returned an error such as #N/A for products it couldn't find.",
   ],
+  "tiktok/missing_required_header": [
+    "The feed was made for Google Merchant Center or Meta, which name the product identifier id; TikTok reads only sku_id.",
+    "The file was exported straight from a store, so its columns use the store's names, such as Handle or Variant Price, instead of TikTok's.",
+    "brand was left out because the feed was built for Meta or Google, where a GTIN or MPN can stand in for it.",
+  ],
+  "tiktok/missing_value": [
+    "Products you make yourself have no brand in the store, so the brand column is empty for them.",
+    "New products were added after the feed was set up and some fields were never filled in.",
+    "A spreadsheet formula that builds a column returned an empty cell for some rows.",
+  ],
+  "tiktok/duplicate_id": [
+    "Variants share their parent's sku_id because the feed used the product's ID instead of each variant's SKU.",
+    "A row was copied to make a new variant and its sku_id wasn't changed.",
+    "Two exports were combined, so some products appear twice.",
+  ],
+  "tiktok/unsupported_image": [
+    "Images were stored in Google Drive or Dropbox and the share link was pasted into the feed.",
+    "The store serves images as .webp or .gif, and the link points to that file.",
+    "The image link was copied from a Pinterest or Flickr page rather than from your own store.",
+  ],
+  "tiktok/title_promotional": [
+    "Store titles include offers such as \"Free Shipping\" or \"20% Off\" that work on the website but not in a catalog.",
+    "Emoji were added to titles for social posts and the same titles were reused in the feed.",
+    "A sale was added to every title in bulk and not removed afterwards.",
+  ],
 };
 
 /** The common causes for an issue code, or an empty list. */

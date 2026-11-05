@@ -68,6 +68,9 @@ const gmcRows = [
   ["CAP-01", "Acme Wool Beanie, Grey"],
 ];
 const gmc = (col: string, pairs: [string, string][]) => column(G, gmcRows, col, pairs);
+// TikTok names the identifier sku_id.
+const TK = ["sku_id", "title"];
+const tik = (col: string, pairs: [string, string][]) => column(TK, gmcRows, col, pairs);
 
 const LONG_TITLE = "Handmade Ceramic Coffee Mug 12oz Speckled Glaze Stoneware Tea Cup Gift for Him Her Coffee Lover Birthday Christmas Present";
 
@@ -858,6 +861,79 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
   "meta/invalid_age_group": gmc("age_group", [
     ["Teens", "teen"],
     ["all-ages", "all ages"],
+  ]),
+  // ── TikTok catalog ──
+  "tiktok/missing_required_header": {
+    cols: ["id", "title", "price"],
+    colsAfter: ["sku_id", "title", "price", "brand"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD"]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD", "Acme"]],
+  },
+  "tiktok/missing_value": tik("brand", [["", "Acme"]]),
+  "tiktok/duplicate_id": {
+    cols: TK,
+    before: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["MUG-01", "Acme Travel Mug, 16 oz"],
+    ],
+    after: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["MUG-02", "Acme Travel Mug, 16 oz"],
+    ],
+    flag: [[0, 0]],
+  },
+  "tiktok/title_promotional": {
+    cols: TK,
+    before: [
+      ["MUG-01", "Acme Mug 🔥 FREE SHIPPING"],
+      ["TOTE-01", "Canvas Tote - 20% off"],
+    ],
+    after: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["TOTE-01", "Acme Canvas Tote Bag, Natural"],
+    ],
+  },
+  "tiktok/invalid_url": tik("image_link", [
+    ["mug.jpg", "https://example.com/images/mug.jpg"],
+    ["www.example.com/tote.jpg", "https://www.example.com/tote.jpg"],
+  ]),
+  "tiktok/unsupported_image": tik("image_link", [
+    ["https://drive.google.com/file/d/1aB…/view", "https://example.com/images/mug.jpg"],
+    ["https://example.com/images/tote.webp", "https://example.com/images/tote.jpg"],
+  ]),
+  "tiktok/too_many_images": tik("additional_image_link", [["https://example.com/1.jpg,… (14 URLs)", "https://example.com/1.jpg,… (10 URLs)"]]),
+  "tiktok/invalid_availability": tik("availability", [
+    ["in_stock", "in stock"],
+    ["Pre-order", "preorder"],
+  ]),
+  "tiktok/price_missing_currency": tik("price", [
+    ["18.00", "18.00 USD"],
+    ["$24", "24.00 USD"],
+  ]),
+  "tiktok/invalid_price": tik("price", [
+    ["18,00 EUR", "18.00 EUR"],
+    ["€24", "24.00 EUR"],
+  ]),
+  "tiktok/invalid_sale_price": {
+    cols: [...TK, "price", "sale_price"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "15.00 USD", "18.00 USD"]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD", "15.00 USD"]],
+  },
+  "tiktok/invalid_condition": tik("condition", [
+    ["New", "new"],
+    ["renewed", "refurbished"],
+  ]),
+  "tiktok/invalid_gtin": tik("gtin", [
+    ["4.00638E+12", "4006381333931"],
+    ["4006-3813-3393-1", "4006381333931"],
+  ]),
+  "tiktok/invalid_gender": tik("gender", [
+    ["Men", "male"],
+    ["Women's", "female"],
+  ]),
+  "tiktok/invalid_age_group": tik("age_group", [
+    ["Teens", "adult"],
+    ["children", "kids"],
   ]),
 };
 

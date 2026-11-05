@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Каталог Meta (Facebook и Instagram)",
+    "fmt_tiktok_catalog": "Каталог TikTok",
     "fmt_shopify_products": "Shopify (новый шаблон)",
     "fmt_shopify_products_legacy": "Shopify (старый шаблон)",
     "noEquivalent": "(нет соответствия в целевом формате):",
@@ -417,6 +418,7 @@
     "fileRestored": "Ваш файл снова загружен — теперь его можно скачать.",
     "googleIntro": "Фиду Merchant Center нужны две вещи, которых нет в экспорте: адрес вашего магазина, чтобы связать каждый товар с его страницей, и валюта цен.",
     "metaIntro": "Каталогу Meta нужны две вещи, которых нет в экспорте: адрес вашего магазина, чтобы связать каждый товар с его страницей, и валюта цен.",
+    "tiktokIntro": "Каталогу TikTok нужны две вещи, которых нет в экспорте: адрес вашего магазина, чтобы связать каждый товар с его страницей, и валюта цен.",
     "storeUrl": "Адрес магазина",
     "storeUrlHint": "Или шаблон адреса страницы товара, например https://shop.example.com/p/{sku} или …/products/{handle}.",
     "currency": "Валюта (код ISO)"

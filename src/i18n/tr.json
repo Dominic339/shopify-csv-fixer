@@ -390,6 +390,7 @@
     "fmt_amazon_inventory_loader": "Amazon Inventory Loader",
     "fmt_google_merchant_center": "Google Merchant Center",
     "fmt_meta_catalog": "Meta Kataloğu (Facebook ve Instagram)",
+    "fmt_tiktok_catalog": "TikTok Kataloğu",
     "fmt_shopify_products": "Shopify (yeni şablon)",
     "fmt_shopify_products_legacy": "Shopify (eski şablon)",
     "noEquivalent": "(hedef biçimde karşılığı yok):",
@@ -417,6 +418,7 @@
     "fileRestored": "Dosyanız yeniden yüklendi; şimdi indirebilirsiniz.",
     "googleIntro": "Merchant Center feed'i, dışa aktarımınızda olmayan iki bilgiye ihtiyaç duyar: her ürünü sayfasına bağlamak için mağaza adresiniz ve fiyatlarınızın para birimi.",
     "metaIntro": "Bir Meta kataloğu, dışa aktarımınızda olmayan iki bilgiye ihtiyaç duyar: her ürünü sayfasına bağlamak için mağaza adresiniz ve fiyatlarınızın para birimi.",
+    "tiktokIntro": "Bir TikTok kataloğu, dışa aktarımınızda olmayan iki bilgiye ihtiyaç duyar: her ürünü sayfasına bağlamak için mağaza adresiniz ve fiyatlarınızın para birimi.",
     "storeUrl": "Mağaza adresi",
     "storeUrlHint": "Ya da her ürün sayfası için bir kalıp, örneğin https://shop.example.com/p/{sku} veya …/products/{handle}.",
     "currency": "Para birimi (ISO kodu)"

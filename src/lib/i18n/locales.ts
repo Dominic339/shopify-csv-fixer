@@ -44,9 +44,22 @@ export function isValidLocale(value: string): value is Locale {
 /** Returns the canonical URL for a locale.
  *  English uses the root; all others use /<locale>/...
  */
+/**
+ * Pages that exist only in English for now (no /<locale>/ copy): links to them from a
+ * translated page go to the English page, and the language switcher and the proxy's
+ * language redirect leave them alone.
+ */
+export const ENGLISH_ONLY_PATHS = ["/tiktok-catalog-feed-checker", "/guides/tiktok"];
+
+/** True for an English-only page (the path may carry a query string or hash). */
+export function isEnglishOnlyPath(path: string): boolean {
+  const bare = path.split(/[?#]/)[0];
+  return ENGLISH_ONLY_PATHS.some((p) => bare === p || bare.startsWith(p + "/"));
+}
+
 export function localeHref(locale: Locale, path = ""): string {
   const norm = path.startsWith("/") ? path : `/${path}`;
-  if (locale === DEFAULT_LOCALE) return norm || "/";
+  if (locale === DEFAULT_LOCALE || isEnglishOnlyPath(norm)) return norm || "/";
   return norm === "/" ? `/${locale}` : `/${locale}${norm}`;
 }
 
