@@ -5,7 +5,7 @@
 
 import { useRef } from "react";
 import { QuotaWallCapture } from "@/components/QuotaWallCapture";
-import { fmt } from "@/lib/i18n/fmt";
+import { fmt, plural } from "@/lib/i18n/fmt";
 import { localeHref } from "@/lib/i18n/locales";
 import { useFixer, type AppStrings } from "./fixer/useFixer";
 import { FormatPicker } from "./fixer/FormatPicker";
@@ -78,6 +78,20 @@ export default function AppClient({ tApp, presetNames }: { tApp: AppStrings; pre
           <FormatPicker f={f} t={t} presetNames={presetNames} />
           <UploadPanel f={f} t={t} />
         </div>
+
+        {hasFile && f.savedEditsOffer ? (
+          <div role="status" className="mt-5 flex flex-col gap-3 rounded-2xl border border-[var(--accent)]/40 bg-[var(--accent-soft)] px-5 py-4 text-sm text-[var(--text)] sm:flex-row sm:items-center sm:justify-between">
+            <span>{plural(f.savedEditsOffer.cells, t.savedEditsFoundOne, t.savedEditsFound, { rows: f.savedEditsOffer.rows })}</span>
+            <span className="flex shrink-0 gap-2">
+              <button type="button" className="rg-btn" onClick={f.applySavedEditsNow}>
+                {t.savedEditsApply}
+              </button>
+              <button type="button" className="pill-btn" onClick={f.forgetSavedEditsNow}>
+                {t.savedEditsForget}
+              </button>
+            </span>
+          </div>
+        ) : null}
 
         {hasFile ? (
           <div className="mt-5 grid gap-5 sm:mt-6 sm:gap-6">

@@ -33,6 +33,8 @@ import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 // Phase 1: strict mode preference (Shopify)
 import { getStrictMode, setStrictMode } from "@/lib/validation/strictMode";
 import { readTextFile } from "@/lib/textFile";
+import { plural } from "@/lib/i18n/fmt";
+import { applySavedEdits, forgetSavedEdits, loadSavedEdits, recordEdit, rowKey } from "@/lib/savedEdits";
 
 
 type SubStatus = {
@@ -148,6 +150,9 @@ export function useFixer(t: AppStrings) {
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [infoBanner, setInfoBanner] = useState<string | null>(null);
+  // Saved fixes: each row's identity as the file was loaded, and how many remembered edits match it.
+  const rowKeysRef = useRef<string[]>([]);
+  const [savedEditsOffer, setSavedEditsOffer] = useState<{ cells: number; rows: number } | null>(null);
 
   const [exportBaseName, setExportBaseName] = useState<string | null>(null);
 
@@ -851,6 +856,7 @@ useEffect(() => {
         }
 
         next[rowIndex] = { ...existing, ...cleaned };
+        if (activeFormat) recordEdit(activeFormat.id, rowKeysRef.current[rowIndex] ?? rowKey(activeFormat.id, existing), cleaned);
 
         const hdrs = tableHeaders.length ? tableHeaders : Object.keys(next[0] ?? {});
         revalidateIssuesOnly(hdrs, next);
@@ -861,6 +867,22 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tableHeaders, activeFormat, parseIssues]
   );
+
+  /** Apply the edits remembered from an earlier file to the rows that match them. */
+  function applySavedEditsNow() {
+    if (!activeFormat) return;
+    const res = applySavedEdits(rows, rowKeysRef.current, loadSavedEdits(activeFormat.id));
+    setSavedEditsOffer(null);
+    if (!res.cells) return;
+    runFormatOnCurrentData(headers, res.rows);
+    setInfoBanner(plural(res.cells, t.savedEditsAppliedOne, t.savedEditsApplied));
+    trackToolEvent("saved_edits_applied", { format: activeFormat.id, cells: res.cells }, subStatus?.plan);
+  }
+
+  function forgetSavedEditsNow() {
+    if (activeFormat) forgetSavedEdits(activeFormat.id);
+    setSavedEditsOffer(null);
+  }
 
   function runFormatOnCurrentData(nextHeaders: string[], nextRows: CsvRow[], additionalFixes: string[] = []) {
     const res = applyFormatToParsedCsv(nextHeaders, nextRows, activeFormat);
@@ -924,6 +946,11 @@ useEffect(() => {
       setHeaders(res.fixedHeaders ?? []);
       setRows(res.fixedRows ?? []);
       setPreamble(res.preamble ?? []);
+
+      // Offer the edits remembered from an earlier file of this format, if any match these rows.
+      rowKeysRef.current = (res.fixedRows ?? []).map((r) => rowKey(format.id, r));
+      const offer = applySavedEdits(res.fixedRows ?? [], rowKeysRef.current, loadSavedEdits(format.id));
+      setSavedEditsOffer(offer.cells ? { cells: offer.cells, rows: offer.matchedRows } : null);
 
       setIssues([...(res.issues ?? []), ...nextParseIssues]);
 
@@ -1202,6 +1229,9 @@ useEffect(() => {
     setErrorBanner,
     infoBanner,
     setInfoBanner,
+    savedEditsOffer,
+    applySavedEditsNow,
+    forgetSavedEditsNow,
     // results
     validation,
     blockingCount,
