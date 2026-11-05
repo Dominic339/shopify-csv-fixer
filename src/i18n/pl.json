@@ -339,7 +339,9 @@
     "name_ebay_variations": "Warianty eBay",
     "desc_ebay_variations": "Sprawdzaj pliki CSV ofert eBay z wariantami: parowanie cech wariantów, zduplikowane kombinacje, pola ceny i ilości.",
     "name_google_merchant_center": "Plik danych Google Merchant Center",
-    "desc_google_merchant_center": "Sprawdź plik produktów Google Merchant Center przed przesłaniem: wymagane atrybuty, ceny z walutą, dostępność, numery GTIN i identyfikatory."
+    "desc_google_merchant_center": "Sprawdź plik produktów Google Merchant Center przed przesłaniem: wymagane atrybuty, ceny z walutą, dostępność, numery GTIN i identyfikatory.",
+    "name_meta_catalog": "Katalog Meta (Facebook i Instagram)",
+    "desc_meta_catalog": "Sprawdź plik katalogu dla Facebooka i Instagrama przed przesłaniem do Commerce Manager: wymagane pola, dostępność, ceny z walutą, marka lub GTIN oraz zdjęcia."
   },
   "convert": {
     "title": "Konwerter formatu CSV",

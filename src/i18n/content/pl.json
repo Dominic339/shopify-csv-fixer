@@ -355,6 +355,45 @@
 "a": "id, title, description, link, image_link, availability i price dla każdego produktu, a także brand dla nowych produktów i kolejne dla odzieży, np. color, size, gender i age_group."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Katalogi Meta zasilają reklamy produktów, Facebook Shops i Instagram Shopping. Katalog w Commerce Manager wypełniasz plikiem produktów: jeden produkt w wierszu, z nazwami pól Meta w wierszu nagłówka. Ten szablon sprawdza każdy produkt według dokumentacji pól katalogu Meta i zachowuje nazwy Twoich kolumn.",
+"Wykrywa to, co blokuje przesyłanie produktów: brak wymaganych pól, wartości dostępności, których Meta nie przyjmuje, ceny bez kodu waluty, produkty bez marki, GTIN i MPN, zduplikowane id i niedziałające linki do zdjęć."
+],
+"howItWorks": [
+"Prześlij plik katalogu (CSV albo .txt lub .tsv rozdzielany tabulatorami).",
+"Każdy produkt jest sprawdzany pod kątem id, title, description, availability, condition, price, link i image_link.",
+"Wartości takie jak in_stock, „Sold out”, „19,99 EUR” i „New” są zamieniane na format Meta.",
+"Produkty bez marki, GTIN i MPN są oznaczane, a numery GTIN sprawdzane cyfrą kontrolną.",
+"Pobierz plik CSV z oryginalnymi kolumnami, gotowy do przesłania w Commerce Manager."
+],
+"commonFixes": [
+"Zamiana availability na in stock lub out of stock",
+"Zapis cen jako 9.99 USD, z kropką i kodem waluty",
+"Zamiana condition na new, refurbished lub used",
+"Czyszczenie numerów GTIN i przywracanie zera wiodącego potwierdzonego cyfrą kontrolną",
+"Zamiana gender i age_group na wartości Meta",
+"Oznaczanie produktów bez marki, GTIN i MPN"
+],
+"faq": [
+{
+"q": "Czy mogę przesłać plik danych Google Merchant Center do Meta?",
+"a": "W dużej mierze tak, bo nazwy pól są te same. Główna różnica to availability: Meta przyjmuje in stock i out of stock ze spacją, gdzie Google używa in_stock. Ten szablon zamienia to za Ciebie."
+},
+{
+"q": "Które pola są wymagane?",
+"a": "id, title, description, availability, condition, price, link i image_link dla każdego produktu, a do tego co najmniej jedno z brand, gtin lub mpn."
+},
+{
+"q": "Jak zapisywać ceny?",
+"a": "Jako liczbę z kropką dziesiętną, a po niej kod waluty ISO 4217, np. 9.99 USD. Sam znak $ nie wystarcza, bo używa go kilka walut."
+},
+{
+"q": "A produkty w przedsprzedaży?",
+"a": "Katalog Meta przyjmuje teraz tylko in stock i out of stock. Użyj in stock, jeśli klienci mogą zamówić produkt już teraz."
+}
+]
 }
 }
 }

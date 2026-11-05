@@ -355,6 +355,45 @@
 "a": "모든 제품에 id, title, description, link, image_link, availability, price가 필요하고, 새 제품에는 brand, 의류에는 color, size, gender, age_group 등이 더 필요합니다."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Meta 카탈로그는 제품 광고, Facebook Shops, Instagram 쇼핑의 바탕이 됩니다. 커머스 관리자에서 제품 파일로 카탈로그를 채웁니다. 한 행에 제품 하나, 헤더 행에는 Meta의 필드 이름을 씁니다. 이 프리셋은 Meta의 카탈로그 필드 참고 자료에 따라 각 제품을 확인하고 열 이름은 그대로 유지합니다.",
+"제품 업로드를 막는 문제를 찾아냅니다: 누락된 필수 필드, Meta가 받지 않는 재고 상태 값, 통화 코드 없는 가격, 브랜드·GTIN·MPN이 없는 제품, 중복 id, 깨진 이미지 링크."
+],
+"howItWorks": [
+"카탈로그 파일(CSV 또는 탭으로 구분된 .txt, .tsv)을 업로드하세요.",
+"각 제품의 id, title, description, availability, condition, price, link, image_link를 확인합니다.",
+"in_stock, \"Sold out\", \"19,99 EUR\", \"New\" 같은 값을 Meta 형식으로 변환합니다.",
+"브랜드, GTIN, MPN이 없는 제품을 표시하고 GTIN을 검사 숫자로 확인합니다.",
+"원래 열을 그대로 둔, 커머스 관리자에 바로 업로드할 수 있는 CSV를 다운로드하세요."
+],
+"commonFixes": [
+"availability를 in stock 또는 out of stock으로 변환",
+"가격을 마침표와 통화 코드를 넣어 9.99 USD 형식으로 작성",
+"condition을 new, refurbished 또는 used로 변환",
+"GTIN을 정리하고 검사 숫자로 확인되는 앞자리 0 복원",
+"gender와 age_group을 Meta의 값으로 변환",
+"브랜드, GTIN, MPN이 없는 제품 표시"
+],
+"faq": [
+{
+"q": "Google Merchant Center 피드를 Meta에 올릴 수 있나요?",
+"a": "필드 이름이 같아서 대부분 가능합니다. 가장 큰 차이는 availability입니다. Google은 in_stock을 쓰지만 Meta는 공백을 넣은 in stock과 out of stock을 씁니다. 이 프리셋이 변환해 드립니다."
+},
+{
+"q": "필수 필드는 무엇인가요?",
+"a": "모든 제품에 id, title, description, availability, condition, price, link, image_link가 필요하고, brand, gtin, mpn 중 적어도 하나가 더 필요합니다."
+},
+{
+"q": "가격은 어떻게 써야 하나요?",
+"a": "소수점을 마침표로 쓴 숫자 뒤에 ISO 4217 통화 코드를 붙입니다(예: 9.99 USD). 여러 통화가 쓰기 때문에 $ 기호만으로는 부족합니다."
+},
+{
+"q": "예약 주문 제품은요?",
+"a": "Meta 카탈로그는 이제 in stock과 out of stock만 받습니다. 지금 주문할 수 있는 제품이면 in stock을 쓰세요."
+}
+]
 }
 }
 }

@@ -355,6 +355,45 @@
 "a": "每个商品都需要 id、title、description、link、image_link、availability 和 price，新商品还需要 brand，服装还需要 color、size、gender 和 age_group 等。"
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Meta 目录为商品广告、Facebook Shops 和 Instagram Shopping 提供数据。你在商务管理工具中用商品文件填充目录：每行一个商品，标题行使用 Meta 的字段名称。此预设按照 Meta 的目录字段参考检查每个商品，并保留你的列名不变。",
+"它会找出阻止商品上传的问题：缺少必填字段、Meta 不接受的库存状态值、没有货币代码的价格、没有品牌、GTIN 或 MPN 的商品、重复的 id 以及失效的图片链接。"
+],
+"howItWorks": [
+"上传目录文件（CSV，或制表符分隔的 .txt 或 .tsv）。",
+"检查每个商品的 id、title、description、availability、condition、price、link 和 image_link。",
+"in_stock、“Sold out”、“19,99 EUR”和“New”等值会转换为 Meta 的格式。",
+"标出没有品牌、GTIN 或 MPN 的商品，并用校验位检查 GTIN。",
+"下载保留原始列、可直接在商务管理工具中上传的 CSV。"
+],
+"commonFixes": [
+"将 availability 转换为 in stock 或 out of stock",
+"将价格写成带句点和货币代码的 9.99 USD",
+"将 condition 转换为 new、refurbished 或 used",
+"清理 GTIN，并补回经校验位证实的前导零",
+"将 gender 和 age_group 转换为 Meta 的值",
+"标出没有品牌、GTIN 或 MPN 的商品"
+],
+"faq": [
+{
+"q": "可以把 Google Merchant Center 的 Feed 上传到 Meta 吗？",
+"a": "大部分可以，因为字段名称相同。主要区别在 availability：Google 使用 in_stock，而 Meta 使用带空格的 in stock 和 out of stock。此预设会为你转换。"
+},
+{
+"q": "哪些字段是必填的？",
+"a": "每个商品都需要 id、title、description、availability、condition、price、link 和 image_link，另外还需要 brand、gtin、mpn 中至少一个。"
+},
+{
+"q": "价格应该怎么写？",
+"a": "写成以句点为小数点的数字，后跟 ISO 4217 货币代码，例如 9.99 USD。只写 $ 符号不够，因为多种货币都使用它。"
+},
+{
+"q": "预购商品怎么办？",
+"a": "Meta 目录现在只接受 in stock 和 out of stock。如果顾客现在就能下单，请使用 in stock。"
+}
+]
 }
 }
 }

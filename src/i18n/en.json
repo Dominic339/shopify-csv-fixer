@@ -333,6 +333,8 @@
     "desc_ebay_variations": "Validate eBay variation listing CSVs: variation specifics pairing, duplicate variation combos, price and quantity fields.",
     "name_google_merchant_center": "Google Merchant Center Feed",
     "desc_google_merchant_center": "Check a Google Merchant Center product file before you upload it: required attributes, prices with currency, availability, GTINs and identifiers.",
+    "name_meta_catalog": "Meta Catalog (Facebook & Instagram)",
+    "desc_meta_catalog": "Check a Facebook and Instagram catalog feed before you upload it to Commerce Manager: required fields, availability, prices with currency, brand or GTIN, and images.",
     "checksCount": "{count} checks",
     "checksShared": "The WooCommerce presets share their checks, as do the eBay presets, so the counts below overlap. The homepage total counts each check once.",
     "templateTitle": "{name} CSV Template",

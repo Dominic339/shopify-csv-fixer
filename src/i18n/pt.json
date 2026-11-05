@@ -339,7 +339,9 @@
     "name_ebay_variations": "Variações eBay",
     "desc_ebay_variations": "Valide CSVs de anúncios com variações do eBay: pares de especificações de variação, combinações duplicadas, campos de preço e quantidade.",
     "name_google_merchant_center": "Feed do Google Merchant Center",
-    "desc_google_merchant_center": "Confira um arquivo de produtos do Google Merchant Center antes de enviá-lo: atributos obrigatórios, preços com moeda, disponibilidade, GTINs e identificadores."
+    "desc_google_merchant_center": "Confira um arquivo de produtos do Google Merchant Center antes de enviá-lo: atributos obrigatórios, preços com moeda, disponibilidade, GTINs e identificadores.",
+    "name_meta_catalog": "Catálogo da Meta (Facebook e Instagram)",
+    "desc_meta_catalog": "Confira um feed de catálogo do Facebook e Instagram antes de enviá-lo ao Commerce Manager: campos obrigatórios, disponibilidade, preços com moeda, marca ou GTIN e imagens."
   },
   "convert": {
     "title": "Conversor de formato CSV",

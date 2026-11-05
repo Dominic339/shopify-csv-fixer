@@ -339,7 +339,9 @@
     "name_ebay_variations": "eBay 변형",
     "desc_ebay_variations": "eBay 변형 리스팅 CSV 검증: 변형 사양 짝, 중복된 조합, 가격과 수량 필드.",
     "name_google_merchant_center": "Google Merchant Center 피드",
-    "desc_google_merchant_center": "Google Merchant Center 제품 파일을 업로드하기 전에 확인하세요: 필수 속성, 통화가 포함된 가격, 재고 상태, GTIN 및 식별자."
+    "desc_google_merchant_center": "Google Merchant Center 제품 파일을 업로드하기 전에 확인하세요: 필수 속성, 통화가 포함된 가격, 재고 상태, GTIN 및 식별자.",
+    "name_meta_catalog": "Meta 카탈로그(Facebook 및 Instagram)",
+    "desc_meta_catalog": "Facebook과 Instagram 카탈로그 피드를 커머스 관리자에 업로드하기 전에 확인하세요: 필수 필드, 재고 상태, 통화가 포함된 가격, 브랜드 또는 GTIN, 이미지."
   },
   "convert": {
     "title": "CSV 형식 변환기",

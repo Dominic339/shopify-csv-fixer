@@ -1000,5 +1000,107 @@
 "explanation": "商品が衣料品または靴のカテゴリにありますが、color、size、gender、age_group のいずれかが空です。",
 "whyPlatformCares": "Google は、米国、英国、ドイツ、フランス、日本、ブラジルなど多くの国で、衣料品にこの 4 つの属性を求めています。ないと商品が制限されたり不承認になったりします。",
 "howToFix": "すべての衣料品とバリエーションに、color、size、gender（male、female、unisex）、age_group（通常は adult）を入力してください。"
+},
+"meta/missing_required_header": {
+"title": "必須列がありません",
+"explanation": "Meta がすべての商品に求める項目の列がありません：id、title、description、availability、condition、price、link、image_link。",
+"whyPlatformCares": "必須項目がない商品はカタログにアップロードされない場合があり、広告やショップに表示されません。",
+"howToFix": "不足している列を、Meta の項目名どおりの綴り（例：image_link）でヘッダー行に追加し、すべての商品で入力してください。"
+},
+"meta/missing_value": {
+"title": "必須項目が空です",
+"explanation": "この行で必須項目（id、title、description、availability、condition、price、link、image_link）が空になっています。",
+"whyPlatformCares": "必須項目が欠けた商品は Meta にアップロードできません。",
+"howToFix": "値を入力してください。カタログに載せない商品なら、行を削除してください。"
+},
+"meta/missing_identifier": {
+"title": "ブランド、GTIN、MPN のいずれもありません",
+"explanation": "商品に brand、gtin、mpn のどれもありません。",
+"whyPlatformCares": "Meta は商品を識別し、広告やショップで照合するために、この 3 つのうち少なくとも 1 つを必要とします。",
+"howToFix": "ブランドを入力してください。自社製品にはストア名を使います。バーコード（gtin）やメーカー型番（mpn）でもかまいません。"
+},
+"meta/duplicate_id": {
+"title": "id が重複しています",
+"explanation": "2 行以上で同じ id が使われています。",
+"whyPlatformCares": "Meta は id で各商品を識別します。重複があると、カタログで一方の行がもう一方を上書きします。",
+"howToFix": "すべての商品とバリエーションに固有の id を付けてください。SKU を使うのが最も簡単です。"
+},
+"meta/id_too_long": {
+"title": "id が 100 文字を超えています",
+"explanation": "Meta の id は最大 100 文字です。",
+"whyPlatformCares": "上限を超える id の商品はカタログに追加できません。",
+"howToFix": "SKU など短い id を使ってください。広告やショップが参照するため、商品の公開後は id を変更しないでください。"
+},
+"meta/title_too_long": {
+"title": "タイトルが 200 文字を超えています",
+"explanation": "Meta の title は最大 200 文字で、65 文字以内が推奨されています。",
+"whyPlatformCares": "長いタイトルは、最初の数語しか表示されない広告やショップで切り詰められます。",
+"howToFix": "最も重要な情報（ブランド、商品、色、サイズ）を先頭に置き、残りを削ってください。"
+},
+"meta/description_too_long": {
+"title": "説明が 9999 文字を超えています",
+"explanation": "Meta の description は最大 9999 文字です。",
+"whyPlatformCares": "上限を超えた部分は切り捨てられます。",
+"howToFix": "説明は商品に関する事実に絞ってください。"
+},
+"meta/invalid_url": {
+"title": "リンクまたは画像 URL が無効です",
+"explanation": "link、image_link、additional_image_link が http:// または https:// で始まる完全なウェブアドレスではありません。",
+"whyPlatformCares": "Meta はこれらのアドレスから商品ページと画像を読み込みます。相対 URL や壊れた URL だと商品をアップロードできません。",
+"howToFix": "商品ページとすべての画像に、https:// とドメインを含む完全なアドレスを使ってください。"
+},
+"meta/too_many_images": {
+"title": "追加画像が 50 枚を超えています",
+"explanation": "additional_image_link に 50 個を超える URL があります。",
+"whyPlatformCares": "Meta が使う追加画像は最大 50 枚で、残りは無視されます。",
+"howToFix": "最も役立つ追加画像 50 枚を残してください。"
+},
+"meta/invalid_availability": {
+"title": "availability の値が無効です",
+"explanation": "availability は in stock または out of stock にする必要があります。",
+"whyPlatformCares": "Meta はスペースを含む独自の 2 つの値しか受け付けません。それ以外の値だと商品をアップロードできません。",
+"howToFix": "in stock または out of stock を使ってください。in_stock のような Google 形式の値や「Sold out」のような語は自動で変換されます。"
+},
+"meta/price_missing_currency": {
+"title": "価格に通貨コードがありません",
+"explanation": "価格に数値はありますが通貨コードがないか、複数の通貨で使われる $ 記号だけです。",
+"whyPlatformCares": "Meta が正しい価格を表示するには ISO 4217 の通貨コード（USD、CAD、EUR など）が必要です。",
+"howToFix": "価格は数値の後にコードを付けて、9.99 USD のように書いてください。€ や £ など 1 つの通貨を示す記号は自動で変換されます。"
+},
+"meta/invalid_price": {
+"title": "価格が無効です",
+"explanation": "price が通貨コード付きの数値ではないか、0 です。",
+"whyPlatformCares": "有効な価格がない商品はカタログにアップロードできません。",
+"howToFix": "小数点にはピリオドを使い、通貨コードを付けてください（例：9.99 USD）。9,99 EUR のような価格は自動で変換されます。"
+},
+"meta/invalid_sale_price": {
+"title": "セール価格が無効です",
+"explanation": "sale_price が有効な価格ではないか、price より低くありません。",
+"whyPlatformCares": "Meta がセールを表示するのは、sale_price が有効で通常価格より低い場合だけです。",
+"howToFix": "通常価格は price に、低いセール価格は sale_price に、どちらも通貨コード付きで入力してください。"
+},
+"meta/invalid_condition": {
+"title": "condition の値が無効です",
+"explanation": "condition は new、refurbished、used のいずれかにする必要があります。",
+"whyPlatformCares": "Meta では condition がすべての商品に必須で、それ以外の値は受け付けられません。",
+"howToFix": "new、refurbished、used を使ってください。大文字の値や「renewed」は自動で変換されます。"
+},
+"meta/invalid_gtin": {
+"title": "GTIN が無効です",
+"explanation": "gtin が正しいチェックディジットを持つ 8、12、13、14 桁ではないか、スプレッドシートで指数表記に変わっています。",
+"whyPlatformCares": "Meta は正しいと確信できる場合にのみ GTIN を求めます。誤った GTIN は他店の商品と照合されることがあります。",
+"howToFix": "バーコードをパッケージや仕入先からコピーするか、gtin を空にして brand または mpn を入力してください。スペース、ハイフン、確認できる先頭の 0 の欠落は自動で修正されます。"
+},
+"meta/invalid_gender": {
+"title": "gender の値が無効です",
+"explanation": "gender は female、male、unisex のいずれかにする必要があります。",
+"whyPlatformCares": "それ以外の値は無視されるため、商品が想定外の買い物客に表示されることがあります。",
+"howToFix": "female、male、unisex を使ってください。「Men」や「Women's」などの値は自動で変換されます。"
+},
+"meta/invalid_age_group": {
+"title": "age_group の値が無効です",
+"explanation": "age_group は adult、all ages、teen、kids、toddler、infant、newborn のいずれかにする必要があります。",
+"whyPlatformCares": "それ以外の値は無視されるため、商品が想定外の買い物客に表示されることがあります。",
+"howToFix": "Meta の 7 つの値のいずれかを使ってください。「Adults」「teens」「children」は自動で変換されます。"
 }
 }

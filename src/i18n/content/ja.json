@@ -355,6 +355,45 @@
 "a": "すべての商品に id、title、description、link、image_link、availability、price が必要です。さらに新品には brand、アパレルには color、size、gender、age_group なども必要です。"
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Meta のカタログは、商品広告、Facebook ショップ、Instagram ショッピングの元になります。コマースマネージャでは商品ファイルからカタログを作成します。1 行に 1 商品、ヘッダー行には Meta の項目名を使います。このプリセットは Meta のカタログ項目リファレンスに沿って各商品をチェックし、列名はそのまま残します。",
+"商品のアップロードを妨げる原因を見つけます：必須項目の欠落、Meta が受け付けない在庫状況の値、通貨コードのない価格、ブランド・GTIN・MPN のない商品、重複した id、壊れた画像リンク。"
+],
+"howItWorks": [
+"カタログファイル（CSV、またはタブ区切りの .txt / .tsv）をアップロードします。",
+"各商品の id、title、description、availability、condition、price、link、image_link をチェックします。",
+"in_stock、「Sold out」「19,99 EUR」「New」などの値を Meta の形式に変換します。",
+"ブランド、GTIN、MPN のない商品を指摘し、GTIN をチェックディジットで確認します。",
+"元の列のまま、コマースマネージャにアップロードできる CSV をダウンロードします。"
+],
+"commonFixes": [
+"availability を in stock または out of stock に変換",
+"価格をピリオドと通貨コード付きの 9.99 USD 形式で記述",
+"condition を new、refurbished、used に変換",
+"GTIN を整え、チェックディジットで確認できる先頭の 0 を復元",
+"gender と age_group を Meta の値に変換",
+"ブランド、GTIN、MPN のない商品を指摘"
+],
+"faq": [
+{
+"q": "Google Merchant Center のフィードを Meta にアップロードできますか？",
+"a": "項目名が同じなので、ほぼ可能です。主な違いは availability で、Google の in_stock に対し、Meta はスペースを含む in stock と out of stock を使います。このプリセットが変換します。"
+},
+{
+"q": "必須の項目はどれですか？",
+"a": "すべての商品に id、title、description、availability、condition、price、link、image_link が必要で、さらに brand、gtin、mpn のうち少なくとも 1 つが必要です。"
+},
+{
+"q": "価格はどう書けばよいですか？",
+"a": "小数点にピリオドを使った数値の後に ISO 4217 の通貨コードを付けます（例：9.99 USD）。$ 記号だけでは不十分です。複数の通貨で使われるためです。"
+},
+{
+"q": "予約注文の商品は？",
+"a": "Meta のカタログは現在 in stock と out of stock だけを受け付けます。今すぐ注文できる商品なら in stock を使ってください。"
+}
+]
 }
 }
 }

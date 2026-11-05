@@ -93,7 +93,7 @@ const AVAILABILITY: Record<string, string> = {
   "back order": "backorder",
 };
 
-const CONDITION: Record<string, string> = { new: "new", used: "used", refurbished: "refurbished", renewed: "refurbished" };
+export const CONDITION: Record<string, string> = { new: "new", used: "used", refurbished: "refurbished", renewed: "refurbished" };
 
 const YES_NO: Record<string, string> = { yes: "yes", y: "yes", true: "yes", "1": "yes", no: "no", n: "no", false: "no", "0": "no" };
 
@@ -104,7 +104,7 @@ const YES_NO: Record<string, string> = { yes: "yes", y: "yes", true: "yes", "1":
 const APPAREL = /(^|[^\d])(166|1604|187|203|204|212|2271)([^\d]|$)|apparel|clothing|clothes|shoes|footwear|t-?shirts?|dresses|jackets|hoodies|trousers|jeans/i;
 const APPAREL_ATTRIBUTES = ["color", "size", "gender", "age_group"];
 
-const GENDER: Record<string, string> = {
+export const GENDER: Record<string, string> = {
   male: "male",
   men: "male",
   man: "male",
@@ -118,7 +118,7 @@ const GENDER: Record<string, string> = {
   unisex: "unisex",
 };
 
-const AGE_GROUP: Record<string, string> = {
+export const AGE_GROUP: Record<string, string> = {
   newborn: "newborn",
   infant: "infant",
   toddler: "toddler",

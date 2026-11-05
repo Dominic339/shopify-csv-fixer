@@ -11,6 +11,7 @@ import { ETSY_ISSUE_META } from "@/lib/validation/issueMetaEtsy";
 import { EBAY_ISSUE_META } from "@/lib/validation/issueMetaEbay";
 import { AMAZON_ISSUE_META } from "@/lib/validation/issueMetaAmazon";
 import { GOOGLE_ISSUE_META } from "@/lib/validation/issueMetaGoogle";
+import { META_ISSUE_META } from "@/lib/validation/issueMetaMeta";
 import { listCuratedGuides } from "@/lib/guides/mdxLoader";
 import { getAllFormats } from "@/lib/formats";
 import { PLATFORM_LANDINGS } from "@/lib/landing/platforms";
@@ -23,7 +24,7 @@ const root = process.cwd();
 const read = (dir: string, loc: string) => JSON.parse(fs.readFileSync(path.join(root, "src/i18n", dir, `${loc}.json`), "utf8"));
 const placeholders = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort();
 
-const issueCodes = [SHOPIFY_ISSUE_META, WOOCOMMERCE_ISSUE_META, ETSY_ISSUE_META, EBAY_ISSUE_META, AMAZON_ISSUE_META, GOOGLE_ISSUE_META].flatMap((m) => Object.keys(m));
+const issueCodes = [SHOPIFY_ISSUE_META, WOOCOMMERCE_ISSUE_META, ETSY_ISSUE_META, EBAY_ISSUE_META, AMAZON_ISSUE_META, GOOGLE_ISSUE_META, META_ISSUE_META].flatMap((m) => Object.keys(m));
 const guideKeys = listCuratedGuides().map((g) => `${g.platform}/${g.slug}`);
 // Every sentence template the issue-guide generator uses for some guide.
 const guideTemplates = (() => {

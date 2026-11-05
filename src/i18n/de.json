@@ -330,6 +330,8 @@
     "desc_ebay_variations": "eBay-Variations-Listing-CSVs validieren: Variations-Spezifikationen, doppelte Variationskombinationen, Preis- und Mengenfelder.",
     "name_google_merchant_center": "Google Merchant Center Feed",
     "desc_google_merchant_center": "Prüfe eine Produktdatei für Google Merchant Center vor dem Hochladen: Pflichtattribute, Preise mit Währung, Verfügbarkeit, GTINs und Kennungen.",
+    "name_meta_catalog": "Meta-Katalog (Facebook & Instagram)",
+    "desc_meta_catalog": "Prüfe einen Katalog-Feed für Facebook und Instagram vor dem Hochladen in den Commerce Manager: Pflichtfelder, Verfügbarkeit, Preise mit Währung, Marke oder GTIN und Bilder.",
     "checksCount": "{count} Prüfungen",
     "checksShared": "Die WooCommerce-Vorlagen teilen sich ihre Prüfungen, ebenso die eBay-Vorlagen, daher überschneiden sich die Zahlen unten. Die Gesamtzahl auf der Startseite zählt jede Prüfung einmal.",
     "templateTitle": "{name}: CSV-Vorlage",

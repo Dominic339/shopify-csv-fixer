@@ -23,6 +23,7 @@ export const MESSAGE_SOURCES = [
   "src/lib/ebayOptimizer.ts",
   "src/lib/amazonOptimizer.ts",
   "src/lib/googleMerchantOptimizer.ts",
+  "src/lib/metaCatalogOptimizer.ts",
   "src/lib/formats/engine.ts",
   "src/lib/formats/customUser.ts",
   "src/lib/convertCsv.ts",

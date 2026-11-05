@@ -1000,5 +1000,107 @@
 "explanation": "商品属于服装或鞋类类别，但 color、size、gender 或 age_group 为空。",
 "whyPlatformCares": "在美国、英国、德国、法国、日本和巴西等许多国家/地区，Google 要求服装提供这四个属性。缺少它们的商品可能受限或被拒登。",
 "howToFix": "为每件服装和每个变体填写 color、size、gender（male、female 或 unisex）和 age_group（通常为 adult）。"
+},
+"meta/missing_required_header": {
+"title": "缺少必填列",
+"explanation": "缺少 Meta 要求每个商品都提供的某个字段列：id、title、description、availability、condition、price、link 或 image_link。",
+"whyPlatformCares": "缺少必填字段的商品可能无法上传到目录，因此不会出现在广告和店铺中。",
+"howToFix": "按 Meta 的字段名称（例如 image_link）在标题行中添加缺少的列，并为每个商品填写。"
+},
+"meta/missing_value": {
+"title": "必填字段为空",
+"explanation": "此行的某个必填字段（id、title、description、availability、condition、price、link 或 image_link）为空。",
+"whyPlatformCares": "Meta 无法上传缺少必填字段的商品。",
+"howToFix": "填写该值。如果商品不应进入目录，请删除这一行。"
+},
+"meta/missing_identifier": {
+"title": "没有品牌、GTIN 或 MPN",
+"explanation": "商品没有 brand、gtin 或 mpn。",
+"whyPlatformCares": "Meta 需要这三者中至少一个，才能识别商品并在广告和店铺中匹配。",
+"howToFix": "填写品牌。自制商品请使用店铺名称。条形码（gtin）或制造商部件号（mpn）也可以。"
+},
+"meta/duplicate_id": {
+"title": "id 重复",
+"explanation": "两行或更多行使用了相同的 id。",
+"whyPlatformCares": "Meta 通过 id 识别每个商品。出现重复时，目录中一行会覆盖另一行。",
+"howToFix": "为每个商品和每个变体设置唯一的 id。最简单的做法是使用 SKU。"
+},
+"meta/id_too_long": {
+"title": "id 超过 100 个字符",
+"explanation": "Meta 允许 id 最多 100 个字符。",
+"whyPlatformCares": "id 超出限制的商品无法添加到目录。",
+"howToFix": "使用更短的 id，例如 SKU。广告和店铺会引用 id，因此商品上线后请保持不变。"
+},
+"meta/title_too_long": {
+"title": "标题超过 200 个字符",
+"explanation": "Meta 允许 title 最多 200 个字符，建议不超过 65 个。",
+"whyPlatformCares": "在只显示前几个词的广告和店铺中，长标题会被截断。",
+"howToFix": "把最重要的信息（品牌、商品、颜色、尺码）放在前面，删减其余内容。"
+},
+"meta/description_too_long": {
+"title": "描述超过 9999 个字符",
+"explanation": "Meta 允许 description 最多 9999 个字符。",
+"whyPlatformCares": "超出部分会被截断。",
+"howToFix": "把描述精简为商品本身的信息。"
+},
+"meta/invalid_url": {
+"title": "链接或图片网址无效",
+"explanation": "link、image_link 或 additional_image_link 不是以 http:// 或 https:// 开头的完整网址。",
+"whyPlatformCares": "Meta 从这些地址加载商品页面和图片。相对网址或失效网址会导致商品无法上传。",
+"howToFix": "商品页面和每张图片都使用包含 https:// 和域名的完整地址。"
+},
+"meta/too_many_images": {
+"title": "附加图片超过 50 张",
+"explanation": "additional_image_link 中的网址超过 50 个。",
+"whyPlatformCares": "Meta 最多使用 50 张附加图片，其余会被忽略。",
+"howToFix": "保留最有用的 50 张附加图片。"
+},
+"meta/invalid_availability": {
+"title": "availability 值无效",
+"explanation": "availability 必须是 in stock 或 out of stock。",
+"whyPlatformCares": "Meta 只接受它自己的两个值，中间用空格。其他值会导致商品无法上传。",
+"howToFix": "使用 in stock 或 out of stock。in_stock 这样的 Google 格式值以及“Sold out”之类的词会自动转换。"
+},
+"meta/price_missing_currency": {
+"title": "价格缺少货币代码",
+"explanation": "价格有数字但没有货币代码，或者只有多种货币通用的 $ 符号。",
+"whyPlatformCares": "Meta 需要 ISO 4217 货币代码（USD、CAD、EUR 等）才能显示正确的价格。",
+"howToFix": "将价格写成数字加代码，例如 9.99 USD。€ 或 £ 等只代表一种货币的符号会自动转换。"
+},
+"meta/invalid_price": {
+"title": "价格无效",
+"explanation": "price 不是带货币代码的数字，或者为 0。",
+"whyPlatformCares": "没有有效价格的商品无法上传到目录。",
+"howToFix": "使用句点作为小数点并加上货币代码，例如 9.99 USD。9,99 EUR 这样的价格会自动转换。"
+},
+"meta/invalid_sale_price": {
+"title": "促销价无效",
+"explanation": "sale_price 不是有效价格，或者不低于 price。",
+"whyPlatformCares": "只有当 sale_price 有效且低于原价时，Meta 才会显示促销。",
+"howToFix": "原价填在 price，较低的促销价填在 sale_price，两者都带货币代码。"
+},
+"meta/invalid_condition": {
+"title": "condition 值无效",
+"explanation": "condition 必须是 new、refurbished 或 used。",
+"whyPlatformCares": "在 Meta 中，每个商品都必须提供 condition，且不接受其他值。",
+"howToFix": "使用 new、refurbished 或 used。大写的值和“renewed”会自动转换。"
+},
+"meta/invalid_gtin": {
+"title": "GTIN 无效",
+"explanation": "gtin 不是带正确校验位的 8、12、13 或 14 位数字，或者被电子表格转成了科学计数法。",
+"whyPlatformCares": "Meta 只在你确定 GTIN 正确时才要求填写。错误的 GTIN 可能把商品匹配到其他商家的商品。",
+"howToFix": "从包装或供应商处复制条形码，或将 gtin 留空并填写 brand 或 mpn。空格、连字符以及经证实缺失的前导零会自动修复。"
+},
+"meta/invalid_gender": {
+"title": "gender 值无效",
+"explanation": "gender 必须是 female、male 或 unisex。",
+"whyPlatformCares": "其他值会被忽略，商品可能会展示给不相关的购物者。",
+"howToFix": "使用 female、male 或 unisex。“Men”或“Women's”等值会自动转换。"
+},
+"meta/invalid_age_group": {
+"title": "age_group 值无效",
+"explanation": "age_group 必须是 adult、all ages、teen、kids、toddler、infant 或 newborn。",
+"whyPlatformCares": "其他值会被忽略，商品可能会展示给不相关的购物者。",
+"howToFix": "使用 Meta 的七个值之一。“Adults”、“teens”和“children”会自动转换。"
 }
 }
