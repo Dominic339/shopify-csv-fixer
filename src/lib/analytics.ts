@@ -32,12 +32,32 @@ function getSessionKey(): string {
   return key;
 }
 
+/** GA4 event parameters take strings and numbers; anything else is turned into text or dropped. */
+function gaParams(metadata: Record<string, unknown>, plan: string): Record<string, string | number> {
+  const out: Record<string, string | number> = { plan };
+  for (const [k, v] of Object.entries(metadata)) {
+    if (typeof v === "number" && Number.isFinite(v)) out[k] = v;
+    else if (typeof v === "string") out[k] = v.slice(0, 100);
+    else if (typeof v === "boolean") out[k] = String(v);
+  }
+  return out;
+}
+
+/**
+ * Records a tool event in our own database and in Google Analytics, so the funnel
+ * (upload, validation, export, pass checkout) can be marked as key events in GA.
+ */
 export function trackToolEvent(
   eventName: string,
   metadata?: Record<string, unknown>,
   plan?: string,
 ): void {
   if (typeof window === "undefined") return;
+  try {
+    window.gtag?.("event", eventName, gaParams(metadata ?? {}, plan ?? "free"));
+  } catch {
+    // Analytics must never break the tool.
+  }
   // fire-and-forget — never await, never throw
   fetch("/api/events/track", {
     method: "POST",

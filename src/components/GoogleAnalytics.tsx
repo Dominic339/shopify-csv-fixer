@@ -9,6 +9,9 @@ declare global {
   }
 }
 
+/** Referrers seen only on bot traffic (hundreds of 0-second sessions from one city). */
+const SPAM_REFERRERS = ["aocr.org"];
+
 export default function GoogleAnalytics() {
   useEffect(() => {
     const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -18,6 +21,11 @@ export default function GoogleAnalytics() {
 
     // Prevent double-loading.
     if (document.getElementById("ga-loader")) return;
+
+    // Keep automated traffic out of the reports: browsers driven by automation tools
+    // (navigator.webdriver) and visits from known referral-spam sites.
+    if (navigator.webdriver) return;
+    if (SPAM_REFERRERS.some((d) => document.referrer.includes(d))) return;
 
     // Init the queue now so nothing is lost; gtag.js reads it when it arrives.
     window.dataLayer = window.dataLayer || [];
