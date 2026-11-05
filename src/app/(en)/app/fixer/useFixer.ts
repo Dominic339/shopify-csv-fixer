@@ -1094,6 +1094,7 @@ useEffect(() => {
         fileName: a.download,
       });
       setUpsellDismissed(false);
+      trackToolEvent("export_completed", { format: activeFormat?.id ?? null, rows: rows.length }, subStatus?.plan);
 
       await refreshQuotaAndPlan();
     } catch (e) {
