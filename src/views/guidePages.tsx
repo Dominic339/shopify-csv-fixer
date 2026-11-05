@@ -485,10 +485,10 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
           <span aria-hidden="true" className="absolute left-4 top-4 h-7 w-7 border-l-[3px] border-t-[3px] border-[var(--accent)] opacity-60" />
           <div className="relative flex flex-wrap items-center gap-2">
             <span className={`rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold ${(PLATFORM_TONE[platform] ?? PLATFORM_TONE.general).text}`}>{label}</span>
-            {/* General guides have the category "general" too; don't show the same word twice. */}
-            {categoryLabel(t, guide.category) !== label && (
-              <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs ${muted}`}>{categoryLabel(t, guide.category)}</span>
-            )}
+            {/* Written articles say "Guide"; issue guides show their category (pricing, images, ...). */}
+            <span className={`rounded-full border border-[var(--border)] px-3 py-1 text-xs ${muted}`}>
+              {guide.kind === "curated" ? t.guides.guideLabel : categoryLabel(t, guide.category)}
+            </span>
             {guide.blocking && <span className={badgeRed}>{t.guide.importBlocker}</span>}
             {guide.autoFixable && <span className={badgeGreen}>{t.guide.autoFixableBadge}</span>}
           </div>

@@ -412,6 +412,7 @@
     "fileRestored": "Twój plik został ponownie wczytany, możesz go teraz pobrać.",
     "googleIntro": "Plik danych Merchant Center potrzebuje dwóch rzeczy, których nie ma w eksporcie: adresu sklepu, aby połączyć każdy produkt z jego stroną, oraz waluty cen.",
     "storeUrl": "Adres sklepu",
+    "storeUrlHint": "Albo wzorzec strony każdego produktu, np. https://shop.example.com/p/{sku} lub …/products/{handle}.",
     "currency": "Waluta (kod ISO)"
   },
   "merge": {

@@ -203,4 +203,14 @@ export const GOOGLE_ISSUE_META: IssueMetaMap = {
     whyPlatformCares: "Age group is required for apparel in many countries, and other values aren't accepted.",
     howToFix: "Use one of Google's five values. \"Adults\" and \"children\" are converted automatically.",
   },
+  "google/missing_apparel_attributes": {
+    code: "google/missing_apparel_attributes",
+    title: "Clothing without color, size, gender or age group",
+    category: "attributes",
+    blocking: false,
+    autoFixable: false,
+    explanation: "The product is in a clothing or shoes category, but color, size, gender or age_group is blank.",
+    whyPlatformCares: "Google requires these four attributes for clothing in many countries, including the US, UK, Germany, France, Japan and Brazil. Without them, products can be limited or disapproved.",
+    howToFix: "Fill in color, size, gender (male, female or unisex) and age_group (usually adult) for every clothing item and variant.",
+  },
 };

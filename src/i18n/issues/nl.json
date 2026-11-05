@@ -994,5 +994,11 @@
 "explanation": "age_group moet newborn, infant, toddler, kids of adult zijn.",
 "whyPlatformCares": "In veel landen is age_group verplicht bij kleding, en andere waarden worden niet geaccepteerd.",
 "howToFix": "Gebruik een van de vijf waarden van Google. 'Adults' en 'children' worden automatisch omgezet."
+},
+"google/missing_apparel_attributes": {
+"title": "Kleding zonder kleur, maat, geslacht of leeftijdsgroep",
+"explanation": "Het product staat in een categorie voor kleding of schoenen, maar color, size, gender of age_group is leeg.",
+"whyPlatformCares": "Google vereist deze vier kenmerken voor kleding in veel landen, waaronder de VS, het VK, Duitsland, Frankrijk, Japan en Brazilië. Zonder deze kenmerken kunnen producten worden beperkt of afgekeurd.",
+"howToFix": "Vul color, size, gender (male, female of unisex) en age_group (meestal adult) in voor elk kledingstuk en elke variant."
 }
 }

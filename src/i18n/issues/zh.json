@@ -994,5 +994,11 @@
 "explanation": "age_group 必须是 newborn、infant、toddler、kids 或 adult。",
 "whyPlatformCares": "许多国家/地区要求服装提供 age_group，且不接受其他值。",
 "howToFix": "使用 Google 的五个值之一。“Adults”和“children”会自动转换。"
+},
+"google/missing_apparel_attributes": {
+"title": "服装缺少颜色、尺码、性别或年龄段",
+"explanation": "商品属于服装或鞋类类别，但 color、size、gender 或 age_group 为空。",
+"whyPlatformCares": "在美国、英国、德国、法国、日本和巴西等许多国家/地区，Google 要求服装提供这四个属性。缺少它们的商品可能受限或被拒登。",
+"howToFix": "为每件服装和每个变体填写 color、size、gender（male、female 或 unisex）和 age_group（通常为 adult）。"
 }
 }

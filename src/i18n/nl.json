@@ -412,6 +412,7 @@
     "fileRestored": "Je bestand is opnieuw geladen, dus je kunt het nu downloaden.",
     "googleIntro": "Een Merchant Center-feed heeft twee dingen nodig die je export niet bevat: het adres van je winkel, om elk product naar zijn pagina te linken, en de valuta van je prijzen.",
     "storeUrl": "Winkeladres",
+    "storeUrlHint": "Of een patroon voor de pagina van elk product, zoals https://shop.example.com/p/{sku} of …/products/{handle}.",
     "currency": "Valuta (ISO-code)"
   },
   "merge": {

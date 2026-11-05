@@ -415,6 +415,7 @@
     "fileRestored": "Your file is loaded again, so you can download it now.",
     "googleIntro": "A Merchant Center feed needs two things your export doesn't have: your store's address, to link each product to its page, and the currency of your prices.",
     "storeUrl": "Store address",
+    "storeUrlHint": "Or a pattern for each product's page, such as https://shop.example.com/p/{sku} or …/products/{handle}.",
     "currency": "Currency (ISO code)"
   },
   "merge": {

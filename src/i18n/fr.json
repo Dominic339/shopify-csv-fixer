@@ -412,6 +412,7 @@
     "fileRestored": "Votre fichier est de nouveau chargé : vous pouvez le télécharger.",
     "googleIntro": "Un flux Merchant Center a besoin de deux informations absentes de votre export : l'adresse de votre boutique, pour lier chaque produit à sa page, et la devise de vos prix.",
     "storeUrl": "Adresse de la boutique",
+    "storeUrlHint": "Ou un modèle pour la page de chaque produit, comme https://shop.example.com/p/{sku} ou …/products/{handle}.",
     "currency": "Devise (code ISO)"
   },
   "merge": {

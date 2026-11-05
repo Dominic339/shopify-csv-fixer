@@ -52,6 +52,22 @@ describe("convert to Google Merchant Center", () => {
     expect(out.warnings.some((w) => w.startsWith("link is blank."))).toBe(true);
   });
 
+  it("builds links from a pattern with {handle} or {sku}", () => {
+    const out = convert("woocommerce_products", { storeUrl: "shop.example.com/p/{sku}", currency: "USD" });
+    expect(out.rows.find((r) => r.id === "TEE-M")!.link).toBe("https://shop.example.com/p/TEE-M");
+    expect(out.warnings[1]).toBe("Each link was built from the pattern https://shop.example.com/p/{sku}. Open a few to check they reach the right product page.");
+    expect(out.warnings.every((w) => matchTemplate(w))).toBe(true);
+  });
+
+  it("keeps Amazon and eBay item conditions", () => {
+    const { headers, rows } = parseCsv(["sku\tprice\titem-condition\titem-name", "A1\t10\t11\tNew mug", "A2\t8\t2\tUsed mug", "A3\t9\t10\tRenewed mug"].join("\n"));
+    const out = convertCsv(headers, rows, "amazon_inventory_loader", "google_merchant_center", null, options);
+    expect(out.rows.map((r) => r.condition)).toEqual(["new", "used", "refurbished"]);
+    expect(out.warnings.some((w) => w.startsWith("condition is set to new"))).toBe(false);
+    const ebay = convert("ebay_listings");
+    expect(ebay.rows.every((r) => r.condition === "new")).toBe(true);
+  });
+
   it("normalizes store addresses", () => {
     expect(normalizeStoreUrl("shop.example.com/")).toBe("https://shop.example.com");
     expect(normalizeStoreUrl("http://example.com/store/")).toBe("http://example.com/store");
