@@ -131,6 +131,7 @@ const GOOGLE_COLUMNS: Record<string, string> = {
   "google/invalid_yes_no": "identifier_exists",
   "google/invalid_gender": "gender",
   "google/invalid_age_group": "age_group",
+  "google/missing_apparel_attributes": "color / size / gender / age_group",
 };
 
 function extractColumnName(code: string, fallback: string, tr: Tr = englishTr): string {

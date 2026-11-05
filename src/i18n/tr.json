@@ -412,6 +412,7 @@
     "fileRestored": "Dosyanız yeniden yüklendi; şimdi indirebilirsiniz.",
     "googleIntro": "Merchant Center feed'i, dışa aktarımınızda olmayan iki bilgiye ihtiyaç duyar: her ürünü sayfasına bağlamak için mağaza adresiniz ve fiyatlarınızın para birimi.",
     "storeUrl": "Mağaza adresi",
+    "storeUrlHint": "Ya da her ürün sayfası için bir kalıp, örneğin https://shop.example.com/p/{sku} veya …/products/{handle}.",
     "currency": "Para birimi (ISO kodu)"
   },
   "merge": {

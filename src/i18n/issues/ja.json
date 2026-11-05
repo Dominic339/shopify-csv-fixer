@@ -994,5 +994,11 @@
 "explanation": "age_group は newborn、infant、toddler、kids、adult のいずれかにする必要があります。",
 "whyPlatformCares": "多くの国でアパレルには age_group が必須で、それ以外の値は受け付けられません。",
 "howToFix": "Google の 5 つの値のいずれかを使ってください。「Adults」や「children」は自動で変換されます。"
+},
+"google/missing_apparel_attributes": {
+"title": "色、サイズ、性別、年齢層のない衣料品",
+"explanation": "商品が衣料品または靴のカテゴリにありますが、color、size、gender、age_group のいずれかが空です。",
+"whyPlatformCares": "Google は、米国、英国、ドイツ、フランス、日本、ブラジルなど多くの国で、衣料品にこの 4 つの属性を求めています。ないと商品が制限されたり不承認になったりします。",
+"howToFix": "すべての衣料品とバリエーションに、color、size、gender（male、female、unisex）、age_group（通常は adult）を入力してください。"
 }
 }

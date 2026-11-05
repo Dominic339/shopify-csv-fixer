@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { exportFileFor, parseCsv, toCsv, isTabDelimitedFormat } from "@/lib/csv";
-import { convertCsv, CONVERT_FORMAT_OPTIONS, CONVERT_SOURCE_OPTIONS, normalizeStoreUrl, type ConvertOptions, type ConvertResult } from "@/lib/convertCsv";
+import { convertCsv, CONVERT_FORMAT_OPTIONS, CONVERT_SOURCE_OPTIONS, normalizeLinkPattern, normalizeStoreUrl, type ConvertOptions, type ConvertResult } from "@/lib/convertCsv";
 import { CONVERT_ROUTES, routeFor } from "@/lib/convertRoutes";
 import { consumeExport } from "@/lib/quota";
 import { FREE_ROWS_PER_EXPORT, PASS_PRICE_LABEL } from "@/lib/plans";
@@ -281,8 +281,9 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
                   placeholder="https://shop.example.com"
                   value={storeUrl}
                   onChange={(e) => setStoreUrl(e.target.value)}
-                  aria-invalid={storeUrl.trim() !== "" && !normalizeStoreUrl(storeUrl)}
+                  aria-invalid={storeUrl.trim() !== "" && !normalizeStoreUrl(storeUrl) && !normalizeLinkPattern(storeUrl)}
                 />
+                <span className={`mt-1.5 block text-xs ${muted}`}>{t.storeUrlHint}</span>
               </label>
               <label className="block">
                 <span className={`mb-1.5 block text-xs font-medium ${muted}`}>{t.currency}</span>

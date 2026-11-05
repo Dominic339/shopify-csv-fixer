@@ -412,6 +412,7 @@
     "fileRestored": "Tu archivo se ha vuelto a cargar, así que ya puedes descargarlo.",
     "googleIntro": "Un feed de Merchant Center necesita dos datos que tu exportación no tiene: la dirección de tu tienda, para enlazar cada producto con su página, y la moneda de tus precios.",
     "storeUrl": "Dirección de la tienda",
+    "storeUrlHint": "O un patrón para la página de cada producto, como https://shop.example.com/p/{sku} o …/products/{handle}.",
     "currency": "Moneda (código ISO)"
   },
   "merge": {

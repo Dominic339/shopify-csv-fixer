@@ -784,6 +784,11 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
     ["Men", "male"],
     ["Women's", "female"],
   ]),
+  "google/missing_apparel_attributes": {
+    cols: [...G, "color", "size", "gender", "age_group"],
+    before: [["TEE-M", "Organic Cotton Tee - M", "", "M", "", ""]],
+    after: [["TEE-M", "Organic Cotton Tee - M", "Blue", "M", "unisex", "adult"]],
+  },
   "google/invalid_age_group": gmc("age_group", [
     ["Adults", "adult"],
     ["children", "kids"],

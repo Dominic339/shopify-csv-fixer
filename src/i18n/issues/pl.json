@@ -994,5 +994,11 @@
 "explanation": "age_group musi mieć wartość newborn, infant, toddler, kids lub adult.",
 "whyPlatformCares": "W wielu krajach age_group jest wymagane dla odzieży, a inne wartości nie są akceptowane.",
 "howToFix": "Użyj jednej z pięciu wartości Google. „Adults” i „children” są zamieniane automatycznie."
+},
+"google/missing_apparel_attributes": {
+"title": "Odzież bez koloru, rozmiaru, płci lub grupy wiekowej",
+"explanation": "Produkt jest w kategorii odzieży lub obuwia, ale color, size, gender lub age_group jest puste.",
+"whyPlatformCares": "Google wymaga tych czterech atrybutów dla odzieży w wielu krajach, m.in. w USA, Wielkiej Brytanii, Niemczech, Francji, Japonii i Brazylii. Bez nich produkty mogą być ograniczane lub odrzucane.",
+"howToFix": "Wypełnij color, size, gender (male, female lub unisex) i age_group (zwykle adult) dla każdej sztuki odzieży i każdego wariantu."
 }
 }

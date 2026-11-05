@@ -994,5 +994,11 @@
 "explanation": "age_group newborn, infant, toddler, kids veya adult olmalıdır.",
 "whyPlatformCares": "Birçok ülkede giyimde age_group zorunludur ve başka değerler kabul edilmez.",
 "howToFix": "Google'ın beş değerinden birini kullanın. \"Adults\" ve \"children\" otomatik olarak dönüştürülür."
+},
+"google/missing_apparel_attributes": {
+"title": "Rengi, bedeni, cinsiyeti veya yaş grubu olmayan giyim ürünü",
+"explanation": "Ürün giyim veya ayakkabı kategorisinde, ancak color, size, gender veya age_group boş.",
+"whyPlatformCares": "Google, ABD, Birleşik Krallık, Almanya, Fransa, Japonya ve Brezilya dahil birçok ülkede giyim için bu dört özelliği zorunlu tutar. Bunlar olmadan ürünler kısıtlanabilir veya reddedilebilir.",
+"howToFix": "Her giyim ürünü ve varyant için color, size, gender (male, female veya unisex) ve age_group (genellikle adult) alanlarını doldurun."
 }
 }

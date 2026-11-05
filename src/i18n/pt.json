@@ -412,6 +412,7 @@
     "fileRestored": "Seu arquivo foi carregado de novo; você já pode baixá-lo.",
     "googleIntro": "Um feed do Merchant Center precisa de duas coisas que sua exportação não tem: o endereço da sua loja, para ligar cada produto à sua página, e a moeda dos seus preços.",
     "storeUrl": "Endereço da loja",
+    "storeUrlHint": "Ou um padrão para a página de cada produto, como https://shop.example.com/p/{sku} ou …/products/{handle}.",
     "currency": "Moeda (código ISO)"
   },
   "merge": {

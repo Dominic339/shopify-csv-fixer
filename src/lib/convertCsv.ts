@@ -53,6 +53,8 @@ type Product = {
   seoDescription: string;
   images: string[];
   variants: Variant[];
+  /** Item condition, when the source says (Amazon and eBay listings). */
+  condition: "" | "new" | "used" | "refurbished";
 };
 
 type ReadResult = { products: Product[]; consumed: Set<string>; warnings: string[] };
@@ -68,7 +70,7 @@ function emptyVariant(): Variant {
 function emptyProduct(key: string): Product {
   return {
     key, title: "", description: "", vendor: "", type: "", category: "", tags: "",
-    published: "", status: "", seoTitle: "", seoDescription: "", images: [], variants: [],
+    published: "", status: "", seoTitle: "", seoDescription: "", images: [], variants: [], condition: "",
   };
 }
 
@@ -430,6 +432,7 @@ function readEbay(headers: string[], rows: CsvRow[]): ReadResult {
     const p = emptyProduct(uniqueKey(slugifyShopifyHandle(title) || variant.sku.toLowerCase(), used));
     p.title = title;
     p.description = get(r, "Description");
+    p.condition = ebayCondition(get(r, "ConditionID"));
     for (const u of get(r, "PicURL").split("|")) addImage(p, u);
     products.push(p);
     const isParent = !!get(r, "RelationshipDetails");
@@ -437,8 +440,28 @@ function readEbay(headers: string[], rows: CsvRow[]): ReadResult {
     parent = isParent ? p : null;
   }
   for (const p of products) if (!p.variants.length) p.variants.push(emptyVariant());
-  for (const c of ["Action", "Category", "ConditionID", "Format", "Duration"]) get({}, c);
+  for (const c of ["Action", "Category", "Format", "Duration"]) get({}, c);
   return { products, consumed, warnings: [] };
+}
+
+/** Amazon's item-condition codes (11 = New, 10 = Refurbished, 1-9 = used and collectible) or their names. */
+function amazonCondition(v: string): Product["condition"] {
+  const s = v.trim().toLowerCase();
+  if (!s) return "";
+  if (s === "11" || s === "new") return "new";
+  if (s === "10" || s.includes("refurbished")) return "refurbished";
+  if (/^[1-9]$/.test(s) || s.startsWith("used") || s.startsWith("collectible")) return "used";
+  return "";
+}
+
+/** eBay ConditionIDs: 1000-1750 new, 2000-2500 refurbished, 2750 and up used. */
+function ebayCondition(v: string): Product["condition"] {
+  const n = Number(v.trim());
+  if (!v.trim() || !Number.isFinite(n)) return "";
+  if (n >= 1000 && n < 2000) return "new";
+  if (n >= 2000 && n <= 2500) return "refurbished";
+  if (n > 2500) return "used";
+  return "";
 }
 
 function readAmazon(headers: string[], rows: CsvRow[]): ReadResult {
@@ -465,6 +488,7 @@ function readAmazon(headers: string[], rows: CsvRow[]): ReadResult {
     p.title = decodeEntities(title) || sku;
     p.description = decodeEntities(get(r, "item-description", "product_description"));
     p.vendor = get(r, "brand-name", "brand_name");
+    p.condition = amazonCondition(get(r, "item-condition", "condition_type"));
     addImage(p, get(r, "image-url", "main_image_url"));
     p.variants.push({
       ...emptyVariant(),
@@ -842,7 +866,10 @@ function writeAmazon(products: Product[]): WriteResult {
 
 /** Settings a Merchant Center feed needs that no store export contains. */
 export type ConvertOptions = {
-  /** The shop's address, like https://shop.example.com, used to build each product's link. */
+  /**
+   * The shop's address, like https://shop.example.com, used to build each product's link; or a
+   * pattern with {handle} or {sku}, like https://shop.example.com/p/{sku}, for any other URL scheme.
+   */
   storeUrl?: string;
   /** ISO 4217 code added to every price, like USD. */
   currency?: string;
@@ -856,6 +883,18 @@ const PRODUCT_PATH: Record<string, string> = {
   woocommerce_products: "/product/",
   woocommerce_variable_products: "/product/",
 };
+
+/** A link pattern with {handle} or {sku} → the full pattern with https://, or "" when it isn't one. */
+export function normalizeLinkPattern(raw: string | undefined): string {
+  let v = t(raw);
+  if (!/\{(handle|sku)\}/.test(v)) return "";
+  if (!/^https?:\/\//i.test(v)) v = `https://${v}`;
+  try {
+    return new URL(v.replace(/\{(handle|sku)\}/g, "x")).hostname.includes(".") ? v : "";
+  } catch {
+    return "";
+  }
+}
 
 /** "shop.example.com/" → "https://shop.example.com", or "" when it isn't a web address. */
 export function normalizeStoreUrl(raw: string | undefined): string {
@@ -878,7 +917,8 @@ const GOOGLE_HEADERS = [
 ];
 
 function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
-  const store = normalizeStoreUrl(ctx.options.storeUrl);
+  const pattern = normalizeLinkPattern(ctx.options.storeUrl);
+  const store = pattern ? "" : normalizeStoreUrl(ctx.options.storeUrl);
   const currency = t(ctx.options.currency).toUpperCase();
   const path = PRODUCT_PATH[ctx.source];
   const rows: CsvRow[] = [];
@@ -887,6 +927,7 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
   let noPrice = 0;
   let badBarcodes = 0;
   let noBrand = 0;
+  let defaultCondition = 0;
   const usedIds = new Set<string>();
   const withCurrency = (v: string) => (v && currency ? `${v} ${currency}` : v);
   const option = (v: Variant, re: RegExp) => v.options.find((o) => re.test(o.name))?.value ?? "";
@@ -897,8 +938,12 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
       continue;
     }
     const multi = p.variants.length > 1;
-    const link = store && path ? `${store}${path}${encodeURIComponent(p.key)}` : "";
+    const productLink = store && path ? `${store}${path}${encodeURIComponent(p.key)}` : "";
     for (const [i, v] of p.variants.entries()) {
+      const link = pattern
+        ? pattern.replace(/\{handle\}/g, encodeURIComponent(p.key)).replace(/\{sku\}/g, encodeURIComponent(v.sku || p.key))
+        : productLink;
+      if (!p.condition) defaultCondition++;
       const images = [...new Set([v.image, ...p.images].filter(Boolean))];
       if (!images.length) noImage++;
       const price = parseLocaleNumber(v.price);
@@ -927,7 +972,7 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
         brand: p.vendor,
         gtin,
         mpn: "",
-        condition: "new",
+        condition: p.condition || "new",
         product_type: p.category || p.type,
         color: option(v, /^colou?r$/i),
         size: option(v, /^size$/i),
@@ -938,15 +983,16 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
 
   const warnings: string[] = [];
   if (!currency) warnings.push("Prices have no currency code. Enter your store's currency, like USD, so every price reads like 19.99 USD.");
-  if (!store) warnings.push("link is blank. Enter your store's address so each product links to its page.");
-  else if (!path) warnings.push("link is blank: this source file doesn't say where each product's page is. Add the product page URLs before uploading.");
+  if (pattern) warnings.push(`Each link was built from the pattern ${pattern}. Open a few to check they reach the right product page.`);
+  else if (!store) warnings.push("link is blank. Enter your store's address so each product links to its page.");
+  else if (!path) warnings.push("link is blank: this source file doesn't say where each product's page is. Enter a link pattern with {handle} or {sku} instead of the store address, or add the URLs before uploading.");
   else warnings.push(`Each link was built as ${store}${path}<handle>. Open a few to check they reach the right product page.`);
   if (skippedDrafts) warnings.push(`${skippedDrafts} draft or unpublished product(s) were left out, because Google only lists products shoppers can buy.`);
   if (noImage) warnings.push(`${noImage} item(s) have no image. Google requires image_link for every product.`);
   if (noPrice) warnings.push(`${noPrice} item(s) have no price. Google requires a price for every product.`);
   if (noBrand) warnings.push(`${noBrand} item(s) have no brand. Google requires one for new products; use your own brand for products you make.`);
   if (badBarcodes) warnings.push(`${badBarcodes} barcode(s) aren't valid GTINs and were left out of gtin.`);
-  warnings.push("condition is set to new for every product. Change it to used or refurbished where that applies.");
+  if (defaultCondition) warnings.push(`condition is set to new for ${defaultCondition} item(s) whose export doesn't say. Change it to used or refurbished where that applies.`);
   const headers = compact(GOOGLE_HEADERS, rows, ["id", "title", "description", "link", "image_link", "availability", "price", "brand", "condition"]);
   return { headers, rows: rows.map((r) => Object.fromEntries(headers.map((h) => [h, r[h] ?? ""]))), warnings };
 }

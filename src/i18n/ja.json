@@ -412,6 +412,7 @@
     "fileRestored": "ファイルを読み込み直しました。今すぐダウンロードできます。",
     "googleIntro": "Merchant Center のフィードには、エクスポートにない 2 つの情報が必要です。各商品をページにリンクするためのストアのアドレスと、価格の通貨です。",
     "storeUrl": "ストアのアドレス",
+    "storeUrlHint": "または、各商品ページのパターン（例：https://shop.example.com/p/{sku}、…/products/{handle}）。",
     "currency": "通貨（ISO コード）"
   },
   "merge": {

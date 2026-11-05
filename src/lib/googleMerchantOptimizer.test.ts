@@ -99,6 +99,18 @@ describe("validateAndFixGoogleMerchant", () => {
     expect(r.fixedRows[0].description).toBe("Line one Line two end");
   });
 
+  it("asks clothing for color, size, gender and age_group", () => {
+    const shirt = { google_product_category: "Apparel & Accessories > Clothing > Shirts & Tops" };
+    const r = validateAndFixGoogleMerchant([...H, "google_product_category", "color", "size"], [row({ ...shirt, color: "Blue" })]);
+    const issue = r.issues.find((i) => i.code === "google/missing_apparel_attributes");
+    expect(issue?.message).toBe("This looks like clothing, but size, gender, age_group are blank.");
+    expect(issue?.severity).toBe("warning");
+    const full = validateAndFixGoogleMerchant([...H, "google_product_category", "color", "size", "gender", "age_group"], [row({ google_product_category: "212", color: "Blue", size: "M", gender: "unisex", age_group: "adult" })]);
+    expect(codes(full)).toEqual([]);
+    // A mug is not clothing.
+    expect(codes(validateAndFixGoogleMerchant([...H, "product_type"], [row({ product_type: "Kitchen > Mugs" })]))).toEqual([]);
+  });
+
   it("reads a tab-delimited file", () => {
     const text = H.join("\t") + "\n" + H.map((h) => row()[h as keyof ReturnType<typeof row>]).join("\t");
     const { headers, rows } = parseCsv(text);

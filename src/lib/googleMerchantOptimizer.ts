@@ -97,6 +97,13 @@ const CONDITION: Record<string, string> = { new: "new", used: "used", refurbishe
 
 const YES_NO: Record<string, string> = { yes: "yes", y: "yes", true: "yes", "1": "yes", no: "no", n: "no", false: "no", "0": "no" };
 
+/**
+ * Google's Apparel & Accessories category (166), Clothing (1604), Shoes (187) and common clothing
+ * categories (203 outerwear, 204 pants, 212 shirts & tops, 2271 dresses), or a category or store type that names them.
+ */
+const APPAREL = /(^|[^\d])(166|1604|187|203|204|212|2271)([^\d]|$)|apparel|clothing|clothes|shoes|footwear|t-?shirts?|dresses|jackets|hoodies|trousers|jeans/i;
+const APPAREL_ATTRIBUTES = ["color", "size", "gender", "age_group"];
+
 const GENDER: Record<string, string> = {
   male: "male",
   men: "male",
@@ -370,6 +377,20 @@ export function validateAndFixGoogleMerchant(headers: string[], rows: CsvRow[]):
       else if (v !== raw) {
         out[col] = v;
         fixesApplied.push(`Normalized ${col} to '${v}' on row ${n}`);
+      }
+    }
+
+    // Clothing needs color, size, gender and age_group in many countries.
+    if (APPAREL.test(`${out.google_product_category ?? ""} | ${out.product_type ?? ""}`)) {
+      const missing = APPAREL_ATTRIBUTES.filter((c) => blank(out[c]));
+      if (missing.length) {
+        flag(
+          missing[0],
+          "warning",
+          "google/missing_apparel_attributes",
+          `This looks like clothing, but ${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} blank.`,
+          "Google requires color, size, gender and age_group for clothing in many countries, including the US, UK, Germany, France, Japan and Brazil.",
+        );
       }
     }
 
