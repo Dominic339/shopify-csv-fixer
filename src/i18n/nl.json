@@ -339,7 +339,9 @@
     "name_ebay_variations": "eBay-variaties",
     "desc_ebay_variations": "Controleer eBay-advertentie-CSV's met variaties: koppeling van variatiekenmerken, dubbele combinaties, prijs- en aantalvelden.",
     "name_google_merchant_center": "Google Merchant Center-feed",
-    "desc_google_merchant_center": "Controleer een productbestand voor Google Merchant Center voordat je het uploadt: verplichte kenmerken, prijzen met valuta, beschikbaarheid, GTIN's en ID's."
+    "desc_google_merchant_center": "Controleer een productbestand voor Google Merchant Center voordat je het uploadt: verplichte kenmerken, prijzen met valuta, beschikbaarheid, GTIN's en ID's.",
+    "name_meta_catalog": "Meta-catalogus (Facebook & Instagram)",
+    "desc_meta_catalog": "Controleer een catalogusfeed voor Facebook en Instagram voordat je hem in Commerce Manager uploadt: verplichte velden, beschikbaarheid, prijzen met valuta, merk of GTIN, en afbeeldingen."
   },
   "convert": {
     "title": "CSV-formaatconverter",

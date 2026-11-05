@@ -339,7 +339,9 @@
     "name_ebay_variations": "Variazioni eBay",
     "desc_ebay_variations": "Convalida i CSV delle inserzioni con variazioni eBay: abbinamento delle specifiche, combinazioni duplicate, campi di prezzo e quantità.",
     "name_google_merchant_center": "Feed Google Merchant Center",
-    "desc_google_merchant_center": "Controlla un file prodotti di Google Merchant Center prima di caricarlo: attributi obbligatori, prezzi con valuta, disponibilità, GTIN e identificatori."
+    "desc_google_merchant_center": "Controlla un file prodotti di Google Merchant Center prima di caricarlo: attributi obbligatori, prezzi con valuta, disponibilità, GTIN e identificatori.",
+    "name_meta_catalog": "Catalogo Meta (Facebook e Instagram)",
+    "desc_meta_catalog": "Controlla un feed di catalogo Facebook e Instagram prima di caricarlo in Commerce Manager: campi obbligatori, disponibilità, prezzi con valuta, marca o GTIN e immagini."
   },
   "convert": {
     "title": "Convertitore di formato CSV",

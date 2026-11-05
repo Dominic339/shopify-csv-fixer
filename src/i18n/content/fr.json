@@ -355,6 +355,45 @@
 "a": "id, title, description, link, image_link, availability et price pour chaque produit, plus brand pour les produits neufs et d'autres pour l'habillement, comme color, size, gender et age_group."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Les catalogues Meta alimentent les publicités produits, Facebook Shops et Instagram Shopping. Vous remplissez un catalogue dans Commerce Manager avec un fichier produits : un produit par ligne, avec les noms de champs de Meta sur la ligne d'en-tête. Ce modèle vérifie chaque produit selon la référence des champs de catalogue de Meta et conserve vos noms de colonnes.",
+"Il repère ce qui bloque l'import des produits : champs obligatoires manquants, valeurs de disponibilité refusées par Meta, prix sans code de devise, produits sans marque, GTIN ni MPN, id en double et liens d'images cassés."
+],
+"howItWorks": [
+"Importez votre fichier de catalogue (CSV, ou .txt ou .tsv délimité par des tabulations).",
+"Chaque produit est vérifié pour id, title, description, availability, condition, price, link et image_link.",
+"Les valeurs comme in_stock, « Sold out », « 19,99 EUR » et « New » sont converties au format de Meta.",
+"Les produits sans marque, GTIN ni MPN sont signalés, et les GTIN sont contrôlés avec leur clé de contrôle.",
+"Téléchargez un CSV avec vos colonnes d'origine, prêt à importer dans Commerce Manager."
+],
+"commonFixes": [
+"Convertir availability en in stock ou out of stock",
+"Écrire les prix sous la forme 9.99 USD, avec un point et un code de devise",
+"Convertir condition en new, refurbished ou used",
+"Nettoyer les GTIN et rétablir un zéro initial prouvé par la clé de contrôle",
+"Convertir gender et age_group aux valeurs de Meta",
+"Signaler les produits sans marque, GTIN ni MPN"
+],
+"faq": [
+{
+"q": "Puis-je importer un flux Google Merchant Center chez Meta ?",
+"a": "En grande partie, car les noms de champs sont les mêmes. La différence principale est availability : Meta prend in stock et out of stock, avec une espace, là où Google utilise in_stock. Ce modèle la convertit pour vous."
+},
+{
+"q": "Quels champs sont obligatoires ?",
+"a": "id, title, description, availability, condition, price, link et image_link pour chaque produit, plus au moins l'un de brand, gtin ou mpn."
+},
+{
+"q": "Comment écrire les prix ?",
+"a": "Sous forme de nombre avec un point décimal, suivi du code de devise ISO 4217, par exemple 9.99 USD. Le signe $ seul ne suffit pas, car plusieurs devises l'utilisent."
+},
+{
+"q": "Et les produits en précommande ?",
+"a": "Le catalogue Meta n'accepte plus que in stock et out of stock. Utilisez in stock si les clients peuvent commander le produit maintenant."
+}
+]
 }
 }
 }

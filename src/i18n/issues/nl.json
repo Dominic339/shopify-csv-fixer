@@ -1000,5 +1000,107 @@
 "explanation": "Het product staat in een categorie voor kleding of schoenen, maar color, size, gender of age_group is leeg.",
 "whyPlatformCares": "Google vereist deze vier kenmerken voor kleding in veel landen, waaronder de VS, het VK, Duitsland, Frankrijk, Japan en Brazilië. Zonder deze kenmerken kunnen producten worden beperkt of afgekeurd.",
 "howToFix": "Vul color, size, gender (male, female of unisex) en age_group (meestal adult) in voor elk kledingstuk en elke variant."
+},
+"meta/missing_required_header": {
+"title": "Verplichte kolom ontbreekt",
+"explanation": "Er ontbreekt een kolom voor een veld dat Meta bij elk product vereist: id, title, description, availability, condition, price, link of image_link.",
+"whyPlatformCares": "Producten zonder verplicht veld worden mogelijk niet in de catalogus geladen en verschijnen dan niet in advertenties of shops.",
+"howToFix": "Voeg de ontbrekende kolom toe aan de kopregel, gespeld zoals Meta het veld noemt (bijvoorbeeld image_link), en vul hem voor elk product."
+},
+"meta/missing_value": {
+"title": "Verplicht veld is leeg",
+"explanation": "Een verplicht veld (id, title, description, availability, condition, price, link of image_link) is leeg in deze rij.",
+"whyPlatformCares": "Meta kan geen product laden waarvan een verplicht veld ontbreekt.",
+"howToFix": "Vul de waarde in. Hoort het product niet in de catalogus, verwijder dan de rij."
+},
+"meta/missing_identifier": {
+"title": "Geen merk, GTIN of MPN",
+"explanation": "Het product heeft geen brand, gtin of mpn.",
+"whyPlatformCares": "Meta heeft er minstens één van de drie nodig om het product te herkennen en te koppelen in advertenties en shops.",
+"howToFix": "Vul het merk in. Gebruik voor producten die je zelf maakt de naam van je winkel. Een streepjescode (gtin) of onderdeelnummer van de fabrikant (mpn) telt ook."
+},
+"meta/duplicate_id": {
+"title": "Dubbele id",
+"explanation": "Twee of meer rijen gebruiken dezelfde id.",
+"whyPlatformCares": "Meta herkent elk product aan zijn id. Bij dubbele id's overschrijft de ene rij de andere in de catalogus.",
+"howToFix": "Geef elk product en elke variant een eigen id. De SKU gebruiken is het eenvoudigst."
+},
+"meta/id_too_long": {
+"title": "id langer dan 100 tekens",
+"explanation": "Meta staat tot 100 tekens toe in id.",
+"whyPlatformCares": "Een product met een te lange id kan niet aan de catalogus worden toegevoegd.",
+"howToFix": "Gebruik een kortere id, zoals de SKU. Wijzig id's niet meer zodra producten live staan, want advertenties en shops verwijzen ernaar."
+},
+"meta/title_too_long": {
+"title": "Titel langer dan 200 tekens",
+"explanation": "Meta staat tot 200 tekens toe in title en raadt er hooguit 65 aan.",
+"whyPlatformCares": "Lange titels worden afgekapt in advertenties en shops, waar alleen de eerste woorden zichtbaar zijn.",
+"howToFix": "Zet de belangrijkste gegevens vooraan (merk, product, kleur, maat) en kort de rest in."
+},
+"meta/description_too_long": {
+"title": "Beschrijving langer dan 9999 tekens",
+"explanation": "Meta staat tot 9999 tekens toe in description.",
+"whyPlatformCares": "Tekst boven de limiet wordt afgekapt.",
+"howToFix": "Kort de beschrijving in tot de feiten over het product."
+},
+"meta/invalid_url": {
+"title": "Ongeldige link of afbeeldings-URL",
+"explanation": "link, image_link of additional_image_link is geen volledig webadres dat begint met http:// of https://.",
+"whyPlatformCares": "Meta laadt de productpagina en de afbeelding vanaf deze adressen. Een relatieve of kapotte URL houdt het product tegen.",
+"howToFix": "Gebruik het volledige adres, met https:// en je domein, voor de productpagina en elke afbeelding."
+},
+"meta/too_many_images": {
+"title": "Meer dan 50 extra afbeeldingen",
+"explanation": "additional_image_link bevat meer dan 50 URL's.",
+"whyPlatformCares": "Meta gebruikt maximaal 50 extra afbeeldingen en negeert de rest.",
+"howToFix": "Houd de 50 nuttigste extra afbeeldingen."
+},
+"meta/invalid_availability": {
+"title": "Ongeldige waarde voor availability",
+"explanation": "availability moet in stock of out of stock zijn.",
+"whyPlatformCares": "Meta accepteert alleen zijn eigen twee waarden, met een spatie. Andere waarden houden het product tegen.",
+"howToFix": "Gebruik in stock of out of stock. Waarden in Google-stijl zoals in_stock en woorden als \"Sold out\" worden automatisch omgezet."
+},
+"meta/price_missing_currency": {
+"title": "Prijs zonder valutacode",
+"explanation": "De prijs heeft een getal maar geen valutacode, of alleen een $-teken, dat meerdere valuta's gebruiken.",
+"whyPlatformCares": "Meta heeft de ISO 4217-valutacode (USD, CAD, EUR...) nodig om de juiste prijs te tonen.",
+"howToFix": "Schrijf de prijs als een getal gevolgd door de code, zoals 9.99 USD. Symbolen voor één valuta, zoals € of £, worden automatisch omgezet."
+},
+"meta/invalid_price": {
+"title": "Ongeldige prijs",
+"explanation": "price is geen getal met valutacode, of is 0.",
+"whyPlatformCares": "Producten zonder geldige prijs kunnen niet in de catalogus worden geladen.",
+"howToFix": "Gebruik een punt als decimaalteken en voeg de valutacode toe, zoals 9.99 USD. Prijzen als 9,99 EUR worden automatisch omgezet."
+},
+"meta/invalid_sale_price": {
+"title": "Ongeldige actieprijs",
+"explanation": "sale_price is geen geldige prijs of is niet lager dan price.",
+"whyPlatformCares": "Meta toont een korting alleen als sale_price geldig is en lager dan de normale prijs.",
+"howToFix": "Laat de normale prijs in price staan en de lagere actieprijs in sale_price, beide met valutacode."
+},
+"meta/invalid_condition": {
+"title": "Ongeldige waarde voor condition",
+"explanation": "condition moet new, refurbished of used zijn.",
+"whyPlatformCares": "Bij Meta is condition verplicht voor elk product, en andere waarden worden niet geaccepteerd.",
+"howToFix": "Gebruik new, refurbished of used. Waarden met hoofdletters en \"renewed\" worden automatisch omgezet."
+},
+"meta/invalid_gtin": {
+"title": "Ongeldige GTIN",
+"explanation": "De gtin heeft geen 8, 12, 13 of 14 cijfers met een correct controlecijfer, of een spreadsheet heeft er wetenschappelijke notatie van gemaakt.",
+"whyPlatformCares": "Meta vraagt een GTIN alleen als je zeker weet dat hij klopt. Een verkeerde kan het product aan dat van een andere winkel koppelen.",
+"howToFix": "Kopieer de streepjescode van de verpakking of de leverancier, of laat gtin leeg en vul brand of mpn in. Spaties, streepjes en een aantoonbaar ontbrekende voorloopnul worden automatisch hersteld."
+},
+"meta/invalid_gender": {
+"title": "Ongeldige waarde voor gender",
+"explanation": "gender moet female, male of unisex zijn.",
+"whyPlatformCares": "Andere waarden worden genegeerd, waardoor het product aan de verkeerde kopers kan worden getoond.",
+"howToFix": "Gebruik female, male of unisex. Waarden als \"Men\" of \"Women's\" worden automatisch omgezet."
+},
+"meta/invalid_age_group": {
+"title": "Ongeldige waarde voor age_group",
+"explanation": "age_group moet adult, all ages, teen, kids, toddler, infant of newborn zijn.",
+"whyPlatformCares": "Andere waarden worden genegeerd, waardoor het product aan de verkeerde kopers kan worden getoond.",
+"howToFix": "Gebruik een van de zeven waarden van Meta. \"Adults\", \"teens\" en \"children\" worden automatisch omgezet."
 }
 }

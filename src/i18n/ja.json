@@ -339,7 +339,9 @@
     "name_ebay_variations": "eBayバリエーション",
     "desc_ebay_variations": "eBayのバリエーション出品CSVを検証:バリエーション仕様の対応、重複した組み合わせ、価格と数量の項目。",
     "name_google_merchant_center": "Google Merchant Center フィード",
-    "desc_google_merchant_center": "Google Merchant Center の商品ファイルをアップロード前にチェック：必須属性、通貨付きの価格、在庫状況、GTIN、識別子。"
+    "desc_google_merchant_center": "Google Merchant Center の商品ファイルをアップロード前にチェック：必須属性、通貨付きの価格、在庫状況、GTIN、識別子。",
+    "name_meta_catalog": "Meta カタログ（Facebook・Instagram）",
+    "desc_meta_catalog": "Facebook と Instagram のカタログフィードを、コマースマネージャにアップロードする前にチェック：必須項目、在庫状況、通貨付きの価格、ブランドまたは GTIN、画像。"
   },
   "convert": {
     "title": "CSV形式コンバーター",

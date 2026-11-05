@@ -355,6 +355,45 @@
 "a": "Her ürün için id, title, description, link, image_link, availability ve price; ayrıca yeni ürünler için brand ve giyim için color, size, gender ve age_group gibi başka özellikler."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Meta katalogları ürün reklamlarını, Facebook Shops'u ve Instagram Shopping'i besler. Commerce Manager'da bir kataloğu ürün dosyasıyla doldurursunuz: her satırda bir ürün, başlık satırında Meta'nın alan adları. Bu şablon her ürünü Meta'nın katalog alanları başvurusuna göre kontrol eder ve sütun adlarınızı olduğu gibi bırakır.",
+"Ürünlerin yüklenmesini engelleyen sorunları yakalar: eksik zorunlu alanlar, Meta'nın kabul etmediği stok durumu değerleri, para birimi kodu olmayan fiyatlar, markası, GTIN'i veya MPN'si olmayan ürünler, yinelenen id'ler ve bozuk görsel bağlantıları."
+],
+"howItWorks": [
+"Katalog dosyanızı yükleyin (CSV ya da sekmeyle ayrılmış .txt veya .tsv).",
+"Her ürün id, title, description, availability, condition, price, link ve image_link açısından kontrol edilir.",
+"in_stock, \"Sold out\", \"19,99 EUR\" ve \"New\" gibi değerler Meta'nın biçimine dönüştürülür.",
+"Markası, GTIN'i veya MPN'si olmayan ürünler işaretlenir ve GTIN'ler kontrol basamağıyla denetlenir.",
+"Orijinal sütunlarınızı içeren, Commerce Manager'a yüklemeye hazır bir CSV indirin."
+],
+"commonFixes": [
+"availability'yi in stock veya out of stock'a dönüştürme",
+"Fiyatları nokta ve para birimi koduyla 9.99 USD şeklinde yazma",
+"condition'ı new, refurbished veya used'a dönüştürme",
+"GTIN'leri temizleme ve kontrol basamağının kanıtladığı baştaki sıfırı geri ekleme",
+"gender ve age_group'u Meta'nın değerlerine dönüştürme",
+"Markası, GTIN'i veya MPN'si olmayan ürünleri işaretleme"
+],
+"faq": [
+{
+"q": "Bir Google Merchant Center feed'ini Meta'ya yükleyebilir miyim?",
+"a": "Büyük ölçüde evet, çünkü alan adları aynıdır. Asıl fark availability'dir: Meta, Google'ın in_stock kullandığı yerde boşluklu in stock ve out of stock alır. Bu şablon bunu sizin için dönüştürür."
+},
+{
+"q": "Hangi alanlar zorunlu?",
+"a": "Her ürün için id, title, description, availability, condition, price, link ve image_link; ayrıca brand, gtin veya mpn'den en az biri."
+},
+{
+"q": "Fiyatlar nasıl yazılmalı?",
+"a": "Ondalık ayırıcı olarak nokta kullanılan bir sayı ve ardından ISO 4217 para birimi kodu olarak, örneğin 9.99 USD. Yalnızca $ işareti yetmez, çünkü birçok para birimi onu kullanır."
+},
+{
+"q": "Ön siparişli ürünler ne olacak?",
+"a": "Meta kataloğu artık yalnızca in stock ve out of stock alır. Müşteriler ürünü şimdi sipariş edebiliyorsa in stock kullanın."
+}
+]
 }
 }
 }

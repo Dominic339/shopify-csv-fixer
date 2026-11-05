@@ -339,7 +339,9 @@
     "name_ebay_variations": "Вариации eBay",
     "desc_ebay_variations": "Проверка CSV объявлений eBay с вариациями: сопоставление характеристик, повторяющиеся комбинации, поля цены и количества.",
     "name_google_merchant_center": "Фид Google Merchant Center",
-    "desc_google_merchant_center": "Проверьте файл товаров для Google Merchant Center перед загрузкой: обязательные атрибуты, цены с валютой, наличие, GTIN и идентификаторы."
+    "desc_google_merchant_center": "Проверьте файл товаров для Google Merchant Center перед загрузкой: обязательные атрибуты, цены с валютой, наличие, GTIN и идентификаторы.",
+    "name_meta_catalog": "Каталог Meta (Facebook и Instagram)",
+    "desc_meta_catalog": "Проверьте фид каталога для Facebook и Instagram перед загрузкой в Commerce Manager: обязательные поля, наличие, цены с валютой, бренд или GTIN и изображения."
   },
   "convert": {
     "title": "Конвертер форматов CSV",

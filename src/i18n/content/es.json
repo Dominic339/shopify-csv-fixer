@@ -355,6 +355,45 @@
 "a": "id, title, description, link, image_link, availability y price en todos los productos, además de brand en los productos nuevos y otros para ropa, como color, size, gender y age_group."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Los catálogos de Meta alimentan los anuncios de productos, Facebook Shops e Instagram Shopping. Llenas un catálogo en Commerce Manager con un archivo de productos: un producto por fila, con los nombres de campo de Meta en la fila de encabezado. Esta plantilla revisa cada producto según la referencia de campos de catálogo de Meta y conserva tus nombres de columna.",
+"Detecta lo que impide subir productos: campos obligatorios ausentes, valores de disponibilidad que Meta no acepta, precios sin código de moneda, productos sin marca, GTIN ni MPN, id duplicados y enlaces de imagen rotos."
+],
+"howItWorks": [
+"Sube tu archivo de catálogo (CSV, o un .txt o .tsv delimitado por tabulaciones).",
+"Se revisa en cada producto id, title, description, availability, condition, price, link e image_link.",
+"Valores como in_stock, \"Sold out\", \"19,99 EUR\" y \"New\" se convierten al formato de Meta.",
+"Se marcan los productos sin marca, GTIN ni MPN, y los GTIN se comprueban con su dígito de control.",
+"Descarga un CSV con tus columnas originales, listo para subir en Commerce Manager."
+],
+"commonFixes": [
+"Convertir availability a in stock u out of stock",
+"Escribir los precios como 9.99 USD, con punto y código de moneda",
+"Convertir condition a new, refurbished o used",
+"Limpiar los GTIN y restaurar un cero inicial que el dígito de control demuestra",
+"Convertir gender y age_group a los valores de Meta",
+"Marcar productos sin marca, GTIN ni MPN"
+],
+"faq": [
+{
+"q": "¿Puedo subir un feed de Google Merchant Center a Meta?",
+"a": "En gran parte sí, porque los nombres de campo son los mismos. La diferencia principal es availability: Meta admite in stock y out of stock, con espacio, donde Google usa in_stock. Esta plantilla lo convierte por ti."
+},
+{
+"q": "¿Qué campos son obligatorios?",
+"a": "id, title, description, availability, condition, price, link e image_link en todos los productos, además de al menos uno de brand, gtin o mpn."
+},
+{
+"q": "¿Cómo deben escribirse los precios?",
+"a": "Como un número con punto decimal seguido del código de moneda ISO 4217, por ejemplo 9.99 USD. El signo $ solo no basta, porque lo usan varias monedas."
+},
+{
+"q": "¿Y los productos en preventa?",
+"a": "El catálogo de Meta ya solo admite in stock y out of stock. Usa in stock si los clientes pueden pedir el producto ya."
+}
+]
 }
 }
 }

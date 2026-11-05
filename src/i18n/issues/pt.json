@@ -1000,5 +1000,107 @@
 "explanation": "O produto está numa categoria de roupas ou calçados, mas color, size, gender ou age_group está vazio.",
 "whyPlatformCares": "O Google exige esses quatro atributos para roupas em muitos países, incluindo EUA, Reino Unido, Alemanha, França, Japão e Brasil. Sem eles, os produtos podem ser limitados ou reprovados.",
 "howToFix": "Preencha color, size, gender (male, female ou unisex) e age_group (geralmente adult) em cada peça e variante."
+},
+"meta/missing_required_header": {
+"title": "Coluna obrigatória ausente",
+"explanation": "Falta a coluna de um campo que a Meta exige em todos os produtos: id, title, description, availability, condition, price, link ou image_link.",
+"whyPlatformCares": "Produtos sem um campo obrigatório podem não subir para o catálogo e, assim, não aparecem em anúncios nem lojas.",
+"howToFix": "Adicione a coluna que falta à linha de cabeçalho, escrita como a Meta chama o campo (por exemplo image_link), e preencha-a em todos os produtos."
+},
+"meta/missing_value": {
+"title": "Campo obrigatório vazio",
+"explanation": "Um campo obrigatório (id, title, description, availability, condition, price, link ou image_link) está vazio nesta linha.",
+"whyPlatformCares": "A Meta não consegue subir um produto sem um campo obrigatório.",
+"howToFix": "Preencha o valor. Se o produto não deve estar no catálogo, remova a linha."
+},
+"meta/missing_identifier": {
+"title": "Sem marca, GTIN nem MPN",
+"explanation": "O produto não tem brand, gtin nem mpn.",
+"whyPlatformCares": "A Meta precisa de pelo menos um dos três para identificar o produto e associá-lo em anúncios e lojas.",
+"howToFix": "Preencha a marca. Para produtos que você mesmo fabrica, use o nome da sua loja. Um código de barras (gtin) ou um código do fabricante (mpn) também servem."
+},
+"meta/duplicate_id": {
+"title": "id duplicado",
+"explanation": "Duas ou mais linhas usam o mesmo id.",
+"whyPlatformCares": "A Meta identifica cada produto pelo id. Com duplicados, uma linha sobrescreve a outra no catálogo.",
+"howToFix": "Dê a cada produto e a cada variante um id próprio. O mais simples é usar o SKU."
+},
+"meta/id_too_long": {
+"title": "id com mais de 100 caracteres",
+"explanation": "A Meta aceita até 100 caracteres em id.",
+"whyPlatformCares": "Um produto com id acima do limite não pode ser adicionado ao catálogo.",
+"howToFix": "Use um id mais curto, como o SKU. Não mude os ids depois que os produtos estiverem no ar, porque anúncios e lojas se referem a eles."
+},
+"meta/title_too_long": {
+"title": "Título com mais de 200 caracteres",
+"explanation": "A Meta aceita até 200 caracteres em title e recomenda no máximo 65.",
+"whyPlatformCares": "Títulos longos são cortados em anúncios e lojas, onde só aparecem as primeiras palavras.",
+"howToFix": "Coloque primeiro os dados mais importantes (marca, produto, cor, tamanho) e corte o resto."
+},
+"meta/description_too_long": {
+"title": "Descrição com mais de 9999 caracteres",
+"explanation": "A Meta aceita até 9999 caracteres em description.",
+"whyPlatformCares": "O texto excedente é cortado.",
+"howToFix": "Reduza a descrição aos fatos sobre o produto."
+},
+"meta/invalid_url": {
+"title": "Link ou URL de imagem inválido",
+"explanation": "link, image_link ou additional_image_link não é um endereço web completo começando com http:// ou https://.",
+"whyPlatformCares": "A Meta carrega a página do produto e a imagem desses endereços. Uma URL relativa ou quebrada impede o envio do produto.",
+"howToFix": "Use o endereço completo, com https:// e seu domínio, para a página do produto e cada imagem."
+},
+"meta/too_many_images": {
+"title": "Mais de 50 imagens adicionais",
+"explanation": "additional_image_link tem mais de 50 URLs.",
+"whyPlatformCares": "A Meta usa até 50 imagens adicionais e ignora o resto.",
+"howToFix": "Mantenha as 50 imagens adicionais mais úteis."
+},
+"meta/invalid_availability": {
+"title": "Valor de availability inválido",
+"explanation": "availability deve ser in stock ou out of stock.",
+"whyPlatformCares": "A Meta só aceita os próprios dois valores, escritos com espaço. Outros valores impedem o envio do produto.",
+"howToFix": "Use in stock ou out of stock. Valores no estilo do Google, como in_stock, e palavras como \"Sold out\" são convertidos automaticamente."
+},
+"meta/price_missing_currency": {
+"title": "Preço sem código de moeda",
+"explanation": "O preço tem um número, mas não tem código de moeda, ou tem só o sinal $, que várias moedas usam.",
+"whyPlatformCares": "A Meta precisa do código de moeda ISO 4217 (USD, CAD, EUR...) para mostrar o preço certo.",
+"howToFix": "Escreva o preço como um número seguido do código, como 9.99 USD. Símbolos de uma só moeda, como € ou £, são convertidos automaticamente."
+},
+"meta/invalid_price": {
+"title": "Preço inválido",
+"explanation": "price não é um número com código de moeda, ou é 0.",
+"whyPlatformCares": "Produtos sem preço válido não podem subir para o catálogo.",
+"howToFix": "Use ponto como separador decimal e adicione o código de moeda, como 9.99 USD. Preços como 9,99 EUR são convertidos automaticamente."
+},
+"meta/invalid_sale_price": {
+"title": "Preço promocional inválido",
+"explanation": "sale_price não é um preço válido ou não é menor que price.",
+"whyPlatformCares": "A Meta só mostra uma promoção quando sale_price é válido e menor que o preço normal.",
+"howToFix": "Mantenha o preço normal em price e o preço promocional, mais baixo, em sale_price, ambos com código de moeda."
+},
+"meta/invalid_condition": {
+"title": "Valor de condition inválido",
+"explanation": "condition deve ser new, refurbished ou used.",
+"whyPlatformCares": "Na Meta, condition é obrigatório em todos os produtos, e outros valores não são aceitos.",
+"howToFix": "Use new, refurbished ou used. Valores em maiúsculas e \"renewed\" são convertidos automaticamente."
+},
+"meta/invalid_gtin": {
+"title": "GTIN inválido",
+"explanation": "O gtin não tem 8, 12, 13 ou 14 dígitos com dígito verificador correto, ou uma planilha o transformou em notação científica.",
+"whyPlatformCares": "A Meta só pede um GTIN se você tiver certeza de que está correto. Um errado pode associar o produto ao de outra loja.",
+"howToFix": "Copie o código de barras da embalagem ou do fornecedor, ou deixe gtin vazio e preencha brand ou mpn. Espaços, hífens e um zero à esquerda comprovadamente perdido são corrigidos automaticamente."
+},
+"meta/invalid_gender": {
+"title": "Valor de gender inválido",
+"explanation": "gender deve ser female, male ou unisex.",
+"whyPlatformCares": "Outros valores são ignorados, e o produto pode ser mostrado aos compradores errados.",
+"howToFix": "Use female, male ou unisex. Valores como \"Men\" ou \"Women's\" são convertidos automaticamente."
+},
+"meta/invalid_age_group": {
+"title": "Valor de age_group inválido",
+"explanation": "age_group deve ser adult, all ages, teen, kids, toddler, infant ou newborn.",
+"whyPlatformCares": "Outros valores são ignorados, e o produto pode ser mostrado aos compradores errados.",
+"howToFix": "Use um dos sete valores da Meta. \"Adults\", \"teens\" e \"children\" são convertidos automaticamente."
 }
 }

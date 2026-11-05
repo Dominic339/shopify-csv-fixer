@@ -80,6 +80,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     shortDescription: "Check Google Shopping product feeds against Merchant Center's product data rules before upload.",
     searchKeywords: ["google merchant center feed", "google shopping feed", "merchant center product data", "fix google shopping feed"],
   },
+  {
+    id: "meta_catalog",
+    slug: "meta-catalog",
+    name: "Meta Catalog (Facebook & Instagram)",
+    category: "Ecommerce",
+    shortDescription: "Check Facebook and Instagram catalog feeds against Meta's catalog field rules before upload.",
+    searchKeywords: ["facebook catalog feed", "meta catalog csv", "instagram shopping feed", "commerce manager product feed"],
+  },
 ];
 
 export function getPresetById(id: string) {

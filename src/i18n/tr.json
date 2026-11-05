@@ -339,7 +339,9 @@
     "name_ebay_variations": "eBay Varyasyonları",
     "desc_ebay_variations": "eBay varyasyonlu ilan CSV'lerini doğrulayın: varyasyon özelliklerinin eşleşmesi, yinelenen kombinasyonlar, fiyat ve miktar alanları.",
     "name_google_merchant_center": "Google Merchant Center Feed'i",
-    "desc_google_merchant_center": "Google Merchant Center ürün dosyanızı yüklemeden önce kontrol edin: zorunlu özellikler, para birimli fiyatlar, stok durumu, GTIN'ler ve tanımlayıcılar."
+    "desc_google_merchant_center": "Google Merchant Center ürün dosyanızı yüklemeden önce kontrol edin: zorunlu özellikler, para birimli fiyatlar, stok durumu, GTIN'ler ve tanımlayıcılar.",
+    "name_meta_catalog": "Meta Kataloğu (Facebook ve Instagram)",
+    "desc_meta_catalog": "Facebook ve Instagram katalog feed'inizi Commerce Manager'a yüklemeden önce kontrol edin: zorunlu alanlar, stok durumu, para birimli fiyatlar, marka veya GTIN ve görseller."
   },
   "convert": {
     "title": "CSV format dönüştürücü",

@@ -355,6 +355,45 @@
 "a": "id, title, description, link, image_link, availability en price voor elk product, plus brand voor nieuwe producten en meer voor kleding, zoals color, size, gender en age_group."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"De catalogi van Meta voeden productadvertenties, Facebook Shops en Instagram Shopping. Je vult een catalogus in Commerce Manager met een productbestand: één product per rij, met de veldnamen van Meta in de kopregel. Deze preset controleert elk product aan de hand van Meta's referentie voor catalogusvelden en laat je kolomnamen ongemoeid.",
+"Hij vindt wat het uploaden van producten tegenhoudt: ontbrekende verplichte velden, beschikbaarheidswaarden die Meta niet accepteert, prijzen zonder valutacode, producten zonder merk, GTIN of MPN, dubbele id's en kapotte afbeeldingslinks."
+],
+"howItWorks": [
+"Upload je catalogusbestand (CSV, of tab-gescheiden .txt of .tsv).",
+"Elk product wordt gecontroleerd op id, title, description, availability, condition, price, link en image_link.",
+"Waarden als in_stock, \"Sold out\", \"19,99 EUR\" en \"New\" worden omgezet naar het formaat van Meta.",
+"Producten zonder merk, GTIN of MPN worden gemarkeerd, en GTIN's worden gecontroleerd met hun controlecijfer.",
+"Download een CSV met je oorspronkelijke kolommen, klaar om te uploaden in Commerce Manager."
+],
+"commonFixes": [
+"availability omzetten naar in stock of out of stock",
+"Prijzen schrijven als 9.99 USD, met een punt en een valutacode",
+"condition omzetten naar new, refurbished of used",
+"GTIN's opschonen en een voorloopnul herstellen die het controlecijfer bewijst",
+"gender en age_group omzetten naar de waarden van Meta",
+"Producten zonder merk, GTIN of MPN markeren"
+],
+"faq": [
+{
+"q": "Kan ik een Google Merchant Center-feed naar Meta uploaden?",
+"a": "Grotendeels wel, want de veldnamen zijn hetzelfde. Het belangrijkste verschil is availability: Meta neemt in stock en out of stock, met een spatie, waar Google in_stock gebruikt. Deze preset zet het voor je om."
+},
+{
+"q": "Welke velden zijn verplicht?",
+"a": "id, title, description, availability, condition, price, link en image_link voor elk product, plus minstens één van brand, gtin of mpn."
+},
+{
+"q": "Hoe moeten prijzen worden geschreven?",
+"a": "Als getal met een punt als decimaalteken, gevolgd door de ISO 4217-valutacode, zoals 9.99 USD. Alleen een $-teken is niet genoeg, omdat meerdere valuta's het gebruiken."
+},
+{
+"q": "En pre-orderproducten?",
+"a": "De catalogus van Meta neemt alleen nog in stock en out of stock. Gebruik in stock als klanten het product nu kunnen bestellen."
+}
+]
 }
 }
 }

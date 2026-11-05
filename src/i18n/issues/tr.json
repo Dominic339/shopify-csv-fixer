@@ -1000,5 +1000,107 @@
 "explanation": "Ürün giyim veya ayakkabı kategorisinde, ancak color, size, gender veya age_group boş.",
 "whyPlatformCares": "Google, ABD, Birleşik Krallık, Almanya, Fransa, Japonya ve Brezilya dahil birçok ülkede giyim için bu dört özelliği zorunlu tutar. Bunlar olmadan ürünler kısıtlanabilir veya reddedilebilir.",
 "howToFix": "Her giyim ürünü ve varyant için color, size, gender (male, female veya unisex) ve age_group (genellikle adult) alanlarını doldurun."
+},
+"meta/missing_required_header": {
+"title": "Zorunlu sütun eksik",
+"explanation": "Meta'nın her üründe istediği bir alanın sütunu yok: id, title, description, availability, condition, price, link veya image_link.",
+"whyPlatformCares": "Zorunlu alanı eksik ürünler kataloğa yüklenmeyebilir; bu durumda reklamlarda ve mağazalarda görünmezler.",
+"howToFix": "Eksik sütunu başlık satırına, Meta'nın alanı adlandırdığı şekilde (örneğin image_link) ekleyin ve her ürün için doldurun."
+},
+"meta/missing_value": {
+"title": "Zorunlu alan boş",
+"explanation": "Zorunlu bir alan (id, title, description, availability, condition, price, link veya image_link) bu satırda boş.",
+"whyPlatformCares": "Meta, zorunlu alanı eksik bir ürünü yükleyemez.",
+"howToFix": "Değeri doldurun. Ürün katalogda olmayacaksa satırı silin."
+},
+"meta/missing_identifier": {
+"title": "Marka, GTIN veya MPN yok",
+"explanation": "Üründe brand, gtin veya mpn yok.",
+"whyPlatformCares": "Meta'nın ürünü tanıyıp reklamlarda ve mağazalarda eşleştirmesi için bu üçünden en az biri gerekir.",
+"howToFix": "Markayı girin. Kendi ürettiğiniz ürünler için mağazanızın adını kullanın. Barkod (gtin) veya üretici parça numarası (mpn) da geçerlidir."
+},
+"meta/duplicate_id": {
+"title": "Yinelenen id",
+"explanation": "İki veya daha fazla satır aynı id'yi kullanıyor.",
+"whyPlatformCares": "Meta her ürünü id'siyle tanır. Yinelemelerde bir satır katalogda diğerinin üzerine yazar.",
+"howToFix": "Her ürüne ve her varyanta kendi id'sini verin. En kolayı SKU'yu kullanmaktır."
+},
+"meta/id_too_long": {
+"title": "id 100 karakterden uzun",
+"explanation": "Meta id'de en fazla 100 karaktere izin verir.",
+"whyPlatformCares": "Sınırı aşan id'ye sahip bir ürün kataloğa eklenemez.",
+"howToFix": "SKU gibi daha kısa bir id kullanın. Ürünler yayına girdikten sonra id'leri değiştirmeyin; reklamlar ve mağazalar onlara başvurur."
+},
+"meta/title_too_long": {
+"title": "Başlık 200 karakterden uzun",
+"explanation": "Meta title'da en fazla 200 karaktere izin verir ve en fazla 65 önerir.",
+"whyPlatformCares": "Uzun başlıklar, yalnızca ilk kelimelerin göründüğü reklamlarda ve mağazalarda kesilir.",
+"howToFix": "En önemli bilgileri (marka, ürün, renk, beden) başa koyun ve gerisini kısaltın."
+},
+"meta/description_too_long": {
+"title": "Açıklama 9999 karakterden uzun",
+"explanation": "Meta description'da en fazla 9999 karaktere izin verir.",
+"whyPlatformCares": "Sınırı aşan metin kesilir.",
+"howToFix": "Açıklamayı ürünle ilgili bilgilere indirin."
+},
+"meta/invalid_url": {
+"title": "Geçersiz bağlantı veya görsel URL'si",
+"explanation": "link, image_link veya additional_image_link, http:// ya da https:// ile başlayan tam bir web adresi değil.",
+"whyPlatformCares": "Meta ürün sayfasını ve görseli bu adreslerden yükler. Göreli veya bozuk bir URL ürünün yüklenmesini engeller.",
+"howToFix": "Ürün sayfası ve her görsel için https:// ve alan adınızı içeren tam adresi kullanın."
+},
+"meta/too_many_images": {
+"title": "50'den fazla ek görsel",
+"explanation": "additional_image_link 50'den fazla URL içeriyor.",
+"whyPlatformCares": "Meta en fazla 50 ek görsel kullanır ve gerisini yok sayar.",
+"howToFix": "En faydalı 50 ek görseli tutun."
+},
+"meta/invalid_availability": {
+"title": "Geçersiz availability değeri",
+"explanation": "availability in stock veya out of stock olmalıdır.",
+"whyPlatformCares": "Meta yalnızca boşlukla yazılan kendi iki değerini kabul eder. Diğer değerler ürünün yüklenmesini engeller.",
+"howToFix": "in stock veya out of stock kullanın. in_stock gibi Google tarzı değerler ve \"Sold out\" gibi kelimeler otomatik olarak dönüştürülür."
+},
+"meta/price_missing_currency": {
+"title": "Para birimi kodu olmayan fiyat",
+"explanation": "Fiyatta bir sayı var ama para birimi kodu yok ya da yalnızca birçok para biriminin kullandığı $ işareti var.",
+"whyPlatformCares": "Meta doğru fiyatı göstermek için ISO 4217 para birimi kodunu (USD, CAD, EUR...) ister.",
+"howToFix": "Fiyatı sayı ve ardından kod olarak yazın, örneğin 9.99 USD. € veya £ gibi tek bir para birimini gösteren simgeler otomatik olarak dönüştürülür."
+},
+"meta/invalid_price": {
+"title": "Geçersiz fiyat",
+"explanation": "price para birimi kodlu bir sayı değil ya da 0.",
+"whyPlatformCares": "Geçerli fiyatı olmayan ürünler kataloğa yüklenemez.",
+"howToFix": "Ondalık ayırıcı olarak nokta kullanın ve para birimi kodunu ekleyin, örneğin 9.99 USD. 9,99 EUR gibi fiyatlar otomatik olarak dönüştürülür."
+},
+"meta/invalid_sale_price": {
+"title": "Geçersiz indirimli fiyat",
+"explanation": "sale_price geçerli bir fiyat değil ya da price'tan düşük değil.",
+"whyPlatformCares": "Meta indirimi yalnızca sale_price geçerli ve normal fiyattan düşükse gösterir.",
+"howToFix": "Normal fiyatı price'ta, daha düşük indirimli fiyatı sale_price'ta tutun; ikisinde de para birimi kodu olsun."
+},
+"meta/invalid_condition": {
+"title": "Geçersiz condition değeri",
+"explanation": "condition new, refurbished veya used olmalıdır.",
+"whyPlatformCares": "Meta'da condition her ürün için zorunludur ve diğer değerler kabul edilmez.",
+"howToFix": "new, refurbished veya used kullanın. Büyük harfli değerler ve \"renewed\" otomatik olarak dönüştürülür."
+},
+"meta/invalid_gtin": {
+"title": "Geçersiz GTIN",
+"explanation": "gtin doğru kontrol basamağına sahip 8, 12, 13 veya 14 haneli bir sayı değil ya da bir elektronik tablo onu bilimsel gösterime çevirmiş.",
+"whyPlatformCares": "Meta GTIN'i yalnızca doğru olduğundan eminseniz ister. Yanlış bir GTIN ürünü başka bir mağazanın ürünüyle eşleştirebilir.",
+"howToFix": "Barkodu ambalajdan veya tedarikçinizden kopyalayın ya da gtin'i boş bırakıp brand veya mpn'yi doldurun. Boşluklar, tireler ve kanıtlanmış şekilde eksik baştaki sıfır otomatik olarak düzeltilir."
+},
+"meta/invalid_gender": {
+"title": "Geçersiz gender değeri",
+"explanation": "gender female, male veya unisex olmalıdır.",
+"whyPlatformCares": "Diğer değerler yok sayılır; bu yüzden ürün yanlış alışverişçilere gösterilebilir.",
+"howToFix": "female, male veya unisex kullanın. \"Men\" veya \"Women's\" gibi değerler otomatik olarak dönüştürülür."
+},
+"meta/invalid_age_group": {
+"title": "Geçersiz age_group değeri",
+"explanation": "age_group adult, all ages, teen, kids, toddler, infant veya newborn olmalıdır.",
+"whyPlatformCares": "Diğer değerler yok sayılır; bu yüzden ürün yanlış alışverişçilere gösterilebilir.",
+"howToFix": "Meta'nın yedi değerinden birini kullanın. \"Adults\", \"teens\" ve \"children\" otomatik olarak dönüştürülür."
 }
 }

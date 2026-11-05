@@ -355,6 +355,45 @@
 "a": "id, title, description, link, image_link, availability und price für jedes Produkt, dazu brand für neue Produkte und weitere für Bekleidung, etwa color, size, gender und age_group."
 }
 ]
+},
+"meta_catalog": {
+"longDescription": [
+"Metas Kataloge speisen Produktanzeigen, Facebook Shops und Instagram Shopping. Du füllst einen Katalog im Commerce Manager mit einer Produktdatei: ein Produkt pro Zeile, mit Metas Feldnamen in der Kopfzeile. Diese Vorlage prüft jedes Produkt anhand von Metas Referenz für Katalogfelder und lässt deine Spaltennamen unverändert.",
+"Sie findet, was den Upload von Produkten verhindert: fehlende Pflichtfelder, Verfügbarkeitswerte, die Meta nicht annimmt, Preise ohne Währungscode, Produkte ohne Marke, GTIN oder MPN, doppelte ids und kaputte Bildlinks."
+],
+"howItWorks": [
+"Lade deine Katalogdatei hoch (CSV oder tabulatorgetrennte .txt oder .tsv).",
+"Jedes Produkt wird auf id, title, description, availability, condition, price, link und image_link geprüft.",
+"Werte wie in_stock, „Sold out“, „19,99 EUR“ und „New“ werden in Metas Format umgewandelt.",
+"Produkte ohne Marke, GTIN oder MPN werden markiert, und GTINs werden anhand ihrer Prüfziffer kontrolliert.",
+"Lade eine CSV mit deinen ursprünglichen Spalten herunter, bereit zum Hochladen im Commerce Manager."
+],
+"commonFixes": [
+"availability in in stock oder out of stock umwandeln",
+"Preise als 9.99 USD schreiben, mit Punkt und Währungscode",
+"condition in new, refurbished oder used umwandeln",
+"GTINs bereinigen und eine durch die Prüfziffer belegte führende Null ergänzen",
+"gender und age_group in Metas Werte umwandeln",
+"Produkte ohne Marke, GTIN oder MPN markieren"
+],
+"faq": [
+{
+"q": "Kann ich einen Google-Merchant-Center-Feed zu Meta hochladen?",
+"a": "Größtenteils ja, denn die Feldnamen sind gleich. Der wichtigste Unterschied ist availability: Meta nimmt in stock und out of stock mit Leerzeichen, wo Google in_stock verwendet. Diese Vorlage wandelt das für dich um."
+},
+{
+"q": "Welche Felder sind Pflicht?",
+"a": "id, title, description, availability, condition, price, link und image_link für jedes Produkt, dazu mindestens eines von brand, gtin oder mpn."
+},
+{
+"q": "Wie sollen Preise geschrieben werden?",
+"a": "Als Zahl mit Punkt als Dezimaltrennzeichen, gefolgt vom ISO-4217-Währungscode, etwa 9.99 USD. Ein $-Zeichen allein reicht nicht, weil mehrere Währungen es verwenden."
+},
+{
+"q": "Was ist mit Vorbestellungen?",
+"a": "Metas Katalog nimmt nur noch in stock und out of stock. Verwende in stock, wenn Kunden das Produkt jetzt bestellen können."
+}
+]
 }
 }
 }

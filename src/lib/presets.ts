@@ -73,6 +73,14 @@ export const PRESET_FORMATS: PresetFormat[] = [
     description:
       "Check a Google Shopping product feed before upload: required attributes, prices with a currency code, availability, GTINs and identifiers.",
   },
+  {
+    id: "meta_catalog",
+    formatId: "meta_catalog",
+    name: "Meta Catalog (Facebook & Instagram)",
+    category: "Ecommerce",
+    description:
+      "Check a Facebook and Instagram catalog feed before upload: required fields, availability, prices with a currency code, and brand or GTIN.",
+  },
 ];
 
 export function getPresetFormats() {
