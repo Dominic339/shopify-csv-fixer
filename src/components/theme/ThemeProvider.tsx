@@ -37,6 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const stored = getStoredTheme();
     document.documentElement.setAttribute("data-theme", stored);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the stored theme is read after hydration so the first render matches the server
     setTheme(stored);
   }, []);
 

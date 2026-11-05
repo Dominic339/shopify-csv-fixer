@@ -2,20 +2,21 @@
 // Rehype plugin: wraps h2-led sections into <section> elements so the
 // MDX component map can render each section as a card.
 
+import type { Element, Root, RootContent } from "hast";
 import { slugifyHeading, dedupeSlug } from "./slug";
 
-function nodeTextContent(node: any): string {
+function nodeTextContent(node: Root | RootContent | undefined): string {
   if (!node) return "";
   if (node.type === "text") return node.value ?? "";
-  if (Array.isArray(node.children)) return node.children.map(nodeTextContent).join("");
+  if ("children" in node && Array.isArray(node.children)) return node.children.map((c) => nodeTextContent(c)).join("");
   return "";
 }
 
 export function rehypeWrapSections() {
-  return (tree: any) => {
-    const children: any[] = tree.children ?? [];
-    const output: any[] = [];
-    let current: any = null;
+  return (tree: Root) => {
+    const children: RootContent[] = tree.children ?? [];
+    const output: RootContent[] = [];
+    let current: Element | null = null;
 
     // Shared dedup map — processed in document order, mirrors extractTocFromMdx.
     const used = new Map<string, number>();
@@ -36,16 +37,16 @@ export function rehypeWrapSections() {
           type: "element",
           tagName: "section",
           properties: { "data-guide-section": "" },
-          children: [node],
+          children: [node as Element],
         };
       } else if (isH3 && current) {
         // Assign matching deduped id to h3 nodes that appear inside a section.
         const text = nodeTextContent(node);
         const id = dedupeSlug(slugifyHeading(text), used);
         node.properties = { ...(node.properties ?? {}), id };
-        current.children.push(node);
+        current.children.push(node as Element);
       } else if (current) {
-        current.children.push(node);
+        current.children.push(node as Element);
       } else {
         // Content before the first h2 stays unwrapped.
         output.push(node);

@@ -59,7 +59,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 
   // Default behavior: build a simple sample from the format's expected headers.
   const fmt = getFormatById(preset.formatId);
-  const headers = ((fmt as any)?.expectedHeaders as string[] | undefined) ?? [];
+  const headers = fmt?.expectedHeaders ?? [];
   const cols = Array.isArray(headers) && headers.length ? headers : ["Column A", "Column B", "Column C"];
 
   const rows = [0, 1, 2].map((i) => {

@@ -154,6 +154,7 @@ export default function FormatsClient({ formatsByLocale }: Props) {
 
   useEffect(() => {
     const initial = loadUserFormatsFromStorage();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- saved formats live in localStorage, which only exists after hydration
     setFormats(initial);
     setSelectedId(initial[0]?.id ?? null);
   }, []);

@@ -100,7 +100,7 @@ describe("Issue count stability", () => {
     const { headers, rows } = readCsv("messy_shopify_export_2_duplicate_sku.csv");
     const result = validateAndFixShopifyOptimizer(headers, rows, { strict: false });
     const skuIssues = result.issues.filter((i) =>
-      (i as any).code?.includes("sku") || (i as any).code?.includes("duplicate")
+      i.code?.includes("sku") || i.code?.includes("duplicate")
     );
     expect(skuIssues.length).toBeGreaterThan(0);
   });
@@ -222,7 +222,7 @@ describe("Golden-file snapshots", () => {
     const summary = result.issues
       .map((i) => ({
         severity: i.severity,
-        code: (i as any).code ?? "",
+        code: i.code ?? "",
         column: i.column,
       }))
       .sort((a, b) =>

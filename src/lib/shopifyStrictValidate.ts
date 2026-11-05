@@ -22,11 +22,11 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
 
   const has = (name: string) => fixedHeaders.some((h) => String(h).toLowerCase() === name.toLowerCase());
   const get = (r: CsvRow, k: string) => {
-    const v = (r as any)?.[k];
+    const v: unknown = r?.[k];
     return typeof v === "string" ? v : v == null ? "" : String(v);
   };
   const set = (r: CsvRow, k: string, v: string) => {
-    (r as any)[k] = v;
+    r[k] = v;
   };
 
   // Canonical columns (from Shopify template)
@@ -338,7 +338,7 @@ export function validateShopifyStrict(headers: string[], rows: CsvRow[]): Issue[
 
         r,
         variantCols,
-        (row, col) => get(row as any, col)
+        (row, col) => get(row, col)
       );
       if (!sig.hasVariantSignals) continue;
 

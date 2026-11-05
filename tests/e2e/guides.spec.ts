@@ -10,7 +10,7 @@ test("new curated guide renders with TOC, section cards, and internal /app link"
 
   // TOC nav should exist on wide desktop viewport
   const toc = page.locator('[data-testid="guide-toc"]');
-  await expect(toc).toBeVisible({ timeout: 5_000 });
+  await expect(toc).toBeVisible();
 
   // At least one TOC link should be rendered
   const firstTocLink = toc.locator("a").first();

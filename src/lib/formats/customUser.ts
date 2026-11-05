@@ -32,7 +32,7 @@ export type UserFormatRule = {
   scope: "global" | "column";
   columnId?: string;
   type: RuleType;
-  value?: any;
+  value?: unknown;
 };
 
 export type UserFormatV1 = {
@@ -51,7 +51,13 @@ export function columnTemplateTitle(index0: number) {
   return `Column ${index0 + 1}`;
 }
 
-function safeString(v: any) {
+/** A rule's argument: older formats store it directly, newer ones as { allowed }, { n } or { pattern }. */
+function ruleArg(value: unknown, key: string): unknown {
+  if (value && typeof value === "object") return (value as Record<string, unknown>)[key] ?? value;
+  return value;
+}
+
+function safeString(v: unknown) {
   if (typeof v === "string") return v;
   if (v == null) return "";
   return String(v);
@@ -82,7 +88,7 @@ function applyTransform(value: string, rule: UserFormatRule) {
       break;
 
     case "no_special_chars": {
-      const allowed = safeString(rule.value?.allowed ?? rule.value ?? "");
+      const allowed = safeString(ruleArg(rule.value, "allowed") ?? "");
       const esc = allowed.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
       // Letters and digits in any script (é, ß, 日本) are kept, not only A–Z.
       const re = new RegExp(`[^\\p{L}\\p{M}\\p{N}${esc}]`, "gu");
@@ -103,7 +109,7 @@ function applyTransform(value: string, rule: UserFormatRule) {
     }
 
     case "max_length": {
-      const n = Number(rule.value?.n ?? rule.value ?? 0);
+      const n = Number(ruleArg(rule.value, "n") ?? 0);
       if (Number.isFinite(n) && n > 0 && v.length > n) v = v.slice(0, n);
       break;
     }
@@ -151,7 +157,7 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
     }
 
     case "regex_allow": {
-      const pattern = safeString(rule.value?.pattern ?? rule.value ?? "");
+      const pattern = safeString(ruleArg(rule.value, "pattern") ?? "");
       if (!pattern) return null;
       try {
         const re = new RegExp(pattern);
@@ -162,7 +168,7 @@ function validateValue(value: string, rule: UserFormatRule): string | null {
     }
 
     case "regex_block": {
-      const pattern = safeString(rule.value?.pattern ?? rule.value ?? "");
+      const pattern = safeString(ruleArg(rule.value, "pattern") ?? "");
       if (!pattern) return null;
       try {
         const re = new RegExp(pattern);
@@ -235,13 +241,14 @@ export function importUserFormatsIntoStorage(payload: unknown) {
   const current = loadUserFormatsFromStorage();
   const existingIds = new Set(current.map((f) => f.id));
 
-  const normalizeOne = (obj: any): UserFormatV1 | null => {
-    if (!obj || typeof obj !== "object") return null;
+  const normalizeOne = (raw: unknown): UserFormatV1 | null => {
+    if (!raw || typeof raw !== "object") return null;
+    const obj = raw as Record<string, unknown>;
     const version = Number(obj.version ?? 1);
     if (version !== 1) return null;
 
     const now = Date.now();
-    const id = ensureUniqueFormatId(obj.id, existingIds);
+    const id = ensureUniqueFormatId(typeof obj.id === "string" ? obj.id : undefined, existingIds);
     existingIds.add(id);
 
     const cols = Array.isArray(obj.columns) ? obj.columns : [];

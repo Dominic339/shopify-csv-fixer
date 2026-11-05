@@ -37,7 +37,7 @@ function clamp(n: number, lo: number, hi: number) {
 }
 
 function normalizeWeights(weights: Partial<Record<ValidationCategory, number>>): Record<ValidationCategory, number> {
-  const out: Record<ValidationCategory, number> = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 0])) as any;
+  const out: Record<ValidationCategory, number> = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 0])) as Record<ValidationCategory, number>;
   for (const [k, v] of Object.entries(weights)) {
     out[k as ValidationCategory] = Math.max(0, Number(v ?? 0));
   }
@@ -123,7 +123,7 @@ export function computeValidationBreakdown(issues: CsvIssue[], opts: { formatId:
   const formatId = opts.formatId;
   const weights = weightsForFormat(formatId);
 
-  const categories: Record<ValidationCategory, number> = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 100])) as any;
+  const categories: Record<ValidationCategory, number> = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 100])) as Record<ValidationCategory, number>;
 
   let errors = 0;
   let warnings = 0;
@@ -131,7 +131,10 @@ export function computeValidationBreakdown(issues: CsvIssue[], opts: { formatId:
   let blockingErrors = 0;
 
   const catCounts: Record<ValidationCategory, { errors: number; warnings: number; infos: number; blockingErrors: number }> =
-    Object.fromEntries(ALL_CATEGORIES.map((c) => [c, { errors: 0, warnings: 0, infos: 0, blockingErrors: 0 }])) as any;
+    Object.fromEntries(ALL_CATEGORIES.map((c) => [c, { errors: 0, warnings: 0, infos: 0, blockingErrors: 0 }])) as Record<
+      ValidationCategory,
+      { errors: number; warnings: number; infos: number; blockingErrors: number }
+    >;
 
   for (const issue of issues ?? []) {
     const sev = issue.severity ?? "error";

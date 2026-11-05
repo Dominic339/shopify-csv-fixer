@@ -28,7 +28,7 @@ test("csv-inspector: upload fixture shows inspector results", async ({ page }) =
 
   // Results container should appear
   const results = page.locator('[data-testid="inspector-results"]');
-  await expect(results).toBeVisible({ timeout: 8_000 });
+  await expect(results).toBeVisible();
 
   // Should show at least row count and column count stats
   await expect(results).toContainText("3"); // 3 data rows
@@ -43,7 +43,7 @@ test("csv-inspector: clean file shows no issues message", async ({ page }) => {
   await fileInput.setInputFiles(csvPath);
 
   const results = page.locator('[data-testid="inspector-results"]');
-  await expect(results).toBeVisible({ timeout: 8_000 });
+  await expect(results).toBeVisible();
 
   // Notes column is empty for all rows — should be flagged as empty column
   // OR all-clean message should appear
@@ -81,7 +81,7 @@ test("merge: upload two files and run merge shows summary", async ({ page }) => 
   await page.getByRole("button", { name: /merge files/i }).click();
 
   // Merge summary should appear
-  await expect(page.locator("text=Merge summary")).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator("text=Merge summary")).toBeVisible();
 
   // Output rows should show 4 (2 + 2)
   await expect(page.locator("text=Output rows")).toBeVisible();
@@ -115,7 +115,7 @@ test("convert: upload WooCommerce file and convert to Shopify shows summary", as
   await page.locator('input[type="file"]').setInputFiles(csvPath);
 
   // Result card with a preview, the download and the hand-off to the fixer
-  await expect(page.getByRole("heading", { name: "Review and download" })).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByRole("heading", { name: "Review and download" })).toBeVisible();
   await expect(page.getByText(/Preview of the first/)).toBeVisible();
   await expect(page.getByRole("button", { name: /download converted/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /Check it in the CSV Fixer \(Shopify\)/ })).toBeVisible();
@@ -151,7 +151,7 @@ test("profile: does not stay stuck on Loading", async ({ page }) => {
 
   // "Loading..." text must be gone — the content must have resolved
   const loadingText = page.locator("text=Loading…");
-  await expect(loadingText).toHaveCount(0, { timeout: 5_000 });
+  await expect(loadingText).toHaveCount(0);
 
   // The profile heading must be present
   await expect(page.getByRole("heading", { name: /Profile/i })).toBeVisible();
@@ -209,7 +209,7 @@ test("profile: language selector is visible", async ({ page }) => {
   await page.goto("/profile");
 
   // Language section should be present
-  await expect(page.getByRole("heading", { name: /Language/i })).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByRole("heading", { name: /Language/i })).toBeVisible();
 
   // A select element with locale options should exist
   const langSelect = page.locator('select[aria-label="Language"]');
@@ -225,7 +225,7 @@ test("profile: changing language updates selection", async ({ page }) => {
   await page.goto("/profile");
 
   const langSelect = page.locator('select[aria-label="Language"]');
-  await expect(langSelect).toBeVisible({ timeout: 8_000 });
+  await expect(langSelect).toBeVisible();
 
   // Wait for navigation that may occur after selecting a locale
   // We use waitForURL with a timeout to handle the redirect
@@ -246,7 +246,7 @@ test("profile: shows subscription section with either sign-in or plan info", asy
 
   // Page must not be stuck on Loading
   await page.waitForTimeout(2000);
-  await expect(page.locator("text=Loading…")).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator("text=Loading…")).toHaveCount(0);
 
   // Either shows "Signed in" with a value, OR shows a "Sign in" link
   // (both are valid depending on auth state)

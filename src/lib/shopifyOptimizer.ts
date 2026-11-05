@@ -1,6 +1,9 @@
 // src/lib/shopifyOptimizer.ts
 import type { CsvRow } from "./csv";
 import { validateAndFixShopifyBasic, type FixResult, type Issue as BaseIssue } from "./shopifyBasic";
+
+/** Issues from the basic and strict validators; some carry a 0-based rowIndex instead of row. */
+type LooseIssue = BaseIssue & { rowIndex?: number };
 import { validateShopifyStrict } from "./shopifyStrictValidate";
 
 /**
@@ -48,7 +51,7 @@ export function validateAndFixShopifyOptimizer(
   const optVals = ["Option1 value", "Option2 value", "Option3 value"];
 
   function get(r: CsvRow, k: string) {
-    const v = (r as any)?.[k];
+    const v: unknown = r?.[k];
     return typeof v === "string" ? v : v == null ? "" : String(v);
   }
 
@@ -138,16 +141,16 @@ export function validateAndFixShopifyOptimizer(
     }
   }
 
-  function shouldSuppressBaseDuplicateSku(issue: BaseIssue): boolean {
-    const code = normalizeCode((issue as any).code);
+  function shouldSuppressBaseDuplicateSku(issue: LooseIssue): boolean {
+    const code = normalizeCode(issue.code);
     if (code !== "shopify/duplicate_sku") return false;
 
-    const col = ((issue as any).column ?? "").toString();
+    const col = (issue.column ?? "").toString();
     if (col && col !== cSku) return false;
 
     const row =
-      (issue as any).row ??
-      (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
+      issue.row ??
+      (typeof issue.rowIndex === "number" ? issue.rowIndex + 1 : undefined);
 
     if (!row || row < 1 || row > fixedRows.length) return false;
 
@@ -158,18 +161,18 @@ export function validateAndFixShopifyOptimizer(
     return skusAcrossProducts.has(skuVal);
   }
 
-  function add(issue: BaseIssue) {
+  function add(issue: LooseIssue) {
     if (shouldSuppressBaseDuplicateSku(issue)) return;
 
-    const code = normalizeCode((issue as any).code);
-    (issue as any).code = code;
+    const code = normalizeCode(issue.code);
+    issue.code = code;
 
     const row =
-      (issue as any).row ??
-      (typeof (issue as any).rowIndex === "number" ? (issue as any).rowIndex + 1 : undefined);
+      issue.row ??
+      (typeof issue.rowIndex === "number" ? issue.rowIndex + 1 : undefined);
 
-    const col = (issue as any).column ?? "(file)";
-    const sev = (issue as any).severity ?? "error";
+    const col = issue.column ?? "(file)";
+    const sev = issue.severity ?? "error";
 
     const key = `${sev}|${code}|${row ?? -1}|${col}`;
     if (seen.has(key)) return;
@@ -203,7 +206,7 @@ export function validateAndFixShopifyOptimizer(
           message: `Row ${idx + 1}: SKU "${sku}" is reused across different URL handles (rows ${rowsList}).`,
           suggestion:
             "Make SKUs unique per variant across your catalog, or verify you truly intend to share SKUs across products.",
-        } as any);
+        });
       }
     }
   }
@@ -245,7 +248,7 @@ export function validateAndFixShopifyOptimizer(
         suggestion: `Pick a single Title for this handle (Shopify groups rows by URL handle). Titles seen: ${distinct
           .slice(0, 4)
           .join(" | ")}${distinct.length > 4 ? " | ..." : ""}`,
-      } as any);
+      });
     }
   }
 

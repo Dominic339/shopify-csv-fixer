@@ -29,7 +29,7 @@ async function postJson(url: string, body?: unknown, token?: string | null) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const j = await r.json().catch(() => ({}));
-  return { ok: r.ok, json: j as any };
+  return { ok: r.ok, json: j as { url?: string; error?: string } };
 }
 
 export function PricingCards({ sub, tPricing: t }: Props) {

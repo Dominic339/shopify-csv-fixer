@@ -1,4 +1,5 @@
 // src/lib/formats/builtins/shopifyProducts.ts
+import type { Issue as ShopifyIssue } from "@/lib/shopifyBasic";
 import type { CsvFormat } from "../types";
 import type { CsvRow } from "@/lib/csv";
 import { validateAndFixShopifyOptimizer } from "@/lib/shopifyOptimizer";
@@ -117,7 +118,7 @@ export const shopifyProductsFormat: CsvFormat = {
     const strict = getStrictMode();
     const res = validateAndFixShopifyOptimizer(headers ?? [], rows ?? [], { strict });
 
-    const issues = (res.issues ?? []).map((i: any) => {
+    const issues = (res.issues ?? []).map((i: ShopifyIssue & { rowIndex?: number; level?: ShopifyIssue["severity"] }) => {
       const row1 =
         typeof i.row === "number"
           ? i.row
