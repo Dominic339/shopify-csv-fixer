@@ -106,6 +106,7 @@ export const config = {
     "/ebay-variations-csv-fixer",
     "/amazon-csv-fixer",
     "/google-merchant-center-feed-checker",
+    "/meta-catalog-feed-checker",
     "/about",
     "/privacy",
     "/terms",

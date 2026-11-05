@@ -452,5 +452,20 @@
   "SKUs were shortened to fit a character limit, and two of them became identical.": "为了符合字符数限制缩短了 SKU，结果有两个变得相同。",
   "Stock came from a warehouse system that counts in decimals, such as 2.5 boxes.": "库存来自按小数计数的仓储系统，例如 2.5 箱。",
   "The cell holds text such as \"in stock\", \"10+\" or \"n/a\".": "单元格中是“in stock”、“10+”或“n/a”之类的文字。",
-  "A spreadsheet formula returned an error such as #N/A for products it couldn't find.": "公式对找不到的商品返回了 #N/A 之类的错误。"
+  "A spreadsheet formula returned an error such as #N/A for products it couldn't find.": "公式对找不到的商品返回了 #N/A 之类的错误。",
+  "Commerce Manager reads Meta's field names, such as image_link, in English whatever language the catalog is in. Use the names as Meta spells them, with underscores.": "无论目录使用什么语言，商务管理工具都按英文读取 Meta 的字段名称，例如 image_link。请按 Meta 的拼写使用名称，包括下划线。",
+  "brand: the brand name, or your store's name for products you make": "brand：品牌名称，自制商品可填店铺名称",
+  "brand, gtin and mpn all blank": "brand、gtin 和 mpn 全部为空",
+  "Your own brand counts": "你自己的品牌也可以",
+  "Meta needs at least one of brand, gtin or mpn on every product. For handmade or custom goods with no barcode, the brand alone is enough.": "Meta 要求每个商品至少有 brand、gtin、mpn 之一。对于没有条形码的手工或定制商品，只填品牌就够了。",
+  "StriveFormats checks brand, gtin and mpn on every row, and flags a row when all three are blank.": "StriveFormats 会检查每一行的 brand、gtin 和 mpn，三者都为空时标出该行。",
+  "Meta uses these identifiers to tell products apart and to match them in ads and shops. A product without any of them may not upload. brand is the easiest to fill in, because every product has one: the manufacturer's, or your store's name for your own products.": "Meta 用这些标识符区分商品，并在广告和店铺中进行匹配。一个都没有的商品可能无法上传。brand 最容易填写，因为每个商品都有品牌：制造商的品牌，或自制商品使用店铺名称。",
+  "Up to 50 URLs, separated by commas, semicolons, spaces or vertical bars": "最多 50 个网址，用逗号、分号、空格或竖线分隔",
+  "Meta uses up to 50 additional_image_link values for each product and ignores the rest. Put the most useful views first.": "Meta 每个商品最多使用 50 个 additional_image_link 值，其余会被忽略。请把最有用的图片放在前面。",
+  "Meta's catalog takes only in stock and out of stock, written with a space. Google-style values like in_stock are converted for you; retired values like preorder have to be changed by hand.": "Meta 目录只接受带空格的 in stock 和 out of stock。in_stock 这样的 Google 格式值会自动转换；preorder 之类已停用的值需要手动修改。",
+  "$ is used by several currencies, so Meta needs the code": "多种货币都使用 $，所以 Meta 需要代码",
+  "Run every file through StriveFormats before uploading it to Commerce Manager.": "每个文件上传到商务管理工具之前，都先用 StriveFormats 检查。",
+  "Meta's catalog reference asks for the price as a number with a period for decimals, a space, and the ISO 4217 currency code, for example 9.99 USD, with no currency symbol. The code tells Meta which currency you mean; a $ sign alone could be US, Canadian or Australian dollars. sale_price follows the same format and is only shown when it is lower than price.": "Meta 目录参考要求价格写成以句点为小数点的数字、一个空格和 ISO 4217 货币代码，不带货币符号，例如 9.99 USD。代码告诉 Meta 你指的是哪种货币；只有 $ 可能是美元、加元或澳元。sale_price 使用相同格式，只有低于 price 时才会显示。",
+  "Don't invent a GTIN. If a product has none, leave gtin blank and fill in brand or mpn.": "不要编造 GTIN。如果商品没有，请将 gtin 留空并填写 brand 或 mpn。",
+  "Meta asks for a GTIN only when you're sure it's right. A wrong one can match your product to someone else's in ads and shops, so a blank gtin with a brand is better than a guess.": "Meta 只在你确定 GTIN 正确时才要求填写。错误的 GTIN 可能在广告和店铺中把你的商品匹配到别人的商品，因此留空 gtin 并填写品牌，比猜测更好。"
 }

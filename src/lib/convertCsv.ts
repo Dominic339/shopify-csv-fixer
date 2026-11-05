@@ -875,7 +875,7 @@ export type ConvertOptions = {
   currency?: string;
 };
 
-type WriteContext = { source: string; options: ConvertOptions };
+type WriteContext = { source: string; target: string; options: ConvertOptions };
 
 /** Where each platform serves a product page, from the product's handle or slug. */
 const PRODUCT_PATH: Record<string, string> = {
@@ -916,7 +916,9 @@ const GOOGLE_HEADERS = [
   "color", "size", "shipping_weight",
 ];
 
+/** Merchant Center and Meta catalog feeds share field names; Meta spells availability with a space. */
 function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
+  const meta = ctx.target === "meta_catalog";
   const pattern = normalizeLinkPattern(ctx.options.storeUrl);
   const store = pattern ? "" : normalizeStoreUrl(ctx.options.storeUrl);
   const currency = t(ctx.options.currency).toUpperCase();
@@ -949,11 +951,12 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
       const price = parseLocaleNumber(v.price);
       const compareAt = parseLocaleNumber(v.compareAt);
       if (price == null) noPrice++;
-      if (!p.vendor) noBrand++;
+      if (!p.vendor && !(meta && v.barcode)) noBrand++;
       // Google's price is the regular price; a lower current price is the sale price.
       const onSale = price != null && compareAt != null && compareAt > price;
       const qty = parseLocaleNumber(v.qty);
-      const availability = v.qty === "" || v.policy === "continue" || (qty != null && qty > 0) ? "in_stock" : "out_of_stock";
+      const inStock = v.qty === "" || v.policy === "continue" || (qty != null && qty > 0);
+      const availability = meta ? (inStock ? "in stock" : "out of stock") : inStock ? "in_stock" : "out_of_stock";
       const code = checkBarcode(v.barcode);
       const gtin = code.status === "ok" || code.status === "fixed" ? code.value : "";
       if (v.barcode && !gtin) badBarcodes++;
@@ -987,10 +990,22 @@ function writeGoogle(products: Product[], ctx: WriteContext): WriteResult {
   else if (!store) warnings.push("link is blank. Enter your store's address so each product links to its page.");
   else if (!path) warnings.push("link is blank: this source file doesn't say where each product's page is. Enter a link pattern with {handle} or {sku} instead of the store address, or add the URLs before uploading.");
   else warnings.push(`Each link was built as ${store}${path}<handle>. Open a few to check they reach the right product page.`);
-  if (skippedDrafts) warnings.push(`${skippedDrafts} draft or unpublished product(s) were left out, because Google only lists products shoppers can buy.`);
-  if (noImage) warnings.push(`${noImage} item(s) have no image. Google requires image_link for every product.`);
-  if (noPrice) warnings.push(`${noPrice} item(s) have no price. Google requires a price for every product.`);
-  if (noBrand) warnings.push(`${noBrand} item(s) have no brand. Google requires one for new products; use your own brand for products you make.`);
+  if (skippedDrafts) {
+    warnings.push(
+      meta
+        ? `${skippedDrafts} draft or unpublished product(s) were left out, because a catalog should only hold products shoppers can buy.`
+        : `${skippedDrafts} draft or unpublished product(s) were left out, because Google only lists products shoppers can buy.`,
+    );
+  }
+  if (noImage) warnings.push(meta ? `${noImage} item(s) have no image. Meta requires image_link for every product.` : `${noImage} item(s) have no image. Google requires image_link for every product.`);
+  if (noPrice) warnings.push(meta ? `${noPrice} item(s) have no price. Meta requires a price for every product.` : `${noPrice} item(s) have no price. Google requires a price for every product.`);
+  if (noBrand) {
+    warnings.push(
+      meta
+        ? `${noBrand} item(s) have no brand or barcode. Meta needs a brand, gtin or mpn on every product; use your own brand for products you make.`
+        : `${noBrand} item(s) have no brand. Google requires one for new products; use your own brand for products you make.`,
+    );
+  }
   if (badBarcodes) warnings.push(`${badBarcodes} barcode(s) aren't valid GTINs and were left out of gtin.`);
   if (defaultCondition) warnings.push(`condition is set to new for ${defaultCondition} item(s) whose export doesn't say. Change it to used or refurbished where that applies.`);
   const headers = compact(GOOGLE_HEADERS, rows, ["id", "title", "description", "link", "image_link", "availability", "price", "brand", "condition"]);
@@ -1006,6 +1021,7 @@ const WRITERS: Record<string, (p: Product[], ctx: WriteContext) => WriteResult> 
   ebay_listings: writeEbay,
   amazon_inventory_loader: writeAmazon,
   google_merchant_center: writeGoogle,
+  meta_catalog: writeGoogle,
 };
 
 // User-facing display names for the converter UI
@@ -1018,6 +1034,7 @@ export const CONVERT_FORMAT_OPTIONS = [
   { id: "ebay_listings", label: "eBay Listings" },
   { id: "amazon_inventory_loader", label: "Amazon Inventory Loader" },
   { id: "google_merchant_center", label: "Google Merchant Center", targetOnly: true },
+  { id: "meta_catalog", label: "Meta Catalog (Facebook & Instagram)", targetOnly: true },
 ];
 
 /** Formats a file can be converted from (a Merchant Center feed is an output only). */
@@ -1067,7 +1084,7 @@ export function convertCsv(
   const rowsToProcess = truncated ? sourceRows.slice(0, limit) : sourceRows;
 
   const source = read(sourceHeaders, rowsToProcess);
-  const target = write(source.products, { source: normalizedSourceId, options });
+  const target = write(source.products, { source: normalizedSourceId, target: targetFormatId, options });
   const warnings = [...source.warnings, ...target.warnings];
 
   const unmappedSourceFields = sourceHeaders.filter((h) => !source.consumed.has(h));

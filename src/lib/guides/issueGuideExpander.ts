@@ -132,6 +132,22 @@ const GOOGLE_COLUMNS: Record<string, string> = {
   "google/invalid_gender": "gender",
   "google/invalid_age_group": "age_group",
   "google/missing_apparel_attributes": "color / size / gender / age_group",
+  "meta/missing_value": "id / title / price",
+  "meta/missing_identifier": "brand / gtin / mpn",
+  "meta/duplicate_id": "id",
+  "meta/id_too_long": "id",
+  "meta/title_too_long": "title",
+  "meta/description_too_long": "description",
+  "meta/invalid_url": "link / image_link",
+  "meta/too_many_images": "additional_image_link",
+  "meta/invalid_availability": "availability",
+  "meta/price_missing_currency": "price",
+  "meta/invalid_price": "price",
+  "meta/invalid_sale_price": "sale_price",
+  "meta/invalid_condition": "condition",
+  "meta/invalid_gtin": "gtin",
+  "meta/invalid_gender": "gender",
+  "meta/invalid_age_group": "age_group",
 };
 
 function extractColumnName(code: string, fallback: string, tr: Tr = englishTr): string {
@@ -155,6 +171,12 @@ const TYPE_BY_CODE: Record<string, IssueType> = {
   "google/invalid_gtin": "misc",
   "google/missing_identifiers": "misc",
   "google/too_many_images": "misc",
+  "meta/invalid_availability": "enum",
+  "meta/invalid_gender": "enum",
+  "meta/invalid_age_group": "enum",
+  "meta/invalid_gtin": "misc",
+  "meta/missing_identifier": "misc",
+  "meta/too_many_images": "misc",
 };
 
 export function classifyIssue(input: IssueInput): IssueType {
@@ -259,6 +281,11 @@ const ENUM_BY_CODE: Record<string, string[]> = {
   "google/invalid_condition": ["new", "used", "refurbished"],
   "google/invalid_gender": ["male", "female", "unisex"],
   "google/invalid_age_group": ["newborn", "infant", "toddler", "kids", "adult"],
+  // Meta's catalog product fields reference.
+  "meta/invalid_availability": ["in stock", "out of stock"],
+  "meta/invalid_condition": ["new", "refurbished", "used"],
+  "meta/invalid_gender": ["female", "male", "unisex"],
+  "meta/invalid_age_group": ["adult", "all ages", "teen", "kids", "toddler", "infant", "newborn"],
 };
 
 /** The character limit named in the rule's (English) explanation, if any. */
@@ -817,6 +844,7 @@ function platformDisplayName(platform: string, tr: Tr = englishTr): string {
     ebay: "eBay",
     amazon: "Amazon",
     google: "Google Merchant Center",
+    meta: "Meta",
   };
   return platform === "general" ? tr("the platform") : (N[platform] ?? platform);
 }
@@ -943,7 +971,7 @@ function getTechnicalDetail(type: IssueType, input: IssueInput, column: string, 
  * identifiers have their own rules. These sections replace the shared ones for Google.
  */
 function googleOverrides(type: IssueType, input: IssueInput, column: string, tr: Tr): Partial<ExpandedIssueContent> {
-  const save = saveStepsFor("google", tr);
+  const save = saveStepsFor(input.platform, tr);
   const col = { column };
   const code = input.issueCode.split("/")[1];
   if (type === "money")
@@ -1087,11 +1115,61 @@ function googleOverrides(type: IssueType, input: IssueInput, column: string, tr:
   return {};
 }
 
+/**
+ * Meta's catalog uses the same price and barcode formats as Google's feed, so it starts from the
+ * Merchant Center sections and replaces only the sentences that name Google, plus its own notes on
+ * brand/gtin/mpn, images, availability and field names. Meta takes CSV, so the save steps say CSV.
+ */
+function metaOverrides(type: IssueType, input: IssueInput, column: string, tr: Tr): Partial<ExpandedIssueContent> {
+  const code = input.issueCode.split("/")[1];
+  const shared = googleOverrides(type, input, column, tr);
+  if (type === "money")
+    return {
+      ...shared,
+      examples: shared.examples?.map((e) => (e.bad === "$19.99" ? { ...e, note: tr("$ is used by several currencies, so Meta needs the code") } : e)),
+      preventTips: [...(shared.preventTips ?? []).slice(0, -1), tr("Run every file through StriveFormats before uploading it to Commerce Manager.")],
+      technicalDetail: tr("Meta's catalog reference asks for the price as a number with a period for decimals, a space, and the ISO 4217 currency code, for example 9.99 USD, with no currency symbol. The code tells Meta which currency you mean; a $ sign alone could be US, Canadian or Australian dollars. sale_price follows the same format and is only shown when it is lower than price."),
+    };
+  if (code === "invalid_gtin")
+    return {
+      ...shared,
+      preventTips: [...(shared.preventTips ?? []).slice(0, 2), tr("Don't invent a GTIN. If a product has none, leave gtin blank and fill in brand or mpn.")],
+      platformNote: tr("Meta asks for a GTIN only when you're sure it's right. A wrong one can match your product to someone else's in ads and shops, so a blank gtin with a brand is better than a guess."),
+    };
+  if (code === "missing_identifier")
+    return {
+      validValues: [tr("brand: the brand name, or your store's name for products you make"), tr("gtin: the barcode number from the packaging"), tr("mpn: the manufacturer's part number")],
+      examples: [
+        { bad: tr("brand, gtin and mpn all blank"), good: "brand = Acme", note: tr("Your own brand counts") },
+        { bad: tr("brand, gtin and mpn all blank"), good: "gtin = 4006381333931", note: tr("Branded product with a barcode") },
+      ],
+      platformNote: tr("Meta needs at least one of brand, gtin or mpn on every product. For handmade or custom goods with no barcode, the brand alone is enough."),
+      detectionNote: tr("StriveFormats checks brand, gtin and mpn on every row, and flags a row when all three are blank."),
+      technicalDetail: tr("Meta uses these identifiers to tell products apart and to match them in ads and shops. A product without any of them may not upload. brand is the easiest to fill in, because every product has one: the manufacturer's, or your store's name for your own products."),
+    };
+  if (code === "too_many_images")
+    return {
+      validValues: [tr("Up to 50 URLs, separated by commas, semicolons, spaces or vertical bars"), tr("Each one a full URL starting with https://")],
+      platformNote: tr("Meta uses up to 50 additional_image_link values for each product and ignores the rest. Put the most useful views first."),
+    };
+  if (code === "invalid_availability")
+    return {
+      platformNote: tr("Meta's catalog takes only in stock and out of stock, written with a space. Google-style values like in_stock are converted for you; retired values like preorder have to be changed by hand."),
+    };
+  if (type === "required_header")
+    return {
+      platformNote: tr("Commerce Manager reads Meta's field names, such as image_link, in English whatever language the catalog is in. Use the names as Meta spells them, with underscores."),
+    };
+  return {};
+}
+
 export function expandIssueContent(input: IssueInput, tr: Tr = englishTr): ExpandedIssueContent {
   const issueType = classifyIssue(input);
   const column = extractColumnName(input.issueCode, input.localTitle ?? input.title, tr);
   const base = expandBase(input, issueType, column, tr);
-  return input.platform === "google" ? { ...base, ...googleOverrides(issueType, input, column, tr) } : base;
+  if (input.platform === "google") return { ...base, ...googleOverrides(issueType, input, column, tr) };
+  if (input.platform === "meta") return { ...base, ...metaOverrides(issueType, input, column, tr) };
+  return base;
 }
 
 function expandBase(input: IssueInput, issueType: IssueType, column: string, tr: Tr): ExpandedIssueContent {

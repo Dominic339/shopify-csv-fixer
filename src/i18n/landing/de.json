@@ -262,5 +262,41 @@
   "title": "Google Merchant Center Feed-Prüfer",
   "intro": "Merchant Center lehnt Produkte wegen Kleinigkeiten ab: ein Preis ohne Währungscode, „In Stock“ statt in_stock, ein Barcode, den eine Tabellenkalkulation gerundet hat. Prüfe deine Produktdatei hier vor dem Hochladen und behebe das meiste mit einem Klick.",
   "exportTip": "Exportiere den Produktfeed aus deinem Shop oder deiner Feed-App, oder starte mit der Vorlage. Füge die korrigierte Datei in Merchant Center unter Produkte → Produkte aus einer Datei hinzufügen hinzu."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "Verfügbarkeit mit Leerzeichen",
+    "body": "Meta nimmt in stock und out of stock, nicht Googles in_stock. Feeds für das Merchant Center werden automatisch umgewandelt; nicht mehr gültige Werte wie preorder werden markiert, damit du sie änderst."
+   },
+   {
+    "title": "Jedes Produkt braucht Marke, GTIN oder MPN",
+    "body": "Ein Produkt ohne eines der drei wird möglicherweise nicht hochgeladen. Für selbst hergestellte Produkte zählt der Name deines Shops als Marke."
+   },
+   {
+    "title": "Zustand ist Pflicht",
+    "body": "Anders als Google verlangt Meta condition bei jedem Produkt: new, refurbished oder used. Werte wie „New“ oder „renewed“ werden automatisch umgeschrieben."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kann ich meinen Google-Merchant-Center-Feed wiederverwenden?",
+    "a": "Größtenteils ja, denn die Feldnamen sind gleich. Lade ihn hier mit der Meta-Vorlage hoch: Die Verfügbarkeit wird in Metas Werte umgewandelt, und alles, was Meta anders als Google braucht, etwa condition, wird markiert."
+   },
+   {
+    "q": "Welches Dateiformat wird heruntergeladen?",
+    "a": "Eine CSV mit deinen ursprünglichen Spaltennamen, die der Commerce Manager als Datenquelle für Kataloge annimmt. Du kannst eine .csv-, .txt- oder .tsv-Datei hochladen."
+   },
+   {
+    "q": "Werden Produktbilder geprüft?",
+    "a": "Es wird geprüft, ob jeder Link und jedes Bild eine vollständige https://-Adresse ist und ob es höchstens 50 zusätzliche Bilder gibt. Die Bilder werden nicht heruntergeladen, prüfe also selbst, ob sie laden und Metas Größenregeln erfüllen."
+   }
+  ],
+  "metaTitle": "Facebook- & Instagram-Katalog prüfen | Meta-Katalog-CSV | StriveFormats",
+  "metaDescription": "Prüfe einen Meta-Katalog-Feed vor dem Hochladen in den Commerce Manager. Verfügbarkeit, Zustand und Preise werden in Metas Format umgewandelt; Produkte ohne Marke, GTIN oder MPN werden markiert.",
+  "kicker": "Meta-Katalog",
+  "title": "Facebook- & Instagram-Katalog-Prüfer",
+  "intro": "Metas Katalog lässt Produkte stillschweigend fallen: in_stock statt in stock, ein Preis ohne Währungscode, ein Produkt ohne Marke. Prüfe deine Katalogdatei hier vor dem Hochladen in den Commerce Manager und behebe das meiste mit einem Klick.",
+  "exportTip": "Exportiere den Produktfeed aus deinem Shop oder deiner Feed-App, oder starte mit der Vorlage. Öffne im Commerce Manager deinen Katalog, gehe zu Datenquellen und füge die korrigierte CSV hinzu."
  }
 }

@@ -12,7 +12,8 @@ export type LandingSlug =
   | "ebay"
   | "ebay-variations"
   | "amazon"
-  | "google";
+  | "google"
+  | "meta";
 
 export type PlatformLanding = {
   slug: LandingSlug;
@@ -367,5 +368,50 @@ export const PLATFORM_LANDINGS: Record<LandingSlug, PlatformLanding> = {
       },
     ],
     related: ["shopify", "woocommerce", "amazon"],
+  },
+
+  meta: {
+    slug: "meta",
+    path: "/meta-catalog-feed-checker",
+    presetId: "meta_catalog",
+    guidePlatform: "meta",
+    accent: { text: "text-indigo-700 dark:text-indigo-400", soft: "bg-indigo-500/10", border: "border-indigo-500/30" },
+    metaTitle: "Facebook & Instagram Catalog Feed Checker | Meta Catalog CSV | StriveFormats",
+    metaDescription:
+      "Check a Meta catalog feed before uploading it to Commerce Manager. Availability, condition and prices are converted to Meta's format; products with no brand, GTIN or MPN are flagged.",
+    kicker: "Meta catalog",
+    title: "Facebook & Instagram Catalog Checker",
+    intro:
+      "Meta's catalog drops products quietly: in_stock instead of in stock, a price with no currency code, a product with no brand. Check your catalog file here before you upload it to Commerce Manager, and fix most of it in one click.",
+    exportTip: "Export the product feed from your store or feed app, or start from the template. In Commerce Manager, open your catalog, go to Data sources and add the fixed CSV.",
+    gotchas: [
+      {
+        title: "Availability has a space",
+        body: "Meta takes in stock and out of stock, not Google's in_stock. Feeds made for Merchant Center are converted automatically; retired values like preorder are flagged for you to change.",
+      },
+      {
+        title: "Every product needs a brand, GTIN or MPN",
+        body: "A product with none of the three may not upload. For products you make yourself, your store's name counts as the brand.",
+      },
+      {
+        title: "Condition is required",
+        body: "Unlike Google, Meta needs condition on every product: new, refurbished or used. Values like \"New\" or \"renewed\" are rewritten automatically.",
+      },
+    ],
+    faq: [
+      {
+        q: "Can I reuse my Google Merchant Center feed?",
+        a: "Mostly, because the field names are the same. Upload it here with the Meta preset: availability is converted to Meta's values, and anything Meta needs that Google doesn't, such as condition, is flagged.",
+      },
+      {
+        q: "Which file format does it download?",
+        a: "A CSV with your original column names, which Commerce Manager accepts for catalog data sources. You can upload a .csv, .txt or .tsv file.",
+      },
+      {
+        q: "Does it check product images?",
+        a: "It checks that every link and image is a full https:// address and that there are no more than 50 extra images. It doesn't download the images, so check that they load and meet Meta's size rules.",
+      },
+    ],
+    related: ["google", "shopify", "woocommerce"],
   },
 };

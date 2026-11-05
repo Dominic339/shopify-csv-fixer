@@ -5,6 +5,7 @@ import { parseCsv } from "@/lib/csv";
 import { convertCsv, normalizeStoreUrl, type ConvertOptions } from "@/lib/convertCsv";
 import { SAMPLE_EXPORTS } from "@/lib/convertRoutes";
 import { validateAndFixGoogleMerchant } from "@/lib/googleMerchantOptimizer";
+import { validateAndFixMetaCatalog } from "@/lib/metaCatalogOptimizer";
 import { matchTemplate } from "@/lib/i18n/messages";
 
 const options = { storeUrl: "shop.example.com/", currency: "USD" };
@@ -74,4 +75,17 @@ describe("convert to Google Merchant Center", () => {
     expect(normalizeStoreUrl("not a url")).toBe("");
     expect(normalizeStoreUrl("localhost")).toBe("");
   });
+
+  for (const source of ["shopify_products", "woocommerce_products"]) {
+    it(`${source} to Meta: availability uses Meta's spelling and the feed has no blocking problems`, () => {
+      const { headers, rows } = parseCsv(SAMPLE_EXPORTS[source]);
+      const out = convertCsv(headers, rows, source, "meta_catalog", null, options);
+      expect(new Set(out.rows.map((r) => r.availability))).toEqual(new Set(source === "shopify_products" ? ["in stock"] : ["in stock", "out of stock"]));
+      const checked = validateAndFixMetaCatalog(out.headers, out.rows);
+      // WooCommerce exports have no brand, so Meta's brand/gtin/mpn rule is the only error left there.
+      const errors = new Set(checked.issues.filter((i) => i.severity === "error").map((i) => i.code));
+      expect([...errors]).toEqual(source === "shopify_products" ? [] : ["meta/missing_identifier"]);
+      expect(out.warnings.every((w) => matchTemplate(w))).toBe(true);
+    });
+  }
 });

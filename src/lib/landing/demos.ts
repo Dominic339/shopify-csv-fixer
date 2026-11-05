@@ -73,4 +73,12 @@ export const LANDING_DEMOS: Record<string, LandingDemo> = {
       "TOTE-01,Acme Canvas Tote,Natural cotton tote bag.,https://example.com/p/tote,tote.jpg,preorder,$24,Acme,4006-3813-3393-2,new",
     ].join("\n"),
   },
+  meta: {
+    formatId: "meta_catalog",
+    csv: [
+      "id,title,description,availability,condition,price,link,image_link,brand",
+      "MUG-01,Acme Ceramic Coffee Mug,Hand-thrown stoneware mug.,in_stock,New,\"18,00 EUR\",https://example.com/p/mug,https://example.com/i/mug.jpg,Acme",
+      "TOTE-01,Canvas Tote,Natural cotton tote bag.,preorder,new,$24,https://example.com/p/tote,https://example.com/i/tote.jpg,",
+    ].join("\n"),
+  },
 };

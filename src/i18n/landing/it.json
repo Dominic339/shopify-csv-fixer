@@ -262,5 +262,41 @@
   "title": "Verifica feed Google Merchant Center",
   "intro": "Merchant Center rifiuta i prodotti per piccolezze: un prezzo senza codice valuta, \"In Stock\" invece di in_stock, un codice a barre arrotondato da un foglio di calcolo. Controlla qui il file prodotti prima di caricarlo e correggi quasi tutto con un clic.",
   "exportTip": "Esporta il feed prodotti dal negozio o dall'app per i feed, oppure parti dal modello. In Merchant Center, aggiungi il file corretto da Prodotti → Aggiungi prodotti da un file."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "La disponibilità ha uno spazio",
+    "body": "Meta accetta in stock e out of stock, non l'in_stock di Google. I feed creati per Merchant Center vengono convertiti automaticamente; i valori ritirati come preorder vengono segnalati perché tu li cambi."
+   },
+   {
+    "title": "Ogni prodotto vuole marca, GTIN o MPN",
+    "body": "Un prodotto senza nessuno dei tre potrebbe non essere caricato. Per i prodotti che realizzi tu, il nome del negozio vale come marca."
+   },
+   {
+    "title": "La condizione è obbligatoria",
+    "body": "A differenza di Google, Meta richiede condition per ogni prodotto: new, refurbished o used. Valori come \"New\" o \"renewed\" vengono riscritti automaticamente."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Posso riutilizzare il feed di Google Merchant Center?",
+    "a": "In gran parte sì, perché i nomi dei campi sono gli stessi. Caricalo qui con il preset Meta: la disponibilità viene convertita nei valori di Meta, e ciò che Meta richiede a differenza di Google, come condition, viene segnalato."
+   },
+   {
+    "q": "Quale formato di file viene scaricato?",
+    "a": "Un CSV con i nomi di colonna originali, che Commerce Manager accetta come origine dati del catalogo. Puoi caricare un file .csv, .txt o .tsv."
+   },
+   {
+    "q": "Controlla le immagini dei prodotti?",
+    "a": "Controlla che ogni link e immagine sia un indirizzo https:// completo e che non ci siano più di 50 immagini aggiuntive. Non scarica le immagini, quindi verifica tu che si carichino e rispettino le regole di dimensione di Meta."
+   }
+  ],
+  "metaTitle": "Verifica catalogo Facebook e Instagram | CSV del catalogo Meta | StriveFormats",
+  "metaDescription": "Controlla un feed di catalogo Meta prima di caricarlo in Commerce Manager. Disponibilità, condizione e prezzi vengono convertiti nel formato di Meta; i prodotti senza marca, GTIN o MPN vengono segnalati.",
+  "kicker": "Catalogo Meta",
+  "title": "Verifica catalogo Facebook e Instagram",
+  "intro": "Il catalogo Meta scarta i prodotti senza avvisare: in_stock invece di in stock, un prezzo senza codice valuta, un prodotto senza marca. Controlla qui il file del catalogo prima di caricarlo in Commerce Manager e correggi quasi tutto con un clic.",
+  "exportTip": "Esporta il feed prodotti dal negozio o dall'app per i feed, oppure parti dal modello. In Commerce Manager apri il catalogo, vai su Origini dei dati e aggiungi il CSV corretto."
  }
 }

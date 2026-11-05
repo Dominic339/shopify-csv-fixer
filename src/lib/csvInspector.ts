@@ -16,7 +16,8 @@ export type DetectedPlatform =
   | "etsy_listings"
   | "ebay_listings"
   | "amazon_inventory_loader"
-  | "google_merchant_center";
+  | "google_merchant_center"
+  | "meta_catalog";
 
 export type InspectorResult = {
   rowCount: number;
@@ -111,14 +112,23 @@ function detectEncodingHints(text: string): EncodingHint[] {
   return hints;
 }
 
-/** Guess which platform exported the file from its headers. */
-export function detectPlatform(headers: string[]): DetectedPlatform | null {
+/**
+ * Guess which platform exported the file from its headers. Google and Meta feeds share their
+ * field names, so a few data rows (when given) tell them apart: Meta writes "in stock" with a space.
+ */
+export function detectPlatform(headers: string[], dataRows: string[][] = []): DetectedPlatform | null {
   const h = new Set(headers.map((x) => x.trim().toLowerCase()));
   const has = (...names: string[]) => names.every((n) => h.has(n));
 
   if (headers.some((x) => /^\*?action\(/i.test(x.trim()))) return "ebay_listings";
   if (has("sku", "product-id", "product-id-type")) return "amazon_inventory_loader";
-  if (has("id", "title", "link", "image_link") && (h.has("availability") || h.has("price"))) return "google_merchant_center";
+  if (has("id", "title", "link", "image_link") && (h.has("availability") || h.has("price"))) {
+    if (h.has("fb_product_category") || h.has("quantity_to_sell_on_facebook")) return "meta_catalog";
+    const col = headers.findIndex((x) => x.trim().toLowerCase() === "availability");
+    const values = col < 0 ? [] : dataRows.slice(0, 50).map((r) => (r[col] ?? "").trim().toLowerCase());
+    if (values.some((v) => v === "in stock" || v === "out of stock")) return "meta_catalog";
+    return "google_merchant_center";
+  }
   if ((h.has("handle") || h.has("url handle")) && (h.has("title") || h.has("option1 name"))) return "shopify_products";
   if (has("type", "sku") && (h.has("regular price") || h.has("parent") || h.has("published"))) return "woocommerce_products";
   if (has("title", "description", "price", "quantity") && (h.has("tags") || h.has("image1") || h.has("materials"))) {
@@ -204,6 +214,6 @@ export function inspectCsv(rawText: string): InspectorResult {
     inconsistentRowCount: inconsistent.length,
     unclosedQuote,
     suspiciousEncodingHints: encodingHints,
-    detectedPlatform: detectPlatform(headers),
+    detectedPlatform: detectPlatform(headers, dataRows),
   };
 }

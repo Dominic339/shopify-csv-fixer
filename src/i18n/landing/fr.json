@@ -262,5 +262,41 @@
   "title": "Vérificateur de flux Google Merchant Center",
   "intro": "Merchant Center refuse des produits pour des détails : un prix sans code de devise, « In Stock » au lieu de in_stock, un code-barres arrondi par un tableur. Vérifiez ici votre fichier produits avant de l'importer et corrigez l'essentiel en un clic.",
   "exportTip": "Exportez le flux produits depuis votre boutique ou votre application de flux, ou partez du modèle. Dans Merchant Center, ajoutez le fichier corrigé via Produits → Ajouter des produits à partir d'un fichier."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "La disponibilité s'écrit avec une espace",
+    "body": "Meta prend in stock et out of stock, pas le in_stock de Google. Les flux faits pour Merchant Center sont convertis automatiquement ; les valeurs retirées comme preorder sont signalées pour que vous les changiez."
+   },
+   {
+    "title": "Chaque produit a besoin d'une marque, d'un GTIN ou d'un MPN",
+    "body": "Un produit sans aucun des trois risque de ne pas être importé. Pour vos créations, le nom de votre boutique compte comme marque."
+   },
+   {
+    "title": "L'état est obligatoire",
+    "body": "Contrairement à Google, Meta exige condition pour chaque produit : new, refurbished ou used. Les valeurs comme « New » ou « renewed » sont réécrites automatiquement."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Puis-je réutiliser mon flux Google Merchant Center ?",
+    "a": "En grande partie, car les noms de champs sont les mêmes. Importez-le ici avec le modèle Meta : la disponibilité est convertie aux valeurs de Meta, et tout ce que Meta exige contrairement à Google, comme condition, est signalé."
+   },
+   {
+    "q": "Quel format de fichier est téléchargé ?",
+    "a": "Un CSV avec vos noms de colonnes d'origine, que Commerce Manager accepte comme source de données de catalogue. Vous pouvez importer un fichier .csv, .txt ou .tsv."
+   },
+   {
+    "q": "Les images produits sont-elles vérifiées ?",
+    "a": "L'outil vérifie que chaque lien et chaque image est une adresse https:// complète et qu'il n'y a pas plus de 50 images supplémentaires. Il ne télécharge pas les images : vérifiez qu'elles se chargent et respectent les règles de taille de Meta."
+   }
+  ],
+  "metaTitle": "Vérificateur de catalogue Facebook et Instagram | CSV Meta | StriveFormats",
+  "metaDescription": "Vérifiez un flux de catalogue Meta avant de l'importer dans Commerce Manager. Disponibilité, état et prix sont convertis au format de Meta ; les produits sans marque, GTIN ni MPN sont signalés.",
+  "kicker": "Catalogue Meta",
+  "title": "Vérificateur de catalogue Facebook et Instagram",
+  "intro": "Le catalogue Meta écarte des produits sans prévenir : in_stock au lieu de in stock, un prix sans code de devise, un produit sans marque. Vérifiez ici votre fichier de catalogue avant de l'importer dans Commerce Manager et corrigez l'essentiel en un clic.",
+  "exportTip": "Exportez le flux produits depuis votre boutique ou votre application de flux, ou partez du modèle. Dans Commerce Manager, ouvrez votre catalogue, allez dans Sources de données et ajoutez le CSV corrigé."
  }
 }

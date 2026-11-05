@@ -48,6 +48,7 @@ const PLATFORM_TONE: Record<string, { text: string; glow: string }> = {
   ebay: { text: "text-sky-700 dark:text-sky-400", glow: "rgba(14,165,233,0.22)" },
   amazon: { text: "text-amber-700 dark:text-amber-400", glow: "rgba(245,158,11,0.22)" },
   google: { text: "text-blue-700 dark:text-blue-400", glow: "rgba(59,130,246,0.22)" },
+  meta: { text: "text-indigo-700 dark:text-indigo-400", glow: "rgba(99,102,241,0.22)" },
   general: { text: "text-[var(--secondary-text)]", glow: "rgba(var(--secondary-rgb),0.2)" },
 };
 const badgeRed = "rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400";
@@ -159,7 +160,7 @@ export async function GuidesHubView({ locale, q = "" }: { locale: Locale; q?: st
                   <Link
                     key={p}
                     href={localeHref(locale, `/guides/${p}`)}
-                    className={`lift group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 ${i === 0 ? "sm:col-span-2" : ""} ${i === GUIDE_PLATFORMS.length - 1 ? "lg:col-span-2" : ""}`}
+                    className={`lift group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 ${i === 0 ? "sm:col-span-2" : ""} ${i === GUIDE_PLATFORMS.length - 1 ? "sm:col-span-2 lg:col-span-1" : ""}`}
                   >
                     <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-2xl" style={{ background: `radial-gradient(circle, ${tone.glow}, transparent 70%)` }} />
                     <div className={`relative text-xs font-bold uppercase tracking-[0.14em] ${tone.text}`}>{platformLabel(t, p)}</div>

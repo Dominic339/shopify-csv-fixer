@@ -47,6 +47,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...translated("/ebay-variations-csv-fixer", "monthly", 0.75),
     ...translated("/amazon-csv-fixer", "monthly", 0.8),
     ...translated("/google-merchant-center-feed-checker", "monthly", 0.8),
+    ...translated("/meta-catalog-feed-checker", "monthly", 0.8),
     english("/formats", "monthly", 0.7),
 
     // Store-migration pages (English only)

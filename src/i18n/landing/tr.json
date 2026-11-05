@@ -262,5 +262,41 @@
   "title": "Google Merchant Center Feed Denetleyici",
   "intro": "Merchant Center ürünleri küçük şeyler yüzünden reddeder: para birimi kodu olmayan bir fiyat, in_stock yerine \"In Stock\", bir elektronik tablonun yuvarladığı bir barkod. Ürün dosyanızı yüklemeden önce burada kontrol edin ve çoğunu tek tıkla düzeltin.",
   "exportTip": "Ürün feed'ini mağazanızdan veya feed uygulamanızdan dışa aktarın ya da şablonla başlayın. Merchant Center'da düzeltilmiş dosyayı Ürünler → Dosyadan ürün ekle bölümünden ekleyin."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "Stok durumu boşluk içerir",
+    "body": "Meta, Google'ın in_stock değerini değil, in stock ve out of stock değerlerini alır. Merchant Center için hazırlanan feed'ler otomatik dönüştürülür; preorder gibi kaldırılmış değerler değiştirmeniz için işaretlenir."
+   },
+   {
+    "title": "Her ürünün markası, GTIN'i veya MPN'si olmalı",
+    "body": "Üçünden hiçbiri olmayan bir ürün yüklenmeyebilir. Kendi ürettiğiniz ürünlerde mağazanızın adı marka sayılır."
+   },
+   {
+    "title": "Ürün durumu zorunlu",
+    "body": "Google'dan farklı olarak Meta her üründe condition ister: new, refurbished veya used. \"New\" veya \"renewed\" gibi değerler otomatik olarak yeniden yazılır."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Google Merchant Center feed'imi yeniden kullanabilir miyim?",
+    "a": "Büyük ölçüde evet, çünkü alan adları aynıdır. Meta şablonuyla buraya yükleyin: stok durumu Meta'nın değerlerine dönüştürülür ve Meta'nın Google'dan farklı olarak istediği condition gibi alanlar işaretlenir."
+   },
+   {
+    "q": "Hangi dosya biçiminde indirilir?",
+    "a": "Commerce Manager'ın katalog veri kaynağı olarak kabul ettiği, orijinal sütun adlarınızı içeren bir CSV. .csv, .txt veya .tsv dosyası yükleyebilirsiniz."
+   },
+   {
+    "q": "Ürün görsellerini kontrol ediyor mu?",
+    "a": "Her bağlantının ve görselin tam bir https:// adresi olduğunu ve 50'den fazla ek görsel olmadığını kontrol eder. Görselleri indirmez; bu yüzden açıldıklarını ve Meta'nın boyut kurallarına uyduklarını kendiniz kontrol edin."
+   }
+  ],
+  "metaTitle": "Facebook ve Instagram Katalog Denetleyici | Meta Katalog CSV | StriveFormats",
+  "metaDescription": "Meta katalog feed'inizi Commerce Manager'a yüklemeden önce kontrol edin. Stok durumu, ürün durumu ve fiyatlar Meta'nın biçimine dönüştürülür; markası, GTIN'i veya MPN'si olmayan ürünler işaretlenir.",
+  "kicker": "Meta kataloğu",
+  "title": "Facebook ve Instagram Katalog Denetleyici",
+  "intro": "Meta kataloğu ürünleri sessizce düşürür: in stock yerine in_stock, para birimi kodu olmayan bir fiyat, markası olmayan bir ürün. Katalog dosyanızı Commerce Manager'a yüklemeden önce burada kontrol edin ve çoğunu tek tıkla düzeltin.",
+  "exportTip": "Ürün feed'ini mağazanızdan veya feed uygulamanızdan dışa aktarın ya da şablonla başlayın. Commerce Manager'da kataloğunuzu açın, Veri kaynakları'na gidin ve düzeltilmiş CSV'yi ekleyin."
  }
 }

@@ -387,6 +387,7 @@
     "fmt_ebay_listings": "Annonces eBay",
     "fmt_amazon_inventory_loader": "Chargeur d'inventaire Amazon",
     "fmt_google_merchant_center": "Google Merchant Center",
+    "fmt_meta_catalog": "Catalogue Meta (Facebook et Instagram)",
     "fmt_shopify_products": "Shopify (nouveau modèle)",
     "fmt_shopify_products_legacy": "Shopify (ancien modèle)",
     "noEquivalent": "(aucun équivalent dans le format cible) :",
@@ -413,6 +414,7 @@
     "viewPlans": "Voir les forfaits",
     "fileRestored": "Votre fichier est de nouveau chargé : vous pouvez le télécharger.",
     "googleIntro": "Un flux Merchant Center a besoin de deux informations absentes de votre export : l'adresse de votre boutique, pour lier chaque produit à sa page, et la devise de vos prix.",
+    "metaIntro": "Un catalogue Meta a besoin de deux informations absentes de votre export : l'adresse de votre boutique, pour lier chaque produit à sa page, et la devise de vos prix.",
     "storeUrl": "Adresse de la boutique",
     "storeUrlHint": "Ou un modèle pour la page de chaque produit, comme https://shop.example.com/p/{sku} ou …/products/{handle}.",
     "currency": "Devise (code ISO)"

@@ -793,6 +793,72 @@ export const SHEET_EXAMPLES: Record<string, SheetExample> = {
     ["Adults", "adult"],
     ["children", "kids"],
   ]),
+  // ── Meta catalog ──
+  "meta/missing_required_header": {
+    cols: ["id", "title", "price"],
+    colsAfter: ["id", "title", "price", "condition"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD"]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD", "new"]],
+  },
+  "meta/missing_value": gmc("image_link", [["", "https://example.com/images/mug.jpg"]]),
+  "meta/missing_identifier": {
+    cols: [...G, "brand", "gtin", "mpn"],
+    before: [["CUP-07", "Handmade Raku Tea Cup", "", "", ""]],
+    after: [["CUP-07", "Handmade Raku Tea Cup", "Acme Studio", "", ""]],
+  },
+  "meta/duplicate_id": {
+    cols: G,
+    before: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["MUG-01", "Acme Travel Mug, 16 oz"],
+    ],
+    after: [
+      ["MUG-01", "Acme Ceramic Coffee Mug, 12 oz"],
+      ["MUG-02", "Acme Travel Mug, 16 oz"],
+    ],
+    flag: [[0, 0]],
+  },
+  "meta/id_too_long": { cols: G, before: [["ACME-CERAMIC-COFFEE-MUG-12OZ-… (120 characters)", "Acme Ceramic Coffee Mug, 12 oz"]], after: [["ACME-MUG-12OZ-WHT", "Acme Ceramic Coffee Mug, 12 oz"]] },
+  "meta/title_too_long": { cols: G, before: [["MUG-01", `${LONG_TITLE} … (230 characters)`]], after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz, Speckled Stoneware"]] },
+  "meta/description_too_long": gmc("description", [["Hand-thrown stoneware mug… (10,400 characters)", "Hand-thrown stoneware mug… (1,800 characters)"]]),
+  "meta/invalid_url": gmc("image_link", [
+    ["mug.jpg", "https://example.com/images/mug.jpg"],
+    ["www.example.com/tote.jpg", "https://www.example.com/tote.jpg"],
+  ]),
+  "meta/too_many_images": gmc("additional_image_link", [["https://example.com/1.jpg,… (64 URLs)", "https://example.com/1.jpg,… (50 URLs)"]]),
+  "meta/invalid_availability": gmc("availability", [
+    ["in_stock", "in stock"],
+    ["Sold out", "out of stock"],
+  ]),
+  "meta/price_missing_currency": gmc("price", [
+    ["18.00", "18.00 USD"],
+    ["$24", "24.00 USD"],
+  ]),
+  "meta/invalid_price": gmc("price", [
+    ["18,00 EUR", "18.00 EUR"],
+    ["€24", "24.00 EUR"],
+  ]),
+  "meta/invalid_sale_price": {
+    cols: [...G, "price", "sale_price"],
+    before: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "15.00 USD", "18.00 USD"]],
+    after: [["MUG-01", "Acme Ceramic Coffee Mug, 12 oz", "18.00 USD", "15.00 USD"]],
+  },
+  "meta/invalid_condition": gmc("condition", [
+    ["New", "new"],
+    ["renewed", "refurbished"],
+  ]),
+  "meta/invalid_gtin": gmc("gtin", [
+    ["4.00638E+12", "4006381333931"],
+    ["4006-3813-3393-1", "4006381333931"],
+  ]),
+  "meta/invalid_gender": gmc("gender", [
+    ["Men", "male"],
+    ["Women's", "female"],
+  ]),
+  "meta/invalid_age_group": gmc("age_group", [
+    ["Teens", "teen"],
+    ["all-ages", "all ages"],
+  ]),
 };
 
 /** The example for an issue code, or null when there is none. */

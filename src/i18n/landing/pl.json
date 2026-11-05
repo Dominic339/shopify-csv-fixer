@@ -262,5 +262,41 @@
   "title": "Walidator pliku danych Google Merchant Center",
   "intro": "Merchant Center odrzuca produkty przez drobiazgi: cenę bez kodu waluty, „In Stock” zamiast in_stock, kod kreskowy zaokrąglony przez arkusz. Sprawdź tu plik produktów przed przesłaniem i napraw większość jednym kliknięciem.",
   "exportTip": "Wyeksportuj plik danych produktów ze sklepu lub aplikacji do plików danych albo zacznij od szablonu. W Merchant Center dodaj poprawiony plik w Produkty → Dodaj produkty z pliku."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "Dostępność ze spacją",
+    "body": "Meta przyjmuje in stock i out of stock, a nie in_stock z Google. Pliki przygotowane dla Merchant Center są zamieniane automatycznie; wycofane wartości, np. preorder, są oznaczane do zmiany."
+   },
+   {
+    "title": "Każdy produkt potrzebuje marki, GTIN lub MPN",
+    "body": "Produkt bez żadnego z nich może nie zostać przesłany. Dla własnych wyrobów nazwa sklepu liczy się jako marka."
+   },
+   {
+    "title": "Stan jest wymagany",
+    "body": "W przeciwieństwie do Google Meta wymaga condition przy każdym produkcie: new, refurbished lub used. Wartości takie jak „New” czy „renewed” są poprawiane automatycznie."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Czy mogę ponownie użyć pliku z Google Merchant Center?",
+    "a": "W dużej mierze tak, bo nazwy pól są te same. Prześlij go tu z szablonem Meta: dostępność zostanie zamieniona na wartości Meta, a to, czego Meta wymaga w odróżnieniu od Google, np. condition, zostanie oznaczone."
+   },
+   {
+    "q": "W jakim formacie pobiera się plik?",
+    "a": "Jako CSV z oryginalnymi nazwami kolumn, który Commerce Manager przyjmuje jako źródło danych katalogu. Możesz przesłać plik .csv, .txt lub .tsv."
+   },
+   {
+    "q": "Czy sprawdza zdjęcia produktów?",
+    "a": "Sprawdza, czy każdy link i zdjęcie to pełny adres https:// i czy dodatkowych zdjęć nie ma więcej niż 50. Nie pobiera zdjęć, więc sam sprawdź, czy się ładują i spełniają zasady Meta dotyczące rozmiaru."
+   }
+  ],
+  "metaTitle": "Walidator katalogu Facebooka i Instagrama | CSV katalogu Meta | StriveFormats",
+  "metaDescription": "Sprawdź plik katalogu Meta przed przesłaniem do Commerce Manager. Dostępność, stan i ceny są zamieniane na format Meta; produkty bez marki, GTIN i MPN są oznaczane.",
+  "kicker": "Katalog Meta",
+  "title": "Walidator katalogu Facebooka i Instagrama",
+  "intro": "Katalog Meta po cichu odrzuca produkty: in_stock zamiast in stock, cenę bez kodu waluty, produkt bez marki. Sprawdź tu plik katalogu przed przesłaniem do Commerce Manager i napraw większość jednym kliknięciem.",
+  "exportTip": "Wyeksportuj plik danych produktów ze sklepu lub aplikacji albo zacznij od szablonu. W Commerce Manager otwórz katalog, przejdź do Źródeł danych i dodaj poprawiony plik CSV."
  }
 }
