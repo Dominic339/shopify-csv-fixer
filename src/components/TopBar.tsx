@@ -85,10 +85,10 @@ export default function TopBar({ navByLocale }: Props) {
         const supabase = await getSupabase();
         if (!alive) return;
         unsub = supabase.auth.onAuthStateChange((_event, nextSession) => {
-          setSession((nextSession as any) ?? null);
+          setSession(nextSession ?? null);
         });
         const { data } = await supabase.auth.getSession();
-        if (alive) setSession((data?.session as any) ?? null);
+        if (alive) setSession(data?.session ?? null);
       } catch {
         // ignore
       }

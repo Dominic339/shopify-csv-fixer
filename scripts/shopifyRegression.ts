@@ -16,7 +16,7 @@ function readText(p: string) {
   return fs.readFileSync(p, "utf8");
 }
 
-function assert(condition: any, message: string, details: string[]) {
+function assert(condition: unknown, message: string, details: string[]) {
   if (!condition) details.push(message);
 }
 

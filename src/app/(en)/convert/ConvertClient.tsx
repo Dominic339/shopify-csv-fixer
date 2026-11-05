@@ -104,6 +104,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
     const pending = takePendingFile("convert");
     if (!pending) return;
     const [src, tgt] = pending.formatId.split(">");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restores a file stashed before sign-in or checkout
     if (src) setSourceFormatId(src);
     if (tgt) setTargetFormatId(tgt);
     setFileName(pending.name);
@@ -139,6 +140,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
 
   // Convert as soon as there is a file, and again whenever a format changes.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- converts again whenever the file, a format or a setting changes
     if (csvText) runConvert(csvText, sourceFormatId, targetFormatId, options);
   }, [csvText, sourceFormatId, targetFormatId, options, runConvert]);
 

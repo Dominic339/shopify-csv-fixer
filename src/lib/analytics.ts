@@ -1,10 +1,10 @@
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
-export function trackEvent(name: string, params?: Record<string, any>) {
+export function trackEvent(name: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   if (!window.gtag) return;
 

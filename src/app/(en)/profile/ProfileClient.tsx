@@ -54,6 +54,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
     const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
     const cookieVal = match?.[1];
     if (cookieVal && (LOCALES as readonly string[]).includes(cookieVal)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the language cookie is read after hydration so the first render matches the server
       setCurrentLocale(cookieVal as Locale);
     }
   }, []);
@@ -84,7 +85,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
         plan: (activePlan ?? "free") as SubStatus["plan"],
         status: data?.status ?? "none",
         current_period_end: data?.current_period_end ?? null,
-        stripeCustomerId: (data as any)?.stripe_customer_id ?? null,
+        stripeCustomerId: data?.stripe_customer_id ?? null,
       });
     }
 
@@ -100,6 +101,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
 
   useEffect(() => {
     const FALLBACK_SUB: SubStatus = { signedIn: false, plan: "free", status: "none", current_period_end: null };
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the subscription after mount
     load().catch(() => { setSub(FALLBACK_SUB); setStripeEnabled(true); });
   }, []);
 
@@ -150,7 +152,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       }
 
       window.location.href = j.url;
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setMsg(tProfile.billingError);
     } finally {
@@ -199,7 +201,7 @@ export default function ProfileClient({ tProfile, navT }: Props) {
       }
 
       window.location.href = j.url;
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setMsg(tProfile.billingError);
     } finally {

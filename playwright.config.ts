@@ -3,6 +3,9 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 30_000,
+  // Assertions wait up to 10s: on a busy CI runner the first page load can take several
+  // seconds to download and run its JavaScript. No retries, so a real failure still fails.
+  expect: { timeout: 10_000 },
   use: {
     baseURL: "http://localhost:3000",
     headless: true,

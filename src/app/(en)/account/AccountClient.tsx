@@ -32,6 +32,7 @@ export default function AccountClient() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the account after mount
     refreshMe();
   }, []);
 

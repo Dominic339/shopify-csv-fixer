@@ -1,7 +1,7 @@
 // src/components/EditableIssuesTable.tsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { getIssueMeta } from "@/lib/validation/issueMetaRegistry";
 import { ENGLISH_VALIDATION_TEXT, type ValidationText } from "@/lib/i18n/validationText";
 import { fmt, plural } from "@/lib/i18n/fmt";
@@ -24,14 +24,18 @@ type AnyIssue = {
   details?: Record<string, unknown>;
 };
 
+/** shopify/options_not_unique details: the repeated option combinations and their rows. */
+type DuplicateCombo = { options?: Record<string, string>; rows?: number[] };
+type DuplicateDetails = { duplicateCombos?: DuplicateCombo[]; duplicateCombo?: Record<string, string>; rows?: number[] };
+
 function normalizeRowIndex(it: AnyIssue) {
-  if (typeof (it as any).rowIndex === "number") return (it as any).rowIndex as number;
+  if (typeof it.rowIndex === "number") return it.rowIndex;
   if (typeof it.row === "number") return Math.max(0, it.row - 1);
   return -1;
 }
 
 function normalizeSeverity(it: AnyIssue): "error" | "warning" | "info" {
-  return ((it.severity ?? it.level ?? "error") as any) || "error";
+  return it.severity ?? it.level ?? "error";
 }
 
 export function EditableIssuesTable(props: {
@@ -76,12 +80,15 @@ export function EditableIssuesTable(props: {
     setOpenWhy((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // When switching formats/files, collapse
-  useEffect(() => {
+  // When switching formats/files, collapse (adjusting state during render, as React recommends,
+  // so the old expanded rows never flash for one frame).
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
     setOpen(new Set());
     setOpenWhy({});
     setVisibleCount(PAGE);
-  }, [resetKey]);
+  }
 
   const issuesByRow = useMemo(() => {
     const map = new Map<number, AnyIssue[]>();
@@ -174,7 +181,7 @@ export function EditableIssuesTable(props: {
                 onFocusCapture={() => props.onRowEditStart?.(rowIndex)}
                 onBlurCapture={(e) => {
                   const next = (e.relatedTarget as Node | null);
-                  if (!next || !(e.currentTarget as any).contains(next)) props.onRowEditEnd?.(rowIndex);
+                  if (!next || !e.currentTarget.contains(next)) props.onRowEditEnd?.(rowIndex);
                 }}
               >
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -230,8 +237,8 @@ export function EditableIssuesTable(props: {
                         {list.slice(0, 6).map((it, idx) => {
                           const sev = normalizeSeverity(it);
                           const title = (it.column ?? it.field ?? "(field)").toString();
-                          const suggestion = (it as any).suggestion as string | undefined;
-                          const code = (it as any).code as string | undefined;
+                          const suggestion = it.suggestion;
+                          const code = it.code;
 
                           const meta = code ? getIssueMeta(formatId, code) : undefined;
                           const why = vt.issue(code, "whyPlatformCares", meta?.whyPlatformCares);
@@ -239,7 +246,7 @@ export function EditableIssuesTable(props: {
 
                           const whyKey = `${rowIndex}:${idx}:${code ?? title}`;
                           const showWhy = Boolean(openWhy[whyKey]);
-                          const details = (it as any).details as any | undefined;
+                          const details = it.details as DuplicateDetails | undefined;
 
                           return (
                             <div
@@ -284,11 +291,11 @@ export function EditableIssuesTable(props: {
                                   <div className="mt-1 text-[color:rgba(var(--muted-rgb),1)]">
                                     {(Array.isArray(details?.duplicateCombos) ? details.duplicateCombos : [{ options: details?.duplicateCombo, rows: details?.rows }])
                                       .slice(0, 3)
-                                      .map((c: any, i: number) => (
+                                      .map((c: DuplicateCombo, i: number) => (
                                         <div key={i} className={i ? "mt-2 pt-2 border-t border-[color:rgba(255,200,0,0.2)]" : ""}>
                                           <div>{t.duplicateCombo}</div>
                                           <div className="mt-1 space-y-0.5">
-                                            {Object.entries((c?.options ?? c ?? {}) as Record<string, string>).map(([k, v]) => (
+                                            {Object.entries((c?.options ?? c ?? {}) as Record<string, unknown>).map(([k, v]) => (
                                               <div key={k}>
                                                 <span className="font-semibold text-[var(--text)]">{k}:</span>{" "}
                                                 {String(v)}

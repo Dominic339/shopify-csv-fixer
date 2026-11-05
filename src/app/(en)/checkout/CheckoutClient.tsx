@@ -83,6 +83,7 @@ export default function CheckoutClient({ authByLocale }: Props) {
     if (status === "success") {
       pollAndRedirect();
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- nothing to wait for unless the checkout succeeded
       setSynced(true);
     }
 

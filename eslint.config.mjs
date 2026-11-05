@@ -18,16 +18,17 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
-      // Pre-existing violations — downgraded to warnings to keep CI green
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@next/next/no-html-link-for-pages": "warn",
-      "react/no-unescaped-entities": "warn",
-      "react-hooks/exhaustive-deps": "warn",
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/use-memo": "warn",
-      "prefer-rest-params": "warn",
+      // The codebase is clean against these, so any new violation fails CI. Where a rule has to be
+      // broken on purpose, disable it on that line with a reason after "--".
+      "@typescript-eslint/no-explicit-any": "error",
+      "@next/next/no-html-link-for-pages": "error",
+      "react/no-unescaped-entities": "error",
+      "react-hooks/exhaustive-deps": "error",
+      "react-hooks/set-state-in-effect": "error",
+      "react-hooks/use-memo": "error",
+      "prefer-rest-params": "error",
       // A leading underscore marks a parameter or variable that is unused on purpose.
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
     },
   },
 ]);

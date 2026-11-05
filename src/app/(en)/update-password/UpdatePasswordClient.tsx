@@ -60,8 +60,8 @@ export default function UpdatePasswordClient({ authByLocale }: Props) {
       if (error) throw error;
       setMsg({ text: t.passwordUpdated, ok: true });
       setTimeout(() => router.push("/login"), 2000);
-    } catch (err: any) {
-      setMsg({ text: err?.message || t.updateFailed, ok: false });
+    } catch (err) {
+      setMsg({ text: (err instanceof Error && err.message) || t.updateFailed, ok: false });
     } finally {
       setBusy(false);
     }

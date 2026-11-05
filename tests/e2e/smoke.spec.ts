@@ -46,7 +46,7 @@ test("simulate import (in Advanced checks) shows PASS/FAIL card and turns off cl
   const toggle = page.getByRole("button", { name: /Simulate Import/i });
   await toggle.click();
   const card = page.locator('[data-testid="simulation-results-card"]');
-  await expect(card).toBeVisible({ timeout: 5_000 });
+  await expect(card).toBeVisible();
   await expect(card).toContainText("PASS");
 
   // 2. Toggle it off again — card should disappear
@@ -64,7 +64,7 @@ test("general MDX guide renders TOC on desktop viewport", async ({ page }) => {
 
   // TOC nav should exist (data-testid on the MdxGuideToc component)
   const toc = page.locator('[data-testid="guide-toc"]');
-  await expect(toc).toBeVisible({ timeout: 5_000 });
+  await expect(toc).toBeVisible();
 
   // At least one TOC link should be rendered
   const firstLink = toc.locator("a").first();
@@ -99,7 +99,7 @@ test("new curated MDX guide renders with TOC and section cards on desktop", asyn
 
   // TOC nav should exist on wide desktop viewport
   const toc = page.locator('[data-testid="guide-toc"]');
-  await expect(toc).toBeVisible({ timeout: 5_000 });
+  await expect(toc).toBeVisible();
 
   // At least one section must exist (rehypeWrapSections wraps h2s in <section>)
   expect(await page.locator("section").count()).toBeGreaterThan(0);
@@ -205,7 +205,7 @@ test("locale-prefixed /de/presets/shopify_products renders translated chrome", a
   // Translated section heading — "Erwartete Spalten" (German for "Expected columns")
   // We also accept English fallback in case the key resolves the same way
   const expectedColsHeading = page.getByRole("heading", { level: 2 }).first();
-  await expect(expectedColsHeading).toBeVisible({ timeout: 5_000 });
+  await expect(expectedColsHeading).toBeVisible();
 });
 
 test("locale-prefixed /de/presets lists preset cards with locale-aware detail links", async ({ page }) => {

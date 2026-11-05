@@ -26,8 +26,8 @@ export default function ResetPasswordClient({ authByLocale }: Props) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) throw error;
       setMsg({ text: t.resetSent, ok: true });
-    } catch (err: any) {
-      setMsg({ text: err?.message || t.somethingWrong, ok: false });
+    } catch (err) {
+      setMsg({ text: (err instanceof Error && err.message) || t.somethingWrong, ok: false });
     } finally {
       setBusy(false);
     }

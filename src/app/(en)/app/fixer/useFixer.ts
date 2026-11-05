@@ -192,6 +192,7 @@ export function useFixer(t: AppStrings) {
   // When the user changes the issue filter, we want the app to re-pin the relevant rows for that filter.
   // Suppression is only meant to apply within the current filter scope.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- suppressed pins only apply within one filter, so a new filter resets them
     if (suppressedAutoPins.size) setSuppressedAutoPins(new Set());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueSeverityFilter]);
@@ -225,6 +226,7 @@ export function useFixer(t: AppStrings) {
     const exists = allFormats.some((f) => f.id === preset);
     if (!exists) return; // wait until formats load
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ?preset= is read after hydration so the first render matches the server
     setFormatId(preset);
     appliedPresetRef.current = true;
   }, [allFormats]);
@@ -238,6 +240,7 @@ export function useFixer(t: AppStrings) {
     const qp = new URLSearchParams(window.location.search);
     const exportName = qp.get("exportName");
     if (exportName) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ?exportName= is read after hydration so the first render matches the server
       setExportBaseName(exportName);
       appliedExportNameRef.current = true;
       return;
@@ -254,6 +257,7 @@ export function useFixer(t: AppStrings) {
   useEffect(() => {
     if (!allFormats.length) return;
     if (allFormats.some((f) => f.id === formatId)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- falls back when the selected custom format is deleted
     setFormatId(allFormats[0]!.id);
   }, [allFormats, formatId]);
 
@@ -302,6 +306,7 @@ export function useFixer(t: AppStrings) {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the plan and export quota after mount
     void refreshQuotaAndPlan();
   }, []);
 
@@ -318,6 +323,7 @@ export function useFixer(t: AppStrings) {
   // Load (and live-refresh) Custom Formats only when the user can access them.
   useEffect(() => {
     if (!canAccessCustomFormats) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- custom formats are cleared when the plan no longer allows them
       setCustomFormats([]);
       return;
     }
@@ -353,6 +359,7 @@ export function useFixer(t: AppStrings) {
     const hasErrors = issues.some((i) => (i.severity ?? i.level) === "error");
     const hasWarnings = issues.some((i) => (i.severity ?? i.level) === "warning");
     const status: DocStatus = hasErrors ? "errors" : hasWarnings ? "warnings" : issues.length ? "warnings" : "clean";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- records the active workspace file's status as its issues change
     setDocStatuses((prev) => new Map(prev).set(activeWorkspaceDocId, status));
   }, [activeWorkspaceDocId, issues]);
 
@@ -680,6 +687,7 @@ useEffect(() => {
   relevantRowsForCurrentFilter.forEach((r) => {
     if (!suppressedAutoPins.has(r)) next.add(r);
   });
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- a new filter re-pins the rows relevant to it
   setAutoPinnedRows(next);
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [issueSeverityFilter]);
@@ -687,6 +695,7 @@ useEffect(() => {
 // While staying in the same filter scope, only ADD new relevant rows (sticky pins).
 useEffect(() => {
   if (!rows.length) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sticky pins: rows are only added while the filter stays the same
     if (autoPinnedRows.size) setAutoPinnedRows(new Set());
     return;
   }
@@ -1021,6 +1030,7 @@ useEffect(() => {
     if (!pending) return;
     const format = allFormats.find((f) => f.id === pending.formatId) ?? activeFormat;
     if (!format) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restores a file stashed before sign-in or checkout
     setFormatId(format.id);
     setLastUploadedText(pending.text);
     setFileName(pending.name);
@@ -1030,6 +1040,7 @@ useEffect(() => {
 
   // Re-run when format changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a new format clears the old results and re-runs the file
     setIssues([]);
     setParseIssues([]);
     setAutoFixes([]);
@@ -1051,6 +1062,7 @@ useEffect(() => {
     if (formatId !== "shopify_products") return;
     if (!lastUploadedText || !activeFormat) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- toggling strict mode re-runs the file
     void runFormatOnText(activeFormat, lastUploadedText, fileName ?? undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strictShopify]);
@@ -1058,6 +1070,7 @@ useEffect(() => {
   // Auto-disable strict mode if the plan drops below Advanced while it's on.
   useEffect(() => {
     if (strictShopify && !isAdvancedActive) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- strict mode is turned off when the plan drops below Advanced
       setStrictShopify(false);
       setInfoBanner(t.strictModeTurnedOff);
     }

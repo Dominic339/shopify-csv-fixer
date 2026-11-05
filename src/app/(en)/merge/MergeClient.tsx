@@ -144,7 +144,7 @@ export default function MergeClient({ t }: Props) {
         }
       );
       setResult(out);
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setError(t.errFailed);
     } finally {
