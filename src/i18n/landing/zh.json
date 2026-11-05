@@ -262,5 +262,41 @@
   "title": "Google Merchant Center Feed 检查工具",
   "intro": "Merchant Center 会因为小问题拒登商品：价格没有货币代码、用了“In Stock”而不是 in_stock、条形码被电子表格四舍五入。上传前先在这里检查商品文件，大部分问题一键修复。",
   "exportTip": "从店铺或 Feed 应用导出商品 Feed，或从模板开始。在 Merchant Center 中，通过“商品”→“从文件添加商品”添加修复后的文件。"
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "库存状态带空格",
+    "body": "Meta 接受 in stock 和 out of stock，而不是 Google 的 in_stock。为 Merchant Center 制作的 Feed 会自动转换；preorder 等已停用的值会被标出，需要你修改。"
+   },
+   {
+    "title": "每个商品都需要品牌、GTIN 或 MPN",
+    "body": "三者都没有的商品可能无法上传。自制商品可以用店铺名称作为品牌。"
+   },
+   {
+    "title": "商品状况必填",
+    "body": "与 Google 不同，Meta 要求每个商品都提供 condition：new、refurbished 或 used。“New”或“renewed”等值会自动改写。"
+   }
+  ],
+  "faq": [
+   {
+    "q": "可以复用 Google Merchant Center 的 Feed 吗？",
+    "a": "大部分可以，因为字段名称相同。用 Meta 预设在这里上传：库存状态会转换为 Meta 的值，Meta 需要而 Google 不需要的字段（例如 condition）会被标出。"
+   },
+   {
+    "q": "下载的是什么文件格式？",
+    "a": "保留原始列名的 CSV，商务管理工具可将其作为目录数据源。你可以上传 .csv、.txt 或 .tsv 文件。"
+   },
+   {
+    "q": "会检查商品图片吗？",
+    "a": "会检查每个链接和图片是否为完整的 https:// 地址，以及附加图片是否不超过 50 张。不会下载图片，请自行确认图片能正常打开并符合 Meta 的尺寸要求。"
+   }
+  ],
+  "metaTitle": "Facebook 和 Instagram 目录检查工具 | Meta 目录 CSV | StriveFormats",
+  "metaDescription": "在上传到商务管理工具之前检查 Meta 目录 Feed。库存状态、商品状况和价格会转换为 Meta 的格式；没有品牌、GTIN 或 MPN 的商品会被标出。",
+  "kicker": "Meta 目录",
+  "title": "Facebook 和 Instagram 目录检查工具",
+  "intro": "Meta 目录会悄悄丢弃商品：用了 in_stock 而不是 in stock、价格没有货币代码、商品没有品牌。上传到商务管理工具之前，先在这里检查目录文件，大部分问题一键修复。",
+  "exportTip": "从店铺或 Feed 应用导出商品 Feed，或从模板开始。在商务管理工具中打开目录，进入“数据源”，添加修复后的 CSV。"
  }
 }

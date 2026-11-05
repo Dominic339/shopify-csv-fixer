@@ -262,5 +262,41 @@
   "title": "Validador de feeds de Google Merchant Center",
   "intro": "Merchant Center rechaza productos por detalles: un precio sin código de moneda, \"In Stock\" en vez de in_stock, un código de barras que una hoja de cálculo redondeó. Revisa aquí tu archivo de productos antes de subirlo y corrige casi todo con un clic.",
   "exportTip": "Exporta el feed de productos desde tu tienda o tu app de feeds, o empieza con la plantilla. En Merchant Center, añade el archivo corregido en Productos → Añadir productos desde un archivo."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "La disponibilidad lleva espacio",
+    "body": "Meta admite in stock y out of stock, no el in_stock de Google. Los feeds hechos para Merchant Center se convierten automáticamente; los valores retirados como preorder se marcan para que los cambies."
+   },
+   {
+    "title": "Cada producto necesita marca, GTIN o MPN",
+    "body": "Un producto sin ninguno de los tres puede no subirse. Para los productos que fabricas tú, el nombre de tu tienda cuenta como marca."
+   },
+   {
+    "title": "El estado es obligatorio",
+    "body": "A diferencia de Google, Meta exige condition en cada producto: new, refurbished o used. Valores como \"New\" o \"renewed\" se reescriben automáticamente."
+   }
+  ],
+  "faq": [
+   {
+    "q": "¿Puedo reutilizar mi feed de Google Merchant Center?",
+    "a": "En gran parte sí, porque los nombres de campo son los mismos. Súbelo aquí con la plantilla de Meta: la disponibilidad se convierte a los valores de Meta y se marca lo que Meta necesita y Google no, como condition."
+   },
+   {
+    "q": "¿Qué formato de archivo se descarga?",
+    "a": "Un CSV con tus nombres de columna originales, que Commerce Manager acepta como origen de datos del catálogo. Puedes subir un archivo .csv, .txt o .tsv."
+   },
+   {
+    "q": "¿Revisa las imágenes de producto?",
+    "a": "Comprueba que cada enlace e imagen sea una dirección https:// completa y que no haya más de 50 imágenes adicionales. No descarga las imágenes, así que comprueba que cargan y cumplen las normas de tamaño de Meta."
+   }
+  ],
+  "metaTitle": "Validador de catálogo de Facebook e Instagram | CSV de Meta | StriveFormats",
+  "metaDescription": "Revisa un feed de catálogo de Meta antes de subirlo a Commerce Manager. Disponibilidad, estado y precios se convierten al formato de Meta; se marcan los productos sin marca, GTIN ni MPN.",
+  "kicker": "Catálogo de Meta",
+  "title": "Validador de catálogo de Facebook e Instagram",
+  "intro": "El catálogo de Meta descarta productos sin avisar: in_stock en vez de in stock, un precio sin código de moneda, un producto sin marca. Revisa aquí tu archivo de catálogo antes de subirlo a Commerce Manager y corrige casi todo con un clic.",
+  "exportTip": "Exporta el feed de productos desde tu tienda o tu app de feeds, o empieza con la plantilla. En Commerce Manager, abre tu catálogo, ve a Orígenes de datos y añade el CSV corregido."
  }
 }

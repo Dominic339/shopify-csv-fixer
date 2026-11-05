@@ -262,5 +262,41 @@
   "title": "Google Merchant Center-feedchecker",
   "intro": "Merchant Center keurt producten af om kleine dingen: een prijs zonder valutacode, \"In Stock\" in plaats van in_stock, een streepjescode die een spreadsheet heeft afgerond. Controleer je productbestand hier voor het uploaden en los het meeste met één klik op.",
   "exportTip": "Exporteer de productfeed uit je winkel of feed-app, of begin met de sjabloon. Voeg het gecorrigeerde bestand in Merchant Center toe via Producten → Producten toevoegen uit een bestand."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "Beschikbaarheid met een spatie",
+    "body": "Meta neemt in stock en out of stock, niet Google's in_stock. Feeds voor Merchant Center worden automatisch omgezet; vervallen waarden zoals preorder worden gemarkeerd zodat je ze aanpast."
+   },
+   {
+    "title": "Elk product heeft een merk, GTIN of MPN nodig",
+    "body": "Een product zonder een van de drie wordt mogelijk niet geladen. Voor producten die je zelf maakt, telt de naam van je winkel als merk."
+   },
+   {
+    "title": "Staat is verplicht",
+    "body": "Anders dan Google vraagt Meta condition bij elk product: new, refurbished of used. Waarden als \"New\" of \"renewed\" worden automatisch herschreven."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Kan ik mijn Google Merchant Center-feed hergebruiken?",
+    "a": "Grotendeels wel, want de veldnamen zijn hetzelfde. Upload hem hier met de Meta-preset: de beschikbaarheid wordt omgezet naar de waarden van Meta, en wat Meta anders dan Google nodig heeft, zoals condition, wordt gemarkeerd."
+   },
+   {
+    "q": "Welk bestandsformaat wordt gedownload?",
+    "a": "Een CSV met je oorspronkelijke kolomnamen, die Commerce Manager accepteert als gegevensbron voor catalogi. Je kunt een .csv-, .txt- of .tsv-bestand uploaden."
+   },
+   {
+    "q": "Worden productafbeeldingen gecontroleerd?",
+    "a": "Er wordt gecontroleerd of elke link en afbeelding een volledig https://-adres is en of er niet meer dan 50 extra afbeeldingen zijn. De afbeeldingen worden niet gedownload, dus controleer zelf of ze laden en aan de formaatregels van Meta voldoen."
+   }
+  ],
+  "metaTitle": "Facebook- en Instagram-catalogus controleren | Meta-catalogus-CSV | StriveFormats",
+  "metaDescription": "Controleer een Meta-catalogusfeed voordat je hem uploadt naar Commerce Manager. Beschikbaarheid, staat en prijzen worden omgezet naar het formaat van Meta; producten zonder merk, GTIN of MPN worden gemarkeerd.",
+  "kicker": "Meta-catalogus",
+  "title": "Facebook- en Instagram-catalogus-checker",
+  "intro": "De catalogus van Meta laat producten stilletjes vallen: in_stock in plaats van in stock, een prijs zonder valutacode, een product zonder merk. Controleer je catalogusbestand hier voor het uploaden naar Commerce Manager en los het meeste met één klik op.",
+  "exportTip": "Exporteer de productfeed uit je winkel of feed-app, of begin met de sjabloon. Open in Commerce Manager je catalogus, ga naar Gegevensbronnen en voeg de gecorrigeerde CSV toe."
  }
 }

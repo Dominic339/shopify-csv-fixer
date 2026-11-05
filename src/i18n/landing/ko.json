@@ -262,5 +262,41 @@
   "title": "Google Merchant Center 피드 검사기",
   "intro": "Merchant Center는 사소한 이유로 제품을 비승인합니다. 통화 코드 없는 가격, in_stock 대신 \"In Stock\", 스프레드시트가 반올림한 바코드 같은 것들이죠. 업로드하기 전에 여기서 제품 파일을 확인하고 대부분을 클릭 한 번으로 고치세요.",
   "exportTip": "스토어나 피드 앱에서 제품 피드를 내보내거나 템플릿으로 시작하세요. Merchant Center에서는 제품 → 파일에서 제품 추가에서 수정된 파일을 추가합니다."
+ },
+ "meta": {
+  "gotchas": [
+   {
+    "title": "재고 상태에는 공백이 있음",
+    "body": "Meta는 Google의 in_stock이 아니라 in stock과 out of stock을 받습니다. Merchant Center용 피드는 자동으로 변환하고, preorder처럼 폐지된 값은 직접 바꾸도록 표시합니다."
+   },
+   {
+    "title": "모든 제품에 브랜드, GTIN, MPN 중 하나 필요",
+    "body": "셋 다 없는 제품은 업로드되지 않을 수 있습니다. 직접 만든 제품에는 스토어 이름이 브랜드가 됩니다."
+   },
+   {
+    "title": "제품 상태는 필수",
+    "body": "Google과 달리 Meta는 모든 제품에 condition(new, refurbished, used)을 요구합니다. \"New\"나 \"renewed\" 같은 값은 자동으로 고쳐 씁니다."
+   }
+  ],
+  "faq": [
+   {
+    "q": "Google Merchant Center 피드를 다시 쓸 수 있나요?",
+    "a": "필드 이름이 같아서 대부분 가능합니다. Meta 프리셋으로 여기에 올리면 재고 상태가 Meta 값으로 바뀌고, condition처럼 Google과 달리 Meta가 요구하는 항목이 표시됩니다."
+   },
+   {
+    "q": "어떤 파일 형식으로 다운로드되나요?",
+    "a": "원래 열 이름을 그대로 둔 CSV이며, 커머스 관리자의 카탈로그 데이터 소스로 쓸 수 있습니다. .csv, .txt, .tsv 파일을 업로드할 수 있습니다."
+   },
+   {
+    "q": "제품 이미지도 확인하나요?",
+    "a": "모든 링크와 이미지가 https://로 시작하는 전체 주소인지, 추가 이미지가 50개를 넘지 않는지 확인합니다. 이미지를 내려받지는 않으므로 잘 열리는지, Meta의 크기 규정에 맞는지는 직접 확인하세요."
+   }
+  ],
+  "metaTitle": "Facebook·Instagram 카탈로그 검사기 | Meta 카탈로그 CSV | StriveFormats",
+  "metaDescription": "Meta 카탈로그 피드를 커머스 관리자에 업로드하기 전에 확인하세요. 재고 상태, 제품 상태, 가격을 Meta 형식으로 변환하고 브랜드·GTIN·MPN이 없는 제품을 표시합니다.",
+  "kicker": "Meta 카탈로그",
+  "title": "Facebook·Instagram 카탈로그 검사기",
+  "intro": "Meta 카탈로그는 in stock 대신 in_stock, 통화 코드 없는 가격, 브랜드 없는 제품 같은 것을 조용히 제외합니다. 커머스 관리자에 업로드하기 전에 여기서 카탈로그 파일을 확인하고 대부분을 클릭 한 번으로 고치세요.",
+  "exportTip": "스토어나 피드 앱에서 제품 피드를 내보내거나 템플릿으로 시작하세요. 커머스 관리자에서 카탈로그를 열고 데이터 소스에서 수정된 CSV를 추가합니다."
  }
 }

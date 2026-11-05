@@ -44,7 +44,7 @@ function downloadFile(filename: string, content: string, type: string) {
 }
 
 /** Targets that have a fixer preset to check the converted file with. */
-const FIXER_PRESETS = new Set(["shopify_products", "woocommerce_products", "woocommerce_variable_products", "etsy_listings", "ebay_listings", "amazon_inventory_loader", "google_merchant_center"]);
+const FIXER_PRESETS = new Set(["shopify_products", "woocommerce_products", "woocommerce_variable_products", "etsy_listings", "ebay_listings", "amazon_inventory_loader", "google_merchant_center", "meta_catalog"]);
 
 const PREVIEW_ROWS = 5;
 const PREVIEW_COLS = 8;
@@ -78,7 +78,8 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
   // Merchant Center needs the store's address and currency, which no export contains.
   const [storeUrl, setStoreUrl] = useState("");
   const [currency, setCurrency] = useState("");
-  const isGoogle = targetFormatId === "google_merchant_center";
+  // Merchant Center and Meta catalog feeds both need the store address and currency.
+  const isGoogle = targetFormatId === "google_merchant_center" || targetFormatId === "meta_catalog";
   const targetOnly = !CONVERT_SOURCE_OPTIONS.some((o) => o.id === targetFormatId);
   const options = useMemo<ConvertOptions>(
     () => (isGoogle ? { storeUrl, currency: /^[a-z]{3}$/i.test(currency.trim()) ? currency.trim() : "" } : {}),
@@ -273,7 +274,7 @@ export default function ConvertClient({ t, initialSource = "shopify_products", i
           </div>
           {isGoogle && (
             <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:grid-cols-[2fr_1fr]">
-              <p className={`text-sm leading-6 sm:col-span-2 ${muted}`}>{t.googleIntro}</p>
+              <p className={`text-sm leading-6 sm:col-span-2 ${muted}`}>{targetFormatId === "meta_catalog" ? t.metaIntro : t.googleIntro}</p>
               <label className="block">
                 <span className={`mb-1.5 block text-xs font-medium ${muted}`}>{t.storeUrl}</span>
                 <input
