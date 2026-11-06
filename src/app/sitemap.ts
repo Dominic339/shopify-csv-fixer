@@ -11,10 +11,18 @@ import { SITE_URL } from "../lib/i18n/seo";
 
 type Freq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
-/** A page with a translated copy under /<locale>/: one entry per language, each listing the others. */
+/**
+ * Languages whose URLs the sitemap lists. English only for now: a new site gets a small crawl
+ * budget, so the sitemap points Google at the English pages first. The translated pages stay
+ * live and keep their hreflang links (here and in each page's head), so Google can still find
+ * them. Set this back to LOCALES to list every language.
+ */
+const SITEMAP_LOCALES: readonly Locale[] = ["en"];
+
+/** A page with a translated copy under /<locale>/: one entry per listed language, each naming all its translations. */
 function translated(path: string, changeFrequency: Freq, priority: number, locales: readonly Locale[] = LOCALES): MetadataRoute.Sitemap {
   const languages = Object.fromEntries(locales.map((l) => [l, `${SITE_URL}${localeHref(l, path)}`]));
-  return locales.map((l) => ({
+  return locales.filter((l) => SITEMAP_LOCALES.includes(l)).map((l) => ({
     url: `${SITE_URL}${localeHref(l, path)}`,
     changeFrequency,
     priority: l === "en" ? priority : Math.round(priority * 0.8 * 100) / 100,

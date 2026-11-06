@@ -28,6 +28,7 @@ import {
   type GuidePlatform,
 } from "@/lib/guidesRegistry";
 import { ENGLISH_ONLY_GUIDE_PLATFORMS } from "@/lib/guidesConstants";
+import { platformErrorsFor } from "@/lib/guides/platformErrors";
 import { guideLocalizer, guideTextTranslator } from "@/lib/guides/localizeGuide";
 import { readCuratedGuide } from "@/lib/guides/mdxLoader";
 import { expandIssueContent, classifyIssue } from "@/lib/guides/issueGuideExpander";
@@ -333,9 +334,15 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
     const short = fitTitle(guide.title, label);
     title = short.includes(label) ? short : `${title} | ${label}`;
   }
-  const description = fitDescription(
+  let description = fitDescription(
     guide.kind === "issue" ? fmt(t.guide.metaIssueDescription, { description: guide.description, platform: label }) : guide.description,
   );
+  // English pages lead with the platform's own error message, which is what people search for.
+  const platformError = locale === DEFAULT_LOCALE ? platformErrorsFor(english.issueCode)[0]?.replace(/\.$/, "") : undefined;
+  if (platformError) {
+    title = fitTitle(platformError, `${label} fix`);
+    description = fitDescription(`Getting "${platformError}" in ${label}? ${guide.description} Here's what causes it and how to fix your CSV.`);
+  }
   const bodyLocales = await guideBodyLocales(english);
   const translated = locale === DEFAULT_LOCALE || bodyLocales.includes(locale);
   const path = `/guides/${platform}/${slug}`;
@@ -343,7 +350,7 @@ export async function guideMetadata(locale: Locale, platform: string, slug: stri
   return {
     title: { absolute: title },
     description,
-    keywords: [guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
+    keywords: [...(locale === DEFAULT_LOCALE ? platformErrorsFor(english.issueCode) : []), guide.title, `${label} CSV`, `${label} import error`, `fix ${guide.title.toLowerCase()}`, guide.category, "csv import", ...guide.keywords],
     // Until a language has the article body, its copy points its canonical at the English page.
     alternates: pageAlternates(locale, path, bodyLocales),
     // Guides for rules the fixer doesn't run are short reference pages: reachable, but not indexed.
@@ -430,6 +437,8 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
       ? expandIssueContent({ ...issueInput(english, platform), localTitle: guide.title }, guideText.tr)
       : null;
   const sheet = english.kind === "issue" ? sheetExampleFor(english.issueCode) : null;
+  // The platform's own wording for the error, on English pages (see platformErrors.ts).
+  const platformErrors = locale === DEFAULT_LOCALE ? platformErrorsFor(english.issueCode) : [];
   const showWooVariableLink = platform === "woocommerce" && expanded?.issueType === "variant_structure";
   const curated = guide.kind === "curated" ? readCuratedGuide(platform, slug, locale) : null;
   const toc = curated ? extractTocFromMdx(curated.rawMdx) : [];
@@ -452,6 +461,11 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
           "@context": "https://schema.org",
           "@type": "FAQPage",
           mainEntity: [
+            ...platformErrors.slice(0, 1).map((e) => ({
+              "@type": "Question",
+              name: `What does "${e.replace(/\.$/, "")}" mean in ${label}?`,
+              acceptedAnswer: { "@type": "Answer", text: `${guide.explanation} ${guide.howToFix}` },
+            })),
             { "@type": "Question", name: fmt(t.guide.faqWhatIs, { title: guide.title }), acceptedAnswer: { "@type": "Answer", text: guide.explanation } },
             { "@type": "Question", name: fmt(t.guide.faqHowFix, { title: guide.title }), acceptedAnswer: { "@type": "Answer", text: guide.howToFix } },
           ],
@@ -585,6 +599,18 @@ export async function GuideView({ locale, platform, slug }: { locale: Locale; pl
             <section className={`${card} p-5 sm:p-6`}>
               <h2 className="text-lg font-semibold text-[var(--text)]">{t.guide.whatIsThisIssue}</h2>
               <p className={`mt-3 text-base ${muted}`}>{guide.explanation}</p>
+              {platformErrors.length > 0 && (
+                <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
+                  <p className="text-sm font-semibold text-[var(--text)]">{platformErrors.length === 1 ? `The error ${label} shows` : `Errors ${label} shows for this`}</p>
+                  <ul className="mt-2 space-y-1.5">
+                    {platformErrors.map((e) => (
+                      <li key={e} className="break-words font-mono text-[13px] text-[var(--text)]">
+                        {e}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
                 <span className="font-semibold text-[var(--text)]">{t.guide.affectedField}:</span>
                 <code className="break-all rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-xs">{expanded.whereItAppears}</code>
