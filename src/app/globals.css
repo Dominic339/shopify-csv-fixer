@@ -529,15 +529,23 @@ select option {
   0% { transform: translate3d(0, 0, 0) scale(1); }
   100% { transform: translate3d(28px, -22px, 0) scale(1.06); }
 }
+/* No blur filter: blurring a 450px element is slow to paint on phones and delayed the
+   homepage's first render. The gradient fades to nothing on its own, with extra stops for the
+   same soft edge, and will-change keeps the drift animation on its own layer. */
 .orb {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(48px);
   pointer-events: none;
+  will-change: transform;
   animation: drift 16s ease-in-out infinite alternate;
 }
-.orb-teal { background: radial-gradient(circle at 35% 35%, rgba(var(--accent-rgb), 0.38), rgba(var(--accent-rgb), 0) 70%); }
-.orb-indigo { background: radial-gradient(circle at 35% 35%, rgba(var(--secondary-rgb), 0.34), rgba(var(--secondary-rgb), 0) 70%); }
+/* closest-side: the gradient reaches 0 exactly at the circle's edge, so no rim shows. */
+.orb-teal {
+  background: radial-gradient(closest-side, rgba(var(--accent-rgb), 0.32), rgba(var(--accent-rgb), 0.17) 40%, rgba(var(--accent-rgb), 0.06) 70%, rgba(var(--accent-rgb), 0));
+}
+.orb-indigo {
+  background: radial-gradient(closest-side, rgba(var(--secondary-rgb), 0.28), rgba(var(--secondary-rgb), 0.15) 40%, rgba(var(--secondary-rgb), 0.05) 70%, rgba(var(--secondary-rgb), 0));
+}
 .orb.slow { animation-duration: 22s; animation-delay: -6s; }
 
 /* Small crisp bubbles: a glassy circle with a highlight. */

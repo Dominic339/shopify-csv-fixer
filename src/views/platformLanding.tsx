@@ -267,7 +267,7 @@ export async function PlatformLandingView({ slug, locale = DEFAULT_LOCALE }: { s
                   </ul>
                 </div>
                 <div className="min-w-0 rounded-2xl border border-red-400/30 bg-red-500/5 p-5">
-                  <h3 className="text-sm font-bold text-red-600 dark:text-red-400">{fmt(L.leftForYou, { count: demo.problems.length })}</h3>
+                  <h3 className="text-sm font-bold text-red-700 dark:text-red-400">{fmt(L.leftForYou, { count: demo.problems.length })}</h3>
                   <ul className={`mt-2 space-y-1.5 text-sm ${muted}`}>
                     {demo.problems.slice(0, 6).map((i) => (
                       <li key={`${i.code}-${i.rowIndex}`} className="flex gap-2">
