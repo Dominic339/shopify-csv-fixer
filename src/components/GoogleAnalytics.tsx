@@ -27,17 +27,27 @@ export default function GoogleAnalytics() {
     if (navigator.webdriver) return;
     if (SPAM_REFERRERS.some((d) => document.referrer.includes(d))) return;
 
-    // Init the queue now so nothing is lost; gtag.js reads it when it arrives.
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function gtag() {
-      // gtag.js reads real Arguments objects from the queue; a rest-parameter array would break tracking.
-      // eslint-disable-next-line prefer-rest-params
-      window.dataLayer.push(arguments);
-    };
-
-    // Load gtag.js (about 150 KB) only once the page has loaded and the browser is idle,
-    // so it doesn't compete with the page's own JavaScript.
-    const load = () => {
+    // Start Analytics on the visitor's first real interaction: moving the mouse, touching the
+    // screen, a wheel scroll or a key press. Crawlers that run a full browser (hundreds of
+    // one-page, 3-second "visits" from data centres, which navigator.webdriver doesn't catch)
+    // never do any of these, so they stay out of the reports. Programmatic scrolling doesn't
+    // count. gtag.js (about 150 KB) is only downloaded then, too.
+    const EVENTS = ["pointermove", "pointerdown", "touchstart", "keydown", "wheel"] as const;
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      for (const e of EVENTS) window.removeEventListener(e, start);
+      // The queue and gtag() exist only from here, so trackEvent() is a no-op for a visitor
+      // who hasn't interacted (and for crawlers); gtag.js reads the queue when it arrives.
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function gtag() {
+        // gtag.js reads real Arguments objects from the queue; a rest-parameter array would break tracking.
+        // eslint-disable-next-line prefer-rest-params
+        window.dataLayer.push(arguments);
+      };
+      window.gtag("js", new Date());
+      window.gtag("config", GA_ID);
       if (document.getElementById("ga-loader")) return;
       const s = document.createElement("script");
       s.id = "ga-loader";
@@ -45,16 +55,10 @@ export default function GoogleAnalytics() {
       s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
       document.head.appendChild(s);
     };
-    const whenIdle = () => {
-      // Safari has no requestIdleCallback.
-      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(load, { timeout: 4000 });
-      else window.setTimeout(load, 1500);
+    for (const e of EVENTS) window.addEventListener(e, start, { passive: true });
+    return () => {
+      for (const e of EVENTS) window.removeEventListener(e, start);
     };
-    if (document.readyState === "complete") whenIdle();
-    else window.addEventListener("load", whenIdle, { once: true });
-
-    window.gtag("js", new Date());
-    window.gtag("config", GA_ID);
   }, []);
 
   return null;
